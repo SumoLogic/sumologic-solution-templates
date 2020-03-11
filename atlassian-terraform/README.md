@@ -12,7 +12,7 @@ Terraform Script to deploy Sumo Logic - Atlassian Solution.
 2. [Null](https://www.terraform.io/docs/providers/null/index.html) "~> 2.1"
 3. [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html) "~> 1.2"
 
-* Required Third Party Terraform providers (Tested on mentioned versions), these providers need explicit installation:
+* Required Third Party Terraform providers (Tested on mentioned versions), these providers need explicit installation as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins):
 1. [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider) "~> 2.0"
 2. [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira) "~> 0.1.11"
 3. [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) "~> 1.12"
