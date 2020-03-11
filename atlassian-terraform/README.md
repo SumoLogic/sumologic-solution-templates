@@ -7,16 +7,20 @@ Terraform Script to deploy Sumo Logic - Atlassian Solution.
 #### Requirements
 
 * Terraform 0.12.20+
-* Required Terraform providers (Tested on mentioned versions):
+* Required Terraform providers (Tested on mentioned versions), these providers are automatically installed on `terraform init`:
+1. [Template](https://www.terraform.io/docs/providers/template/index.html) "~> 2.1"
+2. [Null](https://www.terraform.io/docs/providers/null/index.html) "~> 2.1"
+3. [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html) "~> 1.2"
+
+* Required Third Party Terraform providers (Tested on mentioned versions), these providers need explicit installation:
 1. [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider) "~> 2.0"
 2. [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira) "~> 0.1.11"
-3. [BitBucket Terraform Provider](https://github.com/terraform-providers/terraform-provider-bitbucket) "~> 1.2"
-4. [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) "~> 1.12"
+3. [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) "~> 1.12"
 
 #### Setup working directory
 
 1. Update placeholder values in `terraform.tfvars` to correspond to your Sumo Logic and Atlassian environments. See [list of input parameters](#configurable-parameters) below.
-2. Install required terraform providers.
+2. Install required third party terraform providers.
 3. Initialize Terraform working directory and download plugins by running `terraform init`.
 
 #### Deploy Sumo Logic - Atlassian Solution
