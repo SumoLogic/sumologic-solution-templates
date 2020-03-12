@@ -10,7 +10,7 @@ environment = "${var.environment}"
 
 # Create/Delete Collector
 resource "sumologic_collector" "atlassian_collector" {
-name = "Atlassian Collector"
+name = "Atlassian"
 category = "Atlassian"
 }
 
