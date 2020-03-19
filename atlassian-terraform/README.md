@@ -19,9 +19,9 @@ Terraform Script to deploy Sumo Logic - Atlassian Solution.
 
 #### Setup working directory
 
-1. Update placeholder values in `terraform.tfvars` to correspond to your Sumo Logic and Atlassian environments. See [list of input parameters](#configurable-parameters) below.
-2. Install required third party terraform providers.
-3. Initialize Terraform working directory and download plugins by running `terraform init`.
+1. Install required third party terraform providers.
+2. Initialize Terraform working directory and download plugins by running `terraform init`.
+3. Update placeholder values in `terraform.tfvars` to correspond to your Sumo Logic and Atlassian environments. See [list of input parameters](#configurable-parameters) below.
 
 #### Deploy Sumo Logic - Atlassian Solution
 
