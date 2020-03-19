@@ -70,6 +70,8 @@ Configure below mentioned parameters in `terraform.tfvars`.
 
 [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira)
 
+### Note: Terraform configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector).
+
 | Parameter | Description | URL|
 | --- | --- | --- |
 | jira_on_prem_url        | Jira Server URL                |   |
