@@ -2,6 +2,8 @@
 
 Terraform Script to deploy Sumo Logic - Atlassian Solution.
 
+This Terraform script will install the Sumologic Atlassian solution collection and will install Atlassian Applications in the Personal Folder of the Sumologic user whose access keys have been used. Once the solution is successfully installed, if you need additional copies of the Atlassian Applications within Sumologic, install the respective Atlassian Apps from App catalog in Sumologic.
+
 ## Getting Started
 
 #### Requirements
