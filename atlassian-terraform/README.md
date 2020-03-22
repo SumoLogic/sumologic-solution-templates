@@ -10,15 +10,15 @@ This Terraform script will install the Sumologic Atlassian solution collection a
 
 * [Terraform 0.12.20+](https://www.terraform.io/downloads.html)
 * Required Terraform providers (Tested on mentioned versions), these providers are automatically installed on `terraform init`:
- * [Template](https://www.terraform.io/docs/providers/template/index.html) "~> 2.1"
- * [Null](https://www.terraform.io/docs/providers/null/index.html) "~> 2.1"
- * [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html) "~> 1.2"
+  * [Template](https://www.terraform.io/docs/providers/template/index.html) "~> 2.1"
+  * [Null](https://www.terraform.io/docs/providers/null/index.html) "~> 2.1"
+  * [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html) "~> 1.2"
 
 
 * Required Third Party Terraform providers (Tested on mentioned versions), these providers need explicit installation as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins):
- * [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider) "~> 2.0"
- * [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira) "~> 0.1.11"
- * [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) "~> 1.12"
+  * [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider) "~> 2.0"
+  * [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira) "~> 0.1.11"
+  * [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) "~> 1.12"
 
 #### Setup working directory
 
