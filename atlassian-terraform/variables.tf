@@ -13,7 +13,7 @@ variable "install_bitbucket_cloud" {}
 variable "install_opsgenie" {}
 variable "install_sumo_to_opsgenie_webhook" {}
 variable "install_jira_on_prem" {}
-
+variable "install_atlassian_app" {}
 
 #Jira Cloud
 variable "jira_cloud_url" {}
@@ -23,6 +23,7 @@ variable "jira_cloud_jql" {}
 variable "jira_cloud_events" {}
 
 # #Jira On Prem - TBD
+variable "jira_on_prem_access_logs_sourcecategory" {}
 variable "jira_on_prem_url" {}
 variable "jira_on_prem_user" {}
 variable "jira_on_prem_password" {}
