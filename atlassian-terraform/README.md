@@ -1,8 +1,6 @@
 # sumologic-atlassian-terraform
 
-### This feature is in Beta. To participate contact your Sumo account executive. 
-
-The Terraform Script deploys the Sumo Logic Atlassian Solution.
+### This feature is in Beta. To participate, contact your Sumo account executive.
 
 The Terraform script installs the Sumo Logic Atlassian Solution collection and Atlassian Applications in the Personal Folder of the Sumo Logic user whose access keys have been used. If you need additional copies of the Atlassian Applications within Sumo Logic, install the respective Atlassian Apps from the Sumo Logic App catalog.
 
@@ -78,6 +76,7 @@ Configure the following parameters in `terraform.tfvars`.
 | install_bitbucket_cloud   | Install Sumo Logic Application and WebHooks for BitBucket Cloud       | true  |       |
 | install_opsgenie          | Install Sumo Logic Application and WebHooks for OpsGenie              | true  |   https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/Opsgenie    |
 | install_sumo_to_opsgenie_webhook | Install Sumo Logic to OpsGenie WebHook. Install_opsgenie should be true for this option to be true. |  true  | https://help.sumologic.com/Manage/Connections-and-Integrations/Webhook-Connections/Webhook_Connection_for_Opsgenie |
+| install_atlassian_app     | Install Sumo Logic Atlassian Application                              | true  |
 
 ## Jira Cloud
 
@@ -99,6 +98,7 @@ Configure the following parameters in `terraform.tfvars`.
 
 | Parameter | Description | URL|
 | --- | --- | --- |
+| jira_on_prem_access_logs_sourcecategory| Jira Server Access Logs Source Category|    |
 | jira_on_prem_url        | Jira Server URL                |   |
 | jira_on_prem_user       | Jira Server Username           |   |
 | jira_on_prem_password   | Needs to be the password. API Key is not supported on Jira Server yet.           |  |
