@@ -57,18 +57,18 @@ resource "sumologic_folder" "folder" {
 }
 
 # Install Apps
-# Install Jira Cloud - Needs UUID and Desc change
+# Install Jira Cloud
 resource "null_resource" "install_jira_cloud_app" {
  count = "${var.install_jira_cloud}" ? 1:0
  depends_on = [sumologic_http_source.jira_cloud]
 
  provisioner "local-exec" {
      command = <<EOT
-     curl -s --request POST '${var.sumo_api_endpoint}apps/ec905b32-e514-4c63-baac-0efa3b3a2109/install' \
+     curl -s --request POST '${var.sumo_api_endpoint}apps/019757ca-3b08-457c-bd15-7239f1ab66c9/install' \
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Jira Cloud", "description": "The Sumo Logic App for Jira Cloud provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = Atlassian/Jira/Cloud" }}'
+        --data-raw '{ "name": "Jira Cloud", "description": "The Sumo Logic App for Jira Cloud provides insights into project management issues that enable you to more effectively plan, assign, track, report, and manage work across multiple teams.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = Atlassian/Jira/Cloud" }}'
 EOT
  }
 }
@@ -84,23 +84,23 @@ resource "null_resource" "install_jira_on_prem_app" {
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Jira", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = Atlassian/Jira/Server" }}'
+        --data-raw '{ "name": "Jira", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_on_prem_access_logs_sourcecategory}", "jirawebhooklogsrc": "_sourceCategory = Atlassian/Jira/Server" }}'
 EOT
  }
 }
 
-# Install Bitbucket - Pending UUID and Desc change
+# Install Bitbucket
 resource "null_resource" "install_bitbucket_cloud_app" {
  count = "${var.install_bitbucket_cloud}" ? 1:0
  depends_on = [sumologic_http_source.bitbucket_cloud]
 
  provisioner "local-exec" {
      command = <<EOT
-     curl -s --request POST '${var.sumo_api_endpoint}apps/ec905b32-e514-4c63-baac-0efa3b3a2109/install' \
+     curl -s --request POST '${var.sumo_api_endpoint}apps/3b068c67-069e-417e-a855-ff7549a0606d/install' \
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Bitbucket", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
+        --data-raw '{ "name": "Bitbucket", "description": "The Sumo Logic App for Bitbucket provides insights into project management to more effectively plan the deployments.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"bblogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
 EOT
  }
 }
@@ -117,6 +117,22 @@ resource "null_resource" "install_Opsgenie_app" {
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
         --data-raw '{ "name": "Opsgenie", "description": "The Opsgenie App provides at-a-glance views and detailed analytics for alerts on your DevOps environment.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"opsgenieLogSrc": "_sourceCategory = Atlassian/OpsGenie" }}'
+EOT
+ }
+}
+
+# Install Atlassian Solution App
+resource "null_resource" "install_atlassian_app" {
+ count = "${var.install_atlassian_app}" ? 1:0
+ #depends_on = [sumologic_http_source.opsgenie]
+
+ provisioner "local-exec" {
+     command = <<EOT
+     curl -s --request POST '${var.sumo_api_endpoint}apps/332afd45-eb37-4d65-85b5-21eaead37f6b/install' \
+        --header 'Accept: application/json' \
+        --header 'Content-Type: application/json' \
+        -u "${var.sumo_access_id}:${var.sumo_access_key}" \
+        --data-raw '{ "name": "Atlassian", "description": "The Atlassian App provides insights into critical data across Atlassian applications, including Jira Cloud, Jira Server, Bitbucket, Atlassian Access, and OpsGenie from one pane-of-glass in a seamless dashboard experience.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"oglogsrc": "_sourceCategory = Atlassian/OpsGenie","jiralogsrc": "_sourceCategory = Atlassian/Jira/Cloud","bblogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
 EOT
  }
 }

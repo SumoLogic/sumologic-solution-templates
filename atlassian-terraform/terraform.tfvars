@@ -1,11 +1,12 @@
 # Sumo Logic - Atlassian Terraform
+# This feature is in Beta. To participate contact your Sumo account executive.
 # Configure Sumo Logic, Jira Cloud, Jira Server (Onprem), OpsGenie, BitBucket credentials and installation options.
 
 # Sumologic
 sumo_access_id = "" # https://help.sumologic.com/Manage/Security/Access-Keys
 sumo_access_key = ""
 environment = "us1" # https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
-sumo_api_endpoint = "https://api.sumologic.com/api/v1/" # https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
+sumo_api_endpoint = "https://api.sumologic.com/api/v1/" # Make sure the trailing "/" is present. https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
 app_installation_folder = "Atlassian" # The Sumo Logic apps will be installed in a folder under your personal folder in Sumo Logic.
 
 # Sumo Logic Apps and Webhooks
@@ -15,6 +16,7 @@ install_bitbucket_cloud = "true"
 install_opsgenie = "true"
 # install_opsgenie should be true for the below option install_sumo_to_opsgenie_webhook to be true. https://help.sumologic.com/Manage/Connections-and-Integrations/Webhook-Connections/Webhook_Connection_for_Opsgenie
 install_sumo_to_opsgenie_webhook = "true" # You can modify the file sumo_to_opsgenie_webhook.json.tmpl for customizing payload.
+install_atlassian_app = "true"
 
 # Jira Cloud
 jira_cloud_url = "https://<example>.atlassian.net"
@@ -35,6 +37,9 @@ jira_cloud_events = ["jira:issue_created", "jira:issue_updated","jira:issue_dele
 "jira_expression_evaluation_failed"]
 
 # Jira On Prem/Server
+# Thus script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector).
+# Configure the log collection and update the variable jira_on_prem_access_log_category with the selected source category.
+jira_on_prem_access_logs_sourcecategory = "Atlassian/Jira/Server"
 jira_on_prem_url = ""
 jira_on_prem_user = ""
 jira_on_prem_password = "" # Needs to be the password. API Key is not supported on Jira Server yet: https://jira.atlassian.com/browse/JRASERVER-67869?_ga=2.198461357.302520551.1583314185-1454539139.1580206139&error=login_required&error_description=Login+required&state=d3142ec3-6eb1-4207-bdd7-ce6b93900aa1
@@ -67,4 +72,4 @@ bitbucket_cloud_events = [
 
 # OpsGenie
 opsgenie_api_url = "https://api.opsgenie.com" # Do not add the trailing /. If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed. https://docs.opsgenie.com/docs/api-overview
-opsgenie_key = "" # https://docs.opsgenie.com/docs/api-integration
+opsgenie_key = "" # https://docs.opsgenie.com/docs/api-key-management

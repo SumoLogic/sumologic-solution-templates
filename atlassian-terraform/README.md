@@ -1,5 +1,7 @@
 # sumologic-atlassian-terraform
 
+### This feature is in Beta. To participate contact your Sumo account executive. 
+
 The Terraform Script deploys the Sumo Logic Atlassian Solution.
 
 The Terraform script installs the Sumo Logic Atlassian Solution collection and Atlassian Applications in the Personal Folder of the Sumo Logic user whose access keys have been used. If you need additional copies of the Atlassian Applications within Sumo Logic, install the respective Atlassian Apps from the Sumo Logic App catalog.
@@ -30,7 +32,8 @@ $ git clone https://github.com/SumoLogic/sumologic-solution-templates.git
 ```
 2. Install the required third party terraform providers ([Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider), [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira), [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) ) as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) and on respective provider documentation.
 3. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/atlassian-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html) and [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html).
-4. Update the placeholder values in terraform.tfvars so they correspond with your Sumo Logic and Atlassian environments. See the [list of input parameters](#configurable-parameters) below.
+4. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_on_prem`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook` in `terraform.tfvars`. By default, all applications and Webhooks are installed.
+5. Update the placeholder values in `terraform.tfvars` so they correspond with your Sumo Logic and Atlassian environments. See the [list of input parameters](#configurable-parameters) below.
 
 #### Deploy Sumo Logic - Atlassian Solution
 
@@ -92,7 +95,7 @@ Configure the following parameters in `terraform.tfvars`.
 
 [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira)
 
-#### Note: Terraform configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector).
+#### Note: Terraform configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector). Configure the log collection and update the variable `jira_on_prem_access_logs_sourcecategory` in `terraform.tfvars` with the selected source category.
 
 | Parameter | Description | URL|
 | --- | --- | --- |
