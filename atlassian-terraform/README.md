@@ -94,11 +94,11 @@ Configure the following parameters in `terraform.tfvars`.
 
 [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira)
 
-#### Note: Terraform configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector). Configure the log collection and update the variable `jira_on_prem_access_logs_sourcecategory` in `terraform.tfvars` with the selected source category.
+#### Note: This script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector). Configure the log collection and update the variable `jira_on_prem_access_logs_sourcecategory` in `terraform.tfvars` with the selected source category.
 
 | Parameter | Description | URL|
 | --- | --- | --- |
-| jira_on_prem_access_logs_sourcecategory| Jira Server Access Logs Source Category|    |
+| jira_on_prem_access_logs_sourcecategory| Jira Server Access Logs Source Category|https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector    |
 | jira_on_prem_url        | Jira Server URL                |   |
 | jira_on_prem_user       | Jira Server Username           |   |
 | jira_on_prem_password   | Needs to be the password. API Key is not supported on Jira Server yet.           |  |
