@@ -98,7 +98,7 @@ Configure the following parameters in `terraform.tfvars`.
 
 | Parameter | Description | URL|
 | --- | --- | --- |
-| jira_on_prem_access_logs_sourcecategory| Jira Server Access Logs Source Category|https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector    |
+| jira_on_prem_access_logs_sourcecategory| Jira Server Access Logs Source Category, default "Atlassian/Jira/Server"|https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector    |
 | jira_on_prem_url        | Jira Server URL                |   |
 | jira_on_prem_user       | Jira Server Username           |   |
 | jira_on_prem_password   | Needs to be the password. API Key is not supported on Jira Server yet.           |  |
