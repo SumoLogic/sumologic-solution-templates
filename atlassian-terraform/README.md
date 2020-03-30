@@ -1,7 +1,5 @@
 # sumologic-atlassian-terraform
 
-### This feature is in Beta. To participate, contact your Sumo account executive.
-
 The Terraform script installs the Sumo Logic Atlassian Solution collection and Atlassian Applications in the Personal Folder of the Sumo Logic user whose access keys have been used. If you need additional copies of the Atlassian Applications within Sumo Logic, install the respective Atlassian Apps from the Sumo Logic App catalog.
 
 
