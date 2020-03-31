@@ -28,8 +28,8 @@ $ git clone https://github.com/SumoLogic/sumologic-solution-templates.git
 ```
 2. Install the required third party terraform providers ([Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider), [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira), [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) ) as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) and on respective provider documentation.
 3. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/atlassian-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html) and [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html).
-4. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_on_prem`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook` and `install_sumo_to_jiracloud_webhook` in `terraform.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhook` are installed.
-`Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhook` are in Beta. To participate contact your Sumo account executive.
+4. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_on_prem`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook` and `install_sumo_to_jiracloud_webhook` in `terraform.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
+`Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Beta. To participate contact your Sumo account executive.
 5. Update the placeholder values in `terraform.tfvars` so they correspond with your Sumo Logic and Atlassian environments. See the [list of input parameters](#configurable-parameters) below.
 
 #### Deploy Sumo Logic - Atlassian Solution
@@ -63,7 +63,7 @@ Configure the following parameters in `terraform.tfvars`.
 
 [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider)
 
-Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhook` are in Beta. To participate contact your Sumo account executive.
+Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Beta. To participate contact your Sumo account executive.
 
 | Parameter |Description |Default Value
 | --- | --- | --- |
@@ -79,6 +79,7 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhook` are in Bet
 | install_sumo_to_opsgenie_webhook | Install [Sumo Logic to OpsGenie WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Opsgenie). `install_opsgenie` should be true for this option to be true. |  false  |
 | install_atlassian_app     | Install [Sumo Logic Atlassian Application](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Atlassian)                              | true  |
 | install_sumo_to_jiracloud_webhook| Install [Sumo Logic to Jira Cloud WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud) | false |
+| install_sumo_to_jiraserver_webhook| Install [Sumo Logic to Jira Server WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server) | false |
 
 ## Jira Cloud
 
@@ -118,7 +119,7 @@ This feature is in Beta. To participate contact your Sumo account executive.
 | jira_on_prem_jql        | Jira Server [Query](https://support.atlassian.com/jira-software-cloud/docs/what-is-advanced-searching-in-jira-cloud/) Language Example: "project = Sumo" |
 | jira_on_prem_events     | Jira Server [Events](https://developer.atlassian.com/server/jira/platform/webhooks/) |
 
-## Sumologic to Jira Server Webhook
+## Sumologic to Jira Server (On-Prem) Webhook
 
 This feature is in Beta. To participate contact your Sumo account executive.
 
