@@ -39,7 +39,7 @@ jira_cloud_events = ["jira:issue_created", "jira:issue_updated","jira:issue_dele
 # Jira On Prem/Server
 # Thus script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector).
 # Configure the log collection and update the variable jira_on_prem_access_log_category with the selected source category.
-jira_on_prem_access_logs_sourcecategory = "Atlassian/Jira/Server"
+jira_on_prem_access_logs_sourcecategory = "Atlassian/Jira/Server*"
 jira_on_prem_url = ""
 jira_on_prem_user = ""
 jira_on_prem_password = "" # Needs to be the password. API Key is not supported on Jira Server yet: https://jira.atlassian.com/browse/JRASERVER-67869?_ga=2.198461357.302520551.1583314185-1454539139.1580206139&error=login_required&error_description=Login+required&state=d3142ec3-6eb1-4207-bdd7-ce6b93900aa1
