@@ -10,7 +10,7 @@ environment = "${var.environment}"
 
 # Create/Delete Collector
 resource "sumologic_collector" "atlassian_collector" {
-name = "Atlassian"
+name = "Atlassian c"
 category = "Atlassian"
 }
 
@@ -42,7 +42,7 @@ resource "sumologic_http_source" "jira_on_prem" {
 resource "sumologic_http_source" "opsgenie" {
     count = "${var.install_opsgenie}" ? 1:0
     name = "OpsGenie"
-    category = "Atlassian/OpsGenie"
+    category = "Atlassian/Opsgenie"
     collector_id = "${sumologic_collector.atlassian_collector.id}"
 }
 
@@ -116,7 +116,7 @@ resource "null_resource" "install_Opsgenie_app" {
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Opsgenie", "description": "The Opsgenie App provides at-a-glance views and detailed analytics for alerts on your DevOps environment.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"opsgenieLogSrc": "_sourceCategory = Atlassian/OpsGenie" }}'
+        --data-raw '{ "name": "Opsgenie", "description": "The Opsgenie App provides at-a-glance views and detailed analytics for alerts on your DevOps environment.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"opsgenieLogSrc": "_sourceCategory = Atlassian/Opsgenie" }}'
 EOT
  }
 }
@@ -132,7 +132,7 @@ resource "null_resource" "install_atlassian_app" {
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Atlassian", "description": "The Atlassian App provides insights into critical data across Atlassian applications, including Jira Cloud, Jira Server, Bitbucket, Atlassian Access, and OpsGenie from one pane-of-glass in a seamless dashboard experience.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"oglogsrc": "_sourceCategory = Atlassian/OpsGenie","jiralogsrc": "_sourceCategory = Atlassian/Jira/Cloud","bblogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
+        --data-raw '{ "name": "Atlassian", "description": "The Atlassian App provides insights into critical data across Atlassian applications, including Jira Cloud, Jira Server, Bitbucket, Atlassian Access, and OpsGenie from one pane-of-glass in a seamless dashboard experience.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"oglogsrc": "_sourceCategory = Atlassian/Opsgenie","jiralogsrc": "_sourceCategory = Atlassian/Jira/Cloud","bblogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
 EOT
  }
 }
@@ -149,15 +149,17 @@ provider "restapi" {
   headers = {Content-Type = "application/json"}
 }
 
+#Below value is the opsgenie id of the opsgenie to sumo webhook, retrieved in atlassian.tf
 locals {
-  value = jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey
+  value_opsgenie = jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey
 }
 
 data "template_file" "data_json_sto" {
   count = "${var.install_sumo_to_opsgenie_webhook}" ? 1:0
   template = "${file("${path.module}/sumo_to_opsgenie_webhook.json.tmpl")}"
   vars = {
-    url = "${var.opsgenie_api_url}/v1/json/sumologic?apiKey=${local.value}"
+    url = "${var.opsgenie_api_url}/v1/json/sumologic?apiKey=${local.value_opsgenie}",
+    opsgenie_priority = "${var.opsgenie_priority}"
   }
 }
 
@@ -169,4 +171,27 @@ resource "restapi_object" "sumo_to_opsgenie_webhook" {
 # debug = true
   id_attribute = "id"
   data = "${data.template_file.data_json_sto[0].rendered}"
+}
+
+# Create/Delete Sumo Logic to Jira Cloud Webhook i.e. Connection in Sumo Logic by calling REST API
+# https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud
+data "template_file" "data_json_stjc" {
+  count = "${var.install_sumo_to_jiracloud_webhook}" ? 1:0
+  template = "${file("${path.module}/sumo_to_jiracloud_webhook.json.tmpl")}"
+  vars = {
+    url = "${var.jira_cloud_url}/rest/api/2/issue",
+    jira_cloud_issuetype = "${var.jira_cloud_issuetype}"
+    jira_cloud_priority = "${var.jira_cloud_priority}"
+    jira_cloud_projectkey = "${var.jira_cloud_projectkey}"
+    jira_cloud_auth = "${var.jira_cloud_auth}"
+  }
+}
+
+resource "restapi_object" "sumo_to_jiracloud_webhook" {
+  provider = restapi.sumo
+  count = "${var.install_sumo_to_jiracloud_webhook}" ?1:0
+  path = "/connections"
+  destroy_path = "/connections/{id}?type=WebhookConnection"
+  id_attribute = "id"
+  data = "${data.template_file.data_json_stjc[0].rendered}"
 }

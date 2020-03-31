@@ -1,5 +1,4 @@
 # Sumo Logic - Atlassian Terraform
-# This feature is in Beta. To participate contact your Sumo account executive.
 # Configure Sumo Logic, Jira Cloud, Jira Server (Onprem), OpsGenie, BitBucket credentials and installation options.
 
 # Sumologic
@@ -15,8 +14,9 @@ install_jira_on_prem = "true"
 install_bitbucket_cloud = "true"
 install_opsgenie = "true"
 # install_opsgenie should be true for the below option install_sumo_to_opsgenie_webhook to be true. https://help.sumologic.com/Manage/Connections-and-Integrations/Webhook-Connections/Webhook_Connection_for_Opsgenie
-install_sumo_to_opsgenie_webhook = "true" # You can modify the file sumo_to_opsgenie_webhook.json.tmpl for customizing payload.
+install_sumo_to_opsgenie_webhook = "true" # You can modify the file sumo_to_opsgenie_webhook.json.tmpl for customizing payload. This feature is in Beta. To participate contact your Sumo account executive.
 install_atlassian_app = "true"
+install_sumo_to_jiracloud_webhook = "false" # This feature is in Beta. To participate contact your Sumo account executive.
 
 # Jira Cloud
 jira_cloud_url = "https://<example>.atlassian.net"
@@ -36,8 +36,15 @@ jira_cloud_events = ["jira:issue_created", "jira:issue_updated","jira:issue_dele
 "board_created","board_updated","board_deleted","board_configuration_changed",
 "jira_expression_evaluation_failed"]
 
+# Sumologic to Jira Cloud Webhook - This feature is in Beta. To participate contact your Sumo account executive.
+# https://developer.atlassian.com/cloud/jira/platform/rest/v2/#api-rest-api-2-issue-post
+jira_cloud_issuetype = "Bug"
+jira_cloud_priority = "3"
+jira_cloud_projectkey = "project"
+jira_cloud_auth = "" #Basic Authorization Header. See: https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud#prerequisite
+
 # Jira On Prem/Server
-# Thus script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector).
+# This script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector).
 # Configure the log collection and update the variable jira_on_prem_access_log_category with the selected source category.
 jira_on_prem_access_logs_sourcecategory = "Atlassian/Jira/Server*"
 jira_on_prem_url = ""
@@ -73,3 +80,6 @@ bitbucket_cloud_events = [
 # OpsGenie
 opsgenie_api_url = "https://api.opsgenie.com" # Do not add the trailing /. If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed. https://docs.opsgenie.com/docs/api-overview
 opsgenie_key = "" # https://docs.opsgenie.com/docs/api-key-management
+
+# Sumologic to Opsgenie Webhook
+opsgenie_priority = "P3"
