@@ -10,7 +10,7 @@ environment = "${var.environment}"
 
 # Create/Delete Collector
 resource "sumologic_collector" "atlassian_collector" {
-name = "Atlassian c"
+name = "Atlassian"
 category = "Atlassian"
 }
 
@@ -132,7 +132,7 @@ resource "null_resource" "install_atlassian_app" {
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Atlassian", "description": "The Atlassian App provides insights into critical data across Atlassian applications, including Jira Cloud, Jira Server, Bitbucket, Atlassian Access, and OpsGenie from one pane-of-glass in a seamless dashboard experience.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"oglogsrc": "_sourceCategory = Atlassian/Opsgenie","jiralogsrc": "_sourceCategory = Atlassian/Jira/Cloud","bblogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
+        --data-raw '{ "name": "Atlassian", "description": "The Atlassian App provides insights into critical data across Atlassian applications, including Jira Cloud, Jira Server, Bitbucket, Atlassian Access, and OpsGenie from one pane-of-glass in a seamless dashboard experience.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"oglogsrc": "_sourceCategory = Atlassian/Opsgenie","jiralogsrc": "_sourceCategory = Atlassian/Jira/Cloud or _sourceCategory = Atlassian/Jira/Events","bblogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
 EOT
  }
 }
