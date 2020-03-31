@@ -150,15 +150,15 @@ provider "restapi" {
 }
 
 #Below value is the opsgenie id of the opsgenie to sumo webhook, retrieved in atlassian.tf
-locals {
-  value_opsgenie = jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey
-}
+#locals {
+#  value_opsgenie = jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey
+#}
 
 data "template_file" "data_json_sto" {
   count = "${var.install_sumo_to_opsgenie_webhook}" ? 1:0
   template = "${file("${path.module}/sumo_to_opsgenie_webhook.json.tmpl")}"
   vars = {
-    url = "${var.opsgenie_api_url}/v1/json/sumologic?apiKey=${local.value_opsgenie}",
+    url = "${var.opsgenie_api_url}/v1/json/sumologic?apiKey=${jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey}",
     opsgenie_priority = "${var.opsgenie_priority}"
   }
 }
@@ -194,4 +194,27 @@ resource "restapi_object" "sumo_to_jiracloud_webhook" {
   destroy_path = "/connections/{id}?type=WebhookConnection"
   id_attribute = "id"
   data = "${data.template_file.data_json_stjc[0].rendered}"
+}
+
+# Create/Delete Sumo Logic to Jira Server Webhook i.e. Connection in Sumo Logic by calling REST API
+# https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server
+data "template_file" "data_json_stjs" {
+  count = "${var.install_sumo_to_jiraserver_webhook}" ? 1:0
+  template = "${file("${path.module}/sumo_to_jiraserver_webhook.json.tmpl")}"
+  vars = {
+    url = "${var.jira_on_prem_url}/rest/api/2/issue",
+    jira_server_issuetype = "${var.jira_server_issuetype}"
+    jira_server_priority = "${var.jira_server_priority}"
+    jira_server_projectkey = "${var.jira_server_projectkey}"
+    jira_server_auth = "${var.jira_server_auth}"
+  }
+}
+
+resource "restapi_object" "sumo_to_jiraserver_webhook" {
+  provider = restapi.sumo
+  count = "${var.install_sumo_to_jiraserver_webhook}" ?1:0
+  path = "/connections"
+  destroy_path = "/connections/{id}?type=WebhookConnection"
+  id_attribute = "id"
+  data = "${data.template_file.data_json_stjs[0].rendered}"
 }

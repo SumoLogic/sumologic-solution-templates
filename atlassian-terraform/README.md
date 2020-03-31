@@ -94,6 +94,8 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhook` are in Bet
 
 ## Sumologic to Jira Cloud Webhook
 
+This feature is in Beta. To participate contact your Sumo account executive.
+
 | Parameter | Description |
 | --- | --- |
 | jira_cloud_auth             | [Basic Authorization Header](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud#prerequisite)|
@@ -115,6 +117,17 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhook` are in Bet
 | jira_on_prem_password   | Needs to be the password. API Key is not supported on Jira Server yet.           |
 | jira_on_prem_jql        | Jira Server [Query](https://support.atlassian.com/jira-software-cloud/docs/what-is-advanced-searching-in-jira-cloud/) Language Example: "project = Sumo" |
 | jira_on_prem_events     | Jira Server [Events](https://developer.atlassian.com/server/jira/platform/webhooks/) |
+
+## Sumologic to Jira Server Webhook
+
+This feature is in Beta. To participate contact your Sumo account executive.
+
+| Parameter | Description |
+| --- | --- |
+| jira_server_auth             | [Basic Authorization Header](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server#prerequisite)|
+| jira_server_projectkey       | Jira Server Project Key                   |
+| jira_server_issuetype        | Jira Server Issue Type, for example 'Bug' |
+| jira_server_priority         | Issue Priority, for example 3            |
 
 ## Bitbucket
 
@@ -139,6 +152,8 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhook` are in Bet
 | opsgenie_key            | [OpsGenie API Key](https://docs.opsgenie.com/docs/api-integration)              |
 
 ## Sumologic to Opsgenie Webhook
+
+This feature is in Beta. To participate contact your Sumo account executive.
 
 | Parameter | Description |
 | --- | --- |

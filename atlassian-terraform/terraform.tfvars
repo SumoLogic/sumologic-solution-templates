@@ -14,9 +14,10 @@ install_jira_on_prem = "true"
 install_bitbucket_cloud = "true"
 install_opsgenie = "true"
 # install_opsgenie should be true for the below option install_sumo_to_opsgenie_webhook to be true. https://help.sumologic.com/Manage/Connections-and-Integrations/Webhook-Connections/Webhook_Connection_for_Opsgenie
-install_sumo_to_opsgenie_webhook = "true" # You can modify the file sumo_to_opsgenie_webhook.json.tmpl for customizing payload. This feature is in Beta. To participate contact your Sumo account executive.
+install_sumo_to_opsgenie_webhook = "false" # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_opsgenie_webhook.json.tmpl for customizing payload.
 install_atlassian_app = "true"
-install_sumo_to_jiracloud_webhook = "false" # This feature is in Beta. To participate contact your Sumo account executive.
+install_sumo_to_jiracloud_webhook = "false" # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiracloud_webhook.json.tmpl for customizing payload.
+install_sumo_to_jiraserver_webhook = "false" # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiraserver_webhook.json.tmpl for customizing payload.
 
 # Jira Cloud
 jira_cloud_url = "https://<example>.atlassian.net"
@@ -60,6 +61,13 @@ jira_on_prem_events = ["jira:issue_created", "jira:issue_updated","jira:issue_de
 "option_voting_changed","option_watching_changed","option_unassigned_issues_changed","option_subtasks_changed","option_attachments_changed","option_issuelinks_changed","option_timetracking_changed",
 "sprint_created","sprint_deleted","sprint_updated","sprint_started","sprint_closed",
 "board_created","board_updated","board_deleted","board_configuration_changed"]
+
+# Sumologic to Jira Server Webhook - This feature is in Beta. To participate contact your Sumo account executive.
+# https://docs.atlassian.com/software/jira/docs/api/REST/7.6.1/#api/2/issue-createIssue
+jira_server_issuetype = "Bug"
+jira_server_priority = "3"
+jira_server_projectkey = "project"
+jira_server_auth = "" #Basic Authorization Header. See: https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server#prerequisite
 
 # Bitbucket Cloud
 # Parameter Description: https://www.terraform.io/docs/providers/bitbucket/r/hook.html
