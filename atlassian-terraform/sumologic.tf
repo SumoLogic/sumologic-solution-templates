@@ -34,7 +34,7 @@ resource "sumologic_http_source" "bitbucket_cloud" {
 resource "sumologic_http_source" "jira_on_prem" {
     count = "${var.install_jira_on_prem}" ? 1:0
     name = "Jira On-prem"
-    category = "Atlassian/Jira/Server"
+    category = "Atlassian/Jira/Events"
     collector_id = "${sumologic_collector.atlassian_collector.id}"
 }
 
@@ -84,7 +84,7 @@ resource "null_resource" "install_jira_on_prem_app" {
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Jira", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_on_prem_access_logs_sourcecategory}", "jirawebhooklogsrc": "_sourceCategory = Atlassian/Jira/Server" }}'
+        --data-raw '{ "name": "Jira", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_on_prem_access_logs_sourcecategory}", "jirawebhooklogsrc": "_sourceCategory = Atlassian/Jira/Events" }}'
 EOT
  }
 }
