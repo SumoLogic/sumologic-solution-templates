@@ -93,7 +93,7 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | jira_cloud_jql        | Jira Cloud [Query Language](https://support.atlassian.com/jira-software-cloud/docs/what-is-advanced-searching-in-jira-cloud/) Example: "project = Sumo"|
 | jira_cloud_events     | Jira Cloud [Events](https://developer.atlassian.com/cloud/jira/platform/webhooks/)|
 
-## Sumologic to Jira Cloud Webhook
+## Sumo Logic to Jira Cloud Webhook
 
 This feature is in Beta. To participate contact your Sumo account executive.
 
@@ -119,7 +119,7 @@ This feature is in Beta. To participate contact your Sumo account executive.
 | jira_server_jql        | Jira Server [Query](https://support.atlassian.com/jira-software-cloud/docs/what-is-advanced-searching-in-jira-cloud/) Language Example: "project = Sumo" |
 | jira_server_events     | Jira Server [Events](https://developer.atlassian.com/server/jira/platform/webhooks/) |
 
-## Sumologic to Jira Server Webhook
+## Sumo Logic to Jira Server Webhook
 
 This feature is in Beta. To participate contact your Sumo account executive.
 
@@ -152,7 +152,7 @@ This feature is in Beta. To participate contact your Sumo account executive.
 | opsgenie_api_url        | [Opsgenie API URL](https://docs.opsgenie.com/docs/api-overview). Do not add the trailing "/". If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed.                 |
 | opsgenie_key            | [Opsgenie API Key](https://docs.opsgenie.com/docs/api-integration)              |
 
-## Sumologic to Opsgenie Webhook
+## Sumo Logic to Opsgenie Webhook
 
 This feature is in Beta. To participate contact your Sumo account executive.
 

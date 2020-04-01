@@ -1,7 +1,7 @@
 # Sumo Logic - Atlassian Terraform
 # Configure Sumo Logic, Jira Cloud, Jira Server, OpsGenie, BitBucket credentials and installation options.
 
-# Sumologic
+# Sumo Logic
 sumo_access_id = "<YOUR SUMO ACCESS ID>" # Please replace <YOUR SUMO ACCESS ID> (including brackets) with your Sumo Access ID. https://help.sumologic.com/Manage/Security/Access-Keys
 sumo_access_key = "<YOUR SUMO ACCESS KEY>"  # Please replace <YOUR SUMO ACCESS KEY> (including brackets) with your Sumo Access KEY.
 deployment = "us1" # Please update with your deployment, refer: https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
@@ -37,7 +37,7 @@ jira_cloud_events = ["jira:issue_created", "jira:issue_updated","jira:issue_dele
 "board_created","board_updated","board_deleted","board_configuration_changed",
 "jira_expression_evaluation_failed"]
 
-# Sumologic to Jira Cloud Webhook - This feature is in Beta. To participate contact your Sumo account executive.
+# Sumo Logic to Jira Cloud Webhook - This feature is in Beta. To participate contact your Sumo account executive.
 # https://developer.atlassian.com/cloud/jira/platform/rest/v2/#api-rest-api-2-issue-post
 jira_cloud_issuetype = "Bug" # Refer: https://confluence.atlassian.com/adminjiracloud/issue-types-844500742.html
 jira_cloud_priority = "3"
@@ -62,7 +62,7 @@ jira_server_events = ["jira:issue_created", "jira:issue_updated","jira:issue_del
 "sprint_created","sprint_deleted","sprint_updated","sprint_started","sprint_closed",
 "board_created","board_updated","board_deleted","board_configuration_changed"]
 
-# Sumologic to Jira Server Webhook - This feature is in Beta. To participate contact your Sumo account executive.
+# Sumo Logic to Jira Server Webhook - This feature is in Beta. To participate contact your Sumo account executive.
 # https://docs.atlassian.com/software/jira/docs/api/REST/7.6.1/#api/2/issue-createIssue
 jira_server_issuetype = "Bug" # Refer: https://confluence.atlassian.com/adminjiraserver/defining-issue-type-field-values-938847087.html
 jira_server_priority = "3" # Refer: https://confluence.atlassian.com/adminjiraserver/associating-priorities-with-projects-939514001.html
@@ -89,5 +89,5 @@ bitbucket_cloud_events = [
 opsgenie_api_url = "https://api.opsgenie.com" # Do not add the trailing /. If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed. https://docs.opsgenie.com/docs/api-overview
 opsgenie_key = "<YOUR OPSGENIE KEY>" # Please replace <YOUR OPSGENIE KEY> (including brackets) with your Opsgenie key, to generate the key, refer: https://docs.opsgenie.com/docs/api-key-management
 
-# Sumologic to Opsgenie Webhook
+# Sumo Logic to Opsgenie Webhook
 opsgenie_priority = "P3" # Opsgenie Alert Priority. https://docs.opsgenie.com/docs/priority-field
