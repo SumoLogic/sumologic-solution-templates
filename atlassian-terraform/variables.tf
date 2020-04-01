@@ -32,7 +32,7 @@ variable "jira_cloud_projectkey" {}
 variable "jira_cloud_auth" {}
 
 
-# Jira On Prem
+# Jira Server
 variable "jira_server_access_logs_sourcecategory" {}
 variable "jira_server_url" {}
 variable "jira_server_user" {}

@@ -1,5 +1,5 @@
 # Sumo Logic - Atlassian Terraform
-# Configure Sumo Logic, Jira Cloud, Jira Server (Onprem), OpsGenie, BitBucket credentials and installation options.
+# Configure Sumo Logic, Jira Cloud, Jira Server, OpsGenie, BitBucket credentials and installation options.
 
 # Sumologic
 sumo_access_id = "<YOUR SUMO ACCESS ID>" # Please replace <YOUR SUMO ACCESS ID> (including brackets) with your Sumo Access ID. https://help.sumologic.com/Manage/Security/Access-Keys
@@ -44,13 +44,13 @@ jira_cloud_priority = "3"
 jira_cloud_projectkey = "<JIRA CLOUD PROJECT KEY>" # Please replace <JIRA CLOUD PROJECT KEY> (including brackets) with your Jira cloud project key. Refer, https://support.atlassian.com/jira-core-cloud/docs/edit-a-projects-details/
 jira_cloud_auth = "<JIRA CLOUD BASIC AUTHORIZATION HEADER>" # Please replace <JIRA CLOUD BASIC AUTHORIZATION HEADER> (including brackets) with the Basic Authorization Header for JIRA cloud as explained here: https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud#prerequisite
 
-# Jira On Prem/Server
+# Jira Server
 # This script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector).
 # Configure the log collection and update the variable jira_server_access_log_category with the selected source category.
 jira_server_access_logs_sourcecategory = "Atlassian/Jira/Server*"
-jira_server_url = "<YOUR JIRA ON PREM URL>" # Please replace <YOUR JIRA ON PREM URL> with your Jira Onprem instance URL.
-jira_server_user = "<YOUR JIRA ONPREM USERNAME>" # Please replace <YOUR JIRA ONPREM USERNAME> (including brackets) with your Jira Onprem Username.
-jira_server_password = "<YOUR JIRA ONPREM PASSWORD>" # Please replace <YOUR JIRA ONPREM PASSWORD> (including brackets) with your Jira Onprem password. API Key is not supported on Jira Server yet: https://jira.atlassian.com/browse/JRASERVER-67869?_ga=2.198461357.302520551.1583314185-1454539139.1580206139&error=login_required&error_description=Login+required&state=d3142ec3-6eb1-4207-bdd7-ce6b93900aa1
+jira_server_url = "<YOUR JIRA SERVER URL>" # Please replace <YOUR JIRA SERVER URL> with your Jira Server instance URL.
+jira_server_user = "<YOUR JIRA SERVER USERNAME>" # Please replace <YOUR JIRA SERVER USERNAME> (including brackets) with your Jira Server Username.
+jira_server_password = "<YOUR JIRA SERVER PASSWORD>" # Please replace <YOUR JIRA SERVER PASSWORD> (including brackets) with your Jira Server password. API Key is not supported on Jira Server yet: https://jira.atlassian.com/browse/JRASERVER-67869?_ga=2.198461357.302520551.1583314185-1454539139.1580206139&error=login_required&error_description=Login+required&state=d3142ec3-6eb1-4207-bdd7-ce6b93900aa1
 jira_server_jql = ""
 // See https://developer.atlassian.com/server/jira/platform/webhooks/ for supported events
 jira_server_events = ["jira:issue_created", "jira:issue_updated","jira:issue_deleted",
