@@ -75,8 +75,8 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | install_jira_cloud        | Install [Sumo Logic Application and WebHooks for Jira Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira_Cloud)            | true  |
 | install_jira_server      | Install [Sumo Logic Application and WebHooks for Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira) | true  |
 | install_bitbucket_cloud   | Install [Sumo Logic Application and WebHooks for BitBucket Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket)       | true  |       |
-| install_opsgenie          | Install [Sumo Logic Application and WebHooks for OpsGenie](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/Opsgenie)      | true  |
-| install_sumo_to_opsgenie_webhook | Install [Sumo Logic to OpsGenie WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Opsgenie). `install_opsgenie` should be true for this option to be true. |  false  |
+| install_opsgenie          | Install [Sumo Logic Application and WebHooks for Opsgenie](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/Opsgenie)      | true  |
+| install_sumo_to_opsgenie_webhook | Install [Sumo Logic to Opsgenie WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Opsgenie). `install_opsgenie` should be true for this option to be true. |  false  |
 | install_atlassian_app     | Install [Sumo Logic Atlassian Application](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Atlassian)                              | true  |
 | install_sumo_to_jiracloud_webhook| Install [Sumo Logic to Jira Cloud WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud) | false |
 | install_sumo_to_jiraserver_webhook| Install [Sumo Logic to Jira Server WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server) | false |
@@ -143,14 +143,14 @@ This feature is in Beta. To participate contact your Sumo account executive.
 | bitbucket_cloud_desc          | The name / description to show in the UI          |
 | bitbucket_cloud_events        | Bitbucket [Events](https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html) to track           |
 
-## OpsGenie
+## Opsgenie
 
 [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi)
 
 | Parameter | Description |
 | --- | --- |
-| opsgenie_api_url        | [OpsGenie API URL](https://docs.opsgenie.com/docs/api-overview). Do not add the trailing "/". If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed.                 |
-| opsgenie_key            | [OpsGenie API Key](https://docs.opsgenie.com/docs/api-integration)              |
+| opsgenie_api_url        | [Opsgenie API URL](https://docs.opsgenie.com/docs/api-overview). Do not add the trailing "/". If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed.                 |
+| opsgenie_key            | [Opsgenie API Key](https://docs.opsgenie.com/docs/api-integration)              |
 
 ## Sumologic to Opsgenie Webhook
 
