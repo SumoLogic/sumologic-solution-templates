@@ -28,7 +28,7 @@ $ git clone https://github.com/SumoLogic/sumologic-solution-templates.git
 ```
 2. Install the required third party terraform providers ([Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider), [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira), [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) ) as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) and on respective provider documentation.
 3. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/atlassian-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html) and [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html).
-4. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_on_prem`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook` and `install_sumo_to_jiracloud_webhook` in `terraform.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
+4. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_server`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook` and `install_sumo_to_jiracloud_webhook` in `terraform.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
 `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Beta. To participate contact your Sumo account executive.
 5. Update the placeholder values in `terraform.tfvars` so they correspond with your Sumo Logic and Atlassian environments. See the [list of input parameters](#configurable-parameters) below.
 
@@ -73,7 +73,7 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | sumo_api_endpoint         | [Sumo Logic API Endpoint](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security). Make sure the trailing "/" is present.                    | https://api.sumologic.com/api/v1/  |
 | app_installation_folder   | The Sumo Logic apps will be installed in a folder under your personal folder in Sumo Logic.| Atlassian|
 | install_jira_cloud        | Install [Sumo Logic Application and WebHooks for Jira Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira_Cloud)            | true  |
-| install_jira_on_prem      | Install [Sumo Logic Application and WebHooks for Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira) (On Prem) | true  |
+| install_jira_server      | Install [Sumo Logic Application and WebHooks for Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira) (On Prem) | true  |
 | install_bitbucket_cloud   | Install [Sumo Logic Application and WebHooks for BitBucket Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket)       | true  |       |
 | install_opsgenie          | Install [Sumo Logic Application and WebHooks for OpsGenie](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/Opsgenie)      | true  |
 | install_sumo_to_opsgenie_webhook | Install [Sumo Logic to OpsGenie WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Opsgenie). `install_opsgenie` should be true for this option to be true. |  false  |
@@ -100,24 +100,24 @@ This feature is in Beta. To participate contact your Sumo account executive.
 | Parameter | Description |
 | --- | --- |
 | jira_cloud_auth             | [Basic Authorization Header](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud#prerequisite)|
-| jira_cloud_projectkey       | Jira Cloud Project Key                   |
-| jira_cloud_issuetype        | Jira Cloud Issue Type, for example 'Bug' |
+| jira_cloud_projectkey       | Jira Cloud [Project Key](https://support.atlassian.com/jira-core-cloud/docs/edit-a-projects-details/)                   |
+| jira_cloud_issuetype        | Jira Cloud [Issue Type](https://confluence.atlassian.com/adminjiracloud/issue-types-844500742.html), for example 'Bug' |
 | jira_cloud_priority         | Issue Priority, for example 3            |
 
 ## Jira Server (On-Prem)
 
 [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira)
 
-#### Note: This script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector). Configure the log collection and update the variable `jira_on_prem_access_logs_sourcecategory` in `terraform.tfvars` with the selected source category.
+#### Note: This script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector). Configure the log collection and update the variable `jira_server_access_logs_sourcecategory` in `terraform.tfvars` with the selected source category.
 
 | Parameter | Description |
 | --- | --- |
-| jira_on_prem_access_logs_sourcecategory| Jira Server Access Logs Source Category, default "Atlassian/Jira/Server*", refer [this](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector) link.|
-| jira_on_prem_url        | Jira Server URL                |
-| jira_on_prem_user       | Jira Server Username           |
-| jira_on_prem_password   | Needs to be the password. API Key is not supported on Jira Server yet.           |
-| jira_on_prem_jql        | Jira Server [Query](https://support.atlassian.com/jira-software-cloud/docs/what-is-advanced-searching-in-jira-cloud/) Language Example: "project = Sumo" |
-| jira_on_prem_events     | Jira Server [Events](https://developer.atlassian.com/server/jira/platform/webhooks/) |
+| jira_server_access_logs_sourcecategory| Jira Server Access Logs Source Category, default "Atlassian/Jira/Server*", refer [this](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector) link.|
+| jira_server_url        | Jira Server URL                |
+| jira_server_user       | Jira Server Username           |
+| jira_server_password   | Needs to be the password. API Key is not supported on Jira Server yet.           |
+| jira_server_jql        | Jira Server [Query](https://support.atlassian.com/jira-software-cloud/docs/what-is-advanced-searching-in-jira-cloud/) Language Example: "project = Sumo" |
+| jira_server_events     | Jira Server [Events](https://developer.atlassian.com/server/jira/platform/webhooks/) |
 
 ## Sumologic to Jira Server (On-Prem) Webhook
 
@@ -126,9 +126,9 @@ This feature is in Beta. To participate contact your Sumo account executive.
 | Parameter | Description |
 | --- | --- |
 | jira_server_auth             | [Basic Authorization Header](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server#prerequisite)|
-| jira_server_projectkey       | Jira Server Project Key                   |
-| jira_server_issuetype        | Jira Server Issue Type, for example 'Bug' |
-| jira_server_priority         | Issue Priority, for example 3            |
+| jira_server_projectkey       | Jira Server [Project Key](https://confluence.atlassian.com/adminjiraserver/defining-a-project-938847066.html)                   |
+| jira_server_issuetype        | Jira Server [Issue Type](https://confluence.atlassian.com/adminjiraserver/defining-issue-type-field-values-938847087.html), for example 'Bug' |
+| jira_server_priority         | Issue [Priority](https://confluence.atlassian.com/adminjiraserver/associating-priorities-with-projects-939514001.html), for example 3            |
 
 ## Bitbucket
 

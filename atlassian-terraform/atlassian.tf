@@ -44,22 +44,22 @@ resource "jira_webhook" "sumo_jira" {
   events = "${var.jira_cloud_events}" # See https://developer.atlassian.com/cloud/jira/platform/webhooks/ for supported events
 }
 
-# JIRA On-prem Provider
+# JIRA Server Provider
 provider "jira" {
-  alias = "on_prem"
-  url = "${var.jira_on_prem_url}"
-  user = "${var.jira_on_prem_user}"
-  password = "${var.jira_on_prem_password}"
+  alias = "server"
+  url = "${var.jira_server_url}"
+  user = "${var.jira_server_user}"
+  password = "${var.jira_server_password}"
 }
 
-# Create/Delete Jira On-prem to Sumo Logic Webhook
-resource "jira_webhook" "sumo_jira_on_prem" {
-  provider = jira.on_prem
-  count = "${var.install_jira_on_prem}" ? 1:0
+# Create/Delete Jira Server to Sumo Logic Webhook
+resource "jira_webhook" "sumo_jira_server" {
+  provider = jira.server
+  count = "${var.install_jira_server}" ? 1:0
   name = "Sumologic Hook"
-  url = "${sumologic_http_source.jira_on_prem[0].url}"
-  jql = "${var.jira_on_prem_jql}"
-  events = "${var.jira_on_prem_events}" # See https://developer.atlassian.com/server/jira/platform/webhooks/ for supported events
+  url = "${sumologic_http_source.jira_server[0].url}"
+  jql = "${var.jira_server_jql}"
+  events = "${var.jira_server_events}" # See https://developer.atlassian.com/server/jira/platform/webhooks/ for supported events
 }
 
 # BitBucket Provider
