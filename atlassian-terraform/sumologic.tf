@@ -5,7 +5,7 @@
 provider "sumologic" {
 access_id = "${var.sumo_access_id}"
 access_key = "${var.sumo_access_key}"
-environment = "${var.environment}"
+environment = "${var.deployment}"
 }
 
 # Create/Delete Collector
@@ -30,10 +30,10 @@ resource "sumologic_http_source" "bitbucket_cloud" {
     collector_id = "${sumologic_collector.atlassian_collector.id}"
 }
 
-# Create/Delete Jira On Prem Source
-resource "sumologic_http_source" "jira_on_prem" {
-    count = "${var.install_jira_on_prem}" ? 1:0
-    name = "Jira On-prem"
+# Create/Delete Jira Server Source
+resource "sumologic_http_source" "jira_server" {
+    count = "${var.install_jira_server}" ? 1:0
+    name = "Jira Server"
     category = "Atlassian/Jira/Events"
     collector_id = "${sumologic_collector.atlassian_collector.id}"
 }
@@ -73,10 +73,10 @@ EOT
  }
 }
 
-# Install Jira Onprem
-resource "null_resource" "install_jira_on_prem_app" {
- count = "${var.install_jira_on_prem}" ? 1:0
- depends_on = [sumologic_http_source.jira_on_prem]
+# Install Jira Server
+resource "null_resource" "install_jira_server_app" {
+ count = "${var.install_jira_server}" ? 1:0
+ depends_on = [sumologic_http_source.jira_server]
 
  provisioner "local-exec" {
      command = <<EOT
@@ -84,7 +84,7 @@ resource "null_resource" "install_jira_on_prem_app" {
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Jira", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_on_prem_access_logs_sourcecategory}", "jirawebhooklogsrc": "_sourceCategory = Atlassian/Jira/Events" }}'
+        --data-raw '{ "name": "Jira", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_server_access_logs_sourcecategory}", "jirawebhooklogsrc": "_sourceCategory = Atlassian/Jira/Events" }}'
 EOT
  }
 }
@@ -132,7 +132,7 @@ resource "null_resource" "install_atlassian_app" {
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
         -u "${var.sumo_access_id}:${var.sumo_access_key}" \
-        --data-raw '{ "name": "Atlassian", "description": "The Atlassian App provides insights into critical data across Atlassian applications, including Jira Cloud, Jira Server, Bitbucket, Atlassian Access, and OpsGenie from one pane-of-glass in a seamless dashboard experience.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"oglogsrc": "_sourceCategory = Atlassian/Opsgenie","jiralogsrc": "_sourceCategory = Atlassian/Jira/Cloud or _sourceCategory = Atlassian/Jira/Events","bblogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
+        --data-raw '{ "name": "Atlassian", "description": "The Atlassian App provides insights into critical data across Atlassian applications, including Jira Cloud, Jira Server, Bitbucket, Atlassian Access, and OpsGenie from one pane-of-glass in a seamless dashboard experience.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"oglogsrc": "_sourceCategory = Atlassian/Opsgenie","jiralogsrc": "(_sourceCategory = Atlassian/Jira/Cloud or _sourceCategory = Atlassian/Jira/Events)","bblogsrc": "_sourceCategory = Atlassian/Bitbucket" }}'
 EOT
  }
 }
@@ -202,7 +202,7 @@ data "template_file" "data_json_stjs" {
   count = "${var.install_sumo_to_jiraserver_webhook}" ? 1:0
   template = "${file("${path.module}/sumo_to_jiraserver_webhook.json.tmpl")}"
   vars = {
-    url = "${var.jira_on_prem_url}/rest/api/2/issue",
+    url = "${var.jira_server_url}/rest/api/2/issue",
     jira_server_issuetype = "${var.jira_server_issuetype}"
     jira_server_priority = "${var.jira_server_priority}"
     jira_server_projectkey = "${var.jira_server_projectkey}"
