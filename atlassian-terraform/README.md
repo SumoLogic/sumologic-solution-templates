@@ -73,7 +73,7 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | sumo_api_endpoint         | [Sumo Logic API Endpoint](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security). Make sure the trailing "/" is present.                    | https://api.sumologic.com/api/v1/  |
 | app_installation_folder   | The Sumo Logic apps will be installed in a folder under your personal folder in Sumo Logic.| Atlassian|
 | install_jira_cloud        | Install [Sumo Logic Application and WebHooks for Jira Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira_Cloud)            | true  |
-| install_jira_server      | Install [Sumo Logic Application and WebHooks for Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira) (On Prem) | true  |
+| install_jira_server      | Install [Sumo Logic Application and WebHooks for Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira) | true  |
 | install_bitbucket_cloud   | Install [Sumo Logic Application and WebHooks for BitBucket Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket)       | true  |       |
 | install_opsgenie          | Install [Sumo Logic Application and WebHooks for OpsGenie](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/Opsgenie)      | true  |
 | install_sumo_to_opsgenie_webhook | Install [Sumo Logic to OpsGenie WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Opsgenie). `install_opsgenie` should be true for this option to be true. |  false  |
@@ -104,7 +104,7 @@ This feature is in Beta. To participate contact your Sumo account executive.
 | jira_cloud_issuetype        | Jira Cloud [Issue Type](https://confluence.atlassian.com/adminjiracloud/issue-types-844500742.html), for example 'Bug' |
 | jira_cloud_priority         | Issue Priority, for example 3            |
 
-## Jira Server (On-Prem)
+## Jira Server
 
 [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira)
 
@@ -119,7 +119,7 @@ This feature is in Beta. To participate contact your Sumo account executive.
 | jira_server_jql        | Jira Server [Query](https://support.atlassian.com/jira-software-cloud/docs/what-is-advanced-searching-in-jira-cloud/) Language Example: "project = Sumo" |
 | jira_server_events     | Jira Server [Events](https://developer.atlassian.com/server/jira/platform/webhooks/) |
 
-## Sumologic to Jira Server (On-Prem) Webhook
+## Sumologic to Jira Server Webhook
 
 This feature is in Beta. To participate contact your Sumo account executive.
 
