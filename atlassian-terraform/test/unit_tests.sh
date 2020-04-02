@@ -17,7 +17,7 @@ function check_command()
 }
 
 for cmd in terraform tflint; do
-    echo -e "\t- Check command \"$cmd\" exists and in right version"
+    echo -e "\t- Check command \"$cmd\" exists."
     check_command $cmd
 done
 
