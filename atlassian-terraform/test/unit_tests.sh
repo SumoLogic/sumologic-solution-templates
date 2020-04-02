@@ -32,7 +32,7 @@ terraform init
 echo "\t- Check terraform validate"
 terraform validate
 
-echo -e "\t- Terraform fmt"
+echo "\t- Check terraform fmt"
 terraform fmt -write=false -diff=true -check=true
 
 echo "Done. Please review any errors above."
