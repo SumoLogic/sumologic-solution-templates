@@ -156,7 +156,7 @@ provider "restapi" {
 
 data "template_file" "data_json_sto" {
   count    = "${var.install_sumo_to_opsgenie_webhook}" ? 1 : 0
-  template = "${file("${path.module}/sumo_to_opsgenie_webhook.json.tmpl")}"
+  template = "${file("${path.module}/templates/sumo_to_opsgenie_webhook.json.tmpl")}"
   vars = {
     url               = "${var.opsgenie_api_url}/v1/json/sumologic?apiKey=${jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey}",
     opsgenie_priority = "${var.opsgenie_priority}"
@@ -177,7 +177,7 @@ resource "restapi_object" "sumo_to_opsgenie_webhook" {
 # https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud
 data "template_file" "data_json_stjc" {
   count    = "${var.install_sumo_to_jiracloud_webhook}" ? 1 : 0
-  template = "${file("${path.module}/sumo_to_jiracloud_webhook.json.tmpl")}"
+  template = "${file("${path.module}/templates/sumo_to_jiracloud_webhook.json.tmpl")}"
   vars = {
     url                   = "${var.jira_cloud_url}/rest/api/2/issue",
     jira_cloud_issuetype  = "${var.jira_cloud_issuetype}"
@@ -200,7 +200,7 @@ resource "restapi_object" "sumo_to_jiracloud_webhook" {
 # https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server
 data "template_file" "data_json_stjs" {
   count    = "${var.install_sumo_to_jiraserver_webhook}" ? 1 : 0
-  template = "${file("${path.module}/sumo_to_jiraserver_webhook.json.tmpl")}"
+  template = "${file("${path.module}/templates/sumo_to_jiraserver_webhook.json.tmpl")}"
   vars = {
     url                    = "${var.jira_server_url}/rest/api/2/issue",
     jira_server_issuetype  = "${var.jira_server_issuetype}"
