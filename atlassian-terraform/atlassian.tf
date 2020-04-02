@@ -14,7 +14,7 @@ provider "restapi" {
 data "template_file" "data_json" {
   count      = "${var.install_opsgenie}" ? 1 : 0
   depends_on = [sumologic_http_source.opsgenie]
-  template   = "${file("${path.module}/opsgenie_to_sumo_webhook.json.tmpl")}"
+  template   = "${file("${path.module}/templates/opsgenie_to_sumo_webhook.json.tmpl")}"
   vars = {
     url = "${sumologic_http_source.opsgenie[0].url}"
   }
