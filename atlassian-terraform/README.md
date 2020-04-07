@@ -8,6 +8,7 @@ The Terraform script installs the Sumo Logic Atlassian Solution collection and A
 #### Requirements
 
 * [Terraform 0.12.20+](https://www.terraform.io/downloads.html)
+* [curl](https://curl.haxx.se/download.html)
 * Required Terraform providers (tested on mentioned versions), these providers are automatically installed on `terraform init`:
   * [Template](https://www.terraform.io/docs/providers/template/index.html) "~> 2.1"
   * [Null](https://www.terraform.io/docs/providers/null/index.html) "~> 2.1"
