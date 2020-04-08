@@ -20,3 +20,10 @@ jira_server_issuetype  = "Bug"                                           # Refer
 jira_server_priority   = "3"                                             # Refer: https://confluence.atlassian.com/adminjiraserver/associating-priorities-with-projects-939514001.html
 jira_server_projectkey = "<YOUR JIRA SERVER PROJECT KEY>"                # Please replace <YOUR JIRA SERVER PROJECT KEY> (including brackets) with your Jira server project key.
 jira_server_auth       = "<YOUR JIRA SERVER BASIC AUTHORIZATION HEADER>" # Please replace <YOUR JIRA SERVER BASIC AUTHORIZATION HEADER> (including brackets) with the Basic Authorization Header for JIRA server as explained here See: https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server#prerequisite
+
+# Sumo Logic to Jira Service Desk Webhook - This feature is in Beta. To participate contact your Sumo account executive.
+jira_servicedesk_url        = "https://<EXAMPLE>.atlassian.net"
+jira_servicedesk_issuetype  = "IT Help"
+jira_servicedesk_priority   = "3"
+jira_servicedesk_projectkey = "<JIRA SERVICE DESK PROJECT KEY>"                # Please replace <JIRA SERVICE DESK PROJECT KEY> (including brackets) with your Jira service desk project key.
+jira_servicedesk_auth       = "<JIRA SERVICE DESK BASIC AUTHORIZATION HEADER>" # Please replace <JIRA SERVICE DESK BASIC AUTHORIZATION HEADER> (including brackets) with the Basic Authorization Header for JIRA Service Desk as explained here: https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Service_Desk#prerequisite

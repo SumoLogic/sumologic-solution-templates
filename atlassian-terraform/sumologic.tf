@@ -218,3 +218,26 @@ resource "restapi_object" "sumo_to_jiraserver_webhook" {
   id_attribute = "id"
   data         = "${data.template_file.data_json_stjs[0].rendered}"
 }
+
+# Create/Delete Sumo Logic to Jira Service Desk Webhook i.e. Connection in Sumo Logic by calling REST API
+# https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Service_Desk
+data "template_file" "data_json_stjsd" {
+  count    = "${var.install_sumo_to_jiraservicedesk_webhook}" ? 1 : 0
+  template = "${file("${path.module}/templates/sumo_to_jiraservicedesk_webhook.json.tmpl")}"
+  vars = {
+    url                         = "${var.jira_servicedesk_url}/rest/api/2/issue",
+    jira_servicedesk_issuetype  = "${var.jira_servicedesk_issuetype}"
+    jira_servicedesk_priority   = "${var.jira_servicedesk_priority}"
+    jira_servicedesk_projectkey = "${var.jira_servicedesk_projectkey}"
+    jira_servicedesk_auth       = "${var.jira_servicedesk_auth}"
+  }
+}
+
+resource "restapi_object" "sumo_to_jiraservicedesk_webhook" {
+  provider     = restapi.sumo
+  count        = "${var.install_sumo_to_jiraservicedesk_webhook}" ? 1 : 0
+  path         = "/connections"
+  destroy_path = "/connections/{id}?type=WebhookConnection"
+  id_attribute = "id"
+  data         = "${data.template_file.data_json_stjsd[0].rendered}"
+}
