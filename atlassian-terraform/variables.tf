@@ -15,6 +15,7 @@ variable "install_jira_server" {}
 variable "install_atlassian_app" {}
 variable "install_sumo_to_jiracloud_webhook" {}
 variable "install_sumo_to_jiraserver_webhook" {}
+variable "install_sumo_to_jiraservicedesk_webhook" {}
 
 
 #Jira Cloud
@@ -30,6 +31,12 @@ variable "jira_cloud_priority" {}
 variable "jira_cloud_projectkey" {}
 variable "jira_cloud_auth" {}
 
+# Sumologic to Jira Service Desk Webhook
+variable "jira_servicedesk_url" {}
+variable "jira_servicedesk_issuetype" {}
+variable "jira_servicedesk_priority" {}
+variable "jira_servicedesk_projectkey" {}
+variable "jira_servicedesk_auth" {}
 
 # Jira Server
 variable "jira_server_access_logs_sourcecategory" {}

@@ -30,7 +30,7 @@ $ git clone https://github.com/SumoLogic/sumologic-solution-templates.git
 2. Install [Terraform](https://www.terraform.io/) and make sure it's on your PATH.
 3. Install the required third party terraform providers ([Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider), [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira), [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) ) as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) and on respective provider documentation.
 4. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/atlassian-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html) and [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html).
-5. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_server`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook` and `install_sumo_to_jiracloud_webhook` in `sumologic.auto.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
+5. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_server`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook`, `install_sumo_to_jiraservicedesk_webhook` and `install_sumo_to_jiracloud_webhook` in `sumologic.auto.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
 `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Beta. To participate contact your Sumo account executive.
 6. Update the placeholder values in `sumologic.auto.tfvars`, `atlassian.auto.tfvars` and `webhooks.auto.tfvars` so they correspond with your Sumo Logic and Atlassian environments. See the [list of input parameters](#configurable-parameters) below.
 
@@ -84,6 +84,7 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | install_atlassian_app     | Install [Sumo Logic Atlassian Application](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Atlassian)                              | true  |
 | install_sumo_to_jiracloud_webhook| Install [Sumo Logic to Jira Cloud WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud) | false |
 | install_sumo_to_jiraserver_webhook| Install [Sumo Logic to Jira Server WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server) | false |
+| install_sumo_to_jiraservicedesk_webhook| Install [Sumo Logic to Jira Service Desk WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Service_desk) | false |
 
 ## Jira Cloud
 
@@ -110,6 +111,20 @@ Configure these parameters in `webhooks.auto.tfvars`.
 | jira_cloud_projectkey       | Jira Cloud [Project Key](https://support.atlassian.com/jira-core-cloud/docs/edit-a-projects-details/)                   |
 | jira_cloud_issuetype        | Jira Cloud [Issue Type](https://confluence.atlassian.com/adminjiracloud/issue-types-844500742.html), for example 'Bug' |
 | jira_cloud_priority         | Issue Priority, for example 3            |
+
+## Sumo Logic to Jira Service Desk Webhook
+
+This feature is in Beta. To participate contact your Sumo account executive.
+Configure these parameters in `webhooks.auto.tfvars`.
+
+| Parameter | Description |
+| --- | --- |
+| jira_servicedesk_url              | Jira Service Desk URL, can be same as Jira Cloud URL|
+| jira_servicedesk_auth             | [Basic Authorization Header](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Service_Desk#prerequisite)|
+| jira_servicedesk_projectkey       | Jira Service Desk [Project Key](https://support.atlassian.com/jira-core-cloud/docs/edit-a-projects-details/)                   |
+| jira_servicedesk_issuetype        | Jira Service Desk [Issue Type](https://confluence.atlassian.com/adminjiracloud/issue-types-844500742.html), for example 'Bug' |
+| jira_servicedesk_priority         | Issue Priority, for example 3            |
+
 
 ## Jira Server
 
