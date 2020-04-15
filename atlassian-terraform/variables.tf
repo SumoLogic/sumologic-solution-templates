@@ -2,9 +2,8 @@
 
 variable "sumo_access_id" {}
 variable "sumo_access_key" {}
-variable "environment" {}
+variable "deployment" {}
 variable "sumo_api_endpoint" {}
-
 variable "app_installation_folder" {}
 
 #Apps
@@ -12,10 +11,11 @@ variable "install_jira_cloud" {}
 variable "install_bitbucket_cloud" {}
 variable "install_opsgenie" {}
 variable "install_sumo_to_opsgenie_webhook" {}
-variable "install_jira_on_prem" {}
+variable "install_jira_server" {}
 variable "install_atlassian_app" {}
 variable "install_sumo_to_jiracloud_webhook" {}
 variable "install_sumo_to_jiraserver_webhook" {}
+variable "install_sumo_to_jiraservicedesk_webhook" {}
 
 
 #Jira Cloud
@@ -31,14 +31,20 @@ variable "jira_cloud_priority" {}
 variable "jira_cloud_projectkey" {}
 variable "jira_cloud_auth" {}
 
+# Sumologic to Jira Service Desk Webhook
+variable "jira_servicedesk_url" {}
+variable "jira_servicedesk_issuetype" {}
+variable "jira_servicedesk_priority" {}
+variable "jira_servicedesk_projectkey" {}
+variable "jira_servicedesk_auth" {}
 
-# Jira On Prem
-variable "jira_on_prem_access_logs_sourcecategory" {}
-variable "jira_on_prem_url" {}
-variable "jira_on_prem_user" {}
-variable "jira_on_prem_password" {}
-variable "jira_on_prem_jql" {}
-variable "jira_on_prem_events" {}
+# Jira Server
+variable "jira_server_access_logs_sourcecategory" {}
+variable "jira_server_url" {}
+variable "jira_server_user" {}
+variable "jira_server_password" {}
+variable "jira_server_jql" {}
+variable "jira_server_events" {}
 
 # Sumologic to Jira Server Webhook
 variable "jira_server_issuetype" {}
