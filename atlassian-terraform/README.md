@@ -13,10 +13,10 @@ The Terraform script installs the Sumo Logic Atlassian Solution collection and A
   * [Template](https://www.terraform.io/docs/providers/template/index.html) "~> 2.1"
   * [Null](https://www.terraform.io/docs/providers/null/index.html) "~> 2.1"
   * [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html) "~> 1.2"
+  * [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider) "~> 2.0"
 
 
 * Required Third Party Terraform providers (tested on mentioned versions), these providers need explicit installation as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins):
-  * [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider) "~> 2.0"
   * [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira) "~> 0.1.11"
   * [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) "~> 1.12"
 
@@ -28,8 +28,8 @@ The Terraform script installs the Sumo Logic Atlassian Solution collection and A
 $ git clone https://github.com/SumoLogic/sumologic-solution-templates.git
 ```
 2. Install [Terraform](https://www.terraform.io/) and make sure it's on your PATH.
-3. Install the required third party terraform providers ([Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider), [Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira), [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) ) as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) and on respective provider documentation.
-4. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/atlassian-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html) and [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html).
+3. Install the required third party terraform providers ([Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira), [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) ) as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) and on respective provider documentation.
+4. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/atlassian-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider), [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html) and [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html).
 5. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_server`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook`, `install_sumo_to_jiraservicedesk_webhook` and `install_sumo_to_jiracloud_webhook` in `sumologic.auto.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
 `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Beta. To participate contact your Sumo account executive.
 6. Update the placeholder values in `sumologic.auto.tfvars`, `atlassian.auto.tfvars` and `webhooks.auto.tfvars` so they correspond with your Sumo Logic and Atlassian environments. See the [list of input parameters](#configurable-parameters) below.
