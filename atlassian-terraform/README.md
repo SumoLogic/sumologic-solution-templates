@@ -132,7 +132,7 @@ Configure these parameters in `webhooks.auto.tfvars`.
 
 Configure these parameters in `atlassian.auto.tfvars`.
 
-#### Note: This script configures Jira Server WebHooks. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector). Configure the log collection and update the variable `jira_server_access_logs_sourcecategory` in `atlassian.auto.tfvars` with the selected source category.
+#### Note: This script configures Jira Server WebHooks and creates resources in Sumo Logic. Jira Server Logs collection needs to be configured as explained in Step 1 [here](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector). Configure the log collection and update the variable `jira_server_access_logs_sourcecategory` in `atlassian.auto.tfvars` with the selected source category.
 
 | Parameter | Description |
 | --- | --- |
@@ -160,6 +160,8 @@ Configure these parameters in `webhooks.auto.tfvars`.
 [Bitbucket Terraform Provider](https://github.com/terraform-providers/terraform-provider-bitbucket)
 
 Configure these parameters in `atlassian.auto.tfvars`.
+
+#### Note: This script configures Bitbucket WebHooks and creates resources in Sumo Logic. Configure the [Bitbucket CI/CD Pipeline to Collect Deploy Events](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket/Collect_Logs_for_Bitbucket_App#Step_3:_Configure_the_Bitbucket_CI.2FCD_Pipeline_to_Collect_Deploy_Events) and [Enable Bitbucket Event-Key Tagging](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket/Collect_Logs_for_Bitbucket_App#Step_3:_Configure_the_Bitbucket_CI.2FCD_Pipeline_to_Collect_Deploy_Events) as defined in Sumo Logic [help](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket/Collect_Logs_for_Bitbucket_App).
 
 | Parameter | Description |
 | --- | --- |
