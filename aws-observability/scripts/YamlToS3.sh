@@ -9,13 +9,17 @@ cd ..\/
 for region in "${regions[@]}"
 do
     bucket_name=appdevzipfiles-$region
-    echo "Region is $region and Bucket Name is $bucket_name"
 
-    aws s3 cp . s3://$bucket_name/sumologic-aws-observability/ --recursive --exclude '*.sh' --exclude '*.json' --exclude '.git/*' --exclude '.idea/*' --acl public-read
+    if [[ `echo ${region} | awk '{print substr($0,length,1)}'` == "s" ]]
+    then
+        export region=`echo "${region%?}"`
+    fi
+    echo "Region is $region and Bucket Name is $bucket_name"
+    aws s3 cp . s3://$bucket_name/sumologic-aws-observability/ --region ${region} --recursive --exclude '*.sh' --exclude '*.json' --exclude '.git/*' --exclude '.idea/*' --acl public-read
 done
 
 cd templates/
 
-aws s3 cp sumologic_observability.master.template.yaml s3://sumologic-appdev-aws-sam-apps/ --acl public-read
+#aws s3 cp sumologic_observability.master.template.yaml s3://sumologic-appdev-aws-sam-apps/ --acl public-read
 
 echo "End S3 upload Script....."
