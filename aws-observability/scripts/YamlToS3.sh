@@ -20,6 +20,6 @@ done
 
 cd templates/
 
-#aws s3 cp sumologic_observability.master.template.yaml s3://sumologic-appdev-aws-sam-apps/ --acl public-read
+aws s3 cp sumologic_observability.master.template.yaml s3://sumologic-appdev-aws-sam-apps/ --acl public-read
 
 echo "End S3 upload Script....."
