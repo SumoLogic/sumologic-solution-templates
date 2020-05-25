@@ -23,7 +23,7 @@ app_names=(
 
 echo `sam --version`
 # Regex to deploy only expected templates.
-match_case="ec2metrics"
+match_case="AutoEnableS3LogsAlb"
 
 for app_name in ${app_names[@]}
 do
@@ -32,15 +32,15 @@ do
 
     if [[ "${KEY}" == *"${match_case}"* ]]; then
         # Grep Version from the SAM Template.
-        export version=`grep AWS::ServerlessRepo::Application: ./${KEY}/sam/${VALUE} -A 20 | grep SemanticVersion | cut -d ':' -f 2 | xargs`
+        export version=`grep AWS::ServerlessRepo::Application: ../apps/${KEY}/${VALUE} -A 20 | grep SemanticVersion | cut -d ':' -f 2 | xargs`
         echo "Package and publish the Template file ${VALUE} with version ${version}."
 
-        echo `sam validate -t ./${KEY}/sam/${VALUE}`
+        echo `sam validate -t ../apps/${KEY}/${VALUE}`
 
-        sam package --profile ${AWS_PROFILE} --template-file ./${KEY}/sam/${VALUE} --s3-bucket ${SAM_S3_BUCKET}  --output-template-file ./${KEY}/sam/packaged.yaml \
+        sam package --profile ${AWS_PROFILE} --template-file ../apps/${KEY}/${VALUE} --s3-bucket ${SAM_S3_BUCKET}  --output-template-file ../apps/${KEY}/packaged.yaml \
         --s3-prefix "aws-observability/${KEY}/v${version}"
 
-        sam publish --template ./${KEY}/sam/packaged.yaml --region ${AWS_REGION} --semantic-version ${version}
+        sam publish --template ../apps/${KEY}/packaged.yaml --region ${AWS_REGION} --semantic-version ${version}
         echo "Publish done"
     fi
 done
