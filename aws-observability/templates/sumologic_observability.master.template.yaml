@@ -15,7 +15,7 @@ Metadata:
           - Section1eSumoLogicResourceRemoveOnDeleteStack
 
       - Label:
-          default: "2. AWS Resources Tags Configuration (Required)"
+          default: "2. AWS Resources Tag Configuration (Required)"
         Parameters:
           - Section2aTagAWSResourcesOptions
           - Section2bAWSResourcesList
@@ -33,7 +33,7 @@ Metadata:
           - Section3fAPIGatewayInstallApp
 
       - Label:
-          default: "4. Sumo Logic AWS EC2 Meta Data Source details"
+          default: "4. Sumo Logic AWS EC2 Meta Data Source Details"
         Parameters:
           - Section4aEC2CreateMetaDataSource
 
@@ -55,7 +55,7 @@ Metadata:
           - Section6gALBLogsSourceCategoryName
 
       - Label:
-          default: "7. Sumo Logic AWS CloudTrail Source details"
+          default: "7. Sumo Logic AWS CloudTrail Source Details"
         Parameters:
           - Section7aCreateCloudTrailBucket
           - Section7bCloudTrailLogsBucketName
@@ -66,7 +66,7 @@ Metadata:
           - Section7gCloudTrailLogsSourceCategoryName
 
       - Label:
-          default: "8. Sumo Logic AWS Lambda CloudWatch Logs details"
+          default: "8. Sumo Logic AWS Lambda CloudWatch Logs Details"
         Parameters:
           - Section8aLambdaCreateCloudWatchLogsSource
           - Section8bLambdaCloudWatchLogsCollectorName
@@ -94,7 +94,7 @@ Metadata:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
       Section2aTagAWSResourcesOptions:
-        default: "Auto Enable Tagging of AWS Resources Options"
+        default: "Auto Enable Tagging of AWS Resources"
       Section2bAWSResourcesList:
         default: "Choose AWS Resources to Tag"
       Section2cAccountAlias:
@@ -107,7 +107,7 @@ Metadata:
       Section3bALBInstallApp:
         default: "Install ALB App"
       Section3cDynamoDBInstallApp:
-        default: "Install Dynamo DB App"
+        default: "Install DynamoDB App"
       Section3dRDSInstallApp:
         default: "Install RDS App"
       Section3eLambdaInstallApp:
@@ -167,7 +167,7 @@ Metadata:
       Section9bAutoEnableS3LogsFilterExpression:
         default: "Regular expression to Filter AWS ALB Resources"
       Section9cAutoSubscribeLogGroupsLambdaOptions:
-        default: "Auto Subscribe new log groups to Lambda"
+        default: "Auto Subscribe log groups to Lambda"
       Section9dAutoSubscribeLambdaLogGroupPattern:
         default: "Regex for lambda"
 
@@ -310,7 +310,7 @@ Parameters:
 
   Section6aALBCreateS3Bucket:
     Type: String
-    Description: "Yes - Creates a new Common S3 bucket for all Logs in AWS S3. Default Name - aws-observability-logs-Region-AccountId.
+    Description: "Yes - Creates a new Common S3 bucket for all Logs in AWS S3. Default Name - aws-observability-logs-StackId.
                   No - Uses an existing S3 bucket from AWS S3 which has ALB Logs."
     Default: 'Yes'
     AllowedValues:
@@ -318,7 +318,7 @@ Parameters:
       - 'No'
   Section6bALBS3LogsBucketName:
     Type: String
-    Description: "Required when Flag = No. Provide an existing bucket name that has ALB logs."
+    Description: "Required when Bucket creation Flag = No. Provide an existing bucket name that has ALB logs."
     Default: ""
   Section6cALBS3BucketPathExpression:
     Type: String
@@ -334,20 +334,20 @@ Parameters:
       - 'No'
   Section6eALBS3LogsCollectorName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic collector name for the ALB app."
+    Description: "Required when already collecting ALB logs. Provide the existing Sumo Logic collector name for the ALB app."
     Default: ""
   Section6fALBLogsSourceName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic source name for the ALB app. Account, region and namespace Fields will be added to the Source."
+    Description: "Required when already collecting ALB logs. Provide the existing Sumo Logic source name for the ALB app. Account, region and namespace Fields will be added to the Source."
     Default: ""
   Section6gALBLogsSourceCategoryName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic source category name for the ALB app. Used for the ALB app installation."
+    Description: "Required when already collecting ALB logs. Provide the existing Sumo Logic source category name for the ALB app. Used for the ALB app installation."
     Default: ""
 
   Section7aCreateCloudTrailBucket:
     Type: String
-    Description: "Yes - Creates a new Common S3 bucket for all logs in AWS S3. Default Name - aws-observability-logs-Region-AccountId.
+    Description: "Yes - Creates a new Common S3 bucket for all logs in AWS S3. Default Name - aws-observability-logs-StackId.
                   No - Uses an existing S3 bucket from AWS S3 which has CloudTrail Logs."
     Default: 'Yes'
     AllowedValues:
@@ -355,7 +355,7 @@ Parameters:
       - 'No'
   Section7bCloudTrailLogsBucketName:
     Type: String
-    Description: "Required when Flag = No. Provide an Existing bucket name that has CloudTrail logs."
+    Description: "Required when Bucket creation Flag = No. Provide an Existing bucket name that has CloudTrail logs."
     Default: ""
   Section7cCloudTrailBucketPathExpression:
     Type: String
@@ -371,15 +371,15 @@ Parameters:
       - 'No'
   Section7eCloudTrailCollectorName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic collector name."
+    Description: "Required when already collecting CloudTrail logs. Provide the existing Sumo Logic collector name."
     Default: ""
   Section7fCloudTrailLogsSourceName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic source name. Account field will be added."
+    Description: "Required when already collecting CloudTrail logs. Provide the existing Sumo Logic source name. Account field will be added."
     Default: ""
   Section7gCloudTrailLogsSourceCategoryName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic source category name for the DynamoDB app. Used for the app installation."
+    Description: "Required when already collecting CloudTrail logs. Provide the existing Sumo Logic source category name for the DynamoDB app. Used for the app installation."
     Default: ""
 
   Section8aLambdaCreateCloudWatchLogsSource:
@@ -392,15 +392,15 @@ Parameters:
       - 'No'
   Section8bLambdaCloudWatchLogsCollectorName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic collector name used for CloudWatch logs in the Lambda app."
+    Description: "Required when already collecting CloudWatch logs. Provide the existing Sumo Logic collector name used for CloudWatch logs in the Lambda app."
     Default: ""
   Section8cLambdaCloudWatchLogsSourceName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic source name used for CloudWatch logs in the Lambda app. Account, region and namespace fields will be added."
+    Description: "Required when already collecting CloudWatch logs. Provide the existing Sumo Logic source name used for CloudWatch logs in the Lambda app. Account, region and namespace fields will be added."
     Default: ""
   Section8dLambdaCloudWatchLogsSourceCategoryName:
     Type: String
-    Description: "Required when Flag = No. Provide the existing Sumo Logic source category name used for CloudWatch logs in the Lambda app. Used for the app installation."
+    Description: "Required when already collecting CloudWatch logs. Provide the existing Sumo Logic source category name used for CloudWatch logs in the Lambda app. Used for the app installation."
     Default: ""
 
   Section9aAutoEnableS3LogsALBResourcesOptions:
