@@ -44,7 +44,6 @@ then
 elif [[ "${InstallType}" == "onlytags" ]]
 then
     export Section2aTagExistingAWSResources="Yes"
-    export Section5gCloudTrailLogsSourceCategoryName=""
 elif [[ "${InstallType}" == "onlycwsource" ]]
 then
     export Section4aCloudWatchMetricCollectorName="Sourabh-Collector-CW-${AppName}-${InstallType}"
