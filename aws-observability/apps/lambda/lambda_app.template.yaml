@@ -327,6 +327,8 @@ Conditions:
     - !Condition do_not_use_parent_stack
     - !Condition install_cloudtrail_logs_source
 
+  create_fer: !Not [!Equals [!Ref Section5gCloudTrailLogsSourceCategoryName, ""]]
+
 Resources:
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
@@ -505,6 +507,7 @@ Resources:
   LambdaFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     DependsOn: LambdaFERWaitCondition
+    Condition: create_fer
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
