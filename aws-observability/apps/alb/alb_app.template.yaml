@@ -224,6 +224,30 @@ Parameters:
 
 Mappings:
   Region2ELBAccountId:
+    us-east-1:
+      AccountId: "127311923021"
+    us-east-2:
+      AccountId: "033677994240"
+    us-west-1:
+      AccountId: "027434742980"
+    us-west-2:
+      AccountId: "797873946194"
+    af-south-1:
+      AccountId: "098369216593"
+    ca-central-1:
+      AccountId: "985666609251"
+    eu-central-1:
+      AccountId: "054676820928"
+    eu-west-1:
+      AccountId: "156460612806"
+    eu-west-2:
+      AccountId: "652711504416"
+    eu-south-1:
+      AccountId: "635631232127"
+    eu-west-3:
+      AccountId: "009996457667"
+    eu-north-1:
+      AccountId: "897822967062"
     ap-east-1:
       AccountId: "754344448648"
     ap-northeast-1:
@@ -232,76 +256,24 @@ Mappings:
       AccountId: "600734575887"
     ap-northeast-3:
       AccountId: "383597477331"
-    ap-south-1:
-      AccountId: "718504428378"
     ap-southeast-1:
       AccountId: "114774131450"
     ap-southeast-2:
       AccountId: "783225319266"
-    ca-central-1:
-      AccountId: "985666609251"
+    ap-south-1:
+      AccountId: "718504428378"
+    me-south-1:
+      AccountId: "076674570225"
+    sa-east-1:
+      AccountId: "507241528517"
+    us-gov-west-1:
+      AccountId: "048591011584"
+    us-gov-east-1:
+      AccountId: "190560391635"
     cn-north-1:
       AccountId: "638102146993"
     cn-northwest-1:
       AccountId: "037604701340"
-    eu-central-1:
-      AccountId: "054676820928"
-    eu-north-1:
-      AccountId: "897822967062"
-    eu-west-1:
-      AccountId: "156460612806"
-    eu-west-2:
-      AccountId: "652711504416"
-    eu-west-3:
-      AccountId: "009996457667"
-    sa-east-1:
-      AccountId: "507241528517"
-    us-east-1:
-      AccountId: "127311923021"
-    us-east-2:
-      AccountId: "033677994240"
-    us-gov-east-1:
-      AccountId: "190560391635"
-    us-gov-west-1:
-      AccountId: "048591011584"
-    us-west-1:
-      AccountId: "027434742980"
-    us-west-2:
-      AccountId: "797873946194"
-
-  RegionMap:
-    us-east-1:
-      bucketname: appdevzipfiles-us-east-1
-    us-east-2:
-      bucketname: appdevzipfiles-us-east-2
-    us-west-1:
-      bucketname: appdevzipfiles-us-west-1
-    us-west-2:
-      bucketname: appdevzipfiles-us-west-2
-    ap-south-1:
-      bucketname: appdevzipfiles-ap-south-1
-    ap-northeast-2:
-      bucketname: appdevzipfiles-ap-northeast-2
-    ap-southeast-1:
-      bucketname: appdevzipfiles-ap-southeast-1
-    ap-southeast-2:
-      bucketname: appdevzipfiles-ap-southeast-2
-    ap-northeast-1:
-      bucketname: appdevzipfiles-ap-northeast-1
-    ca-central-1:
-      bucketname: appdevzipfiles-ca-central-1
-    eu-central-1:
-      bucketname: appdevzipfiles-eu-central-1
-    eu-west-1:
-      bucketname: appdevzipfiles-eu-west-1
-    eu-west-2:
-      bucketname: appdevzipfiles-eu-west-2
-    eu-west-3:
-      bucketname: appdevzipfiles-eu-west-3
-    eu-north-1:
-      bucketname: appdevzipfiles-eu-north-1s
-    sa-east-1:
-      bucketname: appdevzipfiles-sa-east-1
 
 Conditions:
   do_not_use_parent_stack: !Equals [ !Ref Section6aParentStackName, "ParentStackName"]
@@ -359,31 +331,15 @@ Resources:
                   - s3:PutBucketPolicy
                 Resource: '*'
 
-  SumoLogicHelperFunction:
-    Type: 'AWS::Serverless::Function'
+  SumoLogicLambdaHelper:
+    Type: AWS::Serverless::Application
     Condition: do_not_use_parent_stack
     Properties:
-      FunctionName: !Join
-        - ""
-        - - !Sub "sumo-lambda-${Section2bAccountAlias}-"
-          - !Select
-            - 0
-            - !Split
-              - "-"
-              - !Select
-                - 2
-                - !Split ["/", !Ref "AWS::StackId"]
-      Handler: main.handler
-      Runtime: python3.7
-      CodeUri:
-        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelper.zip"
-      MemorySize: 128
-      Timeout: 900
-      Role:
-        Fn::GetAtt:
-          - SumoLogicHelperRole
-          - Arn
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-app-utils
+        SemanticVersion: 2.0.0
+      Parameters:
+        RoleArn: !GetAtt SumoLogicHelperRole.Arn
 
   SumoRole:
     Type: AWS::IAM::Role
@@ -423,9 +379,7 @@ Resources:
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
@@ -442,9 +396,7 @@ Resources:
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       RemoveOnDeleteStack: false
@@ -463,9 +415,7 @@ Resources:
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       RemoveOnDeleteStack: false
@@ -483,9 +433,7 @@ Resources:
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
@@ -502,9 +450,7 @@ Resources:
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
@@ -537,9 +483,7 @@ Resources:
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
@@ -663,9 +607,7 @@ Resources:
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
@@ -684,9 +626,7 @@ Resources:
       SourceType: AwsElbBucket
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
@@ -717,9 +657,7 @@ Resources:
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
+        - !GetAtt SumoLogicLambdaHelper.Outputs.SumoAppUtilsFunction
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
