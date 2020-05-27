@@ -229,16 +229,6 @@ Resources:
     Type: AWS::Lambda::Function
     Condition: auto_enable_new
     Properties:
-      FunctionName: !Join
-        - ""
-        - - "sumo-s3-enable-"
-          - !Select
-            - 0
-            - !Split
-              - "-"
-              - !Select
-                - 2
-                - !Split ["/", !Ref "AWS::StackId"]
       Code:
         S3Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
         S3Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelper.zip"
