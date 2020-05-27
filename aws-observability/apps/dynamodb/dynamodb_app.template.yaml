@@ -244,6 +244,7 @@ Conditions:
   create_sns_topic: !And
     - !Condition do_not_use_parent_stack
     - !Condition install_cloudtrail_logs_source
+  create_fer: !Not [!Equals [!Ref Section5gCloudTrailLogsSourceCategoryName, ""]]
 
 Mappings:
   RegionMap:
@@ -434,6 +435,7 @@ Resources:
 
   DynamoFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
+    Condition: create_fer
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
