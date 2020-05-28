@@ -58,8 +58,8 @@ Following objects are verified:
     d. cleanup
 
     All the stages are executed by default. If you would like to skip a stage set the environment variables like `SKIP_deploy=true`.
-    This is very helpful if you are modifying your tests and do not want to create/destroy resources with each run.
-    To achieve this, you would set `SKIP_cleanup=true` and all other variables should be unset for the first run.
+    This is very helpful for example if you are modifying the code and do not want to create/destroy resources with each test run.
+    To achieve this, for the first run you would set `SKIP_cleanup=true` and all other variables should be unset.
     For the second run it would be `SKIP_cleanup=true` and `SKIP_deploy=true`.
 
     Now, you can run tests without creating/destroying resources with each run. Once you are finished, unset `SKIP_cleanup` and run the tests to clean up the resources.
