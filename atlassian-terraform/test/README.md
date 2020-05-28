@@ -1,6 +1,8 @@
-# Unit Tests for Sumo Logic Atlassian Terraform
+# Unit/Integration Tests for Sumo Logic Atlassian Terraform
 
-The tests verify/run following:
+#### Unit Tests
+
+The unit tests verify/run following:
 1. `terraform` installation.
 2. `tflint` installation.
 3. Run `tflint`.
@@ -15,7 +17,7 @@ cd test
 sh unit_tests.sh
 ```
 
-#### Integration Tests for Sumo Logic Atlassian Terraform
+#### Integration Tests
 
 [Terratest](https://terratest.gruntwork.io/) is being used for Integration testing of the Sumo Logic Atlassian Terraform scripts.
 
