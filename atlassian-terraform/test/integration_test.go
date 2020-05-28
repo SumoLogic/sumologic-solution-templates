@@ -18,11 +18,9 @@ var props = loadPropertiesFile("../sumologic.auto.tfvars")
 
 //SumoLogic Environment URL
 var sumologicURL = getSumologicURL()
-var sumologicAccessID = getProperty("sumo_access_id")
-var sumologicAccessKey = getProperty("sumo_access_key")
 
 var customValidation = func(statusCode int, body string) bool { return statusCode == 200 }
-var headers = map[string]string{"Authorization": "Basic " + base64.StdEncoding.EncodeToString([]byte(sumologicAccessID+":"+sumologicAccessKey))}
+var headers = map[string]string{"Authorization": "Basic " + base64.StdEncoding.EncodeToString([]byte(getProperty("sumo_access_id")+":"+getProperty("sumo_access_key")))}
 
 // Main function, define stages and run.
 func TestTerraformSumoLogic(t *testing.T) {
@@ -213,7 +211,6 @@ func validateSumoLogicJiraServiceDeskWebhook(t *testing.T, terraformOptions *ter
 
 func validateSumoLogicAtlassianAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 	if getProperty("install_atlassian_app") == "true" {
-		// Run `terraform output` to get the value of an output variable
 		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Atlassian", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
@@ -223,7 +220,6 @@ func validateSumoLogicAtlassianAppInstallation(t *testing.T, terraformOptions *t
 func validateSumoLogicJiraCloudAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_jira_cloud") == "true" {
-		// Run `terraform output` to get the value of an output variable
 		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Jira%%20Cloud", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
@@ -233,7 +229,6 @@ func validateSumoLogicJiraCloudAppInstallation(t *testing.T, terraformOptions *t
 func validateSumoLogicJiraServerAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_jira_server") == "true" {
-		// Run `terraform output` to get the value of an output variable
 		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Jira", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
@@ -243,7 +238,6 @@ func validateSumoLogicJiraServerAppInstallation(t *testing.T, terraformOptions *
 func validateSumoLogicBitbucketAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_bitbucket_cloud") == "true" {
-		// Run `terraform output` to get the value of an output variable
 		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Bitbucket", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
@@ -253,7 +247,6 @@ func validateSumoLogicBitbucketAppInstallation(t *testing.T, terraformOptions *t
 func validateSumoLogicOpsgenieAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_opsgenie") == "true" {
-		// Run `terraform output` to get the value of an output variable
 		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Opsgenie", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
