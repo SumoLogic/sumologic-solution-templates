@@ -324,12 +324,8 @@ Conditions:
     - !Not [!Equals [!Ref Section6cCloudWatchLogsSourceName, '']]
     - !Not [!Equals [!Ref Section6aCloudWatchLogsCollectorName, '']]
 
-  install_cloudtrail_collector: !Or
-    - !Condition install_cloudtrail_logs_source
-    - !Condition update_cloudtrail_source
-  install_cloudwatch_collector: !Or
-    - !Condition install_cloud_watch_logs_source
-    - !Condition update_cloudwatch_log_source
+  install_cloudtrail_collector: !Condition install_cloudtrail_logs_source
+  install_cloudwatch_collector: !Condition install_cloud_watch_logs_source
 
   create_sns_topic: !And
     - !Condition do_not_use_parent_stack
@@ -379,7 +375,7 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelper.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.1.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -441,9 +437,40 @@ Resources:
   WaitHandle:
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
+  LambdaMetricRule:
+    Type: Custom::SumoLogicMetricRules
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
+      RemoveOnDeleteStack: false
+      MetricRuleName: "AwsObservabilityLambdaMetricsEntityRule"
+      MatchExpression: "Namespace=AWS/Lambda FunctionName=*"
+      ExtractVariables:
+        entity: "$FunctionName._1"
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
+  ExplorerViewWaitHandle:
+    DependsOn: LambdaMetricRule
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  ExplorerViewWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref ExplorerViewWaitHandle
+      Timeout: "5"
+      Count: 0
+
   CreateSumoLogicAWSExplorerView:
     Type: Custom::SumoLogicAWSExplorer
     Condition: do_not_use_parent_stack
+    DependsOn: ExplorerViewWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -463,48 +490,21 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  LambdaMetricWaitHandle:
+  FieldExtractionRuleWaitHandle:
     Condition: do_not_use_parent_stack
     DependsOn: CreateSumoLogicAWSExplorerView
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
-  LambdaMetricWaitCondition:
+  FieldExtractionRuleWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
-      Handle: !If [do_not_use_parent_stack, !Ref LambdaMetricWaitHandle, !Ref WaitHandle]
-      Timeout: "5"
-      Count: 0
-
-  LambdaMetricRule:
-    Type: Custom::SumoLogicMetricRules
-    DependsOn: LambdaMetricWaitCondition
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityLambdaMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/Lambda FunctionName=*"
-      ExtractVariables:
-        entity: "$FunctionName._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  LambdaFERWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !If [do_not_use_parent_stack, !Ref LambdaMetricWaitHandle, !Ref WaitHandle]
-      Timeout: "15"
+      Handle: !If [do_not_use_parent_stack, !Ref FieldExtractionRuleWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
       Count: 0
 
   LambdaFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
-    DependsOn: LambdaFERWaitCondition
+    DependsOn: FieldExtractionRuleWaitCondition
     Condition: create_fer
     Properties:
       ServiceToken: !If
@@ -519,6 +519,41 @@ Resources:
       FieldExtractionRuleScope: !Sub "(_sourceCategory=${Section5gCloudTrailLogsSourceCategoryName} \"eventSource\":\"lambda.amazonaws.com\")"
       FieldExtractionRuleParseExpression: "| json \"eventSource\", \"awsRegion\" as eventSource, region | where eventSource in (\"rds.amazonaws.com\", \"apigateway.amazonaws.com\", \"lambda.amazonaws.com\", \"dynamodb.amazonaws.com\") | if (eventSource matches \"rds.amazonaws.com\", \"aws/rds\", if (eventSource matches \"apigateway.amazonaws.com\",  \"aws/apigateway\", if (eventSource matches \"lambda.amazonaws.com\",  \"aws/lambda\", if (eventSource matches \"dynamodb.amazonaws.com\",  \"aws/dynamodb\", \"\")))) as Namespace"
       FieldExtractionRuleParseEnabled: true
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
+  SumoAppWaitHandle:
+    Condition: create_fer
+    DependsOn: LambdaFieldExtractionRule
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  SumoAppWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [create_fer, !Ref SumoAppWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
+  sumoApp:
+    Type: Custom::App
+    Condition: install_app
+    DependsOn: SumoAppWaitCondition
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      AppName: "AWS Observability Lambda App"
+      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      AppSources:
+        logsrccw: !Sub "_sourceCategory=${Section6dCloudWatchLogsSourceCategoryName}"
+        logsrcct: !Sub "_sourceCategory=${Section5gCloudTrailLogsSourceCategoryName}"
+      FolderName: "Sumo Logic AWS Observability Apps "
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
@@ -577,26 +612,17 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${Section7aParentStackName}-SumoSourceRoleARN'
 
-  sumoApp:
-    Type: Custom::App
+  CloudWatchCollectorWaitHandle:
     Condition: install_app
+    DependsOn: sumoApp
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  CloudWatchCollectorWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
     Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Lambda App"
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      AppSources:
-        logsrccw: !Sub "_sourceCategory=${Section6dCloudWatchLogsSourceCategoryName}"
-        logsrcct: !Sub "_sourceCategory=${Section5gCloudTrailLogsSourceCategoryName}"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
+      Handle: !If [install_app, !Ref CloudWatchCollectorWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
 
   CloudWatchEventFunction:
     Type: AWS::CloudFormation::Stack
@@ -610,6 +636,7 @@ Resources:
   SumoCloudWatchCollector:
     Type: Custom::Collector
     Condition: install_cloudwatch_collector
+    DependsOn: CloudWatchCollectorWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -835,9 +862,22 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${Section7aParentStackName}-SumoSourceRoleARN'
 
+  UpdateSourceWaitHandle:
+    Condition: install_app
+    DependsOn: sumoApp
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  UpdateSourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [install_app, !Ref UpdateSourceWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   SumoCloudTrailUpdateSource:
     Type: Custom::SumoLogicUpdateFields
     Condition: update_cloudtrail_source
+    DependsOn: UpdateSourceWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -849,22 +889,29 @@ Resources:
       Region: !Ref "AWS::Region"
       SourceName: !Ref Section5fCloudTrailLogsSourceName
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      CollectorId: !If
-        - install_cloudtrail_collector
-        - !GetAtt
-          - SumoCloudTrailCollector
-          - COLLECTOR_ID
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-CollectorID'
+      CollectorName: !Ref Section5cCloudTrailCollectorName
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
         account: !Ref Section2bAccountAlias
 
+  UpdateHTTPSourceWaitHandle:
+    Condition: update_cloudtrail_source
+    DependsOn: SumoCloudTrailUpdateSource
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  UpdateHTTPSourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [update_cloudtrail_source, !Ref UpdateHTTPSourceWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   SumoHTTPUpdateSource:
     Type: Custom::SumoLogicUpdateFields
     Condition: update_cloudwatch_log_source
+    DependsOn: UpdateHTTPSourceWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -876,13 +923,7 @@ Resources:
       Region: !Ref "AWS::Region"
       SourceName: !Ref Section6cCloudWatchLogsSourceName
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      CollectorId: !If
-        - install_cloudwatch_collector
-        - !GetAtt
-          - SumoCloudWatchCollector
-          - COLLECTOR_ID
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-CollectorID'
+      CollectorName: !Ref Section6aCloudWatchLogsCollectorName
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
