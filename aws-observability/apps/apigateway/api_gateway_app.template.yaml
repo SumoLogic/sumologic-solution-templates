@@ -280,9 +280,7 @@ Conditions:
     - !Not [!Condition install_cloudtrail_logs_source]
     - !Not [!Equals [!Ref Section5fCloudTrailLogsSourceName, '']]
     - !Not [!Equals [!Ref Section5cCloudTrailCollectorName, '']]
-  install_cloudtrail_collector: !Or
-    - !Condition install_cloudtrail_logs_source
-    - !Condition update_api_gateway_source
+  install_cloudtrail_collector: !Condition install_cloudtrail_logs_source
 
   create_sns_topic: !And
     - !Condition do_not_use_parent_stack
@@ -291,6 +289,10 @@ Conditions:
   create_fer: !Not [!Equals [!Ref Section5gCloudTrailLogsSourceCategoryName, ""]]
 
 Resources:
+
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
     Condition: do_not_use_parent_stack
@@ -333,7 +335,7 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelper.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.1.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -392,28 +394,6 @@ Resources:
       AccountID: !Ref "AWS::AccountId"
       Filter: !Ref Section2cFilterExpression
 
-  CreateSumoLogicAWSExplorerView:
-    Type: Custom::SumoLogicAWSExplorer
-    Condition: do_not_use_parent_stack
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
-      RemoveOnDeleteStack: false
-      ExplorerName: "AWS Observability"
-      MetadataKeys:
-        - "account"
-        - "region"
-        - "namespace"
-        - "entity"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
   APIGatewayMetricRule:
     Type: Custom::SumoLogicMetricRules
     Properties:
@@ -433,9 +413,56 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
+  ExplorerViewWaitHandle:
+    DependsOn: APIGatewayMetricRule
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  ExplorerViewWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref ExplorerViewWaitHandle
+      Timeout: "5"
+      Count: 0
+
+  CreateSumoLogicAWSExplorerView:
+    Type: Custom::SumoLogicAWSExplorer
+    Condition: do_not_use_parent_stack
+    DependsOn: ExplorerViewWaitCondition
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
+      RemoveOnDeleteStack: false
+      ExplorerName: "AWS Observability"
+      MetadataKeys:
+        - "account"
+        - "region"
+        - "namespace"
+        - "entity"
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
+  FieldExtractionRuleWaitHandle:
+    Condition: do_not_use_parent_stack
+    DependsOn: CreateSumoLogicAWSExplorerView
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  FieldExtractionRuleWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [do_not_use_parent_stack, !Ref FieldExtractionRuleWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   APIGatewayFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
+    DependsOn: FieldExtractionRuleWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -452,6 +479,74 @@ Resources:
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
+
+  SumoAppWaitHandle:
+    Condition: create_fer
+    DependsOn: APIGatewayFieldExtractionRule
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  SumoAppWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [create_fer, !Ref SumoAppWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
+  sumoApp:
+    Type: Custom::App
+    Condition: install_app
+    DependsOn: SumoAppWaitCondition
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      AppName: "AWS Observability Api Gateway App"
+      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      AppSources:
+        logsrc: !Sub "_sourceCategory=${Section5gCloudTrailLogsSourceCategoryName}"
+      FolderName: "Sumo Logic AWS Observability Apps "
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
+  UpdateSourceWaitHandle:
+    Condition: install_app
+    DependsOn: sumoApp
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  UpdateSourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [install_app, !Ref UpdateSourceWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
+  SumoCloudTrailUpdateSource:
+    Type: Custom::SumoLogicUpdateFields
+    Condition: update_api_gateway_source
+    DependsOn: UpdateSourceWaitCondition
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref Section5fCloudTrailLogsSourceName
+      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      CollectorName: !Ref Section5cCloudTrailCollectorName
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      Fields:
+        account: !Ref Section2bAccountAlias
 
   SumoCloudwatchMetricsCollector:
     Type: Custom::Collector
@@ -506,26 +601,6 @@ Resources:
           - Arn
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoSourceRoleARN'
-
-  sumoApp:
-    Type: Custom::App
-    Condition: install_app
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Api Gateway App"
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      AppSources:
-        logsrc: !Sub "_sourceCategory=${Section5gCloudTrailLogsSourceCategoryName}"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
 
   SumoCloudTrailExportPolicy:
     Condition: create_target_s3_bucket
@@ -705,30 +780,3 @@ Resources:
           - Arn
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoSourceRoleARN'
-
-  SumoCloudTrailUpdateSource:
-    Type: Custom::SumoLogicUpdateFields
-    Condition: update_api_gateway_source
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      SourceName: !Ref Section5fCloudTrailLogsSourceName
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      CollectorId: !If
-        - install_cloudtrail_collector
-        - !GetAtt
-          - SumoCloudTrailCollector
-          - COLLECTOR_ID
-        - !ImportValue
-          'Fn::Sub': '${Section6aParentStackName}-CollectorID'
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-      Fields:
-        account: !Ref Section2bAccountAlias

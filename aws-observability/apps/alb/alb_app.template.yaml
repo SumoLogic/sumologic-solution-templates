@@ -331,15 +331,17 @@ Conditions:
     - !Not [!Condition install_alb_logs_source]
     - !Not [!Equals [!Ref Section5fALBLogsSourceName, '']]
     - !Not [!Equals [!Ref Section5cALBCollectorName, '']]
-  install_alb_collector: !Or
-    - !Condition install_alb_logs_source
-    - !Condition update_alb_source
+  install_alb_collector: !Condition install_alb_logs_source
 
   create_sns_topic: !And
     - !Condition do_not_use_parent_stack
     - !Condition install_alb_logs_source
 
 Resources:
+
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
     Condition: do_not_use_parent_stack
@@ -381,7 +383,7 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelper.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.1.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -440,28 +442,6 @@ Resources:
       AccountID: !Ref "AWS::AccountId"
       Filter: !Ref Section2cFilterExpression
 
-  CreateSumoLogicAWSExplorerView:
-    Type: Custom::SumoLogicAWSExplorer
-    Condition: do_not_use_parent_stack
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
-      RemoveOnDeleteStack: false
-      ExplorerName: "AWS Observability"
-      MetadataKeys:
-        - "account"
-        - "region"
-        - "namespace"
-        - "entity"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
   ALBMetricRule:
     Type: Custom::SumoLogicMetricRules
     Properties:
@@ -481,9 +461,44 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
+  ExplorerViewWaitHandle:
+    DependsOn: ALBMetricRule
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  ExplorerViewWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref ExplorerViewWaitHandle
+      Timeout: "5"
+      Count: 0
+
+  CreateSumoLogicAWSExplorerView:
+    Type: Custom::SumoLogicAWSExplorer
+    Condition: do_not_use_parent_stack
+    DependsOn: ExplorerViewWaitCondition
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${Section6aParentStackName}-SumoLogicHelperFunctionARN'
+      RemoveOnDeleteStack: false
+      ExplorerName: "AWS Observability"
+      MetadataKeys:
+        - "account"
+        - "region"
+        - "namespace"
+        - "entity"
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
   SumoCloudwatchMetricsCollector:
     Type: Custom::Collector
     Condition: install_cloud_watch_metric_source
+    DependsOn: ALBUpdateSourceWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -535,8 +550,21 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoSourceRoleARN'
 
+  SumoAppWaitHandle:
+    Condition: do_not_use_parent_stack
+    DependsOn: CreateSumoLogicAWSExplorerView
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  SumoAppWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [do_not_use_parent_stack, !Ref SumoAppWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   sumoApp:
     Condition: install_app
+    DependsOn: SumoAppWaitCondition
     Type: Custom::App
     Properties:
       ServiceToken: !If
@@ -551,6 +579,7 @@ Resources:
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       AppSources:
         logsrc: !Sub "_sourceCategory=${Section5gALBLogsSourceCategoryName}"
+      FolderName: "Sumo Logic AWS Observability Apps "
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
@@ -646,9 +675,6 @@ Resources:
       Topics:
         - Ref: SumoSNSTopic
 
-  WaitHandle:
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
   TargetS3BucketWaitHandle:
     Condition: create_target_s3_bucket
     DependsOn: TargetS3Bucket
@@ -661,9 +687,22 @@ Resources:
       Timeout: "1"
       Count: 0
 
+  SumoALBWaitHandle:
+    Condition: install_cloud_watch_metric_source
+    DependsOn: SumoCloudwatchMetricsSource
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  SumoALBWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [install_cloud_watch_metric_source, !Ref SumoALBWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   SumoALBCollector:
     Type: Custom::Collector
     Condition: install_alb_collector
+    DependsOn: SumoALBWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -715,9 +754,22 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${Section6aParentStackName}-SumoSourceRoleARN'
 
+  ALBUpdateSourceWaitHandle:
+    Condition: install_app
+    DependsOn: sumoApp
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  ALBUpdateSourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [install_app, !Ref ALBUpdateSourceWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   SumoALBUpdateSource:
     Type: Custom::SumoLogicUpdateFields
     Condition: update_alb_source
+    DependsOn: ALBUpdateSourceWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -729,7 +781,7 @@ Resources:
       Region: !Ref "AWS::Region"
       SourceName: !Ref Section5fALBLogsSourceName
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      CollectorId: !GetAtt SumoALBCollector.COLLECTOR_ID
+      CollectorName: !Ref Section5cALBCollectorName
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
