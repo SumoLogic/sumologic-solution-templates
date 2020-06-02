@@ -21,6 +21,7 @@ export Section1eSumoLogicResourceRemoveOnDeleteStack=true
 export Section2cAccountAlias=${InstallType}
 export Section2dTagAWSResourcesFilterExpression=".*"
 export Section5bCloudWatchMetricsNameSpaces=""
+export Section5dAnomalyInventoryNameSpaces=""
 export Section6bALBS3LogsBucketName="${AppName}-${InstallType}-${uid}"
 export Section6cALBS3BucketPathExpression="*"
 export Section6eALBS3LogsCollectorName=""
@@ -45,8 +46,10 @@ export Section3cDynamoDBInstallApp="No"
 export Section3dRDSInstallApp="No"
 export Section3eLambdaInstallApp="No"
 export Section3fAPIGatewayInstallApp="No"
+export Section3gAnomalyInstallApp="No"
 export Section4aEC2CreateMetaDataSource="No"
 export Section5aCreateCloudWatchMetricsSource="No"
+export Section5cCreateAnomalyInventorySource="No"
 export Section6aALBCreateS3Bucket="No"
 export Section6dALBCreateLogSource="No"
 export Section7aCreateCloudTrailBucket="No"
@@ -75,6 +78,10 @@ then
     export Section3bALBInstallApp="Yes"
     export Section3dRDSInstallApp="Yes"
     export Section3fAPIGatewayInstallApp="Yes"
+# onlyanamoly - Installs only Anomaly Dashboards.
+elif [[ "${InstallType}" == "onlyanomaly" ]]
+then
+    export Section3gAnomalyInstallApp="Yes"
 # onlytagging - Tags only the existing resources. Alb, dynamo, api
 elif [[ "${InstallType}" == "onlytaggingexisting" ]]
 then
@@ -119,6 +126,11 @@ elif [[ "${InstallType}" == "onlymetricssourcewithname" ]]
 then
     export Section5aCreateCloudWatchMetricsSource="Yes"
     export Section5bCloudWatchMetricsNameSpaces="AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS"
+# onlyanomalywithname - Only Creates the Anamoly Source with namespaces AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS.
+elif [[ "${InstallType}" == "onlyanomalywithname" ]]
+then
+    export Section5cCreateAnomalyInventorySource="Yes"
+    export Section5dAnomalyInventoryNameSpaces="AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS"
 # onlycloudtrailwithbucket - Only Creates the CloudTrail Logs Source with new Bucket.
 elif [[ "${InstallType}" == "onlycloudtrailwithbucket" ]]
 then
@@ -296,5 +308,6 @@ then
     Section7aCreateCloudTrailBucket="${Section7aCreateCloudTrailBucket}" Section7dCreateCloudTrailLogSource="${Section7dCreateCloudTrailLogSource}" \
     Section8aLambdaCreateCloudWatchLogsSource="${Section8aLambdaCreateCloudWatchLogsSource}" \
     Section9aAutoEnableS3LogsALBResourcesOptions="${Section9aAutoEnableS3LogsALBResourcesOptions}" \
-    Section9cAutoSubscribeLogGroupsLambdaOptions="${Section9cAutoSubscribeLogGroupsLambdaOptions}"
+    Section9cAutoSubscribeLogGroupsLambdaOptions="${Section9cAutoSubscribeLogGroupsLambdaOptions}" Section5dAnomalyInventoryNameSpaces="${Section5dAnomalyInventoryNameSpaces}" \
+    Section5cCreateAnomalyInventorySource="${Section5cCreateAnomalyInventorySource}" Section3gAnomalyInstallApp="${Section3gAnomalyInstallApp}"
 fi

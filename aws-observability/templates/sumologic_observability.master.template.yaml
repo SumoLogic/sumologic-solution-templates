@@ -31,6 +31,7 @@ Metadata:
           - Section3dRDSInstallApp
           - Section3eLambdaInstallApp
           - Section3fAPIGatewayInstallApp
+          - Section3gAnomalyInstallApp
 
       - Label:
           default: "4. Sumo Logic AWS EC2 Meta Data Source Details"
@@ -38,10 +39,12 @@ Metadata:
           - Section4aEC2CreateMetaDataSource
 
       - Label:
-          default: "5. Sumo Logic AWS CloudWatch Metrics Source Details"
+          default: "5. Sumo Logic AWS CloudWatch Metrics and Inventory Source Details"
         Parameters:
           - Section5aCreateCloudWatchMetricsSource
           - Section5bCloudWatchMetricsNameSpaces
+          - Section5cCreateAnomalyInventorySource
+          - Section5dAnomalyInventoryNameSpaces
 
       - Label:
           default: "6. Sumo Logic AWS ALB Log Source Details"
@@ -114,6 +117,8 @@ Metadata:
         default: "Install Lambda App"
       Section3fAPIGatewayInstallApp:
         default: "Install API Gateway App"
+      Section3gAnomalyInstallApp:
+        default: "Install Anomaly App "
 
       Section4aEC2CreateMetaDataSource:
         default: "Create Sumo Logic AWS EC2 MetaData Source"
@@ -122,6 +127,10 @@ Metadata:
         default: "Create Sumo Logic CloudWatch Metrics Source"
       Section5bCloudWatchMetricsNameSpaces:
         default: "Sumo Logic AWS CloudWatch Metrics Namespaces"
+      Section5cCreateAnomalyInventorySource:
+        default: "Create Sumo Logic Anomaly Inventory Source"
+      Section5dAnomalyInventoryNameSpaces:
+        default: "Sumo Logic AWS Anomaly Inventory Namespaces"
 
       Section6aALBCreateS3Bucket:
         default: "Create AWS S3 Bucket for Logs"
@@ -285,6 +294,14 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
+  Section3gAnomalyInstallApp:
+    Type: String
+    Default: 'Yes'
+    Description: "Yes - Installs the Anomaly Dashboards in Sumo Logic AWS Observability Solution.
+                  No - Skips the installation of this dashboards."
+    AllowedValues:
+      - 'Yes'
+      - 'No'
 
   Section4aEC2CreateMetaDataSource:
     Type: String
@@ -304,8 +321,20 @@ Parameters:
       - 'Yes'
       - 'No'
   Section5bCloudWatchMetricsNameSpaces:
-    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS"
-    Description: "Provide Comma delimited list of the namespaces to collect. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS."
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis"
+    Description: "Provide Comma delimited list of the namespaces to collect. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis."
+    Type: String
+  Section5cCreateAnomalyInventorySource:
+    Type: String
+    Description: "Yes - Creates a Sumo Logic Inventory Source which collects data for multiple Namespaces from the region selected. Default Name - AccountAlias-aws-observability-inventory-Region.
+                  No - If you already have a Inventory Source collecting data."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section5dAnomalyInventoryNameSpaces:
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis"
+    Description: "Provide Comma delimited list of the namespaces to collect. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis."
     Type: String
 
   Section6aALBCreateS3Bucket:
@@ -455,6 +484,10 @@ Conditions:
 
   # Condition for CloudWatch Metrics Source
   install_cloudwatch_metrics_source: !Equals [ !Ref Section5aCreateCloudWatchMetricsSource, 'Yes' ]
+  install_inventory_source: !Equals [ !Ref Section5cCreateAnomalyInventorySource, 'Yes' ]
+  install_anomaly_detection: !Or
+    - !Equals [ !Ref Section3gAnomalyInstallApp, 'Yes' ]
+    - !Condition install_inventory_source
 
   # Condition for CloudTrail Log Source
   create_cloudtrail_bucket: !Equals [ !Ref Section7aCreateCloudTrailBucket, 'Yes' ]
@@ -497,6 +530,7 @@ Conditions:
     - !Equals [ !Ref Section3dRDSInstallApp, 'Yes' ]
     - !Equals [ !Ref Section3eLambdaInstallApp, 'Yes' ]
     - !Equals [ !Ref Section3fAPIGatewayInstallApp, 'Yes' ]
+    - !Equals [ !Ref Section3gAnomalyInstallApp, 'Yes' ]
 
 Mappings:
   RegionMap:
@@ -669,7 +703,7 @@ Resources:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
       Handle: !Ref ALBWaitHandle
-      Timeout: "10"
+      Timeout: "2"
       Count: 0
 
   sumoAlbMetricsAppStack:
@@ -711,7 +745,7 @@ Resources:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
       Handle: !Ref DynamoDBWaitHandle
-      Timeout: "10"
+      Timeout: "2"
       Count: 0
 
   sumoDynamoDBMetricsAppStack:
@@ -753,7 +787,7 @@ Resources:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
       Handle: !Ref RDSWaitHandle
-      Timeout: "10"
+      Timeout: "2"
       Count: 0
 
   sumoRdsMetricsAppStack:
@@ -795,7 +829,7 @@ Resources:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
       Handle: !Ref LambdaWaitHandle
-      Timeout: "10"
+      Timeout: "2"
       Count: 0
 
   sumoLambdaMetricsAppStack:
@@ -841,7 +875,7 @@ Resources:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
       Handle: !Ref ApiWaitHandle
-      Timeout: "10"
+      Timeout: "2"
       Count: 0
 
   sumoApiGatewayMetricsAppStack:
@@ -874,6 +908,40 @@ Resources:
         Section5fCloudTrailLogsSourceName: ""
         Section5gCloudTrailLogsSourceCategoryName: !If [install_cloudtrail_log_source, "aws/observability/cloudtrail/logs", !Ref Section7gCloudTrailLogsSourceCategoryName]
         Section6aParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
+
+  AnamolyWaitHandle:
+    DependsOn: sumoApiGatewayMetricsAppStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  AnamolyWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref AnamolyWaitHandle
+      Timeout: "2"
+      Count: 0
+
+  AnamolyAppStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: AnamolyWaitCondition
+    Condition: install_anomaly_detection
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/tsat/tsat.template.yaml"
+      Parameters:
+        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
+        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
+        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aInstallApp: !Ref Section3gAnomalyInstallApp
+        Section2bCollectorName: "aws-observability-collector"
+        Section3aCreateAwsInventorySource: !If [install_inventory_source, "Yes", "No" ]
+        Section3bAwsInventorySourceName: !Sub "${Section2cAccountAlias}-aws-observability-inventory-${AWS::Region}"
+        Section3cNamespaces: !Ref Section5dAnomalyInventoryNameSpaces
+        Section4aParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
 
   AutoEnableTaggingNewAWSResources:
     Type: AWS::CloudFormation::Stack
