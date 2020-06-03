@@ -497,7 +497,13 @@ Conditions:
   install_lambda_cloudwatch_logs_source: !Equals [ !Ref Section8aLambdaCreateCloudWatchLogsSource, 'Yes' ]
 
   # Condition for S3 Logging enable
-  auto_enable_s3_logs: !Not [!Equals [ !Ref Section9aAutoEnableS3LogsALBResourcesOptions, 'None' ]]
+  is_bukcet_available: !Or
+    - !Condition create_alb_bucket
+    - !Not [!Equals [ !Ref Section6bALBS3LogsBucketName, '' ]]
+
+  auto_enable_s3_logs: !And
+    - !Not [!Equals [ !Ref Section9aAutoEnableS3LogsALBResourcesOptions, 'None' ]]
+    - !Condition is_bukcet_available
 
   # Condition for Auto Subscribe Lambda
   auto_subscribe_exisitng_lambda_log_groups: !Or

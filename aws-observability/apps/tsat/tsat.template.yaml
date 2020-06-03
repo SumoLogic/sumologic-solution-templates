@@ -184,6 +184,9 @@ Mappings:
 
 Resources:
 
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
     Condition: do_not_use_parent_stack
@@ -340,9 +343,22 @@ Resources:
       SumoDeployment: !Ref Section1aSumoDeployment
       RoleArn: !GetAtt SumoRole.Arn
 
+  SumoAppWaitHandle:
+    Condition: install_aws_inventory_source
+    DependsOn: SumoAwsInventorySource
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  SumoAppWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [install_aws_inventory_source, !Ref SumoAppWaitHandle, !Ref WaitHandle]
+      Timeout: "5"
+      Count: 0
+
   sumoOverview:
     Type: Custom::App
     Condition: install_app
+    DependsOn: SumoAppWaitCondition
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
