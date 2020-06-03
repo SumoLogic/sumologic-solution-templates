@@ -2168,7 +2168,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$paramId123 \"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\"\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by type, user\n| sort by type, eventCount, user\n| limit 50",
+                "queryString": "$$paramId123 \"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\"\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by type, user\n| topk(10, eventCount) by type | fields -_rank",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -2309,7 +2309,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
           "type": "RelativeTimeRangeBoundary",
-          "relativeTime": "-15m"
+          "relativeTime": "-1h"
         },
         "to": null
       },
@@ -3615,7 +3615,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
           "type": "RelativeTimeRangeBoundary",
-          "relativeTime": "-15m"
+          "relativeTime": "-1h"
         },
         "to": null
       },
