@@ -64,7 +64,7 @@ resource "null_resource" "install_jira_cloud_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}apps/019757ca-3b08-457c-bd15-7239f1ab66c9/install' \
+        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/019757ca-3b08-457c-bd15-7239f1ab66c9/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -80,7 +80,7 @@ resource "null_resource" "install_jira_server_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}apps/ec905b32-e514-4c63-baac-0efa3b3a2109/install' \
+        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/ec905b32-e514-4c63-baac-0efa3b3a2109/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -96,7 +96,7 @@ resource "null_resource" "install_bitbucket_cloud_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}apps/3b068c67-069e-417e-a855-ff7549a0606d/install' \
+        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/3b068c67-069e-417e-a855-ff7549a0606d/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -112,7 +112,7 @@ resource "null_resource" "install_Opsgenie_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}apps/05bf2074-0487-486f-8359-3d878fbc1c49/install' \
+        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/05bf2074-0487-486f-8359-3d878fbc1c49/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -128,7 +128,7 @@ resource "null_resource" "install_atlassian_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}apps/332afd45-eb37-4d65-85b5-21eaead37f6b/install' \
+        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/332afd45-eb37-4d65-85b5-21eaead37f6b/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -166,8 +166,8 @@ data "template_file" "data_json_sto" {
 resource "restapi_object" "sumo_to_opsgenie_webhook" {
   provider     = restapi.sumo
   count        = "${var.install_sumo_to_opsgenie_webhook}" ? 1 : 0
-  path         = "/connections"
-  destroy_path = "/connections/{id}?type=WebhookConnection"
+  path         = "/v1/connections"
+  destroy_path = "/v1/connections/{id}?type=WebhookConnection"
   # debug = true
   id_attribute = "id"
   data         = data.template_file.data_json_sto[0].rendered
@@ -190,8 +190,8 @@ data "template_file" "data_json_stjc" {
 resource "restapi_object" "sumo_to_jiracloud_webhook" {
   provider     = restapi.sumo
   count        = "${var.install_sumo_to_jiracloud_webhook}" ? 1 : 0
-  path         = "/connections"
-  destroy_path = "/connections/{id}?type=WebhookConnection"
+  path         = "/v1/connections"
+  destroy_path = "/v1/connections/{id}?type=WebhookConnection"
   id_attribute = "id"
   data         = data.template_file.data_json_stjc[0].rendered
 }
@@ -213,8 +213,8 @@ data "template_file" "data_json_stjs" {
 resource "restapi_object" "sumo_to_jiraserver_webhook" {
   provider     = restapi.sumo
   count        = "${var.install_sumo_to_jiraserver_webhook}" ? 1 : 0
-  path         = "/connections"
-  destroy_path = "/connections/{id}?type=WebhookConnection"
+  path         = "/v1/connections"
+  destroy_path = "/v1/connections/{id}?type=WebhookConnection"
   id_attribute = "id"
   data         = data.template_file.data_json_stjs[0].rendered
 }
@@ -236,8 +236,8 @@ data "template_file" "data_json_stjsd" {
 resource "restapi_object" "sumo_to_jiraservicedesk_webhook" {
   provider     = restapi.sumo
   count        = "${var.install_sumo_to_jiraservicedesk_webhook}" ? 1 : 0
-  path         = "/connections"
-  destroy_path = "/connections/{id}?type=WebhookConnection"
+  path         = "/v1/connections"
+  destroy_path = "/v1/connections/{id}?type=WebhookConnection"
   id_attribute = "id"
   data         = data.template_file.data_json_stjsd[0].rendered
 }
