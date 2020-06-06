@@ -5,7 +5,7 @@
 sumo_access_id          = "<YOUR SUMO ACCESS ID>"         # Please replace <YOUR SUMO ACCESS ID> (including brackets) with your Sumo Access ID. https://help.sumologic.com/Manage/Security/Access-Keys
 sumo_access_key         = "<YOUR SUMO ACCESS KEY>"        # Please replace <YOUR SUMO ACCESS KEY> (including brackets) with your Sumo Access KEY.
 deployment              = "<YOUR SUMO DEPLOYMENT>"        # Please update with your deployment, refer: https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
-sumo_api_endpoint       = "<YOUR SUMOLOGIC API ENDPOINT>" # Please update with your sumologic api endpoint. Make sure the trailing "/" is present. Refer, https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
+sumo_api_endpoint       = "<YOUR SUMOLOGIC API ENDPOINT>" # Example: https://api.sumologic.com/api/ Please update with your sumologic api endpoint. Make sure the trailing "/" is present. Refer, https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
 app_installation_folder = "Atlassian"                     # The Sumo Logic apps will be installed in a folder specified by this value under your personal folder in Sumo Logic.
 
 # Sumo Logic Apps, Collection and Webhooks
