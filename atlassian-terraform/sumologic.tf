@@ -56,6 +56,12 @@ resource "sumologic_folder" "folder" {
   depends_on  = [sumologic_collector.atlassian_collector]
 }
 
+# Remove slash from Sumo Logic sumo_api_endpoint
+
+locals {
+  sumo_api_endpoint_fixed = replace(var.sumo_api_endpoint, "api/", "api")
+}
+
 # Install Apps
 # Install Jira Cloud
 resource "null_resource" "install_jira_cloud_app" {
@@ -64,7 +70,7 @@ resource "null_resource" "install_jira_cloud_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/019757ca-3b08-457c-bd15-7239f1ab66c9/install' \
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/019757ca-3b08-457c-bd15-7239f1ab66c9/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -80,7 +86,7 @@ resource "null_resource" "install_jira_server_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/ec905b32-e514-4c63-baac-0efa3b3a2109/install' \
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/ec905b32-e514-4c63-baac-0efa3b3a2109/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -96,7 +102,7 @@ resource "null_resource" "install_bitbucket_cloud_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/3b068c67-069e-417e-a855-ff7549a0606d/install' \
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/3b068c67-069e-417e-a855-ff7549a0606d/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -112,7 +118,7 @@ resource "null_resource" "install_Opsgenie_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/05bf2074-0487-486f-8359-3d878fbc1c49/install' \
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/05bf2074-0487-486f-8359-3d878fbc1c49/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
@@ -128,7 +134,7 @@ resource "null_resource" "install_atlassian_app" {
 
   provisioner "local-exec" {
     command = <<EOT
-        curl -s --request POST '${var.sumo_api_endpoint}v1/apps/332afd45-eb37-4d65-85b5-21eaead37f6b/install' \
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/332afd45-eb37-4d65-85b5-21eaead37f6b/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
