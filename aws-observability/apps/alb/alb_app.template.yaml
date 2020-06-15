@@ -350,14 +350,11 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  ALBUpdateSourceWaitHandle:
-    DependsOn: ALBMetricRule
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
   ALBUpdateSourceWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: ALBMetricRule
     Properties:
-      Handle: !Ref ALBUpdateSourceWaitHandle
+      Handle: !Ref WaitHandle
       Timeout: "20"
       Count: 0
 
