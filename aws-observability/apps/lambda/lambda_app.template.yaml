@@ -391,15 +391,12 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  UpdateSourceWaitHandle:
-    DependsOn: LambdaMetricRule
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
   UpdateSourceWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: LambdaMetricRule
     Properties:
-      Handle: !Ref UpdateSourceWaitHandle
-      Timeout: "20"
+      Handle: !Ref WaitHandle
+      Timeout: "3"
       Count: 0
 
   SumoCloudTrailLogsUpdateSource:
@@ -432,10 +429,18 @@ Resources:
       Fields:
         account: !Ref Section2bAccountAlias
 
+  FERWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: UpdateSourceWaitCondition
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "7"
+      Count: 0
+
   SumoHTTPUpdateSource:
     Type: Custom::SumoLogicUpdateFields
     Condition: update_cloudwatch_logs_source
-    DependsOn: UpdateSourceWaitCondition
+    DependsOn: FERWaitCondition
     Properties:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
@@ -451,7 +456,7 @@ Resources:
 
   LambdaFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
-    DependsOn: UpdateSourceWaitCondition
+    DependsOn: FERWaitCondition
     Condition: create_fer
     Properties:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]

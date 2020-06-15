@@ -367,14 +367,11 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  UpdateSourceWaitHandle:
-    DependsOn: InstanceMetricRule
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
   UpdateSourceWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: InstanceMetricRule
     Properties:
-      Handle: !Ref UpdateSourceWaitHandle
+      Handle: !Ref WaitHandle
       Timeout: "20"
       Count: 0
 

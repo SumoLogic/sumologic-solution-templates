@@ -535,21 +535,9 @@ Resources:
         RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         ParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
-  AutoSubscribeWaitHandle:
-    DependsOn: CreateCommonResources
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  AutoSubscribeWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref AutoSubscribeWaitHandle
-      Timeout: "20"
-      Count: 0
-
   AutoSubscribeLambdaLogGroupsAWSResources:
     Type: AWS::Serverless::Application
     Condition: auto_subscribe_lambda_log_groups
-    DependsOn: AutoSubscribeWaitCondition
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector

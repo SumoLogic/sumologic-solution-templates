@@ -302,6 +302,8 @@ Mappings:
       AccountId: "037604701340"
 
 Resources:
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
 
   LambdaRole:
     Type: AWS::IAM::Role
@@ -574,9 +576,18 @@ Resources:
 
   ############# START - RESOURCES FOR CLOUD WATCH METRICS SOURCE #################
 
+  SumoLogicCloudwatchMetricsSourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: SumoLogicHostedCollector
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
   SumoLogicCloudwatchMetricsSource:
     Type: Custom::AWSSource
     Condition: install_cloud_watch_metric_source
+    DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
@@ -592,9 +603,18 @@ Resources:
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
   ############# START - RESOURCES FOR ALB SOURCE #################
+  ALBSourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "5"
+      Count: 0
+
   ALBSource:
     Condition: install_alb_logs_source
     Type: Custom::AWSSource
+    DependsOn: ALBSourceWaitCondition
     Properties:
       SourceType: AwsElbBucket
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -669,10 +689,18 @@ Resources:
         - Ref: ALBSNSTopic
 
   ############# START - RESOURCES FOR CLOUD TRAIL SOURCE #################
+  CloudTrailSourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: ALBSourceWaitCondition
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "7"
+      Count: 0
 
   CloudTrailSource:
     Condition: install_cloudtrail_logs_source
     Type: Custom::AWSSource
+    DependsOn: CloudTrailSourceWaitCondition
     Properties:
       SourceType: AwsCloudTrailBucket
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -745,6 +773,13 @@ Resources:
         - Ref: CloudTrailSNSTopic
 
   ############# START - RESOURCES FOR CLOUD WATCH LOGS SOURCE #################
+  CloudWatchHTTPSourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: CloudTrailSourceWaitCondition
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "9"
+      Count: 0
 
   CloudWatchEventFunction:
     Type: AWS::CloudFormation::Stack
@@ -758,6 +793,7 @@ Resources:
   CloudWatchHTTPSource:
     Condition: install_cloudwatch_logs_source
     Type: Custom::HTTPSource
+    DependsOn: CloudWatchHTTPSourceWaitCondition
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
@@ -774,6 +810,13 @@ Resources:
         region: !Ref "AWS::Region"
 
   ############# START - RESOURCES FOR INVENTORY SOURCE #################
+  InventorySourceWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: CloudWatchHTTPSourceWaitCondition
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "11"
+      Count: 0
 
   InventoryRole:
     Type: AWS::IAM::Role
@@ -847,6 +890,7 @@ Resources:
   InventorySource:
     Type: Custom::AWSSource
     Condition: install_inventory_source
+    DependsOn: InventorySourceWaitCondition
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
