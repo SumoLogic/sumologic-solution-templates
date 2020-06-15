@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the EC2 Metrics app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Template to setup the Sumo Logic AWS Inventory Source and Anomaly app."
 
 Metadata:
-  AWS::CloudFormation::Interface:
+  'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
           default: "Sumo Logic Access Configuration (Required)"
@@ -15,28 +15,22 @@ Metadata:
           - Section1eRemoveSumoResourcesOnDeleteStack
 
       - Label:
-          default: "Sumo Logic AWS Resources Tagging Configuration (Required)"
-        Parameters:
-          - Section2aTagExistingAWSResources
-          - Section2bAccountAlias
-          - Section2cFilterExpression
-
-      - Label:
           default: "App Details - Sumo Logic Collector Configuration"
         Parameters:
-          - Section3aInstallApp
-          - Section3bCollectorName
+          - Section2aInstallApp
+          - Section2bCollectorName
 
       - Label:
-          default: "App Details - Sumo Logic MetaData Source Configuration"
+          default: "AWS Inventory Source Details"
         Parameters:
-          - Section4aCreateMetaDataSource
-          - Section4bMetaDataSourceName
+          - Section3aCreateAwsInventorySource
+          - Section3bAwsInventorySourceName
+          - Section3cNamespaces
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
-          - Section5aParentStackLambdaARN
+          - Section4aParentStackLambdaARN
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -50,24 +44,19 @@ Metadata:
       Section1eRemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
-      Section2aTagExistingAWSResources:
-        default: "Tag Existing AWS EC2 Resources."
-      Section2bAccountAlias:
-        default: "Alias for AWS Account Identification"
-      Section2cFilterExpression:
-        default: "Filter Regular expression"
-
-      Section3aInstallApp:
-        default: "Install Sumo Logic App"
-      Section3bCollectorName:
+      Section2aInstallApp:
+        default: "Create AWS Anomaly App"
+      Section2bCollectorName:
         default: "Collector Name"
 
-      Section4aCreateMetaDataSource:
-        default: "Create Sumo Logic MetaData Source"
-      Section4bMetaDataSourceName:
-        default: "Sumo Logic Metadata Source Name"
+      Section3aCreateAwsInventorySource:
+        default: "Create Sumo Logic AWS Inventory Source"
+      Section3bAwsInventorySourceName:
+        default: "Sumo Logic AWS Inventory Source Name"
+      Section3cNamespaces:
+        default: "Limit Inventory collection to following namespaces"
 
-      Section5aParentStackLambdaARN:
+      Section4aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
 
 Parameters:
@@ -109,55 +98,44 @@ Parameters:
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
-  Section2aTagExistingAWSResources:
+  Section2aInstallApp:
     Type: String
-    Description: "Yes - Tags the existing AWS EC2 resources with key - Value as account - account alias and Namespace - AWS/EC2.
-                  No - Skip AWS Resources tagging."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  Section2bAccountAlias:
-    Type: String
-    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-zA-Z0-9]+"
-    ConstraintDescription: "Alias must only contain uppercase, lowercase letters, number and length less than or equal to 30 characters."
-    MaxLength: 30
-  Section2cFilterExpression:
-    Type: String
-    Default: ""
-    Description: "Provide regular expression for matching aws resources. For eg;- 'InstanceType': 't1.micro.*?'|'name': 'Test.*?']|'stageName': 'prod.*?'|'FunctionName': 'Test.*?'|TableName.*?|'LoadBalancerName': 'Test.*?'|'DBClusterIdentifier': 'Test.*?'|'DBInstanceIdentifier': 'Test.*?'"
-
-  Section3aInstallApp:
-    Type: String
-    Description: "Yes - Installs the EC2 App for the Sumo Logic AWS Observability Solution.
+    Description: "Yes - Installs the Anomaly App for the Sumo Logic AWS Observability Solution.
                   No - Skips the installation of this app."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section3bCollectorName:
+  Section2bCollectorName:
     Type: String
     Description: "Change the collector name to be created else default name will be used."
-    Default: AWS-EC2-Collector
+    Default: ""
 
-  Section4aCreateMetaDataSource:
+  Section3aCreateAwsInventorySource:
     Type: String
-    Description: "Yes - Creates Sumo Logic MetaData Source. A common metadata source will be created with the region selected.
-                  No - If you already have a MetaData Source configured."
+    Description: "Choose Yes to create Sumo Logic Aws Inventory Source. Choose No to skip Source Creation."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section4bMetaDataSourceName:
+  Section3bAwsInventorySourceName:
     Type: String
-    Description: "Change the MetaData Source name to be created else default name will be used."
-    Default: AWS-EC2-MetaData-Source
+    Description: "Change the Aws Inventory Source name to be created else default name will be used."
+    Default: ""
+  Section3cNamespaces:
+    Default: ""
+    Description: "Provide Comma delimited list of the namespaces to collect. For Eg.- AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS"
+    Type: String
 
-  Section5aParentStackLambdaARN:
+  Section4aParentStackLambdaARN:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
+
+Conditions:
+  do_not_use_parent_stack: !Equals [ !Ref Section4aParentStackLambdaARN, "ParentStackLambdaARN"]
+
+  install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
 
 Mappings:
   RegionMap:
@@ -202,12 +180,6 @@ Mappings:
     me-south-1:
       bucketname: appdevzipfiles-me-south-1s
 
-Conditions:
-  do_not_use_parent_stack: !Equals [ !Ref Section5aParentStackLambdaARN, "ParentStackLambdaARN"]
-
-  install_app: !Equals [!Ref Section3aInstallApp, 'Yes']
-  tag_existing_aws_resources: !Equals [!Ref Section2aTagExistingAWSResources, 'Yes']
-
 Resources:
 
   CreateCommonResources:
@@ -225,45 +197,19 @@ Resources:
         SumoLogicAccessKey: !Ref Section1cSumoAccessKey
         SumoLogicOrganizationId: !Ref Section1dSumoOrganizationId
         RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-        AccountAlias: !Ref Section2bAccountAlias
-        CollectorName: !Ref Section3bCollectorName
-        CreateMetaDataSource: !Ref Section4aCreateMetaDataSource
-        MetaDataSourceName: !Ref Section4bMetaDataSourceName
+        AccountAlias: "anomaly"
+        CollectorName: !Ref Section2bCollectorName
+        CreateAwsInventorySource: !Ref Section3aCreateAwsInventorySource
+        AwsInventorySourceName: !Ref Section3bAwsInventorySourceName
+        AwsInventoryNamespaces: !Ref Section3cNamespaces
 
-  TagAWSResources:
-    Type: Custom::TagAWSResources
-    Condition: tag_existing_aws_resources
-    Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      Region: !Ref "AWS::Region"
-      AWSResource: ec2
-      Tags:
-        account: !Ref Section2bAccountAlias
-        Namespace: "AWS/EC2"
-      AccountID: !Ref "AWS::AccountId"
-      Filter: !Ref Section2cFilterExpression
-
-  EC2MetricRule:
-    Type: Custom::SumoLogicMetricRules
-    Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
-      RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityEC2MetricsEntityRule"
-      MatchExpression: "Namespace=AWS/EC2 InstanceId=*"
-      ExtractVariables:
-        entity: "$InstanceId._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  sumoApp:
+  sumoOverview:
     Type: Custom::App
     Condition: install_app
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section4aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
-      AppName: "AWS Observability EC2 Metrics App"
+      AppName: "AWS Observability Overview App Tsat"
       FolderName: "Sumo Logic AWS Observability Apps "
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID

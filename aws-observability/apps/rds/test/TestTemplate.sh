@@ -17,27 +17,27 @@ export Section1eRemoveSumoResourcesOnDeleteStack=true
 
 export Section2bAccountAlias=${InstallType}
 export Section2cFilterExpression=".*"
-export Section4cCloudWatchMetricsSourceName="Source-metrics-${AppName}-${InstallType}"
-export Section5eCloudTrailBucketPathExpression="*"
-export Section5gCloudTrailLogsSourceCategoryName="Labs/${AppName}/${InstallType}"
+export Section4bCloudWatchMetricsSourceName="Source-metrics-${AppName}-${InstallType}"
+export Section5dCloudTrailBucketPathExpression="*"
 export Section5bCloudTrailLogsBucketName="${AppName}-${InstallType}-${uid}"
 
 export Section2aTagExistingAWSResources="No"
 export Section3aInstallApp="No"
-export Section4bCreateCloudWatchMetricsSource="No"
+export Section4aCreateCloudWatchMetricsSource="No"
 export Section5aCreateCloudTrailBucket="No"
-export Section5dCreateCloudTrailLogSource="No"
+export Section5cCreateCloudTrailLogSource="No"
 
 if [[ "${InstallType}" == "all" ]]
 then
-    export Section4aCloudWatchMetricCollectorName="Sourabh-Collector-CW-${AppName}-${InstallType}"
-    export Section5cCloudTrailCollectorName="Sourabh-Collector-${AppName}-${InstallType}"
-    export Section5fCloudTrailLogsSourceName="Source-${AppName}-${InstallType}"
+    export Section3bCollectorName="Sourabh-Collector-${AppName}-${InstallType}"
+    export Section5eCloudTrailLogsSourceName="Source-${AppName}-${InstallType}"
     export Section2aTagExistingAWSResources="Yes"
     export Section3aInstallApp="Yes"
-    export Section4bCreateCloudWatchMetricsSource="Yes"
+    export Section4aCreateCloudWatchMetricsSource="Yes"
     export Section5aCreateCloudTrailBucket="Yes"
-    export Section5dCreateCloudTrailLogSource="Yes"
+    export Section5cCreateCloudTrailLogSource="Yes"
+    export Section5fCloudTrailLogsAPIUrl="https://api.sumologic.com/api/v1/collectors/159619269/sources/772748450"
+    export Section4cCloudWatchExistingSourceAPIUrl="https://api.sumologic.com/api/v1/collectors/159619269/sources/772769331"
 elif [[ "${InstallType}" == "onlyapp" ]]
 then
     export Section3aInstallApp="Yes"
@@ -46,44 +46,46 @@ then
     export Section2aTagExistingAWSResources="Yes"
 elif [[ "${InstallType}" == "onlycwsource" ]]
 then
-    export Section4aCloudWatchMetricCollectorName="Sourabh-Collector-CW-${AppName}-${InstallType}"
-    export Section4bCreateCloudWatchMetricsSource="Yes"
+    export Section3bCollectorName="Sourabh-Collector-${AppName}-${InstallType}"
+    export Section4aCreateCloudWatchMetricsSource="Yes"
 elif [[ "${InstallType}" == "onlylogsourcewithbucket" ]]
 then
-    export Section5cCloudTrailCollectorName="Sourabh-Collector-${AppName}-${InstallType}"
-    export Section5fCloudTrailLogsSourceName="Source-${AppName}-${InstallType}"
+    export Section3bCollectorName="Sourabh-Collector-${AppName}-${InstallType}"
+    export Section5eCloudTrailLogsSourceName="Source-${AppName}-${InstallType}"
     export Section5aCreateCloudTrailBucket="Yes"
-    export Section5dCreateCloudTrailLogSource="Yes"
+    export Section5cCreateCloudTrailLogSource="Yes"
 elif [[ "${InstallType}" == "onlylogsourcewithoutbucket" ]]
 then
-    export Section5cCloudTrailCollectorName="Sourabh-Collector-${AppName}-${InstallType}"
-    export Section5fCloudTrailLogsSourceName="Source-${AppName}-${InstallType}"
-    export Section5dCreateCloudTrailLogSource="Yes"
+    export Section3bCollectorName="Sourabh-Collector-${AppName}-${InstallType}"
+    export Section5eCloudTrailLogsSourceName="Source-${AppName}-${InstallType}"
+    export Section5cCreateCloudTrailLogSource="Yes"
     export Section5bCloudTrailLogsBucketName="sumologiclambdahelper-${AWS_REGION}"
-elif [[ "${InstallType}" == "updatesourceonly" ]]
+    export Section5dCloudTrailBucketPathExpression="cloudtrail"
+elif [[ "${InstallType}" == "updatelogsourceonly" ]]
 then
-    export Section5cCloudTrailCollectorName="Sourabh-Collector-${AppName}-onlylogsourcewithoutbucket"
-    export Section5fCloudTrailLogsSourceName="Source-${AppName}-onlylogsourcewithoutbucket"
+    export Section5fCloudTrailLogsAPIUrl="https://api.sumologic.com/api/v1/collectors/159619269/sources/772748450"
+elif [[ "${InstallType}" == "updatemetsourceonly" ]]
+then
+    export Section4cCloudWatchExistingSourceAPIUrl="https://api.sumologic.com/api/v1/collectors/159619269/sources/772769331"
 elif [[ "${InstallType}" == "nothing" ]]
 then
-    export Section5cCloudTrailCollectorName=""
-    export Section5fCloudTrailLogsSourceName=""
+    echo "Installing Nothing."
 else
     echo "No Valid Choice."
 fi
 
 # Stack Name
 export stackName="${AppName}-${InstallType}"
-pwd
+
 aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./apps/${AppName}/rds_app.template.yaml --region ${AWS_REGION} \
 --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --stack-name ${stackName} \
 --parameter-overrides Section1aSumoDeployment="${Section1aSumoDeployment}" Section1bSumoAccessID="${Section1bSumoAccessID}" \
 Section1cSumoAccessKey="${Section1cSumoAccessKey}" Section1dSumoOrganizationId="${Section1dSumoOrganizationId}" \
 Section1eRemoveSumoResourcesOnDeleteStack="${Section1eRemoveSumoResourcesOnDeleteStack}" Section2bAccountAlias="${Section2bAccountAlias}" \
-Section2cFilterExpression="${Section2cFilterExpression}" Section5cCloudTrailCollectorName="${Section5cCloudTrailCollectorName}" \
-Section4cCloudWatchMetricsSourceName="${Section4cCloudWatchMetricsSourceName}" Section5eCloudTrailBucketPathExpression="${Section5eCloudTrailBucketPathExpression}" \
-Section5fCloudTrailLogsSourceName="${Section5fCloudTrailLogsSourceName}" Section5gCloudTrailLogsSourceCategoryName="${Section5gCloudTrailLogsSourceCategoryName}" \
+Section2cFilterExpression="${Section2cFilterExpression}" Section3bCollectorName="${Section3bCollectorName}" \
+Section4bCloudWatchMetricsSourceName="${Section4bCloudWatchMetricsSourceName}" Section5dCloudTrailBucketPathExpression="${Section5dCloudTrailBucketPathExpression}" \
+Section5eCloudTrailLogsSourceName="${Section5eCloudTrailLogsSourceName}" Section5fCloudTrailLogsAPIUrl="${Section5fCloudTrailLogsAPIUrl}" \
 Section2aTagExistingAWSResources="${Section2aTagExistingAWSResources}" Section3aInstallApp="${Section3aInstallApp}" \
-Section4bCreateCloudWatchMetricsSource="${Section4bCreateCloudWatchMetricsSource}" Section5aCreateCloudTrailBucket="${Section5aCreateCloudTrailBucket}" \
-Section5dCreateCloudTrailLogSource="${Section5dCreateCloudTrailLogSource}" Section5bCloudTrailLogsBucketName="${Section5bCloudTrailLogsBucketName}" \
-Section4aCloudWatchMetricCollectorName="${Section4aCloudWatchMetricCollectorName}"
+Section4aCreateCloudWatchMetricsSource="${Section4aCreateCloudWatchMetricsSource}" Section5aCreateCloudTrailBucket="${Section5aCreateCloudTrailBucket}" \
+Section5cCreateCloudTrailLogSource="${Section5cCreateCloudTrailLogSource}" Section5bCloudTrailLogsBucketName="${Section5bCloudTrailLogsBucketName}" \
+Section4cCloudWatchExistingSourceAPIUrl="${Section4cCloudWatchExistingSourceAPIUrl}"
