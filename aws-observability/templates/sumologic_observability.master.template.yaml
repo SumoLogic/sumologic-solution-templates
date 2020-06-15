@@ -491,6 +491,7 @@ Resources:
       ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App"
+      Version: "1"
       FolderName: "Sumo Logic AWS Observability Apps "
       RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
       SumoAccessID: !Ref Section1bSumoLogicAccessID
@@ -535,15 +536,14 @@ Resources:
         ParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
   AutoSubscribeWaitHandle:
-    Condition: auto_enable_s3_logs
-    DependsOn: AutoEnableS3LogsAlbAWSResources
+    DependsOn: CreateCommonResources
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
   AutoSubscribeWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
-      Handle: !If [auto_enable_s3_logs, !Ref AutoSubscribeWaitHandle, !Ref WaitHandle]
-      Timeout: "5"
+      Handle: !Ref AutoSubscribeWaitHandle
+      Timeout: "20"
       Count: 0
 
   AutoSubscribeLambdaLogGroupsAWSResources:

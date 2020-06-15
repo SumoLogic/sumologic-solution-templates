@@ -343,24 +343,22 @@ Resources:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section6aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Alb App"
+      Version: "1"
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      AppSources:
-        logsrc: "_sourceCategory=sourabh"
       FolderName: "Sumo Logic AWS Observability Apps "
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
   ALBUpdateSourceWaitHandle:
-    Condition: install_app
-    DependsOn: sumoApp
+    DependsOn: ALBMetricRule
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
   ALBUpdateSourceWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
-      Handle: !If [install_app, !Ref ALBUpdateSourceWaitHandle, !Ref WaitHandle]
-      Timeout: "5"
+      Handle: !Ref ALBUpdateSourceWaitHandle
+      Timeout: "20"
       Count: 0
 
   SumoALBLogsUpdateSource:

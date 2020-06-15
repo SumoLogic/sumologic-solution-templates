@@ -18,7 +18,7 @@ export Section1cSumoLogicAccessKey=$7
 export Section1dSumoLogicOrganizationId=$8
 export Section1eSumoLogicResourceRemoveOnDeleteStack=true
 
-export Section2cAccountAlias=${InstallType}
+export Section2cAccountAlias="${InstallType}"
 export Section2dTagAWSResourcesFilterExpression=".*"
 export Section6fAutoEnableS3LogsFilterExpression=".*"
 export Section8dAutoSubscribeLambdaLogGroupPattern=".*"
@@ -104,7 +104,7 @@ then
 # updatecloudtrailsource - Only updates the CloudTrail Logs Source with if Collector name and source name is provided.
 elif [[ "${InstallType}" == "updatecloudtrailsource" ]]
 then
-    export Section7dCloudTrailLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/793849844"
+    export Section7dCloudTrailLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794157405"
 # cwlogssourceonly - Creates a Cloudwatch logs source, with lambda function of log group connector.
 elif [[ "${InstallType}" == "cwlogssourceonly" ]]
 then
@@ -122,13 +122,13 @@ then
 # cwlogssourcebothlambdaautosub - Creates a Cloudwatch logs source, with lambda function of log group connector WITH auto subscribe only for new and existing lambda.
 elif [[ "${InstallType}" == "cwlogssourcebothlambdaautosub" ]]
 then
-    export Section8aLambdaCreateCloudWatchLogsSources="Yes"
+    export Section8aLambdaCreateCloudWatchLogsSource="Yes"
     export Section8cAutoSubscribeLogGroupsLambdaOptions="Both"
     export Section8dAutoSubscribeLambdaLogGroupPattern="lambda"
 # cwlogssourcebothlambdaautosub - update the cloudwatch source if collector name and source name is provided.
 elif [[ "${InstallType}" == "updatecwlogssource" ]]
 then
-    export Section8bLambdaCloudWatchLogsSourceUrl=""
+    export Section8bLambdaCloudWatchLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794162256"
 # albsourcewithbukcetwithauto - Creates only ALB source with new bucket along with auto subscribe.
 elif [[ "${InstallType}" == "albsourcewithbukcetwithauto" ]]
 then
@@ -143,7 +143,7 @@ then
 # updatealbsource - updates only ALB source with provided collector and source.
 elif [[ "${InstallType}" == "updatealbsource" ]]
 then
-    export Section6dALBLogsSourceUrl="aws-observability-collector"
+    export Section6dALBLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794166127"
 # onlysources - creates all sources with common bucket creation for ALB and CloudTrail with auto enable option.
 elif [[ "${InstallType}" == "onlysources" ]]
 then
@@ -197,16 +197,16 @@ then
 # onlyappswithexistingsources - Install Apps with existing sources. This should Update the CloudTrail, CloudWatch and ALB sources.
 elif [[ "${InstallType}" == "onlyappswithexistingsources" ]]
 then
-    export Section3aInstallObservabilityApps="Yes"
-    export Section2aTagAWSResourcesOptions="Both"
+    export Section3aInstallObservabilityApps="No"
+    export Section2aTagAWSResourcesOptions="None"
     export Section2bAWSResourcesList="ec2, alb, apigateway, dynamodb, rds, lambda"
-    export Section6eAutoEnableS3LogsALBResourcesOptions="Both"
+    export Section6eAutoEnableS3LogsALBResourcesOptions="None"
     export Section6bALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
-    export Section8cAutoSubscribeLogGroupsLambdaOptions="Both"
+    export Section8cAutoSubscribeLogGroupsLambdaOptions="None"
     export Section8dAutoSubscribeLambdaLogGroupPattern="lambda"
-    export Section6dALBLogsSourceUrl="aws-observability-collector"
-    export Section7dCloudTrailLogsSourceUrl="defaultparameters-aws-observability-alb-${AWS_REGION}"
-    export Section8bLambdaCloudWatchLogsSourceUrl="aws-observability-collector"
+    export Section6dALBLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170215"
+    export Section7dCloudTrailLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170202"
+    export Section8bLambdaCloudWatchLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170214"
 # defaultparameters - Install CF with default parameters.
 elif [[ "${InstallType}" == "defaultparameters" ]]
 then

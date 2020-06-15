@@ -360,24 +360,22 @@ Resources:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section6aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Rds App"
+      Version: "1"
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      AppSources:
-        logsrc: "_sourceCategory=sourabh"
       FolderName: "Sumo Logic AWS Observability Apps "
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
   UpdateSourceWaitHandle:
-    Condition: install_app
-    DependsOn: sumoApp
+    DependsOn: InstanceMetricRule
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
   UpdateSourceWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
-      Handle: !If [install_app, !Ref UpdateSourceWaitHandle, !Ref WaitHandle]
-      Timeout: "5"
+      Handle: !Ref UpdateSourceWaitHandle
+      Timeout: "20"
       Count: 0
 
   SumoCloudTrailLogsUpdateSource:
@@ -421,7 +419,7 @@ Resources:
       FieldExtractionRuleScope: !Join
         - ""
         - - "(_source="
-          - !If [update_cloudtrail_logs_source, !GetAtt SumoCloudTrailLogsUpdateSource.source_name, !Ref Section5eCloudTrailLogsSourceName]
+          - !If [update_cloudtrail_logs_source, !Sub "\"${SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5eCloudTrailLogsSourceName]
           - " (\"lambda.amazonaws.com\" or \"apigateway.amazonaws.com\" or \"dynamodb.amazonaws.com\" or \"rds.amazonaws.com\"))"
       FieldExtractionRuleParseExpression: "| json \"eventSource\", \"awsRegion\" as eventSource, region | where eventSource in (\"rds.amazonaws.com\", \"apigateway.amazonaws.com\", \"lambda.amazonaws.com\", \"dynamodb.amazonaws.com\") | if (eventSource matches \"rds.amazonaws.com\", \"aws/rds\", if (eventSource matches \"apigateway.amazonaws.com\",  \"aws/apigateway\", if (eventSource matches \"lambda.amazonaws.com\",  \"aws/lambda\", if (eventSource matches \"dynamodb.amazonaws.com\",  \"aws/dynamodb\", \"\")))) as Namespace"
       FieldExtractionRuleParseEnabled: true
