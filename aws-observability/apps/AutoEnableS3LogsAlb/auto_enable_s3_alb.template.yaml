@@ -151,10 +151,10 @@ Parameters:
                   False - To keep the S3 logging."
     Type: String
 
-  ParentStackName:
+  ParentStackLambdaARN:
     Type: String
-    Default: "ParentStackName"
-    Description: Parent Stack Name. Do Not Edit the value.
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
 
 Conditions:
   enable_alb_logging: !And
@@ -175,7 +175,7 @@ Conditions:
     - !Equals [ !Ref TaggingResourceOptions, 'Both' ]
 
   do_not_use_parent_stack: !And
-    - !Equals [ !Ref ParentStackName, "ParentStackName"]
+    - !Equals [ !Ref ParentStackLambdaARN, "ParentStackLambdaARN"]
     - !Condition auto_enable_existing
 
 Resources:
@@ -383,13 +383,7 @@ Resources:
     Type: Custom::EnableS3LogsResources
     Condition: auto_enable_existing
     Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - EnableExisitngAWSResourcesLambda
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt EnableExisitngAWSResourcesLambda.Arn, !Ref ParentStackLambdaARN]
       AWSResource: !If [enable_s3_buckets_logging, "s3", !If [enable_vpc_flow_logs_logging, "vpc", "elbv2"] ]
       BucketName: !Ref BucketName
       Filter: !Ref FilterExpression

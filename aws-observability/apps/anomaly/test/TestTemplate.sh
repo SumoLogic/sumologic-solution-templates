@@ -36,8 +36,7 @@ then
     export Section3aCreateAwsInventorySource="Yes"
 elif [[ "${InstallType}" == "nothing" ]]
 then
-    export Section2bCollectorName=""
-    export Section3bAwsInventorySourceName=""
+    echo "Installing Nothing."
 else
     echo "No Valid Choice."
 fi
@@ -45,7 +44,7 @@ fi
 # Stack Name
 export stackName="${AppName}-${InstallType}"
 pwd
-aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./apps/${AppName}/tsat.template.yaml --region ${AWS_REGION} \
+aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./apps/${AppName}/anomaly.template.yaml --region ${AWS_REGION} \
 --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --stack-name ${stackName} \
 --parameter-overrides Section1aSumoDeployment="${Section1aSumoDeployment}" Section1bSumoAccessID="${Section1bSumoAccessID}" \
 Section1cSumoAccessKey="${Section1cSumoAccessKey}" Section1dSumoOrganizationId="${Section1dSumoOrganizationId}" \

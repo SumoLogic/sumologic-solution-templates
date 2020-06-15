@@ -25,37 +25,36 @@ Metadata:
           default: "App Details - Sumo Logic App Configuration"
         Parameters:
           - Section3aInstallApp
+          - Section3bCollectorName
 
       - Label:
           default: "App Details - CloudWatch Metrics Source Configuration"
         Parameters:
-          - Section4aCloudWatchMetricCollectorName
-          - Section4bCreateCloudWatchMetricsSource
-          - Section4cCloudWatchMetricsSourceName
+          - Section4aCreateCloudWatchMetricsSource
+          - Section4bCloudWatchMetricsSourceName
+          - Section4cCloudWatchExistingSourceAPIUrl
 
       - Label:
           default: "App Details - CloudTrail Log Source Configuration"
         Parameters:
           - Section5aCreateCloudTrailBucket
           - Section5bCloudTrailLogsBucketName
-          - Section5cCloudTrailCollectorName
-          - Section5dCreateCloudTrailLogSource
-          - Section5eCloudTrailBucketPathExpression
-          - Section5fCloudTrailLogsSourceName
-          - Section5gCloudTrailLogsSourceCategoryName
+          - Section5cCreateCloudTrailLogSource
+          - Section5dCloudTrailBucketPathExpression
+          - Section5eCloudTrailLogsSourceName
+          - Section5fCloudTrailLogsAPIUrl
 
       - Label:
           default: "App Details - CloudWatch Log Source Configuration"
         Parameters:
-          - Section6aCloudWatchLogsCollectorName
-          - Section6bCreateCloudWatchLogSource
-          - Section6cCloudWatchLogsSourceName
-          - Section6dCloudWatchLogsSourceCategoryName
+          - Section6aCreateCloudWatchLogSource
+          - Section6bCloudWatchLogsSourceName
+          - Section6cCloudWatchLogsAPIUrl
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
-          - Section7aParentStackName
+          - Section7aParentStackLambdaARN
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -78,40 +77,38 @@ Metadata:
 
       Section3aInstallApp:
         default: "Install Sumo Logic App"
+      Section3bCollectorName:
+        default: "Sumo Logic Collector Name"
 
-      Section4aCloudWatchMetricCollectorName:
-        default: "CloudWatch Metrics Source Collector Name"
-      Section4bCreateCloudWatchMetricsSource:
+      Section4aCreateCloudWatchMetricsSource:
         default: "Create Sumo Logic CloudWatch Metrics Source"
-      Section4cCloudWatchMetricsSourceName:
+      Section4bCloudWatchMetricsSourceName:
         default: "Sumo Logic CloudWatch Metrics Source Name"
+      Section4cCloudWatchExistingSourceAPIUrl:
+        default: "Existing Sumo Logic CloudWatch Metrics Source API URL"
 
       Section5aCreateCloudTrailBucket:
         default: "Create AWS S3 Bucket"
       Section5bCloudTrailLogsBucketName:
         default: "AWS S3 Bucket Name"
-      Section5cCloudTrailCollectorName:
-        default: "Sumo Logic CloudTrail Source Collector Name"
-      Section5dCreateCloudTrailLogSource:
+      Section5cCreateCloudTrailLogSource:
         default: "Create Sumo Logic CloudTrail Logs Source"
-      Section5eCloudTrailBucketPathExpression:
+      Section5dCloudTrailBucketPathExpression:
         default: "Path Expression for the logs"
-      Section5fCloudTrailLogsSourceName:
+      Section5eCloudTrailLogsSourceName:
         default: "Sumo Logic CloudTrail Logs Source Name"
-      Section5gCloudTrailLogsSourceCategoryName:
-        default: "Sumo Logic CloudTrail Logs Source Category Name"
+      Section5fCloudTrailLogsAPIUrl:
+        default: "Existing Sumo Logic ALB Logs Source API URL"
 
-      Section6aCloudWatchLogsCollectorName:
-        default: "Sumo Logic CloudWatch Logs Source Collector Name"
-      Section6bCreateCloudWatchLogSource:
+      Section6aCreateCloudWatchLogSource:
         default: "Create Sumo Logic CloudWatch Logs Source"
-      Section6cCloudWatchLogsSourceName:
+      Section6bCloudWatchLogsSourceName:
         default: "Sumo Logic CloudWatch Logs Source Name"
-      Section6dCloudWatchLogsSourceCategoryName:
-        default: "Sumo Logic CloudWatch Logs Source Category Name"
+      Section6cCloudWatchLogsAPIUrl:
+        default: "Existing Sumo Logic ALB Logs Source API URL"
 
-      Section7aParentStackName:
-        default: "If Any, Name of parent Stack"
+      Section7aParentStackLambdaARN:
+        default: "If Any, Lambda ARN from parent Stack"
 
 Parameters:
   Section1aSumoDeployment:
@@ -179,12 +176,12 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-
-  Section4aCloudWatchMetricCollectorName:
+  Section3bCollectorName:
     Type: String
-    Description: "Provide a CloudWatch Metrics Source Collector Name"
+    Description: "Provide a Sumo Logic Collector Name"
     Default: ""
-  Section4bCreateCloudWatchMetricsSource:
+
+  Section4aCreateCloudWatchMetricsSource:
     Type: String
     Description: "Yes - Creates a Sumo Logic CloudWatch Metrics Source which collects Metrics for multiple Namespaces from the region selected.
                   No - If you already have a CloudWatch Metrics Source collecting Lambda metrics."
@@ -192,9 +189,13 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section4cCloudWatchMetricsSourceName:
+  Section4bCloudWatchMetricsSourceName:
     Type: String
     Description: "Provide a Cloud Watch Metrics Source Name"
+    Default: ""
+  Section4cCloudWatchExistingSourceAPIUrl:
+    Type: String
+    Description: "Required when already collecting Lambda Metrics. Provide the existing Sumo Logic Lambda Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
 
   Section5aCreateCloudTrailBucket:
@@ -209,56 +210,47 @@ Parameters:
     Type: String
     Description: "Existing Bucket Name - Provide value if the Flag is set to No.
                   New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
-  Section5cCloudTrailCollectorName:
-    Type: String
-    Description: "Provide a CloudTrail Logs Source Collector Name"
     Default: ""
-  Section5dCreateCloudTrailLogSource:
+  Section5cCreateCloudTrailLogSource:
     Type: String
     Description: "Choose Yes to create Sumo Logic Cloud Trail Log Source with provided bucket Name."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section5eCloudTrailBucketPathExpression:
+  Section5dCloudTrailBucketPathExpression:
     Type: String
     Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
     Default: "*"
-  Section5fCloudTrailLogsSourceName:
+  Section5eCloudTrailLogsSourceName:
     Type: String
     Description: Change the CloudTrail Source name to be created else default name will be used.
     Default: ""
-  Section5gCloudTrailLogsSourceCategoryName:
+  Section5fCloudTrailLogsAPIUrl:
     Type: String
-    Description: "Existing - Change to an existing Source Category from Sumo Logic if CloudTrail Source is not created.\n
-                  New - Default will be used if CloudTrail Source is Created"
-    Default: AWS/Lambda/CloudTrail/Logs
-
-  Section6aCloudWatchLogsCollectorName:
-    Type: String
-    Description: "Provide a CloudWatch Logs Source Collector Name"
+    Description: "Required when already collecting CloudTrail logs. Provide the existing Sumo Logic CloudTrail Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
-  Section6bCreateCloudWatchLogSource:
+
+  Section6aCreateCloudWatchLogSource:
     Type: String
     Description: "Choose Yes to create Sumo Logic Cloud Watch Log Source."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section6cCloudWatchLogsSourceName:
+  Section6bCloudWatchLogsSourceName:
     Type: String
     Description: Change the CloudWatch Log Source name to be created else default name will be used.
     Default: ""
-  Section6dCloudWatchLogsSourceCategoryName:
+  Section6cCloudWatchLogsAPIUrl:
     Type: String
-    Description: "Existing - Change to an existing Source Category from Sumo Logic if CloudWatch Log Source is not created.\n
-                  New - Default will be used if CloudWatch Log Source is Created"
-    Default: AWS/lambda/CloudWatch/Logs
+    Description: "Required when already collecting CloudWatch logs. Provide the existing Sumo Logic CloudWatch Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Default: ""
 
-  Section7aParentStackName:
+  Section7aParentStackLambdaARN:
     Type: String
-    Default: "ParentStackName"
-    Description: Parent Stack Name. Do Not Edit the value.
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
 
 Mappings:
   RegionMap:
@@ -304,128 +296,66 @@ Mappings:
       bucketname: appdevzipfiles-me-south-1s
 
 Conditions:
-  do_not_use_parent_stack: !Equals [ !Ref Section7aParentStackName, "ParentStackName"]
+  do_not_use_parent_stack: !Equals [ !Ref Section7aParentStackLambdaARN, "ParentStackLambdaARN"]
 
   tag_existing_aws_resources: !Equals [!Ref Section2aTagExistingAWSResources, 'Yes']
 
   install_app: !Equals [!Ref Section3aInstallApp, 'Yes']
-  create_target_s3_bucket: !And
-    - !Equals [!Ref Section5aCreateCloudTrailBucket, 'Yes']
-    - !Condition create_sns_topic
-  install_cloudtrail_logs_source: !Equals [!Ref Section5dCreateCloudTrailLogSource, 'Yes']
-  install_cloud_watch_logs_source: !Equals [!Ref Section6bCreateCloudWatchLogSource, 'Yes']
-  install_cloud_watch_metric_source: !Equals [!Ref Section4bCreateCloudWatchMetricsSource, 'Yes']
-  update_cloudtrail_source: !And
-    - !Not [!Condition install_cloudtrail_logs_source]
-    - !Not [!Equals [!Ref Section5fCloudTrailLogsSourceName, '']]
-    - !Not [!Equals [!Ref Section5cCloudTrailCollectorName, '']]
-  update_cloudwatch_log_source: !And
-    - !Not [!Condition install_cloud_watch_logs_source]
-    - !Not [!Equals [!Ref Section6cCloudWatchLogsSourceName, '']]
-    - !Not [!Equals [!Ref Section6aCloudWatchLogsCollectorName, '']]
 
-  install_cloudtrail_collector: !Condition install_cloudtrail_logs_source
-  install_cloudwatch_collector: !Condition install_cloud_watch_logs_source
+  update_cloudtrail_logs_source: !And
+    - !Not [!Equals [!Ref Section5fCloudTrailLogsAPIUrl, '']]
+    - !Not [!Equals [!Ref Section5cCreateCloudTrailLogSource, 'Yes']]
 
-  create_sns_topic: !And
-    - !Condition do_not_use_parent_stack
-    - !Condition install_cloudtrail_logs_source
+  update_cloudwatch_logs_source: !And
+    - !Not [!Equals [!Ref Section6cCloudWatchLogsAPIUrl, '']]
+    - !Not [!Equals [!Ref Section6aCreateCloudWatchLogSource, 'Yes']]
 
-  create_fer: !Not [!Equals [!Ref Section5gCloudTrailLogsSourceCategoryName, ""]]
+  update_metrics_source: !And
+    - !Not [!Equals [!Ref Section4cCloudWatchExistingSourceAPIUrl, '']]
+    - !Not [!Equals [!Ref Section4aCreateCloudWatchMetricsSource, 'Yes']]
+
+  create_fer: !Or
+    - !Condition update_cloudtrail_logs_source
+    - !Not [!Equals [!Ref Section5eCloudTrailLogsSourceName, '']]
 
 Resources:
-  SumoLogicHelperRole:
-    Type: AWS::IAM::Role
-    Condition: do_not_use_parent_stack
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Path: /
-      Policies:
-        - PolicyName: AwsObservabilityLambdaExecutePolicies
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  - cloudtrail:CreateTrail
-                  - cloudtrail:DeleteTrail
-                  - cloudtrail:UpdateTrail
-                  - cloudtrail:StartLogging
-                  - tag:TagResources
-                  - tag:UntagResources
-                  - lambda:ListFunctions
-                  - lambda:TagResource
-                  - lambda:UntagResource
-                Resource: '*'
 
-  SumoLogicHelperFunction:
-    Type: 'AWS::Serverless::Function'
-    Condition: do_not_use_parent_stack
-    Properties:
-      Handler: main.handler
-      Runtime: python3.7
-      CodeUri:
-        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.1.zip"
-      MemorySize: 128
-      Timeout: 900
-      Role:
-        Fn::GetAtt:
-          - SumoLogicHelperRole
-          - Arn
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
 
-  SumoRole:
-    Type: AWS::IAM::Role
+  CreateCommonResources:
+    Type: AWS::CloudFormation::Stack
     Condition: do_not_use_parent_stack
     Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: arn:aws:iam::926226587429:root
-            Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Sub "${Section1aSumoDeployment}:${Section1dSumoOrganizationId}"
-      Path: "/"
-      Policies:
-        - PolicyName: SumoLogicAwsSourcesPolicies
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:ListBucketVersions
-                  - s3:ListBucket
-                  - tag:GetResources
-                  - cloudwatch:ListMetrics
-                  - cloudwatch:GetMetricStatistics
-                Resource:
-                  "*"
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
+      Parameters:
+        SumoLogicDeployment: !Ref Section1aSumoDeployment
+        SumoLogicAccessID: !Ref Section1bSumoAccessID
+        SumoLogicAccessKey: !Ref Section1cSumoAccessKey
+        SumoLogicOrganizationId: !Ref Section1dSumoOrganizationId
+        RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+        AccountAlias: !Ref Section2bAccountAlias
+        CollectorName: !Ref Section3bCollectorName
+        CreateCloudWatchMetricsSource: !Ref Section4aCreateCloudWatchMetricsSource
+        CloudWatchMetricsSourceName: !Ref Section4bCloudWatchMetricsSourceName
+        CloudWatchMetricsNameSpaces: "AWS/Lambda"
+        CreateCloudTrailLogSource: !Ref Section5cCreateCloudTrailLogSource
+        CreateCloudTrailBucket: !Ref Section5aCreateCloudTrailBucket
+        CloudTrailLogsBucketName: !Ref Section5bCloudTrailLogsBucketName
+        CloudTrailBucketPathExpression: !Ref Section5dCloudTrailBucketPathExpression
+        CloudTrailLogsSourceName: !Ref Section5eCloudTrailLogsSourceName
+        CreateCloudWatchLogSource: !Ref Section6aCreateCloudWatchLogSource
+        CloudWatchLogsSourceName: !Ref Section6bCloudWatchLogsSourceName
 
   TagAWSResources:
     Type: Custom::TagAWSResources
     Condition: tag_existing_aws_resources
     Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       Region: !Ref "AWS::Region"
       AWSResource: lambda
@@ -434,19 +364,10 @@ Resources:
       AccountID: !Ref "AWS::AccountId"
       Filter: !Ref Section2cFilterExpression
 
-  WaitHandle:
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
   LambdaMetricRule:
     Type: Custom::SumoLogicMetricRules
     Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]
       RemoveOnDeleteStack: false
       MetricRuleName: "AwsObservabilityLambdaMetricsEntityRule"
       MatchExpression: "Namespace=AWS/Lambda FunctionName=*"
@@ -456,411 +377,21 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  ExplorerViewWaitHandle:
-    DependsOn: LambdaMetricRule
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  ExplorerViewWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref ExplorerViewWaitHandle
-      Timeout: "5"
-      Count: 0
-
-  CreateSumoLogicAWSExplorerView:
-    Type: Custom::SumoLogicAWSExplorer
-    Condition: do_not_use_parent_stack
-    DependsOn: ExplorerViewWaitCondition
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      RemoveOnDeleteStack: false
-      ExplorerName: "AWS Observability"
-      MetadataKeys:
-        - "account"
-        - "region"
-        - "namespace"
-        - "entity"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  FieldExtractionRuleWaitHandle:
-    Condition: do_not_use_parent_stack
-    DependsOn: CreateSumoLogicAWSExplorerView
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  FieldExtractionRuleWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !If [do_not_use_parent_stack, !Ref FieldExtractionRuleWaitHandle, !Ref WaitHandle]
-      Timeout: "5"
-      Count: 0
-
-  LambdaFieldExtractionRule:
-    Type: Custom::SumoLogicFieldExtractionRule
-    DependsOn: FieldExtractionRuleWaitCondition
-    Condition: create_fer
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      RemoveOnDeleteStack: false
-      FieldExtractionRuleName: "AwsObservabilityFieldExtractionRule"
-      FieldExtractionRuleScope: !Sub "(_sourceCategory=${Section5gCloudTrailLogsSourceCategoryName} \"eventSource\":\"lambda.amazonaws.com\")"
-      FieldExtractionRuleParseExpression: "| json \"eventSource\", \"awsRegion\" as eventSource, region | where eventSource in (\"rds.amazonaws.com\", \"apigateway.amazonaws.com\", \"lambda.amazonaws.com\", \"dynamodb.amazonaws.com\") | if (eventSource matches \"rds.amazonaws.com\", \"aws/rds\", if (eventSource matches \"apigateway.amazonaws.com\",  \"aws/apigateway\", if (eventSource matches \"lambda.amazonaws.com\",  \"aws/lambda\", if (eventSource matches \"dynamodb.amazonaws.com\",  \"aws/dynamodb\", \"\")))) as Namespace"
-      FieldExtractionRuleParseEnabled: true
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  SumoAppWaitHandle:
-    Condition: create_fer
-    DependsOn: LambdaFieldExtractionRule
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  SumoAppWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !If [create_fer, !Ref SumoAppWaitHandle, !Ref WaitHandle]
-      Timeout: "5"
-      Count: 0
-
   sumoApp:
     Type: Custom::App
     Condition: install_app
-    DependsOn: SumoAppWaitCondition
     Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Lambda App"
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       AppSources:
-        logsrccw: !Sub "_sourceCategory=${Section6dCloudWatchLogsSourceCategoryName}"
-        logsrcct: !Sub "_sourceCategory=${Section5gCloudTrailLogsSourceCategoryName}"
+        logsrccw: "_sourceCategory=sourabh"
+        logsrcct: "_sourceCategory=sourabh"
       FolderName: "Sumo Logic AWS Observability Apps "
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
-
-  SumoHostedCollector:
-    Type: Custom::Collector
-    Condition: install_cloud_watch_metric_source
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      CollectorType: Hosted
-      RemoveOnDeleteStack: !If [do_not_use_parent_stack, !Ref Section1eRemoveSumoResourcesOnDeleteStack, false]
-      CollectorName: !Ref Section4aCloudWatchMetricCollectorName
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  SumoCloudwatchMetricsSource:
-    Condition: install_cloud_watch_metric_source
-    Type: Custom::AWSSource
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      SourceType: AwsCloudWatch
-      Namespaces:
-        - 'AWS/Lambda'
-      SourceName: !Ref Section4cCloudWatchMetricsSourceName
-      CollectorId: !If
-        - install_cloud_watch_metric_source
-        - !GetAtt
-          - SumoHostedCollector
-          - COLLECTOR_ID
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-CollectorID'
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-      RoleArn: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoRole
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoSourceRoleARN'
-
-  CloudWatchCollectorWaitHandle:
-    Condition: install_app
-    DependsOn: sumoApp
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  CloudWatchCollectorWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !If [install_app, !Ref CloudWatchCollectorWaitHandle, !Ref WaitHandle]
-      Timeout: "5"
-      Count: 0
-
-  CloudWatchEventFunction:
-    Type: AWS::CloudFormation::Stack
-    Condition: install_cloud_watch_logs_source
-    Properties:
-      TemplateURL: "https://s3.amazonaws.com/appdev-cloudformation-templates/DLQLambdaCloudFormation.json"
-      Parameters:
-        SumoEndPointURL: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
-        IncludeLogGroupInfo: true
-
-  SumoCloudWatchCollector:
-    Type: Custom::Collector
-    Condition: install_cloudwatch_collector
-    DependsOn: CloudWatchCollectorWaitCondition
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      CollectorType: Hosted
-      RemoveOnDeleteStack: !If [do_not_use_parent_stack, !Ref Section1eRemoveSumoResourcesOnDeleteStack, false]
-      CollectorName: !Ref Section6aCloudWatchLogsCollectorName
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  SumoHTTPSource:
-    Condition: install_cloud_watch_logs_source
-    Type: Custom::HTTPSource
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      SourceName: !Ref Section6cCloudWatchLogsSourceName
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      SourceCategory: !Ref Section6dCloudWatchLogsSourceCategoryName
-      CollectorId: !If
-        - install_cloudwatch_collector
-        - !GetAtt
-          - SumoCloudWatchCollector
-          - COLLECTOR_ID
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-CollectorID'
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-      Fields:
-        account: !Ref Section2bAccountAlias
-        namespace: "aws/lambda"
-        region: !Ref "AWS::Region"
-
-  SumoCloudTrailExportPolicy:
-    Condition: create_target_s3_bucket
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref Section5bCloudTrailLogsBucketName
-      PolicyDocument:
-        Statement:
-          - Sid: AWSCloudTrailAclCheck
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action: s3:GetBucketAcl
-            Resource:
-              - !Sub "arn:aws:s3:::${Section5bCloudTrailLogsBucketName}"
-          - Sid: AWSCloudTrailWrite
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action: s3:PutObject
-            Resource:
-              - !Sub "arn:aws:s3:::${Section5bCloudTrailLogsBucketName}/*"
-            Condition:
-              StringEquals:
-                s3:x-amz-acl: bucket-owner-full-control
-          - Sid: AWSBucketExistenceCheck
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action: s3:ListBucket
-            Resource:
-              - !Sub "arn:aws:s3:::${Section5bCloudTrailLogsBucketName}"
-    DependsOn:
-      - TargetS3Bucket
-
-  SumoCloudTrail:
-    Condition: create_target_s3_bucket
-    Type: Custom::AWSTrail
-    DependsOn:
-      - SumoCloudTrailExportPolicy
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      IsLogging: true
-      IsMultiRegionTrail: false
-      S3BucketName: !Ref Section5bCloudTrailLogsBucketName
-      TrailName: !Sub "Aws-Observability-${Section2bAccountAlias}"
-
-  TargetS3Bucket:
-    Condition: create_target_s3_bucket
-    Type: AWS::S3::Bucket
-    DependsOn:
-      - SumoSNSpolicy
-    Properties:
-      BucketName: !Ref Section5bCloudTrailLogsBucketName
-      NotificationConfiguration:
-        TopicConfigurations:
-          - Event: s3:ObjectCreated:Put
-            Topic: !Ref SumoSNSTopic
-
-  SumoSNSTopic:
-    Condition: create_sns_topic
-    Type: "AWS::SNS::Topic"
-    Properties:
-      TopicName: !Join
-        - ""
-        - - !Sub "sumo-sns-topic-${Section2bAccountAlias}-"
-          - !Select
-            - 0
-            - !Split
-              - "-"
-              - !Select
-                - 2
-                - !Split ["/", !Ref "AWS::StackId"]
-
-  SumoSNSSubscription:
-    Condition: install_cloudtrail_logs_source
-    Type: "AWS::SNS::Subscription"
-    Properties:
-      TopicArn: !If
-        - create_sns_topic
-        - !Ref SumoSNSTopic
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SNSTopicArn'
-      Endpoint: !GetAtt SumoCloudTrailSource.SUMO_ENDPOINT
-      Protocol: https
-      DeliveryPolicy:
-        healthyRetryPolicy:
-          numRetries: 40
-          minDelayTarget: 10
-          maxDelayTarget: 300
-          numMinDelayRetries: 3
-          numMaxDelayRetries: 5
-          numNoDelayRetries: 0
-          backoffFunction: exponential
-
-  SumoSNSpolicy:
-    Condition: create_sns_topic
-    Type: "AWS::SNS::TopicPolicy"
-    Properties:
-      PolicyDocument:
-        Id: SumoTopicPolicy
-        Statement:
-          - Action:
-              - sns:Publish
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref "AWS::AccountId"
-              ArnLike:
-                aws:SourceArn: !Sub "arn:aws:s3:::${Section5bCloudTrailLogsBucketName}"
-            Effect: Allow
-            Principal:
-              "Service": "s3.amazonaws.com"
-            Resource:
-              - !Ref SumoSNSTopic
-      Topics:
-        - Ref: SumoSNSTopic
-
-  SumoCloudTrailCollector:
-    Type: Custom::Collector
-    Condition: install_cloudtrail_collector
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      CollectorType: Hosted
-      RemoveOnDeleteStack: !If [do_not_use_parent_stack, !Ref Section1eRemoveSumoResourcesOnDeleteStack, false]
-      CollectorName: !Ref Section5cCloudTrailCollectorName
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  SumoCloudTrailSource:
-    Condition: install_cloudtrail_logs_source
-    Type: Custom::AWSSource
-    Properties:
-      SourceType: AwsCloudTrailBucket
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      SourceName: !Ref Section5fCloudTrailLogsSourceName
-      TargetBucketName: !Ref Section5bCloudTrailLogsBucketName
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      SourceCategory: !Ref Section5gCloudTrailLogsSourceCategoryName
-      CollectorId: !If
-        - install_cloudtrail_collector
-        - !GetAtt
-          - SumoCloudTrailCollector
-          - COLLECTOR_ID
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-CollectorID'
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-      PathExpression: !Ref Section5eCloudTrailBucketPathExpression
-      Fields:
-        account: !Ref Section2bAccountAlias
-      RoleArn: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoRole
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoSourceRoleARN'
 
   UpdateSourceWaitHandle:
     Condition: install_app
@@ -874,56 +405,45 @@ Resources:
       Timeout: "5"
       Count: 0
 
-  SumoCloudTrailUpdateSource:
+  SumoCloudTrailLogsUpdateSource:
     Type: Custom::SumoLogicUpdateFields
-    Condition: update_cloudtrail_source
+    Condition: update_cloudtrail_logs_source
     DependsOn: UpdateSourceWaitCondition
     Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
-      SourceName: !Ref Section5fCloudTrailLogsSourceName
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      CollectorName: !Ref Section5cCloudTrailCollectorName
+      SourceApiUrl: !Ref Section5fCloudTrailLogsAPIUrl
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
         account: !Ref Section2bAccountAlias
 
-  UpdateHTTPSourceWaitHandle:
-    Condition: update_cloudtrail_source
-    DependsOn: SumoCloudTrailUpdateSource
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  UpdateHTTPSourceWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
+  SumoMetricsUpdateSource:
+    Type: Custom::SumoLogicUpdateFields
+    Condition: update_metrics_source
+    DependsOn: UpdateSourceWaitCondition
     Properties:
-      Handle: !If [update_cloudtrail_source, !Ref UpdateHTTPSourceWaitHandle, !Ref WaitHandle]
-      Timeout: "5"
-      Count: 0
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      SourceApiUrl: !Ref Section4cCloudWatchExistingSourceAPIUrl
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      Fields:
+        account: !Ref Section2bAccountAlias
 
   SumoHTTPUpdateSource:
     Type: Custom::SumoLogicUpdateFields
-    Condition: update_cloudwatch_log_source
-    DependsOn: UpdateHTTPSourceWaitCondition
+    Condition: update_cloudwatch_logs_source
+    DependsOn: UpdateSourceWaitCondition
     Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${Section7aParentStackName}-SumoLogicHelperFunctionARN'
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
-      SourceName: !Ref Section6cCloudWatchLogsSourceName
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      CollectorName: !Ref Section6aCloudWatchLogsCollectorName
+      SourceApiUrl: !Ref Section6cCloudWatchLogsAPIUrl
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
@@ -932,8 +452,35 @@ Resources:
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
 
+  LambdaFieldExtractionRule:
+    Type: Custom::SumoLogicFieldExtractionRule
+    DependsOn: UpdateSourceWaitCondition
+    Condition: create_fer
+    Properties:
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section7aParentStackLambdaARN]
+      RemoveOnDeleteStack: false
+      FieldExtractionRuleName: "AwsObservabilityFieldExtractionRule"
+      FieldExtractionRuleScope: !Join
+        - ""
+        - - "(_source="
+          - !If [update_cloudtrail_logs_source, !Sub "\"{SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5eCloudTrailLogsSourceName]
+          - " (\"lambda.amazonaws.com\" or \"apigateway.amazonaws.com\" or \"dynamodb.amazonaws.com\" or \"rds.amazonaws.com\"))"
+      FieldExtractionRuleParseExpression: "| json \"eventSource\", \"awsRegion\" as eventSource, region | where eventSource in (\"rds.amazonaws.com\", \"apigateway.amazonaws.com\", \"lambda.amazonaws.com\", \"dynamodb.amazonaws.com\") | if (eventSource matches \"rds.amazonaws.com\", \"aws/rds\", if (eventSource matches \"apigateway.amazonaws.com\",  \"aws/apigateway\", if (eventSource matches \"lambda.amazonaws.com\",  \"aws/lambda\", if (eventSource matches \"dynamodb.amazonaws.com\",  \"aws/dynamodb\", \"\")))) as Namespace"
+      FieldExtractionRuleParseEnabled: true
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
 Outputs:
-  CloudWatchLambdaARN:
-    Description: "Cloud Watch Lambda ARN"
-    Condition: install_cloud_watch_logs_source
-    Value: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
+  ExistingMetricSourceName:
+    Description: "Existing CloudWatch Metrics Source Name"
+    Condition: update_metrics_source
+    Value: !GetAtt SumoMetricsUpdateSource.source_name
+  ExistingCloudTrailLogSourceName:
+    Description: "Existing CloudTrail Logs Source Name"
+    Condition: update_cloudtrail_logs_source
+    Value: !GetAtt SumoCloudTrailLogsUpdateSource.source_name
+  ExistingCloudWatchLogSourceName:
+    Description: "Existing CloudTrail Logs Source Name"
+    Condition: update_cloudwatch_logs_source
+    Value: !GetAtt SumoHTTPUpdateSource.source_name
