@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the AWS Observability Solution with all AWS, Lambda and Sumo Logic Resources installation."
+Description: "NOTE:- Please Check REGION before Deploying the template. Template to setup the AWS Observability Solution with all AWS, Lambda and Sumo Logic Resources installation."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -196,7 +196,7 @@ Parameters:
   Section3aInstallObservabilityApps:
     Type: String
     Default: 'Yes'
-    Description: "Yes - Installs Apps for the Sumo Logic AWS Observability Solution. All the Apps are installed in the folder 'Sumo Logic AWS Observability Apps'.
+    Description: "Yes - Installs Apps (EC2, Application Load Balancer, RDS, API Gateway, Lambda and Dynamo DB) for the Sumo Logic AWS Observability Solution. All the Apps are installed in the folder 'Sumo Logic AWS Observability Apps'.
                   No - Skips the installation of Apps."
     AllowedValues:
       - 'Yes'
@@ -225,7 +225,7 @@ Parameters:
       - 'None'
   Section5bMetricsNameSpaces:
     Default: "AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling"
-    Description: "Provide Comma delimited list of the namespaces to collect. Default will be AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling."
+    Description: "Provide Comma delimited list of the namespaces if creating Metrics or Inventory source. Default will be AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling."
     Type: String
 
   Section6aALBCreateLogSource:
@@ -238,15 +238,15 @@ Parameters:
       - 'No'
   Section6bALBS3LogsBucketName:
     Type: String
-    Description: "Provide any existing bucket name where you want to store ALB logs. You can also provide a bucket name which already has ALB Logs."
+    Description: "Provide any existing bucket name where you want to store ALB logs. If kept empty, a new Bucket will be created in the region. Bucket will also be used for Enable ALB access logs option."
     Default: ""
   Section6cALBS3BucketPathExpression:
     Type: String
-    Description: "Required in case the Bucket already has ALB logs. Default path expression will be elasticloadbalancing/AWSLogs/* when Access logs enable option is selected."
+    Description: "Required in case the Existing Bucket already has ALB logs. Default path expression will be elasticloadbalancing/AWSLogs/* when Access logs enable option is selected."
     Default: "elasticloadbalancing/AWSLogs/*"
   Section6dALBLogsSourceUrl:
     Type: String
-    Description: "Required when already collecting ALB logs. Provide the existing Sumo Logic ALB Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Description: "Required when already collecting ALB logs in Sumo Logic. Provide the existing Sumo Logic ALB Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
   Section6eAutoEnableS3LogsALBResourcesOptions:
     Type: String
@@ -275,7 +275,7 @@ Parameters:
       - 'No'
   Section7bCloudTrailLogsBucketName:
     Type: String
-    Description: "Provide an Existing bucket name that has CloudTrail logs."
+    Description: "Provide an Existing bucket name that has CloudTrail logs. If kept empty, a new Bucket will be created in the region."
     Default: ""
   Section7cCloudTrailBucketPathExpression:
     Type: String
@@ -283,7 +283,7 @@ Parameters:
     Default: "AWSLogs/*/CloudTrail/*/*"
   Section7dCloudTrailLogsSourceUrl:
     Type: String
-    Description: "Required when already collecting CloudTrail logs. Provide the existing Sumo Logic CloudTrail Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Description: "Required when already collecting CloudTrail logs in Sumo Logic. Provide the existing Sumo Logic CloudTrail Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
 
   Section8aLambdaCreateCloudWatchLogsSource:
@@ -296,7 +296,7 @@ Parameters:
       - 'No'
   Section8bLambdaCloudWatchLogsSourceUrl:
     Type: String
-    Description: "Required when already collecting Lambda CloudWatch logs. Provide the existing Sumo Logic Lambda CloudWatch Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Description: "Required when already collecting Lambda CloudWatch logs in Sumo Logic. Provide the existing Sumo Logic Lambda CloudWatch Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
   Section8cAutoSubscribeLogGroupsLambdaOptions:
     Type: String
@@ -313,7 +313,7 @@ Parameters:
   Section8dAutoSubscribeLambdaLogGroupPattern:
     Type: String
     Default: "lambda"
-    Description: "Enter regex for matching logGroups. Regex will check for the name."
+    Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
 
 Conditions:
   # Condition for Tagging Resources
