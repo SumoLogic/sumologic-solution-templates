@@ -4,7 +4,7 @@
   "description": "The Sumo Logic App for AWS API Gateway provides visibility into your Amazon APIGateway Service Metrics collected via a CloudWatch Metrics Source. The App’s Dashboards provide preconfigured searches and filters that allow you to monitor your API Gateway Infrastructure.",
   "children": [
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "1. AWS API Gateway - Latency, Cache",
       "description": "",
       "title": "1. AWS API Gateway - Latency, Cache",
@@ -457,7 +457,7 @@
       "coloringRules": null
     },
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "1. AWS API Gateway - Overview",
       "description": "",
       "title": "1. AWS API Gateway - Overview",
@@ -865,8 +865,8 @@
           {
             "id": null,
             "key": "panelpane-51ff6a2cae479944",
-            "title": "Average Latency By API Name",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":11,\"color\":\"#008000\"},{\"from\":11,\"to\":21,\"color\":\"#ffc508\"},{\"from\":21,\"to\":5000,\"color\":\"#ff0000\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"entity\",\"value\":\"entity\"}],\"aggregationType\":\"avg\"}}",
+            "title": "Average Latency By API Name (ms)",
+            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":500,\"color\":\"#008000\"},{\"from\":500,\"to\":1000,\"color\":\"#ffc508\"},{\"from\":1000,\"to\":null,\"color\":\"#ff0000\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
@@ -886,8 +886,8 @@
           {
             "id": null,
             "key": "panelpane-30c3b615b3da684f",
-            "title": "Average Integration Latency By API Name",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":5,\"color\":\"#008000\"},{\"from\":5,\"to\":10,\"color\":\"#ffc508\"},{\"from\":10,\"to\":5000,\"color\":\"#ff0000\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"entity\",\"value\":\"entity\"}],\"aggregationType\":\"avg\"}}",
+            "title": "Average Integration Latency By API Name (ms)",
+            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":500,\"color\":\"#008000\"},{\"from\":500,\"to\":1000,\"color\":\"#ffc508\"},{\"from\":1000,\"to\":null,\"color\":\"#ff0000\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
@@ -994,7 +994,7 @@
       "coloringRules": null
     },
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "2. AWS API Gateway - 4XX and 5XX Errors",
       "description": "",
       "title": "2. AWS API Gateway - 4XX and 5XX Errors",
@@ -1321,7 +1321,7 @@
       "coloringRules": null
     },
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "2. AWS API Gateway - Audit Events",
       "description": "",
       "title": "2. AWS API Gateway - Audit Events",
@@ -1379,7 +1379,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$logsrc \"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| count by event_name\n| sort by _count, event_name asc",
+                "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| count by event_name\n| sort by _count, event_name asc",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1400,7 +1400,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$logsrc \"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| timeslice 1h\n| count as eventCount by _timeslice, event_name\n| transpose row _timeslice column event_name",
+                "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| timeslice 15m\n| count as eventCount by _timeslice, event_name\n| transpose row _timeslice column event_name",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1421,7 +1421,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$logsrc \"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| count by event_name, Region\n| transpose row Region column event_name",
+                "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| count by event_name, Region\n| transpose row Region column event_name",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1442,7 +1442,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$logsrc \"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\"  and Region matches \"{{region}}\"\n| timeslice 5m\n| count by Region, _timeslice\n| transpose row _timeslice column Region",
+                "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\"  and Region matches \"{{region}}\"\n| timeslice 5m\n| count by Region, _timeslice\n| transpose row _timeslice column Region",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1463,7 +1463,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$logsrc \"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| timeslice 5m\n| count by event_name, user_agent\n| transpose row event_name column user_agent",
+                "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| count by event_name, user_agent\n| transpose row event_name column user_agent",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1484,7 +1484,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$logsrc \"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| timeslice 1h\n| count by event_name, accountId\n| transpose row event_name column accountId",
+                "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| count by event_name, accountId\n| transpose row event_name column accountId",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1505,7 +1505,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$logsrc \"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\" and !isEmpty(errorCode)\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+                "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\" and !isEmpty(errorCode)\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1526,7 +1526,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$logsrc \"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+                "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage nodrop\n| json field=userIdentity \"accountId\" as  accountId2 nodrop | json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1614,7 +1614,7 @@
       "coloringRules": null
     },
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "3. AWS API Gateway - Enhanced Monitoring",
       "description": "",
       "title": "3. AWS API Gateway - Enhanced Monitoring",

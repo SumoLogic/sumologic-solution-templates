@@ -4,7 +4,7 @@
   "description": "The Sumo Logic App for Amazon DynamoDB is a unified logs and metrics (ULM) App which provides operational insights into your DynamoDB solution. The App includes Dashboards that allow you to monitor key metrics and view the throttle events, errors, latency, and help you plan the capacity of your DynamoDB solution.",
   "children": [
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "1. AWS DynamoDB - Capacity Planning",
       "description": "See the details of your DynamoDB capacity including the provisioned read/write consumed, read/write throttle events, and throttled requests.",
       "title": "1. AWS DynamoDB - Capacity Planning",
@@ -496,7 +496,7 @@
       "coloringRules": null
     },
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "1. AWS DynamoDB - Overview",
       "description": "See the overview of your DynamoDB environment including the events, errors, requests, users, and latency.",
       "title": "1. AWS DynamoDB - Overview",
@@ -619,7 +619,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=AccountProvisionedWriteCapacityUtilization Statistic=Average | sum",
+                "queryString": "namespace={{namespace}} region={{region}} metric=AccountProvisionedWriteCapacityUtilization Statistic=Average | avg",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -640,7 +640,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=UserErrors Statistic=SampleCount | avg",
+                "queryString": "namespace={{namespace}} region={{region}} metric=UserErrors Statistic=SampleCount | sum",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -661,7 +661,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=SystemErrors Statistic=SampleCount | avg",
+                "queryString": "namespace={{namespace}} region={{region}} metric=SystemErrors Statistic=SampleCount | sum",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -682,7 +682,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=ConditionalCheckFailedRequests Statistic=SampleCount | avg",
+                "queryString": "namespace={{namespace}} region={{region}} metric=ConditionalCheckFailedRequests Statistic=SampleCount | sum",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -703,7 +703,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=TransactionConflict Statistic=SampleCount | avg",
+                "queryString": "namespace={{namespace}} region={{region}} metric=TransactionConflict Statistic=SampleCount | sum",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -766,7 +766,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} account={{account}} entity={{entity}} metric=SuccessfulRequestLatency Statistic=SampleCount | avg by entity, operation",
+                "queryString": "namespace={{namespace}} region={{region}} account={{account}} entity={{entity}} metric=SuccessfulRequestLatency Statistic=SampleCount | sum by entity, operation",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -787,7 +787,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=UserErrors Statistic=SampleCount | avg by region",
+                "queryString": "namespace={{namespace}} region={{region}} metric=UserErrors Statistic=SampleCount | sum by region",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -808,7 +808,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=SystemErrors Statistic=SampleCount | avg by region",
+                "queryString": "namespace={{namespace}} region={{region}} metric=SystemErrors Statistic=SampleCount | sum by region",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -829,7 +829,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=ConditionalCheckFailedRequests Statistic=SampleCount | avg by region",
+                "queryString": "namespace={{namespace}} region={{region}} metric=ConditionalCheckFailedRequests Statistic=SampleCount | sum by region",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -850,7 +850,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user nodrop\n| where Region matches \"{{region}}\"\n| timeslice 1h\n| count by event_name, _timeslice\n| transpose row _timeslice column event_name ",
+                "queryString": "Region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user nodrop\n| timeslice 1h\n| count by event_name, _timeslice\n| transpose row _timeslice column event_name ",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -871,7 +871,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"errorCode\", \"errorMessage\" as event_name, Region, entity, src_ip, user, error_code, error_msg nodrop\n| where Region matches \"{{region}}\"\n| count by error_code, error_msg, event_name, user, src_ip",
+                "queryString": "Region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"errorCode\", \"errorMessage\" as event_name, Region, entity, src_ip, user, error_code, error_msg nodrop\n| count by error_code, error_msg, event_name, user, src_ip",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -892,7 +892,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user nodrop\n| where Region matches \"{{region}}\"\n| count as count by user\n| sort count \n| limit 10 ",
+                "queryString": "account={{account}} namespace={{namespace}} Region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user nodrop\n| count as count by user\n| sort count \n| limit 10 ",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -940,7 +940,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=AccountProvisionedReadCapacityUtilization Statistic=Average | sum",
+                "queryString": "namespace={{namespace}} region={{region}} metric=AccountProvisionedReadCapacityUtilization Statistic=Average | avg",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -1042,7 +1042,7 @@
       "coloringRules": null
     },
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "2. AWS DynamoDB  - Latency and Errors",
       "description": "See the details of errors and latency of your DynamoDB including the user error, system error, failed request, and latency.",
       "title": "2. AWS DynamoDB  - Latency and Errors",
@@ -1142,7 +1142,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=UserErrors Statistic=SampleCount | avg by region",
+                "queryString": "namespace={{namespace}} region={{region}} metric=UserErrors Statistic=SampleCount | sum by region",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -1163,7 +1163,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=SystemErrors Statistic=SampleCount | avg by region",
+                "queryString": "namespace={{namespace}} region={{region}} metric=SystemErrors Statistic=SampleCount | sum by region",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -1226,7 +1226,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} entity={{entity}} metric=ConditionalCheckFailedRequests Statistic=SampleCount | avg by entity",
+                "queryString": "namespace={{namespace}} region={{region}} entity={{entity}} metric=ConditionalCheckFailedRequests Statistic=SampleCount | sum by entity",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -1247,7 +1247,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "namespace={{namespace}} region={{region}} metric=TransactionConflict Statistic=SampleCount | avg",
+                "queryString": "namespace={{namespace}} region={{region}} metric=TransactionConflict Statistic=SampleCount | sum",
                 "queryType": "Metrics",
                 "queryKey": "A",
                 "metricsQueryMode": "advanced",
@@ -1352,7 +1352,7 @@
       "coloringRules": null
     },
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "3. AWS DynamoDB - Events",
       "description": "See the details on events in your DynamoDB including the location, users, errors, updates, creations, and deletions to tables.",
       "title": "3. AWS DynamoDB - Events",
@@ -1422,7 +1422,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count by event_name",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| count by event_name",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1443,7 +1443,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| timeslice 1h\n| count by event_name, _timeslice\n| transpose row _timeslice column event_name \n| fillmissing timeslice (1h)",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| timeslice 1h\n| count by event_name, _timeslice\n| transpose row _timeslice column event_name \n| fillmissing timeslice (1h)",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1464,7 +1464,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"errorCode\", \"errorMessage\" as event_name, Region, entity, src_ip, user, error_code, error_msg\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"errorCode\", \"errorMessage\" as event_name, Region, entity, src_ip, user, error_code, error_msg\n| where tolowercase(entity) matches \"{{entity}}\"\n| count",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1485,7 +1485,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"errorCode\", \"errorMessage\" as event_name, Region, entity, src_ip, user, error_code, error_msg\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count by entity\n| sort by _count\n| limit 5",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"errorCode\", \"errorMessage\" as event_name, Region, entity, src_ip, user, error_code, error_msg\n| where tolowercase(entity) matches \"{{entity}}\"\n| count by entity\n| sort by _count\n| limit 5",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1506,7 +1506,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count as count by user\n| sort count \n| limit 10",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| count as count by user\n| sort count \n| limit 10",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1527,7 +1527,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"errorCode\", \"errorMessage\" as event_name, Region, entity, src_ip, user, error_code, error_msg\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count as Count by error_code, error_msg, event_name, user, src_ip\n| sort by Count\n| limit 20",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"errorCode\", \"errorMessage\" as event_name, Region, entity, src_ip, user, error_code, error_msg\n| where tolowercase(entity) matches \"{{entity}}\"\n| count as Count by error_code, error_msg, event_name, user, src_ip\n| sort by Count\n| limit 20",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1548,7 +1548,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" CreateTable\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"requestParameters.keySchema\", \"requestParameters.attributeDefinitions\", \"userAgent\", \"responseElements.tableDescription.provisionedThroughput\" as event_name, Region, entity, src_ip, user, table_schema, attribute_definition, user_agent, provisioned_throughput\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count by event_name, entity, table_schema, attribute_definition, provisioned_throughput, user, region, src_ip",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" CreateTable\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"requestParameters.keySchema\", \"requestParameters.attributeDefinitions\", \"userAgent\", \"responseElements.tableDescription.provisionedThroughput\" as event_name, Region, entity, src_ip, user, table_schema, attribute_definition, user_agent, provisioned_throughput\n| where tolowercase(entity) matches \"{{entity}}\"\n| count by event_name, entity, table_schema, attribute_definition, provisioned_throughput, user, region, src_ip",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1569,7 +1569,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" UpdateTable !(errorCode)\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count by event_name, entity, user, region, src_ip",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" UpdateTable !(errorCode)\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| count by event_name, entity, user, region, src_ip",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1590,7 +1590,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" DeleteTable\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.attributes.mfaAuthenticated\" as event_name, Region, entity, src_ip, user, mfa_authentication\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\" \n| count by event_name, entity, user, region, src_ip, mfa_authentication",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" DeleteTable\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.attributes.mfaAuthenticated\" as event_name, Region, entity, src_ip, user, mfa_authentication\n| where tolowercase(entity) matches \"{{entity}}\" \n| count by event_name, entity, user, region, src_ip, mfa_authentication",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1611,7 +1611,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" UpdateTimeToLive\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"requestParameters\", \"responseElements\" as event_name, Region, entity, src_ip, user, req_params, resp_elements\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count by event_name, region, user, src_ip, req_params, resp_elements",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" UpdateTimeToLive\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"requestParameters\", \"responseElements\" as event_name, Region, entity, src_ip, user, req_params, resp_elements\n| where tolowercase(entity) matches \"{{entity}}\"\n| count by event_name, region, user, src_ip, req_params, resp_elements",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1632,7 +1632,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| count by src_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+                "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, src_ip, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| count by src_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1737,7 +1737,7 @@
       "coloringRules": null
     },
     {
-      "type": "MewboardSyncDefinition",
+      "type": "DashboardV2SyncDefinition",
       "name": "4. AWS DynamoDB - Threat Intel",
       "description": "See the details of IP threats including the count, location, and highly malicious IP threats.",
       "title": "4. AWS DynamoDB - Threat Intel",
@@ -1787,7 +1787,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| count as ip_count by ip_address\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count",
+                "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| count as ip_count by ip_address\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1808,7 +1808,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| timeslice 5m\n| count as ip_count by ip_address, _sourceCategory, entity\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and malicious_confidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count by ip_address, malicious_confidence, entity, Actor,  _sourceCategory, label_name\n| sort by threat_count",
+                "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| timeslice 5m\n| count as ip_count by ip_address, _sourceCategory, entity\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and malicious_confidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count by ip_address, malicious_confidence, entity, Actor,  _sourceCategory, label_name\n| sort by threat_count",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1829,7 +1829,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| count as ip_count by ip_address, _sourceCategory\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count by ip_address, malicious_confidence, Actor,  _sourceCategory, label_name\n| sort by threat_count",
+                "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| count as ip_count by ip_address, _sourceCategory\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count by ip_address, malicious_confidence, Actor,  _sourceCategory, label_name\n| sort by threat_count",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1850,7 +1850,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| count as ip_count by ip_address, _sourceCategory\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count by malicious_confidence",
+                "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| count as ip_count by ip_address, _sourceCategory\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count by malicious_confidence",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1871,7 +1871,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| timeslice 5m\n| count as ip_count by ip_address, _sourceCategory, entity\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and malicious_confidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count by entity\n| sort by threat_count",
+                "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| timeslice 5m\n| count as ip_count by ip_address, _sourceCategory, entity\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and malicious_confidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count by entity\n| sort by threat_count",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
@@ -1892,7 +1892,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
               {
-                "queryString": "$$cloudtrail account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where Region matches \"{{region}}\" and tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| count as ip_count by ip_address\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count by ip_address\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = ip_address\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+                "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as event_name, Region, entity, ip_address, user\n| where tolowercase(entity) matches \"{{entity}}\"\n| where ip_address != \"0.0.0.0\" and ip_address != \"127.0.0.1\"\n| count as ip_count by ip_address\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip_address \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count by ip_address\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = ip_address\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
                 "queryType": "Logs",
                 "queryKey": "A",
                 "metricsQueryMode": null,
