@@ -18,21 +18,17 @@ export Section1cSumoLogicAccessKey=$7
 export Section1dSumoLogicOrganizationId=$8
 export Section1eSumoLogicResourceRemoveOnDeleteStack=true
 
-export Section2cAccountAlias="${InstallType}"
-export Section2dTagAWSResourcesFilterExpression=".*"
+export Section2aAccountAlias="${InstallType}"
 export Section6fAutoEnableS3LogsFilterExpression=".*"
-export Section8dAutoSubscribeLambdaLogGroupPattern=".*"
+export Section7dAutoSubscribeLambdaLogGroupPattern=".*"
 
-export Section2aTagAWSResourcesOptions="None"
-export Section2bAWSResourcesList=""
 export Section3aInstallObservabilityApps="No"
-export Section4aEC2CreateMetaDataSource="No"
-export Section5aCreateMetricsSourcesOptions="None"
-export Section6aALBCreateLogSource="No"
-export Section6eAutoEnableS3LogsALBResourcesOptions="None"
-export Section7aCreateCloudTrailLogSource="No"
-export Section8aLambdaCreateCloudWatchLogsSource="No"
-export Section8cAutoSubscribeLogGroupsLambdaOptions="None"
+export Section4aCreateMetricsSourcesOptions="None"
+export Section5bALBCreateLogSource="No"
+export Section5aAutoEnableS3LogsALBResourcesOptions="None"
+export Section6aCreateCloudTrailLogSource="No"
+export Section7aLambdaCreateCloudWatchLogsSource="No"
+export Section7cAutoSubscribeLogGroupsLambdaOptions="None"
 
 
 # By Default, we create explorer view, Metric Rules and FER, as we need them for each case.
@@ -43,170 +39,148 @@ export stackName="${AppName}-${InstallType}"
 if [[ "${InstallType}" == "onlyapps" ]]
 then
     export Section3aInstallObservabilityApps="Yes"
-elif [[ "${InstallType}" == "onlytaggingexisting" ]]
-then
-    export Section2aTagAWSResourcesOptions="Existing"
-    export Section2bAWSResourcesList="alb, dynamodb, apigateway"
-# onlytagging - Tags only the new resources. rds, lambda, ec2
-elif [[ "${InstallType}" == "onlytaggingnew" ]]
-then
-    export Section2aTagAWSResourcesOptions="New"
-    export Section2bAWSResourcesList="ec2, rds, lambda"
-# onlytagging - Tags both existing and the new resources. all.
-elif [[ "${InstallType}" == "onlytagging" ]]
-then
-    export Section2aTagAWSResourcesOptions="Both"
-    export Section2bAWSResourcesList="ec2, alb, dynamodb, apigateway, rds, lambda"
 # onlys3autoenableexisting - Enable S3 logging for existing ALB. Needs an existing bucket or takes if new bucket is created otherwise stack creation fails.
 elif [[ "${InstallType}" == "onlys3autoenableexisting" ]]
 then
-    export Section6eAutoEnableS3LogsALBResourcesOptions="Existing"
-    export Section6bALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
+    export Section5aAutoEnableS3LogsALBResourcesOptions="Existing"
+    export Section5dALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
 # onlys3autoenablenew - Enable S3 logging for new ALB. Needs an existing bucket or takes if new bucket is created otherwise stack creation fails.
 elif [[ "${InstallType}" == "onlys3autoenablenew" ]]
 then
-    export Section6eAutoEnableS3LogsALBResourcesOptions="New"
-    export Section6bALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
+    export Section5aAutoEnableS3LogsALBResourcesOptions="New"
+    export Section5dALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
 # onlys3autoenable - Enable S3 logging for both ALB. Needs an existing bucket or takes if new bucket is created otherwise stack creation fails.
 elif [[ "${InstallType}" == "onlys3autoenable" ]]
 then
-    export Section6eAutoEnableS3LogsALBResourcesOptions="Both"
-    export Section6bALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
-# onlyec2source - Only Creates the EC2 metadata Source.
-elif [[ "${InstallType}" == "onlyec2source" ]]
-then
-    export Section4aEC2CreateMetaDataSource="Yes"
+    export Section5aAutoEnableS3LogsALBResourcesOptions="Both"
+    export Section5dALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
 # onlymetricssourceemptyname - Only Creates the CloudWatch Metrics Source with "" EMPTY namespaces.
 elif [[ "${InstallType}" == "onlymetricssourceemptyname" ]]
 then
-    export Section5aCreateMetricsSourcesOptions="CloudWatchMetrics"
-    export Section5bMetricsNameSpaces=""
+    export Section4aCreateMetricsSourcesOptions="CloudWatchMetrics"
+    export Section4bMetricsNameSpaces=""
 # onlymetricssourcewithname - Only Creates the CloudWatch Metrics Source with namespaces AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS.
 elif [[ "${InstallType}" == "onlymetricssourcewithname" ]]
 then
-    export Section5aCreateMetricsSourcesOptions="CloudWatchMetrics"
-    export Section5bMetricsNameSpaces="AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling"
+    export Section4aCreateMetricsSourcesOptions="CloudWatchMetrics"
+    export Section4bMetricsNameSpaces="AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling"
+# updateexistingmetricsource - update the existing metric source
+elif [[ "${InstallType}" == "updatemetricsource" ]]
+then
+    export Section4cCloudWatchExistingSourceAPIUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/796322092"
 # onlyanomalywithname - Only Creates the Anamoly Source with namespaces AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS.
 elif [[ "${InstallType}" == "onlyanomalywithname" ]]
 then
-    export Section5aCreateMetricsSourcesOptions="InventorySource"
-    export Section5bMetricsNameSpaces="AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling"
+    export Section4aCreateMetricsSourcesOptions="InventorySource"
+    export Section4bMetricsNameSpaces="AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling"
 # onlycloudtrailwithbucket - Only Creates the CloudTrail Logs Source with new Bucket.
 elif [[ "${InstallType}" == "onlycloudtrailwithbucket" ]]
 then
-    export Section7aCreateCloudTrailLogSource="Yes"
+    export Section6aCreateCloudTrailLogSource="Yes"
 # onlycloudtrailexisbucket - Only Creates the CloudTrail Logs Source with existing Bucket. If no "" empty bucket provided with empty bucket name, it fails.
 elif [[ "${InstallType}" == "onlycloudtrailexisbucket" ]]
 then
-    export Section7aCreateCloudTrailLogSource="Yes"
-    export Section7cCloudTrailBucketPathExpression="AWSLogs/Sourabh/Test"
-    export Section7bCloudTrailLogsBucketName="sumologiclambdahelper-${AWS_REGION}"
+    export Section6aCreateCloudTrailLogSource="Yes"
+    export Section6dCloudTrailBucketPathExpression="AWSLogs/Sourabh/Test"
+    export Section6cCloudTrailLogsBucketName="sumologiclambdahelper-${AWS_REGION}"
 # updatecloudtrailsource - Only updates the CloudTrail Logs Source with if Collector name and source name is provided.
 elif [[ "${InstallType}" == "updatecloudtrailsource" ]]
 then
-    export Section7dCloudTrailLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794157405"
+    export Section6bCloudTrailLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794157405"
 # cwlogssourceonly - Creates a Cloudwatch logs source, with lambda function of log group connector.
 elif [[ "${InstallType}" == "cwlogssourceonly" ]]
 then
-    export Section8aLambdaCreateCloudWatchLogsSource="Yes"
+    export Section7aLambdaCreateCloudWatchLogsSource="Yes"
 # cwlogssourcenewlambdaautosub - Creates a Cloudwatch logs source, with lambda function of log group connector with auto subscribe only for new lambda.
 elif [[ "${InstallType}" == "cwlogssourcenewlambdaautosub" ]]
 then
-    export Section8aLambdaCreateCloudWatchLogsSource="Yes"
-    export Section8cAutoSubscribeLogGroupsLambdaOptions="New"
+    export Section7aLambdaCreateCloudWatchLogsSource="Yes"
+    export Section7cAutoSubscribeLogGroupsLambdaOptions="New"
 # cwlogssourceexitlambdaautosub - Creates a Cloudwatch logs source, with lambda function of log group connector WITHOUT auto subscribe only for new lambda.
 elif [[ "${InstallType}" == "cwlogssourceexitlambdaautosub" ]]
 then
-    export Section8aLambdaCreateCloudWatchLogsSource="Yes"
-    export Section8cAutoSubscribeLogGroupsLambdaOptions="Existing"
+    export Section7aLambdaCreateCloudWatchLogsSource="Yes"
+    export Section7cAutoSubscribeLogGroupsLambdaOptions="Existing"
 # cwlogssourcebothlambdaautosub - Creates a Cloudwatch logs source, with lambda function of log group connector WITH auto subscribe only for new and existing lambda.
 elif [[ "${InstallType}" == "cwlogssourcebothlambdaautosub" ]]
 then
-    export Section8aLambdaCreateCloudWatchLogsSource="Yes"
-    export Section8cAutoSubscribeLogGroupsLambdaOptions="Both"
-    export Section8dAutoSubscribeLambdaLogGroupPattern="lambda"
+    export Section7aLambdaCreateCloudWatchLogsSource="Yes"
+    export Section7cAutoSubscribeLogGroupsLambdaOptions="Both"
+    export Section7dAutoSubscribeLambdaLogGroupPattern="lambda"
 # cwlogssourcebothlambdaautosub - update the cloudwatch source if collector name and source name is provided.
 elif [[ "${InstallType}" == "updatecwlogssource" ]]
 then
-    export Section8bLambdaCloudWatchLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794162256"
+    export Section7bLambdaCloudWatchLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794162256"
 # albsourcewithbukcetwithauto - Creates only ALB source with new bucket along with auto subscribe.
 elif [[ "${InstallType}" == "albsourcewithbukcetwithauto" ]]
 then
-    export Section6aALBCreateLogSource="Yes"
-    export Section6eAutoEnableS3LogsALBResourcesOptions="Both"
+    export Section5bALBCreateLogSource="Yes"
+    export Section5aAutoEnableS3LogsALBResourcesOptions="Both"
 # albsourceexistingbukcet - Creates only ALB source with new existing bucket.
 elif [[ "${InstallType}" == "albsourceexistingbukcet" ]]
 then
-    export Section6aALBCreateLogSource="Yes"
-    export Section6bALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
-    export Section6cALBS3BucketPathExpression="Labs/ALB/sourabh"
+    export Section5bALBCreateLogSource="Yes"
+    export Section5dALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
+    export Section5eALBS3BucketPathExpression="Labs/ALB/sourabh"
 # updatealbsource - updates only ALB source with provided collector and source.
 elif [[ "${InstallType}" == "updatealbsource" ]]
 then
-    export Section6dALBLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794166127"
+    export Section5cALBLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794166127"
 # onlysources - creates all sources with common bucket creation for ALB and CloudTrail with auto enable option.
 elif [[ "${InstallType}" == "onlysources" ]]
 then
-    export Section4aEC2CreateMetaDataSource="Yes"
-    export Section5aCreateMetricsSourcesOptions="Both"
-    export Section6aALBCreateLogSource="Yes"
-    export Section7aCreateCloudTrailLogSource="Yes"
-    export Section8aLambdaCreateCloudWatchLogsSource="Yes"
-    export Section6eAutoEnableS3LogsALBResourcesOptions="Existing"
+    export Section4aCreateMetricsSourcesOptions="Both"
+    export Section5bALBCreateLogSource="Yes"
+    export Section6aCreateCloudTrailLogSource="Yes"
+    export Section7aLambdaCreateCloudWatchLogsSource="Yes"
+    export Section5aAutoEnableS3LogsALBResourcesOptions="Existing"
 # albexistingcloudtrialnew - creates ALB source with existing bucket and CloudTrail with new bucket. Create CW metrics source also.
 elif [[ "${InstallType}" == "albexistingcloudtrialnew" ]]
 then
-    export Section5aCreateMetricsSourcesOptions="CloudWatchMetrics"
-    export Section5bMetricsNameSpaces="AWS/ApplicationELB, AWS/ApiGateway"
-    export Section6aALBCreateLogSource="Yes"
-    export Section6bALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
-    export Section6cALBS3BucketPathExpression="Labs/ALB/asasdas"
-    export Section7aCreateCloudTrailLogSource="Yes"
+    export Section4aCreateMetricsSourcesOptions="CloudWatchMetrics"
+    export Section4bMetricsNameSpaces="AWS/ApplicationELB, AWS/ApiGateway"
+    export Section5bALBCreateLogSource="Yes"
+    export Section5dALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
+    export Section5eALBS3BucketPathExpression="Labs/ALB/asasdas"
+    export Section6aCreateCloudTrailLogSource="Yes"
 # albnewcloudtrialexisting - creates ALB source with new bucket and CloudTrail with Existing bucket. Create EC2 source also.
 elif [[ "${InstallType}" == "albnewcloudtrialexisting" ]]
 then
-    export Section4aEC2CreateMetaDataSource="Yes"
-    export Section6aALBCreateLogSource="Yes"
-    export Section7aCreateCloudTrailLogSource="Yes"
-    export Section7cCloudTrailBucketPathExpression="AWSLogs/Sourabh/Test"
-    export Section7bCloudTrailLogsBucketName="sumologiclambdahelper-${AWS_REGION}"
+    export Section5bALBCreateLogSource="Yes"
+    export Section6aCreateCloudTrailLogSource="Yes"
+    export Section6dCloudTrailBucketPathExpression="AWSLogs/Sourabh/Test"
+    export Section6cCloudTrailLogsBucketName="sumologiclambdahelper-${AWS_REGION}"
 # albec2apiappall - creates everything for EC2, ALB and API Gateway apps.
 elif [[ "${InstallType}" == "albec2apiappall" ]]
 then
     export Section3aInstallObservabilityApps="Yes"
-    export Section2aTagAWSResourcesOptions="Both"
-    export Section2bAWSResourcesList="ec2, alb, apigateway"
-    export Section6eAutoEnableS3LogsALBResourcesOptions="Both"
-    export Section4aEC2CreateMetaDataSource="Yes"
-    export Section5aCreateMetricsSourcesOptions="CloudWatchMetrics"
-    export Section5bMetricsNameSpaces="AWS/ApplicationELB, AWS/ApiGateway"
-    export Section6aALBCreateLogSource="Yes"
-    export Section7aCreateCloudTrailLogSource="Yes"
+    export Section5aAutoEnableS3LogsALBResourcesOptions="Both"
+    export Section4aCreateMetricsSourcesOptions="CloudWatchMetrics"
+    export Section4bMetricsNameSpaces="AWS/ApplicationELB, AWS/ApiGateway"
+    export Section5bALBCreateLogSource="Yes"
+    export Section6aCreateCloudTrailLogSource="Yes"
 # rdsdynamolambdaappall - creates everything for RDS, DYNAMO DB and LAMBDA apps.
 elif [[ "${InstallType}" == "rdsdynamolambdaappall" ]]
 then
     export Section3aInstallObservabilityApps="Yes"
-    export Section2aTagAWSResourcesOptions="Both"
-    export Section2bAWSResourcesList="dynamodb, rds, lambda"
-    export Section8cAutoSubscribeLogGroupsLambdaOptions="Both"
-    export Section8dAutoSubscribeLambdaLogGroupPattern="lambda"
-    export Section5aCreateMetricsSourcesOptions="InventorySource"
-    export Section5bMetricsNameSpaces="AWS/DynamoDB, AWS/Lambda, AWS/RDS"
-    export Section7aCreateCloudTrailLogSource="Yes"
-    export Section8aLambdaCreateCloudWatchLogsSource="Yes"
+    export Section7cAutoSubscribeLogGroupsLambdaOptions="Both"
+    export Section7dAutoSubscribeLambdaLogGroupPattern="lambda"
+    export Section4aCreateMetricsSourcesOptions="InventorySource"
+    export Section4bMetricsNameSpaces="AWS/DynamoDB, AWS/Lambda, AWS/RDS"
+    export Section6aCreateCloudTrailLogSource="Yes"
+    export Section7aLambdaCreateCloudWatchLogsSource="Yes"
 # onlyappswithexistingsources - Install Apps with existing sources. This should Update the CloudTrail, CloudWatch and ALB sources.
 elif [[ "${InstallType}" == "onlyappswithexistingsources" ]]
 then
     export Section3aInstallObservabilityApps="No"
-    export Section2aTagAWSResourcesOptions="None"
-    export Section2bAWSResourcesList="ec2, alb, apigateway, dynamodb, rds, lambda"
-    export Section6eAutoEnableS3LogsALBResourcesOptions="None"
-    export Section6bALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
-    export Section8cAutoSubscribeLogGroupsLambdaOptions="None"
-    export Section8dAutoSubscribeLambdaLogGroupPattern="lambda"
-    export Section6dALBLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170215"
-    export Section7dCloudTrailLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170202"
-    export Section8bLambdaCloudWatchLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170214"
+    export Section5aAutoEnableS3LogsALBResourcesOptions="None"
+    export Section5dALBS3LogsBucketName="sumologiclambdahelper-${AWS_REGION}"
+    export Section7cAutoSubscribeLogGroupsLambdaOptions="None"
+    export Section7dAutoSubscribeLambdaLogGroupPattern="lambda"
+    export Section5cALBLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170215"
+    export Section6bCloudTrailLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170202"
+    export Section7bLambdaCloudWatchLogsSourceUrl="https://api.sumologic.com/api/v1/collectors/171619902/sources/794170214"
+    export Section4cCloudWatchExistingSourceAPIUrl=""
 # defaultparameters - Install CF with default parameters.
 elif [[ "${InstallType}" == "defaultparameters" ]]
 then
@@ -215,7 +189,7 @@ then
     --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --stack-name ${stackName} \
     --parameter-overrides Section1aSumoLogicDeployment="${Section1aSumoLogicDeployment}" Section1bSumoLogicAccessID="${Section1bSumoLogicAccessID}" \
     Section1cSumoLogicAccessKey="${Section1cSumoLogicAccessKey}" Section1dSumoLogicOrganizationId="${Section1dSumoLogicOrganizationId}" \
-    Section1eSumoLogicResourceRemoveOnDeleteStack="${Section1eSumoLogicResourceRemoveOnDeleteStack}" Section2cAccountAlias="${Section2cAccountAlias}"
+    Section1eSumoLogicResourceRemoveOnDeleteStack="${Section1eSumoLogicResourceRemoveOnDeleteStack}" Section2aAccountAlias="${Section2aAccountAlias}"
 else
     echo "No Valid Choice."
 fi
@@ -226,15 +200,14 @@ then
     --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --stack-name ${stackName} \
     --parameter-overrides Section1aSumoLogicDeployment="${Section1aSumoLogicDeployment}" Section1bSumoLogicAccessID="${Section1bSumoLogicAccessID}" \
     Section1cSumoLogicAccessKey="${Section1cSumoLogicAccessKey}" Section1dSumoLogicOrganizationId="${Section1dSumoLogicOrganizationId}" \
-    Section1eSumoLogicResourceRemoveOnDeleteStack="${Section1eSumoLogicResourceRemoveOnDeleteStack}" Section2cAccountAlias="${Section2cAccountAlias}" \
-    Section2dTagAWSResourcesFilterExpression="${Section2dTagAWSResourcesFilterExpression}" Section2aTagAWSResourcesOptions="${Section2aTagAWSResourcesOptions}" \
-    Section2bAWSResourcesList="${Section2bAWSResourcesList}" Section3aInstallObservabilityApps="${Section3aInstallObservabilityApps}" \
-    Section4aEC2CreateMetaDataSource="${Section4aEC2CreateMetaDataSource}" Section5aCreateMetricsSourcesOptions="${Section5aCreateMetricsSourcesOptions}" \
-    Section5bMetricsNameSpaces="${Section5bMetricsNameSpaces}" Section6aALBCreateLogSource="${Section6aALBCreateLogSource}" Section6bALBS3LogsBucketName="${Section6bALBS3LogsBucketName}" \
-    Section6cALBS3BucketPathExpression="${Section6cALBS3BucketPathExpression}" Section6dALBLogsSourceUrl="${Section6dALBLogsSourceUrl}" Section6eAutoEnableS3LogsALBResourcesOptions="${Section6eAutoEnableS3LogsALBResourcesOptions}" \
-    Section6fAutoEnableS3LogsFilterExpression="${Section6fAutoEnableS3LogsFilterExpression}" Section7aCreateCloudTrailLogSource="${Section7aCreateCloudTrailLogSource}" \
-    Section7bCloudTrailLogsBucketName="${Section7bCloudTrailLogsBucketName}" Section7cCloudTrailBucketPathExpression="${Section7cCloudTrailBucketPathExpression}" \
-    Section7dCloudTrailLogsSourceUrl="${Section7dCloudTrailLogsSourceUrl}" Section8aLambdaCreateCloudWatchLogsSource="${Section8aLambdaCreateCloudWatchLogsSource}" \
-    Section8bLambdaCloudWatchLogsSourceUrl="${Section8bLambdaCloudWatchLogsSourceUrl}" Section8cAutoSubscribeLogGroupsLambdaOptions="${Section8cAutoSubscribeLogGroupsLambdaOptions}" \
-    Section8dAutoSubscribeLambdaLogGroupPattern="${Section8dAutoSubscribeLambdaLogGroupPattern}"
+    Section1eSumoLogicResourceRemoveOnDeleteStack="${Section1eSumoLogicResourceRemoveOnDeleteStack}" Section2aAccountAlias="${Section2aAccountAlias}" \
+    Section2dTagAWSResourcesFilterExpression="${Section2dTagAWSResourcesFilterExpression}" Section3aInstallObservabilityApps="${Section3aInstallObservabilityApps}" \
+    Section4aCreateMetricsSourcesOptions="${Section4aCreateMetricsSourcesOptions}" \
+    Section4bMetricsNameSpaces="${Section4bMetricsNameSpaces}" Section5bALBCreateLogSource="${Section5bALBCreateLogSource}" Section5dALBS3LogsBucketName="${Section5dALBS3LogsBucketName}" \
+    Section5eALBS3BucketPathExpression="${Section5eALBS3BucketPathExpression}" Section5cALBLogsSourceUrl="${Section5cALBLogsSourceUrl}" Section5aAutoEnableS3LogsALBResourcesOptions="${Section5aAutoEnableS3LogsALBResourcesOptions}" \
+    Section6fAutoEnableS3LogsFilterExpression="${Section6fAutoEnableS3LogsFilterExpression}" Section6aCreateCloudTrailLogSource="${Section6aCreateCloudTrailLogSource}" \
+    Section6cCloudTrailLogsBucketName="${Section6cCloudTrailLogsBucketName}" Section6dCloudTrailBucketPathExpression="${Section6dCloudTrailBucketPathExpression}" \
+    Section6bCloudTrailLogsSourceUrl="${Section6bCloudTrailLogsSourceUrl}" Section7aLambdaCreateCloudWatchLogsSource="${Section7aLambdaCreateCloudWatchLogsSource}" \
+    Section7bLambdaCloudWatchLogsSourceUrl="${Section7bLambdaCloudWatchLogsSourceUrl}" Section7cAutoSubscribeLogGroupsLambdaOptions="${Section7cAutoSubscribeLogGroupsLambdaOptions}" \
+    Section7dAutoSubscribeLambdaLogGroupPattern="${Section7dAutoSubscribeLambdaLogGroupPattern}" Section4cCloudWatchExistingSourceAPIUrl="${Section4cCloudWatchExistingSourceAPIUrl}"
 fi
