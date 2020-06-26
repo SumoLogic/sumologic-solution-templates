@@ -1,0 +1,682 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Lambda Function to add fields to host metrics sources based on the available instances in all regions of the current AWS account."
+
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: "Sumo Logic Access Configuration (Required)"
+        Parameters:
+          - Section1aSumoDeployment
+          - Section1bSumoAccessID
+          - Section1cSumoAccessKey
+          - Section1dRemoveSumoResourcesOnDeleteStack
+
+      - Label:
+          default: "AWS Account Alias"
+        Parameters:
+          - Section2aAccountAlias
+          - Section2bRegionList
+          - Section2cUpdateVersion
+
+    ParameterLabels:
+      Section1aSumoDeployment:
+        default: "Sumo Logic Deployment Name"
+      Section1bSumoAccessID:
+        default: "Sumo Logic Access ID"
+      Section1cSumoAccessKey:
+        default: "Sumo Logic Access Key"
+      Section1dRemoveSumoResourcesOnDeleteStack:
+        default: "Delete Sumo Logic Resources when stack is deleted"
+
+      Section2aAccountAlias:
+        default: "Alias for AWS Account Identification"
+      Section2bRegionList:
+        default: "Region List"
+      Section2cUpdateVersion:
+        default: "Increment if Update is required"
+
+Parameters:
+  Section1aSumoDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+  Section1bSumoAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  Section1cSumoAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  Section1dRemoveSumoResourcesOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Type: String
+
+  Section2aAccountAlias:
+    Type: String
+    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
+    AllowedPattern: "[a-zA-Z0-9]+"
+  Section2bRegionList:
+    Type: String
+    Description: "Provide the list of Regions where EC2 instances are present."
+    Default: "us-east-1, us-east-2, us-west-1, us-west-2, ap-south-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ap-northeast-1, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, eu-north-1, sa-east-1, ap-east-1, af-south-1, eu-south-1, me-south-1"
+  Section2cUpdateVersion:
+    Type: String
+    Description: "Increment the value to update the metrics sources in case new Host Metrics sources are created in Sumo Logic."
+    Default: "1"
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      bucketname: appdevzipfiles-us-east-1
+    us-east-2:
+      bucketname: appdevzipfiles-us-east-2
+    us-west-1:
+      bucketname: appdevzipfiles-us-west-1
+    us-west-2:
+      bucketname: appdevzipfiles-us-west-2
+    ap-south-1:
+      bucketname: sumologiclambdahelper-ap-south-1
+    ap-northeast-2:
+      bucketname: appdevzipfiles-ap-northeast-2
+    ap-southeast-1:
+      bucketname: appdevzipfiles-ap-southeast-1
+    ap-southeast-2:
+      bucketname: appdevzipfiles-ap-southeast-2
+    ap-northeast-1:
+      bucketname: appdevzipfiles-ap-northeast-1
+    ca-central-1:
+      bucketname: appdevzipfiles-ca-central-1
+    eu-central-1:
+      bucketname: appdevzipfiles-eu-central-1
+    eu-west-1:
+      bucketname: appdevzipfiles-eu-west-1
+    eu-west-2:
+      bucketname: appdevzipfiles-eu-west-2
+    eu-west-3:
+      bucketname: appdevzipfiles-eu-west-3
+    eu-north-1:
+      bucketname: appdevzipfiles-eu-north-1s
+    sa-east-1:
+      bucketname: appdevzipfiles-sa-east-1
+    ap-east-1:
+      bucketname: appdevzipfiles-ap-east-1s
+    af-south-1:
+      bucketname: appdevzipfiles-af-south-1s
+    eu-south-1:
+      bucketname: appdevzipfiles-eu-south-1
+    me-south-1:
+      bucketname: appdevzipfiles-me-south-1s
+
+Resources:
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaExecutePolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - ec2:DescribeInstances
+                Resource: '*'
+
+  LambdaToAddFields:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.2.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - LambdaRole
+          - Arn
+
+  ConditionGeneratorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      InlineCode: |
+        import os
+        import cfnresponse
+
+        def handler(event, context):
+          values = os.environ['RegionList']
+          regions = ["us-east-1", "us-east-2", "us-west-1", "us-west-2", "ap-south-1", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-west-3", "eu-north-1", "sa-east-1", "ap-east-1", "af-south-1", "eu-south-1", "me-south-1"]
+          response_value = {}
+          for region in regions:
+            response_value[region] = "Yes" if region in values else "No"
+          cfnresponse.send(event, context, cfnresponse.SUCCESS, response_value, "ConditionCheck")
+      Handler: index.handler
+      Runtime: python3.6
+      Role:
+        Fn::GetAtt:
+          - LambdaRole
+          - Arn
+      Environment:
+        Variables:
+          RegionList: !Ref Section2bRegionList
+
+  Primerinvoke:
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt ConditionGeneratorFunction.Arn
+
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  UsEast1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: LambdaToAddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  UsEast1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: UsEast1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "us-east-1"
+      AddFields: !GetAtt Primerinvoke.us-east-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  UsEast2WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: UsEast1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  UsEast2AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: UsEast2WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "us-east-2"
+      AddFields: !GetAtt Primerinvoke.us-east-2
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  UsWest1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: UsEast2AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  UsWest1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: UsWest1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "us-west-1"
+      AddFields: !GetAtt Primerinvoke.us-west-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  UsWest2WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: UsWest1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  UsWest2AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: UsWest2WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "us-west-2"
+      AddFields: !GetAtt Primerinvoke.us-west-2
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  ApSouth1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: UsWest2AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  ApSouth1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: ApSouth1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "ap-south-1"
+      AddFields: !GetAtt Primerinvoke.ap-south-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  ApNortheast2WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: ApSouth1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  ApNortheast2AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: ApNortheast2WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "ap-northeast-2"
+      AddFields: !GetAtt Primerinvoke.ap-northeast-2
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  ApSoutheast1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: ApNortheast2AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  ApSoutheast1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: ApSoutheast1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "ap-southeast-1"
+      AddFields: !GetAtt Primerinvoke.ap-southeast-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  ApSoutheast2WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: ApSoutheast1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  ApSoutheast2AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: ApSoutheast2WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "ap-southeast-2"
+      AddFields: !GetAtt Primerinvoke.ap-southeast-2
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  ApNortheast1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: ApSoutheast2AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  ApNortheast1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: ApNortheast1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "ap-northeast-1"
+      AddFields: !GetAtt Primerinvoke.ap-northeast-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  CaCentral1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: ApNortheast1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  CaCentral1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: CaCentral1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "ca-central-1"
+      AddFields: !GetAtt Primerinvoke.ca-central-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  EuCentral1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: CaCentral1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  EuCentral1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: EuCentral1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "eu-central-1"
+      AddFields: !GetAtt Primerinvoke.eu-central-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  EuWest1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: EuCentral1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  EuWest1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: EuWest1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "eu-west-1"
+      AddFields: !GetAtt Primerinvoke.eu-west-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  EuWest2WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: EuWest1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  EuWest2AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: EuWest2WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "eu-west-2"
+      AddFields: !GetAtt Primerinvoke.eu-west-2
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  EuWest3WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: EuWest2AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  EuWest3AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: EuWest3WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "eu-west-3"
+      AddFields: !GetAtt Primerinvoke.eu-west-3
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  EuNorth1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: EuWest3AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  EuNorth1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: EuNorth1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "eu-north-1"
+      AddFields: !GetAtt Primerinvoke.eu-north-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  SaEast1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: EuNorth1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  SaEast1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: SaEast1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "sa-east-1"
+      AddFields: !GetAtt Primerinvoke.sa-east-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  ApEast1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: SaEast1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  ApEast1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: ApEast1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "ap-east-1"
+      AddFields: !GetAtt Primerinvoke.ap-east-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  AfSouth1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: ApEast1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  AfSouth1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: AfSouth1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "af-south-1"
+      AddFields: !GetAtt Primerinvoke.af-south-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  EuSouth1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: AfSouth1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  EuSouth1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: EuSouth1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "eu-south-1"
+      AddFields: !GetAtt Primerinvoke.eu-south-1
+      Fields:
+        account: !Ref Section2aAccountAlias
+
+  MeSouth1WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: EuSouth1AddFields
+    Properties:
+      Handle: !Ref WaitHandle
+      Timeout: "3"
+      Count: 0
+
+  MeSouth1AddFields:
+    Type: Custom::AddFieldsInHostMetricsSources
+    DependsOn: MeSouth1WaitCondition
+    Properties:
+      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      UpdateVersion: !Ref Section2cUpdateVersion
+      AccountID: !Ref "AWS::AccountId"
+      Region: "me-south-1"
+      AddFields: !GetAtt Primerinvoke.me-south-1
+      Fields:
+        account: !Ref Section2aAccountAlias
