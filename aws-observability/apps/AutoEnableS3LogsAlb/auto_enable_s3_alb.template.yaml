@@ -105,13 +105,9 @@ Mappings:
 Parameters:
   EnableLogging:
     Type: String
-    Description: "S3 - To Enable S3 Audit Logging for new S3 buckets.
-                  VPC - To Enable VPC flow logs for new VPC, Subnets and Network Interfaces.
-                  ALB - To Enable S3 Logging for new Application Load Balancer."
+    Description: "ALB - To Enable S3 Logging for new Application Load Balancer."
     AllowedPattern: ".+"
     AllowedValues:
-      - 'S3'
-      - 'VPC'
       - 'ALB'
 
   TaggingResourceOptions:
@@ -160,12 +156,6 @@ Conditions:
   enable_alb_logging: !And
     - !Equals [!Ref EnableLogging, 'ALB']
     - !Condition auto_enable_new
-  enable_s3_buckets_logging: !And
-    - !Equals [!Ref EnableLogging, 'S3']
-    - !Condition auto_enable_new
-  enable_vpc_flow_logs_logging: !And
-    - !Equals [!Ref EnableLogging, 'VPC']
-    - !Condition auto_enable_new
 
   auto_enable_existing: !Or
     - !Equals [ !Ref TaggingResourceOptions, 'Existing' ]
@@ -200,29 +190,12 @@ Resources:
                 Action:
                   - elasticloadbalancing:DescribeLoadBalancerAttributes
                   - elasticloadbalancing:DescribeLoadBalancers
-                  - elasticloadbalancing:AddTags
-                  - elasticloadbalancing:RemoveTags
                   - elasticloadbalancing:ModifyLoadBalancerAttributes
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
-                  - ec2:DescribeInstances
-                  - ec2:DescribeVpcs
-                  - ec2:DeleteFlowLogs
-                  - ec2:CreateFlowLogs
-                  - ec2:DescribeFlowLogs
-                  - logs:CreateLogDelivery
-                  - logs:DeleteLogDelivery
-                  - s3:GetBucketPolicy
-                  - s3:PutBucketPolicy
-                  - s3:ListAllMyBuckets
-                  - s3:GetBucketLocation
-                  - s3:PutBucketAcl
-                  - s3:GetBucketAcl
-                  - s3:GetBucketLogging
-                  - s3:PutBucketLogging
                 Resource: '*'
 
   EnableNewAWSResourcesLambda:
@@ -245,84 +218,6 @@ Resources:
           Filter: !Ref FilterExpression
           BucketPrefix: !Ref BucketPrefix
           RegionAccountId: !FindInMap [Region2ELBAccountId, !Ref 'AWS::Region', AccountId]
-
-  AutoEnableS3LogEventsInvokePermission:
-    Type: AWS::Lambda::Permission
-    Condition: enable_s3_buckets_logging
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref EnableNewAWSResourcesLambda
-      Principal: "events.amazonaws.com"
-      SourceArn: !GetAtt AutoEnableS3LogEventsRuleTrigger.Arn
-
-  AutoEnableS3LogEventsRuleTrigger:
-    Type: 'AWS::Events::Rule'
-    Condition: enable_s3_buckets_logging
-    Properties:
-      Description: Auto-Enable S3 loggging for S3 Buckets with Lambda from events
-      EventPattern:
-        source:
-          - aws.s3
-        detail-type:
-          - AWS API Call via CloudTrail
-        detail:
-          eventSource:
-            - s3.amazonaws.com
-          eventName:
-            - CreateBucket
-      Name: !Join
-        - ""
-        - - "sumo-logic-s3-buckets-"
-          - !Select
-            - 0
-            - !Split
-              - "-"
-              - !Select
-                - 2
-                - !Split ["/", !Ref "AWS::StackId"]
-      State: ENABLED
-      Targets:
-        - Arn: !GetAtt EnableNewAWSResourcesLambda.Arn
-          Id: Main
-
-  AutoEnableVPCEventsInvokePermission:
-    Type: AWS::Lambda::Permission
-    Condition: enable_vpc_flow_logs_logging
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref EnableNewAWSResourcesLambda
-      Principal: "events.amazonaws.com"
-      SourceArn: !GetAtt AutoEnableVPCEventsRuleTrigger.Arn
-
-  AutoEnableVPCEventsRuleTrigger:
-    Type: 'AWS::Events::Rule'
-    Condition: enable_vpc_flow_logs_logging
-    Properties:
-      Description: Auto-Enable VPC Flow logs for VPCs with Lambda from events
-      EventPattern:
-        source:
-          - aws.ec2
-        detail-type:
-          - AWS API Call via CloudTrail
-        detail:
-          eventSource:
-            - ec2.amazonaws.com
-          eventName:
-            - CreateVpc
-      Name: !Join
-        - ""
-        - - "sumo-logic-vpc-"
-          - !Select
-            - 0
-            - !Split
-              - "-"
-              - !Select
-                - 2
-                - !Split ["/", !Ref "AWS::StackId"]
-      State: ENABLED
-      Targets:
-        - Arn: !GetAtt EnableNewAWSResourcesLambda.Arn
-          Id: Main
 
   AutoEnableAlbLogEventsInvokePermission:
     Type: AWS::Lambda::Permission
@@ -374,17 +269,14 @@ Resources:
         Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.2.zip"
       MemorySize: 128
       Timeout: 900
-      Role:
-        Fn::GetAtt:
-          - SumoLambdaRole
-          - Arn
+      Role: !GetAtt SumoLambdaRole.Arn
 
   ExistingAWSResources:
     Type: Custom::EnableS3LogsResources
     Condition: auto_enable_existing
     Properties:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt EnableExisitngAWSResourcesLambda.Arn, !Ref ParentStackLambdaARN]
-      AWSResource: !If [enable_s3_buckets_logging, "s3", !If [enable_vpc_flow_logs_logging, "vpc", "elbv2"] ]
+      AWSResource: "elbv2"
       BucketName: !Ref BucketName
       Filter: !Ref FilterExpression
       BucketPrefix: !Ref BucketPrefix

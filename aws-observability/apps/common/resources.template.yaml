@@ -323,37 +323,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - tag:TagResources
-                  - tag:UntagResources
-                  - rds:DescribeDBClusters
-                  - rds:DescribeDBInstances
-                  - rds:AddTagsToResource
-                  - rds:RemoveTagsFromResource
-                  - apigateway:GET
-                  - apigateway:DELETE
-                  - apigateway:POST
-                  - apigateway:PUT
-                  - ec2:DescribeInstances
-                  - ec2:CreateTags
-                  - ec2:DeleteTags
                   - elasticloadbalancing:DescribeLoadBalancerAttributes
                   - elasticloadbalancing:DescribeLoadBalancers
-                  - elasticloadbalancing:AddTags
-                  - elasticloadbalancing:RemoveTags
                   - elasticloadbalancing:ModifyLoadBalancerAttributes
-                  - lambda:ListFunctions
-                  - lambda:TagResource
-                  - lambda:UntagResource
-                  - dynamodb:ListTables
-                  - dynamodb:TagResource
-                  - dynamodb:UntagResource
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                  - cloudtrail:CreateTrail
-                  - cloudtrail:DeleteTrail
-                  - cloudtrail:UpdateTrail
-                  - cloudtrail:StartLogging
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
                 Resource: '*'
@@ -485,11 +460,10 @@ Resources:
         - Ref: CommonBucketSNSTopic
 
   CommonCloudTrail:
+    Type: AWS::CloudTrail::Trail
     Condition: create_cloudtrail_bucket
-    Type: Custom::AWSTrail
     DependsOn: CommonBucketPolicy
     Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
       IsLogging: true
       IsMultiRegionTrail: false
       S3BucketName: !Ref CommonS3Bucket
