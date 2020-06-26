@@ -1,10 +1,10 @@
 #!/bin/sh
 
-export AWS_REGION="ap-south-1"
+export AWS_REGION="us-east-2"
 export AWS_PROFILE="personal"
 # App to test
 export AppName="tag"
-export InstallTypes=("s3" "s3exiting" "vpc" "vpcexisting" "alb" "albexisting")
+export InstallTypes=("alb" "albexisting" "both")
 
 export BucketName="sumologiclambdahelper-${AWS_REGION}"
 export FilterExpression=".*"
@@ -13,23 +13,7 @@ for InstallType in "${InstallTypes[@]}"
 do
     export BucketPrefix=${InstallType}"-LOGS/"
 
-    if [[ "${InstallType}" == "s3" ]]
-    then
-        export EnableLogging="S3"
-        export TaggingResourceOptions="New"
-    elif [[ "${InstallType}" == "s3exiting" ]]
-    then
-        export EnableLogging="S3"
-        export TaggingResourceOptions="Existing"
-    elif [[ "${InstallType}" == "vpc" ]]
-    then
-        export EnableLogging="VPC"
-        export TaggingResourceOptions="New"
-    elif [[ "${InstallType}" == "vpcexisting" ]]
-    then
-        export EnableLogging="VPC"
-        export TaggingResourceOptions="Existing"
-    elif [[ "${InstallType}" == "alb" ]]
+    if [[ "${InstallType}" == "alb" ]]
     then
         export EnableLogging="ALB"
         export TaggingResourceOptions="New"
@@ -37,6 +21,11 @@ do
     then
         export EnableLogging="ALB"
         export TaggingResourceOptions="Existing"
+        export BucketPrefix=${InstallType}"-LOGS"
+    elif [[ "${InstallType}" == "both" ]]
+    then
+        export EnableLogging="ALB"
+        export TaggingResourceOptions="Both"
         export BucketPrefix=${InstallType}"-LOGS"
     else
         echo "No Valid Choice."
