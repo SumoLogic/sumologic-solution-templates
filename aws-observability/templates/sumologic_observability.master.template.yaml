@@ -430,7 +430,7 @@ Resources:
         ALBS3LogsBucketName: !If [create_alb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section5dALBS3LogsBucketName]
         AutoSubscribeLogGroups: !If [auto_subscribe_lambda_log_groups, "Yes", "No"]
         AutoSubscribeLogGroupsLambdaOptions: !Ref Section7cAutoSubscribeLogGroupsLambdaOptions
-        AutoSubscribeLambdaARN: !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN
+        AutoSubscribeLambdaARN: !If [auto_subscribe_lambda_log_groups, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, ""]
         AutoSubscribeLambdaLogGroupPattern: !Ref Section7dAutoSubscribeLambdaLogGroupPattern
 
   sumoEC2MetricsAppStack:
