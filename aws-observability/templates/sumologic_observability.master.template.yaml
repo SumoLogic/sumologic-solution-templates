@@ -1,5 +1,4 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
 Description: "Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#Configuration_prompts_and_input"
 
 Metadata:
@@ -310,6 +309,10 @@ Conditions:
     - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSource, 'Yes' ]
     - !Condition auto_subscribe_new_lambda_log_groups
 
+  call_auto_enable: !Or
+    - !Condition auto_enable_s3_logs
+    - !Condition auto_subscribe_lambda_log_groups
+
   # Condition for Stacks creation. Calling Nested Stack EveryTime to create FER and Metric Rule. If already present, marked as duplicate in Resource.
   install_overview_dashboards: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
 
@@ -411,35 +414,24 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
       SumoDeployment: !Ref Section1aSumoLogicDeployment
 
-  AutoEnableS3LogsAlbAWSResources:
+  AutoEnableOptions:
     Type: AWS::CloudFormation::Stack
-    Condition: auto_enable_s3_logs
+    Condition: call_auto_enable
     Properties:
       TemplateURL: !Join
         - ""
         - - "https://"
           - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/AutoEnableS3LogsAlb/auto_enable_s3_alb.template.yaml"
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/autoenable/auto_enable.template.yaml"
       Parameters:
-        BucketName: !If [create_alb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section5dALBS3LogsBucketName]
-        BucketPrefix: "elasticloadbalancing"
-        EnableLogging: "ALB"
-        TaggingResourceOptions: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
-        FilterExpression: ".*"
-        RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        ParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-
-  AutoSubscribeLambdaLogGroupsAWSResources:
-    Type: AWS::Serverless::Application
-    Condition: auto_subscribe_lambda_log_groups
-    Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.2
-      Parameters:
-        LambdaARN: !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN
-        LogGroupPattern: !Ref Section7dAutoSubscribeLambdaLogGroupPattern
-        UseExistingLogs: !If [auto_subscribe_exisitng_lambda_log_groups, "true", "false"]
+        SumoLogicResourceRemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        ALBAutoEnableS3Logs: !If [auto_enable_s3_logs, "Yes", "No"]
+        ALBAutoEnableS3LogsOptions: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
+        ALBS3LogsBucketName: !If [create_alb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section5dALBS3LogsBucketName]
+        AutoSubscribeLogGroups: !If [auto_subscribe_lambda_log_groups, "Yes", "No"]
+        AutoSubscribeLogGroupsLambdaOptions: !Ref Section7cAutoSubscribeLogGroupsLambdaOptions
+        AutoSubscribeLambdaARN: !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN
+        AutoSubscribeLambdaLogGroupPattern: !Ref Section7dAutoSubscribeLambdaLogGroupPattern
 
   sumoEC2MetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -666,3 +658,23 @@ Resources:
         Section6aCreateCloudWatchLogSource: "No"
         Section6cCloudWatchLogsAPIUrl: !Ref Section7bLambdaCloudWatchLogsSourceUrl
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+
+  AddAccountField:
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "account"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddEntityField:
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "entity"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
