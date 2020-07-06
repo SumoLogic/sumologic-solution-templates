@@ -82,7 +82,10 @@ Parameters:
     Default: ""
     Description: "Provide Comma delimited list of the namespaces to collect."
     Type: CommaDelimitedList
-
+  ScanInterval:
+    Default: 300000
+    Description: "Provide the scan interval to fetch metrics into Sumo Logic."
+    Type: String
   CreateALBLogSource:
     Type: String
     Description: "Choose Yes to create Sumo Logic ALB Log Source with provided bucket Name."
@@ -569,7 +572,7 @@ Resources:
       SourceType: AwsCloudWatch
       Namespaces: !Ref CloudWatchMetricsNameSpaces
       SourceName: !Ref CloudWatchMetricsSourceName
-      ScanInterval: 300000
+      ScanInterval: !Ref ScanInterval
       SourceCategory: "aws/observability/cloudwatch/metrics"
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoLogicAccessID
