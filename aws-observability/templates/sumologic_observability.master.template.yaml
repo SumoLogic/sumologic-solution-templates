@@ -215,8 +215,8 @@ Parameters:
     Default: ""
   Section5eALBS3BucketPathExpression:
     Type: String
-    Description: "This is required in case the above existing bucket is already configured to receive ALB access logs. If this is blank, Sumo Logic will store logs in the path expression: elasticloadbalancing/AWSLogs/*"
-    Default: "elasticloadbalancing/AWSLogs/*"
+    Description: "This is required in case the above existing bucket is already configured to receive ALB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/elasticloadbalancing/*"
+    Default: "*AWSLogs/*/elasticloadbalancing/*"
 
   Section6aCreateCloudTrailLogSource:
     Type: String
@@ -236,8 +236,8 @@ Parameters:
     Default: ""
   Section6dCloudTrailBucketPathExpression:
     Type: String
-    Description: "This is required in case the above existing bucket is already configured to receive CloudTrail logs. If this is blank, Sumo Logic will store logs in the path expression: AWSLogs/*/CloudTrail/*/*"
-    Default: "AWSLogs/*/CloudTrail/*/*"
+    Description: "This is required in case the above existing bucket is already configured to receive CloudTrail logs. If this is blank, Sumo Logic will store logs in the path expression: AWSLogs/*/CloudTrail/*"
+    Default: "AWSLogs/*/CloudTrail/*"
 
   Section7aLambdaCreateCloudWatchLogsSource:
     Type: String
@@ -388,7 +388,7 @@ Resources:
         CreateALBLogSource: !Ref Section5bALBCreateLogSource
         CreateALBS3Bucket: !If [create_alb_bucket, "Yes", "No"]
         ALBS3LogsBucketName: !Ref Section5dALBS3LogsBucketName
-        ALBS3BucketPathExpression: !If [auto_enable_s3_logs, !Sub "elasticloadbalancing/AWSLogs/${AWS::AccountId}/*/${AWS::Region}/*", !Ref Section5eALBS3BucketPathExpression]
+        ALBS3BucketPathExpression: !If [auto_enable_s3_logs, !Sub "*AWSLogs/${AWS::AccountId}/elasticloadbalancing/${AWS::Region}/*", !Ref Section5eALBS3BucketPathExpression]
         ALBLogsSourceName: !Sub "${Section2aAccountAlias}-alb-logs-${AWS::Region}"
         CreateCloudTrailLogSource: !Ref Section6aCreateCloudTrailLogSource
         CreateCloudTrailBucket: !If [create_cloudtrail_bucket, "Yes", "No"]
