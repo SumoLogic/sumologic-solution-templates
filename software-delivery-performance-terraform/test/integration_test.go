@@ -57,6 +57,11 @@ func TestTerraformSumoLogic(t *testing.T) {
 		validatePagerdutyToSumologicWebhook(t, workingDir)
 	})
 
+	// // Validate Github Resources
+	// test_structure.RunTestStage(t, "validateGithub", func() {
+	// 	validateGithubToSumologicWebhook(t, workingDir)
+	// })
+
 }
 
 func loadPropertiesFile(file string) map[string]string {
@@ -172,31 +177,34 @@ func validateSumoLogicBitbucketSource(t *testing.T, terraformOptions *terraform.
 
 func validateSumoLogicOpsgenieSource(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
 	// Run `terraform output` to get the value of an output variable
-	webhookID := terraform.Output(t, terraformOptions, "opsgenie_source_id")
-	if webhookID != "[]" && getProperty("install_opsgenie") == "true" {
-		webhookID = strings.Split(webhookID, "\"")[1]
+	sourceID := terraform.Output(t, terraformOptions, "opsgenie_source_id")
+	if sourceID != "[]" && getProperty("install_opsgenie") == "true" {
+		sourceID = strings.Split(sourceID, "\"")[1]
+
 		// Verify that we get back a 200 OK
-		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/connections/%s", sumologicURL, webhookID), nil, headers, customValidation, nil)
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/collectors/%s/sources/%s", sumologicURL, collectorID, sourceID), nil, headers, customValidation, nil)
 	}
 }
 
 func validateSumoLogicGithubSource(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
 	// Run `terraform output` to get the value of an output variable
-	webhookID := terraform.Output(t, terraformOptions, "github_source_id")
-	if webhookID != "[]" && getProperty("install_github") == "true" {
-		webhookID = strings.Split(webhookID, "\"")[1]
+	sourceID := terraform.Output(t, terraformOptions, "github_source_id")
+	if sourceID != "[]" && getProperty("install_github") == "true" {
+		sourceID = strings.Split(sourceID, "\"")[1]
+
 		// Verify that we get back a 200 OK
-		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/connections/%s", sumologicURL, webhookID), nil, headers, customValidation, nil)
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/collectors/%s/sources/%s", sumologicURL, collectorID, sourceID), nil, headers, customValidation, nil)
 	}
 }
 
 func validateSumoLogicPagerdutySource(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
 	// Run `terraform output` to get the value of an output variable
-	webhookID := terraform.Output(t, terraformOptions, "pagerduty_source_id")
-	if webhookID != "[]" && getProperty("install_pagerduty") == "true" {
-		webhookID = strings.Split(webhookID, "\"")[1]
+	sourceID := terraform.Output(t, terraformOptions, "pagerduty_source_id")
+	if sourceID != "[]" && getProperty("install_pagerduty") == "true" {
+		sourceID = strings.Split(sourceID, "\"")[1]
+
 		// Verify that we get back a 200 OK
-		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/connections/%s", sumologicURL, webhookID), nil, headers, customValidation, nil)
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/collectors/%s/sources/%s", sumologicURL, collectorID, sourceID), nil, headers, customValidation, nil)
 	}
 }
 
@@ -347,10 +355,39 @@ func validatePagerdutyToSumologicWebhook(t *testing.T, workingDir string) {
 		webhookIDs := strings.Split(webhookID, ",")
 		for i := 0; i < len(webhookIDs); i++ {
 			// Verify that we get back a 200 OK
-			http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("https://api.pagerduty.com/extensions/%s", webhookID), nil, pdheaders, customValidation, nil)
+			http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("https://api.pagerduty.com/extensions/%s", strings.TrimSpace(webhookIDs[i])), nil, pdheaders, customValidation, nil)
 		}
 	}
 }
+
+/* In - Progress
+func validateGithubToSumologicWebhook(t *testing.T, workingDir string) {
+	terraformOptions := test_structure.LoadTerraformOptions(t, workingDir)
+	var ghProps = loadPropertiesFile("../github.auto.tfvars")
+	var ghheaders = map[string]string{"Authorization": "token " + ghProps["github_token"], "Accept": "application/vnd.github.v3+json"}
+	// Run `terraform output` to get the value of an output variable
+	repoWebhookID := terraform.Output(t, terraformOptions, "github_repo_webhook_id")
+	if repoWebhookID != "[]" && getProperty("install_github") == "true" && getProperty("github_repo_webhook_create") == "true" {
+		repoWebhookID = strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(repoWebhookID, "{", "", -1), "}", "", -1), "[", "", -1), "]", "", -1), "\"", "", -1)
+		webhookIDs := strings.Split(repoWebhookID, ",")
+		for i := 0; i < len(webhookIDs); i++ {
+			// Verify that we get back a 200 OK
+			http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("https://api.github.com/repos/{owner}/{repo}/hooks/{hook_id}/%s", ghProps["github_organiztion"], ghProps["github_token"], strings.TrimSpace(webhookIDs[i])), nil, ghheaders, customValidation, nil)
+		}
+	}
+
+	// Run `terraform output` to get the value of an output variable
+	orgWebhookID := terraform.Output(t, terraformOptions, "github_org_webhook_id")
+	if orgWebhookID != "[]" && getProperty("install_github") == "true" && getProperty("github_org_webhook_create") == "true" {
+		orgWebhookID = strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(orgWebhookID, "{", "", -1), "}", "", -1), "[", "", -1), "]", "", -1), "\"", "", -1)
+		webhookIDs := strings.Split(orgWebhookID, ",")
+		for i := 0; i < len(webhookIDs); i++ {
+			// Verify that we get back a 200 OK
+			http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("https://api.github.com/extensions/%s", strings.TrimSpace(webhookIDs[i])), nil, ghheaders, customValidation, nil)
+		}
+	}
+}
+*/
 
 // Deploy the resources using Terraform
 func deployTerraform(t *testing.T, workingDir string, collectorName string) {

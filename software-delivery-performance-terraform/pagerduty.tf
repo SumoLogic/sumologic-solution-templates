@@ -13,12 +13,12 @@ data "pagerduty_extension_schema" "webhook" {
 }
 
 # Create Webhook in Pagerduty
-resource "pagerduty_extension" "sumologic_extension"{
-  count = "${var.install_pagerduty}" ? length(var.pagerduty_services) : 0
-  name = "Sumo Logic Webhook"
-  endpoint_url = sumologic_http_source.pagerduty[0].url
-  extension_schema = data.pagerduty_extension_schema.webhook.id
-  extension_objects    = [var.pagerduty_services[count.index]]
+resource "pagerduty_extension" "sumologic_extension" {
+  count             = "${var.install_pagerduty}" ? length(var.pagerduty_services_pagerduty_webhooks) : 0
+  name              = "Sumo Logic Webhook"
+  endpoint_url      = sumologic_http_source.pagerduty[0].url
+  extension_schema  = data.pagerduty_extension_schema.webhook.id
+  extension_objects = [var.pagerduty_services_pagerduty_webhooks[count.index]]
 }
 
 data "pagerduty_vendor" "sumologic" {
@@ -27,8 +27,8 @@ data "pagerduty_vendor" "sumologic" {
 
 # We need to create Service Key for each service for Sumo Logic to Pagerduty Webhook
 resource "pagerduty_service_integration" "sumologic_service" {
-  count = "${var.install_sumo_to_pagerduty_webhook}" ? length(var.pagerduty_services) : 0
+  count   = "${var.install_sumo_to_pagerduty_webhook}" ? length(var.pagerduty_services_sumo_webhooks) : 0
   name    = data.pagerduty_vendor.sumologic.name
-  service = var.pagerduty_services[count.index]
+  service = var.pagerduty_services_sumo_webhooks[count.index]
   vendor  = data.pagerduty_vendor.sumologic.id
 }
