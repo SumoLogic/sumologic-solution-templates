@@ -17,7 +17,6 @@ variable "install_bitbucket_cloud" {}
 variable "install_opsgenie" {}
 variable "install_sumo_to_opsgenie_webhook" {}
 variable "install_jira_server" {}
-variable "install_atlassian_app" {}
 variable "install_sumo_to_jiracloud_webhook" {}
 variable "install_sumo_to_jiraserver_webhook" {}
 variable "install_sumo_to_jiraservicedesk_webhook" {}
@@ -75,12 +74,13 @@ variable "opsgenie_api_url" {
 variable "opsgenie_priority" {}
 
 # Pagerduty
-variable install_pagerduty      {}
+variable install_pagerduty {}
 variable pagerduty_api_endpoint {
   default = "https://api.pagerduty.com"
 }
 variable "pagerduty_api_key" {}
-variable "pagerduty_services" {}
+variable "pagerduty_services_pagerduty_webhooks" {}
+variable "pagerduty_services_sumo_webhooks" {}
 variable "install_sumo_to_pagerduty_webhook" {}
 
 #Github
@@ -90,4 +90,5 @@ variable "github_organization" {}
 variable "github_repository_names" {}
 variable "github_repo_events" {}
 variable "github_org_events" {}
-variable "create_github_org_webhook" {}
+variable "github_org_webhook_create" {}
+variable "github_repo_webhook_create" {}

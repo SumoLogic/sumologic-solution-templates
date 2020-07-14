@@ -1,7 +1,6 @@
 # Sumo Logic - SDP Terraform
 # Configure Sumo Logic Webhook configuration options. These features are in Beta. To participate contact your Sumo account executive.
 
-
 # Sumo Logic to Opsgenie Webhook - This feature is in Beta. To participate contact your Sumo account executive.
 opsgenie_priority = "P3"
 

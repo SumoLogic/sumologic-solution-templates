@@ -1,6 +1,6 @@
 # sumologic-sdp-terraform
 
-The Terraform script installs the Sumo Logic Software delivery Performance (SDP) Solution collection and Applications in the Personal Folder of the Sumo Logic user whose access keys have been used. If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
+The Terraform script installs the Sumo Logic Software Delivery Performance (SDP) Solution collection and Applications in the Personal Folder of the Sumo Logic user whose access keys have been used. If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
 
 
 ## Getting Started
@@ -205,7 +205,8 @@ Configure these parameters in `pagerduty.auto.tfvars`.
 | Parameter | Description |
 | --- | --- |
 | pagerduty_api_key        | [Pagerduty API Key](https://support.pagerduty.com/docs/generating-api-keys#section-generating-a-general-access-rest-api-key). |
-| pagerduty_services       | List of Pagerduty Service IDs. Example, ["P1QWK8J","PK9FKW3"]. You can get these from the URL after opening a specific service in Pagerduty. These are used for both the webhooks i.e. Sumo Logic to Pagerduty and Pagerduty to Sumo Logic webhooks.              |
+| pagerduty_services_pagerduty_webhooks       | List of Pagerduty Service IDs. Example, ["P1QWK8J","PK9FKW3"]. You can get these from the URL after opening a specific service in Pagerduty. These are used for Pagerduty to Sumo Logic webhooks.              |
+| pagerduty_services_sumo_webhooks       | List of Pagerduty Service IDs. Example, ["P1QWK8J","PK9FKW3"]. You can get these from the URL after opening a specific service in Pagerduty. These are used for Sumo Logic to Pagerduty Webhooks.              |
 
 ## Github
 
@@ -215,7 +216,8 @@ Configure these parameters in `github.auto.tfvars`.
 | --- | --- |
 | github_token             | [Github Token](https://github.com/settings/tokens)|
 | github_organization      | Organization Name. |
-| github_repository_names  | Lis of repository names for which webhooks need to be created. Example, ["repo1","repo2"]  |
-| create_github_org_webhook| Also create webhooks at org level. "0 or 1" |
+| github_repo_webhook_create| Create webhooks at repo level.|
+| github_repository_names  | List of repository names for which webhooks need to be created. Example, ["repo1","repo2"]  |
+| github_org_webhook_create| Create webhooks at org level.|
 | github_repo_events       | List of repository [events](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads) which should be sent to Sumo Logic. Example, ["create","delete","fork"] |
 | github_org_events        | List of organization level [events](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads) which should be sent to Sumo Logic. Example, ["create","delete","fork"] |
