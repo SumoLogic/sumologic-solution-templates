@@ -17,7 +17,7 @@ do
         export region=`echo "${region%?}"`
     fi
 
-    aws s3 cp . s3://$bucket_name/sumologic-aws-observability/ --region ${region} --recursive --exclude '*.sh' --exclude '*.json' --exclude '.git/*' --exclude '.idea/*' --acl public-read --profile ${AWS_PROFILE}
+    aws s3 cp . s3://$bucket_name/sumologic-aws-observability/ --region ${region} --recursive --exclude '*.sh' --exclude 'apps/*/test/*' --exclude '*/test/*' --exclude '*.json' --exclude '.git/*' --exclude '.idea/*' --acl public-read --profile ${AWS_PROFILE}
 
     echo "Upload complete for Region -> $region and Bucket Name -> $bucket_name"
 done
