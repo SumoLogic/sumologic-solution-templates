@@ -314,6 +314,13 @@ Conditions:
   install_overview_dashboards: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
 
 Mappings:
+  # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
+  # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
+  # Buckets names which are intentional -
+  # 1. appdevzipfiles-eu-north-1s
+  # 2. appdevzipfiles-ap-east-1s
+  # 3. appdevzipfiles-af-south-1s
+  # 4. appdevzipfiles-me-south-1s
   RegionMap:
     us-east-1:
       bucketname: appdevzipfiles-us-east-1
@@ -405,7 +412,7 @@ Resources:
       ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App"
-      Version: "1"
+      Version: "BetaV0.1"
       FolderName: "Sumo Logic AWS Observability Apps "
       RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
       SumoAccessID: !Ref Section1bSumoLogicAccessID
