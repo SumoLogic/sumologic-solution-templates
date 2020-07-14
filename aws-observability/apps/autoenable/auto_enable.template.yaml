@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: "Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
+
+Parameters:
+  SumoLogicResourceRemoveOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Type: String
+
+  ALBAutoEnableS3Logs:
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+    Default: 'Yes'
+    Description: "Enable ALB S3 Access Logging"
+    Type: String
+  ALBAutoEnableS3LogsOptions:
+    Type: String
+    Description: "New - Automatically enables S3 logging for newly created ALB resources to collect logs for ALB resources. This does not affect ALB resources already collecting logs.
+                  Existing - Automatically enables S3 logging for existing ALB resources to collect logs for ALB resources.
+                  Both - Automatically enables S3 logging for new and existing ALB resources.
+                  None - Skips Automatic S3 Logging enable for ALB resources."
+    Default: 'Both'
+    AllowedValues:
+      - 'New'
+      - 'Existing'
+      - 'Both'
+      - 'None'
+  ALBS3LogsBucketName:
+    Type: String
+    Description: "Provide a name of existing S3 bucket name where you would like to store ALB logs. If this is empty, a new bucket will be created in the region."
+    Default: ""
+
+  AutoSubscribeLogGroups:
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+    Default: 'Yes'
+    Description: "Auto Subscribe Lambda Log Groups"
+    Type: String
+  AutoSubscribeLogGroupsLambdaOptions:
+    Type: String
+    Description: "New - Automatically subscribes new log groups to lambda to send logs to Sumo Logic.
+                  Existing - Automatically subscribes existing log groups to lambda to send logs to Sumo Logic.
+                  Both - Automatically subscribes new and existing log groups.
+                  None - Skips Automatic subscription."
+    Default: 'Both'
+    AllowedValues:
+      - 'New'
+      - 'Existing'
+      - 'Both'
+      - 'None'
+  AutoSubscribeLambdaARN:
+    Type: String
+    Description: "Lambda ARN for Cloudwatch Log Sender."
+    Default: ""
+  AutoSubscribeLambdaLogGroupPattern:
+    Type: String
+    Default: "lambda"
+    Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
+
+Conditions:
+  auto_enable_s3_logs: !Equals [ !Ref ALBAutoEnableS3Logs, 'Yes' ]
+  auto_subscribe_new_lambda_log_groups: !Equals [ !Ref AutoSubscribeLogGroups, 'Yes' ]
+
+  # Condition for Auto Subscribe Lambda
+  auto_subscribe_exisitng_lambda_log_groups: !Or
+    - !Equals [ !Ref AutoSubscribeLogGroupsLambdaOptions, 'Existing' ]
+    - !Equals [ !Ref AutoSubscribeLogGroupsLambdaOptions, 'Both' ]
+
+Resources:
+
+  AutoEnableS3LogsAlbAWSResources:
+    Type: AWS::Serverless::Application
+    Condition: auto_enable_s3_logs
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
+        SemanticVersion: 1.0.1
+      Parameters:
+        BucketName: !Ref ALBS3LogsBucketName
+        BucketPrefix: "elasticloadbalancing"
+        AutoEnableLogging: "ALB"
+        AutoEnableResourceOptions: !Ref ALBAutoEnableS3LogsOptions
+        FilterExpression: ".*"
+        RemoveOnDeleteStack: !Ref SumoLogicResourceRemoveOnDeleteStack
+
+  AutoSubscribeLambdaLogGroupsAWSResources:
+    Type: AWS::Serverless::Application
+    Condition: auto_subscribe_new_lambda_log_groups
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
+        SemanticVersion: 1.0.2
+      Parameters:
+        LambdaARN: !Ref AutoSubscribeLambdaARN
+        LogGroupPattern: !Ref AutoSubscribeLambdaLogGroupPattern
+        UseExistingLogs: !If [auto_subscribe_exisitng_lambda_log_groups, "true", "false"]
