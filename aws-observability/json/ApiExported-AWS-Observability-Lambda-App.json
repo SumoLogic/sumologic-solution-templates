@@ -1,0 +1,2673 @@
+{
+  "type": "FolderSyncDefinition",
+  "name": "AWS Lambda",
+  "description": "The Sumo Logic AWS Lambda App uses the Lambda logs via CloudWatch, CloudWatch Metrics and the CloudTrail Lambda Data Events to visualize the operational and performance trends in all the Lambda functions in your account. The preconfigured dashboards provide insights into executions such as memory and duration usage by function versions or aliases, errors, billed duration, function callers, IAM users, and threat details.",
+  "children": [
+    {
+      "type": "DashboardV2SyncDefinition",
+      "name": "1. AWS Lambda - Overview",
+      "description": "",
+      "title": "1. AWS Lambda - Overview",
+      "rootPanel": null,
+      "theme": "Light",
+      "topologyLabelMap": {
+        "data": {
+          "namespace": [
+            "aws/lambda"
+          ],
+          "region": [
+            "*"
+          ],
+          "account": [
+            "*"
+          ]
+        }
+      },
+      "refreshInterval": 0,
+      "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+          "type": "RelativeTimeRangeBoundary",
+          "relativeTime": "-1h"
+        },
+        "to": null
+      },
+      "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+          {
+            "key": "panelpane-003c8b8f895dbb44",
+            "structure": "{\"height\":7,\"width\":6,\"x\":6,\"y\":8}"
+          },
+          {
+            "key": "panelpane-8e03665b8cdca84a",
+            "structure": "{\"height\":7,\"width\":6,\"x\":12,\"y\":1}"
+          },
+          {
+            "key": "panelpane-ca5a7c80a6581847",
+            "structure": "{\"height\":7,\"width\":6,\"x\":12,\"y\":8}"
+          },
+          {
+            "key": "panelpane-3607a1da9980c849",
+            "structure": "{\"height\":7,\"width\":6,\"x\":18,\"y\":1}"
+          },
+          {
+            "key": "panelpane-3aa7297fa4a29944",
+            "structure": "{\"height\":7,\"width\":6,\"x\":18,\"y\":8}"
+          },
+          {
+            "key": "panelpane-bae35066b5b60848",
+            "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":15}"
+          },
+          {
+            "key": "panelpane-f03235ddbab6fa4b",
+            "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":22}"
+          },
+          {
+            "key": "panelpane-02614a9cbadabb4e",
+            "structure": "{\"height\":6,\"width\":3,\"x\":0,\"y\":44}"
+          },
+          {
+            "key": "panelpane-58fe78d0978b6843",
+            "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":29}"
+          },
+          {
+            "key": "panelpane-9661a24080cb7a43",
+            "structure": "{\"height\":1,\"width\":12,\"x\":12,\"y\":0}"
+          },
+          {
+            "key": "panelpane-d4d18b06ac340b4d",
+            "structure": "{\"height\":1,\"width\":12,\"x\":0,\"y\":0}"
+          },
+          {
+            "key": "panelpane-2c1355a7927f8946",
+            "structure": "{\"height\":7,\"width\":6,\"x\":0,\"y\":8}"
+          },
+          {
+            "key": "panelpane-d9f052d8a3216943",
+            "structure": "{\"height\":6,\"width\":9,\"x\":3,\"y\":44}"
+          },
+          {
+            "key": "panelpane-10f4e6b2b578c949",
+            "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":15}"
+          },
+          {
+            "key": "panelpane-d93f12b480302940",
+            "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":29}"
+          },
+          {
+            "key": "panelpane-6a76b586aaa6eb44",
+            "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":22}"
+          },
+          {
+            "key": "panelpane-6dcf5bbf91746849",
+            "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":36}"
+          },
+          {
+            "key": "panelPANE-2E7EA641BAAB3A42",
+            "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":1}"
+          },
+          {
+            "key": "panelPANE-32972729B258184D",
+            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":44}"
+          },
+          {
+            "key": "panelPANE-F3CF4036807F6A48",
+            "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":36}"
+          },
+          {
+            "key": "panelPANE-7CDE0CEA8CE70A4E",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":43}"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": "429E1D83E52D5649",
+          "key": "panelpane-003c8b8f895dbb44",
+          "title": "Top IAM Users Using Lambda Functions",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\"},\"legend\":{\"enabled\":false}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" \"IAMUser\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\" and caller_type = \"IAMUser\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as Invocations by caller\n| top 10 caller by Invocations",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "5191E5381F987695",
+          "key": "panelpane-8e03665b8cdca84a",
+          "title": "Invocations - Today vs Yesterday vs Last Week",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\"},\"axes\":{\"axisY\":{\"title\":\"Invocations\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | sum ",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | sum  | timeshift -1d",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | sum | timeshift -7d ",
+              "queryType": "Metrics",
+              "queryKey": "C",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "C7A07A7E90BDD2FF",
+          "key": "panelpane-ca5a7c80a6581847",
+          "title": "Errors - Today vs Yesterday vs Last Week",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\"},\"axes\":{\"axisY\":{\"title\":\"Errors\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Last Week\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Errors statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | sum",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Errors statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | sum | timeshift 1d",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Errors statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | sum | timeshift 7d",
+              "queryType": "Metrics",
+              "queryKey": "C",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "7D7CD4DF0D4D522C",
+          "key": "panelpane-3607a1da9980c849",
+          "title": "Duration - Today vs Yesterday vs Last Week",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\"},\"axes\":{\"axisY\":{\"title\":\"Milliseconds\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Last Week\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Duration statistic=average account={{account}} region={{region}} entity={{entity}} Resource=* | avg",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Duration statistic=average account={{account}} region={{region}} entity={{entity}} Resource=* | avg | timeshift 1d",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Duration statistic=average account={{account}} region={{region}} entity={{entity}} Resource=* | avg | timeshift 7d",
+              "queryType": "Metrics",
+              "queryKey": "C",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "2A83D72A0D289144",
+          "key": "panelpane-3aa7297fa4a29944",
+          "title": "Throttling - Today vs Yesterday vs Last Week",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\"},\"axes\":{\"axisY\":{\"title\":\"Avg Throttling Events\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Last Week\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Throttles statistic=average account={{account}} region={{region}} entity={{entity}} Resource=* | avg",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Throttles statistic=average account={{account}} region={{region}} entity={{entity}} Resource=* | avg | timeshift 1d",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Throttles statistic=average account={{account}} region={{region}} entity={{entity}} Resource=* | avg | timeshift 7d",
+              "queryType": "Metrics",
+              "queryKey": "C",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "556A0991E8D171DB",
+          "key": "panelpane-bae35066b5b60848",
+          "title": "Top Functions by Duration",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| sum(Duration) as %\"Total Duration\", avg(Duration) as %\"Avg Duration\", count as Invocations by functionname\n| top 10 functionname by %\"Avg Duration\", %\"Total Duration\", Invocations\n| format( \"%.2f\",%\"Avg Duration\") as %\"Avg Duration\"\n| format( \"%.2f\",%\"Total Duration\") as %\"Total Duration\"",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "A561EDE5C752B39A",
+          "key": "panelpane-f03235ddbab6fa4b",
+          "title": "Top Functions by Memory Used",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"aggregationType\":\"max\",\"fontSize\":12,\"paginationPageSize\":100}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| max(MaxMemoryUsed) as MaxMemoryUsed, avg(MemorySize) as AvgMemorySize by functionname\n| top 10 functionname by MaxMemoryUsed, functionname asc, AvgMemorySize",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "A98180407353745B",
+          "key": "panelpane-02614a9cbadabb4e",
+          "title": "Errors",
+          "visualSettings": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\"Errors\",\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":\"1\",\"to\":\"5\",\"color\":\"#DFBE2E\"},{\"from\":\"5\",\"to\":null,\"color\":\"#BF2121\"}],\"option\":\"Sum\",\"labelFontSize\":10,\"noDataString\":\"0\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage) and tolowercase(functionname) matches \"{{entity}}\"\n| count as eventCount",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "D079E67525E1F613",
+          "key": "panelpane-58fe78d0978b6843",
+          "title": "Allocated Memory vs Used Memory",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"stackedPercent\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| avg(MemorySize) as MemorySizeAvg, avg(MaxMemoryUsed) as MaxMemoryUsedAvg by functionname\n| (MemorySizeAvg - MaxMemoryUsedAvg) as RemainingMemory\n| RemainingMemory/MemorySizeAvg as wastageRatio\n| top 5 functionname by wastageRatio, RemainingMemory, MaxMemoryUsedAvg\n| fields -wastageRatio",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "386777876972B300",
+          "key": "panelpane-9661a24080cb7a43",
+          "title": "Performance",
+          "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "822403293E778701",
+          "key": "panelpane-d4d18b06ac340b4d",
+          "title": "Audit",
+          "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "8C1FC8850EE1C609",
+          "key": "panelpane-2c1355a7927f8946",
+          "title": "Top AWS Services Using Lambda Functions",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\"},\"legend\":{\"enabled\":false}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" \"AWSService\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\" and caller_type = \"AWSService\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as Invocations by caller\n| top 10 caller by Invocations",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "04944466100578E4",
+          "key": "panelpane-d9f052d8a3216943",
+          "title": "Top Error Messages",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage) and tolowercase(functionname) matches \"{{entity}}\"\n| count as num_errors by errorMessage, functionname \n| top 30 errorMessage, functionname by num_errors desc, errorMessage asc, functionname asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "10F4E6B2B578C949",
+          "key": "panelpane-10f4e6b2b578c949",
+          "title": "Invocations and Provisioned Concurrency Invocations",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Invocations\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Invocations\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"ProvisionedConcurrencyInvocations\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | sum",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=ProvisionedConcurrencyInvocations statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | sum",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "D93F12B480302940",
+          "key": "panelpane-d93f12b480302940",
+          "title": "Provisioned Concurrent Executions",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Provisioned Concurrent Executions\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Provisioned Concurrent Executions\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=ProvisionedConcurrentExecutions statistic=Average account={{account}} region={{region}} entity={{entity}} Resource=* | avg",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "The number of events that are being processed on provisioned concurrency. For each invocation of an alias or version with provisioned concurrency, Lambda emits the current count.",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "6A76B586AAA6EB44",
+          "key": "panelpane-6a76b586aaa6eb44",
+          "title": "Provisioned Concurrency Utilization",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Provisioned Concurrency Utilization\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Provisioned Concurrency Utilization\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=ProvisionedConcurrencyUtilization statistic=Average account={{account}} region={{region}} entity={{entity}} Resource=* | avg",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "The number of events that are being processed on provisioned concurrency, divided by the total amount of provisioned concurrency allocated. For example, .5 indicates that 50 percent of allocated provisioned concurrency is in use. For each invocation of an alias or version with provisioned concurrency, Lambda emits the current count.",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "6DCF5BBF91746849",
+          "key": "panelpane-6dcf5bbf91746849",
+          "title": "Provisioned Concurrency Spillover Invocations",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Provisioned Concurrency Spillover Invocations\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"Provisioned Concurrency Spillover Invocations\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=ProvisionedConcurrencySpilloverInvocations statistic=Maximum account={{account}} region={{region}} entity={{entity}} Resource=* | max",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "The number of invocations that are run on nonprovisioned concurrency, when all provisioned concurrency is in use. For a version or alias that is configured to use provisioned concurrency, Lambda increments the count once for each invocation that runs on non-provisioned concurrency.",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "2E7EA641BAAB3A42",
+          "key": "panelPANE-2E7EA641BAAB3A42",
+          "title": "Caller Locations",
+          "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| where event_name = \"Invoke\" and Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code, event_name",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "32972729B258184D",
+          "key": "panelPANE-32972729B258184D",
+          "title": "Pass Vs Fail Requests",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where tolowercase(functionname) matches \"{{entity}}\"\n| if (!isEmpty(errorMessage), 1, 0) as haserror\n| if (!isEmpty(errorMessage), 0, 1) as noerror\n| sum(haserror) as failrequests, sum(noerror) as passrequests by functionname\n| top 10 functionname by failrequests, passrequests",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "F3CF4036807F6A48",
+          "key": "panelPANE-F3CF4036807F6A48",
+          "title": "Requests by Function Versions",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches \"{{entity}}\"\n| count by functionname, version\n| transpose row functionname column version",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "7CDE0CEA8CE70A4E",
+          "key": "panelPANE-7CDE0CEA8CE70A4E",
+          "title": "Success and Failures",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":20},\"text\":{\"backgroundColor\":\"#dfe5e9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        }
+      ],
+      "variables": [
+        {
+          "id": "783AD1761939EA56",
+          "name": "account",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "",
+            "key": "account"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "EC33E2DB4838D241",
+          "name": "region",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}}",
+            "key": "region"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "F9A3F57E1C6B747E",
+          "name": "namespace",
+          "displayName": null,
+          "defaultValue": "aws/lambda",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}}",
+            "key": "namespace"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "754D3EA357EF301B",
+          "name": "entity",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+            "key": "entity"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        }
+      ],
+      "coloringRules": []
+    },
+    {
+      "type": "DashboardV2SyncDefinition",
+      "name": "1. AWS Lambda - Request Analysis",
+      "description": "",
+      "title": "1. AWS Lambda - Request Analysis",
+      "rootPanel": null,
+      "theme": "Light",
+      "topologyLabelMap": {
+        "data": {
+          "namespace": [
+            "aws/lambda"
+          ],
+          "region": [
+            "*"
+          ],
+          "entity": [
+            "*"
+          ],
+          "account": [
+            "*"
+          ]
+        }
+      },
+      "refreshInterval": 0,
+      "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+          "type": "RelativeTimeRangeBoundary",
+          "relativeTime": "-1h"
+        },
+        "to": null
+      },
+      "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+          {
+            "key": "panelpane-3c5b34dda0bbb840",
+            "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":1}"
+          },
+          {
+            "key": "panelpane-3f9f39638d387a43",
+            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":26}"
+          },
+          {
+            "key": "panelpane-16e3f20782380843",
+            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":10}"
+          },
+          {
+            "key": "panelpane-ddbffb2b8add794a",
+            "structure": "{\"height\":8,\"width\":9,\"x\":6,\"y\":10}"
+          },
+          {
+            "key": "panelpane-34eea0d88a1afb49",
+            "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":10}"
+          },
+          {
+            "key": "panelpane-f13c1239a1f49b42",
+            "structure": "{\"height\":8,\"width\":12,\"x\":6,\"y\":26}"
+          },
+          {
+            "key": "panelpane-1b7a3c298ca95949",
+            "structure": "{\"height\":8,\"width\":16,\"x\":8,\"y\":18}"
+          },
+          {
+            "key": "panelpane-9bdb6681b76a7946",
+            "structure": "{\"height\":8,\"width\":6,\"x\":18,\"y\":26}"
+          },
+          {
+            "key": "panelPANE-147BE636A6B81842",
+            "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":18}"
+          },
+          {
+            "key": "panelPANE-11D188E7BCA5C94F",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+          },
+          {
+            "key": "panelPANE-99C148768D8B7A45",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":9}"
+          },
+          {
+            "key": "panelPANE-493D84E79DACFB44",
+            "structure": "{\"height\":8,\"width\":9,\"x\":6,\"y\":34}"
+          },
+          {
+            "key": "panelPANE-E92623F985DD0A48",
+            "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":34}"
+          },
+          {
+            "key": "panelPANE-5A94FACABB0B6947",
+            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":34}"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": "6CFD4B8D4808A028",
+          "key": "panelpane-3c5b34dda0bbb840",
+          "title": "Invocations Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"markerSize\":\"0\",\"lineThickness\":\"3\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"Requests\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{entity}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across All entities\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | avg by entity",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} entity=* Resource=* | avg",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "991A0B5640350C86",
+          "key": "panelpane-3f9f39638d387a43",
+          "title": "Top Source IPs",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as events by src_ip\n| top 10 src_ip by events, src_ip asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "BF53E43062B7A957",
+          "key": "panelpane-16e3f20782380843",
+          "title": "Invoke Breakdown by Function Version",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"us-east-1\" and tolowercase(functionname) matches \"after_create\"\n| count as invocations by function_version\n| top 10 function_version by invocations, function_version asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "9C77C72C88727D1E",
+          "key": "panelpane-ddbffb2b8add794a",
+          "title": "Invocation by Function Version  - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Invoke Frequency\"}}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" (\"Invoke\" OR \"AssumedRole\") account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name in (\"Invoke\", \"AssumedRole\")\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 5m\n| count as InvokeFrequency by function_version, _timeslice\n| transpose row _timeslice column function_version \n| fillmissing timeslice (5m)",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "5F1BEC9A75D04BFB",
+          "key": "panelpane-34eea0d88a1afb49",
+          "title": "Top Caller Types and Callers",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as activities by caller_type, caller\n| top 10 caller_type, caller  by activities, caller_type asc, caller",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "EB8981C2C253E56D",
+          "key": "panelpane-f13c1239a1f49b42",
+          "title": "Function by Version Alias, RequestID",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| parse field=message \"*\\t*\\t*\" as time,RequestId2,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| if (eventStatus matches \"Success\", RequestId, RequestId2) as RequestId\n| count as frequency by functionname, version, eventStatus, requestId\n| where tolowercase(functionname) matches \"{{entity}}\"\n| sort by functionname asc\n| limit 100",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "E29D36A7AC11DE5D",
+          "key": "panelpane-1b7a3c298ca95949",
+          "title": "Function Caller Details",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as frequency by functionname, function_version, caller, caller_type, src_ip, Region\n| sort by frequency, functionname, function_version, caller, caller_type, src_ip, Region\n| limit 30 | fields -frequency",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "9FCE512253310177",
+          "key": "panelpane-9bdb6681b76a7946",
+          "title": "Requests by Version Alias",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"innerRadius\":\"30%\"},\"legend\":{\"enabled\":false}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| count as events by version\n| sort by events, version asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "147BE636A6B81842",
+          "key": "panelPANE-147BE636A6B81842",
+          "title": "Location of Callers",
+          "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"map\":{\"layerType\":\"Cluster\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| where event_name = \"Invoke\" and Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code, event_name",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "11D188E7BCA5C94F",
+          "key": "panelPANE-11D188E7BCA5C94F",
+          "title": "Performance",
+          "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "99C148768D8B7A45",
+          "key": "panelPANE-99C148768D8B7A45",
+          "title": "Lambda Events",
+          "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "493D84E79DACFB44",
+          "key": "panelPANE-493D84E79DACFB44",
+          "title": "Pass Vs Fail Requests",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"column\"}},{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"column\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 5m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "E92623F985DD0A48",
+          "key": "panelPANE-E92623F985DD0A48",
+          "title": "Requests by Version Alias",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches \"{{entity}}\"\n| count by functionname, version\n| transpose row version column functionname",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "5A94FACABB0B6947",
+          "key": "panelPANE-5A94FACABB0B6947",
+          "title": "Requests Pass Vs Fail",
+          "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"overrides\":[{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"pie\"}},{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"pie\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| where tolowercase(functionname) matches \"{{entity}}\"\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        }
+      ],
+      "variables": [
+        {
+          "id": "2373F678DA7D9E43",
+          "name": "account",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "",
+            "key": "account"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "CCD6BC9A80D89425",
+          "name": "region",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}}",
+            "key": "region"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "EF512B71BF64EC9F",
+          "name": "namespace",
+          "displayName": null,
+          "defaultValue": "aws/lambda",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}}",
+            "key": "namespace"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "76DB6A0DB32513AD",
+          "name": "entity",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+            "key": "entity"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        }
+      ],
+      "coloringRules": []
+    },
+    {
+      "type": "DashboardV2SyncDefinition",
+      "name": "2. AWS Lambda - Usage Analysis",
+      "description": "",
+      "title": "2. AWS Lambda - Usage Analysis",
+      "rootPanel": null,
+      "theme": "Light",
+      "topologyLabelMap": {
+        "data": {
+          "namespace": [
+            "aws/lambda"
+          ],
+          "region": [
+            "*"
+          ],
+          "entity": [
+            "*"
+          ],
+          "account": [
+            "*"
+          ]
+        }
+      },
+      "refreshInterval": 0,
+      "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+          "type": "RelativeTimeRangeBoundary",
+          "relativeTime": "-1d"
+        },
+        "to": null
+      },
+      "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+          {
+            "key": "panelpane-b239f83881e27a4b",
+            "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":0}"
+          },
+          {
+            "key": "panelpane-045582fa80a23843",
+            "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":14}"
+          },
+          {
+            "key": "panelpane-3949f1ef821c9b43",
+            "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":7}"
+          },
+          {
+            "key": "panelpane-2957042f8a83b942",
+            "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":0}"
+          },
+          {
+            "key": "panelpane-113c30a1b0e1db4e",
+            "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":7}"
+          },
+          {
+            "key": "panelpane-77af4eac9b2f9b41",
+            "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":14}"
+          },
+          {
+            "key": "panelpane-9f0dd042ad7cda45",
+            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":21}"
+          },
+          {
+            "key": "panelpane-802f003ca7026848",
+            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":21}"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": "7913B3E77ADDBD76",
+          "key": "panelpane-b239f83881e27a4b",
+          "title": "IAM User Invoking Functions - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Frequency\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" \"IAMUser\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop\n| where event_name = \"Invoke\" and caller_type = \"IAMUser\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 15m\n| count by caller, _timeslice\n| transpose row _timeslice column caller ",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "CE3425B8D2E7384A",
+          "key": "panelpane-045582fa80a23843",
+          "title": "Top IAM User Invoking Functions",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" \"IAMUser\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\" and caller_type = \"IAMUser\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as Frequency by caller\n| top 10 caller by Frequency",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "470BDB1C848518E5",
+          "key": "panelpane-3949f1ef821c9b43",
+          "title": "Time Compare - IAM User Invoking Functions",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" \"IAMUser\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\" and caller_type = \"IAMUser\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as today by caller \n| compare with timeshift 1d as yesterday\n| sort by today\n| today_yesterday as yesterday\n| fields -today_yesterday",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "9DDAAB9FAEC302CA",
+          "key": "panelpane-2957042f8a83b942",
+          "title": "AWS Services Invoking Functions - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Frequency\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" \"AWSService\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop\n| where event_name = \"Invoke\" and caller_type = \"AWSService\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 15m\n| count by caller, _timeslice\n| transpose row _timeslice column caller",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "3B61D2592354E3DB",
+          "key": "panelpane-113c30a1b0e1db4e",
+          "title": "Time Compare - AWS Services Invoking Functions",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" \"AWSService\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \n\"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\" and caller_type = \"AWSService\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as today by caller\n| compare with timeshift 1d as yesterday\n| sort by today\n| today_yesterday as yesterday\n| fields -today_yesterday",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "8551240E22E5AAF9",
+          "key": "panelpane-77af4eac9b2f9b41",
+          "title": "Top AWS Services Invoking Functions",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" \"AWSService\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\" and caller_type = \"AWSService\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as Frequency by caller\n| top 10 caller by Frequency",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "22D8E2CC1EE93ABB",
+          "key": "panelpane-9f0dd042ad7cda45",
+          "title": "User Agents",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as Frequency by user_agent\n| top 10 user_agent by Frequency, user_agent asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "6C4C091DBCA7D937",
+          "key": "panelpane-802f003ca7026848",
+          "title": "Time Compare - User Agent",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" \"Invoke\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| count as today by user_agent\n| compare with timeshift 1d as yesterday\n| today_yesterday as yesterday\n| sort by today, yesterday\n| fields -today_yesterday\n",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        }
+      ],
+      "variables": [
+        {
+          "id": "574563C463A0CCE9",
+          "name": "account",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "",
+            "key": "account"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "7DA41081FDA8DBE6",
+          "name": "region",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}}",
+            "key": "region"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "C1AC3E534F65EB17",
+          "name": "namespace",
+          "displayName": null,
+          "defaultValue": "aws/lambda",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}}",
+            "key": "namespace"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "990E05C86BABD766",
+          "name": "entity",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+            "key": "entity"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        }
+      ],
+      "coloringRules": []
+    },
+    {
+      "type": "DashboardV2SyncDefinition",
+      "name": "3. AWS Lambda - Error Analysis",
+      "description": "",
+      "title": "3. AWS Lambda - Error Analysis",
+      "rootPanel": null,
+      "theme": "Light",
+      "topologyLabelMap": {
+        "data": {
+          "namespace": [
+            "aws/lambda"
+          ],
+          "region": [
+            "*"
+          ],
+          "entity": [
+            "*"
+          ],
+          "account": [
+            "*"
+          ]
+        }
+      },
+      "refreshInterval": 0,
+      "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+          "type": "RelativeTimeRangeBoundary",
+          "relativeTime": "-1h"
+        },
+        "to": null
+      },
+      "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+          {
+            "key": "panelpane-a12e5afa999cfa4e",
+            "structure": "{\"height\":7,\"width\":4,\"x\":0,\"y\":1}"
+          },
+          {
+            "key": "panelpane-9b125784bf09f843",
+            "structure": "{\"height\":7,\"width\":14,\"x\":10,\"y\":1}"
+          },
+          {
+            "key": "panelpane-94e9b41a9d04284b",
+            "structure": "{\"height\":6,\"width\":10,\"x\":4,\"y\":9}"
+          },
+          {
+            "key": "panelpane-e4b91e63a4412947",
+            "structure": "{\"height\":6,\"width\":10,\"x\":14,\"y\":15}"
+          },
+          {
+            "key": "panelpane-655003898484f942",
+            "structure": "{\"height\":6,\"width\":10,\"x\":4,\"y\":15}"
+          },
+          {
+            "key": "panelpane-fd692661bfea5a47",
+            "structure": "{\"height\":6,\"width\":10,\"x\":14,\"y\":9}"
+          },
+          {
+            "key": "panelpane-df7ce2499c0fa842",
+            "structure": "{\"height\":7,\"width\":6,\"x\":4,\"y\":1}"
+          },
+          {
+            "key": "panelPANE-9F1118A790758B40",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":8}"
+          },
+          {
+            "key": "panelPANE-ED7E848CA880B844",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+          },
+          {
+            "key": "panelPANE-DEE76A78994C6B46",
+            "structure": "{\"height\":6,\"width\":4,\"x\":0,\"y\":15}"
+          },
+          {
+            "key": "panelPANE-2CE18154866C3A4E",
+            "structure": "{\"height\":6,\"width\":4,\"x\":0,\"y\":9}"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": "856A8E97E1987AF5",
+          "key": "panelpane-a12e5afa999cfa4e",
+          "title": "Error Count",
+          "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\"Errors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":1,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage) and tolowercase(functionname) matches \"{{entity}}\"\n| count as eventCount",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "EBBDAF08EC798F94",
+          "key": "panelpane-9b125784bf09f843",
+          "title": "Top Error Messages",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage) and tolowercase(functionname) matches \"{{entity}}\"\n| count as Frequency by errorMessage, functionname, version\n| top 30 errorMessage, functionname, version by Frequency desc, errorMessage asc, functionname asc, version asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "7841B1D27F7ACB3F",
+          "key": "panelpane-94e9b41a9d04284b",
+          "title": "Errors - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"circle\",\"lineThickness\":\"3\"},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Error Count\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{entity}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across All entities\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Errors Statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | avg by entity",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Errors Statistic=Sum account={{account}} region={{region}} entity=* Resource=* | avg ",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "31740696EA71A58D",
+          "key": "panelpane-e4b91e63a4412947",
+          "title": "Iterator Age - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"circle\",\"lineThickness\":\"3\"},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{entity}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across All Entities\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=IteratorAge Statistic=Maximum account={{account}} region={{region}} entity={{entity}} Resource=* | avg by entity",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=IteratorAge Statistic=Maximum account={{account}} region={{region}} entity=* | avg",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "921BEF8401BCBD63",
+          "key": "panelpane-655003898484f942",
+          "title": "Throttling - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"circle\",\"lineThickness\":\"3\"},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Invocation Throttled Count\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{entity}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across all entities\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Throttles Statistic=average account={{account}} region={{region}} entity={{entity}} Resource=* | avg by entity",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Throttles Statistic=average account={{account}} region={{region}} entity=* Resource=*  | avg ",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "A99292B9A5F643F3",
+          "key": "panelpane-fd692661bfea5a47",
+          "title": "Dead Letter Errors - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":\"3\"},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Error Count\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{entity}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across All entities\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=DeadLetterErrors Statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | avg by entity",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=DeadLetterErrors Statistic=Sum account={{account}} region={{region}} entity=* Resource=* | avg ",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "2C1AAFBA691AB4B8",
+          "key": "panelpane-df7ce2499c0fa842",
+          "title": "Error Breakdown",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage) and tolowercase(functionname) matches \"{{entity}}\"\n| count by version\n| sort by _count, version asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "9F1118A790758B40",
+          "key": "panelPANE-9F1118A790758B40",
+          "title": "Lambda Performance",
+          "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "ED7E848CA880B844",
+          "key": "panelPANE-ED7E848CA880B844",
+          "title": "Lambda Events",
+          "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "DEE76A78994C6B46",
+          "key": "panelPANE-DEE76A78994C6B46",
+          "title": "Invocation Throttles",
+          "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Sum\",\"label\":\"Throttled\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"rounding\":0,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#527b01\"},{\"from\":1,\"to\":5,\"color\":\"#b18209\"},{\"from\":5,\"to\":null,\"color\":\"#b63010\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false},\"valueFontSize\":24}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Throttles Statistic=sum account={{account}} region={{region}} entity={{entity}} | sum ",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "2CE18154866C3A4E",
+          "key": "panelPANE-2CE18154866C3A4E",
+          "title": "Errors",
+          "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Sum\",\"label\":\"Errors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"rounding\":0,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#527b01\"},{\"from\":1,\"to\":10,\"color\":\"#b18209\"},{\"from\":10,\"to\":null,\"color\":\"#b63010\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false},\"valueFontSize\":24,\"labelFontSize\":16}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "namespace={{namespace}} metric=Errors statistic=Sum account={{account}} region={{region}} entity={{entity}} | sum",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        }
+      ],
+      "variables": [
+        {
+          "id": "ED5A3FC13B950D2E",
+          "name": "account",
+          "displayName": null,
+          "defaultValue": "*",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "",
+            "key": "account"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "F485339CF28D9840",
+          "name": "region",
+          "displayName": null,
+          "defaultValue": "*",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}}",
+            "key": "region"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "FBEDBC426FFEBCEC",
+          "name": "namespace",
+          "displayName": null,
+          "defaultValue": "aws/lambda",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}}",
+            "key": "namespace"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "191C92EE5EF88A99",
+          "name": "entity",
+          "displayName": null,
+          "defaultValue": "*",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+            "key": "entity"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        }
+      ],
+      "coloringRules": []
+    },
+    {
+      "type": "DashboardV2SyncDefinition",
+      "name": "4. AWS Lambda - Performance Analysis I",
+      "description": "",
+      "title": "4. AWS Lambda - Performance Analysis I",
+      "rootPanel": null,
+      "theme": "Light",
+      "topologyLabelMap": {
+        "data": {
+          "namespace": [
+            "aws/lambda"
+          ],
+          "region": [
+            "*"
+          ],
+          "entity": [
+            "*"
+          ],
+          "account": [
+            "*"
+          ]
+        }
+      },
+      "refreshInterval": 0,
+      "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+          "type": "RelativeTimeRangeBoundary",
+          "relativeTime": "-1h"
+        },
+        "to": null
+      },
+      "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+          {
+            "key": "panelpane-219757da9d65f941",
+            "structure": "{\"height\":8,\"width\":9,\"x\":6,\"y\":1}"
+          },
+          {
+            "key": "panelpane-a6e5e649a3dd1b48",
+            "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":1}"
+          },
+          {
+            "key": "panelpane-6fce866fb553d845",
+            "structure": "{\"height\":4,\"width\":6,\"x\":0,\"y\":1}"
+          },
+          {
+            "key": "panelpane-cb75ba2e8296da45",
+            "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":9}"
+          },
+          {
+            "key": "panelpane-dffe2c33b7aa9a4e",
+            "structure": "{\"height\":4,\"width\":6,\"x\":0,\"y\":5}"
+          },
+          {
+            "key": "panelpane-fa25f26eb2ecab46",
+            "structure": "{\"height\":5,\"width\":12,\"x\":0,\"y\":14}"
+          },
+          {
+            "key": "panelpane-17077145b6c3c841",
+            "structure": "{\"height\":5,\"width\":12,\"x\":12,\"y\":14}"
+          },
+          {
+            "key": "panelpane-41411978beff494d",
+            "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":19}"
+          },
+          {
+            "key": "panelpane-419733b5bbfebb4a",
+            "structure": "{\"height\":6,\"width\":16,\"x\":8,\"y\":19}"
+          },
+          {
+            "key": "panelpane-c3040721b12de94a",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": "71C520EDD07F345C",
+          "key": "panelpane-219757da9d65f941",
+          "title": "Duration (ms) - Timeline",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 5m\n| sum(Duration) as Duration by functionname, _timeslice\n| sort by _timeslice\n| transpose row _timeslice column functionname",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "6AB07D1445FF20FC",
+          "key": "panelpane-a6e5e649a3dd1b48",
+          "title": "Max Memory Used (MB) - Timeline",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"MB\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 5m\n| sum(MaxMemoryUsed) as MaxMemoryUsedSum by functionname, _timeslice\n| sort by _timeslice\n| transpose row _timeslice column functionname",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "25426DA9DB928128",
+          "key": "panelpane-6fce866fb553d845",
+          "title": "Duration (ms)",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| sum(Duration) as TotalDuration by functionname\n| sort by TotalDuration, functionname asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "02D5FE04D7886D2D",
+          "key": "panelpane-cb75ba2e8296da45",
+          "title": "Recent Request Details",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| count as Frequency by functionname, RequestId, Duration, BilledDuration, MemorySize, MaxMemoryUsed, _messagetime \n| sort by _messagetime \n| formatDate(_messagetime, \"yyyy/MM/dd HH:mm:ss Z\") as time\n| fields -Frequency\n| fields -_messagetime\n| limit 20\n",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "827CE47E03A328BB",
+          "key": "panelpane-dffe2c33b7aa9a4e",
+          "title": "Max Memory Used (MB)",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| sum(MaxMemoryUsed) as MemoryUsed by functionname\n| sort by MemoryUsed, functionname asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "4EAF7E6BFB2534AA",
+          "key": "panelpane-fa25f26eb2ecab46",
+          "title": "Average Duration vs Average Billed Unused Duration",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| avg(BilledDuration) as BilledDurationAvg, avg(Duration) as DurationAvg by functionname\n| BilledDurationAvg-DurationAvg as BilledUnusedDuration\n| BilledUnusedDuration/BilledDurationAvg as wastageRatio\n| top 5 functionname by wastageRatio, BilledUnusedDuration, DurationAvg\n| fields -wastageRatio",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": {
+            "type": "BeginBoundedTimeRange",
+            "from": {
+              "type": "RelativeTimeRangeBoundary",
+              "relativeTime": "-1h"
+            },
+            "to": null
+          },
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "5F13872F52AFEDE2",
+          "key": "panelpane-17077145b6c3c841",
+          "title": "Avg Unused Allocated Memory vs Avg Used Memory",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| avg(MemorySize) as MemorySizeAvg, avg(MaxMemoryUsed) as MaxMemoryUsedAvg by functionname\n| (MemorySizeAvg-MaxMemoryUsedAvg) as AvgUnusedAllocatedMemory\n| AvgUnusedAllocatedMemory/MemorySizeAvg as wastageRatio\n| top 5 functionname by wastageRatio, AvgUnusedAllocatedMemory, MaxMemoryUsedAvg\n| fields -wastageRatio",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "37A8187CC45D3C70",
+          "key": "panelpane-41411978beff494d",
+          "title": "Compute Usage (GB-s)",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by functionname\n| sort by ComputeUsage, functionname",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "074FE51DD14258B6",
+          "key": "panelpane-419733b5bbfebb4a",
+          "title": "Compute Usage (GB-s) - Timeline",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"ComputeUsage\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 5m\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by functionname, _timeslice\n| transpose row _timeslice column functionname",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "C3040721B12DE94A",
+          "key": "panelpane-c3040721b12de94a",
+          "title": "Lambda Events",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":\"20\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"left\",\"format\":\"text\",\"text\":\"\",\"showTitle\":true}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        }
+      ],
+      "variables": [
+        {
+          "id": "1FD37BEBD026B0A1",
+          "name": "account",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "",
+            "key": "account"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "3AFEF3AA54A44C21",
+          "name": "region",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}}",
+            "key": "region"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "0A6830E54FEF6B97",
+          "name": "namespace",
+          "displayName": null,
+          "defaultValue": "aws/lambda",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}}",
+            "key": "namespace"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "E44241BBDFBB2831",
+          "name": "entity",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+            "key": "entity"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        }
+      ],
+      "coloringRules": []
+    },
+    {
+      "type": "DashboardV2SyncDefinition",
+      "name": "5. AWS Lambda - Performance Analysis II",
+      "description": "",
+      "title": "5. AWS Lambda - Performance Analysis II",
+      "rootPanel": null,
+      "theme": "Light",
+      "topologyLabelMap": {
+        "data": {
+          "namespace": [
+            "aws/lambda"
+          ],
+          "region": [
+            "*"
+          ],
+          "entity": [
+            "*"
+          ],
+          "account": [
+            "*"
+          ]
+        }
+      },
+      "refreshInterval": 0,
+      "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+          "type": "RelativeTimeRangeBoundary",
+          "relativeTime": "-6h"
+        },
+        "to": null
+      },
+      "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+          {
+            "key": "panelpane-8a8e4a2cab0beb4c",
+            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":1}"
+          },
+          {
+            "key": "panelpane-4fda36319f35b841",
+            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":1}"
+          },
+          {
+            "key": "panelpane-4313def9ba295844",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+          },
+          {
+            "key": "panelpane-b147fe9a88d8fb4d",
+            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":7}"
+          },
+          {
+            "key": "panelpane-30e8f3b78c1f2b41",
+            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":7}"
+          },
+          {
+            "key": "panelpane-9906166682e0bb4a",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":13}"
+          },
+          {
+            "key": "panelpane-32b7aab792cb294a",
+            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":14}"
+          },
+          {
+            "key": "panelpane-65a4a31cb839aa4e",
+            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":14}"
+          },
+          {
+            "key": "panelpane-9e36cd5daf47184a",
+            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":20}"
+          },
+          {
+            "key": "panelpane-767aaa0f99e1584d",
+            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":20}"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": "08C98015C8EFA98D",
+          "key": "panelpane-8a8e4a2cab0beb4c",
+          "title": "Average Duration",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":\"3\"},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{entity}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Across All entities\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=Duration Statistic=Average account={{account}} region={{region}} entity={{entity}} Resource=* | avg by entity",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=Duration Statistic=Average account={{account}} region={{region}} entity=* | avg",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "4FDA36319F35B841",
+          "key": "panelpane-4fda36319f35b841",
+          "title": "Note:",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"markdown\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": "Concurrent Executions: This shows you the concurrent executions at an account level, and for any function with a custom concurrency limit. Both graphs will be same if none of the functions are configured with concurrency limit. Not applicable for versions or aliases.\n\nUnreservedConcurrentExecutions: This shows you the total concurrent executions for functions assigned to the default unreserved concurrency pool. Not applicable for functions, versions, or aliases.\n\nInvocations vs Errors vs Throttle: It's important to distinguish between an invocation request and an actual invocation. It is possible for the error rate to exceed the number of billed Lambda function invocations. Lambda reports an invocation metric only if the Lambda function code is executed. If the invocation request yields a throttling or other initialization error that prevents the Lambda function code from being invoked, Lambda will report an error, but it does not log an invocation metric."
+        },
+        {
+          "id": "4313DEF9BA295844",
+          "key": "panelpane-4313def9ba295844",
+          "title": "Performance",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":\"20\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"left\",\"format\":\"text\",\"text\":\"\",\"showTitle\":true}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "B147FE9A88D8FB4D",
+          "key": "panelpane-b147fe9a88d8fb4d",
+          "title": "Unreserved Concurrent Executions (Today,  Yesterday, Last Week)",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":\"3\"},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Unreserved Concurrent Executions\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today, {{region}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday, {{region}}\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week, {{region}}\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=UnreservedConcurrentExecutions Statistic=Average region={{region}} | avg by region",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=UnreservedConcurrentExecutions Statistic=Average region={{region}} | avg by region | timeshift -1d",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=UnreservedConcurrentExecutions Statistic=Average region={{region}} | avg by region | timeshift -7d",
+              "queryType": "Metrics",
+              "queryKey": "C",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "30E8F3B78C1F2B41",
+          "key": "panelpane-30e8f3b78c1f2b41",
+          "title": "Concurrent Executions",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"circle\",\"lineThickness\":\"3\"},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Concurrent Executions\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{entity}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Across All Entities\"}}]}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "Namespace={{namespace}} metric=ConcurrentExecutions Statistic=Average account={{account}} region={{region}} entity={{entity}} Resource=* | sum by entity",
+              "queryType": "Metrics",
+              "queryKey": "A",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            },
+            {
+              "queryString": "Namespace={{namespace}} metric=ConcurrentExecutions Statistic=Average account={{account}} region={{region}} entity=* |  sum",
+              "queryType": "Metrics",
+              "queryKey": "B",
+              "metricsQueryMode": "Advanced",
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "9906166682E0BB4A",
+          "key": "panelpane-9906166682e0bb4a",
+          "title": "Lambda Events - Performance Trends",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":\"20\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"left\",\"format\":\"text\",\"text\":\"\",\"showTitle\":true}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "32B7AAB792CB294A",
+          "key": "panelpane-32b7aab792cb294a",
+          "title": "Unused Memory - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"MB\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 1m\n| sum(MemorySize) as MemorySize, sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| MemorySize - MaxMemoryUsed as UnusedMemory\n| predict UnusedMemory by 1m model=ar, forecast=15",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "65A4A31CB839AA4E",
+          "key": "panelpane-65a4a31cb839aa4e",
+          "title": "Memory Used - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"MB\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 1m\n| sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| predict MaxMemoryUsed by 1m model=ar, forecast=15",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "9E36CD5DAF47184A",
+          "key": "panelpane-9e36cd5daf47184a",
+          "title": "Compute Usage (GB-s) - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 1m\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by _timeslice\n| predict ComputeUsage by 1m model=ar, forecast=15",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "767AAA0F99E1584D",
+          "key": "panelpane-767aaa0f99e1584d",
+          "title": "Billed Duration - Trend",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 1m\n| sum(BilledDuration) as BilledDuration by _timeslice\n| predict BilledDuration by 1m model=ar, forecast=15",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        }
+      ],
+      "variables": [
+        {
+          "id": "61A093A3D455A384",
+          "name": "account",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "",
+            "key": "account"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "2FB68BAE368ECD8E",
+          "name": "region",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}}",
+            "key": "region"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "C7F0DA6A3F10CBA0",
+          "name": "namespace",
+          "displayName": null,
+          "defaultValue": "aws/lambda",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}}",
+            "key": "namespace"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "E6E718248AC64963",
+          "name": "entity",
+          "displayName": null,
+          "defaultValue": null,
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+            "key": "entity"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        }
+      ],
+      "coloringRules": []
+    },
+    {
+      "type": "DashboardV2SyncDefinition",
+      "name": "6. AWS Lambda - Threat Intel",
+      "description": "See the details of IP threats including the count, location, and highly malicious IP threats.",
+      "title": "6. AWS Lambda - Threat Intel",
+      "rootPanel": null,
+      "theme": "Light",
+      "topologyLabelMap": {
+        "data": {
+          "namespace": [
+            "aws/applicationelb"
+          ],
+          "region": [
+            "*"
+          ],
+          "entity": [
+            "*"
+          ],
+          "account": [
+            "*"
+          ]
+        }
+      },
+      "refreshInterval": 0,
+      "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+          "type": "RelativeTimeRangeBoundary",
+          "relativeTime": "-1d"
+        },
+        "to": null
+      },
+      "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+          {
+            "key": "panelpane-3b762241ac0aba4d",
+            "structure": "{\"height\":6,\"width\":5,\"x\":8,\"y\":0}"
+          },
+          {
+            "key": "panelpane-c08479a8a0390b4d",
+            "structure": "{\"height\":6,\"width\":16,\"x\":8,\"y\":6}"
+          },
+          {
+            "key": "panelpane-b8ffc92b8b722a41",
+            "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":12}"
+          },
+          {
+            "key": "panelpane-c605d948852ffb48",
+            "structure": "{\"height\":6,\"width\":11,\"x\":13,\"y\":0}"
+          },
+          {
+            "key": "panelPANE-642147F890E0F848",
+            "structure": "{\"height\":12,\"width\":8,\"x\":0,\"y\":0}"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": "DF7336B86DD7252C",
+          "key": "panelpane-3b762241ac0aba4d",
+          "title": "All IP Threat Count",
+          "visualSettings": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Sum\",\"label\":\"Threats\",\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"valueFontSize\":20,\"labelFontSize\":8,\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as ip_count by src_ip\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum(ip_count) as threat_count",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "52230700D1D8BD54",
+          "key": "panelpane-c08479a8a0390b4d",
+          "title": "Highly Malicious IP Threats Table",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count by src_ip,  functionName, caller, user_agent\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where type=\"ip_address\" and malicious_confidence = \"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sort by _count\n| fields src_ip,  functionName, caller, user_agent, type, actor, malicious_confidence",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "48FF706C1BA6744D",
+          "key": "panelpane-b8ffc92b8b722a41",
+          "title": "All IP Threats Table",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as ip_count by src_ip\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as ThreatCount by src_ip, malicious_confidence, Actor, label_name\n| sort by malicious_confidence",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "EC37C28A55AF1A46",
+          "key": "panelpane-c605d948852ffb48",
+          "title": "Malicious Confidence",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count by src_ip,  functionName, caller, user_agent\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count as Threats by malicious_confidence\n| sort by Threats",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        },
+        {
+          "id": "582B8DB83B2D6190",
+          "key": "panelPANE-642147F890E0F848",
+          "title": "Threat Locations",
+          "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as ip_count by src_ip\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count by src_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
+        }
+      ],
+      "variables": [
+        {
+          "id": "FA2B48BEA746DA3E",
+          "name": "account",
+          "displayName": null,
+          "defaultValue": "*",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "",
+            "key": "account"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "AB39510AA8CB0EA2",
+          "name": "region",
+          "displayName": null,
+          "defaultValue": "*",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}}",
+            "key": "region"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "6BBB4E5DCDAE85CF",
+          "name": "namespace",
+          "displayName": null,
+          "defaultValue": "aws/lambda",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account=\"{{account}}\" region=\"{{region}}\"",
+            "key": "namespace"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        },
+        {
+          "id": "0AB32E42FBFFD136",
+          "name": "entity",
+          "displayName": null,
+          "defaultValue": "*",
+          "sourceDefinition": {
+            "variableSourceType": "MetadataVariableSourceDefinition",
+            "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+            "key": "entity"
+          },
+          "allowMultiSelect": false,
+          "includeAllOption": true,
+          "hideFromUI": false
+        }
+      ],
+      "coloringRules": []
+    }
+  ]
+}
