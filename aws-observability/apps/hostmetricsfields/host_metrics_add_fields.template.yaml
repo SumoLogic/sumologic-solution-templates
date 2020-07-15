@@ -13,7 +13,7 @@ Metadata:
           - Section1dRemoveSumoResourcesOnDeleteStack
 
       - Label:
-          default: "AWS Account Alias"
+          default: "AWS Account Alias (Required)"
         Parameters:
           - Section2aAccountAlias
           - Section2bUpdateVersion
@@ -26,12 +26,12 @@ Metadata:
       Section1cSumoAccessKey:
         default: "Sumo Logic Access Key"
       Section1dRemoveSumoResourcesOnDeleteStack:
-        default: "Delete Sumo Logic Resources when stack is deleted"
+        default: "Delete Fields when stack is deleted"
 
       Section2aAccountAlias:
-        default: "Alias for AWS Account Identification"
+        default: "Alias for your AWS Account"
       Section2bUpdateVersion:
-        default: "Increment if Update is required"
+        default: "Force Update the Stack"
 
 Parameters:
   Section1aSumoDeployment:
@@ -46,15 +46,15 @@ Parameters:
       - us1
       - in
       - fed
-    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   Section1bSumoAccessID:
     Type: String
-    Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
+    Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Access ID can not be empty."
   Section1cSumoAccessKey:
     Type: String
-    Description: "Sumo Logic Access Key. Used for Sumo Logic API calls."
+    Description: "Sumo Logic Access Key."
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Access Key can not be empty."
     NoEcho: true
@@ -63,17 +63,17 @@ Parameters:
       - true
       - false
     Default: true
-    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
-                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Description: "True - Deletes the Account and Namespace fields from the Host Metric Sources when the stack is deleted.
+                  False - Keeps the fields in Host Metric Sources when the stack is deleted."
     Type: String
 
   Section2aAccountAlias:
     Type: String
-    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
+    Description: "Enter a name for the AWS environment from which you are collecting data. This name will appear in the Sumo Logic Explorer View, metrics and logs. Do not include special characters in the alias."
     AllowedPattern: "[a-zA-Z0-9]+"
   Section2bUpdateVersion:
     Type: String
-    Description: "Increment the value to update the metrics sources in case new Host Metrics sources are created in Sumo Logic."
+    Description: "Increment the value in case you want to force update the stack."
     Default: "1"
 
 Mappings:
