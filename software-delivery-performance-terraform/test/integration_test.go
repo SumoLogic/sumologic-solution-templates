@@ -85,7 +85,7 @@ func getSumologicURL() string {
 func validateSumoLogicResources(t *testing.T, workingDir string) {
 
 	// Get folder where the Apps are installed
-	folderName := getProperty("app_installation_folder")
+	folderName := strings.Replace(getProperty("app_installation_folder"), " ", "%20", -1)
 
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
 	terraformOptions := test_structure.LoadTerraformOptions(t, workingDir)
@@ -127,6 +127,14 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicBitbucketAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Opsgenie App is installed
 	validateSumoLogicOpsgenieAppInstallation(t, terraformOptions, folderName)
+	// Validate if the Pagerduty App is installed
+	validateSumoLogicPagerdutyAppInstallation(t, terraformOptions, folderName)
+	// Validate if the Github App is installed
+	validateSumoLogicGithubAppInstallation(t, terraformOptions, folderName)
+	// Validate if the Github Field is added successfully
+	validateSumoLogicGithubField(t, terraformOptions, folderName)
+	// Validate if the Bitbucket Field is added successfully
+	validateSumoLogicBitbucketField(t, terraformOptions, folderName)
 }
 
 func validateSumoLogicCollector(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
@@ -299,6 +307,46 @@ func validateSumoLogicOpsgenieAppInstallation(t *testing.T, terraformOptions *te
 		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Opsgenie", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicPagerdutyAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+
+	if getProperty("install_pagerduty") == "true" {
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Pagerduty%%20V2", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGithubAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+
+	if getProperty("install_github") == "true" {
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Github", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGithubField(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+
+	// Run `terraform output` to get the value of an output variable
+	fieldID := terraform.Output(t, terraformOptions, "sumo_github_field_id")
+	if fieldID != "[]" && getProperty("install_github") == "true" {
+		fieldID = strings.Split(fieldID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/fields/%s", sumologicURL, fieldID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicBitbucketField(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+
+	// Run `terraform output` to get the value of an output variable
+	fieldID := terraform.Output(t, terraformOptions, "sumo_bitbucket_field_id")
+	if fieldID != "[]" && getProperty("install_bitbucket_cloud") == "true" {
+		fieldID = strings.Split(fieldID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/fields/%s", sumologicURL, fieldID), nil, headers, customValidation, nil)
 	}
 }
 

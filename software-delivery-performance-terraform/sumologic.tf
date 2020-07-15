@@ -176,3 +176,42 @@ resource "null_resource" "install_github_app" {
     EOT
   }
 }
+
+# Create/Delete Field required by BitBucket App in Sumo Logic by calling REST API
+provider "restapi" {
+  alias = "sumo"
+  uri   = var.sumo_api_endpoint
+  # debug                = true
+  write_returns_object = true
+  username             = var.sumo_access_id
+  password             = var.sumo_access_key
+  headers              = { Content-Type = "application/json" }
+}
+
+# Create/Delete Field required by BitBucket App in Sumo Logic by calling REST API
+resource "restapi_object" "bitbucket_field" {
+  provider     = restapi.sumo
+  count        = "${var.install_bitbucket_cloud}" ? 1 : 0
+  path         = "/v1/fields"
+  destroy_path = "/v1/fields/{id}"
+  id_attribute = "fieldId"
+  data         = <<JSON
+  {
+      "fieldName": "X-Event-Key"
+  }
+  JSON
+}
+
+# Create/Delete Field required by Github App in Sumo Logic by calling REST API
+resource "restapi_object" "github_field" {
+  provider     = restapi.sumo
+  count        = "${var.install_github}" ? 1 : 0
+  path         = "/v1/fields"
+  destroy_path = "/v1/fields/{id}"
+  id_attribute = "fieldId"
+  data         = <<JSON
+  {
+      "fieldName": "x-github-event"
+  }
+  JSON
+}
