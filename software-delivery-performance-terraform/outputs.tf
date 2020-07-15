@@ -73,3 +73,11 @@ output "github_repo_webhook_id" {
 output "github_org_webhook_id" {
   value = github_organization_webhook.github_sumologic_org_webhook.*.id
 }
+
+output "sumo_github_field_id" {
+  value = restapi_object.github_field.*.id
+}
+
+output "sumo_bitbucket_field_id" {
+  value = restapi_object.github_field.*.id
+}
