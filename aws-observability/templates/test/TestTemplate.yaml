@@ -1,8 +1,8 @@
 ---
 Global:
   TemplatePath: "../sumologic_observability.master.template.yaml"
-  TestProjectName: BasicTestProject
-  ParallelTestsRun: 8
+  TestProjectName: MasterTemplate
+  ParallelTestsRun: 1
   GlobalParameters:
     Section1aSumoLogicDeployment: ''
     Section1bSumoLogicAccessID: ''
@@ -200,3 +200,955 @@ Tests:
             Section5cCreateCloudTrailLogSource: 'No'
             Section5eCloudTrailLogsSourceName: "*cloudtrail-logs*"
             Section6aCreateCloudWatchLogSource: 'No'
+  - TestName: nothingtoinstall
+    Regions:
+      - us-east-2
+    Skip: false
+    Parameters:
+      Values:
+        Section2aAccountAlias: 'TestEnv'
+        Section3aInstallObservabilityApps: 'No'
+        Section4aCreateMetricsSourcesOptions: 'None'
+        Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
+        Section5bALBCreateLogSource: 'No'
+        Section6aCreateCloudTrailLogSource: 'No'
+        Section7aLambdaCreateCloudWatchLogsSource: 'No'
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - CreateCommonResources
+            - sumoEC2MetricsAppStack
+            - ALBWaitHandle
+            - ALBWaitCondition
+            - sumoAlbMetricsAppStack
+            - DynamoDBWaitHandle
+            - DynamoDBWaitCondition
+            - sumoDynamoDBMetricsAppStack
+            - RDSWaitHandle
+            - RDSWaitCondition
+            - sumoRdsMetricsAppStack
+            - ApiWaitHandle
+            - ApiWaitCondition
+            - sumoApiGatewayMetricsAppStack
+            - AnamolyWaitHandle
+            - AnamolyWaitCondition
+            - AnamolyAppStack
+            - LambdaWaitHandle
+            - LambdaWaitCondition
+            - sumoLambdaMetricsAppStack
+            - AddAccountField
+            - AddEntityField
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+            - CreateCommonResources.InventorySourceWaitCondition
+            - sumoEC2MetricsAppStack.EC2MetricRule
+            - sumoAlbMetricsAppStack.WaitHandle
+            - sumoAlbMetricsAppStack.ALBMetricRule
+            - sumoAlbMetricsAppStack.ALBUpdateSourceWaitCondition
+            - sumoDynamoDBMetricsAppStack.WaitHandle
+            - sumoDynamoDBMetricsAppStack.MetricRule
+            - sumoDynamoDBMetricsAppStack.UpdateSourceWaitCondition
+            - sumoRdsMetricsAppStack.WaitHandle
+            - sumoRdsMetricsAppStack.ClusterMetricRule
+            - sumoRdsMetricsAppStack.InstanceMetricRule
+            - sumoRdsMetricsAppStack.UpdateSourceWaitCondition
+            - sumoApiGatewayMetricsAppStack.WaitHandle
+            - sumoApiGatewayMetricsAppStack.MetricRule
+            - sumoApiGatewayMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.WaitHandle
+            - sumoLambdaMetricsAppStack.LambdaMetricRule
+            - sumoLambdaMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.FERWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CollectorName: "aws-observability-collector"
+            CreateMetaDataSource: 'No'
+            CreateCloudWatchMetricsSource:  'No'
+            CloudWatchMetricsSourceName: 'TestEnv-cloudwatch-metrics-us-east-2'
+            CreateALBLogSource: 'No'
+            CreateALBS3Bucket: 'No'
+            ALBS3BucketPathExpression: ''
+            ALBLogsSourceName: "TestEnv-alb-logs-us-east-2"
+            CreateCloudTrailLogSource: 'No'
+            CreateCloudTrailBucket: 'No'
+            CloudTrailBucketPathExpression: ''
+            CloudTrailLogsSourceName: "TestEnv-cloudtrail-logs-us-east-2"
+            CreateCloudWatchLogSource: 'No'
+            CloudWatchLogsSourceName: "TestEnv-cloudwatch-logs-us-east-2"
+            CreateAwsInventorySource: 'No'
+            AwsInventorySourceName: "TestEnv-inventory-us-east-2"
+          sumoEC2MetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateMetaDataSource: 'No'
+          sumoAlbMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateS3Bucket: 'No'
+            Section5cCreateALBLogSource: 'No'
+          sumoDynamoDBMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoRdsMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoApiGatewayMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          AnamolyAppStack:
+            Section2aInstallApp: 'No'
+            Section3aCreateAwsInventorySource: 'No'
+          sumoLambdaMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+            Section5eCloudTrailLogsSourceName: ""
+            Section6aCreateCloudWatchLogSource: 'No'
+  - TestName: nocloudtrailandinventory
+    Regions:
+      - us-west-2
+    Skip: false
+    Parameters:
+      Values:
+        Section2aAccountAlias: 'TestEnv'
+        Section3aInstallObservabilityApps: 'Yes'
+        Section4aCreateMetricsSourcesOptions: 'CloudWatchMetrics'
+        Section5aAutoEnableS3LogsALBResourcesOptions: 'New'
+        Section5bALBCreateLogSource: 'Yes'
+        Section6aCreateCloudTrailLogSource: 'No'
+        Section7aLambdaCreateCloudWatchLogsSource: 'Yes'
+        Section7cAutoSubscribeLogGroupsLambdaOptions: 'New'
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - CreateCommonResources
+            - sumoOverview
+            - AutoEnableOptions
+            - sumoEC2MetricsAppStack
+            - ALBWaitHandle
+            - ALBWaitCondition
+            - sumoAlbMetricsAppStack
+            - DynamoDBWaitHandle
+            - DynamoDBWaitCondition
+            - sumoDynamoDBMetricsAppStack
+            - RDSWaitHandle
+            - RDSWaitCondition
+            - sumoRdsMetricsAppStack
+            - ApiWaitHandle
+            - ApiWaitCondition
+            - sumoApiGatewayMetricsAppStack
+            - AnamolyWaitHandle
+            - AnamolyWaitCondition
+            - AnamolyAppStack
+            - LambdaWaitHandle
+            - LambdaWaitCondition
+            - sumoLambdaMetricsAppStack
+            - AddAccountField
+            - AddEntityField
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.CommonBucketSNSTopic
+            - CreateCommonResources.CommonS3Bucket
+            - CreateCommonResources.CommonBucketPolicy
+            - CreateCommonResources.CommonSNSpolicy
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicSourceRole
+            - CreateCommonResources.SumoLogicHostedCollector
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSource
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.ALBSource
+            - CreateCommonResources.ALBSNSSubscription
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+            - CreateCommonResources.CloudWatchEventFunction
+            - CreateCommonResources.CloudWatchHTTPSource
+            - CreateCommonResources.InventorySourceWaitCondition
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWDeadLetterQueue
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWEmailSNSTopic
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWEventsInvokeLambdaPermission
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaExecutionRole
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaPermission
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLogGroup
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLogSubsriptionFilter
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambda
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQLambda
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWSpilloverAlarm
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources
+            - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.AutoEnableAlbLogEventsInvokePermission
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.AutoEnableAlbLogEventsRuleTrigger
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableNewAWSResourcesLambda
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.SumoLambdaRole
+            - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoCWLambdaInvokePermission
+            - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
+            - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorLambdaTrigger
+            - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorLambdaTriggerPermission
+            - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorRole
+            - sumoEC2MetricsAppStack.EC2MetricRule
+            - sumoEC2MetricsAppStack.sumoApp
+            - sumoAlbMetricsAppStack.WaitHandle
+            - sumoAlbMetricsAppStack.ALBMetricRule
+            - sumoAlbMetricsAppStack.sumoApp
+            - sumoAlbMetricsAppStack.ALBUpdateSourceWaitCondition
+            - sumoDynamoDBMetricsAppStack.WaitHandle
+            - sumoDynamoDBMetricsAppStack.MetricRule
+            - sumoDynamoDBMetricsAppStack.sumoApp
+            - sumoDynamoDBMetricsAppStack.UpdateSourceWaitCondition
+            - sumoRdsMetricsAppStack.WaitHandle
+            - sumoRdsMetricsAppStack.ClusterMetricRule
+            - sumoRdsMetricsAppStack.InstanceMetricRule
+            - sumoRdsMetricsAppStack.sumoApp
+            - sumoRdsMetricsAppStack.UpdateSourceWaitCondition
+            - sumoApiGatewayMetricsAppStack.WaitHandle
+            - sumoApiGatewayMetricsAppStack.MetricRule
+            - sumoApiGatewayMetricsAppStack.sumoApp
+            - sumoApiGatewayMetricsAppStack.UpdateSourceWaitCondition
+            - AnamolyAppStack.sumoOverview
+            - sumoLambdaMetricsAppStack.WaitHandle
+            - sumoLambdaMetricsAppStack.LambdaMetricRule
+            - sumoLambdaMetricsAppStack.sumoApp
+            - sumoLambdaMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.FERWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.BucketName
+            - CreateCommonResources.CloudWatchLambdaARN
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambdaArn
+            - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableNewAWSResourcesLambda
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CollectorName: "aws-observability-collector"
+            CreateMetaDataSource: 'No'
+            CreateCloudWatchMetricsSource:  'Yes'
+            CloudWatchMetricsSourceName: 'TestEnv-cloudwatch-metrics-us-west-2'
+            CreateALBLogSource: 'Yes'
+            CreateALBS3Bucket: 'Yes'
+            ALBS3BucketPathExpression: '/elasticloadbalancing/us-west-2/*'
+            ALBLogsSourceName: "TestEnv-alb-logs-us-west-2"
+            CreateCloudTrailLogSource: 'No'
+            CreateCloudTrailBucket: 'No'
+            CloudTrailBucketPathExpression: ''
+            CloudTrailLogsSourceName: "TestEnv-cloudtrail-logs-us-west-2"
+            CreateCloudWatchLogSource: 'Yes'
+            CloudWatchLogsSourceName: "TestEnv-cloudwatch-logs-us-west-2"
+            CreateAwsInventorySource: 'No'
+            AwsInventorySourceName: "TestEnv-inventory-us-west-2"
+          AutoEnableOptions:
+            ALBAutoEnableS3Logs: 'Yes'
+            ALBS3LogsBucketName: 'aws-observability-logs'
+            AutoSubscribeLogGroups: 'Yes'
+          AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
+            BucketName: 'aws-observability-logs'
+            AutoEnableResourceOptions: 'New'
+          AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources:
+            UseExistingLogs: 'false'
+          sumoEC2MetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'Yes'
+            Section4aCreateMetaDataSource: 'No'
+          sumoAlbMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'Yes'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateS3Bucket: 'No'
+            Section5cCreateALBLogSource: 'No'
+          sumoDynamoDBMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'Yes'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoRdsMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'Yes'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoApiGatewayMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'Yes'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          AnamolyAppStack:
+            Section2aInstallApp: 'Yes'
+            Section3aCreateAwsInventorySource: 'No'
+          sumoLambdaMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'Yes'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+            Section5eCloudTrailLogsSourceName: ""
+            Section6aCreateCloudWatchLogSource: 'No'
+  - TestName: onlycloudtrailinventorysource
+    Regions:
+      - us-west-1
+    Skip: false
+    Parameters:
+      Values:
+        Section2aAccountAlias: 'TestEnv'
+        Section3aInstallObservabilityApps: 'No'
+        Section4aCreateMetricsSourcesOptions: 'InventorySource'
+        Section5aAutoEnableS3LogsALBResourcesOptions: 'New'
+        Section5bALBCreateLogSource: 'No'
+        Section6aCreateCloudTrailLogSource: 'Yes'
+        Section7aLambdaCreateCloudWatchLogsSource: 'Yes'
+        Section7cAutoSubscribeLogGroupsLambdaOptions: 'Existing'
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - CreateCommonResources
+            - sumoEC2MetricsAppStack
+            - ALBWaitHandle
+            - ALBWaitCondition
+            - sumoAlbMetricsAppStack
+            - DynamoDBWaitHandle
+            - DynamoDBWaitCondition
+            - sumoDynamoDBMetricsAppStack
+            - RDSWaitHandle
+            - RDSWaitCondition
+            - sumoRdsMetricsAppStack
+            - ApiWaitHandle
+            - ApiWaitCondition
+            - sumoApiGatewayMetricsAppStack
+            - AnamolyWaitHandle
+            - AnamolyWaitCondition
+            - AnamolyAppStack
+            - LambdaWaitHandle
+            - LambdaWaitCondition
+            - sumoLambdaMetricsAppStack
+            - AddAccountField
+            - AddEntityField
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.CommonBucketSNSTopic
+            - CreateCommonResources.CommonS3Bucket
+            - CreateCommonResources.CommonBucketPolicy
+            - CreateCommonResources.CommonSNSpolicy
+            - CreateCommonResources.CommonCloudTrail
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicSourceRole
+            - CreateCommonResources.SumoLogicHostedCollector
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudTrailSource
+            - CreateCommonResources.CloudTrailSNSSubscription
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+            - CreateCommonResources.CloudWatchEventFunction
+            - CreateCommonResources.CloudWatchHTTPSource
+            - CreateCommonResources.InventorySourceWaitCondition
+            - CreateCommonResources.InventoryRole
+            - CreateCommonResources.InventorySource
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWDeadLetterQueue
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWEmailSNSTopic
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWEventsInvokeLambdaPermission
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaExecutionRole
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaPermission
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLogGroup
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLogSubsriptionFilter
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambda
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQLambda
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWSpilloverAlarm
+            - sumoEC2MetricsAppStack.EC2MetricRule
+            - sumoAlbMetricsAppStack.WaitHandle
+            - sumoAlbMetricsAppStack.ALBMetricRule
+            - sumoAlbMetricsAppStack.ALBUpdateSourceWaitCondition
+            - sumoDynamoDBMetricsAppStack.WaitHandle
+            - sumoDynamoDBMetricsAppStack.MetricRule
+            - sumoDynamoDBMetricsAppStack.UpdateSourceWaitCondition
+            - sumoRdsMetricsAppStack.WaitHandle
+            - sumoRdsMetricsAppStack.ClusterMetricRule
+            - sumoRdsMetricsAppStack.InstanceMetricRule
+            - sumoRdsMetricsAppStack.UpdateSourceWaitCondition
+            - sumoApiGatewayMetricsAppStack.WaitHandle
+            - sumoApiGatewayMetricsAppStack.MetricRule
+            - sumoApiGatewayMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.WaitHandle
+            - sumoLambdaMetricsAppStack.LambdaMetricRule
+            - sumoLambdaMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.FERWaitCondition
+            - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.BucketName
+            - CreateCommonResources.CloudWatchLambdaARN
+            - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambdaArn
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CollectorName: "aws-observability-collector"
+            CreateMetaDataSource: 'No'
+            CreateCloudWatchMetricsSource:  'No'
+            CloudWatchMetricsSourceName: 'TestEnv-cloudwatch-metrics-us-west-1'
+            CreateALBLogSource: 'No'
+            CreateALBS3Bucket: 'No'
+            ALBS3BucketPathExpression: ''
+            ALBLogsSourceName: "TestEnv-alb-logs-us-west-1"
+            CreateCloudTrailLogSource: 'Yes'
+            CreateCloudTrailBucket: 'Yes'
+            CloudTrailBucketPathExpression: '/CloudTrail/us-west-1/*'
+            CloudTrailLogsSourceName: "TestEnv-cloudtrail-logs-us-west-1"
+            CreateCloudWatchLogSource: 'Yes'
+            CloudWatchLogsSourceName: "TestEnv-cloudwatch-logs-us-west-1"
+            CreateAwsInventorySource: 'Yes'
+            AwsInventorySourceName: "TestEnv-inventory-us-west-1"
+          sumoEC2MetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateMetaDataSource: 'No'
+          sumoAlbMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateS3Bucket: 'No'
+            Section5cCreateALBLogSource: 'No'
+          sumoDynamoDBMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoRdsMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoApiGatewayMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          AnamolyAppStack:
+            Section2aInstallApp: 'No'
+            Section3aCreateAwsInventorySource: 'No'
+          sumoLambdaMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+            Section5eCloudTrailLogsSourceName: "*cloudtrail-logs*"
+            Section6aCreateCloudWatchLogSource: 'No'
+  - TestName: existingresourcetestcase1
+    Regions:
+      - ap-south-1
+    Skip: false
+    Parameters:
+      Values:
+        Section2aAccountAlias: 'TestEnv'
+        Section3aInstallObservabilityApps: 'No'
+        Section4aCreateMetricsSourcesOptions: 'None'
+        Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
+        Section5aAutoEnableS3LogsALBResourcesOptions: 'Existing'
+        Section5bALBCreateLogSource: 'Yes'
+        Section5dALBS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+        Section5eALBS3BucketPathExpression: '*abc*'
+        Section6aCreateCloudTrailLogSource: 'Yes'
+        Section7aLambdaCreateCloudWatchLogsSource: 'No'
+        Section7bLambdaCloudWatchLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779514196'
+        Section7cAutoSubscribeLogGroupsLambdaOptions: 'Existing'
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - CreateCommonResources
+            - AutoEnableOptions
+            - sumoEC2MetricsAppStack
+            - ALBWaitHandle
+            - ALBWaitCondition
+            - sumoAlbMetricsAppStack
+            - DynamoDBWaitHandle
+            - DynamoDBWaitCondition
+            - sumoDynamoDBMetricsAppStack
+            - RDSWaitHandle
+            - RDSWaitCondition
+            - sumoRdsMetricsAppStack
+            - ApiWaitHandle
+            - ApiWaitCondition
+            - sumoApiGatewayMetricsAppStack
+            - AnamolyWaitHandle
+            - AnamolyWaitCondition
+            - AnamolyAppStack
+            - LambdaWaitHandle
+            - LambdaWaitCondition
+            - sumoLambdaMetricsAppStack
+            - AddAccountField
+            - AddEntityField
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.CommonBucketSNSTopic
+            - CreateCommonResources.CommonS3Bucket
+            - CreateCommonResources.CommonBucketPolicy
+            - CreateCommonResources.CommonSNSpolicy
+            - CreateCommonResources.CommonCloudTrail
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicSourceRole
+            - CreateCommonResources.SumoLogicHostedCollector
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.ALBSource
+            - CreateCommonResources.ALBSNSTopic
+            - CreateCommonResources.ALBSNSpolicy
+            - CreateCommonResources.ALBSNSSubscription
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudTrailSource
+            - CreateCommonResources.CloudTrailSNSSubscription
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+            - CreateCommonResources.InventorySourceWaitCondition
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableExisitngAWSResourcesLambda
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.ExistingAWSResources
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.SumoLambdaRole
+            - sumoEC2MetricsAppStack.EC2MetricRule
+            - sumoAlbMetricsAppStack.WaitHandle
+            - sumoAlbMetricsAppStack.ALBMetricRule
+            - sumoAlbMetricsAppStack.SumoALBMetricsUpdateSource
+            - sumoAlbMetricsAppStack.ALBUpdateSourceWaitCondition
+            - sumoDynamoDBMetricsAppStack.WaitHandle
+            - sumoDynamoDBMetricsAppStack.MetricRule
+            - sumoDynamoDBMetricsAppStack.UpdateSourceWaitCondition
+            - sumoRdsMetricsAppStack.WaitHandle
+            - sumoRdsMetricsAppStack.ClusterMetricRule
+            - sumoRdsMetricsAppStack.InstanceMetricRule
+            - sumoRdsMetricsAppStack.UpdateSourceWaitCondition
+            - sumoApiGatewayMetricsAppStack.WaitHandle
+            - sumoApiGatewayMetricsAppStack.MetricRule
+            - sumoApiGatewayMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.WaitHandle
+            - sumoLambdaMetricsAppStack.LambdaMetricRule
+            - sumoLambdaMetricsAppStack.SumoHTTPUpdateSource
+            - sumoLambdaMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.FERWaitCondition
+            - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.BucketName
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableExisitngAWSResourcesLambda
+            - sumoLambdaMetricsAppStack.ExistingCloudWatchLogSourceName
+            - sumoAlbMetricsAppStack.ExistingMetricSourceName
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CollectorName: "aws-observability-collector"
+            CreateMetaDataSource: 'No'
+            CreateCloudWatchMetricsSource:  'No'
+            CloudWatchMetricsSourceName: 'TestEnv-cloudwatch-metrics-ap-south-1'
+            CreateALBLogSource: 'Yes'
+            CreateALBS3Bucket: 'No'
+            ALBS3BucketPathExpression: '/elasticloadbalancing/ap-south-1/*'
+            ALBS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+            ALBLogsSourceName: "TestEnv-alb-logs-ap-south-1"
+            CreateCloudTrailLogSource: 'Yes'
+            CreateCloudTrailBucket: 'Yes'
+            CloudTrailBucketPathExpression: '/CloudTrail/ap-south-1/*'
+            CloudTrailLogsSourceName: "TestEnv-cloudtrail-logs-ap-south-1"
+            CreateCloudWatchLogSource: 'No'
+            CloudWatchLogsSourceName: "TestEnv-cloudwatch-logs-ap-south-1"
+            CreateAwsInventorySource: 'No'
+            AwsInventorySourceName: "TestEnv-inventory-ap-south-1"
+          AutoEnableOptions:
+            ALBAutoEnableS3Logs: 'Yes'
+            ALBS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+            AutoSubscribeLogGroups: 'No'
+          AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
+            BucketName: 'sumologiclambdahelper-ap-south-1'
+            AutoEnableResourceOptions: 'Existing'
+          sumoEC2MetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateMetaDataSource: 'No'
+          sumoAlbMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateS3Bucket: 'No'
+            Section5cCreateALBLogSource: 'No'
+            Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
+          sumoDynamoDBMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoRdsMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoApiGatewayMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          AnamolyAppStack:
+            Section2aInstallApp: 'No'
+            Section3aCreateAwsInventorySource: 'No'
+          sumoLambdaMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+            Section5eCloudTrailLogsSourceName: ""
+            Section6aCreateCloudWatchLogSource: 'No'
+            Section6cCloudWatchLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779514196'
+  - TestName: existingbuckets
+    Regions:
+      - ap-east-1
+    Skip: false
+    Parameters:
+      Values:
+        Section2aAccountAlias: 'TestEnv'
+        Section3aInstallObservabilityApps: 'No'
+        Section4aCreateMetricsSourcesOptions: 'Both'
+        Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
+        Section5bALBCreateLogSource: 'Yes'
+        Section6aCreateCloudTrailLogSource: 'Yes'
+        Section6cCloudTrailLogsBucketName: 'sumologiclambdahelper-us-east-1'
+        Section6dCloudTrailBucketPathExpression: '*abc*'
+        Section7aLambdaCreateCloudWatchLogsSource: 'No'
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - CreateCommonResources
+            - sumoEC2MetricsAppStack
+            - ALBWaitHandle
+            - ALBWaitCondition
+            - sumoAlbMetricsAppStack
+            - DynamoDBWaitHandle
+            - DynamoDBWaitCondition
+            - sumoDynamoDBMetricsAppStack
+            - RDSWaitHandle
+            - RDSWaitCondition
+            - sumoRdsMetricsAppStack
+            - ApiWaitHandle
+            - ApiWaitCondition
+            - sumoApiGatewayMetricsAppStack
+            - AnamolyWaitHandle
+            - AnamolyWaitCondition
+            - AnamolyAppStack
+            - LambdaWaitHandle
+            - LambdaWaitCondition
+            - sumoLambdaMetricsAppStack
+            - AddAccountField
+            - AddEntityField
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.CommonBucketSNSTopic
+            - CreateCommonResources.CommonS3Bucket
+            - CreateCommonResources.CommonBucketPolicy
+            - CreateCommonResources.CommonSNSpolicy
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicSourceRole
+            - CreateCommonResources.SumoLogicHostedCollector
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSource
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.ALBSource
+            - CreateCommonResources.ALBSNSSubscription
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudTrailSource
+            - CreateCommonResources.CloudTrailSNSTopic
+            - CreateCommonResources.CloudTrailSNSpolicy
+            - CreateCommonResources.CloudTrailSNSSubscription
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+            - CreateCommonResources.InventorySourceWaitCondition
+            - CreateCommonResources.InventoryRole
+            - CreateCommonResources.InventorySource
+            - sumoEC2MetricsAppStack.EC2MetricRule
+            - sumoAlbMetricsAppStack.WaitHandle
+            - sumoAlbMetricsAppStack.ALBMetricRule
+            - sumoAlbMetricsAppStack.ALBUpdateSourceWaitCondition
+            - sumoDynamoDBMetricsAppStack.WaitHandle
+            - sumoDynamoDBMetricsAppStack.MetricRule
+            - sumoDynamoDBMetricsAppStack.UpdateSourceWaitCondition
+            - sumoRdsMetricsAppStack.WaitHandle
+            - sumoRdsMetricsAppStack.ClusterMetricRule
+            - sumoRdsMetricsAppStack.InstanceMetricRule
+            - sumoRdsMetricsAppStack.UpdateSourceWaitCondition
+            - sumoApiGatewayMetricsAppStack.WaitHandle
+            - sumoApiGatewayMetricsAppStack.MetricRule
+            - sumoApiGatewayMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.WaitHandle
+            - sumoLambdaMetricsAppStack.LambdaMetricRule
+            - sumoLambdaMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.FERWaitCondition
+            - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.BucketName
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CollectorName: "aws-observability-collector"
+            CreateMetaDataSource: 'No'
+            CreateCloudWatchMetricsSource:  'Yes'
+            CloudWatchMetricsSourceName: 'TestEnv-cloudwatch-metrics-ap-east-1'
+            CreateALBLogSource: 'Yes'
+            CreateALBS3Bucket: 'Yes'
+            ALBS3BucketPathExpression: '*AWSLogs/*/elasticloadbalancing/*'
+            ALBLogsSourceName: "TestEnv-alb-logs-ap-east-1"
+            CreateCloudTrailLogSource: 'Yes'
+            CreateCloudTrailBucket: 'No'
+            CloudTrailLogsBucketName: 'sumologiclambdahelper-us-east-1'
+            CloudTrailBucketPathExpression: '*abc*'
+            CloudTrailLogsSourceName: "TestEnv-cloudtrail-logs-ap-east-1"
+            CreateCloudWatchLogSource: 'No'
+            CloudWatchLogsSourceName: "TestEnv-cloudwatch-logs-ap-east-1"
+            CreateAwsInventorySource: 'Yes'
+            AwsInventorySourceName: "TestEnv-inventory-ap-east-1"
+          sumoEC2MetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateMetaDataSource: 'No'
+          sumoAlbMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateS3Bucket: 'No'
+            Section5cCreateALBLogSource: 'No'
+          sumoDynamoDBMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoRdsMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoApiGatewayMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          AnamolyAppStack:
+            Section2aInstallApp: 'No'
+            Section3aCreateAwsInventorySource: 'No'
+          sumoLambdaMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+            Section5eCloudTrailLogsSourceName: "*cloudtrail-logs*"
+            Section6aCreateCloudWatchLogSource: 'No'
+  - TestName: existingsourcestestcase2
+    Regions:
+      - ap-south-1
+    Skip: false
+    Parameters:
+      Values:
+        Section2aAccountAlias: 'TestEnv'
+        Section3aInstallObservabilityApps: 'No'
+        Section4aCreateMetricsSourcesOptions: 'None'
+        Section5aAutoEnableS3LogsALBResourcesOptions: 'Both'
+        Section5bALBCreateLogSource: 'No'
+        Section5cALBLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
+        Section5dALBS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+        Section6aCreateCloudTrailLogSource: 'No'
+        Section6bCloudTrailLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779514196'
+        Section7aLambdaCreateCloudWatchLogsSource: 'No'
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - CreateCommonResources
+            - AutoEnableOptions
+            - sumoEC2MetricsAppStack
+            - ALBWaitHandle
+            - ALBWaitCondition
+            - sumoAlbMetricsAppStack
+            - DynamoDBWaitHandle
+            - DynamoDBWaitCondition
+            - sumoDynamoDBMetricsAppStack
+            - RDSWaitHandle
+            - RDSWaitCondition
+            - sumoRdsMetricsAppStack
+            - ApiWaitHandle
+            - ApiWaitCondition
+            - sumoApiGatewayMetricsAppStack
+            - AnamolyWaitHandle
+            - AnamolyWaitCondition
+            - AnamolyAppStack
+            - LambdaWaitHandle
+            - LambdaWaitCondition
+            - sumoLambdaMetricsAppStack
+            - AddAccountField
+            - AddEntityField
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+            - CreateCommonResources.InventorySourceWaitCondition
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.AutoEnableAlbLogEventsInvokePermission
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.AutoEnableAlbLogEventsRuleTrigger
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableExisitngAWSResourcesLambda
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableNewAWSResourcesLambda
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.ExistingAWSResources
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.SumoLambdaRole
+            - sumoEC2MetricsAppStack.EC2MetricRule
+            - sumoAlbMetricsAppStack.WaitHandle
+            - sumoAlbMetricsAppStack.ALBMetricRule
+            - sumoAlbMetricsAppStack.SumoALBLogsUpdateSource
+            - sumoAlbMetricsAppStack.ALBUpdateSourceWaitCondition
+            - sumoDynamoDBMetricsAppStack.WaitHandle
+            - sumoDynamoDBMetricsAppStack.MetricRule
+            - sumoDynamoDBMetricsAppStack.UpdateSourceWaitCondition
+            - sumoRdsMetricsAppStack.WaitHandle
+            - sumoRdsMetricsAppStack.ClusterMetricRule
+            - sumoRdsMetricsAppStack.InstanceMetricRule
+            - sumoRdsMetricsAppStack.UpdateSourceWaitCondition
+            - sumoApiGatewayMetricsAppStack.WaitHandle
+            - sumoApiGatewayMetricsAppStack.MetricRule
+            - sumoApiGatewayMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.WaitHandle
+            - sumoLambdaMetricsAppStack.LambdaMetricRule
+            - sumoLambdaMetricsAppStack.SumoCloudTrailLogsUpdateSource
+            - sumoLambdaMetricsAppStack.UpdateSourceWaitCondition
+            - sumoLambdaMetricsAppStack.FERWaitCondition
+            - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - sumoLambdaMetricsAppStack.ExistingCloudTrailLogSourceName
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableExisitngAWSResourcesLambda
+            - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableNewAWSResourcesLambda
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CollectorName: "aws-observability-collector"
+            CreateMetaDataSource: 'No'
+            CreateCloudWatchMetricsSource:  'No'
+            CloudWatchMetricsSourceName: 'TestEnv-cloudwatch-metrics-ap-south-1'
+            CreateALBLogSource: 'No'
+            CreateALBS3Bucket: 'No'
+            ALBS3BucketPathExpression: '/elasticloadbalancing/ap-south-1/*'
+            ALBLogsSourceName: "TestEnv-alb-logs-ap-south-1"
+            CreateCloudTrailLogSource: 'No'
+            CreateCloudTrailBucket: 'No'
+            CloudTrailBucketPathExpression: 'AWSLogs/*/CloudTrail/*'
+            CloudTrailLogsSourceName: "TestEnv-cloudtrail-logs-ap-south-1"
+            CreateCloudWatchLogSource: 'No'
+            CloudWatchLogsSourceName: "TestEnv-cloudwatch-logs-ap-south-1"
+            CreateAwsInventorySource: 'No'
+            AwsInventorySourceName: "TestEnv-inventory-ap-south-1"
+          AutoEnableOptions:
+            ALBAutoEnableS3Logs: 'Yes'
+            ALBS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+            AutoSubscribeLogGroups: 'No'
+          AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
+            BucketName: 'sumologiclambdahelper-ap-south-1'
+            AutoEnableResourceOptions: 'Both'
+          sumoEC2MetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateMetaDataSource: 'No'
+          sumoAlbMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateS3Bucket: 'No'
+            Section5cCreateALBLogSource: 'No'
+            Section5fALBLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
+          sumoDynamoDBMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoRdsMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          sumoApiGatewayMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+          AnamolyAppStack:
+            Section2aInstallApp: 'No'
+            Section3aCreateAwsInventorySource: 'No'
+          sumoLambdaMetricsAppStack:
+            Section2aTagExistingAWSResources: 'No'
+            Section3aInstallApp: 'No'
+            Section4aCreateCloudWatchMetricsSource: 'No'
+            Section5aCreateCloudTrailBucket: 'No'
+            Section5cCreateCloudTrailLogSource: 'No'
+            Section5eCloudTrailLogsSourceName: ""
+            Section6aCreateCloudWatchLogSource: 'No'
+            Section5fCloudTrailLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779514196'
