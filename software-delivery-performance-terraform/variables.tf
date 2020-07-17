@@ -20,7 +20,18 @@ variable "install_jira_server" {}
 variable "install_sumo_to_jiracloud_webhook" {}
 variable "install_sumo_to_jiraserver_webhook" {}
 variable "install_sumo_to_jiraservicedesk_webhook" {}
+variable "install_jenkins" {}
+variable "install_github" {}
+variable install_pagerduty {}
 
+#Source Categories
+variable "jira_cloud_sc" {}
+variable "jira_server_sc" {}
+variable "bitbucket_sc" {}
+variable "opsgenie_sc" {}
+variable "pagerduty_sc" {}
+variable "github_sc" {}
+variable "jenkins_sc" {}
 
 #Jira Cloud
 variable "jira_cloud_url" {}
@@ -74,7 +85,6 @@ variable "opsgenie_api_url" {
 variable "opsgenie_priority" {}
 
 # Pagerduty
-variable install_pagerduty {}
 variable pagerduty_api_endpoint {
   default = "https://api.pagerduty.com"
 }
@@ -84,7 +94,6 @@ variable "pagerduty_services_sumo_webhooks" {}
 variable "install_sumo_to_pagerduty_webhook" {}
 
 #Github
-variable "install_github" {}
 variable "github_token" {}
 variable "github_organization" {}
 variable "github_repository_names" {}
@@ -92,3 +101,31 @@ variable "github_repo_events" {}
 variable "github_org_events" {}
 variable "github_org_webhook_create" {}
 variable "github_repo_webhook_create" {}
+
+#FERs
+variable "github_pull_request_fer_scope" {}
+variable "github_pull_request_fer_parse" {}
+
+variable "jenkins_build_fer_scope" {}
+variable "jenkins_build_fer_parse" {}
+
+variable "jenkins_deploy_fer_scope" {}
+variable "jenkins_deploy_fer_parse" {}
+
+variable "opsgenie_alerts_fer_scope" {}
+variable "opsgenie_alerts_fer_parse" {}
+
+variable "bitbucket_pull_request_fer_scope" {}
+variable "bitbucket_pull_request_fer_parse" {}
+
+variable "bitbucket_build_fer_scope" {}
+variable "bitbucket_build_fer_parse" {}
+
+variable "bitbucket_deploy_fer_scope" {}
+variable "bitbucket_deploy_fer_parse" {}
+
+variable "jira_issues_fer_scope" {}
+variable "jira_issues_fer_parse" {}
+
+variable "pagerduty_alerts_fer_scope" {}
+variable "pagerduty_alerts_fer_parse" {}
