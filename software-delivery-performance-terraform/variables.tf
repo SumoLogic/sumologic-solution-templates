@@ -124,8 +124,11 @@ variable "bitbucket_build_fer_parse" {}
 variable "bitbucket_deploy_fer_scope" {}
 variable "bitbucket_deploy_fer_parse" {}
 
-variable "jira_issues_fer_scope" {}
-variable "jira_issues_fer_parse" {}
+variable "jira_cloud_issues_fer_scope" {}
+variable "jira_cloud_issues_fer_parse" {}
+
+variable "jira_server_issues_fer_scope" {}
+variable "jira_server_issues_fer_parse" {}
 
 variable "pagerduty_alerts_fer_scope" {}
 variable "pagerduty_alerts_fer_parse" {}

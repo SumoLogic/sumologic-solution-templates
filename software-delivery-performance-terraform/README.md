@@ -1,7 +1,10 @@
 # sumologic-sdp-terraform
 
-The Terraform script installs the Sumo Logic Software Delivery Performance (SDP) Solution collection and Applications in the Personal Folder of the Sumo Logic user whose access keys have been used. If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
+The SDP solution provides an established framework to simplify the monitoring and troubleshooting of your software delivery infrastructure.
+* The Terraform script installs the Sumo Logic Software Delivery Performance (SDP) solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
+*  If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
 
+For more details, please look at [Sumo Logic SDP Help Document](https://help.sumologic.com/Solutions/AWS_Observability_Solution/About_the_AWS_Observability_Solution).
 
 ## Getting Started
 
@@ -34,7 +37,7 @@ $ git clone https://github.com/SumoLogic/sumologic-solution-templates.git
 4. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/software-delivery-performance-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Sumo Logic Terraform Provider](https://www.terraform.io/docs/providers/sumologic/index.html), [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html), [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html), [Github Terraform Provider](https://www.terraform.io/docs/providers/github/index.html) and [Pagerduty Terraform Provider](https://www.terraform.io/docs/providers/pagerduty/index.html).
 5. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_server`, `install_bitbucket_cloud`,`install_opsgenie`,`install_github`,`install_pagerduty`,`install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook`, `install_sumo_to_jiraservicedesk_webhook`, `install_sumo_to_jiracloud_webhook` and `install_sumo_to_pagerduty_webhook` in `sumologic.auto.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
 `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Beta. To participate contact your Sumo account executive.
-6. Update the placeholder values in `sumologic.auto.tfvars`, `atlassian.auto.tfvars`, `pagerduty.auto.tfvars`, `github.auto.tfvars` and `webhooks.auto.tfvars` so they correspond with your Sumo Logic, Atlassian, Github and Pagerduty environments. See the [list of input parameters](#configurable-parameters) below.
+6. Update the placeholder values in `sumologic.auto.tfvars`, `atlassian.auto.tfvars`, `pagerduty.auto.tfvars`, `github.auto.tfvars`, `sumologic_fer.auto.tfvars` and `sumologic_webhooks.auto.tfvars` so they correspond with your Sumo Logic, Atlassian, Github and Pagerduty environments. See the [list of input parameters](#configurable-parameters) below.
 
 #### Deploy Sumo Logic - SDP Solution
 
@@ -61,7 +64,7 @@ $ terraform destroy
 
 ## Configurable Parameters
 
-Configure the following parameters in `sumologic.auto.tfvars`, `atlassian.auto.tfvars`, `github.auto.tfvars`, `pagerduty.auto.tfvars` and `webhooks.auto.tfvars`.
+Configure the following parameters in `sumologic.auto.tfvars`, `atlassian.auto.tfvars`, `github.auto.tfvars`, `pagerduty.auto.tfvars`, `sumologic_fer.auto.tfvars` and `webhooks.auto.tfvars`.
 
 ### Sumo Logic
 
@@ -77,7 +80,7 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | sumo_access_key           | [Sumo Logic Access Key](https://help.sumologic.com/Manage/Security/Access-Keys) |       |
 | deployment                | [Sumo Logic Deployment](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security)                                                                   | us1   |
 | sumo_api_endpoint         | [Sumo Logic API Endpoint](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security). Make sure the trailing "/" is present.                    | https://api.sumologic.com/api/v1/  |
-| app_installation_folder   | The Sumo Logic apps will be installed in a folder under your personal folder in Sumo Logic.| Atlassian|
+| app_installation_folder   | The Sumo Logic apps will be installed in a folder under your personal folder in Sumo Logic.| SDP|
 | install_jira_cloud        | Install [Sumo Logic Application and WebHooks for Jira Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira_Cloud)            | true  |
 | install_jira_server       | Install [Sumo Logic Application and WebHooks for Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira) | true  |
 | install_bitbucket_cloud   | Install [Sumo Logic Application and WebHooks for BitBucket Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket)       | true  |       |
@@ -89,6 +92,27 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | install_sumo_to_jiraserver_webhook| Install [Sumo Logic to Jira Server WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server) | false |
 | install_sumo_to_jiraservicedesk_webhook| Install [Sumo Logic to Jira Service Desk WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Service_desk) | false |
 | install_sumo_to_pagerduty_webhook| Install [Sumo Logic to Pagerduty WebHook](https://help.sumologic.com/Manage/Connections-and-Integrations/Webhook-Connections/Webhook-Connection-for-PagerDuty) | true |
+| jira_cloud_sc        | Source Category for [Jira Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira_Cloud)            | SDP/Jira/Cloud  |
+| jira_server_sc       | Source Category for [Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira)                 | SDP/Jira/Server/Events  |
+| bitbucket_sc         | Source Category for [BitBucket Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket)        | SDP/Bitbucket  |       |
+| opsgenie_sc          | Source Category for [Opsgenie](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/Opsgenie)            | SDP/Opsgenie  |
+| pagerduty_sc         | Source Category for [Pagrduty](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/PagerDuty_V2)        | SDP/Pagerduty  |
+| github_sc            | Source Category for [Github](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/GitHub)                    | SDP/Github  |
+| jenkins_sc           | Source Category for [Jenkins](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jenkins)                  | SDP/Jenkins  |
+
+### Sumo Logic Field Extraction Rules
+
+[Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider)
+
+Configure these parameters in `sumologic_fer.auto.tfvars`. There are a set of FER's for the SDP Apps. Each FER needs a `Scope` and a `Parse expression`. In most cases default values will suffice, you can edit the `scope` and `parse expression` as per your requirements if required.
+
+| Parameter |Description |
+| --- | --- |
+| (app)_pull_request_fer_scope           | [FER](https://help.sumologic.com/Manage/Field-Extractions/Create-a-Field-Extraction-Rule)  |
+| (app)_pull_request_fer_parse           | [FER](https://help.sumologic.com/Manage/Field-Extractions/Create-a-Field-Extraction-Rule) |
+
+`app` can be jira_cloud, jira_server, github, bitbucket, pagerduty, opsgenie or jenkins.
+
 
 ## Jira Cloud
 
@@ -140,7 +164,7 @@ Configure these parameters in `atlassian.auto.tfvars`.
 
 | Parameter | Description |
 | --- | --- |
-| jira_server_access_logs_sourcecategory| Jira Server Access Logs Source Category, default "Atlassian/Jira/Server*", refer [this](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector) link.|
+| jira_server_access_logs_sourcecategory| Jira Server Access Logs Source Category, default "SDP/Jira/Server*", refer [this](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira/Collect_Logs_for_Jira#step-1-set-up-local-file-sources-on-an-installed-collector) link.|
 | jira_server_url        | Jira Server URL                |
 | jira_server_user       | Jira Server Username           |
 | jira_server_password   | Needs to be the password. API Key is not supported on Jira Server yet.           |
@@ -196,7 +220,7 @@ Configure these parameters in `webhooks.auto.tfvars`.
 | --- | --- |
 | opsgenie_priority             | [Opsgenie Alert Priority](https://docs.opsgenie.com/docs/priority-field)|
 
-## Pagerduty and Sumo Logic to Pagerduty Webhook
+## Pagerduty
 
 [Pagerduty Terraform Provider](https://www.terraform.io/docs/providers/pagerduty/index.html)
 
@@ -206,7 +230,14 @@ Configure these parameters in `pagerduty.auto.tfvars`.
 | --- | --- |
 | pagerduty_api_key        | [Pagerduty API Key](https://support.pagerduty.com/docs/generating-api-keys#section-generating-a-general-access-rest-api-key). |
 | pagerduty_services_pagerduty_webhooks       | List of Pagerduty Service IDs. Example, ["P1QWK8J","PK9FKW3"]. You can get these from the URL after opening a specific service in Pagerduty. These are used for Pagerduty to Sumo Logic webhooks.              |
-| pagerduty_services_sumo_webhooks       | List of Pagerduty Service IDs. Example, ["P1QWK8J","PK9FKW3"]. You can get these from the URL after opening a specific service in Pagerduty. These are used for Sumo Logic to Pagerduty Webhooks.              |
+
+## Sumo Logic to Pagerduty Webhook
+
+Configure these parameters in `webhooks.auto.tfvars`.
+
+| Parameter | Description |
+| --- | --- |
+| pagerduty_services_sumo_webhooks             | [Sumo Logic to Pagerduty Webhook](https://help.sumologic.com/Manage/Connections-and-Integrations/Webhook-Connections/Webhook-Connection-for-PagerDuty). List of Pagerduty Service IDs. Example, ["P1QWK8J","PK9FKW3"]. You can get these from the URL after opening a specific service in Pagerduty. These are used for Sumo Logic to Pagerduty Webhooks. |
 
 ## Github
 
@@ -221,3 +252,27 @@ Configure these parameters in `github.auto.tfvars`.
 | github_org_webhook_create| Create webhooks at org level.|
 | github_repo_events       | List of repository [events](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads) which should be sent to Sumo Logic. Example, ["create","delete","fork"] |
 | github_org_events        | List of organization level [events](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads) which should be sent to Sumo Logic. Example, ["create","delete","fork"] |
+
+## Jenkins
+
+To configure Jenkins, please follow the [step 3](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jenkins/Collect_Logs_and_Metrics_for_Jenkins#step-3-install-the-jenkins-plugin), [step 4](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jenkins/Collect_Logs_and_Metrics_for_Jenkins#step-4-configure-jenkins-plugin) and optionally [step 5](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jenkins/Collect_Logs_and_Metrics_for_Jenkins#step-5-optional-advanced-configuration) to install and configure the Jenkins Sumo Logic plugin.
+
+In [step 4](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jenkins/Collect_Logs_and_Metrics_for_Jenkins#step-4-configure-jenkins-plugin), a source category is configured which is utilized by the plugin, specify the same source category in the below mentioned parameter in `sumologic.auto.tfvars`.
+
+| Parameter | Description |
+| --- | --- |
+| jenkins_sc   | [Jenkins Source Category](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jenkins/Collect_Logs_and_Metrics_for_Jenkins#step-4-configure-jenkins-plugin).|
+
+## License
+
+The SDP Terraform is licensed under the apache v2.0 license.
+
+## Issues
+
+Raise issues at [Issues](https://github.com/SumoLogic/sumologic-solution-templates/issues)
+
+## Contributing
+
+* Fork the project on [Github](https://github.com/SumoLogic/sumologic-solution-templates).
+* Make your feature addition or fix bug, write tests and commit.
+* Create a pull request with one of the maintainer as Reviewer.
