@@ -1,7 +1,7 @@
 # sumologic-sdp-terraform
 
-The SDP solution provides an established framework to simplify the monitoring and troubleshooting of your software delivery infrastructure.
-* The Terraform script installs the Sumo Logic Software Delivery Performance (SDP) solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
+The Sumo Logic Software Delivery Performance (SDP) solution provides an established framework to simplify the monitoring and troubleshooting of your software delivery infrastructure.
+* This Terraform script installs the Sumo Logic Software Delivery Performance (SDP) solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
 *  If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
 
 For more details, please look at [Sumo Logic SDP Help Document](https://help.sumologic.com/Solutions/AWS_Observability_Solution/About_the_AWS_Observability_Solution).
@@ -104,7 +104,7 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 
 [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider)
 
-Configure these parameters in `sumologic_fer.auto.tfvars`. There are a set of FER's for the SDP Apps. Each FER needs a `Scope` and a `Parse expression`. In most cases default values will suffice, you can edit the `scope` and `parse expression` as per your requirements if required.
+Configure these parameters in `sumologic_fer.auto.tfvars`. There are a set of FER's for the SDP Apps. Each FER needs a `scope` and a `parse expression`. In most cases default values will suffice, if required you can edit the `scope` and `parse expression` as per your requirements.
 
 | Parameter |Description |
 | --- | --- |
