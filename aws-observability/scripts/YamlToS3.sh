@@ -22,6 +22,13 @@ do
     echo "Upload complete for Region -> $region and Bucket Name -> $bucket_name"
 done
 
+if [[ ${AWS_PROFILE} == 'default' ]]
+then
+    aws s3 cp apps/permissionchecker/permissioncheck.template.yaml s3://sumologic-appdev-aws-sam-apps/ --acl public-read --profile ${AWS_PROFILE}
+
+    echo "Upload complete for Permission check Template to Bucket Name -> sumologic-appdev-aws-sam-apps"
+fi
+
 cd templates/
 
 if [[ ${AWS_PROFILE} == 'default' ]]
