@@ -167,9 +167,7 @@ Parameters:
   Section4aCreateMetricsSourcesOptions:
     Type: String
     Description: "CloudWatchMetrics - Creates a Sumo Logic CloudWatch Metrics Source, which collects metrics for multiple namespaces from the region selected.
-                  InventorySource - Creates a Sumo Logic Inventory Source used by Anomaly Explorer.
-                  Both - Installs Both Sumo Logic CloudWatch Metrics and Inventory Source
-                  None - Skips the Installation of both the Sumo Logic Sources"
+                  InventorySource - Creates a Sumo Logic Inventory Source used by Root Cause Explorer."
     Default: 'Both'
     AllowedValues:
       - 'CloudWatchMetrics'
@@ -368,7 +366,7 @@ Resources:
   WaitHandle:
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
-  # Create a Lambda and check for Enterprise by using Custom resource. Use the value to create inventory and anomaly app.
+  # Create a Lambda and check for Enterprise by using Custom resource. Use the value to create inventory and root cause app.
 
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
@@ -598,26 +596,26 @@ Resources:
         Section5cCreateCloudTrailLogSource: "No"
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
-  AnamolyWaitHandle:
+  RootCauseWaitHandle:
     DependsOn: sumoApiGatewayMetricsAppStack
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
-  AnamolyWaitCondition:
+  RootCauseWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
-      Handle: !Ref AnamolyWaitHandle
+      Handle: !Ref RootCauseWaitHandle
       Timeout: "2"
       Count: 0
 
-  AnamolyAppStack:
+  RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: AnamolyWaitCondition
+    DependsOn: RootCauseWaitCondition
     Properties:
       TemplateURL: !Join
         - ""
         - - "https://"
           - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/anomaly/anomaly.template.yaml"
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/rootcause/rootcauseexplorer.template.yaml"
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
@@ -629,7 +627,7 @@ Resources:
         Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
   LambdaWaitHandle:
-    DependsOn: AnamolyAppStack
+    DependsOn: RootCauseAppStack
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
   LambdaWaitCondition:
