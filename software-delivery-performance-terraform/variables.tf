@@ -22,7 +22,7 @@ variable "install_sumo_to_jiraserver_webhook" {}
 variable "install_sumo_to_jiraservicedesk_webhook" {}
 variable "install_jenkins" {}
 variable "install_github" {}
-variable install_pagerduty {}
+variable "install_pagerduty" {}
 
 #Source Categories
 variable "jira_cloud_sc" {}

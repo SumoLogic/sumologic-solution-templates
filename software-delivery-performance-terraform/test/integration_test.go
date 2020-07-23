@@ -107,7 +107,7 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicGithubSource(t, terraformOptions, collectorID)
 	// Validate if the Pagerduty Source is created successfully
 	validateSumoLogicPagerdutySource(t, terraformOptions, collectorID)
-	// Validate if the Sumologic Opsgenie Webhook is created successfully
+	// Validate if the Sumologic Pagerduty Webhook is created successfully
 	validateSumoLogicPagerdutyWebhook(t, terraformOptions)
 	// Validate if the Sumologic Opsgenie Webhook is created successfully
 	validateSumoLogicOpsgenieWebhook(t, terraformOptions)
