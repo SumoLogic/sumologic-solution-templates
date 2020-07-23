@@ -9,7 +9,7 @@ provider "sumologic" {
 }
 
 # Create/Delete Collector
-resource "sumologic_collector" "atlassian_collector" {
+resource "sumologic_collector" "sdp_collector" {
   name     = var.collector_name
   category = "SDP"
 }
@@ -19,7 +19,7 @@ resource "sumologic_http_source" "jira_cloud" {
   count        = "${var.install_jira_cloud}" ? 1 : 0
   name         = "Jira Cloud"
   category     = var.jira_cloud_sc
-  collector_id = sumologic_collector.atlassian_collector.id
+  collector_id = sumologic_collector.sdp_collector.id
 }
 
 # Create/Delete BitBucket Cloud Source
@@ -28,7 +28,7 @@ resource "sumologic_http_source" "bitbucket_cloud" {
   name         = "Bitbucket Cloud"
   category     = var.bitbucket_sc
   fields       = { "_convertHeadersToFields" = "true" }
-  collector_id = sumologic_collector.atlassian_collector.id
+  collector_id = sumologic_collector.sdp_collector.id
 }
 
 # Create/Delete Jira Server Source
@@ -36,7 +36,7 @@ resource "sumologic_http_source" "jira_server" {
   count        = "${var.install_jira_server}" ? 1 : 0
   name         = "Jira Server"
   category     = var.jira_server_sc
-  collector_id = sumologic_collector.atlassian_collector.id
+  collector_id = sumologic_collector.sdp_collector.id
 }
 
 # Create/Delete OpsGenie Source
@@ -44,7 +44,7 @@ resource "sumologic_http_source" "opsgenie" {
   count        = "${var.install_opsgenie}" ? 1 : 0
   name         = "OpsGenie"
   category     = var.opsgenie_sc
-  collector_id = sumologic_collector.atlassian_collector.id
+  collector_id = sumologic_collector.sdp_collector.id
 }
 
 # Create/Delete Pagerduty Source
@@ -52,7 +52,7 @@ resource "sumologic_http_source" "pagerduty" {
   count        = "${var.install_pagerduty}" ? 1 : 0
   name         = "Pagerduty"
   category     = var.pagerduty_sc
-  collector_id = sumologic_collector.atlassian_collector.id
+  collector_id = sumologic_collector.sdp_collector.id
 }
 
 # Create/Delete Github Source
@@ -61,7 +61,7 @@ resource "sumologic_http_source" "github" {
   name         = "Github"
   category     = var.github_sc
   fields       = { "_convertHeadersToFields" = "true" }
-  collector_id = sumologic_collector.atlassian_collector.id
+  collector_id = sumologic_collector.sdp_collector.id
 }
 
 # Create/Delete Jenkins Source
@@ -70,7 +70,7 @@ resource "sumologic_http_source" "jenkins" {
   name         = "Jenkins"
   category     = var.jenkins_sc
   fields       = { "_convertHeadersToFields" = "true" }
-  collector_id = sumologic_collector.atlassian_collector.id
+  collector_id = sumologic_collector.sdp_collector.id
 }
 
 # Sumo Logic - Create/Delete folder for installing the applications
@@ -80,7 +80,7 @@ resource "sumologic_folder" "folder" {
   name        = var.app_installation_folder
   description = "Atlassian Applications"
   parent_id   = data.sumologic_personal_folder.personalFolder.id
-  depends_on  = [sumologic_collector.atlassian_collector]
+  depends_on  = [sumologic_collector.sdp_collector]
 }
 
 # Remove slash from Sumo Logic sumo_api_endpoint
@@ -149,7 +149,7 @@ resource "null_resource" "install_Opsgenie_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Opsgenie", "description": "The Opsgenie App provides at-a-glance views and detailed analytics for alerts on your DevOps environment.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"opsgenieLogSrc": "_sourceCategory = ${var.github_sc}" }}'
+            --data-raw '{ "name": "Opsgenie", "description": "The Opsgenie App provides at-a-glance views and detailed analytics for alerts on your DevOps environment.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"opsgenieLogSrc": "_sourceCategory = ${var.opsgenie_sc}" }}'
     EOT
   }
 }
