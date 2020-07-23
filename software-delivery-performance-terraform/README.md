@@ -2,7 +2,7 @@
 
 The Sumo Logic Software Delivery Performance (SDP) solution provides an established framework to simplify the monitoring and troubleshooting of your software delivery infrastructure.
 * This Terraform script installs the Sumo Logic Software Delivery Performance (SDP) solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
-*  If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
+* If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
 
 For more details, please look at [Sumo Logic SDP Help Document](https://help.sumologic.com/Solutions/AWS_Observability_Solution/About_the_AWS_Observability_Solution).
 
