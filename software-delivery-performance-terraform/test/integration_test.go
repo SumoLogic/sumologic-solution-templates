@@ -90,7 +90,7 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
 	terraformOptions := test_structure.LoadTerraformOptions(t, workingDir)
 	// Run `terraform output` to get the value of an output variable
-	collectorID := terraform.Output(t, terraformOptions, "atlassian_collector_id")
+	collectorID := terraform.Output(t, terraformOptions, "sdp_collector_id")
 	// Validate if the collector is created successfully
 	validateSumoLogicCollector(t, terraformOptions, collectorID)
 	// Validate if the folder is created successfully

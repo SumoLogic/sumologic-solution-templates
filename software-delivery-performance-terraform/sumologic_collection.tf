@@ -76,9 +76,14 @@ resource "sumologic_http_source" "jenkins" {
 # Sumo Logic - Create/Delete folder for installing the applications
 data "sumologic_personal_folder" "personalFolder" {}
 
+# Generate timestamp to add to the folder name.
+locals {
+  time_stamp = formatdate("DD-MMM-YYYY hh:mm:ss",timestamp())
+}
+
 resource "sumologic_folder" "folder" {
-  name        = var.app_installation_folder
-  description = "Atlassian Applications"
+  name        = "${var.app_installation_folder} - ${local.time_stamp}"
+  description = "SDP Applications"
   parent_id   = data.sumologic_personal_folder.personalFolder.id
   depends_on  = [sumologic_collector.sdp_collector]
 }
@@ -222,7 +227,7 @@ resource "restapi_object" "bitbucket_field" {
   id_attribute = "fieldId"
   data         = <<JSON
   {
-      "fieldName": "X-Event-Key"
+      "fieldName": "X-Event-Key1"
   }
   JSON
 }
@@ -236,7 +241,7 @@ resource "restapi_object" "github_field" {
   id_attribute = "fieldId"
   data         = <<JSON
   {
-      "fieldName": "x-github-event"
+      "fieldName": "x-github-event1"
   }
   JSON
 }

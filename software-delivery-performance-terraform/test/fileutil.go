@@ -10,7 +10,7 @@ import (
 // AppConfigProperties Map of properties
 type AppConfigProperties map[string]string
 
-// ReadPropertiesFile Read properties file and create a map
+// ReadPropertiesFile Read properties file and create a map. This method is used to read the terraform configuration files which are required while running the tests.
 func ReadPropertiesFile(filename string) (AppConfigProperties, error) {
 	config := AppConfigProperties{}
 
