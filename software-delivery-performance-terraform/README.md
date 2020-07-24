@@ -66,7 +66,7 @@ Configure the following parameters in `sumologic.auto.tfvars`, `atlassian.auto.t
 
 ### Sumo Logic
 
-[Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider)
+[Sumo Logic Terraform Provider](https://www.terraform.io/docs/providers/sumologic/index.html)
 
 Configure these parameters in `sumologic.auto.tfvars`.
 
