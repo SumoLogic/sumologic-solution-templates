@@ -248,7 +248,7 @@
       ],
       "variables": [
         {
-          "id": "3ED194BFE6FB8BB6",
+          "id": "4EEDFBCB3EA1D17E",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -262,7 +262,7 @@
           "hideFromUI": false
         },
         {
-          "id": "69E0E14CC1D8BDB0",
+          "id": "D3A2124C1F6D5305",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -276,7 +276,7 @@
           "hideFromUI": false
         },
         {
-          "id": "084BFA6ADC41B2DF",
+          "id": "9467A5923C6BD7AC",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/apigateway",
@@ -290,7 +290,7 @@
           "hideFromUI": false
         },
         {
-          "id": "9AF7C37FFB4828B4",
+          "id": "1207F7C5C135299C",
           "name": "entity",
           "displayName": null,
           "defaultValue": null,
@@ -652,7 +652,7 @@
           "id": "6CB0B12449D3AAAA",
           "key": "panelpane-c557c5d28b2c684f",
           "title": "API Calls by Entity",
-          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"sum\"}}",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Calls\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
@@ -749,7 +749,7 @@
       ],
       "variables": [
         {
-          "id": "440A41C430F0A95E",
+          "id": "5A7FBA5FE32246FF",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -763,7 +763,7 @@
           "hideFromUI": false
         },
         {
-          "id": "3CD785C48666CB15",
+          "id": "F02A014F14748548",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -777,7 +777,7 @@
           "hideFromUI": false
         },
         {
-          "id": "DE5F83F80CDFA14D",
+          "id": "9B44C196B57B0F1F",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/apigateway",
@@ -791,7 +791,7 @@
           "hideFromUI": false
         },
         {
-          "id": "688F05D73CECE324",
+          "id": "09867F0E1529C506",
           "name": "entity",
           "displayName": null,
           "defaultValue": null,
@@ -1172,7 +1172,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Failure\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+              "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Failure\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| where !isnull(latitude)",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -1193,7 +1193,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Success\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+              "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Success\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| where !isnull(latitude)",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -1298,7 +1298,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Failure\"\n| timeslice 1s\n| count as eventCount by _timeslice, event_name, errorCode, errorMessage, Region, src_ip, accountId, user, type, requestID, user_agent\n| sort by _timeslice\n| limit 100",
+              "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop \n| json field=responseElements \"name\", \"Message\" as ApiName, responseMessage nodrop // CreateRestApi, ImportRestApi, UpdateRestApi provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(errorMessage), responseMessage, errorMessage) as errorMessage\n| where event_source = \"apigateway.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Failure\"\n| timeslice 1s\n| count as eventCount by _timeslice, event_name, errorCode, errorMessage, Region, src_ip, accountId, user, type, requestID, user_agent\n| sort by _timeslice\n| limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -1397,7 +1397,7 @@
       ],
       "variables": [
         {
-          "id": "928CA2A564D469BE",
+          "id": "3E19C9B730CDCF26",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -1411,7 +1411,7 @@
           "hideFromUI": false
         },
         {
-          "id": "08E5D064292F1161",
+          "id": "F2F905EB506C5FDB",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -1425,7 +1425,7 @@
           "hideFromUI": false
         },
         {
-          "id": "9DB8A238BA7E48C5",
+          "id": "F78C466A3FF62232",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/apigateway",
@@ -1482,11 +1482,11 @@
           },
           {
             "key": "panelpane-0c6ca348a22a684a",
-            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":22}"
+            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":15}"
           },
           {
             "key": "panelpane-fcf2a359aca4f947",
-            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":28}"
+            "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":21}"
           },
           {
             "key": "panelpane-1bd728408f442a49",
@@ -1506,15 +1506,15 @@
           },
           {
             "key": "panelpane-6052fefb99524948",
-            "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":15}"
+            "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":27}"
           },
           {
             "key": "panelpane-b7fcf1e9a9428b41",
-            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":22}"
+            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":15}"
           },
           {
             "key": "panelpane-3bd1f319951a1949",
-            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":28}"
+            "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":21}"
           },
           {
             "key": "panelpane-4f8a91c58c9d3b4e",
@@ -1653,7 +1653,7 @@
           "id": "3CF8DCA3FDFD525A",
           "key": "panelpane-2c931e93b0a25940",
           "title": "API Call Breakdown",
-          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"sum\"}}",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Calls\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
@@ -1752,7 +1752,7 @@
       ],
       "variables": [
         {
-          "id": "F35254A807147880",
+          "id": "579651933A1CCC9B",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -1766,7 +1766,7 @@
           "hideFromUI": false
         },
         {
-          "id": "864908C9A1C50ACF",
+          "id": "64CC5AFF07DCEA7F",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -1780,7 +1780,7 @@
           "hideFromUI": false
         },
         {
-          "id": "A394D2E515F4A912",
+          "id": "9D5B35FA73CDF586",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/apigateway",
@@ -1794,7 +1794,7 @@
           "hideFromUI": false
         },
         {
-          "id": "929F9969E4B578C7",
+          "id": "7B7E33101220F8E8",
           "name": "entity",
           "displayName": null,
           "defaultValue": null,
@@ -1808,7 +1808,7 @@
           "hideFromUI": false
         },
         {
-          "id": "E11460941AFF9D89",
+          "id": "8515FB962E1E7B94",
           "name": "stage",
           "displayName": null,
           "defaultValue": null,
@@ -1822,7 +1822,7 @@
           "hideFromUI": false
         },
         {
-          "id": "25BA79EE00ED4CA3",
+          "id": "E41486F9D101D9B6",
           "name": "method",
           "displayName": null,
           "defaultValue": null,
@@ -1836,7 +1836,7 @@
           "hideFromUI": false
         },
         {
-          "id": "25F99F7B58A02249",
+          "id": "C6CE41CD7B2EAEC5",
           "name": "resource",
           "displayName": null,
           "defaultValue": null,

@@ -272,7 +272,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region=* entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region=* entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -398,7 +398,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\"\" account={{account}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| where event_source matches \"*amazonaws.com\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+              "queryString": "\"\\\"eventsource\\\"\" account={{account}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| where event_source matches \"*amazonaws.com\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| where !isnull(latitude)",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -440,7 +440,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region=*  entity=* | sum by entity",
+              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region=*  entity=* | sum by entity, namespace, region",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -497,7 +497,7 @@
       ],
       "variables": [
         {
-          "id": "545D10734E95B964",
+          "id": "03267BBB68063120",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -785,7 +785,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity, namespace, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -911,7 +911,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\"\" account={{account}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| where event_source matches \"*amazonaws.com\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+              "queryString": "\"\\\"eventsource\\\"\" account={{account}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| where event_source matches \"*amazonaws.com\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| where !isnull(latitude)",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -1010,7 +1010,7 @@
       ],
       "variables": [
         {
-          "id": "92A301C7C1452CD7",
+          "id": "8811A5BEE092DB69",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -1024,7 +1024,7 @@
           "hideFromUI": false
         },
         {
-          "id": "F0C63C6A16CBABFF",
+          "id": "BBCB49CD6DC6CEA9",
           "name": "region",
           "displayName": null,
           "defaultValue": "*",
