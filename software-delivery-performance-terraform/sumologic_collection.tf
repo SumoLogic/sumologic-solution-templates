@@ -78,7 +78,7 @@ data "sumologic_personal_folder" "personalFolder" {}
 
 # Generate timestamp to add to the folder name.
 locals {
-  time_stamp = formatdate("DD-MMM-YYYY hh:mm:ss",timestamp())
+  time_stamp = formatdate("DD-MMM-YYYY hh:mm:ss", timestamp())
 }
 
 resource "sumologic_folder" "folder" {
