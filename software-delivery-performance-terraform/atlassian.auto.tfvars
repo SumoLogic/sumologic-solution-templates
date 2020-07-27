@@ -58,5 +58,7 @@ bitbucket_cloud_events = [
 
 
 # OpsGenie
-opsgenie_api_url = "https://api.opsgenie.com" # Do not add the trailing /. If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed. https://docs.opsgenie.com/docs/api-overview
-opsgenie_key     = "<YOUR OPSGENIE KEY>"      # Please replace <YOUR OPSGENIE KEY> (including brackets) with your Opsgenie key, to generate the key, refer: https://docs.opsgenie.com/docs/api-key-management
+opsgenie_api_url = "https://api.opsgenie.com"
+# Do not add the trailing /. If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed. https://docs.opsgenie.com/docs/api-overview
+opsgenie_key = "<YOUR OPSGENIE KEY>"
+# Please replace <YOUR OPSGENIE KEY> (including brackets) with your Opsgenie key, to generate the key, refer: https://docs.opsgenie.com/docs/api-key-management

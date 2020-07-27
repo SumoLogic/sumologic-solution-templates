@@ -30,7 +30,7 @@ func TestTerraformSumoLogic(t *testing.T) {
 
 	// A unique ID we can use to namespace resources so we don't clash with anything already in the Sumo Logic
 	uniqueID := random.UniqueId()
-	collectorName := fmt.Sprintf("Atlassian_%s", uniqueID)
+	collectorName := fmt.Sprintf("SDP_%s", uniqueID)
 
 	// At the end of the test, un-deploy the solution using Terraform
 	defer test_structure.RunTestStage(t, "cleanup", func() {
@@ -84,11 +84,10 @@ func getSumologicURL() string {
 // Validate that the Sumo Logic Resources have been created
 func validateSumoLogicResources(t *testing.T, workingDir string) {
 
-	// Get folder where the Apps are installed
-	folderName := strings.Replace(getProperty("app_installation_folder"), " ", "%20", -1)
-
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
 	terraformOptions := test_structure.LoadTerraformOptions(t, workingDir)
+	// Get folder where the Apps are installed
+	folderName := strings.Replace(terraform.Output(t, terraformOptions, "folder_name"), " ", "%20", -1)
 	// Run `terraform output` to get the value of an output variable
 	collectorID := terraform.Output(t, terraformOptions, "sdp_collector_id")
 	// Validate if the collector is created successfully
@@ -117,8 +116,6 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicJiraServerWebhook(t, terraformOptions)
 	// Validate if the Jira Service Desk Webhook is created successfully
 	validateSumoLogicJiraServiceDeskWebhook(t, terraformOptions)
-	// Validate if the Atlassian App is installed
-	validateSumoLogicAtlassianAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Jira Server App is installed
 	validateSumoLogicJiraServerAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Jira Cloud App is installed
@@ -131,10 +128,32 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicPagerdutyAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Github App is installed
 	validateSumoLogicGithubAppInstallation(t, terraformOptions, folderName)
+	// Validate if the jenkins App is installed
+	validateSumoLogicJenkinsAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Github Field is added successfully
-	validateSumoLogicGithubField(t, terraformOptions, folderName)
+	validateSumoLogicGithubField(t, terraformOptions)
 	// Validate if the Bitbucket Field is added successfully
-	validateSumoLogicBitbucketField(t, terraformOptions, folderName)
+	validateSumoLogicBitbucketField(t, terraformOptions)
+	// Validate if the Bitbucket PR FER is added successfully
+	validateSumoLogicBitbucketPrFER(t, terraformOptions)
+	// Validate if the Bitbucket Build FER is added successfully
+	validateSumoLogicBitbucketBuildFER(t, terraformOptions)
+	// Validate if the Bitbucket Deploy FER is added successfully
+	validateSumoLogicBitbucketDeployFER(t, terraformOptions)
+	// Validate if the Jenkins Build FER is added successfully
+	validateSumoLogicJenkinsBuildFER(t, terraformOptions)
+	// Validate if the Jenkins Deploy FER is added successfully
+	validateSumoLogicJenkinsDeployFER(t, terraformOptions)
+	// Validate if the Pagerduty alerts FER is added successfully
+	validateSumoLogicPagerdutyAlertsFER(t, terraformOptions)
+	// Validate if the Github PR FER is added successfully
+	validateSumoLogicGithubPrFER(t, terraformOptions)
+	// Validate if the Opsgenie Alerts FER is added successfully
+	validateSumoLogicOpsgenieAlertsFER(t, terraformOptions)
+	// Validate if the Jira Cloud FER is added successfully
+	validateSumoLogicJiraCloudFER(t, terraformOptions)
+	// Validate if the Jira Server FER is added successfully
+	validateSumoLogicJiraServerFER(t, terraformOptions)
 }
 
 func validateSumoLogicCollector(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
@@ -266,18 +285,10 @@ func validateSumoLogicJiraServiceDeskWebhook(t *testing.T, terraformOptions *ter
 	}
 }
 
-func validateSumoLogicAtlassianAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
-	if getProperty("install_atlassian_app") == "true" {
-		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Atlassian", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
-		// Verify that we get back a 200 OK
-		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
-	}
-}
-
 func validateSumoLogicJiraCloudAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_jira_cloud") == "true" {
-		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Jira%%20Cloud", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Jira%%20Cloud", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
 	}
@@ -286,7 +297,7 @@ func validateSumoLogicJiraCloudAppInstallation(t *testing.T, terraformOptions *t
 func validateSumoLogicJiraServerAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_jira_server") == "true" {
-		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Jira", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Jira", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
 	}
@@ -295,7 +306,7 @@ func validateSumoLogicJiraServerAppInstallation(t *testing.T, terraformOptions *
 func validateSumoLogicBitbucketAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_bitbucket_cloud") == "true" {
-		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Bitbucket", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Bitbucket", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
 	}
@@ -304,7 +315,7 @@ func validateSumoLogicBitbucketAppInstallation(t *testing.T, terraformOptions *t
 func validateSumoLogicOpsgenieAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_opsgenie") == "true" {
-		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Opsgenie", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Opsgenie", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
 	}
@@ -313,7 +324,7 @@ func validateSumoLogicOpsgenieAppInstallation(t *testing.T, terraformOptions *te
 func validateSumoLogicPagerdutyAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_pagerduty") == "true" {
-		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Pagerduty%%20V2", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Pagerduty%%20V2", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
 	}
@@ -322,13 +333,132 @@ func validateSumoLogicPagerdutyAppInstallation(t *testing.T, terraformOptions *t
 func validateSumoLogicGithubAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_github") == "true" {
-		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Github", os.Getenv("SUMOLOGIC_USERNAME"), folderName)
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Github", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
 	}
 }
 
-func validateSumoLogicGithubField(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+func validateSumoLogicJenkinsAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+
+	if getProperty("install_jenkins") == "true" {
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Jenkins", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGithubPrFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "github_pr_fer_id")
+	if ferID != "[]" && getProperty("install_github") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicJenkinsBuildFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "jenkins_build_fer_id")
+	if ferID != "[]" && getProperty("install_jenkins") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicJenkinsDeployFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "jenkins_deploy_fer_id")
+	if ferID != "[]" && getProperty("install_jenkins") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicOpsgenieAlertsFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "opsgenie_alerts_fer_id")
+	if ferID != "[]" && getProperty("install_opsgenie") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicBitbucketPrFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "bitbucket_pr_fer_id")
+	if ferID != "[]" && getProperty("install_bitbucket_cloud") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicPagerdutyAlertsFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "pagerduty_alerts_fer_id")
+	if ferID != "[]" && getProperty("install_pagerduty") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicJiraServerFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "jira_server_issues_fer_id")
+	if ferID != "[]" && getProperty("install_jira_server") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicJiraCloudFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "jira_cloud_issues_fer_id")
+	if ferID != "[]" && getProperty("install_jira_cloud") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicBitbucketDeployFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "bitbucket_deploy_fer_id")
+	if ferID != "[]" && getProperty("install_bitbucket_cloud") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicBitbucketBuildFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "bitbucket_build_fer_id")
+	if ferID != "[]" && getProperty("install_bitbucket_cloud") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGithubField(t *testing.T, terraformOptions *terraform.Options) {
 
 	// Run `terraform output` to get the value of an output variable
 	fieldID := terraform.Output(t, terraformOptions, "sumo_github_field_id")
@@ -339,7 +469,7 @@ func validateSumoLogicGithubField(t *testing.T, terraformOptions *terraform.Opti
 	}
 }
 
-func validateSumoLogicBitbucketField(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+func validateSumoLogicBitbucketField(t *testing.T, terraformOptions *terraform.Options) {
 
 	// Run `terraform output` to get the value of an output variable
 	fieldID := terraform.Output(t, terraformOptions, "sumo_bitbucket_field_id")
@@ -388,7 +518,7 @@ func validateAtlassianOpsgenieWebhook(t *testing.T, terraformOptions *terraform.
 	if webhookID != "[]" && getProperty("install_opsgenie") == "true" {
 		webhookID = strings.Split(webhookID, "\"")[1]
 		// Verify that we get back a 200 OK
-		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/integrations/%s", opsgenieURL, webhookID), nil, opsgenieheaders, customValidation, nil)
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/v2/integrations/%s", opsgenieURL, webhookID), nil, opsgenieheaders, customValidation, nil)
 	}
 }
 

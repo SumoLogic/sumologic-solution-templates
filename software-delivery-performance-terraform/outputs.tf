@@ -30,6 +30,10 @@ output "folder_id" {
   value = sumologic_folder.folder.id
 }
 
+output "folder_name" {
+  value = sumologic_folder.folder.name
+}
+
 # output "folder_path" {
 #   value = sumologic_folder.folder.path
 # }
