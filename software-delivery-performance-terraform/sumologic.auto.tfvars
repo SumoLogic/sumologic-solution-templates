@@ -16,6 +16,7 @@ install_opsgenie        = "true"
 install_pagerduty       = "true"
 install_github          = "true"
 install_jenkins         = "true"
+install_sdp             = "true"
 
 # Sumo Logic App source category
 jira_cloud_sc  = "SDP/Jira/Cloud"
@@ -28,7 +29,7 @@ jenkins_sc     = "SDP/Jenkins"
 
 # install_opsgenie should be true for the below option install_sumo_to_opsgenie_webhook to be true. https://help.sumologic.com/Manage/Connections-and-Integrations/Webhook-Connections/Webhook_Connection_for_Opsgenie
 install_sumo_to_opsgenie_webhook        = "false" # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_opsgenie_webhook.json.tmpl for customizing payload.
-install_sumo_to_jiracloud_webhook       = "true"  # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiracloud_webhook.json.tmpl for customizing payload.
+install_sumo_to_jiracloud_webhook       = "false" # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiracloud_webhook.json.tmpl for customizing payload.
 install_sumo_to_jiraserver_webhook      = "false" # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiraserver_webhook.json.tmpl for customizing payload.
 install_sumo_to_jiraservicedesk_webhook = "false" # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiraservicedesk_webhook.json.tmpl for customizing payload.
 install_sumo_to_pagerduty_webhook       = "true"

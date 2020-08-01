@@ -207,6 +207,21 @@ resource "null_resource" "install_jenkins_app" {
   }
 }
 
+# Install SDP App
+resource "null_resource" "install_sdp_app" {
+  count = "${var.install_sdp}" ? 1 : 0
+
+  provisioner "local-exec" {
+    command = <<EOT
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/cdf6245b-3c27-4de8-89bf-216e41d18c28/install' \
+            --header 'Accept: application/json' \
+            --header 'Content-Type: application/json' \
+            -u ${var.sumo_access_id}:${var.sumo_access_key} \
+            --data-raw '{ "name": "Software Development Observability", "description": "TO DO", "destinationFolderId": "${sumologic_folder.folder.id}"}'
+    EOT
+  }
+}
+
 # Create/Delete Field required by BitBucket App in Sumo Logic by calling REST API
 provider "restapi" {
   alias = "sumo"
