@@ -1,0 +1,440 @@
+---
+Global:
+  TemplatePath: "../resources.template.yaml"
+  TestProjectName: BasicTestProject
+  ParallelTestsRun: 5
+  GlobalParameters:
+    SumoLogicDeployment: us1
+    SumoLogicAccessID: '${ADMIN_ROLE_ACCESS_ID}'
+    SumoLogicAccessKey: '${ADMIN_ROLE_ACCESS_KEY}'
+    SumoLogicOrganizationId: '${US1_ORG_ID}'
+    RemoveSumoLogicResourcesOnDeleteStack: 'true'
+    AccountAlias: 'TestEnv'
+    CreateMetaDataSource: 'No'
+    CreateCloudWatchMetricsSource: 'No'
+    CreateALBLogSource: 'No'
+    CreateALBS3Bucket: 'No'
+    CreateCloudTrailLogSource: 'No'
+    CreateCloudTrailBucket: 'No'
+    CreateCloudWatchLogSource: 'No'
+    CloudWatchMetricsNameSpaces: 'AWS/RDS'
+Tests:
+  - TestName: installall
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+        CreateMetaDataSource: 'Yes'
+        MetaDataSourceName: 'Sourabh MetaData Source'
+        CreateCloudWatchMetricsSource: 'Yes'
+        CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
+        CreateALBLogSource: 'Yes'
+        CreateALBS3Bucket: 'Yes'
+        ALBS3LogsBucketName: 'sumologiclambdahelper-sp-south-1'
+        ALBLogsSourceName: 'Sourabh ALB Source'
+        CreateCloudTrailLogSource: 'Yes'
+        CreateCloudTrailBucket: 'Yes'
+        CloudTrailLogsBucketName: 'sumologiclambdahelper-us-east-1'
+        CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
+        CreateCloudWatchLogSource: 'Yes'
+        CloudWatchLogsSourceName: 'Sourabh CW Logs Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CommonBucketSNSTopic
+            - CommonS3Bucket
+            - CommonBucketPolicy
+            - CommonSNSpolicy
+            - CommonCloudTrail
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicSourceRole
+            - SumoLogicHostedCollector
+            - SumoLogicMetaDataSource
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - SumoLogicCloudwatchMetricsSource
+            - ALBSourceWaitCondition
+            - ALBSource
+            - ALBSNSSubscription
+            - CloudTrailSourceWaitCondition
+            - CloudTrailSource
+            - CloudTrailSNSSubscription
+            - CloudWatchHTTPSourceWaitCondition
+            - CloudWatchEventFunction
+            - CloudWatchHTTPSource
+            - CloudWatchEventFunction.SumoCWDeadLetterQueue
+            - CloudWatchEventFunction.SumoCWEmailSNSTopic
+            - CloudWatchEventFunction.SumoCWEventsInvokeLambdaPermission
+            - CloudWatchEventFunction.SumoCWLambdaExecutionRole
+            - CloudWatchEventFunction.SumoCWLambdaPermission
+            - CloudWatchEventFunction.SumoCWLogGroup
+            - CloudWatchEventFunction.SumoCWLogSubsriptionFilter
+            - CloudWatchEventFunction.SumoCWLogsLambda
+            - CloudWatchEventFunction.SumoCWProcessDLQLambda
+            - CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
+            - CloudWatchEventFunction.SumoCWSpilloverAlarm
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - BucketName
+            - CloudWatchLambdaARN
+            - CloudWatchEventFunction.SumoCWLogsLambdaArn
+  - TestName: installmetadata
+    Regions:
+      - us-east-1
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install MetaData'
+        CreateMetaDataSource: 'Yes'
+        MetaDataSourceName: 'Sourabh MetaData Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicSourceRole
+            - SumoLogicHostedCollector
+            - SumoLogicMetaDataSource
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - ALBSourceWaitCondition
+            - CloudTrailSourceWaitCondition
+            - CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+  - TestName: installcwmetrics
+    Regions:
+      - us-east-2
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+        CreateCloudWatchMetricsSource: 'Yes'
+        CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicSourceRole
+            - SumoLogicHostedCollector
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - SumoLogicCloudwatchMetricsSource
+            - ALBSourceWaitCondition
+            - CloudTrailSourceWaitCondition
+            - CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+  - TestName: installalbsourcewithbucket
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+        CreateALBLogSource: 'Yes'
+        CreateALBS3Bucket: 'Yes'
+        ALBS3LogsBucketName: 'sumologiclambdahelper-sp-south-1'
+        ALBLogsSourceName: 'Sourabh ALB Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CommonBucketSNSTopic
+            - CommonS3Bucket
+            - CommonBucketPolicy
+            - CommonSNSpolicy
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicSourceRole
+            - SumoLogicHostedCollector
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - ALBSourceWaitCondition
+            - ALBSource
+            - ALBSNSSubscription
+            - CloudTrailSourceWaitCondition
+            - CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - BucketName
+  - TestName: installctwithbucket
+    Regions:
+      - us-east-1
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+        CreateCloudTrailLogSource: 'Yes'
+        CreateCloudTrailBucket: 'Yes'
+        CloudTrailLogsBucketName: 'sumologiclambdahelper-us-east-1'
+        CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CommonBucketSNSTopic
+            - CommonS3Bucket
+            - CommonBucketPolicy
+            - CommonSNSpolicy
+            - CommonCloudTrail
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicSourceRole
+            - SumoLogicHostedCollector
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - ALBSourceWaitCondition
+            - CloudTrailSourceWaitCondition
+            - CloudTrailSource
+            - CloudTrailSNSSubscription
+            - CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - BucketName
+  - TestName: installcwlogs
+    Regions:
+      - us-east-2
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+        CreateCloudWatchLogSource: 'Yes'
+        CloudWatchLogsSourceName: 'Sourabh CW Logs Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicHostedCollector
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - ALBSourceWaitCondition
+            - CloudTrailSourceWaitCondition
+            - CloudWatchHTTPSourceWaitCondition
+            - CloudWatchEventFunction
+            - CloudWatchHTTPSource
+            - CloudWatchEventFunction.SumoCWDeadLetterQueue
+            - CloudWatchEventFunction.SumoCWEmailSNSTopic
+            - CloudWatchEventFunction.SumoCWEventsInvokeLambdaPermission
+            - CloudWatchEventFunction.SumoCWLambdaExecutionRole
+            - CloudWatchEventFunction.SumoCWLambdaPermission
+            - CloudWatchEventFunction.SumoCWLogGroup
+            - CloudWatchEventFunction.SumoCWLogSubsriptionFilter
+            - CloudWatchEventFunction.SumoCWLogsLambda
+            - CloudWatchEventFunction.SumoCWProcessDLQLambda
+            - CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
+            - CloudWatchEventFunction.SumoCWSpilloverAlarm
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - CloudWatchLambdaARN
+            - CloudWatchEventFunction.SumoCWLogsLambdaArn
+  - TestName: installalbexisctnew
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+        CreateALBLogSource: 'Yes'
+        CreateALBS3Bucket: 'No'
+        ALBS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+        ALBLogsSourceName: 'Sourabh ALB Source'
+        CreateCloudTrailLogSource: 'Yes'
+        CreateCloudTrailBucket: 'Yes'
+        CloudTrailLogsBucketName: 'sumologiclambdahelper-us-east-1'
+        CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CommonBucketSNSTopic
+            - CommonS3Bucket
+            - CommonBucketPolicy
+            - CommonSNSpolicy
+            - CommonCloudTrail
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicSourceRole
+            - SumoLogicHostedCollector
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - ALBSourceWaitCondition
+            - ALBSource
+            - ALBSNSTopic
+            - ALBSNSSubscription
+            - ALBSNSpolicy
+            - CloudTrailSourceWaitCondition
+            - CloudTrailSource
+            - CloudTrailSNSSubscription
+            - CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - BucketName
+  - TestName: installalbnewctexis
+    Regions:
+      - us-east-1
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+        CreateALBLogSource: 'Yes'
+        CreateALBS3Bucket: 'Yes'
+        ALBS3LogsBucketName: 'sumologiclambdahelper-sp-south-1'
+        ALBLogsSourceName: 'Sourabh ALB Source'
+        CreateCloudTrailLogSource: 'Yes'
+        CreateCloudTrailBucket: 'No'
+        CloudTrailLogsBucketName: 'sumologiclambdahelper-us-east-1'
+        CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CommonBucketSNSTopic
+            - CommonS3Bucket
+            - CommonBucketPolicy
+            - CommonSNSpolicy
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicSourceRole
+            - SumoLogicHostedCollector
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - ALBSourceWaitCondition
+            - ALBSource
+            - ALBSNSSubscription
+            - CloudTrailSourceWaitCondition
+            - CloudTrailSource
+            - CloudTrailSNSTopic
+            - CloudTrailSNSSubscription
+            - CloudTrailSNSpolicy
+            - CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - BucketName
+  - TestName: installalbctexis
+    Regions:
+      - us-east-2
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+        CreateALBLogSource: 'Yes'
+        CreateALBS3Bucket: 'No'
+        ALBS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+        ALBLogsSourceName: 'Sourabh ALB Source'
+        CreateCloudTrailLogSource: 'Yes'
+        CreateCloudTrailBucket: 'No'
+        CloudTrailLogsBucketName: 'sumologiclambdahelper-us-east-1'
+        CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicSourceRole
+            - SumoLogicHostedCollector
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - ALBSourceWaitCondition
+            - ALBSource
+            - ALBSNSTopic
+            - ALBSNSSubscription
+            - ALBSNSpolicy
+            - CloudTrailSourceWaitCondition
+            - CloudTrailSource
+            - CloudTrailSNSTopic
+            - CloudTrailSNSSubscription
+            - CloudTrailSNSpolicy
+            - CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+  - TestName: installnothing
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        CollectorName: 'Sourabh Collector Install All'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle
+            - LambdaRole
+            - LambdaHelper
+            - EnterpriseCheck
+            - CreateSumoLogicAWSExplorerView
+            - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - ALBSourceWaitCondition
+            - CloudTrailSourceWaitCondition
+            - CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck

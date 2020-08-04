@@ -1,0 +1,195 @@
+---
+Global:
+  TemplatePath: "../ec2_metrics_app.template.yaml"
+  TestProjectName: BasicTestProject
+  ParallelTestsRun: 5
+  GlobalParameters:
+    Section1aSumoDeployment: us1
+    Section1bSumoAccessID: '${ADMIN_ROLE_ACCESS_ID}'
+    Section1cSumoAccessKey: '${ADMIN_ROLE_ACCESS_KEY}'
+    Section1dSumoOrganizationId: '${US1_ORG_ID}'
+    Section1eRemoveSumoResourcesOnDeleteStack: 'true'
+    Section2bAccountAlias: 'TestEnv'
+    Section3aInstallApp: 'No'
+    Section2aTagExistingAWSResources: 'No'
+    Section4aCreateMetaDataSource: 'No'
+Tests:
+  - TestName: installall
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section3aInstallApp: 'Yes'
+        Section2aTagExistingAWSResources: 'No'
+        Section4aCreateMetaDataSource: 'Yes'
+        Section3bCollectorName: 'Sourabh Collector Install All'
+        Section4bMetaDataSourceName: 'Source MetaData'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - CreateCommonResources
+            - EC2MetricRule
+            - sumoApp
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicSourceRole
+            - CreateCommonResources.SumoLogicHostedCollector
+            - CreateCommonResources.SumoLogicMetaDataSource
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.EnterpriseCheck
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CollectorName: 'Sourabh Collector Install All'
+            CreateMetaDataSource: 'Yes'
+            MetaDataSourceName: 'Source MetaData'
+  - TestName: onlytagging
+    Regions:
+      - us-east-1
+    Parameters:
+      Values:
+        Section2aTagExistingAWSResources: 'Yes'
+    Skip: true
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - CreateCommonResources
+            - TagAWSResources
+            - MetricRule
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.EnterpriseCheck
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CreateMetaDataSource: 'No'
+  - TestName: onlymetadatasource
+    Regions:
+      - us-east-2
+    Parameters:
+      Values:
+        Section4aCreateMetaDataSource: 'Yes'
+        Section3bCollectorName: 'Sourabh Collector Install All'
+        Section4bMetaDataSourceName: 'Source MetaData'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - CreateCommonResources
+            - EC2MetricRule
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicSourceRole
+            - CreateCommonResources.SumoLogicHostedCollector
+            - CreateCommonResources.SumoLogicMetaDataSource
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.EnterpriseCheck
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CollectorName: 'Sourabh Collector Install All'
+            CreateMetaDataSource: 'Yes'
+            MetaDataSourceName: 'Source MetaData'
+  - TestName: onlyappinstall
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section3aInstallApp: 'Yes'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - CreateCommonResources
+            - EC2MetricRule
+            - sumoApp
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.EnterpriseCheck
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CreateMetaDataSource: 'No'
+  - TestName: nothing
+    Regions:
+      - us-east-1
+    Parameters:
+      Values:
+        Section3aInstallApp: 'No'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - CreateCommonResources
+            - EC2MetricRule
+            - CreateCommonResources.WaitHandle
+            - CreateCommonResources.LambdaRole
+            - CreateCommonResources.LambdaHelper
+            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.CreateSumoLogicAWSExplorerView
+            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
+            - CreateCommonResources.ALBSourceWaitCondition
+            - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.LambdaHelperARN
+            - CreateCommonResources.LambdaRoleARN
+            - CreateCommonResources.EnterpriseCheck
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CreateMetaDataSource: 'No'
