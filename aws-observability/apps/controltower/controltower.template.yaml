@@ -1,0 +1,165 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Lambda Function for automatic automatic tagging of provided AWS resources like EC2, RDS, API Gateway, DynamoDB, Lambda and Application load balancer."
+
+Globals:
+  Function:
+    Timeout: 300
+    MemorySize: 128
+
+Parameters:
+  SumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  SumoLogicAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoLogicAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  SumoLogicOrganizationId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+
+Resources:
+
+  LambdaRoleToCaptureEvents:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+            Condition: {}
+      Path: /
+      Policies:
+        - PolicyName: inline-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'cloudformation:CreateStackInstances'
+                  - 'cloudformation:CreateStackSet'
+                Resource: !Join [':',['arn:aws:cloudformation', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'stackset/*:*']]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  TriggerCustomizationsOnLifeCycleEvent:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import logging
+          LOGGER = logging.getLogger()
+          LOGGER.setLevel(logging.INFO)
+
+          # Stack Set Details
+          stackSetName = 'SUMO-LOGIC-AWS-OBSERVABILITY'
+          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/sumologic_observability.master.template.yaml"
+          ALL = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+
+          result = {"ResponseMetadata":{"HTTPStatusCode":"400"}}
+
+          def lambda_handler(event, context):
+              masterAcct = event['account']
+              eventDetails = event['detail']
+              regionName = eventDetails['awsRegion']
+              eventName = eventDetails['eventName']
+              srvEventDetails = eventDetails['serviceEventDetails']
+              if eventName == 'CreateManagedAccount':
+                  parameters = {
+                                "Section1aSumoLogicDeployment": os.environ['Section1aSumoLogicDeployment'],
+                                "Section1bSumoLogicAccessID": os.environ['Section1bSumoLogicAccessID'],
+                                "Section1cSumoLogicAccessKey": os.environ['Section1cSumoLogicAccessKey'],
+                                "Section1dSumoLogicOrganizationId": os.environ['Section1dSumoLogicOrganizationId'],
+                                "Section2aAccountAlias": "ControlTowerAccount",
+                                "Section3aInstallObservabilityApps": "No"
+                                }
+                  newAccInfo = srvEventDetails['createManagedAccountStatus']
+                  cmdStatus = newAccInfo['state']
+                  if cmdStatus == 'SUCCEEDED':
+                      '''Sucessful event recieved'''
+                      accId = newAccInfo['account']['accountId']
+                      accName = newAccInfo['account']['accountName']
+                      CFT = boto3.client('cloudformation')
+                      try:
+                        response = CFT.create_stack_set(StackSetName=stackSetName, TemplateURL=templateURL, Capabilities=ALL, Parameters=parameters)
+                        parameters["Section2aAccountAlias"] = accName
+                        response = CFT.create_stack_instances(StackSetName=item, Accounts=[accId], Regions=[regionName], ParameterOverrides=parameters)
+                      except cf_client.exceptions.NameAlreadyExistsException:
+                        parameters["Section2aAccountAlias"] = accName
+                        response = CFT.create_stack_instances(StackSetName=item, Accounts=[accId], Regions=[regionName], ParameterOverrides=parameters)
+                  else:
+                      '''Unsucessful event recieved'''
+                      LOGGER.info('Unsucessful Event Recieved. SKIPPING :{}'.format(event))
+                      return(False)
+              else:
+                  LOGGER.info('Control Tower Event Captured :{}'.format(event))
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt "LambdaRoleToCaptureEvents.Arn"
+      Runtime: python3.7
+      Timeout: 60
+      Environment:
+        Variables:
+          Section1aSumoLogicDeployment: !Ref SumoLogicDeployment
+          Section1bSumoLogicAccessID: !Ref SumoLogicAccessID
+          Section1cSumoLogicAccessKey: !Ref SumoLogicAccessKey
+          Section1dSumoLogicOrganizationId: !Ref SumoLogicOrganizationId
+
+  PermissionForEventsToInvokeLambdachk:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt "TriggerCustomizationsOnLifeCycleEvent.Arn"
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt "CaptureControlTowerLifeCycleEvents.Arn"
+
+  CaptureControlTowerLifeCycleEvents:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Capture Control Tower LifeCycle Events and Trigger an Action
+      EventPattern:
+        detail:
+          eventName:
+            - CreateManagedAccount
+          eventSource:
+            - controltower.amazonaws.com
+        detail-type:
+          - AWS Service Event via CloudTrail
+        source:
+          - aws.controltower
+      Name: AWSObservabilityLifeCycleEvent
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt "TriggerCustomizationsOnLifeCycleEvent.Arn"
+          Id: IDCaptureControlTowerLifeCycleEvents
+
+Outputs:
+
+  TriggerCustomizationsOnLifeCycleEvent:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt TriggerCustomizationsOnLifeCycleEvent.Arn

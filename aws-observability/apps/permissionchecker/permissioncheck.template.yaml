@@ -11,6 +11,7 @@ Metadata:
           - Section1aSumoLogicDeployment
           - Section1bSumoLogicAccessID
           - Section1cSumoLogicAccessKey
+          - Section1dSumoLogicOrganizationId
 
     ParameterLabels:
       Section1aSumoLogicDeployment:
@@ -19,6 +20,8 @@ Metadata:
         default: "Sumo Logic Access ID"
       Section1cSumoLogicAccessKey:
         default: "Sumo Logic Access Key"
+      Section1dSumoLogicOrganizationId:
+        default: "Sumo Logic Organization Id"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -45,6 +48,11 @@ Parameters:
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Access Key can not be empty."
     NoEcho: true
+  Section1dSumoLogicOrganizationId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -152,6 +160,7 @@ Resources:
 
   ################# Create Lambda Role and Lambda Function to create Sumo Logic Custom Resources #################
   ################# Checks for IAM and Lambda Permissions #################
+  ################# Checks for IAM ROLE - Sumo Source, Inventory Source also #################
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -180,6 +189,105 @@ Resources:
                   - s3:PutBucketPolicy
                 Resource: '*'
 
+  SumoLogicSourceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${Section1aSumoLogicDeployment}:${Section1dSumoLogicOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoLogicAwsSourcesPolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucketVersions
+                  - s3:ListBucket
+                  - tag:GetResources
+                  - cloudwatch:ListMetrics
+                  - cloudwatch:GetMetricStatistics
+                Resource:
+                  "*"
+
+  RootCauseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${Section1aSumoLogicDeployment}:${Section1dSumoLogicOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoInventoryPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - apigateway:GET
+                  - autoscaling:Describe*
+                  - cloudfront:GetDistributionConfig
+                  - cloudfront:ListDistributions
+                  - cloudtrail:DescribeTrails
+                  - cloudtrail:GetTrailStatus
+                  - cloudwatch:Describe*
+                  - cloudwatch:Get*
+                  - cloudwatch:List*
+                  - codedeploy:List*
+                  - codedeploy:BatchGet*
+                  - dynamodb:Describe*
+                  - dynamodb:List*
+                  - ec2:Describe*
+                  - ecs:Describe*
+                  - ecs:List*
+                  - elasticache:Describe*
+                  - elasticache:List*
+                  - elasticfilesystem:Describe*
+                  - elasticloadbalancing:Describe*
+                  - elasticmapreduce:Describe*
+                  - elasticmapreduce:List*
+                  - es:Describe*
+                  - es:List*
+                  - health:Describe*
+                  - kinesis:Describe*
+                  - kinesis:List*
+                  - lambda:List*
+                  - mq:Describe*
+                  - mq:List*
+                  - rds:Describe*
+                  - rds:List*
+                  - redshift:Describe*
+                  - route53:List*
+                  - sqs:ListQueues
+                  - ses:GetSendStatistics
+                  - ses:GetSendQuota
+                  - sns:List*
+                  - tag:GetResources
+                  - tag:GetTagKeys
+                  - tag:GetTagValues
+                  - xray:BatchGetTraces
+                  - xray:Get*
+                  - pi:DescribeDimensionKeys
+                  - pi:GetResourceMetrics
+                Effect: Allow
+                Resource: "*"
+
   LambdaHelper:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -187,13 +295,22 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.5.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.6.zip"
       MemorySize: 128
       Timeout: 900
       Role:
         Fn::GetAtt:
           - LambdaRole
           - Arn
+
+  EnterpriseCheck:
+    Type: Custom::EnterpriseOrTrialAccountCheck
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
 
   ################# START - AWS RESOURCES Permission Check #################
   ################# Checks for SNS, S3, Trail, ALB Permissions #################
@@ -202,7 +319,7 @@ Resources:
     Properties:
       TopicName: !Join
         - ""
-        - - !Sub "sumo-sns-topic-"
+        - - "sumo-sns-topic-"
           - !Select
             - 0
             - !Split
@@ -326,7 +443,7 @@ Resources:
       IsLogging: true
       IsMultiRegionTrail: false
       S3BucketName: !Ref CommonS3Bucket
-      TrailName: !Sub "Aws-Observability-test"
+      TrailName: "Aws-Observability-test"
 
   AutoEnableS3LogsAlbAWSResources:
     Type: AWS::Serverless::Application
@@ -469,3 +586,6 @@ Outputs:
   CloudWatchLambdaARN:
     Description: "Cloud Watch Lambda ARN"
     Value: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
+  EnterpriseCheck:
+    Description: "Check If Account is Enterprise or Not"
+    Value: !GetAtt EnterpriseCheck.is_enterprise

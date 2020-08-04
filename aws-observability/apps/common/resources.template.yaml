@@ -86,6 +86,7 @@ Parameters:
     Default: 300000
     Description: "Provide the scan interval to fetch metrics into Sumo Logic."
     Type: String
+
   CreateALBLogSource:
     Type: String
     Description: "Choose Yes to create Sumo Logic ALB Log Source with provided bucket Name."
@@ -154,22 +155,6 @@ Parameters:
     Description: "Provide a CloudWatch Logs Source Name"
     Default: ""
 
-  CreateAwsInventorySource:
-    Type: String
-    Description: "Choose Yes to create Sumo Logic Aws Inventory Source. Choose No to skip Source Creation."
-    Default: 'No'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  AwsInventorySourceName:
-    Type: String
-    Description: "Change the Aws Inventory Source name to be created else default name will be used."
-    Default: ""
-  AwsInventoryNamespaces:
-    Default: ""
-    Description: "Provide Comma delimited list of the namespaces to collect. For Eg.- AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS"
-    Type: CommaDelimitedList
-
 Conditions:
   # Sources Conditions
   install_metadata_source: !Equals [!Ref CreateMetaDataSource, 'Yes']
@@ -177,7 +162,6 @@ Conditions:
   install_alb_logs_source: !Equals [!Ref CreateALBLogSource, 'Yes']
   install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
   install_cloudwatch_logs_source: !Equals [!Ref CreateCloudWatchLogSource, 'Yes']
-  install_inventory_source: !Equals [!Ref CreateAwsInventorySource, 'Yes']
 
   install_collector: !Or
     - !Condition install_metadata_source
@@ -185,7 +169,6 @@ Conditions:
     - !Condition install_alb_logs_source
     - !Condition install_cloudtrail_logs_source
     - !Condition install_cloudwatch_logs_source
-    - !Condition install_inventory_source
 
   # Bucket Condition and Trail
   create_alb_bucket: !Equals [!Ref CreateALBS3Bucket, 'Yes']
@@ -350,13 +333,22 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.5.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.6.zip"
       MemorySize: 128
       Timeout: 900
       Role:
         Fn::GetAtt:
           - LambdaRole
           - Arn
+
+  EnterpriseCheck:
+    Type: Custom::EnterpriseOrTrialAccountCheck
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
 
   ############# START - RESOURCES FOR COMMON BUCKET #################
 
@@ -813,101 +805,6 @@ Resources:
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
 
-  ############# START - RESOURCES FOR INVENTORY SOURCE #################
-  InventorySourceWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: CloudWatchHTTPSourceWaitCondition
-    Properties:
-      Handle: !Ref WaitHandle
-      Timeout: "11"
-      Count: 0
-
-  InventoryRole:
-    Type: AWS::IAM::Role
-    Condition: install_inventory_source
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: arn:aws:iam::926226587429:root
-            Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Sub "${SumoLogicDeployment}:${SumoLogicOrganizationId}"
-      Path: "/"
-      Policies:
-        - PolicyName: SumoInventoryPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - apigateway:GET
-                  - autoscaling:Describe*
-                  - cloudfront:GetDistributionConfig
-                  - cloudfront:ListDistributions
-                  - cloudtrail:DescribeTrails
-                  - cloudtrail:GetTrailStatus
-                  - cloudwatch:Describe*
-                  - cloudwatch:Get*
-                  - cloudwatch:List*
-                  - codedeploy:List*
-                  - codedeploy:BatchGet*
-                  - dynamodb:Describe*
-                  - dynamodb:List*
-                  - ec2:Describe*
-                  - ecs:Describe*
-                  - ecs:List*
-                  - elasticache:Describe*
-                  - elasticache:List*
-                  - elasticfilesystem:Describe*
-                  - elasticloadbalancing:Describe*
-                  - elasticmapreduce:Describe*
-                  - elasticmapreduce:List*
-                  - es:Describe*
-                  - es:List*
-                  - health:Describe*
-                  - kinesis:Describe*
-                  - kinesis:List*
-                  - lambda:List*
-                  - mq:Describe*
-                  - mq:List*
-                  - rds:Describe*
-                  - rds:List*
-                  - redshift:Describe*
-                  - route53:List*
-                  - sqs:ListQueues
-                  - ses:GetSendStatistics
-                  - ses:GetSendQuota
-                  - sns:List*
-                  - tag:GetResources
-                  - tag:GetTagKeys
-                  - tag:GetTagValues
-                  - xray:BatchGetTraces
-                  - xray:Get*
-                  - pi:DescribeDimensionKeys
-                  - pi:GetResourceMetrics
-                Effect: Allow
-                Resource: "*"
-
-  InventorySource:
-    Type: Custom::AWSSource
-    Condition: install_inventory_source
-    DependsOn: InventorySourceWaitCondition
-    Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
-      Region: !Ref "AWS::Region"
-      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SourceType: AwsInventory
-      Namespaces: !Ref AwsInventoryNamespaces
-      SourceName: !Ref AwsInventorySourceName
-      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
-      SumoAccessID: !Ref SumoLogicAccessID
-      SumoAccessKey: !Ref SumoLogicAccessKey
-      SumoDeployment: !Ref SumoLogicDeployment
-      RoleArn: !GetAtt InventoryRole.Arn
-
 Outputs:
   LambdaHelperARN:
     Description: "Sumo Logic Lambda Helper ARN"
@@ -923,3 +820,6 @@ Outputs:
     Description: "Cloud Watch Lambda ARN"
     Condition: install_cloudwatch_logs_source
     Value: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
+  EnterpriseCheck:
+    Description: "Check If Account is Enterprise or Not"
+    Value: !GetAtt EnterpriseCheck.is_enterprise
