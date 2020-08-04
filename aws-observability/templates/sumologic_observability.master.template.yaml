@@ -48,12 +48,17 @@ Metadata:
           - Section6dCloudTrailBucketPathExpression
 
       - Label:
-          default: "7. Sumo Logic AWS Lambda CloudWatch Logs"
+          default: "7. Sumo Logic AWS Lambda CloudWatch HTTP Source"
         Parameters:
           - Section7aLambdaCreateCloudWatchLogsSource
           - Section7bLambdaCloudWatchLogsSourceUrl
           - Section7cAutoSubscribeLogGroupsLambdaOptions
           - Section7dAutoSubscribeLambdaLogGroupPattern
+
+      - Label:
+          default: "8. Sumo Logic AWS XRay Source"
+        Parameters:
+          - Section8aCreateAwsXraySource
 
     ParameterLabels:
       Section1aSumoLogicDeployment:
@@ -108,6 +113,9 @@ Metadata:
         default: "Subscribe log groups to Sumo Logic Lambda Forwarder"
       Section7dAutoSubscribeLambdaLogGroupPattern:
         default: "Regex for Filtering lambda Log Groups"
+
+      Section8aCreateAwsXraySource:
+        default: "Create Sumo Logic AWS XRay Source"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -266,6 +274,15 @@ Parameters:
     Default: "lambda"
     Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
 
+  Section8aCreateAwsXraySource:
+    Type: String
+    Description: "Yes - Creates a Sumo Logic AWS XRay Source that collects XRAY Information from your AWS account.
+                  No - If you already have a Sumo Logic AWS XRAY source configured or skip the source creation."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+
 Conditions:
   # Condition for Metrics Source
   install_cloudwatch_metrics_source: !Or
@@ -274,6 +291,7 @@ Conditions:
   install_inventory_source: !Or
     - !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'InventorySource' ]
     - !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'Both' ]
+  install_xray_source: !Equals [ !Ref Section8aCreateAwsXraySource, 'Yes' ]
 
   # Conditions for Bucket
   create_alb_bucket: !And
@@ -401,9 +419,6 @@ Resources:
         CloudTrailLogsSourceName: !Sub "${Section2aAccountAlias}-cloudtrail-logs-${AWS::Region}"
         CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSource
         CloudWatchLogsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-logs-${AWS::Region}"
-        CreateAwsInventorySource: !If [install_inventory_source, "Yes", "No"]
-        AwsInventorySourceName: !Sub "${Section2aAccountAlias}-inventory-${AWS::Region}"
-        AwsInventoryNamespaces: !Ref Section4bMetricsNameSpaces
 
   sumoOverview:
     Type: Custom::App
@@ -622,9 +637,14 @@ Resources:
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
         Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aInstallApp: !Ref Section3aInstallObservabilityApps
-        Section3aCreateAwsInventorySource: "No"
-        Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section2aInstallApp: !If [install_overview_dashboards, "Yes", "No"]
+        Section2bCollectorName: "aws-observability-collector"
+        Section3aCreateAwsInventorySource: !If [install_inventory_source, "Yes", "No"]
+        Section3bAwsInventorySourceName: !Sub "${Section2aAccountAlias}-inventory-${AWS::Region}"
+        Section3cNamespaces: !Ref Section4bMetricsNameSpaces
+        Section4aCreateAwsXRaySource: !If [install_xray_source, "Yes", "No"]
+        Section4bAwsXRaySourceName: !Sub "${Section2aAccountAlias}-xray-${AWS::Region}"
+        Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
   LambdaWaitHandle:
     DependsOn: RootCauseAppStack
