@@ -1,4 +1,4 @@
-# Sumo Logic - SDP Terraform
+# Sumo Logic - SDO Terraform
 # Configure Github credentials and parameters.
 
 # https://github.com/settings/tokens

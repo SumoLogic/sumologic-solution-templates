@@ -1,5 +1,5 @@
-output "sdp_collector_id" {
-  value = sumologic_collector.sdp_collector.id
+output "sdo_collector_id" {
+  value = sumologic_collector.sdo_collector.id
 }
 
 output "jira_cloud_source_id" {

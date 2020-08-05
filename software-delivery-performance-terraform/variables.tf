@@ -1,4 +1,4 @@
-#Sumo Logic - SDP Terraform
+#Sumo Logic - SDO Terraform
 
 variable "sumo_access_id" {}
 variable "sumo_access_key" {}
@@ -23,6 +23,7 @@ variable "install_sumo_to_jiraservicedesk_webhook" {}
 variable "install_jenkins" {}
 variable "install_github" {}
 variable "install_pagerduty" {}
+variable "install_sdo" {}
 
 #Source Categories
 variable "jira_cloud_sc" {}
