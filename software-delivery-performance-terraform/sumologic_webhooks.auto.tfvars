@@ -1,4 +1,4 @@
-# Sumo Logic - SDP Terraform
+# Sumo Logic - SDO Terraform
 # Configure Sumo Logic Webhook configuration options. Some features are in Beta. To participate contact your Sumo account executive.
 
 # Sumo Logic to Opsgenie Webhook - This feature is in Beta. To participate contact your Sumo account executive.
@@ -28,4 +28,5 @@ jira_servicedesk_projectkey = "<JIRA SERVICE DESK PROJECT KEY>"                #
 jira_servicedesk_auth       = "<JIRA SERVICE DESK BASIC AUTHORIZATION HEADER>" # Please replace <JIRA SERVICE DESK BASIC AUTHORIZATION HEADER> (including brackets) with the Basic Authorization Header for JIRA Service Desk as explained here: https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Service_Desk#prerequisite
 
 # Sumo Logic to Pagerduty Webhook
-pagerduty_services_sumo_webhooks = ["<SERVICE1>", "<SERVICE2>"] #  Please replace <SERVICE1> and <SERVICE2> (including brackets) with your Pagerduty service IDs. You can get these from the URL after opening a specific service. These are used for Sumo Logic to Pagerduty webhooks.
+pagerduty_services_sumo_webhooks = ["<SERVICE1>", "<SERVICE2>"]
+# Please replace <SERVICE1> and <SERVICE2> (including brackets) with your Pagerduty service IDs. You can get these from the URL after opening a specific service. These are used for Sumo Logic to Pagerduty webhooks.

@@ -30,7 +30,7 @@ func TestTerraformSumoLogic(t *testing.T) {
 
 	// A unique ID we can use to namespace resources so we don't clash with anything already in the Sumo Logic
 	uniqueID := random.UniqueId()
-	collectorName := fmt.Sprintf("SDP_%s", uniqueID)
+	collectorName := fmt.Sprintf("SDO_%s", uniqueID)
 
 	// At the end of the test, un-deploy the solution using Terraform
 	defer test_structure.RunTestStage(t, "cleanup", func() {
@@ -89,7 +89,7 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Get folder where the Apps are installed
 	folderName := strings.Replace(terraform.Output(t, terraformOptions, "folder_name"), " ", "%20", -1)
 	// Run `terraform output` to get the value of an output variable
-	collectorID := terraform.Output(t, terraformOptions, "sdp_collector_id")
+	collectorID := terraform.Output(t, terraformOptions, "sdo_collector_id")
 	// Validate if the collector is created successfully
 	validateSumoLogicCollector(t, terraformOptions, collectorID)
 	// Validate if the folder is created successfully

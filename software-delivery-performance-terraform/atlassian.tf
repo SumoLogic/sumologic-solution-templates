@@ -1,4 +1,4 @@
-# Sumo Logic - SDP Terraform
+# Sumo Logic - SDO Terraform
 
 # This script creates Webhooks to Sumo Logic in Atlassian Systems.
 # Configure the Atlassian credentials in the atlassian.auto.tfvars.

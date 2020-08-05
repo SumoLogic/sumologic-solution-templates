@@ -1,4 +1,4 @@
-# Unit/Integration Tests for Sumo Logic SDP Terraform
+# Unit/Integration Tests for Sumo Logic SDO Terraform
 
 #### Unit Tests
 
@@ -19,7 +19,7 @@ sh unit_tests.sh
 
 #### Integration Tests
 
-[Terratest](https://terratest.gruntwork.io/) is being used for Integration testing of the Sumo Logic SDP Terraform scripts.
+[Terratest](https://terratest.gruntwork.io/) is being used for Integration testing of the Sumo Logic SDO Terraform scripts.
 
 Following objects are verified:
 

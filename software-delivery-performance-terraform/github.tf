@@ -1,4 +1,4 @@
-# Sumo Logic - SDP Terraform
+# Sumo Logic - SDO Terraform
 
 # This script creates Webhooks to Sumo Logic in Github Repositories.
 # Configure the Github credentials in the github.auto.tfvars.

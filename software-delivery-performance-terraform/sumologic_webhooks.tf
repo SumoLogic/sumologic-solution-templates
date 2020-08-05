@@ -6,7 +6,7 @@ resource "sumologic_connection" "pagerduty_connection" {
   count       = "${var.install_sumo_to_pagerduty_webhook}" ? length(var.pagerduty_services_sumo_webhooks) : 0
   type        = "WebhookConnection"
   name        = "Pagerduty Connection for Service - ${var.pagerduty_services_sumo_webhooks[count.index]}"
-  description = "Created via Sumo Logic SDP Terraform Script."
+  description = "Created via Sumo Logic SDO Terraform Script."
   url         = "https://events.pagerduty.com/generic/2010-04-15/create_event.json"
   headers = {
     "X-Header" : "Token token=${var.pagerduty_api_key}"
@@ -29,7 +29,7 @@ resource "sumologic_connection" "opsgenie_connection" {
   count       = "${var.install_sumo_to_opsgenie_webhook}" ? 1 : 0
   type        = "WebhookConnection"
   name        = "Opsgenie Webhook"
-  description = "Created via Sumo Logic SDP Terraform Script."
+  description = "Created via Sumo Logic SDO Terraform Script."
   url         = "${var.opsgenie_api_url}/v1/json/sumologic?apiKey=${jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey}"
 
   default_payload = <<JSON
@@ -54,7 +54,7 @@ resource "sumologic_connection" "jira_cloud_connection" {
   count       = "${var.install_sumo_to_jiracloud_webhook}" ? 1 : 0
   type        = "WebhookConnection"
   name        = "Jira Cloud Webhook"
-  description = "Created via Sumo Logic SDP Terraform Script."
+  description = "Created via Sumo Logic SDO Terraform Script."
   url         = "${var.jira_cloud_url}/rest/api/2/issue"
   headers = {
     "X-Header" : "${var.jira_cloud_auth}"
@@ -85,7 +85,7 @@ resource "sumologic_connection" "jira_server_connection" {
   count       = "${var.install_sumo_to_jiraserver_webhook}" ? 1 : 0
   type        = "WebhookConnection"
   name        = "Jira Server Webhook"
-  description = "Created via Sumo Logic SDP Terraform Script."
+  description = "Created via Sumo Logic SDO Terraform Script."
   url         = "${var.jira_server_url}/rest/api/2/issue"
   headers = {
     "X-Header" : "${var.jira_server_auth}"
@@ -116,7 +116,7 @@ resource "sumologic_connection" "jira_service_desk_connection" {
   count       = "${var.install_sumo_to_jiraservicedesk_webhook}" ? 1 : 0
   type        = "WebhookConnection"
   name        = "Jira Service Desk Webhook"
-  description = "Created via Sumo Logic SDP Terraform Script."
+  description = "Created via Sumo Logic SDO Terraform Script."
   url         = "${var.jira_servicedesk_url}/rest/api/2/issue"
   headers = {
     "X-Header" : "${var.jira_servicedesk_auth}"

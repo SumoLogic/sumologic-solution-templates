@@ -9,9 +9,9 @@ provider "sumologic" {
 }
 
 # Create/Delete Collector
-resource "sumologic_collector" "sdp_collector" {
+resource "sumologic_collector" "sdo_collector" {
   name     = var.collector_name
-  category = "SDP"
+  category = "SDO"
 }
 
 # Create/Delete Jira Cloud Source
@@ -19,7 +19,7 @@ resource "sumologic_http_source" "jira_cloud" {
   count        = "${var.install_jira_cloud}" ? 1 : 0
   name         = "Jira Cloud"
   category     = var.jira_cloud_sc
-  collector_id = sumologic_collector.sdp_collector.id
+  collector_id = sumologic_collector.sdo_collector.id
 }
 
 # Create/Delete BitBucket Cloud Source
@@ -28,7 +28,7 @@ resource "sumologic_http_source" "bitbucket_cloud" {
   name         = "Bitbucket Cloud"
   category     = var.bitbucket_sc
   fields       = { "_convertHeadersToFields" = "true" }
-  collector_id = sumologic_collector.sdp_collector.id
+  collector_id = sumologic_collector.sdo_collector.id
 }
 
 # Create/Delete Jira Server Source
@@ -36,7 +36,7 @@ resource "sumologic_http_source" "jira_server" {
   count        = "${var.install_jira_server}" ? 1 : 0
   name         = "Jira Server"
   category     = var.jira_server_sc
-  collector_id = sumologic_collector.sdp_collector.id
+  collector_id = sumologic_collector.sdo_collector.id
 }
 
 # Create/Delete OpsGenie Source
@@ -44,7 +44,7 @@ resource "sumologic_http_source" "opsgenie" {
   count        = "${var.install_opsgenie}" ? 1 : 0
   name         = "OpsGenie"
   category     = var.opsgenie_sc
-  collector_id = sumologic_collector.sdp_collector.id
+  collector_id = sumologic_collector.sdo_collector.id
 }
 
 # Create/Delete Pagerduty Source
@@ -52,7 +52,7 @@ resource "sumologic_http_source" "pagerduty" {
   count        = "${var.install_pagerduty}" ? 1 : 0
   name         = "Pagerduty"
   category     = var.pagerduty_sc
-  collector_id = sumologic_collector.sdp_collector.id
+  collector_id = sumologic_collector.sdo_collector.id
 }
 
 # Create/Delete Github Source
@@ -61,7 +61,7 @@ resource "sumologic_http_source" "github" {
   name         = "Github"
   category     = var.github_sc
   fields       = { "_convertHeadersToFields" = "true" }
-  collector_id = sumologic_collector.sdp_collector.id
+  collector_id = sumologic_collector.sdo_collector.id
 }
 
 # Create/Delete Jenkins Source
@@ -70,7 +70,7 @@ resource "sumologic_http_source" "jenkins" {
   name         = "Jenkins"
   category     = var.jenkins_sc
   fields       = { "_convertHeadersToFields" = "true" }
-  collector_id = sumologic_collector.sdp_collector.id
+  collector_id = sumologic_collector.sdo_collector.id
 }
 
 # Sumo Logic - Create/Delete folder for installing the applications
@@ -83,9 +83,9 @@ locals {
 
 resource "sumologic_folder" "folder" {
   name        = "${var.app_installation_folder} - ${local.time_stamp}"
-  description = "SDP Applications"
+  description = "SDO Applications"
   parent_id   = data.sumologic_personal_folder.personalFolder.id
-  depends_on  = [sumologic_collector.sdp_collector]
+  depends_on  = [sumologic_collector.sdo_collector]
 }
 
 # Remove slash from Sumo Logic sumo_api_endpoint
@@ -207,9 +207,9 @@ resource "null_resource" "install_jenkins_app" {
   }
 }
 
-# Install SDP App
-resource "null_resource" "install_sdp_app" {
-  count = "${var.install_sdp}" ? 1 : 0
+# Install SDO App
+resource "null_resource" "install_sdo_app" {
+  count = "${var.install_sdo}" ? 1 : 0
 
   provisioner "local-exec" {
     command = <<EOT
