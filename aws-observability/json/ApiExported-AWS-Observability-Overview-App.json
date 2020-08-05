@@ -22,7 +22,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
           "type": "RelativeTimeRangeBoundary",
-          "relativeTime": "-1h"
+          "relativeTime": "-1d"
         },
         "to": null
       },
@@ -230,7 +230,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} metric=Mem_Free region=* entity=* | eval _value / 1073741824 | avg",
+              "queryString": "namespace=AWS/EC2 account={{account}} metric=Mem_Free region=* entity=* | eval _value / 1073741824 | avg",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -293,7 +293,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApplicationELB (metric=HTTPCode_ELB_4XX_Count or metric=HTTPCode_ELB_5XX_Count) statistic=Sum account={{account}} region=* entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApplicationELB (metric=HTTPCode_ELB_4XX_Count or metric=HTTPCode_ELB_5XX_Count) statistic=Sum account={{account}} region=* entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -419,7 +419,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway metric=count Statistic=sum account={{account}} region=* entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApiGateway metric=count Statistic=sum account={{account}} region=* entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -440,7 +440,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region=*  entity=* | sum by entity, namespace, region",
+              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region=*  entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -461,7 +461,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/lambda metric=Invocations statistic=Sum account={{account}} region=* entity=* | sum by entity",
+              "queryString": "Namespace=aws/lambda metric=Invocations statistic=Sum account={{account}} region=* entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -482,7 +482,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/dynamodb metric=SuccessfulRequestLatency Statistic=SampleCount account={{account}} region=* entity=* | sum by entity | eval round(_value)",
+              "queryString": "Namespace=aws/dynamodb metric=SuccessfulRequestLatency Statistic=SampleCount account={{account}} region=* entity=* | sum by entity, namespace, region, account | eval round(_value)",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -497,7 +497,7 @@
       ],
       "variables": [
         {
-          "id": "03267BBB68063120",
+          "id": "B624219C3CA5C92D",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -535,7 +535,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
           "type": "RelativeTimeRangeBoundary",
-          "relativeTime": "-1h"
+          "relativeTime": "-1d"
         },
         "to": null
       },
@@ -743,7 +743,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} metric=Mem_Free region={{region}} entity=* | eval _value / 1073741824 | avg",
+              "queryString": "namespace=AWS/EC2 account={{account}} metric=Mem_Free region={{region}} entity=* | eval _value / 1073741824 | avg",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -785,7 +785,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity, namespace, account",
+              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -806,7 +806,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApplicationELB (metric=HTTPCode_ELB_4XX_Count or metric=HTTPCode_ELB_5XX_Count) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApplicationELB (metric=HTTPCode_ELB_4XX_Count or metric=HTTPCode_ELB_5XX_Count) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -932,7 +932,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway metric=count Statistic=sum account={{account}} region={{region}} entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApiGateway metric=count Statistic=sum account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -953,7 +953,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region={{region}}  entity=* | sum by entity",
+              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region={{region}}  entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -974,7 +974,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/lambda metric=Invocations statistic=Sum account={{account}} region={{region}} entity=* | sum by entity",
+              "queryString": "Namespace=aws/lambda metric=Invocations statistic=Sum account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -995,7 +995,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/dynamodb metric=SuccessfulRequestLatency Statistic=SampleCount account={{account}} region={{region}} entity=* | sum by entity | eval round(_value)",
+              "queryString": "Namespace=aws/dynamodb metric=SuccessfulRequestLatency Statistic=SampleCount account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account | eval round(_value)",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -1010,7 +1010,7 @@
       ],
       "variables": [
         {
-          "id": "8811A5BEE092DB69",
+          "id": "4BA91FFA93AFADA9",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -1024,7 +1024,7 @@
           "hideFromUI": false
         },
         {
-          "id": "BBCB49CD6DC6CEA9",
+          "id": "D970722490694B2A",
           "name": "region",
           "displayName": null,
           "defaultValue": "*",
