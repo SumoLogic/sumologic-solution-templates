@@ -207,19 +207,27 @@ resource "null_resource" "install_jenkins_app" {
   }
 }
 
-# Install SDO App
-resource "null_resource" "install_sdo_app" {
-  count = "${var.install_sdo}" ? 1 : 0
+# Install SDO App - Uncomment after BETA
+# resource "null_resource" "install_sdo_app" {
+#   count = "${var.install_sdo}" ? 1 : 0
 
-  provisioner "local-exec" {
-    command = <<EOT
-        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/cdf6245b-3c27-4de8-89bf-216e41d18c28/install' \
-            --header 'Accept: application/json' \
-            --header 'Content-Type: application/json' \
-            -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Software Development Observability", "description": "TO DO", "destinationFolderId": "${sumologic_folder.folder.id}"}'
-    EOT
-  }
+#   provisioner "local-exec" {
+#     command = <<EOT
+#         curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/cdf6245b-3c27-4de8-89bf-216e41d18c28/install' \
+#             --header 'Accept: application/json' \
+#             --header 'Content-Type: application/json' \
+#             -u ${var.sumo_access_id}:${var.sumo_access_key} \
+#             --data-raw '{ "name": "Software Development Observability", "description": "TO DO", "destinationFolderId": "${sumologic_folder.folder.id}"}'
+#     EOT
+#   }
+# }
+
+# REMOVE AFTER BETA
+# Install SDO App by importing JSON
+resource "sumologic_content" "install_sdo_app" {
+  count = "${var.install_sdo}" ? 1 : 0
+  parent_id = sumologic_folder.folder.id
+  config = file("${path.module}/sdo_json/sdo.json")
 }
 
 # Create/Delete Field required by BitBucket App in Sumo Logic by calling REST API

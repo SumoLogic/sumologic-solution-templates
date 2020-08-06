@@ -5,10 +5,10 @@ variable "sumo_access_key" {}
 variable "deployment" {}
 variable "sumo_api_endpoint" {}
 variable "app_installation_folder" {
-  default = "Software Delivery Performance"
+  default = "Software Development Observability"
 }
 variable "collector_name" {
-  default = "Software Delivery Performance"
+  default = "Software Development Observability"
 }
 
 #Apps
