@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "Lambda Function for automatic automatic tagging of provided AWS resources like EC2, RDS, API Gateway, DynamoDB, Lambda and Application load balancer."
+Description: "The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets."
 
 Globals:
   Function:
@@ -147,7 +147,8 @@ Resources:
                       cf_client = boto3.client('cloudformation', regionName)
 
                       try:
-                        response = cf_client.create_stack_set(StackSetName=stackSetName, TemplateURL=templateURL, Capabilities=ALL, Parameters=parameters)
+                        description = "The Stack instances are added when a new AWS account is created using AWS Control Tower Account factory process. The Stack Sets sets up the AWS Observability CloudFormation template on the AWS accounts and AWS Regions."
+                        response = cf_client.create_stack_set(StackSetName=stackSetName, Description=description, TemplateURL=templateURL, Capabilities=ALL, Parameters=parameters)
                         LOGGER.info('Stack Set Created with Name {} in Region {}'.format(stackSetName, regionName))
                         response = cf_client.create_stack_instances(StackSetName=stackSetName, Accounts=[accId], Regions=regions, ParameterOverrides=parameters)
                         LOGGER.info('Stack Instance added to the Stack Set with parameters {}'.format(parameters))
