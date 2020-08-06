@@ -1,7 +1,7 @@
 # sumologic-sdo-terraform
 
-The Sumo Logic Software Delivery Observability (SDO) solution provides an established framework to simplify the monitoring and troubleshooting of your software delivery infrastructure.
-* This Terraform script installs the Sumo Logic Software Delivery Observability (SDO) solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
+The Sumo Logic Software Development Observability (SDO) solution provides an established framework to simplify the monitoring and troubleshooting of your software development infrastructure.
+* This Terraform script installs the Sumo Logic Software Development Observability (SDO) solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
 * If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
 
 ## Getting Started
@@ -32,14 +32,14 @@ $ git clone https://github.com/SumoLogic/sumologic-solution-templates.git
 ```
 2. Install [Terraform](https://www.terraform.io/) and make sure it's on your PATH.
 3. Install the required third party terraform providers ([Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira), [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) ) as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) and on respective provider documentation.
-4. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/software-delivery-observability-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Sumo Logic Terraform Provider](https://www.terraform.io/docs/providers/sumologic/index.html), [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html), [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html), [Github Terraform Provider](https://www.terraform.io/docs/providers/github/index.html) and [Pagerduty Terraform Provider](https://www.terraform.io/docs/providers/pagerduty/index.html).
+4. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/software-development-observability-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Sumo Logic Terraform Provider](https://www.terraform.io/docs/providers/sumologic/index.html), [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html), [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html), [Github Terraform Provider](https://www.terraform.io/docs/providers/github/index.html) and [Pagerduty Terraform Provider](https://www.terraform.io/docs/providers/pagerduty/index.html).
 5. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_server`, `install_bitbucket_cloud`,`install_opsgenie`,`install_github`,`install_pagerduty`,`install_sdo`, `install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook`, `install_sumo_to_jiraservicedesk_webhook`, `install_sumo_to_jiracloud_webhook` and `install_sumo_to_pagerduty_webhook` in `sumologic.auto.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
 `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Beta. To participate contact your Sumo account executive.
 6. Update the placeholder values in `sumologic.auto.tfvars`, `atlassian.auto.tfvars`, `pagerduty.auto.tfvars`, `github.auto.tfvars`, `sumologic_fer.auto.tfvars` and `sumologic_webhooks.auto.tfvars` so they correspond with your Sumo Logic, Atlassian, Github and Pagerduty environments. See the [list of input parameters](#configurable-parameters) below.
 
 #### Deploy Sumo Logic - SDO Solution
 
-To deploy Sumo Logic - SDO Solution, navigate to the directory `sumologic-solution-templates/software-delivery-observability-terraform` and execute the below commands:
+To deploy Sumo Logic - SDO Solution, navigate to the directory `sumologic-solution-templates/software-development-observability-terraform` and execute the below commands:
 
 ```shell
 $ terraform plan
@@ -47,7 +47,7 @@ $ terraform apply
 ```
 #### Uninstall Sumo Logic - SDO Solution
 
-To uninstall the solution, navigate to the directory `sumologic-solution-templates/software-delivery-observability-terraform` and execute the below command:
+To uninstall the solution, navigate to the directory `sumologic-solution-templates/software-development-observability-terraform` and execute the below command:
 
 ```shell
 $ terraform destroy
@@ -78,14 +78,14 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | sumo_access_key           | [Sumo Logic Access Key](https://help.sumologic.com/Manage/Security/Access-Keys) |       |
 | deployment                | [Sumo Logic Deployment](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security)                                                                   | us1   |
 | sumo_api_endpoint         | [Sumo Logic API Endpoint](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security). Make sure the trailing "/" is present.                    | https://api.sumologic.com/api/v1/  |
-| app_installation_folder   | The Sumo Logic apps will be installed in a folder under your personal folder in Sumo Logic.| Software Delivery Observability|
+| app_installation_folder   | The Sumo Logic apps will be installed in a folder under your personal folder in Sumo Logic.| Software Development Observability|
 | install_jira_cloud        | Install [Sumo Logic Application and WebHooks for Jira Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira_Cloud)            | true  |
 | install_jira_server       | Install [Sumo Logic Application and WebHooks for Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira) | true  |
 | install_bitbucket_cloud   | Install [Sumo Logic Application and WebHooks for BitBucket Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket)       | true  |       |
 | install_opsgenie          | Install [Sumo Logic Application and WebHooks for Opsgenie](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/Opsgenie)      | true  |
 | install_github            | Install [Sumo Logic Application and WebHooks for Github](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/GitHub)      | true  |
 | install_pagerduty         | Install [Sumo Logic Application and WebHooks for Pagerduty](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/PagerDuty_V2)      | true  |
-| install_sdo               | Install [Sumo Logic Application for Software Delivery Observability]()      | true  |
+| install_sdo               | Install [Sumo Logic Application for Software Development Observability]()      | true  |
 | install_sumo_to_opsgenie_webhook | Install [Sumo Logic to Opsgenie WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Opsgenie). `install_opsgenie` should be true for this option to be true. |  false  |
 | install_sumo_to_jiracloud_webhook| Install [Sumo Logic to Jira Cloud WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud) | false |
 | install_sumo_to_jiraserver_webhook| Install [Sumo Logic to Jira Server WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server) | false |

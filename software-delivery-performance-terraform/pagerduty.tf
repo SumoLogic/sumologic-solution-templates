@@ -1,4 +1,4 @@
-# Sumo Logic - SDP Terraform
+# Sumo Logic - SDO Terraform
 
 # This script creates Webhooks to Sumo Logic in Pagerduty Services.
 # Configure the Pagerduty credentials in the pagerduty.auto.tfvars.
