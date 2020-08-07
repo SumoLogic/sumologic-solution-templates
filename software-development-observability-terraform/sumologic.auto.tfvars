@@ -10,7 +10,7 @@ deployment              = "<YOUR SUMO DEPLOYMENT>"
 # Please update with your deployment, refer: https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
 sumo_api_endpoint       = "<YOUR SUMOLOGIC API ENDPOINT>"
 # Example: https://api.sumologic.com/api/ Please update with your sumologic api endpoint. Make sure the trailing "/" is present. Refer, https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security
-app_installation_folder = "Software Delivery Observability"
+app_installation_folder = "Software Development Observability"
 # The Sumo Logic apps will be installed in a folder specified by this value under your personal folder in Sumo Logic.
 
 # Sumo Logic Apps, Collection and Webhooks
