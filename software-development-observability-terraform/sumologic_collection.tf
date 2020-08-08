@@ -227,7 +227,7 @@ resource "null_resource" "install_jenkins_app" {
 resource "sumologic_content" "install_sdo_app" {
   count = "${var.install_sdo}" ? 1 : 0
   parent_id = sumologic_folder.folder.id
-  config = file("${path.module}/sdo_json/sdo.json")
+  config = file("${path.module}/sdo_app_artifacts/sdo.json")
 }
 
 # Create/Delete Field required by BitBucket App in Sumo Logic by calling REST API
