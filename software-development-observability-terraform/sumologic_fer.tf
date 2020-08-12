@@ -63,21 +63,11 @@ resource "sumologic_field_extraction_rule" "bitbucket_deploy_fer" {
   enabled          = true
 }
 
-resource "sumologic_field_extraction_rule" "jira_cloud_issues_fer" {
-  count            = "${var.install_jira_cloud}" ? 1 : 0
-  depends_on       = [sumologic_http_source.jira_cloud]
-  name             = "Jira Cloud Issues"
-  scope            = "_sourceCategory=${var.jira_cloud_sc} ${var.jira_cloud_issues_fer_scope}"
-  parse_expression = var.jira_cloud_issues_fer_parse
-  enabled          = true
-}
-
-resource "sumologic_field_extraction_rule" "jira_server_issues_fer" {
-  count            = "${var.install_jira_server}" ? 1 : 0
-  depends_on       = [sumologic_http_source.jira_server]
-  name             = "Jira Server Issues"
-  scope            = "_sourceCategory=${var.jira_server_sc} ${var.jira_server_issues_fer_scope}"
-  parse_expression = var.jira_server_issues_fer_parse
+resource "sumologic_field_extraction_rule" "jira_issues_fer" {
+  count            = "${var.install_jira_cloud}" || "${var.install_jira_server}" ? 1 : 0
+  name             = "Jira Issues"
+  scope            = "_sourceCategory=${var.jira_cloud_sc} or _sourceCategory=${var.jira_server_sc} ${var.jira_issues_fer_scope}"
+  parse_expression = var.jira_issues_fer_parse
   enabled          = true
 }
 

@@ -151,9 +151,7 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the Opsgenie Alerts FER is added successfully
 	validateSumoLogicOpsgenieAlertsFER(t, terraformOptions)
 	// Validate if the Jira Cloud FER is added successfully
-	validateSumoLogicJiraCloudFER(t, terraformOptions)
-	// Validate if the Jira Server FER is added successfully
-	validateSumoLogicJiraServerFER(t, terraformOptions)
+	validateSumoLogicJiraFER(t, terraformOptions)
 }
 
 func validateSumoLogicCollector(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
@@ -414,22 +412,11 @@ func validateSumoLogicPagerdutyAlertsFER(t *testing.T, terraformOptions *terrafo
 	}
 }
 
-func validateSumoLogicJiraServerFER(t *testing.T, terraformOptions *terraform.Options) {
+func validateSumoLogicJiraFER(t *testing.T, terraformOptions *terraform.Options) {
 
 	// Run `terraform output` to get the value of an output variable
-	ferID := terraform.Output(t, terraformOptions, "jira_server_issues_fer_id")
-	if ferID != "[]" && getProperty("install_jira_server") == "true" {
-		ferID = strings.Split(ferID, "\"")[1]
-		// Verify that we get back a 200 OK
-		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
-	}
-}
-
-func validateSumoLogicJiraCloudFER(t *testing.T, terraformOptions *terraform.Options) {
-
-	// Run `terraform output` to get the value of an output variable
-	ferID := terraform.Output(t, terraformOptions, "jira_cloud_issues_fer_id")
-	if ferID != "[]" && getProperty("install_jira_cloud") == "true" {
+	ferID := terraform.Output(t, terraformOptions, "jira_issues_fer_id")
+	if ferID != "[]" && (getProperty("install_jira_cloud") == "true" || getProperty("install_jira_server") == "true") {
 		ferID = strings.Split(ferID, "\"")[1]
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
