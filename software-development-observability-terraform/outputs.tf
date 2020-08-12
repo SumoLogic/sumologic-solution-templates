@@ -94,12 +94,8 @@ output "bitbucket_deploy_fer_id" {
   value = sumologic_field_extraction_rule.bitbucket_deploy_fer.*.id
 }
 
-output "jira_cloud_issues_fer_id" {
-  value = sumologic_field_extraction_rule.jira_cloud_issues_fer.*.id
-}
-
-output "jira_server_issues_fer_id" {
-  value = sumologic_field_extraction_rule.jira_server_issues_fer.*.id
+output "jira_issues_fer_id" {
+  value = sumologic_field_extraction_rule.jira_issues_fer.*.id
 }
 
 output "pagerduty_alerts_fer_id" {

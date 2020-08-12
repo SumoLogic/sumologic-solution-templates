@@ -159,55 +159,55 @@ resource "null_resource" "install_Opsgenie_app" {
   }
 }
 
-# Install Pagerduty App
-resource "null_resource" "install_pagerduty_app" {
-  count      = "${var.install_pagerduty}" ? 1 : 0
-  depends_on = [sumologic_http_source.pagerduty]
+# Install Pagerduty App - Uncomment after GA
+# resource "null_resource" "install_pagerduty_app" {
+#   count      = "${var.install_pagerduty}" ? 1 : 0
+#   depends_on = [sumologic_http_source.pagerduty]
 
-  provisioner "local-exec" {
-    command = <<EOT
-        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/589857e0-e4c1-4165-8212-f656899a3b95/install' \
-            --header 'Accept: application/json' \
-            --header 'Content-Type: application/json' \
-            -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Pagerduty V2", "description": "The Sumo Logic App for PagerDuty V2 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"logsrcpd": "_sourceCategory = ${var.pagerduty_sc}"}}'
-    EOT
-  }
-}
+#   provisioner "local-exec" {
+#     command = <<EOT
+#         curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/589857e0-e4c1-4165-8212-f656899a3b95/install' \
+#             --header 'Accept: application/json' \
+#             --header 'Content-Type: application/json' \
+#             -u ${var.sumo_access_id}:${var.sumo_access_key} \
+#             --data-raw '{ "name": "Pagerduty V2", "description": "The Sumo Logic App for PagerDuty V2 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"logsrcpd": "_sourceCategory = ${var.pagerduty_sc}"}}'
+#     EOT
+#   }
+# }
 
-# Install Github App
-resource "null_resource" "install_github_app" {
-  count      = "${var.install_github}" ? 1 : 0
-  depends_on = [sumologic_http_source.github]
+# # Install Github App - Uncomment after GA
+# resource "null_resource" "install_github_app" {
+#   count      = "${var.install_github}" ? 1 : 0
+#   depends_on = [sumologic_http_source.github]
 
-  provisioner "local-exec" {
-    command = <<EOT
-        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/86289912-b909-426e-8154-bda55b9ee902/install' \
-            --header 'Accept: application/json' \
-            --header 'Content-Type: application/json' \
-            -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Github", "description": "The Sumo Logic App for GitHub connects to your GitHub repository at the Organization or Repository level, and ingests GitHub events via a webhook.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"paramId123": "_sourceCategory = ${var.github_sc}"}}'
-    EOT
-  }
-}
+#   provisioner "local-exec" {
+#     command = <<EOT
+#         curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/86289912-b909-426e-8154-bda55b9ee902/install' \
+#             --header 'Accept: application/json' \
+#             --header 'Content-Type: application/json' \
+#             -u ${var.sumo_access_id}:${var.sumo_access_key} \
+#             --data-raw '{ "name": "Github", "description": "The Sumo Logic App for GitHub connects to your GitHub repository at the Organization or Repository level, and ingests GitHub events via a webhook.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"paramId123": "_sourceCategory = ${var.github_sc}"}}'
+#     EOT
+#   }
+# }
 
-# Install Jenkins App
-resource "null_resource" "install_jenkins_app" {
-  count      = "${var.install_jenkins}" ? 1 : 0
-  depends_on = [sumologic_http_source.jenkins]
+# # Install Jenkins App - Uncomment after GA
+# resource "null_resource" "install_jenkins_app" {
+#   count      = "${var.install_jenkins}" ? 1 : 0
+#   depends_on = [sumologic_http_source.jenkins]
 
-  provisioner "local-exec" {
-    command = <<EOT
-        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/050ad791-f6e6-45e1-bae3-be4818c240dc/install' \
-            --header 'Accept: application/json' \
-            --header 'Content-Type: application/json' \
-            -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Jenkins", "description": "Jenkins is an open source automation server for automating tasks related to building, testing, and delivering software.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"paramId123": "_sourceCategory = ${var.jenkins_sc}"}}'
-    EOT
-  }
-}
+#   provisioner "local-exec" {
+#     command = <<EOT
+#         curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/050ad791-f6e6-45e1-bae3-be4818c240dc/install' \
+#             --header 'Accept: application/json' \
+#             --header 'Content-Type: application/json' \
+#             -u ${var.sumo_access_id}:${var.sumo_access_key} \
+#             --data-raw '{ "name": "Jenkins", "description": "Jenkins is an open source automation server for automating tasks related to building, testing, and delivering software.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"paramId123": "_sourceCategory = ${var.jenkins_sc}"}}'
+#     EOT
+#   }
+# }
 
-# Install SDO App - Uncomment after BETA
+# Install SDO App - Uncomment after GA
 # resource "null_resource" "install_sdo_app" {
 #   count = "${var.install_sdo}" ? 1 : 0
 
@@ -228,6 +228,63 @@ resource "sumologic_content" "install_sdo_app" {
   count = "${var.install_sdo}" ? 1 : 0
   parent_id = sumologic_folder.folder.id
   config = file("${path.module}/sdo_app_artifacts/sdo.json")
+}
+
+# REMOVE AFTER BETA
+# Install PagerDuty App by importing JSON
+data "template_file" "pagerduty_json" {
+  count      = "${var.install_pagerduty}" ? 1 : 0
+  depends_on = [sumologic_http_source.pagerduty]
+  template   = "${file("${path.module}/sdo_app_artifacts/pagerduty.json.tmpl")}"
+  vars = {
+    sourceCategory = var.pagerduty_sc
+  }
+}
+
+# REMOVE AFTER BETA
+# Install PagerDuty App by importing JSON
+resource "sumologic_content" "install_pagerduty_app" {
+  count = "${var.install_pagerduty}" ? 1 : 0
+  parent_id = sumologic_folder.folder.id
+  config = data.template_file.pagerduty_json[0].rendered
+}
+
+# REMOVE AFTER BETA
+# Install jenkins App by importing JSON
+data "template_file" "jenkins_json" {
+  count      = "${var.install_jenkins}" ? 1 : 0
+  depends_on = [sumologic_http_source.jenkins]
+  template   = "${file("${path.module}/sdo_app_artifacts/jenkins.json.tmpl")}"
+  vars = {
+    sourceCategory = var.jenkins_sc
+  }
+}
+
+# REMOVE AFTER BETA
+# Install Jenkins App by importing JSON
+resource "sumologic_content" "install_jenkins_app" {
+  count = "${var.install_jenkins}" ? 1 : 0
+  parent_id = sumologic_folder.folder.id
+  config = data.template_file.jenkins_json[0].rendered
+}
+
+# REMOVE AFTER BETA
+# Install github App by importing JSON
+data "template_file" "github_json" {
+  count      = "${var.install_github}" ? 1 : 0
+  depends_on = [sumologic_http_source.github]
+  template   = "${file("${path.module}/sdo_app_artifacts/github.json.tmpl")}"
+  vars = {
+    sourceCategory = var.github_sc
+  }
+}
+
+# REMOVE AFTER BETA
+# Install Github App by importing JSON
+resource "sumologic_content" "install_github_app" {
+  count = "${var.install_github}" ? 1 : 0
+  parent_id = sumologic_folder.folder.id
+  config = data.template_file.github_json[0].rendered
 }
 
 # Create/Delete Field required by BitBucket App in Sumo Logic by calling REST API
