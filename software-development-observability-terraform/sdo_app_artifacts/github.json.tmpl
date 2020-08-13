@@ -57,7 +57,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} added \"commits\" repository pusher \n| json \"ref\", \"commits[*].added[*]\", \"repository.name\", \"pusher.name\" as branch, files, repo_name, user\n| where files != \"[]\" \n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(files, \",\",\"\") as Cfiles\n| (length(files) - length (Cfiles) +1) as num_files \n| timeslice 1d\n|sum(num_files) group by Bname, _timeslice\n| order by _sum\n| transpose row _timeslice column Bname",
+                            "queryString": "_sourceCategory=${sourceCategory} added \"commits\" repository pusher \n| json \"ref\", \"commits[*].added[*]\", \"repository.name\", \"pusher.name\" as branch, files, repo_name, user\n| where files != \"[]\" \n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(files, \",\",\"\") as Cfiles\n| (length(files) - length (Cfiles) +1) as num_files \n| timeslice 1d\n|sum(num_files) group by Bname, _timeslice\n| order by _sum\n| transpose row _timeslice column Bname",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -78,7 +78,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"commits\" \"id\" \"distinct\" repository pusher \n| json \"ref\", \"commits[*].id[*]\", \"repository.name\", \"pusher.name\" as branch, commit_size, repo_name, user\n| where commit_size != \"[]\"\n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commit_size, \",\",\"\") as Ccommit_size\n| (length(commit_size) - length(Ccommit_size) + 1) as num_commits \n| timeslice 1d\n|sum(num_commits) group by Bname, _timeslice\n| order by _sum\n| transpose row _timeslice column Bname\n",
+                            "queryString": "_sourceCategory=${sourceCategory} \"commits\" \"id\" \"distinct\" repository pusher \n| json \"ref\", \"commits[*].id[*]\", \"repository.name\", \"pusher.name\" as branch, commit_size, repo_name, user\n| where commit_size != \"[]\"\n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commit_size, \",\",\"\") as Ccommit_size\n| (length(commit_size) - length(Ccommit_size) + 1) as num_commits \n| timeslice 1d\n|sum(num_commits) group by Bname, _timeslice\n| order by _sum\n| transpose row _timeslice column Bname\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -99,7 +99,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"commits\" \"removed\"  repository pusher \n| json \"ref\", \"commits[*].removed[*]\",  \"repository.name\", \"pusher.name\" as branch, files_del, repo_name, user\n| where files_del != \"[]\"\n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(files_del, \",\",\"\") as Cfiles_del\n| (length(Cfiles_del) - length (Cfiles_del) +1) as num_del_files\n| timeslice 1d\n|sum(num_del_files) group by Bname, _timeslice\n| order by _sum\n| transpose row _timeslice column Bname\n",
+                            "queryString": "_sourceCategory=${sourceCategory} \"commits\" \"removed\"  repository pusher \n| json \"ref\", \"commits[*].removed[*]\",  \"repository.name\", \"pusher.name\" as branch, files_del, repo_name, user\n| where files_del != \"[]\"\n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(files_del, \",\",\"\") as Cfiles_del\n| (length(Cfiles_del) - length (Cfiles_del) +1) as num_del_files\n| timeslice 1d\n|sum(num_del_files) group by Bname, _timeslice\n| order by _sum\n| transpose row _timeslice column Bname\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -120,7 +120,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"commits\" \"modified\" repository pusher \n| json \"ref\", \"commits[*].modified[*]\",  \"repository.name\", \"pusher.name\" as branch, files_mod, repo_name, user\n| where files_mod != \"[]\"\n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(files_mod, \",\",\"\") as Cfiles_mod\n| (length(files_mod) - length (Cfiles_mod) +1) as num_mod_files\n| timeslice 1d\n|sum(num_mod_files) group by Bname, _timeslice\n| order by _sum\n| transpose row _timeslice column Bname\n",
+                            "queryString": "_sourceCategory=${sourceCategory} \"commits\" \"modified\" repository pusher \n| json \"ref\", \"commits[*].modified[*]\",  \"repository.name\", \"pusher.name\" as branch, files_mod, repo_name, user\n| where files_mod != \"[]\"\n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(files_mod, \",\",\"\") as Cfiles_mod\n| (length(files_mod) - length (Cfiles_mod) +1) as num_mod_files\n| timeslice 1d\n|sum(num_mod_files) group by Bname, _timeslice\n| order by _sum\n| transpose row _timeslice column Bname\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -141,7 +141,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} added \"commits\" repository pusher \n| json \"ref\", \"commits[*].added[*]\", \"repository.name\", \"pusher.name\" as branch, files, repo_name, user\n| where files != \"[]\" \n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(files, \",\",\"\") as Cfiles\n| (length(files) - length (Cfiles) +1) as num_files \n| sum(num_files) group by Bname\n//| order by _sum\n//| transpose row Bname column _sum",
+                            "queryString": "_sourceCategory=${sourceCategory} added \"commits\" repository pusher \n| json \"ref\", \"commits[*].added[*]\", \"repository.name\", \"pusher.name\" as branch, files, repo_name, user\n| where files != \"[]\" \n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| where Bname matches \"{{branch}}\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(files, \",\",\"\") as Cfiles\n| (length(files) - length (Cfiles) +1) as num_files \n| sum(num_files) group by Bname\n//| order by _sum\n//| transpose row Bname column _sum",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -162,7 +162,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory} added \"commits\" repository pusher \n| json \"ref\", \"commits[*].added[*]\", \"repository.name\", \"pusher.name\" as branch, files, repo_name, user\n| where files != \"[]\" \n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| fields Bname",
+                        "query": "_sourceCategory=${sourceCategory} added \"commits\" repository pusher \n| json \"ref\", \"commits[*].added[*]\", \"repository.name\", \"pusher.name\" as branch, files, repo_name, user\n| where files != \"[]\" \n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| fields Bname",
                         "field": "Bname"
                     },
                     "allowMultiSelect": false,
@@ -176,7 +176,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"repository.name\", \"pusher.name\" as repo_name, user",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"repository.name\", \"pusher.name\" as repo_name, user",
                         "field": "repo_name"
                     },
                     "allowMultiSelect": false,
@@ -190,7 +190,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"repository.name\", \"pusher.name\" as repo_name, user",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"repository.name\", \"pusher.name\" as repo_name, user",
                         "field": "user"
                     },
                     "allowMultiSelect": false,
@@ -266,7 +266,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} issue\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as axn,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"issues\"\n| withtime repoOpenIssueCnt\n| most_recent (repoopenissuecnt_withtime) as number_issues\t by repo_name\n| number (number_issues)",
+                            "queryString": "_sourceCategory=${sourceCategory}  and %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as axn,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| withtime repoOpenIssueCnt\n| most_recent (repoopenissuecnt_withtime) as number_issues\t by repo_name\n| number (number_issues)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -287,7 +287,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} open issue \n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n|where action =\"opened\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"issues\"\n| count by id, title,  created_date, user,  repo_name ,action\n|order created_date desc\n| fields - _count\n",
+                            "queryString": "_sourceCategory=${sourceCategory} open and %\"x-github-event\" = \"issues\" \n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n|where action =\"opened\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| count by id, title,  created_date, user,  repo_name ,action\n|order created_date desc\n| fields - _count\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -308,7 +308,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} open issue\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"issues\"\n|withtime action\n|most_recent(action_withtime) as state by  id, title,created_date, user, repo_name\n| where state in ( \"opened\", \"reopened\")\n|order created_date asc",
+                            "queryString": "_sourceCategory=${sourceCategory} open  and %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n|withtime action\n|most_recent(action_withtime) as state by  id, title,created_date, user, repo_name\n| where state in ( \"opened\", \"reopened\")\n|order created_date asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -329,7 +329,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} open issue\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"issues\"\n|withtime action\n|most_recent(action_withtime) as state by  id, title,closedAt, user, repo_name\n| where state = \"closed\"\n|order closedAt desc",
+                            "queryString": "_sourceCategory=${sourceCategory} open  and %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n|withtime action\n|most_recent(action_withtime) as state by  id, title,closedAt, user, repo_name\n| where state = \"closed\"\n|order closedAt desc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -350,7 +350,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} open issue\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"issues\"\n|withtime action\n|most_recent(action_withtime) as state by  id, title,updatedAt, repo_name, user\n| where state = \"reopened\"\n|order updatedAt desc\n",
+                            "queryString": "_sourceCategory=${sourceCategory} open  and %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n|withtime action\n|most_recent(action_withtime) as state by  id, title,updatedAt, repo_name, user\n| where state = \"reopened\"\n|order updatedAt desc\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -371,7 +371,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} closed issue\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as axn,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where state =\"closed\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"  and %\"x-github-event\" = \"issues\"\n| count by user, state\n|order by _count desc\n| limit 10",
+                            "queryString": "_sourceCategory=${sourceCategory} closed  and %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as axn,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where state =\"closed\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| count by user, state\n|order by _count desc\n| limit 10",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -392,7 +392,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} open issue\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as axn,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where state =\"open\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"issues\"\n| count by user, state\n|order by _count desc\n| limit 10",
+                            "queryString": "_sourceCategory=${sourceCategory} open  and %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as axn,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where state =\"open\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| count by user, state\n|order by _count desc\n| limit 10",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -413,7 +413,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} issue\n| json \"action\", \"issue.id\", \"issue.title\" , \"issue.state\",\"issue.assignee\", \"issue.created_at\", \"issue.closed_at\", \"issue.user.login\",\"repository.name\"  as action,  id, title, state, asignee ,created_at, closed_at, user, repo_name\n|where state =\"open\" and isNull(asignee) and isNull(closed_at) and user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"issues\"\n| count by id, state, title, user, created_at\n| order by created_at asc\n| fields id,  title, created_at, user, state\n",
+                            "queryString": "_sourceCategory=${sourceCategory}  and %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.title\" , \"issue.state\",\"issue.assignee\", \"issue.created_at\", \"issue.closed_at\", \"issue.user.login\",\"repository.name\"  as action,  id, title, state, asignee ,created_at, closed_at, user, repo_name\n|where state =\"open\" and isNull(asignee) and isNull(closed_at) and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| count by id, state, title, user, created_at\n| order by created_at asc\n| fields id,  title, created_at, user, state\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -428,13 +428,13 @@
             ],
             "variables": [
                 {
-                    "id": "74CFC4F5FE5555BA",
+                    "id": "B1B2AE5C1C32D6C0",
                     "name": "repository",
                     "displayName": null,
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"repository.name\" as repo_name",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"repository.name\" as repo_name",
                         "field": "repo_name"
                     },
                     "allowMultiSelect": false,
@@ -442,13 +442,13 @@
                     "hideFromUI": false
                 },
                 {
-                    "id": "15D9CAEE532BB0F6",
+                    "id": "4DEBCC76A0F957FA",
                     "name": "user",
                     "displayName": null,
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"issue.user.login\" as user",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"issue.user.login\" as user",
                         "field": "user"
                     },
                     "allowMultiSelect": false,
@@ -540,7 +540,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"commits\"  \"https://api.github.com/repos\"\n| json  \"commits[*].id[*]\", \"repository.name\", \"pusher.name\" as  commit_size, repo_name, user\n| where commit_size != \"[]\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commit_size, \",\",\"\") as Ccommit_size\n| (length(commit_size) - length(Ccommit_size) + 1) as num_commits \n| timeslice 1d\n| count by _timeslice ",
+                            "queryString": "_sourceCategory=${sourceCategory} \"commits\"  \"https://api.github.com/repos\"\n| json  \"commits[*].id[*]\", \"repository.name\", \"pusher.name\" as  commit_size, repo_name, user\n| where commit_size != \"[]\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commit_size, \",\",\"\") as Ccommit_size\n| (length(commit_size) - length(Ccommit_size) + 1) as num_commits \n| timeslice 1d\n| count by _timeslice ",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -588,7 +588,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\" as action, pull_req_state, tittle, body, created_time, updated_time, user, repo_name\n| where action =\"opened\" and %\"x-github-event\" = \"pull_request\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| timeslice 1d\n| count by _timeslice\n",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\" as action, pull_req_state, tittle, body, created_time, updated_time, user, repo_name\n| where action =\"opened\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| timeslice 1d\n| count by _timeslice\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -609,7 +609,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} ( \"opened\" or \"closed\" ) \n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where action in ( \"opened\", \"closed\") and %\"x-github-event\" = \"issues\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| timeslice 1d\n| count by _timeslice, action\n| transpose row _timeslice column action ",
+                            "queryString": "_sourceCategory=${sourceCategory} ( \"opened\" or \"closed\" ) AND %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where action in ( \"opened\", \"closed\")\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| timeslice 1d\n| count by _timeslice, action\n| transpose row _timeslice column action ",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -630,7 +630,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"commits\" \"https://api.github.com/repos\"\n| json  \"commits[*].id[*]\", \"repository.name\", \"pusher.name\"  as  commit_size, repo_name, user\n| where commit_size != \"[]\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commit_size, \",\",\"\") as Ccommit_size\n| (length(commit_size) - length(Ccommit_size) + 1) as num_commits \n| count by repo_name\n| order by repo_name asc\n",
+                            "queryString": "_sourceCategory=${sourceCategory} \"commits\" \"https://api.github.com/repos\"\n| json  \"commits[*].id[*]\", \"repository.name\", \"pusher.name\"  as  commit_size, repo_name, user\n| where commit_size != \"[]\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commit_size, \",\",\"\") as Ccommit_size\n| (length(commit_size) - length(Ccommit_size) + 1) as num_commits \n| count by repo_name\n| order by repo_name asc\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -651,7 +651,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"commits\" repository pusher\n| json \"ref\", \"commits[0].timestamp\", \"commits[*].distinct[*]\" ,\"pusher.name\",  \"repository.name\" as ref, commit_time, commits ,user, repo_name\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commits, \"true\",\"\") as Ccommits\n| replace(commits, \"true\",\"1\") as C1commits\n| length(C1commits) - length (Ccommits) as num_commits \n| sum (num_commits) group by user\n| order by _sum\n| limit 10",
+                            "queryString": "_sourceCategory=${sourceCategory} \"commits\" repository pusher\n| json \"ref\", \"commits[0].timestamp\", \"commits[*].distinct[*]\" ,\"pusher.name\",  \"repository.name\" as ref, commit_time, commits ,user, repo_name\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commits, \"true\",\"\") as Ccommits\n| replace(commits, \"true\",\"1\") as C1commits\n| length(C1commits) - length (Ccommits) as num_commits \n| sum (num_commits) group by user\n| order by _sum\n| limit 10",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -672,7 +672,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.title\", \"number\", \"pull_request.created_at\", \"pull_request.user.login\", \"repository.name\" as action, title, id, created_time, user, repo_name\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"pull_request\"\n| withtime action\n| most_recent(action_withtime) as state by  id, title, user, repo_name, created_time\n| where state  in (\"opened\", \"reopened\")\n| fields - state\n| order by repo_name\n\n",
+                            "queryString": "_sourceCategory=${sourceCategory}  and %\"x-github-event\" = \"pull_request\"\n| json \"action\", \"pull_request.title\", \"number\", \"pull_request.created_at\", \"pull_request.user.login\", \"repository.name\" as action, title, id, created_time, user, repo_name\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| withtime action\n| most_recent(action_withtime) as state by  id, title, user, repo_name, created_time\n| where state  in (\"opened\", \"reopened\")\n| fields - state\n| order by repo_name\n\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -693,7 +693,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} open \"issue\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as axn,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"issues\"\n| withtime axn\n| most_recent(axn_withtime) as state by  id, title, created_date\n| where state in (\"opened\", \"reopened\")\n| order created_date asc\n| fields id, title, state,created_date\n",
+                            "queryString": "_sourceCategory=${sourceCategory} open \"issue\" AND %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as axn,  id, issue_num, title, state, created_date, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| withtime axn\n| most_recent(axn_withtime) as state by  id, title, created_date\n| where state in (\"opened\", \"reopened\")\n| order created_date asc\n| fields id, title, state,created_date\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -714,7 +714,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"opened\" \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\" as action, pull_req_state, tittle, body, created_time, updated_time, user, repo_name\n| where action =\"opened\" and %\"x-github-event\" = \"pull_request\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n|count by repo_name, pull_req_state\n| order by repo_name asc\n| transpose row repo_name column  pull_req_state",
+                            "queryString": "_sourceCategory=${sourceCategory} \"opened\"  and %\"x-github-event\" = \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\" as action, pull_req_state, tittle, body, created_time, updated_time, user, repo_name\n| where action =\"opened\"\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n|count by repo_name, pull_req_state\n| order by repo_name asc\n| transpose row repo_name column  pull_req_state",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -735,7 +735,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} and ( \"opened\" or \"closed\" or \"reopened\" ) \n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" AND %\"x-github-event\" = \"issues\" and action in ( \"opened\", \"closed\", \"reopened\")\n| count by action,repo_name\n| where action != \"assigned\"\n| transpose row action column repo_name",
+                            "queryString": "_sourceCategory=${sourceCategory} and ( \"opened\" or \"closed\" or \"reopened\" ) AND %\"x-github-event\" = \"issues\"\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and action in ( \"opened\", \"closed\", \"reopened\")\n| count by action,repo_name\n| where action != \"assigned\"\n| transpose row action column repo_name",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -750,13 +750,13 @@
             ],
             "variables": [
                 {
-                    "id": "171382330BCF751F",
+                    "id": "58B346593CED74F7",
                     "name": "user",
                     "displayName": null,
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"ref\", \"commits[0].timestamp\", \"commits[*].distinct[*]\" ,\"pusher.name\",  \"repository.name\" as ref, commit_time, commits ,user, repo_name",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"ref\", \"commits[0].timestamp\", \"commits[*].distinct[*]\" ,\"pusher.name\",  \"repository.name\" as ref, commit_time, commits ,user, repo_name",
                         "field": "user"
                     },
                     "allowMultiSelect": false,
@@ -764,13 +764,13 @@
                     "hideFromUI": false
                 },
                 {
-                    "id": "BA269638D2DAAEE7",
+                    "id": "ABD284AB7CA2860E",
                     "name": "repository",
                     "displayName": null,
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"repository.name\" as repo_name",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"repository.name\" as repo_name",
                         "field": "repo_name"
                     },
                     "allowMultiSelect": false,
@@ -834,7 +834,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\",\"pull_request.merged\", \"pull_request.changed_files\", \"pull_request.additions\",\"pull_request.deletions\", \"number\",\"pull_request._links.html.href\" as action, pull_req_state, title, body, created_time, updated_time, user, repo_name, merge, changed_files, lines_added, lines_deleted, id, review_url\n| where action =\"opened\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"pull_request\"\n|count by id, title,user,lines_added, lines_deleted,changed_files, repo_name\n| fields id, title, repo_name, user,lines_added,lines_deleted,changed_files\n| num (lines_added) | num (lines_deleted) \n| (lines_added - lines_deleted) as score\n| sort by score  desc\n| fields - score\n//| limit 15\n",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\",\"pull_request.merged\", \"pull_request.changed_files\", \"pull_request.additions\",\"pull_request.deletions\", \"number\",\"pull_request._links.html.href\" as action, pull_req_state, title, body, created_time, updated_time, user, repo_name, merge, changed_files, lines_added, lines_deleted, id, review_url\n| where action =\"opened\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n|count by id, title,user,lines_added, lines_deleted,changed_files, repo_name\n| fields id, title, repo_name, user,lines_added,lines_deleted,changed_files\n| num (lines_added) | num (lines_deleted) \n| (lines_added - lines_deleted) as score\n| sort by score  desc\n| fields - score\n//| limit 15\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -855,7 +855,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"comment\"\n| json \"comment.user.login\",\"comment.body\", \"comment.created_at\", \"pull_request.number\", \"pull_request.title\", \"repository.name\",\"pull_request._links.html.href\" as user, body, created_at, id, title, repo_name, review_url\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"pull_request_review_comment\"\n| count id, title, repo_name\n| order by _count desc",
+                            "queryString": "_sourceCategory=${sourceCategory} \"comment\" and %\"x-github-event\" = \"pull_request_review_comment\"\n| json \"comment.user.login\",\"comment.body\", \"comment.created_at\", \"pull_request.number\", \"pull_request.title\", \"repository.name\",\"pull_request._links.html.href\" as user, body, created_at, id, title, repo_name, review_url\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| count id, title, repo_name\n| order by _count desc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -876,7 +876,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.title\", \"number\", \"pull_request.created_at\",\"pull_request.user.login\", \"repository.name\", \"pull_request._links.html.href\" as action, title, id, created_time, user, repo_name, review_url\n| where action in (\"opened\", \"closed\", \"reopened\") and user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"pull_request\"\n| withtime action\n|most_recent(action_withtime) as state by  id, title, created_time, user, repo_name \n|where state  in (\"opened\", \"reopened\")\n| order created_time asc\n| fields id, title, repo_name, state,user,created_time\n",
+                            "queryString": "_sourceCategory=${sourceCategory}  and %\"x-github-event\" = \"pull_request\"\n| json \"action\", \"pull_request.title\", \"number\", \"pull_request.created_at\",\"pull_request.user.login\", \"repository.name\", \"pull_request._links.html.href\" as action, title, id, created_time, user, repo_name, review_url\n| where action in (\"opened\", \"closed\", \"reopened\") and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| withtime action\n|most_recent(action_withtime) as state by  id, title, created_time, user, repo_name \n|where state  in (\"opened\", \"reopened\")\n| order created_time asc\n| fields id, title, repo_name, state,user,created_time\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -897,7 +897,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"closed\" \"merged\" \"false\" \"pull_request\"\n| json \"pull_request.number\", \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\",\"pull_request.merged\" ,\"pull_request._links.html.href\" as id, action, pull_req_state, title, body, created_time, updated_time, user, repo_name, merge, review_url\n| where action = \"closed\" and merge = \"false\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"pull_request\"\n| count by id, title, repo_name, created_time, user \n|  fields - _count\n| order by repo_name asc\n",
+                            "queryString": "_sourceCategory=${sourceCategory}  and %\"x-github-event\" = \"pull_request\" \"closed\" \"merged\" \"false\" \"pull_request\"\n| json \"pull_request.number\", \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\",\"pull_request.merged\" ,\"pull_request._links.html.href\" as id, action, pull_req_state, title, body, created_time, updated_time, user, repo_name, merge, review_url\n| where action = \"closed\" and merge = \"false\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| count by id, title, repo_name, created_time, user \n|  fields - _count\n| order by repo_name asc\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -918,7 +918,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\", \"pull_request.merged\" as action, pull_req_state, tittle, body, created_time, updated_time, user, repo_name, merge\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"pull_request\"\n| if (pull_req_state matches \"open\", \"Opened\", if(action matches \"closed\" and merge matches \"true\", \"Closed\", \"Other\")) as state\n| where state != \"Other\"\n|count by repo_name, state\n| transpose row repo_name column state\n| order by repo_name asc",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\", \"pull_request.merged\" as action, pull_req_state, tittle, body, created_time, updated_time, user, repo_name, merge\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| if (pull_req_state matches \"open\", \"Opened\", if(action matches \"closed\" and merge matches \"true\", \"Closed\", \"Other\")) as state\n| where state != \"Other\"\n|count by repo_name, state\n| transpose row repo_name column state\n| order by repo_name asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -933,13 +933,13 @@
             ],
             "variables": [
                 {
-                    "id": "FE197C8B1E18209F",
+                    "id": "46B560F0C425A91D",
                     "name": "repository",
                     "displayName": null,
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"repository.name\" as repo_name",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"repository.name\" as repo_name",
                         "field": "repo_name"
                     },
                     "allowMultiSelect": false,
@@ -947,13 +947,13 @@
                     "hideFromUI": false
                 },
                 {
-                    "id": "60B2385D2D2DAEFD",
+                    "id": "705326DC3227890B",
                     "name": "user",
                     "displayName": null,
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"pull_request.user.login\" as user",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"pull_request.user.login\" as user",
                         "field": "user"
                     },
                     "allowMultiSelect": false,
@@ -1041,7 +1041,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| Json \"action\", \"scope\", \"member.login\", \"member.id\", \"member.type\",  \"team.name\", \"team.permission\", \"organization.login\" as action, scope, member_name, member_id, member_type, team_name, team_permission, org_login\n| where %\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" \n| count by member_id, action, team_name, org_login, member_name,team_permission\n| order by action, member_id\n|fields member_name, action, team_name, org_login,team_permission, _count",
+                            "queryString": "_sourceCategory=${sourceCategory} (%\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" )\n| Json \"action\", \"scope\", \"member.login\", \"member.id\", \"member.type\",  \"team.name\", \"team.permission\", \"organization.login\" as action, scope, member_name, member_id, member_type, team_name, team_permission, org_login\n| where %\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" \n| count by member_id, action, team_name, org_login, member_name,team_permission\n| order by action, member_id\n|fields member_name, action, team_name, org_login,team_permission, _count",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1062,7 +1062,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"repository.name\", \"sender.login\", \"repository.private\", \"action\" as rep_name, sender_login, private, action\n| where rep_name matches \"{{repository}}\" and %\"x-github-event\" = \"repository\" and action = \"created\"\n| count by  rep_name, sender_login, private\n| fields  rep_name, sender_login, private",
+                            "queryString": "_sourceCategory=${sourceCategory}\n| json \"repository.name\", \"sender.login\", \"repository.private\", \"action\" as rep_name, sender_login, private, action\n| where rep_name matches \"{{repository}}\" and %\"x-github-event\" = \"repository\" and action = \"created\"\n| count by  rep_name, sender_login, private\n| fields  rep_name, sender_login, private",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1083,7 +1083,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"team.name\", \"team.permission\", \"repository.name\" as team_name, team_permission, repo_name\n| where repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"team\"\n| count by repo_name, team_name,team_permission\n| fields repo_name, team_name,team_permission",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"team\"\n| json \"team.name\", \"team.permission\", \"repository.name\" as team_name, team_permission, repo_name\n| where repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"team\"\n| count by repo_name, team_name,team_permission\n| fields repo_name, team_name,team_permission",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1104,7 +1104,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json  \"repository.name\" as  repo_name\n| where repo_name !=\"\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"fork\"\n| timeslice 1m\n| count by _timeslice, repo_name \n| transpose row _timeslice column repo_name ",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"fork\"\n| json  \"repository.name\" as  repo_name\n| where repo_name !=\"\" and repo_name matches \"{{repository}}\" and %\"x-github-event\" = \"fork\"\n| timeslice 1m\n| count by _timeslice, repo_name \n| transpose row _timeslice column repo_name ",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1125,7 +1125,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}  and  ( not action and not pull_request and not \"\\\"team\\\":\" not ref_type not state)\n| json \"repository.name\", \"sender.login\", \"repository.private\",\"repository.owner.login\", \"action\" as repo_name, sender_login, private, owner_login, action\n| where repo_name matches \"{{repository}}\" and action =\"publicized\" and %\"x-github-event\" = \"repository\"\n| where private = \"false\"\n| count by repo_name, sender_login , owner_login\n| fields repo_name, sender_login, owner_login",
+                            "queryString": "_sourceCategory=${sourceCategory}  and %\"x-github-event\" = \"repository\" and  ( not action and not pull_request and not \"\\\"team\\\":\" not ref_type not state)\n| json \"repository.name\", \"sender.login\", \"repository.private\",\"repository.owner.login\", \"action\" as repo_name, sender_login, private, owner_login, action\n| where repo_name matches \"{{repository}}\" and action =\"publicized\" and %\"x-github-event\" = \"repository\"\n| where private = \"false\"\n| count by repo_name, sender_login , owner_login\n| fields repo_name, sender_login, owner_login",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1146,7 +1146,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"team.name\", \"team.permission\", \"repository.name\", \"action\" as team_name, team_permission, repo_name, action\n| where repo_name matches \"{{repository}}\" and action =\"added_to_repository\" and %\"x-github-event\" = \"team\"\n| count by repo_name, team_name,team_permission\n| fields repo_name, team_name,team_permission, _count",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"team\"\n| json \"team.name\", \"team.permission\", \"repository.name\", \"action\" as team_name, team_permission, repo_name, action\n| where repo_name matches \"{{repository}}\" and action =\"added_to_repository\" and %\"x-github-event\" = \"team\"\n| count by repo_name, team_name,team_permission\n| fields repo_name, team_name,team_permission, _count",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1167,7 +1167,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| Json \"action\", \"scope\", \"member.login\", \"member.id\", \"member.type\",  \"team.name\", \"team.permission\", \"organization.login\" as action, scope, member_name, member_id, member_type, team_name, team_permission, org_login\n| where %\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" \n| count by team_name, action\n| transpose row team_name column action",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"membership\"\n| Json \"action\", \"scope\", \"member.login\", \"member.id\", \"member.type\",  \"team.name\", \"team.permission\", \"organization.login\" as action, scope, member_name, member_id, member_type, team_name, team_permission, org_login\n| where %\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" \n| count by team_name, action\n| transpose row team_name column action",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1188,7 +1188,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} and ( action not pull_request not closed not opened not position not line not page_name not distinct)\n| json \"repository.name\", \"sender.login\", \"repository.private\", \"action\" as rep_name, sender_login, private, action\n| where rep_name matches \"{{repository}}\" and %\"x-github-event\" = \"repository\" and action = \"created\"\n// count by  rep_name, sender_login, private\n| count_distinct(rep_name)",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"repository\" and \"\\\"action\\\":\\\"created\\\",\\\"repository\\\"\" and ( action not pull_request not closed not opened not position not line not page_name not distinct)\n| json \"repository.name\", \"sender.login\", \"repository.private\", \"action\" as rep_name, sender_login, private, action\n| where rep_name matches \"{{repository}}\" and %\"x-github-event\" = \"repository\" and action = \"created\"\n// count by  rep_name, sender_login, private\n| count_distinct(rep_name)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1209,7 +1209,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| Json \"action\", \"scope\", \"member.login\", \"member.id\", \"member.type\",  \"team.name\", \"team.permission\", \"organization.login\" as action, scope, member_name, member_id, member_type, team_name, team_permission, org_login\n| where action =\"added\" and %\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" \n| count(team_name)",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"member\"\n| Json \"action\", \"scope\", \"member.login\", \"member.id\", \"member.type\",  \"team.name\", \"team.permission\", \"organization.login\" as action, scope, member_name, member_id, member_type, team_name, team_permission, org_login\n| where action =\"added\" and %\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" \n| count(team_name)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1230,7 +1230,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| Json \"action\", \"scope\", \"member.login\", \"member.id\", \"member.type\",  \"team.name\", \"team.permission\", \"organization.login\" as action, scope, member_name, member_id, member_type, team_name, team_permission, org_login\n| where action =\"removed\" and %\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" \n| count(team_name)",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"member\"\n| Json \"action\", \"scope\", \"member.login\", \"member.id\", \"member.type\",  \"team.name\", \"team.permission\", \"organization.login\" as action, scope, member_name, member_id, member_type, team_name, team_permission, org_login\n| where action =\"removed\" and %\"x-github-event\" = \"member\" or %\"x-github-event\" = \"membership\" \n| count(team_name)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1251,7 +1251,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"team.name\", \"team.permission\", \"repository.name\", \"action\" as team_name, team_permission, repo_name, action\n| where repo_name matches \"{{repository}}\" and action =\"added_to_repository\" and %\"x-github-event\" = \"team\"\n| count_distinct(repo_name)",
+                            "queryString": "_sourceCategory=${sourceCategory} and %\"x-github-event\" = \"team\"\n| json \"team.name\", \"team.permission\", \"repository.name\", \"action\" as team_name, team_permission, repo_name, action\n| where repo_name matches \"{{repository}}\" and action =\"added_to_repository\" and %\"x-github-event\" = \"team\"\n| count_distinct(repo_name)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1266,13 +1266,13 @@
             ],
             "variables": [
                 {
-                    "id": "969BCBF5DF737245",
+                    "id": "40460032798C9AF4",
                     "name": "repository",
                     "displayName": null,
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"repository.name\", \"sender.login\", \"repository.private\" as rep_name, sender_login, private",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"repository.name\", \"sender.login\", \"repository.private\" as rep_name, sender_login, private",
                         "field": "rep_name"
                     },
                     "allowMultiSelect": false,
@@ -1340,7 +1340,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| parse regex field=files_added \"\\.(?<file_type>[\\w]+)[\\\",|\\\"]\" multi\n| where file_type matches \"{{file_type}}\"\n| fields file_type, user, repo_name\n| count by file_type, user\n| order by _count\n| transpose row user column file_type\n",
+                            "queryString": "_sourceCategory=${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| parse regex field=files_added \"\\.(?<file_type>[\\w]+)[\\\",|\\\"]\" multi\n| where file_type matches \"{{file_type}}\"\n| fields file_type, user, repo_name\n| count by file_type, user\n| order by _count\n| transpose row user column file_type\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1361,7 +1361,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory} \"commits\" repository pusher\n| json \"ref\", \"commits[0].timestamp\", \"commits[*].distinct[*]\" ,\"pusher.name\",  \"repository.name\" as ref, commit_time, commits ,user, repo_name\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commits, \"true\",\"\") as Ccommits\n| replace(commits, \"true\",\"1\") as C1commits\n| length(C1commits) - length (Ccommits) as num_commits \n| sum (num_commits) group by user\n| order by _sum",
+                            "queryString": "_sourceCategory=${sourceCategory} \"commits\" repository pusher\n| json \"ref\", \"commits[0].timestamp\", \"commits[*].distinct[*]\" ,\"pusher.name\",  \"repository.name\" as ref, commit_time, commits ,user, repo_name\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| replace(commits, \"true\",\"\") as Ccommits\n| replace(commits, \"true\",\"1\") as C1commits\n| length(C1commits) - length (Ccommits) as num_commits \n| sum (num_commits) group by user\n| order by _sum",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1382,7 +1382,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"comment.user.login\",\"comment.body\", \"comment.created_at\", \"pull_request.id\", \"pull_request.title\", \"repository.name\" as user, body, created_at, id, title, repo_name\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| count by user\n| order by _count desc\n",
+                            "queryString": "_sourceCategory=${sourceCategory}\n| json \"comment.user.login\",\"comment.body\", \"comment.created_at\", \"pull_request.id\", \"pull_request.title\", \"repository.name\" as user, body, created_at, id, title, repo_name\n| where user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| count by user\n| order by _count desc\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1403,7 +1403,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"ref\", \"commits[*].added[*]\", \"repository.name\", \"pusher.name\" as branch, files, repo_name, user\n| where files != \"[]\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| replace(files, \",\",\"\") as Cfiles\n| (length(files) - length (Cfiles) +1) as num_files \n|sum(num_files) group by Bname, user\n| order by _sum\n| transpose row user column Bname\n",
+                            "queryString": "_sourceCategory=${sourceCategory}\n| json \"ref\", \"commits[*].added[*]\", \"repository.name\", \"pusher.name\" as branch, files, repo_name, user\n| where files != \"[]\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| parse regex field=branch \"^\\S+\\/\\S+\\/(?<branch_name>\\S+)$\"\n| concat(repo_name,\"/\" ,branch_name) as Bname\n| replace(files, \",\",\"\") as Cfiles\n| (length(files) - length (Cfiles) +1) as num_files \n|sum(num_files) group by Bname, user\n| order by _sum\n| transpose row user column Bname\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1424,7 +1424,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\",\"pull_request.merged\", \"pull_request.changed_files\", \"number\" as action, pull_req_state, title, body, created_time, updated_time, user, repo_name, merge, changed_files, id\n| where action =\"opened\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n|count by id, repo_name, changed_files ,title,user\n| num (changed_files)\n| sort by  changed_files desc\n| fields id,title,user, changed_files\n",
+                            "queryString": "_sourceCategory=${sourceCategory}\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.name\",\"pull_request.merged\", \"pull_request.changed_files\", \"number\" as action, pull_req_state, title, body, created_time, updated_time, user, repo_name, merge, changed_files, id\n| where action =\"opened\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n|count by id, repo_name, changed_files ,title,user\n| num (changed_files)\n| sort by  changed_files desc\n| fields id,title,user, changed_files\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1445,7 +1445,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory= ${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| parse regex field=files_added \"\\.(?<file_type>[\\w]+)[\\\",|\\\"]\" multi\n| where file_type matches \"{{file_type}}\"\n| fields file_type, user, repo_name\n| count by file_type, user\n| order by _count\n| transpose row user column file_type\n",
+                            "queryString": "_sourceCategory=${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\" and user matches \"{{user}}\" and repo_name matches \"{{repository}}\"\n| parse regex field=files_added \"\\.(?<file_type>[\\w]+)[\\\",|\\\"]\" multi\n| where file_type matches \"{{file_type}}\"\n| fields file_type, user, repo_name\n| count by file_type, user\n| order by _count\n| transpose row user column file_type\n",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1466,7 +1466,7 @@
                     "defaultValue": null,
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\"",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\"",
                         "field": "user"
                     },
                     "allowMultiSelect": false,
@@ -1480,7 +1480,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\"",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\"",
                         "field": "repo_name"
                     },
                     "allowMultiSelect": false,
@@ -1494,7 +1494,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory= ${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\"\n| parse regex field=files_added \"\\.(?<file_type>[\\w]+)[\\\",|\\\"]\" multi",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"commits[*].added[*]\", \"pusher.name\",  \"repository.name\" as  files_added, user, repo_name\n| where files_added != \"[]\"\n| parse regex field=files_added \"\\.(?<file_type>[\\w]+)[\\\",|\\\"]\" multi",
                         "field": "file_type"
                     },
                     "allowMultiSelect": false,
@@ -1508,7 +1508,7 @@
             "type": "SavedSearchWithScheduleSyncDefinition",
             "name": "Issue opened in last 24 Hours",
             "search": {
-                "queryText": "_sourceCategory= ${sourceCategory}  issue  opened\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where action in ( \"opened\")  and %\"x-github-event\" = \"issues\" \n| count by _messagetime,createdAt, updatedAt, issue_title, state,url, repo_name\n| sort by _messagetime \n| fields -_messagetime, _count",
+                "queryText": "_sourceCategory=${sourceCategory}  issue  opened\n| json \"action\", \"issue.id\", \"issue.number\", \"issue.title\" , \"issue.state\", \"issue.created_at\", \"issue.updated_at\", \"issue.closed_at\", \"issue.body\", \"issue.user.login\", \"issue.url\", \"repository.name\", \"repository.open_issues_count\"  as action,  issue_ID, issue_num, issue_title, state, createdAt, updatedAt, closedAt, body, user, url, repo_name, repoOpenIssueCnt\n| where action in ( \"opened\")  and %\"x-github-event\" = \"issues\" \n| count by _messagetime,createdAt, updatedAt, issue_title, state,url, repo_name\n| sort by _messagetime \n| fields -_messagetime, _count",
                 "defaultTimeRange": "-1d",
                 "byReceiptTime": false,
                 "viewName": "",
@@ -1523,7 +1523,7 @@
             "type": "SavedSearchWithScheduleSyncDefinition",
             "name": "Open Pull Requests",
             "search": {
-                "queryText": "_sourceCategory= ${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.title\", \"number\", \"pull_request.created_at\",\"pull_request.user.login\", \"repository.name\", \"pull_request._links.html.href\" as action, title, id, created_time, user, repo_name, review_url\n| where action in (\"opened\", \"closed\", \"reopened\") and %\"x-github-event\" = \"pull_request\"\n| withtime action\n|most_recent(action_withtime) as state by  id, title, created_time, user, repo_name , review_url\n|where state  in (\"opened\", \"reopened\")\n| order created_time asc\n| fields id, title, repo_name, state,user,created_time, review_url",
+                "queryText": "_sourceCategory=${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.title\", \"number\", \"pull_request.created_at\",\"pull_request.user.login\", \"repository.name\", \"pull_request._links.html.href\" as action, title, id, created_time, user, repo_name, review_url\n| where action in (\"opened\", \"closed\", \"reopened\") and %\"x-github-event\" = \"pull_request\"\n| withtime action\n|most_recent(action_withtime) as state by  id, title, created_time, user, repo_name , review_url\n|where state  in (\"opened\", \"reopened\")\n| order created_time asc\n| fields id, title, repo_name, state,user,created_time, review_url",
                 "defaultTimeRange": "-24h",
                 "byReceiptTime": false,
                 "viewName": "",
@@ -1538,7 +1538,7 @@
             "type": "SavedSearchWithScheduleSyncDefinition",
             "name": "Pull Requests opened in last 24 Hours",
             "search": {
-                "queryText": "_sourceCategory= ${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.full_name\", \"pull_request.merged\", \"pull_request.html_url\" as  action, pull_req_state, title, body, created_time, updated_time, user, repo_name, merge,url\n| parse regex field=repo_name \"^\\S+\\/(?<repo>\\S+)$\"\n| where pull_req_state=\"open\" and %\"x-github-event\" = \"pull_request\"\n| count by created_time, repo_name, user,title,url \n| fields - _count",
+                "queryText": "_sourceCategory=${sourceCategory} \"pull_request\"\n| json \"action\", \"pull_request.state\", \"pull_request.title\", \"pull_request.body\", \"pull_request.created_at\",\"pull_request.updated_at\", \"pull_request.user.login\", \"repository.full_name\", \"pull_request.merged\", \"pull_request.html_url\" as  action, pull_req_state, title, body, created_time, updated_time, user, repo_name, merge,url\n| parse regex field=repo_name \"^\\S+\\/(?<repo>\\S+)$\"\n| where pull_req_state=\"open\" and %\"x-github-event\" = \"pull_request\"\n| count by created_time, repo_name, user,title,url \n| fields - _count",
                 "defaultTimeRange": "-24h",
                 "byReceiptTime": false,
                 "viewName": "",
