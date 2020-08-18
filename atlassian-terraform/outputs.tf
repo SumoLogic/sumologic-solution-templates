@@ -22,24 +22,28 @@ output "folder_id" {
   value = sumologic_folder.folder.id
 }
 
+output "folder_name" {
+  value = sumologic_folder.folder.name
+}
+
 # output "folder_path" {
 #   value = sumologic_folder.folder.path
 # }
 
 output "sumo_opsgenie_webhook_id" {
-  value = restapi_object.sumo_to_opsgenie_webhook.*.id
+  value = sumologic_connection.opsgenie_connection.*.id
 }
 
 output "sumo_jiracloud_webhook_id" {
-  value = restapi_object.sumo_to_jiracloud_webhook.*.id
+  value = sumologic_connection.jira_cloud_connection.*.id
 }
 
 output "sumo_jiraserver_webhook_id" {
-  value = restapi_object.sumo_to_jiraserver_webhook.*.id
+  value = sumologic_connection.jira_server_connection.*.id
 }
 
 output "sumo_jiraservicedesk_webhook_id" {
-  value = restapi_object.sumo_to_jiraservicedesk_webhook.*.id
+  value = sumologic_connection.jira_service_desk_connection.*.id
 }
 
 output "bitbucket_webhook_id" {
@@ -48,4 +52,8 @@ output "bitbucket_webhook_id" {
 
 output "opsgenie_webhook_id" {
   value = restapi_object.ops_to_sumo_webhook.*.id
+}
+
+output "sumo_bitbucket_field_id" {
+  value = restapi_object.bitbucket_field.*.id
 }
