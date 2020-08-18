@@ -22,6 +22,11 @@ variable "install_sumo_to_jiracloud_webhook" {}
 variable "install_sumo_to_jiraserver_webhook" {}
 variable "install_sumo_to_jiraservicedesk_webhook" {}
 
+#Source Categories
+variable "jira_cloud_sc" {}
+variable "jira_server_sc" {}
+variable "bitbucket_sc" {}
+variable "opsgenie_sc" {}
 
 #Jira Cloud
 variable "jira_cloud_url" {}
