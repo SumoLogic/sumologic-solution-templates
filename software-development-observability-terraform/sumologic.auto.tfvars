@@ -25,7 +25,7 @@ install_sdo             = "true"
 
 # Sumo Logic App source category
 jira_cloud_sc  = "SDO/Jira/Cloud"
-jira_server_sc = "SDO/Jira/Server/Events"
+jira_server_sc = "SDO/Jira/ServerEvents"
 bitbucket_sc   = "SDO/Bitbucket"
 opsgenie_sc    = "SDO/Opsgenie"
 pagerduty_sc   = "SDO/Pagerduty"
