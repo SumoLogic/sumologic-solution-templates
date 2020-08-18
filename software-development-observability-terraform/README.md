@@ -6,7 +6,7 @@ The Sumo Logic Software Development Observability (SDO) solution provides an est
 
 For more details, Please look at Sumo Logic Software Development Observability Help Document.
 
-![](https://github.com/SumoLogic/sumologic-solution-templates/tree/master/software-development-observability-terraform/gif/sdo3.gif)
+![SDO](https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/master/software-development-observability-terraform/gif/sdo3.gif)
 
 ## License
 
