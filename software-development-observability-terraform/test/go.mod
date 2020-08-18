@@ -1,4 +1,4 @@
-module github.com/SumoLogic/sumologic-solution-templates/tree/master/atlassian-terraform
+module github.com/SumoLogic/sumologic-solution-templates/tree/master/software-development-observability-terraform
 
 go 1.14
 
