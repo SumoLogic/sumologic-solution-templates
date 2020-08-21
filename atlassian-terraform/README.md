@@ -1,7 +1,10 @@
 # sumologic-atlassian-terraform
 
-The Terraform script installs the Sumo Logic Atlassian Solution collection and Atlassian Applications in the Personal Folder of the Sumo Logic user whose access keys have been used. If you need additional copies of the Atlassian Applications within Sumo Logic, install the respective Atlassian Apps from the Sumo Logic App catalog.
+The Sumo Logic Atlassian solution provides an established framework to simplify the monitoring and troubleshooting of your Atlassian systems.
+* This Terraform script installs the Sumo Logic Atlassian solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
+* If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
 
+For more details, please look at [Sumo Logic Atlassian Solution Help Document](https://help.sumologic.com/Solutions/Atlassian_Solution).
 
 ## Getting Started
 
@@ -13,7 +16,7 @@ The Terraform script installs the Sumo Logic Atlassian Solution collection and A
   * [Template](https://www.terraform.io/docs/providers/template/index.html) "~> 2.1"
   * [Null](https://www.terraform.io/docs/providers/null/index.html) "~> 2.1"
   * [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html) "~> 1.2"
-  * [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider) "~> 2.0"
+  * [Sumo Logic Terraform Provider](https://www.terraform.io/docs/providers/sumologic/index.html) "~> 2.0"
 
 
 * Required Third Party Terraform providers (tested on mentioned versions), these providers need explicit installation as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins):
@@ -29,7 +32,7 @@ $ git clone https://github.com/SumoLogic/sumologic-solution-templates.git
 ```
 2. Install [Terraform](https://www.terraform.io/) and make sure it's on your PATH.
 3. Install the required third party terraform providers ([Jira Terraform Provider](https://github.com/fourplusone/terraform-provider-jira), [Rest API Terraform Provider](https://github.com/Mastercard/terraform-provider-restapi) ) as explained [here](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) and on respective provider documentation.
-4. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/atlassian-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider), [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html) and [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html).
+4. Initialize the Terraform working directory and download the official providers by navigating to the directory `sumologic-solution-templates/atlassian-terraform` and running `terraform init`. This will install the required Terraform providers i.e. [Sumo Logic Terraform Provider](https://www.terraform.io/docs/providers/sumologic/index.html), [Template](https://www.terraform.io/docs/providers/template/index.html), [Null](https://www.terraform.io/docs/providers/null/index.html) and [BitBucket Terraform Provider](https://www.terraform.io/docs/providers/bitbucket/index.html).
 5. You can choose which applications and Webhooks to install by updating the flags `install_jira_cloud`, `install_jira_server`, `install_bitbucket_cloud`,`install_opsgenie`,`install_atlassian_app`,`install_sumo_to_opsgenie_webhook`, `install_sumo_to_jiraserver_webhook`, `install_sumo_to_jiraservicedesk_webhook` and `install_sumo_to_jiracloud_webhook` in `sumologic.auto.tfvars`. By default, all components except `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are installed.
 `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Beta. To participate contact your Sumo account executive.
 6. Update the placeholder values in `sumologic.auto.tfvars`, `atlassian.auto.tfvars` and `webhooks.auto.tfvars` so they correspond with your Sumo Logic and Atlassian environments. See the [list of input parameters](#configurable-parameters) below.
@@ -63,7 +66,7 @@ Configure the following parameters in `sumologic.auto.tfvars`, `atlassian.auto.t
 
 ### Sumo Logic
 
-[Sumo Logic Terraform Provider](https://github.com/SumoLogic/sumologic-terraform-provider)
+[Sumo Logic Terraform Provider](https://www.terraform.io/docs/providers/sumologic/index.html)
 
 Configure these parameters in `sumologic.auto.tfvars`.
 
@@ -85,6 +88,10 @@ Note: `Sumologic to Opsgenie Webhook` and `Sumologic to Jira Webhooks` are in Be
 | install_sumo_to_jiracloud_webhook| Install [Sumo Logic to Jira Cloud WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Cloud) | false |
 | install_sumo_to_jiraserver_webhook| Install [Sumo Logic to Jira Server WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Server) | false |
 | install_sumo_to_jiraservicedesk_webhook| Install [Sumo Logic to Jira Service Desk WebHook](https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Service_desk) | false |
+| jira_cloud_sc        | Source Category for [Jira Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira_Cloud)            | Atlassian/Jira/Cloud  |
+| jira_server_sc       | Source Category for [Jira Server](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Jira)                 | Atlassian/Jira/Server/Events  |
+| bitbucket_sc         | Source Category for [BitBucket Cloud](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket)        | Atlassian/Bitbucket  |       |
+| opsgenie_sc          | Source Category for [Opsgenie](https://help.sumologic.com/07Sumo-Logic-Apps/18SAAS_and_Cloud_Apps/Opsgenie)            | Atlassian/Opsgenie  |
 
 ## Jira Cloud
 
@@ -161,7 +168,7 @@ Configure these parameters in `webhooks.auto.tfvars`.
 
 Configure these parameters in `atlassian.auto.tfvars`.
 
-#### Note: This script configures Bitbucket WebHooks and creates resources in Sumo Logic. Configure the [Bitbucket CI/CD Pipeline to Collect Deploy Events](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket/Collect_Logs_for_Bitbucket_App#Step_3:_Configure_the_Bitbucket_CI.2FCD_Pipeline_to_Collect_Deploy_Events) and [Enable Bitbucket Event-Key Tagging](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket/Collect_Logs_for_Bitbucket_App#Step_3:_Configure_the_Bitbucket_CI.2FCD_Pipeline_to_Collect_Deploy_Events) as defined in Sumo Logic [help](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket/Collect_Logs_for_Bitbucket_App).
+#### Note: This script configures Bitbucket WebHooks and creates resources in Sumo Logic. Configure the [Bitbucket CI/CD Pipeline to Collect Deploy Events](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket/Collect_Logs_for_Bitbucket_App#Step_3:_Configure_the_Bitbucket_CI.2FCD_Pipeline_to_Collect_Deploy_Events) as defined in Sumo Logic [help](https://help.sumologic.com/07Sumo-Logic-Apps/08App_Development/Bitbucket/Collect_Logs_for_Bitbucket_App).
 
 | Parameter | Description |
 | --- | --- |
@@ -191,3 +198,17 @@ Configure these parameters in `webhooks.auto.tfvars`.
 | Parameter | Description |
 | --- | --- |
 | opsgenie_priority             | [Opsgenie Alert Priority](https://docs.opsgenie.com/docs/priority-field)|
+
+## License
+
+The Sumo Logic Atlassian Terraform is licensed under the apache v2.0 license.
+
+## Issues
+
+Raise issues at [Issues](https://github.com/SumoLogic/sumologic-solution-templates/issues)
+
+## Contributing
+
+* Fork the project on [Github](https://github.com/SumoLogic/sumologic-solution-templates).
+* Make your feature addition or fix bug, write tests and commit.
+* Create a pull request with one of the maintainer as Reviewer.

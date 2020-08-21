@@ -1,7 +1,7 @@
 # Sumo Logic - Atlassian Terraform
 
 # This script creates Webhooks to Sumo Logic in Atlassian Systems.
-# Configure the Atlassian credentials in the atlassian.auto.tvars.
+# Configure the Atlassian credentials in the atlassian.auto.tfvars.
 
 # Create/Delete OpsGenie to Sumo Logic Webhook by calling REST API
 provider "restapi" {
