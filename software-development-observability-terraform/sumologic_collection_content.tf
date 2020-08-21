@@ -307,7 +307,7 @@ resource "restapi_object" "bitbucket_field" {
   id_attribute = "fieldId"
   data         = <<JSON
   {
-      "fieldName": "X-Event-Key1"
+      "fieldName": "X-Event-Key"
   }
   JSON
 }
@@ -321,7 +321,7 @@ resource "restapi_object" "github_field" {
   id_attribute = "fieldId"
   data         = <<JSON
   {
-      "fieldName": "x-github-event1"
+      "fieldName": "x-github-event"
   }
   JSON
 }
