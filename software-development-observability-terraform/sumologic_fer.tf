@@ -2,7 +2,7 @@
 
 resource "sumologic_field_extraction_rule" "github_pr_fer" {
   count            = "${var.install_github}" ? 1 : 0
-  depends_on       = [sumologic_http_source.github]
+  depends_on       = [sumologic_http_source.github,restapi_object.github_field]
   name             = "Github Pull Request"
   scope            = "_sourceCategory=${var.github_sc} ${var.github_pull_request_fer_scope}"
   parse_expression = var.github_pull_request_fer_parse
@@ -38,7 +38,7 @@ resource "sumologic_field_extraction_rule" "opsgenie_alerts_fer" {
 
 resource "sumologic_field_extraction_rule" "bitbucket_pr_fer" {
   count            = "${var.install_bitbucket_cloud}" ? 1 : 0
-  depends_on       = [sumologic_http_source.bitbucket_cloud]
+  depends_on       = [sumologic_http_source.bitbucket_cloud,restapi_object.bitbucket_field]
   name             = "Bitbucket Pull Request"
   scope            = "_sourceCategory=${var.bitbucket_sc} ${var.bitbucket_pull_request_fer_scope}"
   parse_expression = var.bitbucket_pull_request_fer_parse
@@ -47,7 +47,7 @@ resource "sumologic_field_extraction_rule" "bitbucket_pr_fer" {
 
 resource "sumologic_field_extraction_rule" "bitbucket_build_fer" {
   count            = "${var.install_bitbucket_cloud}" ? 1 : 0
-  depends_on       = [sumologic_http_source.bitbucket_cloud]
+  depends_on       = [sumologic_http_source.bitbucket_cloud,restapi_object.bitbucket_field]
   name             = "Bitbucket Build"
   scope            = "_sourceCategory=${var.bitbucket_sc} ${var.bitbucket_build_fer_scope}"
   parse_expression = var.bitbucket_build_fer_parse
@@ -56,7 +56,7 @@ resource "sumologic_field_extraction_rule" "bitbucket_build_fer" {
 
 resource "sumologic_field_extraction_rule" "bitbucket_deploy_fer" {
   count            = "${var.install_bitbucket_cloud}" ? 1 : 0
-  depends_on       = [sumologic_http_source.bitbucket_cloud]
+  depends_on       = [sumologic_http_source.bitbucket_cloud,restapi_object.bitbucket_field]
   name             = "Bitbucket Deploy"
   scope            = "_sourceCategory=${var.bitbucket_sc} ${var.bitbucket_deploy_fer_scope}"
   parse_expression = var.bitbucket_deploy_fer_parse
