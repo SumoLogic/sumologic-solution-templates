@@ -3,11 +3,11 @@
       "Deploy": {
         "Bitbucket": {
           "Scope": "$$bitbucket deploymentEnvironment pipe_result_link deploy_status commit_link",
-          "Parse": "json field=_raw  \"deploymentEnvironment\",  \"repoFullName\", \"pipe_result_link\", \"deploy_status\", \"commit\",  \"event_date\"  as environment_name,  repository_name, link, status, commit_id, dateTime\n| parse regex field=dateTime \"(?<datetime_epoch>[\\S]+) (?<dateTime>[\\S]+)\"\n| concat(datetime_epoch,\"T\",dateTime) as datetime_epoch\n| parseDate(datetime_epoch, \"yyyy-MM-dd'T'HH:mm:ss\") as datetime_epoch\n| if (status matches \"0\", \"Success\", \"Failed\") as status\n| \"deploy\" as event_type\n"
+          "Parse": "json field=_raw  \"deploymentEnvironment\",  \"repoFullName\", \"pipe_result_link\", \"deploy_status\", \"commit\",  \"event_date\", \"prDestinationBranch\", \"repoOwner\", \"buildNumber\"  as environment_name, repository_name, link, status, commit_id, datetime, target_branch, user, title\n| commit_id as trace_id\n| \"n/a\" as team\n| concat(\"build number \", title, \". Commiit link \", link) as message \n| parse regex field=datetime \"(?<dateTime_epoch>[\\S]+) (?<datetime>[\\S]+)\"\n| concat(datetime_epoch,\"T\",dateTime) as datetime_epoch\n| parseDate(datetime_epoch, \"yyyy-MM-dd'T'HH:mm:ss\") as datetime_epoch\n| if (status matches \"0\", \"Success\", \"Failed\") as status\n| \"deploy\" as event_type\n"
         },
         "Jenkins": {
-          "Scope": "$$jenkins timestamp commit_id result event_name env_name git_url",
-          "Parse": "json field=_raw \"event_name\", \"result\", \"commit_id\", \"env_name\", \"git_url\", \"timeStamp\" as event_type, status, commit_id, environment_name, link, datetime\n    | toLong(datetime) as datetime_epoch\n    | parse regex field=link \"(?<repository_name>[^/]+)\\.git$\"\n    | parse regex field=link \"(?<link>.+)\\.git\"\n    | concat (link,\"/commit/\", commit_id) as link\n    | if (status matches \"SUCCESS\", \"Success\", if (status matches \"FAILURE\", \"Failed\", status) ) as status\n    | \"deploy\" as event_type\n"
+          "Scope": "$$jenkins trace_id",
+          "Parse": "json \"event_type\", \"team\",  \"service\", \"trace_id\", \"user\", \"link\", \"title\", \"timeStamp\", \"message\", \"env_name\", \"result\", \"target_branch\", \"repository_name\", \"commit_id\" as event_type, team, service, trace_id, user, link, title, datetime, message, environment_name, status, target_branch, repository_name, commit_id\n| toLong(datetime) as datetime_epoch\n| \"deploy\" as event_type\n"
         }
       }
     },
@@ -34,12 +34,12 @@
     {
       "Build": {
         "Jenkins": {
-          "Scope": "$$jenkins Job_Status",
-          "Parse": "json \"result\", \"description\", \"name\", \"user\" ,\"label\", \"jobBuildURL\", \"start_time\" as status, message, title, user, target_branch, link, datetime_epoch\n            | toLong(datetime_epoch) as datetime_epoch\n     // setting repository_name as empty\n            | \"\" as repository_name\n        | if ( status matches \"SUCCESS\", \"SUCCESSFUL\", if(status matches \"FAILURE\", \"FAILED\", status)) as status\n            | where status in (\"SUCCESSFUL\", \"FAILED\")\n            | \"build\" as event_type\n"
+          "Scope": "$$jenkins trace_id",
+          "Parse": "json \"event_type\", \"team\",  \"service\", \"trace_id\", \"user\", \"link\", \"title\", \"timeStamp\", \"message\", \"env_name\", \"result\", \"target_branch\", \"repository_name\", \"commit_id\" as event_type, team, service, trace_id, user, link, title, datetime, message, environment_name, status, target_branch, repository_name, commit_id nodrop\n| toLong(datetime) as datetime_epoch\n| \"build\" as event_type\n"
         },
         "Bitbucket": {
           "Scope": "$$bitbucket %\"x-event-key\"=repo:commit_status_* (\"SUCCESSFUL\" OR \"FAILED\")",
-          "Parse": "json \"commit_status.state\", \"commit_status.commit.message\", \"commit_status.name\", \"actor.display_name\", \"repository.full_name\",  \"commit_status.refname\", \"commit_status.url\", \"commit_status.created_on\" as status, message, title, user, repository_name, target_branch, link, dateTime\n            | parse regex field= datetime \"(?<datetime_epoch>\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d)\"  nodrop   \n            | parseDate(datetime_epoch, \"yyyy-MM-dd'T'HH:mm:ss\") as datetime_epoch\n            | where status in (\"SUCCESSFUL\", \"FAILED\")\n            | \"build\" as event_type\n"
+          "Parse": "json \"commit_status.state\", \"commit_status.commit.message\", \"commit_status.name\", \"actor.display_name\", \"repository.full_name\",  \"commit_status.refname\", \"commit_status.url\", \"commit_status.created_on\", \"commit_status.commit.hash\", \"commit_status.repository.name\" as status, message, title, user, repository_name, target_branch, link, datetime, commit_id, service \n| commit_id as trace_id\n| \"n/a\" as team\n| parse regex field= datetime \"(?<datetime_epoch>\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d)\"  nodrop   \n| parseDate(datetime_epoch, \"yyyy-MM-dd'T'HH:mm:ss\") as datetime_epoch\n| where status in (\"SUCCESSFUL\", \"FAILED\")\n| \"build\" as event_type\n"
         }
       }
     },
