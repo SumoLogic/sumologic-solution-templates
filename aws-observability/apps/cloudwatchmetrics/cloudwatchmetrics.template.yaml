@@ -1,0 +1,253 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: "Template to Setup Sumo Logic CloudWatch Metric Source. The template setup CW Metrics Sources for Namespaces."
+
+Parameters:
+  SumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+  SumoLogicAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoLogicAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  RemoveSumoLogicResourcesOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Type: String
+
+  AccountAlias:
+    Type: String
+    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
+    AllowedPattern: "[a-z0-9]+"
+    ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
+    MaxLength: 30
+
+  SumoLogicCollectorId:
+    Type: String
+    Description: "Provide an existing Collector ID"
+    Default: ""
+  LambdaARN:
+    Type: String
+    Description: "Custom Lambda function ARN to create Sumo Logic resources."
+    Default: ""
+  SumoLogicSourceRole:
+    Type: String
+    Description: "ARN of the AWS IAM Role used to collect CloudWatch Metrics."
+    Default: ""
+  CloudWatchMetricsSourceName:
+    Type: String
+    Description: "Provide a Cloud Watch Metrics Source Name"
+    Default: ""
+
+  CreateFirstMetricsSource:
+    Type: String
+    Description: "Select Yes if you would like to create the Metric Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  FirstMetricsSourceNamespace:
+    Type: String
+    Description: "Provide the Namespace with which Source need to be created."
+    Default: ''
+
+  CreateSecondMetricsSource:
+    Type: String
+    Description: "Select Yes if you would like to create the Metric Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  SecondMetricsSourceNamespace:
+    Type: String
+    Description: "Provide the Namespace with which Source need to be created."
+    Default: ''
+
+  CreateThirdMetricsSource:
+    Type: String
+    Description: "Select Yes if you would like to create the Metric Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  ThirdMetricsSourceNamespace:
+    Type: String
+    Description: "Provide the Namespace with which Source need to be created."
+    Default: ''
+
+  CreateFourthMetricsSource:
+    Type: String
+    Description: "Select Yes if you would like to create the Metric Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  FourthMetricsSourceNamespace:
+    Type: String
+    Description: "Provide the Namespace with which Source need to be created."
+    Default: ''
+
+  CreateFifthMetricsSource:
+    Type: String
+    Description: "Select Yes if you would like to create the Metric Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  FifthMetricsSourceNamespace:
+    Type: String
+    Description: "Provide the Namespace with which Source need to be created."
+    Default: ''
+
+Mappings:
+  # Update the Namespaces mapping whenever CF starts supporting More Namespaces
+  Namespaces:
+    ApplicationELB:
+      ScanInterval: 60000
+    ApiGateway:
+      ScanInterval: 300000
+    DynamoDB:
+      ScanInterval: 300000
+    Lambda:
+      ScanInterval: 300000
+    RDS:
+      ScanInterval: 300000
+    ECS:
+      ScanInterval: 300000
+    ElastiCache:
+      ScanInterval: 300000
+    ELB:
+      ScanInterval: 300000
+    NetworkELB:
+      ScanInterval: 60000
+
+Conditions:
+  # Sources Conditions
+  install_first_cw_source: !Equals [!Ref CreateFirstMetricsSource, 'Yes']
+  install_second_cw_source: !Equals [!Ref CreateSecondMetricsSource, 'Yes']
+  install_third_cw_source: !Equals [!Ref CreateThirdMetricsSource, 'Yes']
+  install_fourth_cw_source: !Equals [!Ref CreateFourthMetricsSource, 'Yes']
+  install_fifth_cw_source: !Equals [!Ref CreateFifthMetricsSource, 'Yes']
+
+Resources:
+
+  FirstCloudwatchMetricsSource:
+    Type: Custom::AWSSource
+    Condition: install_first_cw_source
+    Properties:
+      ServiceToken: !Ref LambdaARN
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceType: AwsCloudWatch
+      Namespaces: !Split [ "," , !Sub "AWS/${FirstMetricsSourceNamespace}" ]
+      SourceName: !Sub "${CloudWatchMetricsSourceName}-${FirstMetricsSourceNamespace}"
+      ScanInterval: !FindInMap [Namespaces, !Ref FirstMetricsSourceNamespace, ScanInterval]
+      SourceCategory: "aws/observability/cloudwatch/metrics"
+      CollectorId: !Ref SumoLogicCollectorId
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      RoleArn: !Ref SumoLogicSourceRole
+      Fields:
+        account: !Ref AccountAlias
+
+  SecondCloudwatchMetricsSource:
+    Type: Custom::AWSSource
+    Condition: install_second_cw_source
+    Properties:
+      ServiceToken: !Ref LambdaARN
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceType: AwsCloudWatch
+      Namespaces: !Split [ "," , !Sub "AWS/${SecondMetricsSourceNamespace}" ]
+      SourceName: !Sub "${CloudWatchMetricsSourceName}-${SecondMetricsSourceNamespace}"
+      ScanInterval: !FindInMap [Namespaces, !Ref SecondMetricsSourceNamespace, ScanInterval]
+      SourceCategory: "aws/observability/cloudwatch/metrics"
+      CollectorId: !Ref SumoLogicCollectorId
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      RoleArn: !Ref SumoLogicSourceRole
+      Fields:
+        account: !Ref AccountAlias
+
+  ThirdCloudwatchMetricsSource:
+    Type: Custom::AWSSource
+    Condition: install_third_cw_source
+    Properties:
+      ServiceToken: !Ref LambdaARN
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceType: AwsCloudWatch
+      Namespaces: !Split [ "," , !Sub "AWS/${ThirdMetricsSourceNamespace}" ]
+      SourceName: !Sub "${CloudWatchMetricsSourceName}-${ThirdMetricsSourceNamespace}"
+      ScanInterval: !FindInMap [Namespaces, !Ref ThirdMetricsSourceNamespace, ScanInterval]
+      SourceCategory: "aws/observability/cloudwatch/metrics"
+      CollectorId: !Ref SumoLogicCollectorId
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      RoleArn: !Ref SumoLogicSourceRole
+      Fields:
+        account: !Ref AccountAlias
+
+  FourthCloudwatchMetricsSource:
+    Type: Custom::AWSSource
+    Condition: install_fourth_cw_source
+    Properties:
+      ServiceToken: !Ref LambdaARN
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceType: AwsCloudWatch
+      Namespaces: !Split [ "," , !Sub "AWS/${FourthMetricsSourceNamespace}" ]
+      SourceName: !Sub "${CloudWatchMetricsSourceName}-${FourthMetricsSourceNamespace}"
+      ScanInterval: !FindInMap [Namespaces, !Ref FourthMetricsSourceNamespace, ScanInterval]
+      SourceCategory: "aws/observability/cloudwatch/metrics"
+      CollectorId: !Ref SumoLogicCollectorId
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      RoleArn: !Ref SumoLogicSourceRole
+      Fields:
+        account: !Ref AccountAlias
+
+  FifthCloudwatchMetricsSource:
+    Type: Custom::AWSSource
+    Condition: install_fifth_cw_source
+    Properties:
+      ServiceToken: !Ref LambdaARN
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceType: AwsCloudWatch
+      Namespaces: !Split [ "," , !Sub "AWS/${FifthMetricsSourceNamespace}" ]
+      SourceName: !Sub "${CloudWatchMetricsSourceName}-${FifthMetricsSourceNamespace}"
+      ScanInterval: !FindInMap [Namespaces, !Ref FifthMetricsSourceNamespace, ScanInterval]
+      SourceCategory: "aws/observability/cloudwatch/metrics"
+      CollectorId: !Ref SumoLogicCollectorId
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      RoleArn: !Ref SumoLogicSourceRole
+      Fields:
+        account: !Ref AccountAlias

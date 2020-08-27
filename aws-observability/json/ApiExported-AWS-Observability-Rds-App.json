@@ -53,19 +53,19 @@
           },
           {
             "key": "panelpane-c16c7d27adcd1b45",
-            "structure": "{\"height\":5,\"width\":4,\"x\":20,\"y\":15}"
+            "structure": "{\"height\":5,\"width\":4,\"x\":12,\"y\":15}"
           },
           {
             "key": "panelpane-c7b2b0dbba2e4b46",
-            "structure": "{\"height\":5,\"width\":4,\"x\":0,\"y\":20}"
+            "structure": "{\"height\":5,\"width\":4,\"x\":20,\"y\":15}"
           },
           {
             "key": "panelpane-9b2d25eaa1db9845",
-            "structure": "{\"height\":5,\"width\":4,\"x\":4,\"y\":20}"
+            "structure": "{\"height\":5,\"width\":4,\"x\":0,\"y\":20}"
           },
           {
             "key": "panelpane-188b131cb1372b44",
-            "structure": "{\"height\":5,\"width\":4,\"x\":8,\"y\":20}"
+            "structure": "{\"height\":5,\"width\":4,\"x\":4,\"y\":20}"
           },
           {
             "key": "panelpane-f111287faf32ca42",
@@ -77,7 +77,7 @@
           },
           {
             "key": "panelpane-dad8b840bf488947",
-            "structure": "{\"height\":5,\"width\":4,\"x\":12,\"y\":15}"
+            "structure": "{\"height\":5,\"width\":4,\"x\":8,\"y\":20}"
           },
           {
             "key": "panelpane-33d3a97b8753594f",
@@ -758,7 +758,7 @@
         {
           "id": "F768F8C3A4E31B47",
           "key": "panelPANE-F768F8C3A4E31B47",
-          "title": "RDS Performance Insight",
+          "title": "RDS Performance Insights",
           "visualSettings": "{\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":20}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "TextPanel",
@@ -830,7 +830,7 @@
       ],
       "variables": [
         {
-          "id": "29C27F6973DEF81A",
+          "id": "CC4C39ABC19C7288",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -844,7 +844,7 @@
           "hideFromUI": false
         },
         {
-          "id": "C51438E3F1F7C55D",
+          "id": "EDE7D89277A149C8",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -858,7 +858,7 @@
           "hideFromUI": false
         },
         {
-          "id": "A8A32F80B3E530C0",
+          "id": "DDFEE585F83B8ACD",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/rds",
@@ -872,7 +872,7 @@
           "hideFromUI": false
         },
         {
-          "id": "11FCEF4D7F4CC4C2",
+          "id": "CDFE13A7E5BC565E",
           "name": "entity",
           "displayName": null,
           "defaultValue": null,
@@ -1976,7 +1976,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop  \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Failure\"\n| count as eventCount by errorCode \n| top 10 errorCode by eventCount, errorCode asc",
+              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop  \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Failure\"\n| count as Frequency by errorCode \n| top 10 errorCode by Frequency, errorCode asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2039,7 +2039,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Failure\"\n| if (isEmpty(userName), user, userName) as user\n| timeslice 1s\n| count as eventCount by _timeslice, event_name, errorCode, errorMessage, src_ip, user, type, requestID, user_agent, Region, accountId\n| sort by _timeslice\n| limit 100",
+              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Failure\"\n| if (isEmpty(userName), user, userName) as user\n| timeslice 1s\n| count as Frequency by _timeslice, event_name, errorCode, errorMessage, src_ip, user, type, requestID, user_agent, Region, accountId\n| sort by _timeslice\n| limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2081,7 +2081,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| where eventSource=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Success\"\n| if (isEmpty(userName), user, userName) as user\n| timeslice 1s\n| count as eventCount by _timeslice, event_name, src_ip, user, type, requestId, user_agent, Region, accountId\n| sort by _timeslice\n| limit 100",
+              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and eventStatus=\"Success\"\n| if (isEmpty(userName), user, userName) as user\n| timeslice 1s\n| count as Frequency by _timeslice, event_name, src_ip, user, type, requestId, user_agent, Region, accountId\n| sort by _timeslice\n| limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2102,7 +2102,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\"\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by type, user\n| topk(10, eventCount) by type | fields -_rank",
+              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\"\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by type, user\n| topk(10, Frequency) by type | fields -_rank",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2123,7 +2123,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" engine account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop  \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json \"requestParameters.engine\", \"responseElements.engine\" as engine1, engine2 nodrop\n| if (!isEmpty(engine1), engine1, engine2) as engine\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and !isEmpty(engine)\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by engine\n| sort by eventCount, engine asc",
+              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" engine account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop  \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json \"requestParameters.engine\", \"responseElements.engine\" as engine1, engine2 nodrop\n| if (!isEmpty(engine1), engine1, engine2) as engine\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and !isEmpty(engine)\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by engine\n| sort by Frequency, engine asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2144,7 +2144,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\"\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus \n| timeslice 15m\n| count as eventCount by _timeslice, event_name\n| transpose row _timeslice column event_name",
+              "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\"\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus \n| timeslice 15m\n| count as Frequency by _timeslice, event_name\n| transpose row _timeslice column event_name",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2201,7 +2201,7 @@
       ],
       "variables": [
         {
-          "id": "94FA525AE587259F",
+          "id": "44024ACEE806E732",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -2215,7 +2215,7 @@
           "hideFromUI": false
         },
         {
-          "id": "08D42FFD5B308310",
+          "id": "020FE28371A25BA2",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -2229,7 +2229,7 @@
           "hideFromUI": false
         },
         {
-          "id": "FB03445472C39D3B",
+          "id": "EA8AE3AF00E1E4AC",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/rds",
@@ -2247,9 +2247,9 @@
     },
     {
       "type": "DashboardV2SyncDefinition",
-      "name": "2. Amazon RDS Performance and Resource Usage",
+      "name": "2. Amazon RDS Performance Insights",
       "description": "",
-      "title": "2. Amazon RDS Performance and Resource Usage",
+      "title": "2. Amazon RDS Performance Insights",
       "rootPanel": null,
       "theme": "Light",
       "topologyLabelMap": {
@@ -2381,7 +2381,7 @@
           "visualSettings": "{\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":20}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "TextPanel",
-          "text": "   - __DBLoad__: The number of active sessions for the DB engine. Typically, you want the data for the average number of active sessions. In Performance Insights, this data is queried as db.load.avg.\n\n   - __DBLoadCPU__: The number of active sessions where the wait event type is CPU. In Performance Insights, this data is queried as db.load.avg, filtered by the wait event type CPU.\n\n   - __DBLoadNonCPU__: The number of active sessions where the wait event type is not CPU."
+          "text": "   - __DBLoad__: The number of active sessions for the DB engine. Typically, you want the data for the average number of active sessions. In Performance Insights, this data is queried as db.load.avg.\n\n   - __DBLoadCPU__: The number of active sessions where the wait event type is CPU. In Performance Insights, this data is queried as db.load.avg, filtered by the wait event type CPU.\n\n   - __DBLoadNonCPU__: The number of active sessions where the wait event type is not CPU.\n   \nTo enable Performance Insight on database instance read AWS document at https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Enabling.html"
         },
         {
           "id": "1F1A74A3D27194D6",
@@ -2449,7 +2449,7 @@
       ],
       "variables": [
         {
-          "id": "B7F2B6FC583FB52C",
+          "id": "AE79F9CE2B67E08F",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -2463,7 +2463,7 @@
           "hideFromUI": false
         },
         {
-          "id": "24C559EEFC39165C",
+          "id": "AD4F6D694ED6C14E",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -2477,7 +2477,7 @@
           "hideFromUI": false
         },
         {
-          "id": "559C50DFACAA4106",
+          "id": "81A35C0B5D16F0BB",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/rds",
@@ -2491,7 +2491,7 @@
           "hideFromUI": false
         },
         {
-          "id": "FDF27FCA1F2C896F",
+          "id": "12D753C2BE184C58",
           "name": "entity",
           "displayName": null,
           "defaultValue": null,
@@ -3182,7 +3182,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" *DBInstance* !Describe*DBInstance* !StartDBInstance !StopDBInstance !RebootDBInstance account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2 nodrop  \n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name matches \"*DBInstance*\" and !(event_name matches \"Describe*DBInstance*\") and !(event_name in (\"StartDBInstance\", \"StopDBInstance\", \"RebootDBInstance\"))\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by eventTime, event_name, dBInstanceIdentifier, user, Region, src_ip, eventStatus, dBInstanceClass, engine, dbName, dBSnapshotIdentifier, errorCode, errorMessage\n| sort by eventTime | limit 100",
+              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" *DBInstance* !Describe*DBInstance* !StartDBInstance !StopDBInstance !RebootDBInstance account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2 nodrop  \n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name matches \"*DBInstance*\" and !(event_name matches \"Describe*DBInstance*\") and !(event_name in (\"StartDBInstance\", \"StopDBInstance\", \"RebootDBInstance\"))\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by eventTime, event_name, dBInstanceIdentifier, user, Region, src_ip, eventStatus, dBInstanceClass, engine, dbName, dBSnapshotIdentifier, errorCode, errorMessage\n| sort by eventTime | limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -3203,7 +3203,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" (StartDBInstance or StopDBInstance or RebootDBInstance) account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2 nodrop  \n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name in (\"StartDBInstance\", \"StopDBInstance\", \"RebootDBInstance\")\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by eventTime, event_name, dBInstanceIdentifier, user, Region, src_ip, eventStatus, dBInstanceClass, engine, dbName, dBSnapshotIdentifier, errorCode, errorMessage\n| sort by eventTime | limit 100",
+              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" (StartDBInstance or StopDBInstance or RebootDBInstance) account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2 nodrop  \n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name in (\"StartDBInstance\", \"StopDBInstance\", \"RebootDBInstance\")\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by eventTime, event_name, dBInstanceIdentifier, user, Region, src_ip, eventStatus, dBInstanceClass, engine, dbName, dBSnapshotIdentifier, errorCode, errorMessage\n| sort by eventTime | limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -3245,7 +3245,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" *DB*Snapshot* !Describe*DB*Snapshot* account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier1 nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2, dBSnapshotIdentifier2 nodrop \n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name matches \"*DB*Snapshot*\" and !(event_name matches \"Describe*DB*Snapshot*\")\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier | concat (dBSnapshotIdentifier1, dBSnapshotIdentifier2) as dBSnapshotIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (!isEmpty(dBSnapshotIdentifier1), dBSnapshotIdentifier1, dBSnapshotIdentifier) as dBSnapshotIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by eventTime, event_name, dBSnapshotIdentifier, user, Region, src_ip, eventStatus, dBInstanceIdentifier, engine, dBInstanceClass, dbName, errorCode, errorMessage\n| sort by eventTime | limit 100",
+              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" *DB*Snapshot* !Describe*DB*Snapshot* account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop \n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier1 nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2, dBSnapshotIdentifier2 nodrop \n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name matches \"*DB*Snapshot*\" and !(event_name matches \"Describe*DB*Snapshot*\")\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier | concat (dBSnapshotIdentifier1, dBSnapshotIdentifier2) as dBSnapshotIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (!isEmpty(dBSnapshotIdentifier1), dBSnapshotIdentifier1, dBSnapshotIdentifier) as dBSnapshotIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by eventTime, event_name, dBSnapshotIdentifier, user, Region, src_ip, eventStatus, dBInstanceIdentifier, engine, dBInstanceClass, dbName, errorCode, errorMessage\n| sort by eventTime | limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -3305,7 +3305,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" *DBCluster !Describe*DBCluster* account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2 nodrop \n| where eventSource=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name matches \"*DBCluster\" and !(event_name matches \"Describe*DBCluster*\")\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by eventTime, event_name, dBClusterIdentifier, user, Region, src_ip, eventStatus, engine, errorCode, errorMessage\n| sort by eventTime | limit 100",
+              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" *DBCluster !Describe*DBCluster* account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2 nodrop \n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name matches \"*DBCluster\" and !(event_name matches \"Describe*DBCluster*\")\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by eventTime, event_name, dBClusterIdentifier, user, Region, src_ip, eventStatus, engine, errorCode, errorMessage\n| sort by eventTime | limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -3347,7 +3347,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" *DBSecurityGroup* !DescribeDBSecurityGroups account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\", \"dBSecurityGroupName\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier, dBSecurityGroupName  nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2 nodrop\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name matches \"*DBSecurityGroup*\" and event_name<>\"DescribeDBSecurityGroups\"\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by eventTime, event_name, dBSecurityGroupName, type, user, Region, src_ip, eventStatus, errorCode, errorMessage, engine, dBInstanceIdentifier, dBClusterIdentifier, dBInstanceClass, dbName\n| sort by eventTime | limit 100",
+              "queryString": "\"\\\"eventSource\\\":\\\"rds.amazonaws.com\\\"\" *DBSecurityGroup* !DescribeDBSecurityGroups account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\", \"dBSnapshotIdentifier\", \"dBSecurityGroupName\" as engine1, dBInstanceClass1, dBClusterIdentifier1, dBInstanceIdentifier1, dBSnapshotIdentifier, dBSecurityGroupName  nodrop  \n| json field=responseElements \"dBName\", \"engine\", \"dBInstanceClass\", \"dBClusterIdentifier\", \"dBInstanceIdentifier\" as dbName, engine2, dBInstanceClass2, dBClusterIdentifier2, dBInstanceIdentifier2 nodrop\n| where event_source=\"rds.amazonaws.com\" and Region matches \"{{region}}\" and event_name matches \"*DBSecurityGroup*\" and event_name<>\"DescribeDBSecurityGroups\"\n| concat (dBInstanceIdentifier1, dBInstanceIdentifier2) as dBInstanceIdentifier | concat (engine1, engine2) as engine | concat (dBInstanceClass1, dBInstanceClass2) as dBInstanceClass | concat (dBClusterIdentifier1, dBClusterIdentifier2) as dBClusterIdentifier\n| if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier) as dBInstanceIdentifier\n| if (!isEmpty(engine1), engine1, engine) as engine\n| if (!isEmpty(dBInstanceClass1), dBInstanceClass1, dBInstanceClass) as dBInstanceClass\n| if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier) as dBClusterIdentifier\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by eventTime, event_name, dBSecurityGroupName, type, user, Region, src_ip, eventStatus, errorCode, errorMessage, engine, dBInstanceIdentifier, dBClusterIdentifier, dBInstanceClass, dbName\n| sort by eventTime | limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -3371,7 +3371,7 @@
       ],
       "variables": [
         {
-          "id": "949657172A4EF05C",
+          "id": "6D3F9AC173663A3B",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -3385,7 +3385,7 @@
           "hideFromUI": false
         },
         {
-          "id": "64A0894468F106D2",
+          "id": "16527FADD10553DD",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -3399,7 +3399,7 @@
           "hideFromUI": false
         },
         {
-          "id": "0BC8D5D7F4ED4FD9",
+          "id": "060EF08449BFBDAA",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/rds",

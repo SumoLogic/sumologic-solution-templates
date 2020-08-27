@@ -183,9 +183,11 @@ Parameters:
       - 'Both'
       - 'None'
   Section4bMetricsNameSpaces:
-    Default: "AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling"
-    Description: "Provide Comma delimited list of the namespaces if creating Metrics or Inventory source. Default will be AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling."
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
+    Description: "Provide Comma delimited list of the namespaces which will be used for both AWS CLoudWatch Metrics and Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
     Type: String
+    AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB)\\s*(,|$))+"
+    ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
   Section4cCloudWatchExistingSourceAPIUrl:
     Type: String
     Description: "Required when already collecting CloudWatch Metrics. Provide the existing Sumo Logic CloudWatch Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
@@ -401,7 +403,7 @@ Resources:
         SumoLogicOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         AccountAlias: !Ref Section2aAccountAlias
-        CollectorName: "aws-observability-collector"
+        CollectorName: !Sub "aws-observability-${Section2aAccountAlias}"
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: !If [install_cloudwatch_metrics_source, "Yes", "No"]
         CloudWatchMetricsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-metrics-${AWS::Region}"
@@ -419,20 +421,6 @@ Resources:
         CloudTrailLogsSourceName: !Sub "${Section2aAccountAlias}-cloudtrail-logs-${AWS::Region}"
         CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSource
         CloudWatchLogsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-logs-${AWS::Region}"
-
-  sumoOverview:
-    Type: Custom::App
-    Condition: install_overview_dashboards
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Overview App"
-      Version: "BetaV0.3"
-      FolderName: "Sumo Logic AWS Observability Apps "
-      RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
 
   AutoEnableOptions:
     Type: AWS::CloudFormation::Stack
@@ -469,7 +457,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateMetaDataSource: "No"
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
@@ -501,7 +489,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section4cCloudWatchExistingSourceAPIUrl: !Ref Section4cCloudWatchExistingSourceAPIUrl
         Section5aCreateS3Bucket: "No"
@@ -537,7 +525,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
@@ -571,7 +559,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
@@ -605,7 +593,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
@@ -637,12 +625,12 @@ Resources:
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
         Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aInstallApp: !If [install_overview_dashboards, "Yes", "No"]
-        Section2bCollectorName: "aws-observability-collector"
-        Section3aCreateAwsInventorySource: !If [install_inventory_source, "Yes", "No"]
+        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
+        Section2bCollectorName: !Sub "aws-observability-${Section2aAccountAlias}"
+        Section3aCreateAwsInventorySource: !If [install_inventory_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section3bAwsInventorySourceName: !Sub "${Section2aAccountAlias}-inventory-aws-${AWS::Region}"
-        Section3cNamespaces: !Ref Section4bMetricsNameSpaces
-        Section4aCreateAwsXRaySource: !If [install_xray_source, "Yes", "No"]
+        Section3cNamespaces: !GetAtt CreateCommonResources.Outputs.Namespaces
+        Section4aCreateAwsXRaySource: !If [install_xray_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section4bAwsXRaySourceName: !Sub "${Section2aAccountAlias}-xray-aws-${AWS::Region}"
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
@@ -674,7 +662,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"

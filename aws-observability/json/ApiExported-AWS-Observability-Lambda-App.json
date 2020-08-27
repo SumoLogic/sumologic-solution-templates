@@ -701,39 +701,39 @@
         "layoutStructures": [
           {
             "key": "panelpane-3c5b34dda0bbb840",
-            "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":1}"
+            "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":1}"
           },
           {
             "key": "panelpane-3f9f39638d387a43",
-            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":26}"
+            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":31}"
           },
           {
             "key": "panelpane-16e3f20782380843",
-            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":10}"
+            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":15}"
           },
           {
             "key": "panelpane-ddbffb2b8add794a",
-            "structure": "{\"height\":8,\"width\":9,\"x\":6,\"y\":10}"
+            "structure": "{\"height\":8,\"width\":9,\"x\":6,\"y\":15}"
           },
           {
             "key": "panelpane-34eea0d88a1afb49",
-            "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":10}"
+            "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":15}"
           },
           {
             "key": "panelpane-f13c1239a1f49b42",
-            "structure": "{\"height\":8,\"width\":12,\"x\":6,\"y\":26}"
+            "structure": "{\"height\":8,\"width\":12,\"x\":6,\"y\":31}"
           },
           {
             "key": "panelpane-1b7a3c298ca95949",
-            "structure": "{\"height\":8,\"width\":16,\"x\":8,\"y\":18}"
+            "structure": "{\"height\":8,\"width\":16,\"x\":8,\"y\":23}"
           },
           {
             "key": "panelpane-9bdb6681b76a7946",
-            "structure": "{\"height\":8,\"width\":6,\"x\":18,\"y\":26}"
+            "structure": "{\"height\":8,\"width\":6,\"x\":18,\"y\":31}"
           },
           {
             "key": "panelPANE-147BE636A6B81842",
-            "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":18}"
+            "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":23}"
           },
           {
             "key": "panelPANE-11D188E7BCA5C94F",
@@ -741,19 +741,23 @@
           },
           {
             "key": "panelPANE-99C148768D8B7A45",
-            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":9}"
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":14}"
           },
           {
             "key": "panelPANE-493D84E79DACFB44",
-            "structure": "{\"height\":8,\"width\":9,\"x\":6,\"y\":34}"
+            "structure": "{\"height\":8,\"width\":9,\"x\":6,\"y\":39}"
           },
           {
             "key": "panelPANE-E92623F985DD0A48",
-            "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":34}"
+            "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":39}"
           },
           {
             "key": "panelPANE-5A94FACABB0B6947",
-            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":34}"
+            "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":39}"
+          },
+          {
+            "key": "panelPANE-204391B58D3AD849",
+            "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":8}"
           }
         ]
       },
@@ -1034,11 +1038,32 @@
           "timeRange": null,
           "coloringRules": null,
           "linkedDashboards": []
+        },
+        {
+          "id": "204391B58D3AD849",
+          "key": "panelPANE-204391B58D3AD849",
+          "title": "Function Duration (ms)",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 15m\n| sum(Duration) as Duration by functionname, _timeslice\n| transpose row _timeslice column functionname",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
         }
       ],
       "variables": [
         {
-          "id": "68393F2FCF5FCEED",
+          "id": "D2225ED5FF85D881",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -1052,7 +1077,7 @@
           "hideFromUI": false
         },
         {
-          "id": "A536ED730A93AA8C",
+          "id": "05B75E4B83669CB7",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -1066,7 +1091,7 @@
           "hideFromUI": false
         },
         {
-          "id": "6DD8789368A45FD6",
+          "id": "A886FC65C8234231",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/lambda",
@@ -1080,7 +1105,7 @@
           "hideFromUI": false
         },
         {
-          "id": "105D6826A14A9D04",
+          "id": "246CCB1E8B817674",
           "name": "entity",
           "displayName": null,
           "defaultValue": null,
@@ -1596,14 +1621,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace={{namespace}} metric=Throttles Statistic=average account={{account}} region={{region}} entity={{entity}} Resource=* | avg by entity, namespace, region, account",
+              "queryString": "Namespace={{namespace}} metric=Throttles Statistic=Sum account={{account}} region={{region}} entity={{entity}} Resource=* | Sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
               "metricsQueryData": null
             },
             {
-              "queryString": "Namespace={{namespace}} metric=Throttles Statistic=average account={{account}} region={{region}} entity=* Resource=*  | avg ",
+              "queryString": "Namespace={{namespace}} metric=Throttles Statistic=Sum account={{account}} region={{region}} entity=* Resource=*  | avg ",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
@@ -1790,7 +1815,7 @@
       ],
       "variables": [
         {
-          "id": "527A74A2C7C196F9",
+          "id": "982ABCECF6DAA1A2",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -1804,7 +1829,7 @@
           "hideFromUI": false
         },
         {
-          "id": "6FC9C183B9261229",
+          "id": "AA2B12E4C425DB6A",
           "name": "region",
           "displayName": null,
           "defaultValue": "*",
@@ -1818,7 +1843,7 @@
           "hideFromUI": false
         },
         {
-          "id": "0D9D30E2EDC89FE7",
+          "id": "62FDDCE939B8F787",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/lambda",
@@ -1832,7 +1857,7 @@
           "hideFromUI": false
         },
         {
-          "id": "2F48C8677D6E7681",
+          "id": "27FF5444EE3C2184",
           "name": "entity",
           "displayName": null,
           "defaultValue": "*",
@@ -1884,69 +1909,56 @@
         "layoutType": "Grid",
         "layoutStructures": [
           {
-            "key": "panelpane-219757da9d65f941",
-            "structure": "{\"height\":8,\"width\":9,\"x\":6,\"y\":1}"
-          },
-          {
             "key": "panelpane-a6e5e649a3dd1b48",
-            "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":1}"
+            "structure": "{\"height\":8,\"width\":13,\"x\":11,\"y\":7}"
           },
           {
             "key": "panelpane-6fce866fb553d845",
-            "structure": "{\"height\":4,\"width\":6,\"x\":0,\"y\":1}"
+            "structure": "{\"height\":4,\"width\":13,\"x\":11,\"y\":16}"
           },
           {
             "key": "panelpane-cb75ba2e8296da45",
-            "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":9}"
+            "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":1}"
           },
           {
             "key": "panelpane-dffe2c33b7aa9a4e",
-            "structure": "{\"height\":4,\"width\":6,\"x\":0,\"y\":5}"
+            "structure": "{\"height\":4,\"width\":11,\"x\":0,\"y\":7}"
           },
           {
             "key": "panelpane-fa25f26eb2ecab46",
-            "structure": "{\"height\":5,\"width\":12,\"x\":0,\"y\":14}"
+            "structure": "{\"height\":4,\"width\":11,\"x\":0,\"y\":16}"
           },
           {
             "key": "panelpane-17077145b6c3c841",
-            "structure": "{\"height\":5,\"width\":12,\"x\":12,\"y\":14}"
+            "structure": "{\"height\":4,\"width\":11,\"x\":0,\"y\":11}"
           },
           {
             "key": "panelpane-41411978beff494d",
-            "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":19}"
+            "structure": "{\"height\":5,\"width\":11,\"x\":0,\"y\":21}"
           },
           {
             "key": "panelpane-419733b5bbfebb4a",
-            "structure": "{\"height\":6,\"width\":16,\"x\":8,\"y\":19}"
+            "structure": "{\"height\":5,\"width\":13,\"x\":11,\"y\":21}"
           },
           {
             "key": "panel4E6DAA3DAA450A49",
-            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0,\"minHeight\":1,\"minWidth\":1}"
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+          },
+          {
+            "key": "panel65100DE4812F894F",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":20}"
+          },
+          {
+            "key": "panel77A3F8EEB03EC842",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":15}"
+          },
+          {
+            "key": "panel8E61D69B81806846",
+            "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":6}"
           }
         ]
       },
       "panels": [
-        {
-          "id": "71C520EDD07F345C",
-          "key": "panelpane-219757da9d65f941",
-          "title": "Function Duration (ms)",
-          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
-          "keepVisualSettingsConsistentWithParent": true,
-          "panelType": "SumoSearchPanel",
-          "queries": [
-            {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 15m\n| sum(Duration) as Duration by functionname, _timeslice\n| transpose row _timeslice column functionname",
-              "queryType": "Logs",
-              "queryKey": "A",
-              "metricsQueryMode": null,
-              "metricsQueryData": null
-            }
-          ],
-          "description": "",
-          "timeRange": null,
-          "coloringRules": null,
-          "linkedDashboards": []
-        },
         {
           "id": "6AB07D1445FF20FC",
           "key": "panelpane-a6e5e649a3dd1b48",
@@ -1977,7 +1989,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| sum(Duration) as TotalDuration by functionname\n| sort by TotalDuration, functionname asc",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| sum(Duration) as TotalDuration, avg(Duration) as AvgDuration, min(Duration) as MinDuration, max(Duration) as MaxDuration by functionname\n| sort by TotalDuration, functionname asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2040,7 +2052,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| avg(BilledDuration) as BilledDurationAvg, avg(Duration) as DurationAvg by functionname\n| BilledDurationAvg-DurationAvg as BilledUnusedDuration\n| BilledUnusedDuration/BilledDurationAvg as wastageRatio\n| top 5 functionname by wastageRatio, BilledUnusedDuration, DurationAvg\n| fields -wastageRatio",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches \"{{entity}}\"\n| avg(BilledDuration) as BilledDurationAvg, avg(Duration) as AvgDuration by functionname\n| BilledDurationAvg-AvgDuration as BilledUnusedDuration\n| BilledUnusedDuration/BilledDurationAvg as wastageRatio\n| top 5 functionname by wastageRatio, BilledUnusedDuration, AvgDuration\n| fields -wastageRatio",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2126,7 +2138,34 @@
           "id": "4E6DAA3DAA450A49",
           "key": "panel4E6DAA3DAA450A49",
           "title": "Lambda Events",
-          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":\"20\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"left\",\"format\":\"text\",\"text\":\"\",\"showTitle\":true}}",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"left\",\"format\":\"text\",\"text\":\"\",\"showTitle\":true},\"title\":{\"fontSize\":20}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "65100DE4812F894F",
+          "key": "panel65100DE4812F894F",
+          "title": "Compute Usage",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"left\",\"format\":\"text\",\"text\":\"\",\"showTitle\":true},\"title\":{\"fontSize\":20}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "77A3F8EEB03EC842",
+          "key": "panel77A3F8EEB03EC842",
+          "title": "Duration",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"left\",\"format\":\"text\",\"text\":\"\",\"showTitle\":true},\"title\":{\"fontSize\":20}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "TextPanel",
+          "text": ""
+        },
+        {
+          "id": "8E61D69B81806846",
+          "key": "panel8E61D69B81806846",
+          "title": "Memory Usage",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"left\",\"format\":\"text\",\"text\":\"\",\"showTitle\":true},\"title\":{\"fontSize\":20}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "TextPanel",
           "text": ""
@@ -2134,7 +2173,7 @@
       ],
       "variables": [
         {
-          "id": "803FBDCA05F84D18",
+          "id": "EB24BDA9734ACB46",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -2148,7 +2187,7 @@
           "hideFromUI": false
         },
         {
-          "id": "BBA7445B989966AB",
+          "id": "56AED4B40DE0F092",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -2162,7 +2201,7 @@
           "hideFromUI": false
         },
         {
-          "id": "CC9495C97FA725E8",
+          "id": "5DA7E6899E8A47DA",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/lambda",
@@ -2176,7 +2215,7 @@
           "hideFromUI": false
         },
         {
-          "id": "6C3259C2F20A9CBF",
+          "id": "E4C6C7E620EA13CF",
           "name": "entity",
           "displayName": null,
           "defaultValue": null,
@@ -2397,7 +2436,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 10m\n| sum(MemorySize) as MemorySize, sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| MemorySize - MaxMemoryUsed as UnusedMemory\n| predict UnusedMemory by 10m model=ar, forecast=18",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 10m\n| sum(MemorySize) as MemorySize, sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| MemorySize - MaxMemoryUsed as UnusedMemory\n| predict UnusedMemory by 10m model=ar, forecast=18\n| fields - MaxMemoryUsed, MemorySize, UnusedMemory_error, UnusedMemory_linear",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2418,7 +2457,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 10m\n| sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| predict MaxMemoryUsed by 10m model=ar, forecast=18",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 10m\n| sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| predict MaxMemoryUsed by 10m model=ar, forecast=18\n| fields - MaxMemoryUsed_error, MaxMemoryUsed_linear",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2439,7 +2478,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 10m\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by _timeslice\n| predict ComputeUsage by 10m model=ar, forecast=18",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 10m\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by _timeslice\n| predict ComputeUsage by 10m model=ar, forecast=18\n| fields - ComputeUsage_linear, ComputeUsage_error",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2460,7 +2499,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 10m\n| sum(BilledDuration) as BilledDuration by _timeslice\n| predict BilledDuration by 10m model=ar, forecast=18",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches \"{{entity}}\"\n| timeslice 10m\n| sum(BilledDuration) as BilledDuration by _timeslice\n| predict BilledDuration by 10m model=ar, forecast=18\n| fields - BilledDuration_error, BilledDuration_linear",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -2475,7 +2514,7 @@
       ],
       "variables": [
         {
-          "id": "ED217219F755737E",
+          "id": "63065F3F71F1D9E0",
           "name": "account",
           "displayName": null,
           "defaultValue": null,
@@ -2489,7 +2528,7 @@
           "hideFromUI": false
         },
         {
-          "id": "892B8D43290867A4",
+          "id": "2C4D173AF46A3E24",
           "name": "region",
           "displayName": null,
           "defaultValue": null,
@@ -2503,7 +2542,7 @@
           "hideFromUI": false
         },
         {
-          "id": "D664EC1D99C8AC98",
+          "id": "F3399013B306F1CE",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/lambda",
@@ -2517,7 +2556,7 @@
           "hideFromUI": false
         },
         {
-          "id": "DA6C68AAD8F33FEB",
+          "id": "008E6B27588657FA",
           "name": "entity",
           "displayName": null,
           "defaultValue": null,
@@ -2578,7 +2617,7 @@
           },
           {
             "key": "panelpane-b8ffc92b8b722a41",
-            "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":12}"
+            "structure": "{\"height\":8,\"width\":16,\"x\":8,\"y\":12}"
           },
           {
             "key": "panelpane-c605d948852ffb48",
@@ -2587,6 +2626,10 @@
           {
             "key": "panelPANE-642147F890E0F848",
             "structure": "{\"height\":12,\"width\":8,\"x\":0,\"y\":0}"
+          },
+          {
+            "key": "panelPANE-79AA62F18928EA42",
+            "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":12}"
           }
         ]
       },
@@ -2695,11 +2738,32 @@
           "timeRange": null,
           "coloringRules": null,
           "linkedDashboards": []
+        },
+        {
+          "id": "79AA62F18928EA42",
+          "key": "panelPANE-79AA62F18928EA42",
+          "title": "Function Accessed by Highly Malicious Threat IPs",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+          "keepVisualSettingsConsistentWithParent": true,
+          "panelType": "SumoSearchPanel",
+          "queries": [
+            {
+              "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\" as func_name nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=func_name \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\"\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\"\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| where Region matches \"{{region}}\" and tolowercase(functionname) matches \"{{entity}}\"\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count by src_ip, functionName\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where type=\"ip_address\" and malicious_confidence = \"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count(_count) as UniqueThreatIPs by functionName\n| top 20 functionName by UniqueThreatIPs, functionName asc",
+              "queryType": "Logs",
+              "queryKey": "A",
+              "metricsQueryMode": null,
+              "metricsQueryData": null
+            }
+          ],
+          "description": "",
+          "timeRange": null,
+          "coloringRules": null,
+          "linkedDashboards": []
         }
       ],
       "variables": [
         {
-          "id": "28F54DF8022437B3",
+          "id": "192029F08D90A4FA",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -2713,7 +2777,7 @@
           "hideFromUI": false
         },
         {
-          "id": "382B2B3C7D664E5D",
+          "id": "8248105D164F57AF",
           "name": "region",
           "displayName": null,
           "defaultValue": "*",
@@ -2727,7 +2791,7 @@
           "hideFromUI": false
         },
         {
-          "id": "416F22662AE1E39E",
+          "id": "3481C27E240F6571",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/lambda",
@@ -2741,7 +2805,7 @@
           "hideFromUI": false
         },
         {
-          "id": "84B00D51858D278C",
+          "id": "0F54575A3FFAECE6",
           "name": "entity",
           "displayName": null,
           "defaultValue": "*",
