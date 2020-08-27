@@ -1,6 +1,8 @@
+
+
 {
     "type": "FolderSyncDefinition",
-    "name": "Jenkins",
+    "name": "Jenkins - Mewboards",
     "description": "Jenkins is an open source automation server for automating tasks related to building, testing, and delivering software. The Sumo Logic App for Jenkins helps you monitor build successes, failures, and performance. The preconfigured dashboards provide insight into current current and recent build activity.",
     "children": [
         {
@@ -89,7 +91,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"eventSource\\\":\\\"Shutdown\\\"\" \n| _sourceHost as Master\n| timeslice {{TimeSlice}}\n| count as Count by _timeslice\n| fillmissing timeslice({{TimeSlice}}) with 0 for Count\n| outlier Count",
+                            "queryString": "_sourceCategory=${sourceCategory} \"\\\"eventSource\\\":\\\"Shutdown\\\"\" \n| _sourceHost as Master\n| timeslice {{TimeSlice}}\n| count as Count by _timeslice\n| fillmissing timeslice({{TimeSlice}}) with 0 for Count\n| outlier Count",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -117,7 +119,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Queue_Event\n| _sourceHost as Master\n| json \"jobName\" as Name\n| first(_raw) by Name, Master\n| json field = _first \"queueId\", \"queueTime\", \"isBlocked\", \"reasonForBlock\", \"isConcurrentBuild\", \"jobName\", \"jobURL\" as %\"Queue Id\", %\"Queue Time(sec)\", Blocked, Reason, %\"Concurrent Build\", Name, URL nodrop\n| tourl(URL, Name) as Name\n| replace (URL, /\\/[0-9]{1,}/, \"\") as URL\n| where ![subquery : _sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"jobBuildURL\" as URL\n| replace (URL, /\\/[0-9]{1,}/, \"\") as URL\n| count by URL, Master\n| compose URL, Master]\n| count by Master, %\"Queue Time(sec)\", Name, Blocked, Reason\n| fields - _count",
+                            "queryString": "_sourceCategory=${sourceCategory} Queue_Event\n| _sourceHost as Master\n| json \"jobName\" as Name\n| first(_raw) by Name, Master\n| json field = _first \"queueId\", \"queueTime\", \"isBlocked\", \"reasonForBlock\", \"isConcurrentBuild\", \"jobName\", \"jobURL\" as %\"Queue Id\", %\"Queue Time(sec)\", Blocked, Reason, %\"Concurrent Build\", Name, URL nodrop\n| tourl(URL, Name) as Name\n| replace (URL, /\\/[0-9]{1,}/, \"\") as URL\n| where ![subquery : _sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"jobBuildURL\" as URL\n| replace (URL, /\\/[0-9]{1,}/, \"\") as URL\n| count by URL, Master\n| compose URL, Master]\n| count by Master, %\"Queue Time(sec)\", Name, Blocked, Reason\n| fields - _count",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -145,7 +147,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Jenkins_Log\n| json \"threadId\", \"logType\", \"logLevel\", \"logMessage\", \"logSource\", \"eventTime\", \"logStackTrace\" as %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Message\", %\"Log Source\", %\"Event Time\", %\"Log Stack Trace\" nodrop\n| where %\"Log Level\" matches \"{{LogLevel}}\" AND %\"Log Message\" matches \"{{LogMessage}}\"\n| where %\"Log Message\" matches \"*WARN*\" OR %\"Log Message\" matches \"*Warn*\" OR %\"Log Message\" matches \"*warn*\" OR %\"Log Message\" matches \"*FAIL*\" OR %\"Log Message\" matches \"*Fail*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*EXCEPTION*\" OR %\"Log Message\" matches \"*Exception*\" OR %\"Log Message\" matches \"*exception*\" OR %\"Log Message\" matches \"*ERROR*\" OR %\"Log Message\" matches \"*Error*\" OR %\"Log Message\" matches \"*error*\"\n| timeslice {{TimeSlice}}\n| count as Errors by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
+                            "queryString": "_sourceCategory=${sourceCategory} Jenkins_Log\n| json \"threadId\", \"logType\", \"logLevel\", \"logMessage\", \"logSource\", \"eventTime\", \"logStackTrace\" as %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Message\", %\"Log Source\", %\"Event Time\", %\"Log Stack Trace\" nodrop\n| where %\"Log Level\" matches \"{{LogLevel}}\" AND %\"Log Message\" matches \"{{LogMessage}}\"\n| where %\"Log Message\" matches \"*WARN*\" OR %\"Log Message\" matches \"*Warn*\" OR %\"Log Message\" matches \"*warn*\" OR %\"Log Message\" matches \"*FAIL*\" OR %\"Log Message\" matches \"*Fail*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*EXCEPTION*\" OR %\"Log Message\" matches \"*Exception*\" OR %\"Log Message\" matches \"*exception*\" OR %\"Log Message\" matches \"*ERROR*\" OR %\"Log Message\" matches \"*Error*\" OR %\"Log Message\" matches \"*error*\"\n| timeslice {{TimeSlice}}\n| count as Errors by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -166,7 +168,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Job_Status\n| json \"name\", \"result\", \"jobRunDuration\", \"number\" as JobName, Result, Duration, BuildNumber\n| where JobName matches \"{{JobName}}\" and BuildNumber matches \"{{BuildNumber}}\"\n| timeslice {{TimeSlice}}\n| Duration/60 as Duration\n| avg(Duration) as Average, max(Duration) as Maximum, min(Duration) as Minimum by _timeslice \n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Maximum, Minimum, Maximum_1d, Minimum_1d",
+                            "queryString": "_sourceCategory=${sourceCategory} Job_Status\n| json \"name\", \"result\", \"jobRunDuration\", \"number\" as JobName, Result, Duration, BuildNumber\n| where JobName matches \"{{JobName}}\" and BuildNumber matches \"{{BuildNumber}}\"\n| timeslice {{TimeSlice}}\n| Duration/60 as Duration\n| avg(Duration) as Average, max(Duration) as Maximum, min(Duration) as Minimum by _timeslice \n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Maximum, Minimum, Maximum_1d, Minimum_1d",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -187,7 +189,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Queue_Event\n| json \"queueId\", \"queueTime\", \"isBlocked\", \"reasonForBlock\", \"isConcurrentBuild\", \"jobName\", \"jobURL\" as %\"Queue Id\", %\"Queue Time(sec)\", Blocked, Reason, %\"Concurrent Build\", Name, URL nodrop\n| where URL matches \"{{JobName}}\"\n| timeslice {{TimeSlice}}\n| First(%\"Queue Time(sec)\") as %\"Queue Time(sec)\" by %\"Queue Id\", _timeslice\n| %\"Queue Time(sec)\"/60 as QueueTime\n| avg(QueueTime) as Average, max(QueueTime) as Maximum, min(QueueTime) as Minimum by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Maximum, Minimum, Maximum_1d, Minimum_1d",
+                            "queryString": "_sourceCategory=${sourceCategory} Queue_Event\n| json \"queueId\", \"queueTime\", \"isBlocked\", \"reasonForBlock\", \"isConcurrentBuild\", \"jobName\", \"jobURL\" as %\"Queue Id\", %\"Queue Time(sec)\", Blocked, Reason, %\"Concurrent Build\", Name, URL nodrop\n| where URL matches \"{{JobName}}\"\n| timeslice {{TimeSlice}}\n| First(%\"Queue Time(sec)\") as %\"Queue Time(sec)\" by %\"Queue Id\", _timeslice\n| %\"Queue Time(sec)\"/60 as QueueTime\n| avg(QueueTime) as Average, max(QueueTime) as Maximum, min(QueueTime) as Minimum by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Maximum, Minimum, Maximum_1d, Minimum_1d",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -208,7 +210,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Job_Status\n| json \"name\", \"result\", \"number\" as JobName, Result, BuildNumber\n| where JobName matches \"{{JobName}}\" and BuildNumber matches \"{{BuildNumber}}\"\n| if(Result matches \"SUCCESS\", 1, 0) as Success\n| if(Result matches \"SUCCESS\", 0, 1) as Failure\n| timeslice {{TimeSlice}}\n| count as Total, sum(Success) as Success, sum(Failure) as Failure by _timeslice \n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Success, Failure, Success_1d, Failure_1d",
+                            "queryString": "_sourceCategory=${sourceCategory} Job_Status\n| json \"name\", \"result\", \"number\" as JobName, Result, BuildNumber\n| where JobName matches \"{{JobName}}\" and BuildNumber matches \"{{BuildNumber}}\"\n| if(Result matches \"SUCCESS\", 1, 0) as Success\n| if(Result matches \"SUCCESS\", 0, 1) as Failure\n| timeslice {{TimeSlice}}\n| count as Total, sum(Success) as Success, sum(Failure) as Failure by _timeslice \n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Success, Failure, Success_1d, Failure_1d",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -229,7 +231,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} {{LogLevel}}\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| where %\"Log Message\" matches \"{{LogMessage}}\"\n| where %\"Log Message\" matches \"*WARN*\" OR %\"Log Message\" matches \"*Warn*\" OR %\"Log Message\" matches \"*warn*\" OR %\"Log Message\" matches \"*FAIL*\" OR %\"Log Message\" matches \"*Fail*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*EXCEPTION*\" OR %\"Log Message\" matches \"*Exception*\" OR %\"Log Message\" matches \"*exception*\" OR %\"Log Message\" matches \"*ERROR*\" OR %\"Log Message\" matches \"*Error*\" OR %\"Log Message\" matches \"*error*\"\n| timeslice {{TimeSlice}}\n| count as Errors by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
+                            "queryString": "_sourceCategory=${sourceCategory} {{LogLevel}}\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| where %\"Log Message\" matches \"{{LogMessage}}\"\n| where %\"Log Message\" matches \"*WARN*\" OR %\"Log Message\" matches \"*Warn*\" OR %\"Log Message\" matches \"*warn*\" OR %\"Log Message\" matches \"*FAIL*\" OR %\"Log Message\" matches \"*Fail*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*EXCEPTION*\" OR %\"Log Message\" matches \"*Exception*\" OR %\"Log Message\" matches \"*exception*\" OR %\"Log Message\" matches \"*ERROR*\" OR %\"Log Message\" matches \"*Error*\" OR %\"Log Message\" matches \"*error*\"\n| timeslice {{TimeSlice}}\n| count as Errors by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -250,7 +252,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time nodrop\n| where [subquery from=(-2d): _sourceCategory =  ${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| timeslice {{TimeSlice}}\n| Total_Executors - Free_Executors as Busy_Executors\n| first(Total_Executors) as Total_Executors, first(Busy_Executors) as Busy_Executors by NodeName, _timeslice\n| where Busy_Executors >= 0\n| sum(Total_Executors) as Total, sum(Busy_Executors) as Busy by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
+                            "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time nodrop\n| where [subquery from=(-2d): _sourceCategory=${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| timeslice {{TimeSlice}}\n| Total_Executors - Free_Executors as Busy_Executors\n| first(Total_Executors) as Total_Executors, first(Busy_Executors) as Busy_Executors by NodeName, _timeslice\n| where Busy_Executors >= 0\n| sum(Total_Executors) as Total, sum(Busy_Executors) as Busy by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -271,7 +273,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| where Total_Executors > 0\n| where [subquery from=(-2d): _sourceCategory =  ${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| timeslice {{TimeSlice}}\n| count_distinct (NodeName) as Total by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
+                            "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| where Total_Executors > 0\n| where [subquery from=(-2d): _sourceCategory=${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| timeslice {{TimeSlice}}\n| count_distinct (NodeName) as Total by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -292,7 +294,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"isOnline\", \"nodeLabel\" as NodeName, ExecutorsCount, Onilne, NodeLabel nodrop\n| where ExecutorsCount > 0 AND Onilne matches \"true\"\n| where [subquery from=(-2d): _sourceCategory =  ${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| json field=_raw \"monitorData.DiskSpaceMonitor\" as Disk_Space nodrop\n| parse regex field=Disk_Space \"(?<Disk_Space>.*?) (?<Unit>.*[A-Z]+)\" nodrop\n| where !isEmpty(Disk_Space)\n| num(Disk_Space)\n| if(Unit in (\"MB\", \"Mb\", \"mb\"), Disk_Space/1024, if(Unit in (\"KB\", \"Kb\", \"kb\"), Disk_Space/1024/1024, if(Unit in (\"TB\", \"Tb\", \"tb\"), Disk_Space*1024, Disk_Space))) as Disk_Space\n| timeslice {{TimeSlice}}\n| avg(Disk_Space) as Average, max(Disk_Space) as Maximum, min(Disk_Space) as Minimum by _timeslice\n| fields _timeslice, Average, Minimum, Maximum\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Maximum, Minimum, Minimum_1d, Maximum_1d",
+                            "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"isOnline\", \"nodeLabel\" as NodeName, ExecutorsCount, Onilne, NodeLabel nodrop\n| where ExecutorsCount > 0 AND Onilne matches \"true\"\n| where [subquery from=(-2d): _sourceCategory=${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| json field=_raw \"monitorData.DiskSpaceMonitor\" as Disk_Space nodrop\n| parse regex field=Disk_Space \"(?<Disk_Space>.*?) (?<Unit>.*[A-Z]+)\" nodrop\n| where !isEmpty(Disk_Space)\n| num(Disk_Space)\n| if(Unit in (\"MB\", \"Mb\", \"mb\"), Disk_Space/1024, if(Unit in (\"KB\", \"Kb\", \"kb\"), Disk_Space/1024/1024, if(Unit in (\"TB\", \"Tb\", \"tb\"), Disk_Space*1024, Disk_Space))) as Disk_Space\n| timeslice {{TimeSlice}}\n| avg(Disk_Space) as Average, max(Disk_Space) as Maximum, min(Disk_Space) as Minimum by _timeslice\n| fields _timeslice, Average, Minimum, Maximum\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Maximum, Minimum, Minimum_1d, Maximum_1d",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -313,7 +315,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"isOnline\", \"nodeLabel\" as NodeName, ExecutorsCount, Onilne, NodeLabel nodrop\n| where ExecutorsCount > 0 AND Onilne matches \"true\"\n| where [subquery from=(-2d): _sourceCategory =  ${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| json \"monitorData.SwapSpaceMonitor\", \"nodeLabel\"  as SwapMemory, Node_Label nodrop\n| parse field=SwapMemory \"Memory:*  Swap:*\" as Physical_Memory, Swap_Memory\n| parse regex field=Physical_Memory \"(?<Free_Memory>.*?)/(?<Total_Memory>.*?)[A-Z]\"\n| (Free_Memory/Total_Memory)*100 as Free_Memory\n| timeslice {{TimeSlice}}\n| avg(Free_Memory) as Average, max(Free_Memory) as Maximum, min(Free_Memory) as Minimum by _timeslice\n| fields _timeslice, Average, Minimum, Maximum\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Minimum, Maximum, Minimum_1d, Maximum_1d",
+                            "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"isOnline\", \"nodeLabel\" as NodeName, ExecutorsCount, Onilne, NodeLabel nodrop\n| where ExecutorsCount > 0 AND Onilne matches \"true\"\n| where [subquery from=(-2d): _sourceCategory=${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| json \"monitorData.SwapSpaceMonitor\", \"nodeLabel\"  as SwapMemory, Node_Label nodrop\n| parse field=SwapMemory \"Memory:*  Swap:*\" as Physical_Memory, Swap_Memory\n| parse regex field=Physical_Memory \"(?<Free_Memory>.*?)/(?<Total_Memory>.*?)[A-Z]\"\n| (Free_Memory/Total_Memory)*100 as Free_Memory\n| timeslice {{TimeSlice}}\n| avg(Free_Memory) as Average, max(Free_Memory) as Maximum, min(Free_Memory) as Minimum by _timeslice\n| fields _timeslice, Average, Minimum, Maximum\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})\n| fields - Minimum, Maximum, Minimum_1d, Maximum_1d",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -334,7 +336,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| where Total_Executors > 0\n| where ![subquery from=(-2d): _sourceCategory =  ${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| timeslice {{TimeSlice}}\n| count_distinct (NodeName) as Total by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
+                            "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\"\n| where Total_Executors > 0\n| where ![subquery from=(-2d): _sourceCategory=${sourceCategory} (*running on* OR *building on*)\n| where _sourceName matches \"{{JobName}}#{{BuildNumber}}\"\n| parse regex \"Running on (?<NodeName>.*) in\" nodrop\n| parse regex \"Building on (?<NodeName>.*) in\" nodrop\n| if (NodeName matches \"Jenkins\", \"master\", NodeName) as NodeName\n| compose NodeName]\n| timeslice {{TimeSlice}}\n| count_distinct (NodeName) as Total by _timeslice\n| compare with timeshift {{TimeCompare}}\n| fillmissing timeslice({{TimeSlice}})",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -364,7 +366,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory =  ${sourceCategory}\n| json \"threadId\", \"logType\", \"logLevel\", \"logMessage\", \"logSource\", \"eventTime\", \"logStackTrace\" as %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Message\", %\"Log Source\", %\"Event Time\", %\"Log Stack Trace\"",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"threadId\", \"logType\", \"logLevel\", \"logMessage\", \"logSource\", \"eventTime\", \"logStackTrace\" as %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Message\", %\"Log Source\", %\"Event Time\", %\"Log Stack Trace\"",
                         "field": "Log Level"
                     },
                     "allowMultiSelect": false,
@@ -378,7 +380,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory =  ${sourceCategory}\n| json \"threadId\", \"logType\", \"logLevel\", \"logMessage\", \"logSource\", \"eventTime\", \"logStackTrace\" as %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Message\", %\"Log Source\", %\"Event Time\", %\"Log Stack Trace\"",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"threadId\", \"logType\", \"logLevel\", \"logMessage\", \"logSource\", \"eventTime\", \"logStackTrace\" as %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Message\", %\"Log Source\", %\"Event Time\", %\"Log Stack Trace\"",
                         "field": "Log Message"
                     },
                     "allowMultiSelect": false,
@@ -418,7 +420,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory =  ${sourceCategory} Queue_Event\n| json \"jobURL\" as URL",
+                        "query": "_sourceCategory=${sourceCategory} Queue_Event\n| json \"jobURL\" as URL",
                         "field": "url"
                     },
                     "allowMultiSelect": false,
@@ -432,7 +434,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory =  ${sourceCategory} Job_Status\n| json \"name\", \"result\", \"jobRunDuration\", \"number\" as JobName, Result, Duration, BuildNumber",
+                        "query": "_sourceCategory=${sourceCategory} Job_Status\n| json \"name\", \"result\", \"jobRunDuration\", \"number\" as JobName, Result, Duration, BuildNumber",
                         "field": "BuildNumber"
                     },
                     "allowMultiSelect": false,
@@ -446,7 +448,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory =  ${sourceCategory}\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time ",
+                        "query": "_sourceCategory=${sourceCategory}\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time ",
                         "field": "NodeName"
                     },
                     "allowMultiSelect": false,
@@ -460,7 +462,7 @@
                     "defaultValue": "*",
                     "sourceDefinition": {
                         "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time ",
+                        "query": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time ",
                         "field": "NodeLabel"
                     },
                     "allowMultiSelect": false,
@@ -479,7 +481,7 @@
                     "type": "SavedSearchWithScheduleSyncDefinition",
                     "name": "Console Logs by Stages",
                     "search": {
-                        "queryText": "_sourceCategory =  ${sourceCategory} _sourceName={{Job_Name}}#*\n| parse field=_raw \"[*] *\" as Log_Time, Log_Message\n| trim (Log_Message)\n| parse regex field=_sourceName \"(?<Job_Name>.*?)#(?<Build_Number>[0-9]+)(?<Stage_Name>.*)\" nodrop\n| count by Log_Time, Job_Name, Build_Number, Stage_Name, Log_Message\n| sort by Log_Time\n| fields Log_Time, Job_Name, Build_Number, Stage_Name, Log_Message",
+                        "queryText": "_sourceCategory=${sourceCategory} _sourceName={{Job_Name}}#*\n| parse field=_raw \"[*] *\" as Log_Time, Log_Message\n| trim (Log_Message)\n| parse regex field=_sourceName \"(?<Job_Name>.*?)#(?<Build_Number>[0-9]+)(?<Stage_Name>.*)\" nodrop\n| count by Log_Time, Job_Name, Build_Number, Stage_Name, Log_Message\n| sort by Log_Time\n| fields Log_Time, Job_Name, Build_Number, Stage_Name, Log_Message",
                         "defaultTimeRange": "-24h",
                         "byReceiptTime": false,
                         "viewName": "",
@@ -612,7 +614,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"hudsonVersion\", \"label\", \"result\", \"description\", \"jobType\", \"user\", \"nodeName\" as Name, number, hudsonVersion, Label, Result, Description, JobType, User, NodeName nodrop\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| if(Result matches \"SUCCESS\", \":white-heavy-check-mark:\", \":prohibited:\") as icon\n| lookup utf as Result from https://s3.amazonaws.com/sumologic-app-data/emoji.csv on shortname=icon\n| count by Name, Master, Number, hudsonVersion, Label, Result, Description, JobType, User, NodeName\n| fields - _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"hudsonVersion\", \"label\", \"result\", \"description\", \"jobType\", \"user\", \"nodeName\" as Name, number, hudsonVersion, Label, Result, Description, JobType, User, NodeName nodrop\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| if(Result matches \"SUCCESS\", \":white-heavy-check-mark:\", \":prohibited:\") as icon\n| lookup utf as Result from https://s3.amazonaws.com/sumologic-app-data/emoji.csv on shortname=icon\n| count by Name, Master, Number, hudsonVersion, Label, Result, Description, JobType, User, NodeName\n| fields - _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -633,7 +635,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"result\" as Name, Number, Result\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| where Result != \"SUCCESS\"\n| count by Name,Result\n| fields - _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"result\" as Name, Number, Result\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| where Result != \"SUCCESS\"\n| count by Name,Result\n| fields - _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -654,7 +656,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"jobRunDuration\" as Name, Number, Duration\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Number\n| fields %\"Duration in minutes\"",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"jobRunDuration\" as Name, Number, Duration\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Number\n| fields %\"Duration in minutes\"",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -675,7 +677,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"jobBuildURL\", \"upstreamJobURL\" as Name, Number, URL, UpStreamURL\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| if(isEmpty(URL) ,\"\", tourl(URL, concat(\"Build URL - \", name))) as %\"Build URL\"\n| parse field=URL \"*://*/\" as domain, url_base nodrop\n| if(isEmpty(UpStreamURL) ,\"\", tourl(concat(domain, \"://\",url_base,\"/\",UpStreamURL), concat(\"UpStream URL - \", name))) as %\"Upstream Build URL\"\n| replace(URL, concat(\"/\",number,\"/\"), \"\") as Config_URL\n| concat(Config_URL, \"/configure\") as Config_URL\n| tourl(Config_URL, concat(\"Config URL - \", name)) as %\"Configuration URL\"\n| count by Master, %\"Build URL\", %\"Upstream Build URL\", %\"Configuration URL\"\n| fields Master, %\"Build URL\", %\"Upstream Build URL\", %\"Configuration URL\"",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"jobBuildURL\", \"upstreamJobURL\" as Name, Number, URL, UpStreamURL\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| if(isEmpty(URL) ,\"\", tourl(URL, concat(\"Build URL - \", name))) as %\"Build URL\"\n| parse field=URL \"*://*/\" as domain, url_base nodrop\n| if(isEmpty(UpStreamURL) ,\"\", tourl(concat(domain, \"://\",url_base,\"/\",UpStreamURL), concat(\"UpStream URL - \", name))) as %\"Upstream Build URL\"\n| replace(URL, concat(\"/\",number,\"/\"), \"\") as Config_URL\n| concat(Config_URL, \"/configure\") as Config_URL\n| tourl(Config_URL, concat(\"Config URL - \", name)) as %\"Configuration URL\"\n| count by Master, %\"Build URL\", %\"Upstream Build URL\", %\"Configuration URL\"\n| fields Master, %\"Build URL\", %\"Upstream Build URL\", %\"Configuration URL\"",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -696,7 +698,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"jobMetaData\", \"jobStartTime\", \"triggerCauses\" as Name, Number, jobMetaData, jobStartTime, triggerCauses nodrop\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| count by jobStartTime, triggerCauses, jobMetaData\n| fields- _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"jobMetaData\", \"jobStartTime\", \"triggerCauses\" as Name, Number, jobMetaData, jobStartTime, triggerCauses nodrop\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| count by jobStartTime, triggerCauses, jobMetaData\n| fields- _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -735,7 +737,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Test_Result {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| className as %\"Class Name\" | testName as %\"Test Name\"| duration/60 as Duration | status as %\"Test Status\"\n| concat(%\"Class Name\",\".\",%\"Test Name\") as %\"Test Name\"\n| Duration/60 as Duration\n| sum(Duration) as %\"Test Duration in minutes\" by %\"Test Name\"\n| sort by %\"Test Duration in minutes\"\n| limit 10",
+                                    "queryString": "_sourceCategory=${sourceCategory} Test_Result {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| className as %\"Class Name\" | testName as %\"Test Name\"| duration/60 as Duration | status as %\"Test Status\"\n| concat(%\"Class Name\",\".\",%\"Test Name\") as %\"Test Name\"\n| Duration/60 as Duration\n| sum(Duration) as %\"Test Duration in minutes\" by %\"Test Name\"\n| sort by %\"Test Duration in minutes\"\n| limit 10",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -756,7 +758,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"stageId\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\", \"error\" as ID, %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\", %\"Stage Error\" nodrop\n| sum(%\"Stage Duration\") as %\"Stage Duration in seconds\" by %\"Stage Name\"\n| sort by  %\"Stage Duration in seconds\"\n| limit 5",
+                                    "queryString": "_sourceCategory=${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"stageId\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\", \"error\" as ID, %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\", %\"Stage Error\" nodrop\n| sum(%\"Stage Duration\") as %\"Stage Duration in seconds\" by %\"Stage Name\"\n| sort by  %\"Stage Duration in seconds\"\n| limit 5",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -777,7 +779,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Scm_Status {{Name}}\n| _sourceHost as Master\n| json \"jobName\", \"buildNumber\", \"scmURLs\", \"branches\", \"scmType\", \"revision\" as Name, Number, scmURLs, branches, scmType, revision\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| count by Name, Number, scmURLs, branches, scmType, revision\n| fields - _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Scm_Status {{Name}}\n| _sourceHost as Master\n| json \"jobName\", \"buildNumber\", \"scmURLs\", \"branches\", \"scmType\", \"revision\" as Name, Number, scmURLs, branches, scmType, revision\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| count by Name, Number, scmURLs, branches, scmType, revision\n| fields - _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -807,7 +809,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"stages\" as StagesPipeline   \n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"stageId\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\", \"error\" as ID, %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\", %\"Stage Error\" nodrop\n//| where %\"Stage Status\" matches {{StageStatus}}\n| replace (%\"Stage Error\", \",\", \"\\n\\n\") as %\"Stage Error\"\n| replace (%\"Stage Steps\", \",\\\"\", \"\\n\\n\") as %\"Stage Steps\"\n| replace (%\"Stage Steps\", \",\", \"\\n\") as %\"Stage Steps\"\n| count by ID, %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Status\", %\"Stage Duration\", %\"Stage Error\", %\"Stage Steps\"\n| tolong(ID) as ID\n| sort by ID\n| fields - _count, ID",
+                                    "queryString": "_sourceCategory=${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"stages\" as StagesPipeline   \n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"stageId\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\", \"error\" as ID, %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\", %\"Stage Error\" nodrop\n//| where %\"Stage Status\" matches {{StageStatus}}\n| replace (%\"Stage Error\", \",\", \"\\n\\n\") as %\"Stage Error\"\n| replace (%\"Stage Steps\", \",\\\"\", \"\\n\\n\") as %\"Stage Steps\"\n| replace (%\"Stage Steps\", \",\", \"\\n\") as %\"Stage Steps\"\n| count by ID, %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Status\", %\"Stage Duration\", %\"Stage Error\", %\"Stage Steps\"\n| tolong(ID) as ID\n| sort by ID\n| fields - _count, ID",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -828,7 +830,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"stageId\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\", \"error\" as ID, %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\", %\"Stage Error\" nodrop\n| sum(%\"Stage Duration\") as %\"Stage Duration in seconds\" by %\"Stage Name\"\n| sort by  %\"Stage Duration in seconds\"\n| limit 5",
+                                    "queryString": "_sourceCategory=${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"stageId\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\", \"error\" as ID, %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\", %\"Stage Error\" nodrop\n| sum(%\"Stage Duration\") as %\"Stage Duration in seconds\" by %\"Stage Name\"\n| sort by  %\"Stage Duration in seconds\"\n| limit 5",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -858,7 +860,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Scm_Status {{Name}}\n| _sourceHost as Master\n| json \"jobName\", \"buildNumber\", \"changeLog\" as Name, Number, Commit\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| where !isEmpty(Commit)\n| count as Count by Master, Commit\n| fields Master, Commit\n| limit 10",
+                                    "queryString": "_sourceCategory=${sourceCategory} Scm_Status {{Name}}\n| _sourceHost as Master\n| json \"jobName\", \"buildNumber\", \"changeLog\" as Name, Number, Commit\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| where !isEmpty(Commit)\n| count as Count by Master, Commit\n| fields Master, Commit\n| limit 10",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -879,7 +881,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Test_Result {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| where status=\"Failed\"\n| className as %\"Class Name\" | testName as %\"Test Name\"| duration/60 as %\"Test Duration\" | status as %\"Test Status\"\n| errorStackTrace as %\"Error Stack Trace\"| errorDetails as %\"Error Details\"\n| count by Master, %\"Class Name\", %\"Test Name\", %\"Test Duration\", %\"Error Stack Trace\", %\"Error Details\"\n|fields - _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Test_Result {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| where Name matches \"{{Name}}\" AND Number matches \"{{Number}}\" and Master matches \"{{Master}}\"\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| where status=\"Failed\"\n| className as %\"Class Name\" | testName as %\"Test Name\"| duration/60 as %\"Test Duration\" | status as %\"Test Status\"\n| errorStackTrace as %\"Error Stack Trace\"| errorDetails as %\"Error Details\"\n| count by Master, %\"Class Name\", %\"Test Name\", %\"Test Duration\", %\"Error Stack Trace\", %\"Error Details\"\n|fields - _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -900,7 +902,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| _sourceName as SourceName\n| where SourceName matches \"{{Name}}#{{Number}}*\" and Master matches \"{{Master}}\"\n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| count by Time, Master, %\"Log Message\"\n| sort by Time\n| fields Time, Master, %\"Log Message\"\n| limit 50",
+                                    "queryString": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| _sourceName as SourceName\n| where SourceName matches \"{{Name}}#{{Number}}*\" and Master matches \"{{Master}}\"\n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| count by Time, Master, %\"Log Message\"\n| sort by Time\n| fields Time, Master, %\"Log Message\"\n| limit 50",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -921,7 +923,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| _sourceName as SourceName\n| where SourceName matches \"{{Name}}#{{Number}}*\" and Master matches \"{{Master}}\"\n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| where %\"Log Message\" matches \"*WARNING*\" OR %\"Log Message\" matches \"*ERROR*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*warning*\" OR %\"Log Message\" matches \"*error*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*Exception*\" OR %\"Log Message\" matches \"*Fail*\" OR %\"Log Message\" matches \"*Error*\"\n| count by Time, Master, %\"Log Message\"\n| sort by Time\n| fields Time, Master, %\"Log Message\"\n| limit 20",
+                                    "queryString": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| _sourceName as SourceName\n| where SourceName matches \"{{Name}}#{{Number}}*\" and Master matches \"{{Master}}\"\n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| where %\"Log Message\" matches \"*WARNING*\" OR %\"Log Message\" matches \"*ERROR*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*warning*\" OR %\"Log Message\" matches \"*error*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*Exception*\" OR %\"Log Message\" matches \"*Fail*\" OR %\"Log Message\" matches \"*Error*\"\n| count by Time, Master, %\"Log Message\"\n| sort by Time\n| fields Time, Master, %\"Log Message\"\n| limit 20",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -942,7 +944,7 @@
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"name\" as Name",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"name\" as Name",
                                 "field": "Name"
                             },
                             "allowMultiSelect": false,
@@ -956,7 +958,7 @@
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number",
                                 "field": "Number"
                             },
                             "allowMultiSelect": false,
@@ -970,7 +972,7 @@
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master",
                                 "field": "Master"
                             },
                             "allowMultiSelect": false,
@@ -1090,7 +1092,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\" \n| first(_raw) as message by Name, Master\n| parse regex field=message \"\\\"(?<Key>.*?)\\\":(?<Value>.*?),\"  multi\n| where key in (\"jobBuildURL\", \"upstreamJobURL\", \"hudsonVersion\")\n| json field=message \"jobBuildURL\", \"number\" as URL, number\n| replace(URL, concat(\"/\",number,\"/\"), \"\") as URL\n| concat(URL, \"/configure\") as Config_URL\n| if(key=\"hudsonVersion\" , Config_URL, Value) as Value\n| replace(Value, \"\\\"\", \"\") as Value\n| parse field=URL \"*://*/\" as domain, url_base nodrop\n| if(key=\"upstreamJobURL\" , if(isEmpty(value), \"\",concat(domain, \"://\",url_base,\"/\",Value)), Value) as Value\n| if(Key=\"hudsonVersion\", \"CONFIG URL\", if(Key=\"jobBuildURL\", \"BUILD URL\", \"UPSTREAM JOB URL\")) as Key\n| if(isEmpty(value) ,\"-\", tourl(Value, Key)) as URL\n| where URL != \"-\"\n| fields Master, URL",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\" \n| first(_raw) as message by Name, Master\n| parse regex field=message \"\\\"(?<Key>.*?)\\\":(?<Value>.*?),\"  multi\n| where key in (\"jobBuildURL\", \"upstreamJobURL\", \"hudsonVersion\")\n| json field=message \"jobBuildURL\", \"number\" as URL, number\n| replace(URL, concat(\"/\",number,\"/\"), \"\") as URL\n| concat(URL, \"/configure\") as Config_URL\n| if(key=\"hudsonVersion\" , Config_URL, Value) as Value\n| replace(Value, \"\\\"\", \"\") as Value\n| parse field=URL \"*://*/\" as domain, url_base nodrop\n| if(key=\"upstreamJobURL\" , if(isEmpty(value), \"\",concat(domain, \"://\",url_base,\"/\",Value)), Value) as Value\n| if(Key=\"hudsonVersion\", \"CONFIG URL\", if(Key=\"jobBuildURL\", \"BUILD URL\", \"UPSTREAM JOB URL\")) as Key\n| if(isEmpty(value) ,\"-\", tourl(Value, Key)) as URL\n| where URL != \"-\"\n| fields Master, URL",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1118,7 +1120,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"result\" as Name, Result\n| where Name matches \"{{Name}}\"\n| count as Total_Build",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"result\" as Name, Result\n| where Name matches \"{{Name}}\"\n| count as Total_Build",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1139,7 +1141,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status\n| _sourceHost as Master\n| json \"name\", \"result\" as Name, Result\n| where Name matches \"{{Name}}\"\n| if((Result=\"SUCCESS\"),1,0) as successfulEvent \n| sum(successfulEvent) as count_success, count \n| (count_success/_count)*100 as successPercent\n| fields successPercent",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status\n| _sourceHost as Master\n| json \"name\", \"result\" as Name, Result\n| where Name matches \"{{Name}}\"\n| if((Result=\"SUCCESS\"),1,0) as successfulEvent \n| sum(successfulEvent) as count_success, count \n| (count_success/_count)*100 as successPercent\n| fields successPercent",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1160,7 +1162,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"result\" as Name, Result\n| where Name matches \"{{Name}}\"\n| where !(Result matches \"SUCCESS\")\n| count as Failed\n\n",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"result\" as Name, Result\n| where Name matches \"{{Name}}\"\n| where !(Result matches \"SUCCESS\")\n| count as Failed\n\n",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1181,7 +1183,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"result\", \"jobRunDuration\" as Name, Result, Duration\n| where Name matches \"{{Name}}\"\n| Duration/60 as Duration\n| max(Duration) by Name",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"result\", \"jobRunDuration\" as Name, Result, Duration\n| where Name matches \"{{Name}}\"\n| Duration/60 as Duration\n| max(Duration) by Name",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1202,7 +1204,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"jobRunDuration\", \"number\", \"result\", \"name\", \"jobBuildURL\" as %\"Duration in minutes\", Number, Result, Name, URL\n| where Name matches \"{{Name}}\"\n| tourl(URL, Name) as Name\n| if(Result matches \"SUCCESS\", \":white-heavy-check-mark:\", \":prohibited:\") as icon\n| lookup utf as Result from https://s3.amazonaws.com/sumologic-app-data/emoji.csv on shortname=icon\n| count by Master, Name, Number, Result, _messageTime\n| sort by _messageTime\n| fields - _count, _messageTime",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"jobRunDuration\", \"number\", \"result\", \"name\", \"jobBuildURL\" as %\"Duration in minutes\", Number, Result, Name, URL\n| where Name matches \"{{Name}}\"\n| tourl(URL, Name) as Name\n| if(Result matches \"SUCCESS\", \":white-heavy-check-mark:\", \":prohibited:\") as icon\n| lookup utf as Result from https://s3.amazonaws.com/sumologic-app-data/emoji.csv on shortname=icon\n| count by Master, Name, Number, Result, _messageTime\n| sort by _messageTime\n| fields - _count, _messageTime",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1223,7 +1225,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"nodeName\", \"result\" as %\"Node Name\", Result\n| if(Result matches \"SUCCESS\", 1, 0) as Success\n| if(Result matches \"FAILURE\", 1, 0) as Failure\n| if(Result matches \"ABORTED\", 1, 0) as Aborted\n| if(Result matches \"UNSTABLE\", 1, 0) as Unstable\n| count as Total_Logs, sum(Success) as Successes, sum(Failure) as Failures, sum(Aborted) as Abort, sum(Unstable) as Unstable by %\"Node Name\"\n| (Successes/Total_Logs) as Successful\n| (Failures/Total_Logs) as Failed\n| (Abort/Total_Logs) as Aborted\n| (Unstable/Total_Logs) as Unstable\n| fields %\"Node Name\", Successful, Failed, Aborted, Unstable",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"nodeName\", \"result\" as %\"Node Name\", Result\n| if(Result matches \"SUCCESS\", 1, 0) as Success\n| if(Result matches \"FAILURE\", 1, 0) as Failure\n| if(Result matches \"ABORTED\", 1, 0) as Aborted\n| if(Result matches \"UNSTABLE\", 1, 0) as Unstable\n| count as Total_Logs, sum(Success) as Successes, sum(Failure) as Failures, sum(Aborted) as Abort, sum(Unstable) as Unstable by %\"Node Name\"\n| (Successes/Total_Logs) as Successful\n| (Failures/Total_Logs) as Failed\n| (Abort/Total_Logs) as Aborted\n| (Unstable/Total_Logs) as Unstable\n| fields %\"Node Name\", Successful, Failed, Aborted, Unstable",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1244,7 +1246,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"jobRunDuration\", \"result\" as Name, Duration, Result\n| where Name matches \"{{Name}}\"\n| Duration/60 as Duration\n| timeslice 10m\n| avg(Duration) as %\"Duration in minutes\" by _timeslice\n| fillmissing timeslice(10m)\n| outlier %\"Duration in minutes\"",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"jobRunDuration\", \"result\" as Name, Duration, Result\n| where Name matches \"{{Name}}\"\n| Duration/60 as Duration\n| timeslice 10m\n| avg(Duration) as %\"Duration in minutes\" by _timeslice\n| fillmissing timeslice(10m)\n| outlier %\"Duration in minutes\"",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1265,7 +1267,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"result\", \"jobRunDuration\" as Name, Number, Result, Duration\n| where name matches \"{{Name}}\"\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Number\n| toLong(Number)\n| sort by Number asc\n| concat(\"#\", Number) as Number",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"result\", \"jobRunDuration\" as Name, Number, Result, Duration\n| where name matches \"{{Name}}\"\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Number\n| toLong(Number)\n| sort by Number asc\n| concat(\"#\", Number) as Number",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1286,7 +1288,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"result\" as Result\n| if(Result matches \"SUCCESS\", 1, 0) as Success\n| if(Result matches \"FAILURE\", 1, 0) as Failure\n| if(Result matches \"ABORTED\", 1, 0) as Aborted\n| if(Result matches \"UNSTABLE\", 1, 0) as Unstable\n| timeslice 10m\n| count as Total_Logs, sum(Success) as Successes, sum(Failure) as Failures, sum(Aborted) as Abort, sum(Unstable) as Unstable by _timeslice\n| (Successes/Total_Logs) as Successful\n| (Failures/Total_Logs) as Failed\n| (Abort/Total_Logs) as Aborted\n| (Unstable/Total_Logs) as Unstable\n| fields _timeslice, Successful, Failed, Aborted, Unstable",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"result\" as Result\n| if(Result matches \"SUCCESS\", 1, 0) as Success\n| if(Result matches \"FAILURE\", 1, 0) as Failure\n| if(Result matches \"ABORTED\", 1, 0) as Aborted\n| if(Result matches \"UNSTABLE\", 1, 0) as Unstable\n| timeslice 10m\n| count as Total_Logs, sum(Success) as Successes, sum(Failure) as Failures, sum(Aborted) as Abort, sum(Unstable) as Unstable by _timeslice\n| (Successes/Total_Logs) as Successful\n| (Failures/Total_Logs) as Failed\n| (Abort/Total_Logs) as Aborted\n| (Unstable/Total_Logs) as Unstable\n| fields _timeslice, Successful, Failed, Aborted, Unstable",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1307,7 +1309,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"result\" as Name, Number, Result\n| where name matches \"{{Name}}\"\n| json \"testResult.failures\", \"testResult.passes\", \"testResult.skips\", \"testResult.total\" as Failed, Passed, Skipped, Total\n| avg(Failed) as Failed, avg(Passed) as Passed, avg(Skipped) as Skipped, avg(Total) as Total by Number\n| toLong(Number)\n| sort by Number asc\n| concat(\"#\", Number) as Number",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status {{Name}}\n| _sourceHost as Master\n| json \"name\", \"number\", \"result\" as Name, Number, Result\n| where name matches \"{{Name}}\"\n| json \"testResult.failures\", \"testResult.passes\", \"testResult.skips\", \"testResult.total\" as Failed, Passed, Skipped, Total\n| avg(Failed) as Failed, avg(Passed) as Passed, avg(Skipped) as Skipped, avg(Total) as Total by Number\n| toLong(Number)\n| sort by Number asc\n| concat(\"#\", Number) as Number",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1328,7 +1330,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Test_Result {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| className as %\"Class Name\" | testName as %\"Test Name\"| duration/60 as %\"Test Duration\" | status as %\"Test Status\"\n| concat(%\"Class Name\", \".\", %\"Test Name\") as %\"Test Name\"\n| avg(%\"Test Duration\") as %\"Test Duration in minutes\" by %\"Test Name\"\n| sort by %\"Test Duration in minutes\"\n| limit 5",
+                                    "queryString": "_sourceCategory=${sourceCategory} Test_Result {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| className as %\"Class Name\" | testName as %\"Test Name\"| duration/60 as %\"Test Duration\" | status as %\"Test Status\"\n| concat(%\"Class Name\", \".\", %\"Test Name\") as %\"Test Name\"\n| avg(%\"Test Duration\") as %\"Test Duration in minutes\" by %\"Test Name\"\n| sort by %\"Test Duration in minutes\"\n| limit 5",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1349,7 +1351,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Test_Result {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| className as %\"Class Name\" | testName as %\"Test Name\"| duration/60 as %\"Test Duration\" | status as %\"Test Status\"\n| where %\"Test Status\" matches \"Failed\"\n| concat(%\"Class Name\", \".\", %\"Test Name\") as %\"Test Name\"\n| count as Count by %\"Test Name\"\n| sort by Count\n| limit 5",
+                                    "queryString": "_sourceCategory=${sourceCategory} Test_Result {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| className as %\"Class Name\" | testName as %\"Test Name\"| duration/60 as %\"Test Duration\" | status as %\"Test Status\"\n| where %\"Test Status\" matches \"Failed\"\n| concat(%\"Class Name\", \".\", %\"Test Name\") as %\"Test Name\"\n| count as Count by %\"Test Name\"\n| sort by Count\n| limit 5",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1370,7 +1372,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\" as %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\" nodrop\n| avg(%\"Stage Duration\") as %\"Stage Duration in seconds\" by %\"Stage Name\"\n| sort by %\"Stage Duration in seconds\"\n| limit 5",
+                                    "queryString": "_sourceCategory=${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where Name matches \"{{Name}}\"\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\" as %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\" nodrop\n| avg(%\"Stage Duration\") as %\"Stage Duration in seconds\" by %\"Stage Name\"\n| sort by %\"Stage Duration in seconds\"\n| limit 5",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1391,7 +1393,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where name matches \"{{Name}}\"\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\", \"error\" as %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\", %\"Stage Error\" nodrop\n| where !(%\"Stage Status\" matches \"SUCCESS\")\n| replace (%\"Stage Error\", \",\", \"\\n\") as %\"Stage Error\"\n| count as Count by %\"Stage Name\", %\"Stage Error\"\n| limit 10",
+                                    "queryString": "_sourceCategory=${sourceCategory} Pipeline_Stages {{Name}}\n| _sourceHost as Master\n| json \"name\" as Name\n| where name matches \"{{Name}}\"\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"id\", \"name\", \"startTime\", \"duration\", \"status\", \"steps\", \"error\" as %\"Stage ID\", %\"Stage Name\", %\"Start Time\", %\"Stage Duration\", %\"Stage Status\", %\"Stage Steps\", %\"Stage Error\" nodrop\n| where !(%\"Stage Status\" matches \"SUCCESS\")\n| replace (%\"Stage Error\", \",\", \"\\n\") as %\"Stage Error\"\n| count as Count by %\"Stage Name\", %\"Stage Error\"\n| limit 10",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1412,7 +1414,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Scm_Status {{Name}}\n| _sourceHost as Master\n| json \"jobName\" as Name\n| where Name matches \"{{Name}}\"\n| json \"eventTime\", \"changeLog\" as Time, Commit\n| where Commit != \"[]\"\n| replace(Commit, \",\", \"\\n\\n\") as Commit\n| replace(Commit, \"author\", \"\\nauthor\") as Commit\n| replace(Commit, \"message\", \"\\nmessage\") as Commit\n| replace(Commit, \"[\", \"\") as Commit\n| replace(Commit, \"]\", \"\") as Commit\n| count by Master, Time, Commit\n| sort by Time\n| fields - _count\n| limit 10",
+                                    "queryString": "_sourceCategory=${sourceCategory} Scm_Status {{Name}}\n| _sourceHost as Master\n| json \"jobName\" as Name\n| where Name matches \"{{Name}}\"\n| json \"eventTime\", \"changeLog\" as Time, Commit\n| where Commit != \"[]\"\n| replace(Commit, \",\", \"\\n\\n\") as Commit\n| replace(Commit, \"author\", \"\\nauthor\") as Commit\n| replace(Commit, \"message\", \"\\nmessage\") as Commit\n| replace(Commit, \"[\", \"\") as Commit\n| replace(Commit, \"]\", \"\") as Commit\n| count by Master, Time, Commit\n| sort by Time\n| fields - _count\n| limit 10",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1433,7 +1435,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| _sourceName as SourceName\n| where SourceName matches \"{{Name}}#*\"\n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| where %\"Log Message\" matches \"*WARNING*\" OR %\"Log Message\" matches \"*ERROR*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*warning*\" OR %\"Log Message\" matches \"*error*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*Exception*\" OR %\"Log Message\" matches \"*Fail*\" OR %\"Log Message\" matches \"*Error*\"\n| count as Count by Master, %\"Log Message\"\n| sort by Count\n| limit 10",
+                                    "queryString": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| _sourceName as SourceName\n| where SourceName matches \"{{Name}}#*\"\n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| where %\"Log Message\" matches \"*WARNING*\" OR %\"Log Message\" matches \"*ERROR*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*warning*\" OR %\"Log Message\" matches \"*error*\" OR %\"Log Message\" matches \"*fail*\" OR %\"Log Message\" matches \"*Exception*\" OR %\"Log Message\" matches \"*Fail*\" OR %\"Log Message\" matches \"*Error*\"\n| count as Count by Master, %\"Log Message\"\n| sort by Count\n| limit 10",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1454,7 +1456,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Config_Change {{Name}}\n| _sourceHost as Master\n| json \"userId\", \"userName\", \"eventTime\", \"message\", \"fileDetails.Old_File_Data\", \"fileDetails.Current_File_Data\" as %\"User Id\", %\"User Name\", Time, %\"Config Message\", %\"Old File Data\", %\"Current File Data\" nodrop\n| parse field=%\"Config Message\" \"* changed configuration for the file jobs/*/config.xml.\" as User, Name\n| where Name matches \"{{Name}}\"\n| base64Decode(%\"Old File Data\") as %\"Old File Data\"\n| base64Decode(%\"Current File Data\") as %\"Current File Data\"\n| count by Time, Master, %\"User Id\", %\"User Name\", %\"Current File Data\", %\"Old File Data\"\n| sort by Time\n| fields - _count\n| limit 10",
+                                    "queryString": "_sourceCategory=${sourceCategory} Config_Change {{Name}}\n| _sourceHost as Master\n| json \"userId\", \"userName\", \"eventTime\", \"message\", \"fileDetails.Old_File_Data\", \"fileDetails.Current_File_Data\" as %\"User Id\", %\"User Name\", Time, %\"Config Message\", %\"Old File Data\", %\"Current File Data\" nodrop\n| parse field=%\"Config Message\" \"* changed configuration for the file jobs/*/config.xml.\" as User, Name\n| where Name matches \"{{Name}}\"\n| base64Decode(%\"Old File Data\") as %\"Old File Data\"\n| base64Decode(%\"Current File Data\") as %\"Current File Data\"\n| count by Time, Master, %\"User Id\", %\"User Name\", %\"Current File Data\", %\"Old File Data\"\n| sort by Time\n| fields - _count\n| limit 10",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1475,7 +1477,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| _sourceName as SourceName\n| where SourceName matches \"{{Name}}#*\" \n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| count by Time, Master, %\"Log Message\"\n| sort by Time\n| fields Time, Master, %\"Log Message\"\n| limit 50",
+                                    "queryString": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| _sourceName as SourceName\n| where SourceName matches \"{{Name}}#*\" \n| parse field=_raw \"[*] *\" as Time, %\"Log Message\"\n| trim (%\"Log Message\")\n| count by Time, Master, %\"Log Message\"\n| sort by Time\n| fields Time, Master, %\"Log Message\"\n| limit 50",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1496,7 +1498,7 @@
                             "defaultValue": null,
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
                                 "field": "Name"
                             },
                             "allowMultiSelect": false,
@@ -1600,7 +1602,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| count as TotalBuilds",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| count as TotalBuilds",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1621,7 +1623,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status\n| _sourceHost as Master\n| json \"name\", \"result\" as Name, Result\n| where Name matches \"{{Name}}\"\n| if((Result=\"SUCCESS\"),1,0) as successfulEvent \n| sum(successfulEvent) as count_success, count \n| (count_success/_count)*100 as successPercent\n| fields successPercent",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status\n| _sourceHost as Master\n| json \"name\", \"result\" as Name, Result\n| where Name matches \"{{Name}}\"\n| if((Result=\"SUCCESS\"),1,0) as successfulEvent \n| sum(successfulEvent) as count_success, count \n| (count_success/_count)*100 as successPercent\n| fields successPercent",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1642,7 +1644,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result\n| where !(Result matches \"SUCCESS\") and Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Master matches \"{{Master}}\"\n| count as Failures",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result\n| where !(Result matches \"SUCCESS\") and Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Master matches \"{{Master}}\"\n| count as Failures",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1663,7 +1665,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\", \"jobRunDuration\" as Name, Label, Result, Duration\n| Duration/60 as Duration\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| max(Duration)",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\", \"jobRunDuration\" as Name, Label, Result, Duration\n| Duration/60 as Duration\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| max(Duration)",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1684,7 +1686,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\",\"number\",\"label\",\"jobRunDuration\", \"result\" as Name, Number, Label, Duration, Result\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| Duration/60 as Duration\n| timeslice 10m\n| avg(Duration) as %\"Duration in minutes\" by _timeslice\n| fillmissing timeslice(10m)\n| outlier %\"Duration in minutes\"",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\",\"number\",\"label\",\"jobRunDuration\", \"result\" as Name, Number, Label, Duration, Result\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| Duration/60 as Duration\n| timeslice 10m\n| avg(Duration) as %\"Duration in minutes\" by _timeslice\n| fillmissing timeslice(10m)\n| outlier %\"Duration in minutes\"",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1705,7 +1707,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"jobRunDuration\", \"number\", \"result\", \"name\", \"jobBuildURL\", \"label\" as Duration, Number, Result, Name, URL, Label nodrop\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| _sourceHost as Master\n| tourl(URL, Name) as Name\n| if(Result matches \"SUCCESS\", \":white-heavy-check-mark:\", \":prohibited:\") as icon\n| lookup utf as Result from https://s3.amazonaws.com/sumologic-app-data/emoji.csv on shortname=icon\n| count by Master, Name, Number, Result, Label, _messageTime\n| sort by _messageTime\n| fields - _count, _messageTime",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"jobRunDuration\", \"number\", \"result\", \"name\", \"jobBuildURL\", \"label\" as Duration, Number, Result, Name, URL, Label nodrop\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| _sourceHost as Master\n| tourl(URL, Name) as Name\n| if(Result matches \"SUCCESS\", \":white-heavy-check-mark:\", \":prohibited:\") as icon\n| lookup utf as Result from https://s3.amazonaws.com/sumologic-app-data/emoji.csv on shortname=icon\n| count by Master, Name, Number, Result, Label, _messageTime\n| sort by _messageTime\n| fields - _count, _messageTime",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1726,7 +1728,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"jobRunDuration\", \"number\", \"result\", \"name\", \"label\" as Duration, Number, Result, Name, Label nodrop\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| concat(Name,\"#\" ,Number) as Name\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Name, _messageTime\n| sort by _messageTime asc\n| fields - _messageTime",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"jobRunDuration\", \"number\", \"result\", \"name\", \"label\" as Duration, Number, Result, Name, Label nodrop\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| concat(Name,\"#\" ,Number) as Name\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Name, _messageTime\n| sort by _messageTime asc\n| fields - _messageTime",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1747,7 +1749,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"result\", \"label\", \"jobRunDuration\" as Name, Result, Label, Duration\n| where !(Result matches \"SUCCESS\") and Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Master matches \"{{Master}}\"\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Name, Duration\n| sort by %\"Duration in minutes\"\n| fields - Duration\n| limit 10",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"result\", \"label\", \"jobRunDuration\" as Name, Result, Label, Duration\n| where !(Result matches \"SUCCESS\") and Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Master matches \"{{Master}}\"\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Name, Duration\n| sort by %\"Duration in minutes\"\n| fields - Duration\n| limit 10",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1768,7 +1770,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"label\",\"result\", \"jobRunDuration\" as Name,Label, Result, Duration\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| count by Name, Result, Master\n| transpose row Name, Master column Result as %\"SUCCESS\", %\"FAILURE\", %\"ABORTED\", %\"UNSTABLE\"\n| compare with timeshift 1d\n| concat(if(isNull(SUCCESS), tolong(0), SUCCESS), \" / \", if(isNull(SUCCESS_1d), tolong(0), SUCCESS_1d)) as %\"Compare Success\"\n| concat(if(isNull(FAILURE), tolong(0), FAILURE), \" / \", if(isNull(FAILURE_1d), tolong(0), FAILURE_1d)) as %\"Compare Failure\"\n| concat(if(isNull(ABORTED), tolong(0), ABORTED), \" / \", if(isNull(ABORTED_1d), tolong(0), ABORTED_1d)) as %\"Compare Aborted\"\n| concat(if(isNull(UNSTABLE), tolong(0), UNSTABLE), \" / \", if(isNull(UNSTABLE_1d), tolong(0), UNSTABLE_1d)) as %\"Compare Unstable\"\n| fields Master, Name, %\"Compare Success\", %\"Compare Failure\", %\"Compare Aborted\", %\"Compare Unstable\"",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"label\",\"result\", \"jobRunDuration\" as Name,Label, Result, Duration\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| count by Name, Result, Master\n| transpose row Name, Master column Result as %\"SUCCESS\", %\"FAILURE\", %\"ABORTED\", %\"UNSTABLE\"\n| compare with timeshift 1d\n| concat(if(isNull(SUCCESS), tolong(0), SUCCESS), \" / \", if(isNull(SUCCESS_1d), tolong(0), SUCCESS_1d)) as %\"Compare Success\"\n| concat(if(isNull(FAILURE), tolong(0), FAILURE), \" / \", if(isNull(FAILURE_1d), tolong(0), FAILURE_1d)) as %\"Compare Failure\"\n| concat(if(isNull(ABORTED), tolong(0), ABORTED), \" / \", if(isNull(ABORTED_1d), tolong(0), ABORTED_1d)) as %\"Compare Aborted\"\n| concat(if(isNull(UNSTABLE), tolong(0), UNSTABLE), \" / \", if(isNull(UNSTABLE_1d), tolong(0), UNSTABLE_1d)) as %\"Compare Unstable\"\n| fields Master, Name, %\"Compare Success\", %\"Compare Failure\", %\"Compare Aborted\", %\"Compare Unstable\"",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1789,7 +1791,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"result\", \"jobRunDuration\", \"label\" as Name, Result, Duration, Label\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| where Result matches \"SUCCESS\"\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Duration, Name\n| sort by %\"Duration in minutes\"\n| fields - Duration\n| limit 10",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"result\", \"jobRunDuration\", \"label\" as Name, Result, Duration, Label\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| where Result matches \"SUCCESS\"\n| Duration/60 as Duration\n| avg(Duration) as %\"Duration in minutes\" by Duration, Name\n| sort by %\"Duration in minutes\"\n| fields - Duration\n| limit 10",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1810,7 +1812,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"number\",\"label\", \"result\" as Name, Number, Label, Result nodrop\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| timeslice 10m\n| if(Result matches \"SUCCESS\", \"Success\", \"Failure\") as Result\n| count by _timeslice, Result\n| transpose row _timeslice column Result\n| fillmissing timeslice(10m)",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"number\",\"label\", \"result\" as Name, Number, Label, Result nodrop\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| timeslice 10m\n| if(Result matches \"SUCCESS\", \"Success\", \"Failure\") as Result\n| count by _timeslice, Result\n| transpose row _timeslice column Result\n| fillmissing timeslice(10m)",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1831,7 +1833,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\",\"label\",\"result\" as Name, Label, Result\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| if(Result matches \"SUCCESS\", 1, 0) as Success\n| if(Result matches \"FAILURE\", 1, 0) as Failure\n| if(Result matches \"ABORTED\", 1, 0) as Aborted\n| if(Result matches \"UNSTABLE\", 1, 0) as Unstable\n| timeslice 30m\n| count as Total_Logs, sum(Success) as Successes, sum(Failure) as Failures, sum(Aborted) as Abort, sum(Unstable) as Unstable by _timeslice\n| (Successes/Total_Logs) as Successful\n| (Failures/Total_Logs) as Failed\n| (Abort/Total_Logs) as Aborted\n| (Unstable/Total_Logs) as Unstable\n| fields _timeslice, Successful, Failed, Aborted, Unstable",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\",\"label\",\"result\" as Name, Label, Result\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| if(Result matches \"SUCCESS\", 1, 0) as Success\n| if(Result matches \"FAILURE\", 1, 0) as Failure\n| if(Result matches \"ABORTED\", 1, 0) as Aborted\n| if(Result matches \"UNSTABLE\", 1, 0) as Unstable\n| timeslice 30m\n| count as Total_Logs, sum(Success) as Successes, sum(Failure) as Failures, sum(Aborted) as Abort, sum(Unstable) as Unstable by _timeslice\n| (Successes/Total_Logs) as Successful\n| (Failures/Total_Logs) as Failed\n| (Abort/Total_Logs) as Aborted\n| (Unstable/Total_Logs) as Unstable\n| fields _timeslice, Successful, Failed, Aborted, Unstable",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1852,7 +1854,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} In_Progress\n| _sourceHost as Master\n| json \"name\", \"result\", \"number\" as Name, Result, Number\n| where Result = \"In_Progress\" and Name matches \"{{Name}}\" and Master matches \"{{Master}}\"\n| first(_raw) by Name, Number, Master\n| json field=_first \"jobBuildURL\", \"label\", \"nodeName\", \"jobStartTime\", \"jobRunDuration\" as URL, Label, %\"Node Name\", %\"Start Time\", %\"Duration(sec)\" nodrop\n| where Label matches \"{{Label}}\"\n| where ![subquery : _sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| count by Master, Name, Number   \n| compose Master, Name, Number]  \n| tourl(URL, Name) as Name\n| count by Master, Name, Label, %\"Node Name\", %\"Start Time\", %\"Duration(sec)\", Number\n| fields Master, Name, Label, %\"Node Name\", %\"Start Time\", %\"Duration(sec)\", Number",
+                                    "queryString": "_sourceCategory=${sourceCategory} In_Progress\n| _sourceHost as Master\n| json \"name\", \"result\", \"number\" as Name, Result, Number\n| where Result = \"In_Progress\" and Name matches \"{{Name}}\" and Master matches \"{{Master}}\"\n| first(_raw) by Name, Number, Master\n| json field=_first \"jobBuildURL\", \"label\", \"nodeName\", \"jobStartTime\", \"jobRunDuration\" as URL, Label, %\"Node Name\", %\"Start Time\", %\"Duration(sec)\" nodrop\n| where Label matches \"{{Label}}\"\n| where ![subquery : _sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"name\", \"number\" as Name, Number\n| count by Master, Name, Number   \n| compose Master, Name, Number]  \n| tourl(URL, Name) as Name\n| count by Master, Name, Label, %\"Node Name\", %\"Start Time\", %\"Duration(sec)\", Number\n| fields Master, Name, Label, %\"Node Name\", %\"Start Time\", %\"Duration(sec)\", Number",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1873,7 +1875,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"nodeName\", \"name\", \"number\", \"label\", \"result\" as %\"Node Name\", Name, Number, Label, Result\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| count by %\"Node Name\", Name\n| transpose row %\"Node Name\" column Name",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"nodeName\", \"name\", \"number\", \"label\", \"result\" as %\"Node Name\", Name, Number, Label, Result\n| where Name matches \"{{Name}}\" and Label matches \"{{Label}}\" and Result matches \"{{Result}}\" and Master matches \"{{Master}}\"\n| count by %\"Node Name\", Name\n| transpose row %\"Node Name\" column Name",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1894,7 +1896,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Queue_Event\n| _sourceHost as Master\n| json \"jobName\" as Name\n| first(_raw) by Name, Master\n| json field = _first \"queueId\", \"queueTime\", \"isBlocked\", \"reasonForBlock\", \"isConcurrentBuild\", \"jobName\", \"jobURL\" as %\"Queue Id\", %\"Queue Time(sec)\", Blocked, Reason, %\"Concurrent Build\", Name, URL nodrop\n| where Name matches \"{{Name}}\" and Master matches \"{{Master}}\"\n| tourl(URL, Name) as Name\n| replace (URL, /\\/[0-9]{1,}/, \"\") as URL\n| where ![subquery : _sourceCategory =  ${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"jobBuildURL\" as URL\n| replace (URL, /\\/[0-9]{1,}/, \"\") as URL\n| count by URL, Master\n| compose URL, Master]\n| count by Master, %\"Queue Id\", %\"Queue Time(sec)\", Name, Blocked, Reason, %\"Concurrent Build\"\n| fields - _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Queue_Event\n| _sourceHost as Master\n| json \"jobName\" as Name\n| first(_raw) by Name, Master\n| json field = _first \"queueId\", \"queueTime\", \"isBlocked\", \"reasonForBlock\", \"isConcurrentBuild\", \"jobName\", \"jobURL\" as %\"Queue Id\", %\"Queue Time(sec)\", Blocked, Reason, %\"Concurrent Build\", Name, URL nodrop\n| where Name matches \"{{Name}}\" and Master matches \"{{Master}}\"\n| tourl(URL, Name) as Name\n| replace (URL, /\\/[0-9]{1,}/, \"\") as URL\n| where ![subquery : _sourceCategory=${sourceCategory} \"\\\"logType\\\":\\\"Job_Status\\\"\"\n| _sourceHost as Master\n| json \"jobBuildURL\" as URL\n| replace (URL, /\\/[0-9]{1,}/, \"\") as URL\n| count by URL, Master\n| compose URL, Master]\n| count by Master, %\"Queue Id\", %\"Queue Time(sec)\", Name, Blocked, Reason, %\"Concurrent Build\"\n| fields - _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -1915,7 +1917,7 @@
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
                                 "field": "Name"
                             },
                             "allowMultiSelect": false,
@@ -1929,7 +1931,7 @@
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
                                 "field": "Label"
                             },
                             "allowMultiSelect": false,
@@ -1943,7 +1945,7 @@
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
                                 "field": "Result"
                             },
                             "allowMultiSelect": false,
@@ -1957,7 +1959,7 @@
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"name\", \"label\", \"result\" as Name, Label, Result",
                                 "field": "Master"
                             },
                             "allowMultiSelect": false,
@@ -1971,7 +1973,7 @@
                     "type": "SavedSearchWithScheduleSyncDefinition",
                     "name": "Parse Stages for Job (Copy)",
                     "search": {
-                        "queryText": "_sourceCategory =  ${sourceCategory} Pipeline_Stages {{Job_Name}}\n| json \"name\"\n| where name = {{Job_Name}}\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"startTime\", \"stageId\", \"name\", \"duration\", \"status\", \"pauseDuration\", \"id\", \"steps\", \"error\" as Start_Time, Stage_Id, Stage_Name, Stage_Duration, Stage_Status, Stage_Pause_Duration, ID, Steps, Error nodrop\n| count  by Start_Time, Stage_Id, Stage_Name, Stage_Duration, Stage_Status, Stage_Pause_Duration, ID, Steps, Error\n| sort by Start_Time\n| fields - _count, ID",
+                        "queryText": "_sourceCategory=${sourceCategory} Pipeline_Stages {{Job_Name}}\n| json \"name\"\n| where name = {{Job_Name}}\n| json \"stages\" as StagesPipeline\n| parse regex field = StagesPipeline \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi\n| json field=json_added_blob \"startTime\", \"stageId\", \"name\", \"duration\", \"status\", \"pauseDuration\", \"id\", \"steps\", \"error\" as Start_Time, Stage_Id, Stage_Name, Stage_Duration, Stage_Status, Stage_Pause_Duration, ID, Steps, Error nodrop\n| count  by Start_Time, Stage_Id, Stage_Name, Stage_Duration, Stage_Status, Stage_Pause_Duration, ID, Steps, Error\n| sort by Start_Time\n| fields - _count, ID",
                         "defaultTimeRange": "-24h",
                         "byReceiptTime": false,
                         "viewName": "",
@@ -2002,7 +2004,7 @@
                     "type": "SavedSearchWithScheduleSyncDefinition",
                     "name": "Test Cases Comparison by Builds (Copy)",
                     "search": {
-                        "queryText": "_sourceCategory =  ${sourceCategory} Job_Status {{Job_Name}}\n| json \"name\", \"number\"\n| where name = {{Job_Name}}\n| json \"testResult.failures\", \"testResult.passes\", \"testResult.skips\" as Failed, Passed, Skipped\n| avg(Failed) as Failed, avg(Passed) as Passed, avg(Skipped) as Skipped by number",
+                        "queryText": "_sourceCategory=${sourceCategory} Job_Status {{Job_Name}}\n| json \"name\", \"number\"\n| where name = {{Job_Name}}\n| json \"testResult.failures\", \"testResult.passes\", \"testResult.skips\" as Failed, Passed, Skipped\n| avg(Failed) as Failed, avg(Passed) as Passed, avg(Skipped) as Skipped by number",
                         "defaultTimeRange": "-24h",
                         "byReceiptTime": false,
                         "viewName": "",
@@ -2033,7 +2035,7 @@
                     "type": "SavedSearchWithScheduleSyncDefinition",
                     "name": "Test Cases Parsing (Copy)",
                     "search": {
-                        "queryText": "_sourceCategory =  ${sourceCategory} Test_Result {{Job_Name}}\n| json \"name\"\n| where name = {{Job_Name}}\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| className as Class_Name | testName as Test_Name| duration as Test_Duration | status as Test_Status | errorStackTrace as Error_Stack_Trace | errorDetails as Error\n| where Test_Name matches {{Test_Name}}\n| count by Class_Name, Test_Name, Test_Status, Test_Duration, Error, errorStackTrace",
+                        "queryText": "_sourceCategory=${sourceCategory} Test_Result {{Job_Name}}\n| json \"name\"\n| where name = {{Job_Name}}\n| json \"testResult\" as statusValues\n| parse regex field=statusValues \"(?<TestResult>\\{[^\\}]+\\})\" multi\n| json auto field=TestResult\n| className as Class_Name | testName as Test_Name| duration as Test_Duration | status as Test_Status | errorStackTrace as Error_Stack_Trace | errorDetails as Error\n| where Test_Name matches {{Test_Name}}\n| count by Class_Name, Test_Name, Test_Status, Test_Duration, Error, errorStackTrace",
                         "defaultTimeRange": "-24h",
                         "byReceiptTime": false,
                         "viewName": "",
@@ -2118,7 +2120,7 @@
                             },
                             {
                                 "key": "panelPANE-7560D16AB0B40843",
-                                "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":17}"
+                                "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":9}"
                             },
                             {
                                 "key": "panelPANE-3A9D57ABA1DB6844",
@@ -2126,15 +2128,15 @@
                             },
                             {
                                 "key": "panelPANE-C35611A4AD6A9B43",
-                                "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":23}"
+                                "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":17}"
                             },
                             {
                                 "key": "panelPANE-097EF46696995A40",
-                                "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":23}"
+                                "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":23}"
                             },
                             {
-                                "key": "panelPANE-15C4C06399B32949",
-                                "structure": "{\"height\":17,\"width\":12,\"x\":0,\"y\":0}"
+                                "key": "panelPANE-8A2E06BF832FB844",
+                                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":0}"
                             }
                         ]
                     },
@@ -2148,7 +2150,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Job_Started\", \"Job_Aborted\", \"Job_Finished\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| timeslice 10m\n| count as Count by _timeslice, Event\n| transpose row _timeslice column Event\n| fillmissing timeslice(10m)",
+                                    "queryString": "_sourceCategory=${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Job_Started\", \"Job_Aborted\", \"Job_Finished\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| timeslice 10m\n| count as Count by _timeslice, Event\n| transpose row _timeslice column Event\n| fillmissing timeslice(10m)",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2169,7 +2171,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Config_Change\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| parse regex \"file (?<Item_Name>.*?).xml\"\n| concat(Item_Name, \".xml\") as ItemName\n| where !(ItemName matches \"jobs/*\")\n| count as Count by ItemName\n| sort by Count\n| limit 5",
+                                    "queryString": "_sourceCategory=${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Config_Change\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| parse regex \"file (?<Item_Name>.*?).xml\"\n| concat(Item_Name, \".xml\") as ItemName\n| where !(ItemName matches \"jobs/*\")\n| count as Count by ItemName\n| sort by Count\n| limit 5",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2190,7 +2192,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Config_Change\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| parse regex \"file (?<ItemName>.*?).xml\"\n| concat(ItemName, \".xml\") as ItemName\n| where ItemName matches \"jobs/*\"\n| parse field=ItemName \"jobs/*/config.xml\" as JobName\n| count as Count by JobName\n| sort by Count\n| limit 5",
+                                    "queryString": "_sourceCategory=${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Config_Change\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| parse regex \"file (?<ItemName>.*?).xml\"\n| concat(ItemName, \".xml\") as ItemName\n| where ItemName matches \"jobs/*\"\n| parse field=ItemName \"jobs/*/config.xml\" as JobName\n| count as Count by JobName\n| sort by Count\n| limit 5",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2211,7 +2213,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Config_Change\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| json \"fileDetails.Current_File_Data\", \"fileDetails.Old_File_Data\" as Current_File_Data, Old_File_Data nodrop\n| base64Decode(Current_File_Data) as Current_File_Data\n| base64Decode(Old_File_Data) as Old_File_Data\n| count as Count by Time, Master, Event, UserName, UserId, Message\n| sort by Time\n| fields - Count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Config_Change\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| json \"fileDetails.Current_File_Data\", \"fileDetails.Old_File_Data\" as Current_File_Data, Old_File_Data nodrop\n| base64Decode(Current_File_Data) as Current_File_Data\n| base64Decode(Old_File_Data) as Old_File_Data\n| count as Count by Time, Master, Event, UserName, UserId, Message\n| sort by Time\n| fields - Count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2232,7 +2234,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"User_Login\", \"User_Logout\", \"User_Login_Failure\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| count as Count by Time, Master, Event, UserName, UserId, Message\n| sort by Time\n| fields - Count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"User_Login\", \"User_Logout\", \"User_Login_Failure\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| count as Count by Time, Master, Event, UserName, UserId, Message\n| sort by Time\n| fields - Count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2253,7 +2255,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Created\", \"Deleted\", \"Updated\", \"Copied\", \"Location_Changed\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| count as Count by Time, Master, Event, UserName, UserId, Message\n| sort by Time\n| fields - Count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Created\", \"Deleted\", \"Updated\", \"Copied\", \"Location_Changed\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| count as Count by Time, Master, Event, UserName, UserId, Message\n| sort by Time\n| fields - Count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2274,7 +2276,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Job_Started\", \"Job_Aborted\", \"Job_Finished\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| count as Count by Time, Master, Event, UserName, UserId, Message\n| sort by Time\n| fields - Count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where Event in (\"Job_Started\", \"Job_Aborted\", \"Job_Finished\") and userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Master matches \"{{Master}}\"\n| count as Count by Time, Master, Event, UserName, UserId, Message\n| sort by Time\n| fields - Count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2287,15 +2289,15 @@
                             "linkedDashboards": []
                         },
                         {
-                            "id": "15C4C06399B32949",
-                            "key": "panelPANE-15C4C06399B32949",
+                            "id": "8A2E06BF832FB844",
+                            "key": "panelPANE-8A2E06BF832FB844",
                             "title": "User Events",
-                            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"series\",\"value\":\"series\"}],\"aggregationType\":\"avg\"}}",
+                            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
                             "keepVisualSettingsConsistentWithParent": true,
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Event matches \"{{Event}}\" and Master matches \"{{Master}}\"\n| count as Count by UserId, Event\n| transpose row UserId column Event",
+                                    "queryString": "_sourceCategory=${sourceCategory} Audit_Event\n| _sourceHost as Master\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time nodrop\n| where userName matches \"{{UserName}}\" and userId matches \"{{UserId}}\" and Event matches \"{{Event}}\" and Master matches \"{{Master}}\"\n| count as Count by UserId, Event\n| transpose row UserId column Event",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2310,13 +2312,13 @@
                     ],
                     "variables": [
                         {
-                            "id": "7D0933D68A888B9B",
+                            "id": "C7085F415FD53229",
                             "name": "Master",
                             "displayName": null,
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master",
                                 "field": "Master"
                             },
                             "allowMultiSelect": false,
@@ -2324,13 +2326,13 @@
                             "hideFromUI": false
                         },
                         {
-                            "id": "0B7C83F29A899889",
+                            "id": "C79870E107C2B337",
                             "name": "UserName",
                             "displayName": null,
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time ",
+                                "query": "_sourceCategory=${sourceCategory}\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time ",
                                 "field": "UserName"
                             },
                             "allowMultiSelect": false,
@@ -2338,13 +2340,13 @@
                             "hideFromUI": false
                         },
                         {
-                            "id": "AFC5D62B9888A8B8",
+                            "id": "8E1BB674E9582F3B",
                             "name": "UserId",
                             "displayName": null,
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time ",
+                                "query": "_sourceCategory=${sourceCategory}\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time ",
                                 "field": "UserId"
                             },
                             "allowMultiSelect": false,
@@ -2352,13 +2354,13 @@
                             "hideFromUI": false
                         },
                         {
-                            "id": "AD72B0B39B99BA8A",
+                            "id": "45AB183169146481",
                             "name": "Event",
                             "displayName": null,
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time ",
+                                "query": "_sourceCategory=${sourceCategory}\n| json \"userName\", \"auditEventType\", \"userId\", \"message\", \"eventTime\" as UserName, Event, UserId, Message, Time ",
                                 "field": "Event"
                             },
                             "allowMultiSelect": false,
@@ -2463,7 +2465,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.job.total.duration.mean | parse field=_rawName \"*.jenkins.job.total.duration.mean\" as MetricPrefix | eval _value/1000",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.job.total.duration.mean | parse field=_rawName \"*.jenkins.job.total.duration.mean\" as MetricPrefix | eval _value/1000",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2484,7 +2486,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.job.waiting.duration.mean | parse field=_rawName \"*.jenkins.job.waiting.duration.mean\" as MetricPrefix | eval _value/1000",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.job.waiting.duration.mean | parse field=_rawName \"*.jenkins.job.waiting.duration.mean\" as MetricPrefix | eval _value/1000",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2505,7 +2507,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.job.queuing.duration.mean | parse field=_rawName \"*.jenkins.job.queuing.duration.mean\" as MetricPrefix | eval _value/1000",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.job.queuing.duration.mean | parse field=_rawName \"*.jenkins.job.queuing.duration.mean\" as MetricPrefix | eval _value/1000",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2526,7 +2528,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.job.blocked.duration.mean | parse field=_rawName \"*.jenkins.job.blocked.duration.mean\" as MetricPrefix | eval _value/1000",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.job.blocked.duration.mean | parse field=_rawName \"*.jenkins.job.blocked.duration.mean\" as MetricPrefix | eval _value/1000",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2556,7 +2558,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.queue.size.value | parse field=_rawName \"*.jenkins.queue.size.value\" as MetricPrefix",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.queue.size.value | parse field=_rawName \"*.jenkins.queue.size.value\" as MetricPrefix",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2577,7 +2579,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.queue.pending.value | parse field=_rawName \"*.jenkins.queue.pending.value\" as MetricPrefix",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.queue.pending.value | parse field=_rawName \"*.jenkins.queue.pending.value\" as MetricPrefix",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2598,7 +2600,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.queue.buildable.value | parse field=_rawName \"*.jenkins.queue.buildable.value\" as MetricPrefix",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.queue.buildable.value | parse field=_rawName \"*.jenkins.queue.buildable.value\" as MetricPrefix",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2619,7 +2621,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.queue.blocked.value | parse field=_rawName \"*.jenkins.queue.blocked.value\" as MetricPrefix",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.queue.blocked.value | parse field=_rawName \"*.jenkins.queue.blocked.value\" as MetricPrefix",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2649,7 +2651,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.vm.gc.*.count | parse field=_rawName \"*.vm.gc.*.count\" as prefix, name",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.vm.gc.*.count | parse field=_rawName \"*.vm.gc.*.count\" as prefix, name",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2670,7 +2672,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.vm.gc.*.time | parse field=_rawName \"*.vm.gc.*.time\" as prefix, name | eval _value/60",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.vm.gc.*.time | parse field=_rawName \"*.vm.gc.*.time\" as prefix, name | eval _value/60",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2752,7 +2754,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.*.cpu.load | parse field=_rawName \"*.vm.cpu.load\" as MetricPrefix",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.*.cpu.load | parse field=_rawName \"*.vm.cpu.load\" as MetricPrefix",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2773,7 +2775,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.vm.memory.total.used | parse field=_rawName \"*.vm.memory.total.used\" as MetricPrefix | eval _value/1024/1024",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.vm.memory.total.used | parse field=_rawName \"*.vm.memory.total.used\" as MetricPrefix | eval _value/1024/1024",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2794,7 +2796,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Jenkins_Log\n| json \"threadId\", \"logType\", \"logLevel\", \"logMessage\", \"logSource\", \"eventTime\", \"logStackTrace\" as %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Message\", %\"Log Source\", %\"Event Time\", %\"Log Stack Trace\" nodrop\n| _sourceHost as Master\n//| where Master matches {{Master}} AND %\"Log Level\" matches {{LogLevel}} AND %\"Log Message\" matches {{LogMessage}}\n| count by Master, %\"Event Time\", %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Source\", %\"Log Message\", %\"Log Stack Trace\"\n| sort by %\"Event Time\"\n| fields - _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Jenkins_Log\n| json \"threadId\", \"logType\", \"logLevel\", \"logMessage\", \"logSource\", \"eventTime\", \"logStackTrace\" as %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Message\", %\"Log Source\", %\"Event Time\", %\"Log Stack Trace\" nodrop\n| _sourceHost as Master\n//| where Master matches {{Master}} AND %\"Log Level\" matches {{LogLevel}} AND %\"Log Message\" matches {{LogMessage}}\n| count by Master, %\"Event Time\", %\"Thread ID\", %\"Log Type\", %\"Log Level\", %\"Log Source\", %\"Log Message\", %\"Log Stack Trace\"\n| sort by %\"Event Time\"\n| fields - _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2815,7 +2817,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.*.cpu.load | parse field=_rawName \"*.system.cpu.load\" as MetricPrefix",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.*.cpu.load | parse field=_rawName \"*.system.cpu.load\" as MetricPrefix",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2836,7 +2838,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.vm.memory.heap.used | parse field=_rawName \"*.vm.memory.heap.used\" as MetricPrefix | eval _value/1024/1024",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.vm.memory.heap.used | parse field=_rawName \"*.vm.memory.heap.used\" as MetricPrefix | eval _value/1024/1024",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -2857,7 +2859,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} \"\\\"eventSource\\\":\\\"Shutdown\\\"\" \n| _sourceHost as Master\n| timeslice 10m\n|where Master matches \"*\"\n|count as Count by _timeslice, Master\n| transpose row _timeslice column Master",
+                                    "queryString": "_sourceCategory=${sourceCategory} \"\\\"eventSource\\\":\\\"Shutdown\\\"\" \n| _sourceHost as Master\n| timeslice 10m\n|where Master matches \"*\"\n|count as Count by _timeslice, Master\n| transpose row _timeslice column Master",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -2878,14 +2880,14 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.executor.count.value | parse field=_rawName \"*.jenkins.executor.count.value\" as MetricPrefix",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.executor.count.value | parse field=_rawName \"*.jenkins.executor.count.value\" as MetricPrefix",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
                                     "metricsQueryData": null
                                 },
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.jenkins.executor.in-use.value | parse field=_rawName \"*.jenkins.executor.in-use.value\" as MetricPrefix",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.jenkins.executor.in-use.value | parse field=_rawName \"*.jenkins.executor.in-use.value\" as MetricPrefix",
                                     "queryType": "Metrics",
                                     "queryKey": "B",
                                     "metricsQueryMode": "Advanced",
@@ -2913,7 +2915,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} *.vm.runnable.count | parse field=_rawName \"*.*\" as MetricPrefix, unused",
+                                    "queryString": "_sourceCategory=${sourceCategory} *.vm.runnable.count | parse field=_rawName \"*.*\" as MetricPrefix, unused",
                                     "queryType": "Metrics",
                                     "queryKey": "A",
                                     "metricsQueryMode": "Advanced",
@@ -3000,12 +3002,12 @@
                                 "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":26}"
                             },
                             {
-                                "key": "panelPANE-6839143DB8333B49",
-                                "structure": "{\"height\":7,\"width\":8,\"x\":0,\"y\":12}"
-                            },
-                            {
                                 "key": "panelPANE-87EC8A89B9A9A84F",
                                 "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":0}"
+                            },
+                            {
+                                "key": "panelPANE-335837D7BA76D84E",
+                                "structure": "{\"height\":7,\"width\":8,\"x\":0,\"y\":12}"
                             }
                         ]
                     },
@@ -3019,7 +3021,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as %\"Node Name\", Architecture, Clock, %\"Reponse Time\", %\"Free Disk Space\", Temporary_Space, SwapMemory, Idle, Online, URL, %\"Node Label\" nodrop\n| if(Idle matches \"true\", \"false\", \"true\") as Busy\n| parse field=SwapMemory \"Memory:*  Swap:*\" as Physical_Memory, Swap_Memory\n| parse regex field=Physical_Memory \"(?<Free_Physical_Memory>.*?)/(?<Total_Physical_Memory>.*?)(?<Unit_Phy>[A-Z]+)\"\n| num(Free_Physical_Memory) | num(Total_Physical_Memory)\n| (Free_Physical_Memory/Total_Physical_Memory)*100 as Free_Physical_Memory\n| parse regex field=Swap_Memory \"(?<Free_Swap_Memory>.*?)/(?<Total_Swap_Memory>.*?)(?<Unit_Swap>[A-Z]+)\"\n| num(Free_Swap_Memory) | num(Total_Swap_Memory)\n| (Free_Swap_Memory/Total_Swap_Memory)*100 as Free_Swap_Memory\n| if(Total_Physical_Memory=0, \"0 %\", format(\"%.2f %s\",Free_Physical_Memory, \"%\")) as %\"Free Physical Memory\"\n| if(Total_Swap_Memory=0, \"0 %\", format(\"%.2f %s\",Free_Swap_Memory, \"%\")) as %\"Free Swap Memory\" \n| replace(URL, \"(\", \"%28\") as URL\n| replace(URL, \")\", \"%29\") as URL\n| tourl(URL, %\"Node Name\") as URL\n| count by Master, %\"Node Name\", %\"Node Label\", Busy, Online, Architecture, Clock, %\"Reponse Time\", %\"Free Physical Memory\", %\"Free Swap Memory\", %\"Free Disk Space\", URL\n| fields - _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as %\"Node Name\", Architecture, Clock, %\"Reponse Time\", %\"Free Disk Space\", Temporary_Space, SwapMemory, Idle, Online, URL, %\"Node Label\" nodrop\n| if(Idle matches \"true\", \"false\", \"true\") as Busy\n| parse field=SwapMemory \"Memory:*  Swap:*\" as Physical_Memory, Swap_Memory\n| parse regex field=Physical_Memory \"(?<Free_Physical_Memory>.*?)/(?<Total_Physical_Memory>.*?)(?<Unit_Phy>[A-Z]+)\"\n| num(Free_Physical_Memory) | num(Total_Physical_Memory)\n| (Free_Physical_Memory/Total_Physical_Memory)*100 as Free_Physical_Memory\n| parse regex field=Swap_Memory \"(?<Free_Swap_Memory>.*?)/(?<Total_Swap_Memory>.*?)(?<Unit_Swap>[A-Z]+)\"\n| num(Free_Swap_Memory) | num(Total_Swap_Memory)\n| (Free_Swap_Memory/Total_Swap_Memory)*100 as Free_Swap_Memory\n| if(Total_Physical_Memory=0, \"0 %\", format(\"%.2f %s\",Free_Physical_Memory, \"%\")) as %\"Free Physical Memory\"\n| if(Total_Swap_Memory=0, \"0 %\", format(\"%.2f %s\",Free_Swap_Memory, \"%\")) as %\"Free Swap Memory\" \n| replace(URL, \"(\", \"%28\") as URL\n| replace(URL, \")\", \"%29\") as URL\n| tourl(URL, %\"Node Name\") as URL\n| count by Master, %\"Node Name\", %\"Node Label\", Busy, Online, Architecture, Clock, %\"Reponse Time\", %\"Free Physical Memory\", %\"Free Swap Memory\", %\"Free Disk Space\", URL\n| fields - _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3040,7 +3042,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as %\"Node Name\", Architecture, Clock, Reponse_Time, Disk_Space, Temporary_Space, SwapMemory, Idle, Online, URL, %\"Node Label\" nodrop\n| if(Idle matches \"true\", \"false\", \"true\") as Busy\n| where busy = \"true\"\n| count as Count by Busy",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as %\"Node Name\", Architecture, Clock, Reponse_Time, Disk_Space, Temporary_Space, SwapMemory, Idle, Online, URL, %\"Node Label\" nodrop\n| if(Idle matches \"true\", \"false\", \"true\") as Busy\n| where busy = \"true\"\n| count as Count by Busy",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3061,7 +3063,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as %\"Node Name\", Architecture, Clock, Reponse_Time, Disk_Space, Temporary_Space, SwapMemory, Idle, Online, URL, %\"Node Label\" nodrop\n| if(Idle matches \"true\", \"false\", \"true\") as Busy\n| where busy = \"false\"\n| count as Count by Busy",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as %\"Node Name\", Architecture, Clock, Reponse_Time, Disk_Space, Temporary_Space, SwapMemory, Idle, Online, URL, %\"Node Label\" nodrop\n| if(Idle matches \"true\", \"false\", \"true\") as Busy\n| where busy = \"false\"\n| count as Count by Busy",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3082,7 +3084,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as Node_Name, Architecture, Clock, Reponse_Time, Disk_Space, Temporary_Space, SwapMemory, Idle, Online, URL, Label nodrop\n| where Online = \"true\"\n| count as Count by Online",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as Node_Name, Architecture, Clock, Reponse_Time, Disk_Space, Temporary_Space, SwapMemory, Idle, Online, URL, Label nodrop\n| where Online = \"true\"\n| count as Count by Online",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3103,7 +3105,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as Node_Name, Architecture, Clock, Reponse_Time, Disk_Space, Temporary_Space, SwapMemory, Idle, Online, URL, Label nodrop\n| where Online = \"false\"\n| count as Count by Online",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as Node_Name, Architecture, Clock, Reponse_Time, Disk_Space, Temporary_Space, SwapMemory, Idle, Online, URL, Label nodrop\n| where Online = \"false\"\n| count as Count by Online",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3124,7 +3126,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Job_Status\n| json \"nodeName\", \"name\", \"result\", \"jobBuildURL\", \"number\" as NodeName, JobName, Result, jobBuildURL, Number nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and Master matches \"{{Master}}\"\n| tourl(jobBuildURL, JobName) as JobName\n| JobName as %\"Job Name\"\n| NodeName as %\"Node Name\"\n| count by Master, %\"Node Name\", %\"Job Name\", Number, Result\n| fields - _count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Job_Status\n| json \"nodeName\", \"name\", \"result\", \"jobBuildURL\", \"number\" as NodeName, JobName, Result, jobBuildURL, Number nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and Master matches \"{{Master}}\"\n| tourl(jobBuildURL, JobName) as JobName\n| JobName as %\"Job Name\"\n| NodeName as %\"Node Name\"\n| count by Master, %\"Node Name\", %\"Job Name\", Number, Result\n| fields - _count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3145,7 +3147,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"isOnline\", \"nodeLabel\" as NodeName, ExecutorsCount, Onilne, NodeLabel nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| where ExecutorsCount > 0 AND Onilne matches \"true\"\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| concat(Master, \"-\", NodeName) as %\"Node Name\"\n| json field=_raw \"monitorData.DiskSpaceMonitor\" as Disk_Space\n| parse regex field=Disk_Space \"(?<Disk_Space>.*?) (?<Unit>.*[A-Z]+)\" nodrop\n| num(Disk_Space)\n| if(Unit in (\"MB\", \"Mb\", \"mb\"), Disk_Space/1024, if(Unit in (\"KB\", \"Kb\", \"kb\"), Disk_Space/1024/1024, if(Unit in (\"TB\", \"Tb\", \"tb\"), Disk_Space*1024, Disk_Space))) as Disk_Space\n| timeslice 10m\n| avg(Disk_Space) as Disk_Space by _timeslice, %\"Node Name\"\n| transpose row _timeslice column %\"Node Name\"",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"isOnline\", \"nodeLabel\" as NodeName, ExecutorsCount, Onilne, NodeLabel nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| where ExecutorsCount > 0 AND Onilne matches \"true\"\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| concat(Master, \"-\", NodeName) as %\"Node Name\"\n| json field=_raw \"monitorData.DiskSpaceMonitor\" as Disk_Space\n| parse regex field=Disk_Space \"(?<Disk_Space>.*?) (?<Unit>.*[A-Z]+)\" nodrop\n| num(Disk_Space)\n| if(Unit in (\"MB\", \"Mb\", \"mb\"), Disk_Space/1024, if(Unit in (\"KB\", \"Kb\", \"kb\"), Disk_Space/1024/1024, if(Unit in (\"TB\", \"Tb\", \"tb\"), Disk_Space*1024, Disk_Space))) as Disk_Space\n| timeslice 10m\n| avg(Disk_Space) as Disk_Space by _timeslice, %\"Node Name\"\n| transpose row _timeslice column %\"Node Name\"",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3161,12 +3163,12 @@
                             "id": "46D8C625B9B3EA42",
                             "key": "panelPANE-46D8C625B9B3EA42",
                             "title": "Physical Memory",
-                            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+                            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme8\"}}",
                             "keepVisualSettingsConsistentWithParent": true,
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"isOnline\", \"nodeLabel\" as NodeName, ExecutorsCount, Onilne, NodeLabel nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| where ExecutorsCount > 0 AND Onilne matches \"true\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| concat(Master, \"-\", NodeName) as NodeName\n| json field=Message \"monitorData.SwapSpaceMonitor\", \"nodeLabel\"  as SwapMemory, Node_Label nodrop\n| parse field=SwapMemory \"Memory:*  Swap:*\" as Physical_Memory, Swap_Memory\n| parse regex field=Physical_Memory \"(?<Free_Memory>.*?)/(?<Total_Memory>.*?)[A-Z]\"\n| Free_Memory/Total_Memory as Free_Memory\n| 1 - Free_Memory as Used_Memory\n| avg(Used_Memory) as %\"Used Memory\", avg(Free_Memory) as %\"Free Memory\" by NodeName",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| _sourceHost as Master\n| json \"nodeName\", \"numberOfExecutors\", \"isOnline\", \"nodeLabel\" as NodeName, ExecutorsCount, Onilne, NodeLabel nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| where ExecutorsCount > 0 AND Onilne matches \"true\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| concat(Master, \"-\", NodeName) as NodeName\n| json field=Message \"monitorData.SwapSpaceMonitor\", \"nodeLabel\"  as SwapMemory, Node_Label nodrop\n| parse field=SwapMemory \"Memory:*  Swap:*\" as Physical_Memory, Swap_Memory\n| parse regex field=Physical_Memory \"(?<Free_Memory>.*?)/(?<Total_Memory>.*?)[A-Z]\"\n| Free_Memory/Total_Memory as Free_Memory\n| 1 - Free_Memory as Used_Memory\n| avg(Used_Memory) as %\"Used Memory\", avg(Free_Memory) as %\"Free Memory\" by NodeName",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3187,7 +3189,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} (\"Computer_Offline\")\n| _sourceHost as Master\n| json \"nodeName\", \"nodeLabel\" as NodeName, NodeLabel nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| _sourceHost as Jenkins_Master\n| concat (\"Master=\",Master,\" Node=\", NodeName) as %\"Master Node Name\" \n| timeslice 10m\n| count as Count by _timeslice, %\"Master Node Name\"\n| transpose row _timeslice column %\"Master Node Name\" ",
+                                    "queryString": "_sourceCategory=${sourceCategory} (\"Computer_Offline\")\n| _sourceHost as Master\n| json \"nodeName\", \"nodeLabel\" as NodeName, NodeLabel nodrop\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| _sourceHost as Jenkins_Master\n| concat (\"Master=\",Master,\" Node=\", NodeName) as %\"Master Node Name\" \n| timeslice 10m\n| count as Count by _timeslice, %\"Master Node Name\"\n| transpose row _timeslice column %\"Master Node Name\" ",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3208,7 +3210,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} (\"Launch_Failure\")\n| json \"nodeName\", \"nodeLabel\" as NodeName, NodeLabel nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| concat (\"Master=\",Master,\" Node=\", NodeName) as %\"Master Node Name\" \n| timeslice 10m\n| count as Count by _timeslice, %\"Master Node Name\"\n| transpose row _timeslice column %\"Master Node Name\"",
+                                    "queryString": "_sourceCategory=${sourceCategory} (\"Launch_Failure\")\n| json \"nodeName\", \"nodeLabel\" as NodeName, NodeLabel nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| concat (\"Master=\",Master,\" Node=\", NodeName) as %\"Master Node Name\" \n| timeslice 10m\n| count as Count by _timeslice, %\"Master Node Name\"\n| transpose row _timeslice column %\"Master Node Name\"",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3229,7 +3231,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and Master matches \"{{Master}}\"\n| count as Count by Time, NodeName, Master \n| sort by Time\n| fields - Count",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and Master matches \"{{Master}}\"\n| count as Count by Time, NodeName, Master \n| sort by Time\n| fields - Count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3250,28 +3252,7 @@
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} (\"Computer_Online\" OR \"Computer_Offline\" OR \"Computer_Temp_Online\" OR \"Computer_Temp_Offline\" OR \"Launch_Failure\")\n| json \"nodeName\", \"eventSource\", \"eventTime\", \"nodeLabel\", \"numberOfExecutors\", \"nodeURL\" as NodeName, Event, Time, NodeLabel, Executors, Node_URL nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| NodeName as %\"Node Name\"\n| NodeLabel as %\"Node Label\"\n| replace(Node_URL, \"(\", \"%28\") as Node_URL\n| replace(Node_URL, \")\", \"%29\") as Node_URL\n| tourl(Node_URL, %\"Node Name\") as %\"Node URL\"\n| count as Count by Time, Master, Event, %\"Node Name\", %\"Node Label\", Executors, %\"Node URL\"\n| sort by Time\n| fields - Count",
-                                    "queryType": "Logs",
-                                    "queryKey": "A",
-                                    "metricsQueryMode": null,
-                                    "metricsQueryData": null
-                                }
-                            ],
-                            "description": "",
-                            "timeRange": null,
-                            "coloringRules": null,
-                            "linkedDashboards": []
-                        },
-                        {
-                            "id": "6839143DB8333B49",
-                            "key": "panelPANE-6839143DB8333B49",
-                            "title": "Executors",
-                            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"series\",\"value\":\"series\"}],\"aggregationType\":\"avg\"}}",
-                            "keepVisualSettingsConsistentWithParent": true,
-                            "panelType": "SumoSearchPanel",
-                            "queries": [
-                                {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| concat(Master, \"-\",NodeName) as NodeName\n| Total_Executors - Free_Executors as Busy_Executors\n| first(Total_Executors) as Total_Executors, first(Free_Executors) as Free_Executors, first(Busy_Executors) as Busy_Executors by NodeName\n| where Busy_Executors >= 0\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master\n| concat(Master, \"-\",NodeName) as NodeName\n| compose NodeName]\n| NodeName as %\"Node Name\"\n| avg(Free_Executors) as %\"Free Executors\", avg(Busy_Executors) as %\"Busy Executors\" by %\"Node Name\"\n| fields %\"Node Name\", %\"Free Executors\", %\"Busy Executors\"",
+                                    "queryString": "_sourceCategory=${sourceCategory} (\"Computer_Online\" OR \"Computer_Offline\" OR \"Computer_Temp_Online\" OR \"Computer_Temp_Offline\" OR \"Launch_Failure\")\n| json \"nodeName\", \"eventSource\", \"eventTime\", \"nodeLabel\", \"numberOfExecutors\", \"nodeURL\" as NodeName, Event, Time, NodeLabel, Executors, Node_URL nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| NodeName as %\"Node Name\"\n| NodeLabel as %\"Node Label\"\n| replace(Node_URL, \"(\", \"%28\") as Node_URL\n| replace(Node_URL, \")\", \"%29\") as Node_URL\n| tourl(Node_URL, %\"Node Name\") as %\"Node URL\"\n| count as Count by Time, Master, Event, %\"Node Name\", %\"Node Label\", Executors, %\"Node URL\"\n| sort by Time\n| fields - Count",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3287,12 +3268,33 @@
                             "id": "87EC8A89B9A9A84F",
                             "key": "panelPANE-87EC8A89B9A9A84F",
                             "title": "Nodes by Online Status",
-                            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"series\",\"value\":\"series\"}],\"aggregationType\":\"avg\"}}",
+                            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":1,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":0,\"to\":0.99,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
                             "keepVisualSettingsConsistentWithParent": true,
                             "panelType": "SumoSearchPanel",
                             "queries": [
                                 {
-                                    "queryString": "_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory =  ${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master \n| compose NodeName, Master]\n| json field=Message \"nodeName\", \"monitorData.ArchitectureMonitor\", \"monitorData.ClockMonitor\" ,\"monitorData.ResponseTimeMonitor\", \"monitorData.DiskSpaceMonitor\", \"monitorData.TemporarySpaceMonitor\", \"monitorData.SwapSpaceMonitor\", \"isIdle\", \"isOnline\", \"nodeURL\", \"nodeLabel\"  as %\"Node Name\", Architecture, Clock, %\"Reponse Time\", %\"Free Disk Space\", Temporary_Space, SwapMemory, Idle, Online, URL, %\"Node Label\" nodrop\n| if(Idle matches \"true\", \"false\", \"true\") as Busy\n| parse field=SwapMemory \"Memory:*  Swap:*\" as Physical_Memory, Swap_Memory\n| parse regex field=Physical_Memory \"(?<Free_Physical_Memory>.*?)/(?<Total_Physical_Memory>.*?)(?<Unit_Phy>[A-Z]+)\"\n| num(Free_Physical_Memory) | num(Total_Physical_Memory)\n| (Free_Physical_Memory/Total_Physical_Memory)*100 as Free_Physical_Memory\n| parse regex field=Swap_Memory \"(?<Free_Swap_Memory>.*?)/(?<Total_Swap_Memory>.*?)(?<Unit_Swap>[A-Z]+)\"\n| num(Free_Swap_Memory) | num(Total_Swap_Memory)\n| (Free_Swap_Memory/Total_Swap_Memory)*100 as Free_Swap_Memory\n| if(Total_Physical_Memory=0, \"0 %\", format(\"%.2f %s\",Free_Physical_Memory, \"%\")) as %\"Free Physical Memory\"\n| if(Total_Swap_Memory=0, \"0 %\", format(\"%.2f %s\",Free_Swap_Memory, \"%\")) as %\"Free Swap Memory\" \n| replace(URL, \"(\", \"%28\") as URL\n| replace(URL, \")\", \"%29\") as URL\n| tourl(URL, %\"Node Name\") as URL\n| count by %\"Node Name\", Online\n| transpose row %\"Node Name\" column Online",
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"nodeName\", \"numberOfExecutors\", \"nodeLabel\" as NodeName, ExecutorsCount,NodeLabel\n| _sourceHost as Master\n| first(_raw) as Message by NodeName, Master\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master  \n| compose NodeName, Master] \n| json field=Message \"nodeName\",\"isOnline\" as %\"Node Name\",Online\n| where (Online = \"true\" or Online = \"false\")\n| count(%\"Node Name\") by %\"Node Name\", Online\n| fields - _count",
+                                    "queryType": "Logs",
+                                    "queryKey": "A",
+                                    "metricsQueryMode": null,
+                                    "metricsQueryData": null
+                                }
+                            ],
+                            "description": "",
+                            "timeRange": null,
+                            "coloringRules": null,
+                            "linkedDashboards": []
+                        },
+                        {
+                            "id": "335837D7BA76D84E",
+                            "key": "panelPANE-335837D7BA76D84E",
+                            "title": "Executors",
+                            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme6\"}}",
+                            "keepVisualSettingsConsistentWithParent": true,
+                            "panelType": "SumoSearchPanel",
+                            "queries": [
+                                {
+                                    "queryString": "_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"updated\"\n| json \"numberOfExecutors\", \"nodeName\", \"nodeLabel\", \"numberOfFreeExecutors\", \"eventTime\" as Total_Executors, NodeName, NodeLabel, Free_Executors, Event_Time nodrop\n| _sourceHost as Master\n| where NodeName matches \"{{NodeName}}\" and NodeLabel matches \"{{NodeLabel}}\" and Master matches \"{{Master}}\"\n| concat(Master, \"-\",NodeName) as NodeName\n| Total_Executors - Free_Executors as Busy_Executors\n| first(Total_Executors) as Total_Executors, first(Free_Executors) as Free_Executors, first(Busy_Executors) as Busy_Executors by NodeName\n| where Busy_Executors >= 0\n| where ![subquery:_sourceCategory=${sourceCategory} Periodic_Update \"nodeStatus\":\"removed\"\n| json \"eventTime\", \"nodeName\", \"numberOfExecutors\" as Time, NodeName, ExecutorsCount nodrop\n| _sourceHost as Master\n| count as Count by NodeName, Master\n| concat(Master, \"-\",NodeName) as NodeName\n| compose NodeName]\n| NodeName as %\"Node Name\"\n| avg(Free_Executors) as %\"Free Executors\", avg(Busy_Executors) as %\"Busy Executors\" by %\"Node Name\"\n| fields %\"Node Name\", %\"Free Executors\", %\"Busy Executors\"",
                                     "queryType": "Logs",
                                     "queryKey": "A",
                                     "metricsQueryMode": null,
@@ -3307,13 +3309,13 @@
                     ],
                     "variables": [
                         {
-                            "id": "769A05DAEA2C5184",
+                            "id": "BEE19C8AD09C73E2",
                             "name": "Master",
                             "displayName": null,
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"nodeName\", \"nodeLabel\" as NodeName,NodeLabel",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"nodeName\", \"nodeLabel\" as NodeName,NodeLabel",
                                 "field": "Master"
                             },
                             "allowMultiSelect": false,
@@ -3321,13 +3323,13 @@
                             "hideFromUI": false
                         },
                         {
-                            "id": "5E82D5E31E90043B",
+                            "id": "0707EB17DB3DADEB",
                             "name": "NodeName",
                             "displayName": null,
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"nodeName\", \"nodeLabel\" as NodeName,NodeLabel",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"nodeName\", \"nodeLabel\" as NodeName,NodeLabel",
                                 "field": "NodeName"
                             },
                             "allowMultiSelect": false,
@@ -3335,13 +3337,13 @@
                             "hideFromUI": false
                         },
                         {
-                            "id": "776A1CF551F75328",
+                            "id": "C27681238DCBF134",
                             "name": "NodeLabel",
                             "displayName": null,
                             "defaultValue": "*",
                             "sourceDefinition": {
                                 "variableSourceType": "LogQueryVariableSourceDefinition",
-                                "query": "_sourceCategory =  ${sourceCategory}\n| _sourceHost as Master\n| json \"nodeName\", \"nodeLabel\" as NodeName,NodeLabel",
+                                "query": "_sourceCategory=${sourceCategory}\n| _sourceHost as Master\n| json \"nodeName\", \"nodeLabel\" as NodeName,NodeLabel",
                                 "field": "NodeLabel"
                             },
                             "allowMultiSelect": false,
