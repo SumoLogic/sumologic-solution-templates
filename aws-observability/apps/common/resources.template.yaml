@@ -79,9 +79,11 @@ Parameters:
     Description: "Provide a Cloud Watch Metrics Source Name"
     Default: ""
   CloudWatchMetricsNameSpaces:
-    Default: ""
-    Description: "Provide Comma delimited list of the namespaces to collect."
-    Type: CommaDelimitedList
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
+    Description: "Provide Comma delimited list of the namespaces. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB."
+    Type: String
+    AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB)\\s*(,|$))+"
+    ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
   ScanInterval:
     Default: 300000
     Description: "Provide the scan interval to fetch metrics into Sumo Logic."
@@ -333,7 +335,7 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.6.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.7.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -341,7 +343,7 @@ Resources:
           - LambdaRole
           - Arn
 
-  EnterpriseCheck:
+  AccountCheck:
     Type: Custom::EnterpriseOrTrialAccountCheck
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -577,26 +579,119 @@ Resources:
       Timeout: "3"
       Count: 0
 
-  SumoLogicCloudwatchMetricsSource:
-    Type: Custom::AWSSource
+  LambdaToDecideCWMetricsSources:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import logging
+          import os
+          import cfnresponse
+
+          LOGGER = logging.getLogger()
+          LOGGER.setLevel(logging.INFO)
+          # Update the Default value whenever CF starts supporting More Namespaces
+          default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS",
+                     "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB"]
+
+
+          def lambda_handler(event, context):
+              unique_namespaces = set(["AWS/AutoScaling"])
+              response_value = {}
+              for value in default:
+                  response_value[value.split("/")[1]] = 'No'
+
+              namespaces = os.environ['CloudWatchMetricsNameSpaces']
+              LOGGER.info('Inside the Handler with namespaces as {}'.format(namespaces))
+              if namespaces:
+                  namespace_list = namespaces.split(",")
+                  for namespace in namespace_list:
+                      unique_namespaces.add(namespace.replace(" ", ""))
+                      response_value[namespace.split("/")[1]] = "Yes"
+
+              response_value["namespaces"] = ", ".join(unique_namespaces)
+              LOGGER.info("Response is {}".format(response_value))
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response_value, "NamespaceSplitting")
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt "LambdaRole.Arn"
+      Runtime: python3.7
+      Timeout: 60
+      Environment:
+        Variables:
+          CloudWatchMetricsNameSpaces: !Ref CloudWatchMetricsNameSpaces
+          ScanInterval: !Ref ScanInterval
+
+  Primerinvoke:
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt LambdaToDecideCWMetricsSources.Arn
+      CloudWatchMetricsNameSpaces: !Ref CloudWatchMetricsNameSpaces
+      ScanInterval: !Ref ScanInterval
+
+  # Each Stack can create up to 5 Metrics sources. To support more namespaces keep on adding more nested stacks.
+  # This is done in order to limit number of API calls and handle API limit exceeded exception from Sumo Logic.
+  CloudWatchMetricsFirstStack:
+    Type: AWS::CloudFormation::Stack
     Condition: install_cloud_watch_metric_source
     DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
     Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
-      Region: !Ref "AWS::Region"
-      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SourceType: AwsCloudWatch
-      Namespaces: !Ref CloudWatchMetricsNameSpaces
-      SourceName: !Ref CloudWatchMetricsSourceName
-      ScanInterval: !Ref ScanInterval
-      SourceCategory: "aws/observability/cloudwatch/metrics"
-      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
-      SumoAccessID: !Ref SumoLogicAccessID
-      SumoAccessKey: !Ref SumoLogicAccessKey
-      SumoDeployment: !Ref SumoLogicDeployment
-      RoleArn: !GetAtt SumoLogicSourceRole.Arn
-      Fields:
-        account: !Ref AccountAlias
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      Parameters:
+        SumoLogicDeployment: !Ref SumoLogicDeployment
+        SumoLogicAccessID: !Ref SumoLogicAccessID
+        SumoLogicAccessKey: !Ref SumoLogicAccessKey
+        RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+        AccountAlias: !Ref AccountAlias
+        SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+        LambdaARN: !GetAtt LambdaHelper.Arn
+        SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
+        CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
+        CreateFirstMetricsSource: !GetAtt Primerinvoke.ApplicationELB
+        FirstMetricsSourceNamespace: "ApplicationELB"
+        CreateSecondMetricsSource: !GetAtt Primerinvoke.ApiGateway
+        SecondMetricsSourceNamespace: "ApiGateway"
+        CreateThirdMetricsSource: !GetAtt Primerinvoke.DynamoDB
+        ThirdMetricsSourceNamespace: "DynamoDB"
+        CreateFourthMetricsSource: !GetAtt Primerinvoke.Lambda
+        FourthMetricsSourceNamespace: "Lambda"
+        CreateFifthMetricsSource: !GetAtt Primerinvoke.RDS
+        FifthMetricsSourceNamespace: "RDS"
+
+  CloudWatchMetricsSecondStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: install_cloud_watch_metric_source
+    DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      Parameters:
+        SumoLogicDeployment: !Ref SumoLogicDeployment
+        SumoLogicAccessID: !Ref SumoLogicAccessID
+        SumoLogicAccessKey: !Ref SumoLogicAccessKey
+        RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+        AccountAlias: !Ref AccountAlias
+        SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+        LambdaARN: !GetAtt LambdaHelper.Arn
+        SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
+        CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
+        CreateFirstMetricsSource: !GetAtt Primerinvoke.ECS
+        FirstMetricsSourceNamespace: "ECS"
+        CreateSecondMetricsSource: !GetAtt Primerinvoke.ElastiCache
+        SecondMetricsSourceNamespace: "ElastiCache"
+        CreateThirdMetricsSource: !GetAtt Primerinvoke.ELB
+        ThirdMetricsSourceNamespace: "ELB"
+        CreateFourthMetricsSource: !GetAtt Primerinvoke.NetworkELB
+        FourthMetricsSourceNamespace: "NetworkELB"
+        CreateFifthMetricsSource: "No"
 
   ############# START - RESOURCES FOR ALB SOURCE #################
   ALBSourceWaitCondition:
@@ -822,4 +917,10 @@ Outputs:
     Value: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
   EnterpriseCheck:
     Description: "Check If Account is Enterprise or Not"
-    Value: !GetAtt EnterpriseCheck.is_enterprise
+    Value: !GetAtt AccountCheck.is_enterprise
+  PaidAccountCheck:
+    Description: "Check If Account is Paid or Not"
+    Value: !GetAtt AccountCheck.is_paid
+  Namespaces:
+    Description: "Comma Delimited String of CloudWatch Metrics Namespaces for Inventory Source."
+    Value: !GetAtt Primerinvoke.namespaces

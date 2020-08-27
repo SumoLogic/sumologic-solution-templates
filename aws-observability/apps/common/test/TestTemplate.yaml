@@ -5,8 +5,6 @@ Global:
   ParallelTestsRun: 5
   GlobalParameters:
     SumoLogicDeployment: us1
-    SumoLogicAccessID: '${ADMIN_ROLE_ACCESS_ID}'
-    SumoLogicAccessKey: '${ADMIN_ROLE_ACCESS_KEY}'
     SumoLogicOrganizationId: '${US1_ORG_ID}'
     RemoveSumoLogicResourcesOnDeleteStack: 'true'
     AccountAlias: 'testenv'
@@ -17,18 +15,21 @@ Global:
     CreateCloudTrailLogSource: 'No'
     CreateCloudTrailBucket: 'No'
     CreateCloudWatchLogSource: 'No'
-    CloudWatchMetricsNameSpaces: 'AWS/RDS'
 Tests:
   - TestName: installall
     Regions:
       - ap-south-1
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_1}'
+        SumoLogicAccessKey: '${ACCESS_KEY_1}'
+        AccountAlias: 'test1env'
         CollectorName: 'Sourabh Collector Install All'
         CreateMetaDataSource: 'Yes'
         MetaDataSourceName: 'Sourabh MetaData Source'
         CreateCloudWatchMetricsSource: 'Yes'
         CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
+        CloudWatchMetricsNameSpaces: 'AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB'
         CreateALBLogSource: 'Yes'
         CreateALBS3Bucket: 'Yes'
         ALBS3LogsBucketName: 'sumologiclambdahelper-sp-south-1'
@@ -47,7 +48,7 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CommonBucketSNSTopic
             - CommonS3Bucket
             - CommonBucketPolicy
@@ -58,7 +59,19 @@ Tests:
             - SumoLogicHostedCollector
             - SumoLogicMetaDataSource
             - SumoLogicCloudwatchMetricsSourceWaitCondition
-            - SumoLogicCloudwatchMetricsSource
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
+            - CloudWatchMetricsFirstStack
+            - CloudWatchMetricsFirstStack.FirstCloudwatchMetricsSource
+            - CloudWatchMetricsFirstStack.SecondCloudwatchMetricsSource
+            - CloudWatchMetricsFirstStack.ThirdCloudwatchMetricsSource
+            - CloudWatchMetricsFirstStack.FourthCloudwatchMetricsSource
+            - CloudWatchMetricsFirstStack.FifthCloudwatchMetricsSource
+            - CloudWatchMetricsSecondStack
+            - CloudWatchMetricsSecondStack.FirstCloudwatchMetricsSource
+            - CloudWatchMetricsSecondStack.SecondCloudwatchMetricsSource
+            - CloudWatchMetricsSecondStack.ThirdCloudwatchMetricsSource
+            - CloudWatchMetricsSecondStack.FourthCloudwatchMetricsSource
             - ALBSourceWaitCondition
             - ALBSource
             - ALBSNSSubscription
@@ -85,6 +98,8 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
             - BucketName
             - CloudWatchLambdaARN
             - CloudWatchEventFunction.SumoCWLogsLambdaArn
@@ -93,6 +108,8 @@ Tests:
       - us-east-1
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_2}'
+        SumoLogicAccessKey: '${ACCESS_KEY_2}'
         CollectorName: 'Sourabh Collector Install MetaData'
         CreateMetaDataSource: 'Yes'
         MetaDataSourceName: 'Sourabh MetaData Source'
@@ -104,12 +121,14 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CreateSumoLogicAWSExplorerView
             - SumoLogicSourceRole
             - SumoLogicHostedCollector
             - SumoLogicMetaDataSource
             - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
             - ALBSourceWaitCondition
             - CloudTrailSourceWaitCondition
             - CloudWatchHTTPSourceWaitCondition
@@ -119,14 +138,19 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
   - TestName: installcwmetrics
     Regions:
       - us-east-2
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_3}'
+        SumoLogicAccessKey: '${ACCESS_KEY_3}'
         CollectorName: 'Sourabh Collector Install All'
         CreateCloudWatchMetricsSource: 'Yes'
         CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
+        CloudWatchMetricsNameSpaces: 'AWS/ApplicationELB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ELB, AWS/NetworkELB'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -135,12 +159,21 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CreateSumoLogicAWSExplorerView
             - SumoLogicSourceRole
             - SumoLogicHostedCollector
             - SumoLogicCloudwatchMetricsSourceWaitCondition
-            - SumoLogicCloudwatchMetricsSource
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
+            - CloudWatchMetricsFirstStack
+            - CloudWatchMetricsFirstStack.FirstCloudwatchMetricsSource
+            - CloudWatchMetricsFirstStack.FourthCloudwatchMetricsSource
+            - CloudWatchMetricsFirstStack.FifthCloudwatchMetricsSource
+            - CloudWatchMetricsSecondStack
+            - CloudWatchMetricsSecondStack.FirstCloudwatchMetricsSource
+            - CloudWatchMetricsSecondStack.ThirdCloudwatchMetricsSource
+            - CloudWatchMetricsSecondStack.FourthCloudwatchMetricsSource
             - ALBSourceWaitCondition
             - CloudTrailSourceWaitCondition
             - CloudWatchHTTPSourceWaitCondition
@@ -150,11 +183,15 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
   - TestName: installalbsourcewithbucket
     Regions:
       - ap-south-1
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_4}'
+        SumoLogicAccessKey: '${ACCESS_KEY_4}'
         CollectorName: 'Sourabh Collector Install All'
         CreateALBLogSource: 'Yes'
         CreateALBS3Bucket: 'Yes'
@@ -168,7 +205,7 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CommonBucketSNSTopic
             - CommonS3Bucket
             - CommonBucketPolicy
@@ -177,6 +214,8 @@ Tests:
             - SumoLogicSourceRole
             - SumoLogicHostedCollector
             - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
             - ALBSourceWaitCondition
             - ALBSource
             - ALBSNSSubscription
@@ -188,13 +227,17 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
             - BucketName
   - TestName: installctwithbucket
     Regions:
       - us-east-1
     Parameters:
       Values:
-        CollectorName: 'Sourabh Collector Install All'
+        SumoLogicAccessID: '${ACCESS_ID_5}'
+        SumoLogicAccessKey: '${ACCESS_KEY_5}'
+        CollectorName: 'Sourabh Collector Install CT'
         CreateCloudTrailLogSource: 'Yes'
         CreateCloudTrailBucket: 'Yes'
         CloudTrailLogsBucketName: 'sumologiclambdahelper-us-east-1'
@@ -207,7 +250,7 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CommonBucketSNSTopic
             - CommonS3Bucket
             - CommonBucketPolicy
@@ -217,6 +260,8 @@ Tests:
             - SumoLogicSourceRole
             - SumoLogicHostedCollector
             - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
             - ALBSourceWaitCondition
             - CloudTrailSourceWaitCondition
             - CloudTrailSource
@@ -228,12 +273,16 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
             - BucketName
   - TestName: installcwlogs
     Regions:
       - us-east-2
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_1}'
+        SumoLogicAccessKey: '${ACCESS_KEY_1}'
         CollectorName: 'Sourabh Collector Install All'
         CreateCloudWatchLogSource: 'Yes'
         CloudWatchLogsSourceName: 'Sourabh CW Logs Source'
@@ -245,10 +294,12 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CreateSumoLogicAWSExplorerView
             - SumoLogicHostedCollector
             - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
             - ALBSourceWaitCondition
             - CloudTrailSourceWaitCondition
             - CloudWatchHTTPSourceWaitCondition
@@ -271,6 +322,8 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
             - CloudWatchLambdaARN
             - CloudWatchEventFunction.SumoCWLogsLambdaArn
   - TestName: installalbexisctnew
@@ -278,6 +331,8 @@ Tests:
       - ap-south-1
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_2}'
+        SumoLogicAccessKey: '${ACCESS_KEY_2}'
         CollectorName: 'Sourabh Collector Install All'
         CreateALBLogSource: 'Yes'
         CreateALBS3Bucket: 'No'
@@ -295,7 +350,7 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CommonBucketSNSTopic
             - CommonS3Bucket
             - CommonBucketPolicy
@@ -305,6 +360,8 @@ Tests:
             - SumoLogicSourceRole
             - SumoLogicHostedCollector
             - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
             - ALBSourceWaitCondition
             - ALBSource
             - ALBSNSTopic
@@ -321,11 +378,15 @@ Tests:
             - LambdaRoleARN
             - EnterpriseCheck
             - BucketName
+            - PaidAccountCheck
+            - Namespaces
   - TestName: installalbnewctexis
     Regions:
       - us-east-1
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_3}'
+        SumoLogicAccessKey: '${ACCESS_KEY_3}'
         CollectorName: 'Sourabh Collector Install All'
         CreateALBLogSource: 'Yes'
         CreateALBS3Bucket: 'Yes'
@@ -343,7 +404,7 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CommonBucketSNSTopic
             - CommonS3Bucket
             - CommonBucketPolicy
@@ -352,6 +413,8 @@ Tests:
             - SumoLogicSourceRole
             - SumoLogicHostedCollector
             - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
             - ALBSourceWaitCondition
             - ALBSource
             - ALBSNSSubscription
@@ -367,12 +430,16 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
             - BucketName
   - TestName: installalbctexis
     Regions:
       - us-east-2
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_4}'
+        SumoLogicAccessKey: '${ACCESS_KEY_4}'
         CollectorName: 'Sourabh Collector Install All'
         CreateALBLogSource: 'Yes'
         CreateALBS3Bucket: 'No'
@@ -390,11 +457,13 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CreateSumoLogicAWSExplorerView
             - SumoLogicSourceRole
             - SumoLogicHostedCollector
             - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
             - ALBSourceWaitCondition
             - ALBSource
             - ALBSNSTopic
@@ -412,11 +481,15 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
   - TestName: installnothing
     Regions:
       - ap-south-1
     Parameters:
       Values:
+        SumoLogicAccessID: '${ACCESS_ID_5}'
+        SumoLogicAccessKey: '${ACCESS_KEY_5}'
         CollectorName: 'Sourabh Collector Install All'
     Skip: false
     Assertions:
@@ -426,9 +499,11 @@ Tests:
             - WaitHandle
             - LambdaRole
             - LambdaHelper
-            - EnterpriseCheck
+            - AccountCheck
             - CreateSumoLogicAWSExplorerView
             - SumoLogicCloudwatchMetricsSourceWaitCondition
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
             - ALBSourceWaitCondition
             - CloudTrailSourceWaitCondition
             - CloudWatchHTTPSourceWaitCondition
@@ -438,3 +513,5 @@ Tests:
             - LambdaHelperARN
             - LambdaRoleARN
             - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
