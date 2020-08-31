@@ -1,0 +1,281 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets."
+
+Globals:
+  Function:
+    Timeout: 300
+    MemorySize: 128
+
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: "1. Sumo Logic Access Configuration (Required)"
+        Parameters:
+          - Section1aSumoLogicDeployment
+          - Section1bKmsKeyID
+          - Section1cSumoLogicOrganizationId
+
+      - Label:
+          default: "2. Regions to Monitor"
+        Parameters:
+          - Section2aRegions
+
+    ParameterLabels:
+      Section1aSumoLogicDeployment:
+        default: "Sumo Logic Deployment Name"
+      Section1bKmsKeyID:
+        default: "AWS Key Management Service Key ID"
+      Section1cSumoLogicOrganizationId:
+        default: "Sumo Logic Organization Id"
+
+      Section2aRegions:
+        default: "List of AWS Regions"
+
+Parameters:
+  Section1aSumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  Section1bKmsKeyID:
+    Type: String
+    Description: "Provide the AWS KMS (Key Management Service) Key ID used to Encrypt the Sumo Logic Access ID and Access Key. Make sure the name of the Parameters are Sumo-Logic-Access-Id and Sumo-Logic-Access-Key."
+    AllowedPattern: ".+"
+    ConstraintDescription: "AWS KMS Key ID can not be Empty."
+  Section1cSumoLogicOrganizationId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+
+  Section2aRegions:
+    Description: "Provide a list of Comma Separated AWS Regions where you would like to deploy Sumo Logic AWS Observability Solution when a new AWS account is created using Control Tower Account Factory settings. Default value is :- us-east-1, us-east-2, us-west-1, us-west-2, af-south-1, ap-east-1, ap-south-1, ap-northeast-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, eu-south-1, eu-north-1, me-south-1, sa-east-1"
+    Type: String
+    ConstraintDescription: "Regions list cannot be empty."
+    AllowedPattern: ".+"
+    Default: "us-east-1, us-east-2, us-west-1, us-west-2, af-south-1, ap-east-1, ap-south-1, ap-northeast-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, eu-south-1, eu-north-1, me-south-1, sa-east-1"
+
+Mappings:
+  AWSControlTower:
+    ExecutionRole:
+      Name: "AWSControlTowerExecution"
+
+Resources:
+
+  LambdaRoleToCaptureEvents:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+            Condition: {}
+      Path: /
+      Policies:
+        - PolicyName: inline-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'cloudformation:CreateStackInstances'
+                  - 'cloudformation:CreateStackSet'
+                  - 'cloudformation:UpdateStackInstances'
+                Resource: !Join [':',['arn:aws:cloudformation:*', !Ref 'AWS::AccountId', 'stackset/*:*']]
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                Resource: "*"
+        - PolicyName: State-Machine-Lambda-Policy-IAM
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:GetRole
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
+        - PolicyName: Kms-Decrypt-Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${Section1bKmsKeyID}
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/Sumo-Logic-Access-Key
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/Sumo-Logic-Access-Id
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  TriggerCustomizationsOnLifeCycleEvent:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import boto3
+          import os
+          import re
+          import cfnresponse
+
+          stackSetName = 'SUMO-LOGIC-AWS-OBSERVABILITY'
+          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/sumologic_observability.master.template.yaml"
+          ALL = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+
+          def lambda_handler(event, context):
+              ssm = boto3.client('ssm')
+              try:
+                  print('Event is {}'.format(event))
+                  a_k_param = ssm.get_parameter(Name='Sumo-Logic-Access-Key', WithDecryption=True)
+                  a_key = a_k_param['Parameter']['Value']
+                  a_id_param = ssm.get_parameter(Name='Sumo-Logic-Access-Id', WithDecryption=True)
+                  a_id = a_id_param['Parameter']['Value']
+              except (ssm.exceptions.InvalidKeyId, ssm.exceptions.ParameterNotFound, Exception):
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {"Error": "Make Sure AWS KMS Key ID, Parameter with Required names present in Systems Manager."}, "Primerinvoke")
+                  return
+              if "LogicalResourceId" in event and 'Primerinvoke' in event['LogicalResourceId']:
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, "Primerinvoke")
+                  return
+              else:
+                  details = event['detail']
+                  event = details['eventName']
+                  region = details['awsRegion']
+                  if event == 'CreateManagedAccount':
+                      info = details['serviceEventDetails']['createManagedAccountStatus']
+                  elif event == 'UpdateManagedAccount':
+                      info = details['serviceEventDetails']['updateManagedAccountStatus']
+
+                  if info['state'] == 'SUCCEEDED':
+                      acc_name = info['account']['accountName']
+                      acc_id = info['account']['accountId']
+                      acc_name = re.sub('[^a-z0-9]+', '', acc_name.lower())
+                      params = [{"ParameterKey": "Section1aSumoLogicDeployment", "ParameterValue": os.environ['Deployment']},
+                                {"ParameterKey": "Section1bSumoLogicAccessID", "ParameterValue": a_id},
+                                {"ParameterKey": "Section1cSumoLogicAccessKey", "ParameterValue": a_key},
+                                {"ParameterKey": "Section1dSumoLogicOrganizationId", "ParameterValue": os.environ['OrgId']},
+                                {"ParameterKey": "Section3aInstallObservabilityApps", "ParameterValue": "No"},
+                                {"ParameterKey": "Section6aCreateCloudTrailLogSource", "ParameterValue": "No"},
+                                {"ParameterKey": "Section2aAccountAlias", "ParameterValue": acc_name[0:30]}]
+
+                      regions = [x.strip() for x in os.environ['Regions'].split(",")]
+                      cf_client = boto3.client('cloudformation', region)
+                      if event == 'CreateManagedAccount':
+                          try:
+                              description = "The Stack Sets sets up the AWS Observability CloudFormation template on the New AWS accounts and AWS Regions."
+                              cf_client.create_stack_set(StackSetName=stackSetName, Description=description,
+                                                         TemplateURL=templateURL, Capabilities=ALL, Parameters=params,
+                                                         AdministrationRoleARN=os.environ['AdminRole'],
+                                                         ExecutionRoleName=os.environ['ExecutionRole'])
+                              print('Stack Set Created Name {} Region {}'.format(stackSetName, region))
+                              cf_client.create_stack_instances(StackSetName=stackSetName, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
+                          except cf_client.exceptions.NameAlreadyExistsException:
+                              cf_client.create_stack_instances(StackSetName=stackSetName, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
+                      elif event == 'UpdateManagedAccount':
+                          cf_client.update_stack_instances(StackSetName=stackSetName, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
+                      print('Stack Instance updated to Stack Set parameters')
+                  else:
+                      print('Unsuccessful Event Received {}'.format(event))
+                      return False
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt "LambdaRoleToCaptureEvents.Arn"
+      Runtime: python3.7
+      Timeout: 60
+      Environment:
+        Variables:
+          Deployment: !Ref Section1aSumoLogicDeployment
+          OrgId: !Ref Section1cSumoLogicOrganizationId
+          AdminRole: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
+          ExecutionRole: !FindInMap [AWSControlTower, ExecutionRole, Name]
+          Regions: !Ref Section2aRegions
+
+  Primerinvoke:
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt TriggerCustomizationsOnLifeCycleEvent.Arn
+      Section1bKmsKeyID: !Ref Section1bKmsKeyID
+
+  CreateManagedAccountPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt "TriggerCustomizationsOnLifeCycleEvent.Arn"
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt "CreateManagedAccountEventRule.Arn"
+
+  CreateManagedAccountEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Capture Control Tower LifeCycle Events and Trigger an Action
+      EventPattern:
+        detail:
+          eventName:
+            - CreateManagedAccount
+          eventSource:
+            - controltower.amazonaws.com
+        detail-type:
+          - AWS Service Event via CloudTrail
+        source:
+          - aws.controltower
+      Name: AWSObservabilityCreateAccountEvent
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt "TriggerCustomizationsOnLifeCycleEvent.Arn"
+          Id: IDCaptureControlTowerLifeCycleEvents
+
+  UpdateManagedAccountPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt "TriggerCustomizationsOnLifeCycleEvent.Arn"
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt "UpdateManagedAccountEventRule.Arn"
+
+  UpdateManagedAccountEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Capture Control Tower LifeCycle Events and Trigger an Action
+      EventPattern:
+        detail:
+          eventName:
+            - UpdateManagedAccount
+          eventSource:
+            - controltower.amazonaws.com
+        detail-type:
+          - AWS Service Event via CloudTrail
+        source:
+          - aws.controltower
+      Name: AWSObservabilityUpdateAccountEvent
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt "TriggerCustomizationsOnLifeCycleEvent.Arn"
+          Id: IDCaptureControlTowerLifeCycleEvents
+
+Outputs:
+
+  TriggerCustomizationsOnLifeCycleEvent:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt TriggerCustomizationsOnLifeCycleEvent.Arn

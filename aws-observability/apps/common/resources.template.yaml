@@ -44,8 +44,8 @@ Parameters:
   AccountAlias:
     Type: String
     Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-zA-Z0-9]+"
-    ConstraintDescription: "Alias must only contain uppercase, lowercase letters, number and length less than or equal to 30 characters."
+    AllowedPattern: "[a-z0-9]+"
+    ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
     MaxLength: 30
 
   CollectorName:
@@ -79,13 +79,16 @@ Parameters:
     Description: "Provide a Cloud Watch Metrics Source Name"
     Default: ""
   CloudWatchMetricsNameSpaces:
-    Default: ""
-    Description: "Provide Comma delimited list of the namespaces to collect."
-    Type: CommaDelimitedList
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
+    Description: "Provide Comma delimited list of the namespaces. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB."
+    Type: String
+    AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB)\\s*(,|$))+"
+    ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
   ScanInterval:
     Default: 300000
     Description: "Provide the scan interval to fetch metrics into Sumo Logic."
     Type: String
+
   CreateALBLogSource:
     Type: String
     Description: "Choose Yes to create Sumo Logic ALB Log Source with provided bucket Name."
@@ -154,22 +157,6 @@ Parameters:
     Description: "Provide a CloudWatch Logs Source Name"
     Default: ""
 
-  CreateAwsInventorySource:
-    Type: String
-    Description: "Choose Yes to create Sumo Logic Aws Inventory Source. Choose No to skip Source Creation."
-    Default: 'No'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  AwsInventorySourceName:
-    Type: String
-    Description: "Change the Aws Inventory Source name to be created else default name will be used."
-    Default: ""
-  AwsInventoryNamespaces:
-    Default: ""
-    Description: "Provide Comma delimited list of the namespaces to collect. For Eg.- AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS"
-    Type: CommaDelimitedList
-
 Conditions:
   # Sources Conditions
   install_metadata_source: !Equals [!Ref CreateMetaDataSource, 'Yes']
@@ -177,7 +164,6 @@ Conditions:
   install_alb_logs_source: !Equals [!Ref CreateALBLogSource, 'Yes']
   install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
   install_cloudwatch_logs_source: !Equals [!Ref CreateCloudWatchLogSource, 'Yes']
-  install_inventory_source: !Equals [!Ref CreateAwsInventorySource, 'Yes']
 
   install_collector: !Or
     - !Condition install_metadata_source
@@ -185,7 +171,6 @@ Conditions:
     - !Condition install_alb_logs_source
     - !Condition install_cloudtrail_logs_source
     - !Condition install_cloudwatch_logs_source
-    - !Condition install_inventory_source
 
   # Bucket Condition and Trail
   create_alb_bucket: !Equals [!Ref CreateALBS3Bucket, 'Yes']
@@ -350,13 +335,22 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.2.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.7.zip"
       MemorySize: 128
       Timeout: 900
       Role:
         Fn::GetAtt:
           - LambdaRole
           - Arn
+
+  AccountCheck:
+    Type: Custom::EnterpriseOrTrialAccountCheck
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
 
   ############# START - RESOURCES FOR COMMON BUCKET #################
 
@@ -437,6 +431,23 @@ Resources:
             Action: s3:PutObject
             Resource:
               - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+          - Sid: AWSAlbLogDeliveryAclCheck
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+          - Sid: AWSAlbLogDeliveryWrite
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action: s3:PutObject
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
 
   CommonSNSpolicy:
     Condition: create_target_s3_bucket
@@ -568,26 +579,119 @@ Resources:
       Timeout: "3"
       Count: 0
 
-  SumoLogicCloudwatchMetricsSource:
-    Type: Custom::AWSSource
+  LambdaToDecideCWMetricsSources:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import logging
+          import os
+          import cfnresponse
+
+          LOGGER = logging.getLogger()
+          LOGGER.setLevel(logging.INFO)
+          # Update the Default value whenever CF starts supporting More Namespaces
+          default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS",
+                     "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB"]
+
+
+          def lambda_handler(event, context):
+              unique_namespaces = set(["AWS/AutoScaling"])
+              response_value = {}
+              for value in default:
+                  response_value[value.split("/")[1]] = 'No'
+
+              namespaces = os.environ['CloudWatchMetricsNameSpaces']
+              LOGGER.info('Inside the Handler with namespaces as {}'.format(namespaces))
+              if namespaces:
+                  namespace_list = namespaces.split(",")
+                  for namespace in namespace_list:
+                      unique_namespaces.add(namespace.replace(" ", ""))
+                      response_value[namespace.split("/")[1]] = "Yes"
+
+              response_value["namespaces"] = ", ".join(unique_namespaces)
+              LOGGER.info("Response is {}".format(response_value))
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response_value, "NamespaceSplitting")
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt "LambdaRole.Arn"
+      Runtime: python3.7
+      Timeout: 60
+      Environment:
+        Variables:
+          CloudWatchMetricsNameSpaces: !Ref CloudWatchMetricsNameSpaces
+          ScanInterval: !Ref ScanInterval
+
+  Primerinvoke:
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt LambdaToDecideCWMetricsSources.Arn
+      CloudWatchMetricsNameSpaces: !Ref CloudWatchMetricsNameSpaces
+      ScanInterval: !Ref ScanInterval
+
+  # Each Stack can create up to 5 Metrics sources. To support more namespaces keep on adding more nested stacks.
+  # This is done in order to limit number of API calls and handle API limit exceeded exception from Sumo Logic.
+  CloudWatchMetricsFirstStack:
+    Type: AWS::CloudFormation::Stack
     Condition: install_cloud_watch_metric_source
     DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
     Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
-      Region: !Ref "AWS::Region"
-      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SourceType: AwsCloudWatch
-      Namespaces: !Ref CloudWatchMetricsNameSpaces
-      SourceName: !Ref CloudWatchMetricsSourceName
-      ScanInterval: !Ref ScanInterval
-      SourceCategory: "aws/observability/cloudwatch/metrics"
-      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
-      SumoAccessID: !Ref SumoLogicAccessID
-      SumoAccessKey: !Ref SumoLogicAccessKey
-      SumoDeployment: !Ref SumoLogicDeployment
-      RoleArn: !GetAtt SumoLogicSourceRole.Arn
-      Fields:
-        account: !Ref AccountAlias
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      Parameters:
+        SumoLogicDeployment: !Ref SumoLogicDeployment
+        SumoLogicAccessID: !Ref SumoLogicAccessID
+        SumoLogicAccessKey: !Ref SumoLogicAccessKey
+        RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+        AccountAlias: !Ref AccountAlias
+        SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+        LambdaARN: !GetAtt LambdaHelper.Arn
+        SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
+        CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
+        CreateFirstMetricsSource: !GetAtt Primerinvoke.ApplicationELB
+        FirstMetricsSourceNamespace: "ApplicationELB"
+        CreateSecondMetricsSource: !GetAtt Primerinvoke.ApiGateway
+        SecondMetricsSourceNamespace: "ApiGateway"
+        CreateThirdMetricsSource: !GetAtt Primerinvoke.DynamoDB
+        ThirdMetricsSourceNamespace: "DynamoDB"
+        CreateFourthMetricsSource: !GetAtt Primerinvoke.Lambda
+        FourthMetricsSourceNamespace: "Lambda"
+        CreateFifthMetricsSource: !GetAtt Primerinvoke.RDS
+        FifthMetricsSourceNamespace: "RDS"
+
+  CloudWatchMetricsSecondStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: install_cloud_watch_metric_source
+    DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      Parameters:
+        SumoLogicDeployment: !Ref SumoLogicDeployment
+        SumoLogicAccessID: !Ref SumoLogicAccessID
+        SumoLogicAccessKey: !Ref SumoLogicAccessKey
+        RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+        AccountAlias: !Ref AccountAlias
+        SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+        LambdaARN: !GetAtt LambdaHelper.Arn
+        SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
+        CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
+        CreateFirstMetricsSource: !GetAtt Primerinvoke.ECS
+        FirstMetricsSourceNamespace: "ECS"
+        CreateSecondMetricsSource: !GetAtt Primerinvoke.ElastiCache
+        SecondMetricsSourceNamespace: "ElastiCache"
+        CreateThirdMetricsSource: !GetAtt Primerinvoke.ELB
+        ThirdMetricsSourceNamespace: "ELB"
+        CreateFourthMetricsSource: !GetAtt Primerinvoke.NetworkELB
+        FourthMetricsSourceNamespace: "NetworkELB"
+        CreateFifthMetricsSource: "No"
 
   ############# START - RESOURCES FOR ALB SOURCE #################
   ALBSourceWaitCondition:
@@ -796,101 +900,6 @@ Resources:
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
 
-  ############# START - RESOURCES FOR INVENTORY SOURCE #################
-  InventorySourceWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: CloudWatchHTTPSourceWaitCondition
-    Properties:
-      Handle: !Ref WaitHandle
-      Timeout: "11"
-      Count: 0
-
-  InventoryRole:
-    Type: AWS::IAM::Role
-    Condition: install_inventory_source
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: arn:aws:iam::926226587429:root
-            Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Sub "${SumoLogicDeployment}:${SumoLogicOrganizationId}"
-      Path: "/"
-      Policies:
-        - PolicyName: SumoInventoryPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - apigateway:GET
-                  - autoscaling:Describe*
-                  - cloudfront:GetDistributionConfig
-                  - cloudfront:ListDistributions
-                  - cloudtrail:DescribeTrails
-                  - cloudtrail:GetTrailStatus
-                  - cloudwatch:Describe*
-                  - cloudwatch:Get*
-                  - cloudwatch:List*
-                  - codedeploy:List*
-                  - codedeploy:BatchGet*
-                  - dynamodb:Describe*
-                  - dynamodb:List*
-                  - ec2:Describe*
-                  - ecs:Describe*
-                  - ecs:List*
-                  - elasticache:Describe*
-                  - elasticache:List*
-                  - elasticfilesystem:Describe*
-                  - elasticloadbalancing:Describe*
-                  - elasticmapreduce:Describe*
-                  - elasticmapreduce:List*
-                  - es:Describe*
-                  - es:List*
-                  - health:Describe*
-                  - kinesis:Describe*
-                  - kinesis:List*
-                  - lambda:List*
-                  - mq:Describe*
-                  - mq:List*
-                  - rds:Describe*
-                  - rds:List*
-                  - redshift:Describe*
-                  - route53:List*
-                  - sqs:ListQueues
-                  - ses:GetSendStatistics
-                  - ses:GetSendQuota
-                  - sns:List*
-                  - tag:GetResources
-                  - tag:GetTagKeys
-                  - tag:GetTagValues
-                  - xray:BatchGetTraces
-                  - xray:Get*
-                  - pi:DescribeDimensionKeys
-                  - pi:GetResourceMetrics
-                Effect: Allow
-                Resource: "*"
-
-  InventorySource:
-    Type: Custom::AWSSource
-    Condition: install_inventory_source
-    DependsOn: InventorySourceWaitCondition
-    Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
-      Region: !Ref "AWS::Region"
-      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SourceType: AwsInventory
-      Namespaces: !Ref AwsInventoryNamespaces
-      SourceName: !Ref AwsInventorySourceName
-      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
-      SumoAccessID: !Ref SumoLogicAccessID
-      SumoAccessKey: !Ref SumoLogicAccessKey
-      SumoDeployment: !Ref SumoLogicDeployment
-      RoleArn: !GetAtt InventoryRole.Arn
-
 Outputs:
   LambdaHelperARN:
     Description: "Sumo Logic Lambda Helper ARN"
@@ -906,3 +915,12 @@ Outputs:
     Description: "Cloud Watch Lambda ARN"
     Condition: install_cloudwatch_logs_source
     Value: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
+  EnterpriseCheck:
+    Description: "Check If Account is Enterprise or Not"
+    Value: !GetAtt AccountCheck.is_enterprise
+  PaidAccountCheck:
+    Description: "Check If Account is Paid or Not"
+    Value: !GetAtt AccountCheck.is_paid
+  Namespaces:
+    Description: "Comma Delimited String of CloudWatch Metrics Namespaces for Inventory Source."
+    Value: !GetAtt Primerinvoke.namespaces
