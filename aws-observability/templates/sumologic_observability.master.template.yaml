@@ -48,12 +48,17 @@ Metadata:
           - Section6dCloudTrailBucketPathExpression
 
       - Label:
-          default: "7. Sumo Logic AWS Lambda CloudWatch Logs"
+          default: "7. Sumo Logic AWS Lambda CloudWatch HTTP Source"
         Parameters:
           - Section7aLambdaCreateCloudWatchLogsSource
           - Section7bLambdaCloudWatchLogsSourceUrl
           - Section7cAutoSubscribeLogGroupsLambdaOptions
           - Section7dAutoSubscribeLambdaLogGroupPattern
+
+      - Label:
+          default: "8. Sumo Logic AWS X-Ray Source"
+        Parameters:
+          - Section8aCreateAwsXraySource
 
     ParameterLabels:
       Section1aSumoLogicDeployment:
@@ -109,6 +114,9 @@ Metadata:
       Section7dAutoSubscribeLambdaLogGroupPattern:
         default: "Regex for Filtering lambda Log Groups"
 
+      Section8aCreateAwsXraySource:
+        default: "Create Sumo Logic AWS X-Ray Source"
+
 Parameters:
   Section1aSumoLogicDeployment:
     Type: String
@@ -151,8 +159,8 @@ Parameters:
   Section2aAccountAlias:
     Type: String
     Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-zA-Z0-9]+"
-    ConstraintDescription: "Alias must only contain uppercase, lowercase letters, number and length less than or equal to 30 characters."
+    AllowedPattern: "[a-z0-9]+"
+    ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
     MaxLength: 30
 
   Section3aInstallObservabilityApps:
@@ -167,9 +175,7 @@ Parameters:
   Section4aCreateMetricsSourcesOptions:
     Type: String
     Description: "CloudWatchMetrics - Creates a Sumo Logic CloudWatch Metrics Source, which collects metrics for multiple namespaces from the region selected.
-                  InventorySource - Creates a Sumo Logic Inventory Source used by Anomaly Explorer.
-                  Both - Installs Both Sumo Logic CloudWatch Metrics and Inventory Source
-                  None - Skips the Installation of both the Sumo Logic Sources"
+                  InventorySource - Creates a Sumo Logic Inventory Source used by Root Cause Explorer."
     Default: 'Both'
     AllowedValues:
       - 'CloudWatchMetrics'
@@ -177,9 +183,11 @@ Parameters:
       - 'Both'
       - 'None'
   Section4bMetricsNameSpaces:
-    Default: "AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling"
-    Description: "Provide Comma delimited list of the namespaces if creating Metrics or Inventory source. Default will be AWS/EC2, AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/EBS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/Redshift, AWS/Kinesis, AWS/AutoScaling."
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
+    Description: "Provide Comma delimited list of the namespaces which will be used for both AWS CLoudWatch Metrics and Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
     Type: String
+    AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB)\\s*(,|$))+"
+    ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
   Section4cCloudWatchExistingSourceAPIUrl:
     Type: String
     Description: "Required when already collecting CloudWatch Metrics. Provide the existing Sumo Logic CloudWatch Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
@@ -268,6 +276,15 @@ Parameters:
     Default: "lambda"
     Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
 
+  Section8aCreateAwsXraySource:
+    Type: String
+    Description: "Yes - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account.
+                  No - If you already have a Sumo Logic AWS X-Ray source configured or skip the source creation."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+
 Conditions:
   # Condition for Metrics Source
   install_cloudwatch_metrics_source: !Or
@@ -276,6 +293,7 @@ Conditions:
   install_inventory_source: !Or
     - !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'InventorySource' ]
     - !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'Both' ]
+  install_xray_source: !Equals [ !Ref Section8aCreateAwsXraySource, 'Yes' ]
 
   # Conditions for Bucket
   create_alb_bucket: !And
@@ -368,6 +386,8 @@ Resources:
   WaitHandle:
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
+  # Create a Lambda and check for Enterprise by using Custom resource. Use the value to create inventory and root cause app.
+
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -383,7 +403,7 @@ Resources:
         SumoLogicOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         AccountAlias: !Ref Section2aAccountAlias
-        CollectorName: "aws-observability-collector"
+        CollectorName: !Sub "aws-observability-${Section2aAccountAlias}"
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: !If [install_cloudwatch_metrics_source, "Yes", "No"]
         CloudWatchMetricsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-metrics-${AWS::Region}"
@@ -401,23 +421,6 @@ Resources:
         CloudTrailLogsSourceName: !Sub "${Section2aAccountAlias}-cloudtrail-logs-${AWS::Region}"
         CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSource
         CloudWatchLogsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-logs-${AWS::Region}"
-        CreateAwsInventorySource: !If [install_inventory_source, "Yes", "No"]
-        AwsInventorySourceName: !Sub "${Section2aAccountAlias}-inventory-${AWS::Region}"
-        AwsInventoryNamespaces: !Ref Section4bMetricsNameSpaces
-
-  sumoOverview:
-    Type: Custom::App
-    Condition: install_overview_dashboards
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Overview App"
-      Version: "BetaV0.1"
-      FolderName: "Sumo Logic AWS Observability Apps "
-      RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
 
   AutoEnableOptions:
     Type: AWS::CloudFormation::Stack
@@ -454,7 +457,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateMetaDataSource: "No"
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
@@ -486,7 +489,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section4cCloudWatchExistingSourceAPIUrl: !Ref Section4cCloudWatchExistingSourceAPIUrl
         Section5aCreateS3Bucket: "No"
@@ -522,7 +525,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
@@ -556,7 +559,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
@@ -590,44 +593,49 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
-  AnamolyWaitHandle:
+  RootCauseWaitHandle:
     DependsOn: sumoApiGatewayMetricsAppStack
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
-  AnamolyWaitCondition:
+  RootCauseWaitCondition:
     Type: "AWS::CloudFormation::WaitCondition"
     Properties:
-      Handle: !Ref AnamolyWaitHandle
+      Handle: !Ref RootCauseWaitHandle
       Timeout: "2"
       Count: 0
 
-  AnamolyAppStack:
+  RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: AnamolyWaitCondition
+    DependsOn: RootCauseWaitCondition
     Properties:
       TemplateURL: !Join
         - ""
         - - "https://"
           - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/anomaly/anomaly.template.yaml"
+          - ".s3.amazonaws.com/sumologic-aws-observability/apps/rootcause/rootcauseexplorer.template.yaml"
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
         Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aInstallApp: !Ref Section3aInstallObservabilityApps
-        Section3aCreateAwsInventorySource: "No"
-        Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
+        Section2bCollectorName: !Sub "aws-observability-${Section2aAccountAlias}"
+        Section3aCreateAwsInventorySource: !If [install_inventory_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
+        Section3bAwsInventorySourceName: !Sub "${Section2aAccountAlias}-inventory-aws-${AWS::Region}"
+        Section3cNamespaces: !GetAtt CreateCommonResources.Outputs.Namespaces
+        Section4aCreateAwsXRaySource: !If [install_xray_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
+        Section4bAwsXRaySourceName: !Sub "${Section2aAccountAlias}-xray-aws-${AWS::Region}"
+        Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
   LambdaWaitHandle:
-    DependsOn: AnamolyAppStack
+    DependsOn: RootCauseAppStack
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
   LambdaWaitCondition:
@@ -654,7 +662,7 @@ Resources:
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aTagExistingAWSResources: "No"
         Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !Ref Section3aInstallObservabilityApps
+        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
@@ -669,16 +677,6 @@ Resources:
     Properties:
       ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
       FieldName: "account"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddEntityField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "entity"
       RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoLogicAccessID
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey

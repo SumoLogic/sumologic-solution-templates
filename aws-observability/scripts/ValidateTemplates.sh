@@ -1,6 +1,6 @@
 #!/bin/sh
 
-declare -a apps=('alb' 'anomaly' 'apigateway' 'autoenable' 'AutoTagAWSResources' 'common' 'dynamodb' 'ec2metrics' 'hostmetricsfields' 'lambda' 'rds' 'master')
+declare -a apps=('alb' 'rootcause' 'apigateway' 'autoenable' 'AutoTagAWSResources' 'common' 'dynamodb' 'ec2metrics' 'hostmetricsfields' 'permissionchecker' 'controltower' 'lambda' 'rds' 'master')
 
 cd ..\/
 

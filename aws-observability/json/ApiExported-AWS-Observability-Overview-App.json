@@ -22,7 +22,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
           "type": "RelativeTimeRangeBoundary",
-          "relativeTime": "-1h"
+          "relativeTime": "-1d"
         },
         "to": null
       },
@@ -230,7 +230,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} metric=Mem_Free region=* entity=* | eval _value / 1073741824 | avg",
+              "queryString": "namespace=AWS/EC2 account={{account}} metric=Mem_Free region=* entity=* | eval _value / 1073741824 | avg",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -272,7 +272,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region=* entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region=* entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -288,12 +288,12 @@
           "id": "F361E48F8E269B40",
           "key": "panelPANE-F361E48F8E269B40",
           "title": "Load Balancer Errors",
-          "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":5,\"color\":\"#75bf00\"},{\"from\":5,\"to\":50,\"color\":\"#f6c851\"},{\"from\":50,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
+          "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":5,\"color\":\"#75bf00\"},{\"from\":6,\"to\":50,\"color\":\"#f6c851\"},{\"from\":51,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApplicationELB (metric=HTTPCode_ELB_4XX_Count or metric=HTTPCode_ELB_5XX_Count) statistic=Sum account={{account}} region=* entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApplicationELB (metric=HTTPCode_ELB_4XX_Count or metric=HTTPCode_ELB_5XX_Count) statistic=Sum account={{account}} region=* entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -398,7 +398,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\"\" account={{account}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| where event_source matches \"*amazonaws.com\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+              "queryString": "\"\\\"eventsource\\\"\" account={{account}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| where event_source matches \"*amazonaws.com\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| where !isnull(latitude)",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -419,7 +419,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway metric=count Statistic=sum account={{account}} region=* entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApiGateway metric=count Statistic=sum account={{account}} region=* entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -440,7 +440,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region=*  entity=* | sum by entity",
+              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region=*  entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -461,7 +461,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/lambda metric=Invocations statistic=Sum account={{account}} region=* entity=* | sum by entity",
+              "queryString": "Namespace=aws/lambda metric=Invocations statistic=Sum account={{account}} region=* entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -482,7 +482,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/dynamodb metric=SuccessfulRequestLatency Statistic=SampleCount account={{account}} region=* entity=* | sum by entity | eval round(_value)",
+              "queryString": "Namespace=aws/dynamodb metric=SuccessfulRequestLatency Statistic=SampleCount account={{account}} region=* entity=* | sum by entity, namespace, region, account | eval round(_value)",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -497,7 +497,7 @@
       ],
       "variables": [
         {
-          "id": "545D10734E95B964",
+          "id": "41DF16A41B2AAB72",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -535,7 +535,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
           "type": "RelativeTimeRangeBoundary",
-          "relativeTime": "-1h"
+          "relativeTime": "-1d"
         },
         "to": null
       },
@@ -743,7 +743,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} metric=Mem_Free region={{region}} entity=* | eval _value / 1073741824 | avg",
+              "queryString": "namespace=AWS/EC2 account={{account}} metric=Mem_Free region={{region}} entity=* | eval _value / 1073741824 | avg",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -785,7 +785,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApiGateway (metric=4XXError or metric=5XXError) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -801,12 +801,12 @@
           "id": "DC409CC4BCDAA7D6",
           "key": "panelPANE-F361E48F8E269B40",
           "title": "Load Balancer Errors",
-          "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":5,\"color\":\"#75bf00\"},{\"from\":5,\"to\":50,\"color\":\"#f6c851\"},{\"from\":50,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
+          "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":5,\"color\":\"#75bf00\"},{\"from\":6,\"to\":50,\"color\":\"#f6c851\"},{\"from\":51,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApplicationELB (metric=HTTPCode_ELB_4XX_Count or metric=HTTPCode_ELB_5XX_Count) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApplicationELB (metric=HTTPCode_ELB_4XX_Count or metric=HTTPCode_ELB_5XX_Count) statistic=Sum account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -911,7 +911,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "\"\\\"eventsource\\\"\" account={{account}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| where event_source matches \"*amazonaws.com\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+              "queryString": "\"\\\"eventsource\\\"\" account={{account}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, errorCode, errorMessage, requestID, src_ip nodrop\n| where event_source matches \"*amazonaws.com\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| where !isnull(latitude)",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -932,7 +932,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=AWS/ApiGateway metric=count Statistic=sum account={{account}} region={{region}} entity=* | sum by entity",
+              "queryString": "Namespace=AWS/ApiGateway metric=count Statistic=sum account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -953,7 +953,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region={{region}}  entity=* | sum by entity",
+              "queryString": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account={{account}} region={{region}}  entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -974,7 +974,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/lambda metric=Invocations statistic=Sum account={{account}} region={{region}} entity=* | sum by entity",
+              "queryString": "Namespace=aws/lambda metric=Invocations statistic=Sum account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -995,7 +995,7 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/dynamodb metric=SuccessfulRequestLatency Statistic=SampleCount account={{account}} region={{region}} entity=* | sum by entity | eval round(_value)",
+              "queryString": "Namespace=aws/dynamodb metric=SuccessfulRequestLatency Statistic=SampleCount account={{account}} region={{region}} entity=* | sum by entity, namespace, region, account | eval round(_value)",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
@@ -1010,7 +1010,7 @@
       ],
       "variables": [
         {
-          "id": "92A301C7C1452CD7",
+          "id": "8401E8D5141212C1",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -1024,7 +1024,7 @@
           "hideFromUI": false
         },
         {
-          "id": "F0C63C6A16CBABFF",
+          "id": "489688ABAFC36031",
           "name": "region",
           "displayName": null,
           "defaultValue": "*",

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the Sumo Logic AWS Inventory Source and Anomaly app."
+Description: "Template to setup the Sumo Logic AWS Inventory Source and Root Cause Explorer app."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -28,9 +28,15 @@ Metadata:
           - Section3cNamespaces
 
       - Label:
+          default: "AWS XRay Source Details"
+        Parameters:
+          - Section4aCreateAwsXRaySource
+          - Section4bAwsXRaySourceName
+
+      - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
-          - Section4aParentStackLambdaARN
+          - Section5aParentStackLambdaARN
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -45,7 +51,7 @@ Metadata:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
       Section2aInstallApp:
-        default: "Create AWS Anomaly App"
+        default: "Create AWS Root Cause Explorer App"
       Section2bCollectorName:
         default: "Collector Name"
 
@@ -56,7 +62,12 @@ Metadata:
       Section3cNamespaces:
         default: "Limit Inventory collection to following namespaces"
 
-      Section4aParentStackLambdaARN:
+      Section4aCreateAwsXRaySource:
+        default: "Create Sumo Logic AWS XRay Source"
+      Section4bAwsXRaySourceName:
+        default: "Sumo Logic AWS XRay Source Name"
+
+      Section5aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
 
 Parameters:
@@ -100,7 +111,7 @@ Parameters:
 
   Section2aInstallApp:
     Type: String
-    Description: "Yes - Installs the Anomaly App for the Sumo Logic AWS Observability Solution.
+    Description: "Yes - Installs the Root Cause Explorer App for the Sumo Logic AWS Observability Solution.
                   No - Skips the installation of this app."
     Default: 'Yes'
     AllowedValues:
@@ -125,17 +136,37 @@ Parameters:
   Section3cNamespaces:
     Default: ""
     Description: "Provide Comma delimited list of the namespaces to collect. For Eg.- AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS"
-    Type: String
+    Type: CommaDelimitedList
 
-  Section4aParentStackLambdaARN:
+  Section4aCreateAwsXRaySource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic Aws XRay Source. Choose No to skip Source Creation."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section4bAwsXRaySourceName:
+    Type: String
+    Description: "Change the Aws XRay Source name to be created else default name will be used."
+    Default: ""
+
+  Section5aParentStackLambdaARN:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
 
 Conditions:
-  do_not_use_parent_stack: !Equals [ !Ref Section4aParentStackLambdaARN, "ParentStackLambdaARN"]
+  do_not_use_parent_stack: !Equals [ !Ref Section5aParentStackLambdaARN, "ParentStackLambdaARN"]
 
   install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
+
+  install_inventory_source: !Equals [!Ref Section3aCreateAwsInventorySource, 'Yes']
+
+  install_xray_source: !Equals [!Ref Section4aCreateAwsXRaySource, 'Yes']
+
+  install_collector: !Or
+    - !Condition install_inventory_source
+    - !Condition install_xray_source
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -204,22 +235,133 @@ Resources:
         SumoLogicAccessKey: !Ref Section1cSumoAccessKey
         SumoLogicOrganizationId: !Ref Section1dSumoOrganizationId
         RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-        AccountAlias: "anomaly"
-        CollectorName: !Ref Section2bCollectorName
-        CreateAwsInventorySource: !Ref Section3aCreateAwsInventorySource
-        AwsInventorySourceName: !Ref Section3bAwsInventorySourceName
-        AwsInventoryNamespaces: !Ref Section3cNamespaces
+        AccountAlias: "rootcause"
 
   sumoOverview:
     Type: Custom::App
     Condition: install_app
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section4aParentStackLambdaARN]
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App Tsat"
-      Version: "BetaV0.1"
+      Version: "V1.0.0"
       FolderName: "Sumo Logic AWS Observability Apps "
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
+
+  SumoLogicHostedCollector:
+    Type: Custom::Collector
+    Condition: install_collector
+    Properties:
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      Region: !Ref "AWS::Region"
+      CollectorType: Hosted
+      RemoveOnDeleteStack: !If [do_not_use_parent_stack, !Ref Section1eRemoveSumoResourcesOnDeleteStack, false]
+      CollectorName: !Ref Section2bCollectorName
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
+  RootCauseRole:
+    Type: AWS::IAM::Role
+    Condition: install_collector
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${Section1aSumoDeployment}:${Section1dSumoOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoInventoryPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - apigateway:GET
+                  - autoscaling:Describe*
+                  - cloudfront:GetDistributionConfig
+                  - cloudfront:ListDistributions
+                  - cloudtrail:DescribeTrails
+                  - cloudtrail:GetTrailStatus
+                  - cloudwatch:Describe*
+                  - cloudwatch:Get*
+                  - cloudwatch:List*
+                  - codedeploy:List*
+                  - codedeploy:BatchGet*
+                  - dynamodb:Describe*
+                  - dynamodb:List*
+                  - ec2:Describe*
+                  - ecs:Describe*
+                  - ecs:List*
+                  - elasticache:Describe*
+                  - elasticache:List*
+                  - elasticfilesystem:Describe*
+                  - elasticloadbalancing:Describe*
+                  - elasticmapreduce:Describe*
+                  - elasticmapreduce:List*
+                  - es:Describe*
+                  - es:List*
+                  - health:Describe*
+                  - kinesis:Describe*
+                  - kinesis:List*
+                  - lambda:List*
+                  - mq:Describe*
+                  - mq:List*
+                  - rds:Describe*
+                  - rds:List*
+                  - redshift:Describe*
+                  - route53:List*
+                  - sqs:ListQueues
+                  - ses:GetSendStatistics
+                  - ses:GetSendQuota
+                  - sns:List*
+                  - tag:GetResources
+                  - tag:GetTagKeys
+                  - tag:GetTagValues
+                  - xray:BatchGetTraces
+                  - xray:Get*
+                  - pi:DescribeDimensionKeys
+                  - pi:GetResourceMetrics
+                Effect: Allow
+                Resource: "*"
+
+  InventorySource:
+    Type: Custom::AWSSource
+    Condition: install_inventory_source
+    Properties:
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      SourceType: AwsInventory
+      Namespaces: !Ref Section3cNamespaces
+      SourceName: !Ref Section3bAwsInventorySourceName
+      SourceCategory: "aws/observability/inventory"
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      RoleArn: !GetAtt RootCauseRole.Arn
+
+  XraySource:
+    Type: Custom::AWSSource
+    Condition: install_xray_source
+    Properties:
+      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      SourceType: AwsXRay
+      SourceName: !Ref Section4bAwsXRaySourceName
+      SourceCategory: "aws/observability/xray"
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      RoleArn: !GetAtt RootCauseRole.Arn

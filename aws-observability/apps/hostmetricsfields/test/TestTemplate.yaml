@@ -1,0 +1,27 @@
+---
+Global:
+  TemplatePath: "../host_metrics_add_fields.template.yaml"
+  TestProjectName: BasicTestProject
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Section1aSumoDeployment: us1
+    Section1bSumoAccessID: '${ADMIN_ROLE_ACCESS_ID}'
+    Section1cSumoAccessKey: '${ADMIN_ROLE_ACCESS_KEY}'
+    Section1dRemoveSumoResourcesOnDeleteStack: 'true'
+    Section2aAccountAlias: 'testenv'
+    Section2bUpdateVersion: '1'
+Tests:
+  - TestName: testtemplate
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2bUpdateVersion: '1'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - LambdaRole
+            - LambdaToAddFields
+            - AddFields

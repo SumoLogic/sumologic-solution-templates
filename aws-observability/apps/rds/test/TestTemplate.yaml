@@ -1,6 +1,6 @@
 ---
 Global:
-  TemplatePath: "../alb_app.template.yaml"
+  TemplatePath: "../rds_app.template.yaml"
   TestProjectName: BasicTestProject
   ParallelTestsRun: 8
   GlobalParameters:
@@ -13,8 +13,8 @@ Global:
     Section3aInstallApp: 'No'
     Section2aTagExistingAWSResources: 'No'
     Section4aCreateCloudWatchMetricsSource: 'No'
-    Section5aCreateS3Bucket: 'No'
-    Section5cCreateALBLogSource: 'No'
+    Section5aCreateCloudTrailBucket: 'No'
+    Section5cCreateCloudTrailLogSource: 'No'
 Tests:
   - TestName: installall
     Regions:
@@ -22,13 +22,13 @@ Tests:
     Parameters:
       Values:
         Section3aInstallApp: 'Yes'
-        Section2aTagExistingAWSResources: 'Yes'
+        Section2aTagExistingAWSResources: 'No'
         Section4aCreateCloudWatchMetricsSource: 'Yes'
-        Section5aCreateS3Bucket: 'Yes'
-        Section5cCreateALBLogSource: 'Yes'
+        Section5aCreateCloudTrailBucket: 'Yes'
+        Section5cCreateCloudTrailLogSource: 'Yes'
         Section3bCollectorName: 'Sourabh Collector Install All'
         Section4bCloudWatchMetricsSourceName: 'Source CloudWatch Metrics All'
-        Section5eALBLogsSourceName: 'Source ALB Logs All'
+        Section5eCloudTrailLogsSourceName: 'Source CloudTrail Logs All'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -36,10 +36,11 @@ Tests:
           Resources:
             - WaitHandle
             - CreateCommonResources
-            - TagAWSResources
-            - ALBMetricRule
+            - ClusterMetricRule
+            - InstanceMetricRule
             - sumoApp
-            - ALBUpdateSourceWaitCondition
+            - UpdateSourceWaitCondition
+            - FieldExtractionRule
             - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
@@ -48,39 +49,40 @@ Tests:
             - CreateCommonResources.CommonS3Bucket
             - CreateCommonResources.CommonBucketPolicy
             - CreateCommonResources.CommonSNSpolicy
+            - CreateCommonResources.CommonCloudTrail
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - CreateCommonResources.SumoLogicSourceRole
             - CreateCommonResources.SumoLogicHostedCollector
             - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
             - CreateCommonResources.SumoLogicCloudwatchMetricsSource
             - CreateCommonResources.ALBSourceWaitCondition
-            - CreateCommonResources.ALBSource
-            - CreateCommonResources.ALBSNSSubscription
             - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudTrailSource
+            - CreateCommonResources.CloudTrailSNSSubscription
             - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
             - CreateCommonResources.LambdaHelperARN
             - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.BucketName
             - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.BucketName
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
             CollectorName: 'Sourabh Collector Install All'
             CreateCloudWatchMetricsSource: 'Yes'
             CloudWatchMetricsSourceName:  'Source CloudWatch Metrics All'
-            CreateALBLogSource: 'Yes'
-            CreateALBS3Bucket: 'Yes'
-            ALBLogsSourceName: 'Source ALB Logs All'
+            CreateCloudTrailLogSource: 'Yes'
+            CreateCloudTrailBucket: 'Yes'
+            CloudTrailLogsSourceName: 'Source CloudTrail Logs All'
   - TestName: onlytagging
     Regions:
       - us-east-1
     Parameters:
       Values:
         Section2aTagExistingAWSResources: 'Yes'
-    Skip: false
+    Skip: true
     Assertions:
       - AssertType: ResourceExistence
         Assert:
@@ -88,8 +90,9 @@ Tests:
             - WaitHandle
             - CreateCommonResources
             - TagAWSResources
-            - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
+            - ClusterMetricRule
+            - InstanceMetricRule
+            - UpdateSourceWaitCondition
             - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
@@ -109,8 +112,8 @@ Tests:
         Assert:
           CreateCommonResources:
             CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
+            CreateCloudTrailLogSource: 'No'
+            CreateCloudTrailBucket: 'No'
   - TestName: onlycwsource
     Regions:
       - us-east-2
@@ -126,8 +129,9 @@ Tests:
           Resources:
             - WaitHandle
             - CreateCommonResources
-            - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
+            - ClusterMetricRule
+            - InstanceMetricRule
+            - UpdateSourceWaitCondition
             - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
@@ -152,8 +156,8 @@ Tests:
             CollectorName: 'Sourabh Collector Install CW Source'
             CreateCloudWatchMetricsSource: 'Yes'
             CloudWatchMetricsSourceName: 'Source CloudWatch Metrics'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
+            CreateCloudTrailLogSource: 'No'
+            CreateCloudTrailBucket: 'No'
   - TestName: onlyappinstall
     Regions:
       - ap-south-1
@@ -176,9 +180,10 @@ Tests:
             - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
             - CreateCommonResources.WaitHandle
             - WaitHandle
-            - ALBMetricRule
+            - ClusterMetricRule
+            - InstanceMetricRule
             - sumoApp
-            - ALBUpdateSourceWaitCondition
+            - UpdateSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -189,17 +194,17 @@ Tests:
         Assert:
           CreateCommonResources:
             CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
+            CreateCloudTrailLogSource: 'No'
+            CreateCloudTrailBucket: 'No'
   - TestName: onlylogsourcewithbucket
     Regions:
       - us-east-1
     Parameters:
       Values:
-        Section5aCreateS3Bucket: 'Yes'
-        Section5cCreateALBLogSource: 'Yes'
+        Section5aCreateCloudTrailBucket: 'Yes'
+        Section5cCreateCloudTrailLogSource: 'Yes'
         Section3bCollectorName: 'Sourabh Collector Install Log Source'
-        Section5eALBLogsSourceName: 'Source ALB Logs'
+        Section5eCloudTrailLogsSourceName: 'Source CloudTrail Logs'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -207,8 +212,10 @@ Tests:
           Resources:
             - WaitHandle
             - CreateCommonResources
-            - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
+            - ClusterMetricRule
+            - InstanceMetricRule
+            - UpdateSourceWaitCondition
+            - FieldExtractionRule
             - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
@@ -217,39 +224,40 @@ Tests:
             - CreateCommonResources.CommonBucketPolicy
             - CreateCommonResources.CommonS3Bucket
             - CreateCommonResources.CommonSNSpolicy
+            - CreateCommonResources.CommonCloudTrail
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - CreateCommonResources.SumoLogicSourceRole
             - CreateCommonResources.SumoLogicHostedCollector
             - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
             - CreateCommonResources.ALBSourceWaitCondition
-            - CreateCommonResources.ALBSource
-            - CreateCommonResources.ALBSNSSubscription
             - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudTrailSource
+            - CreateCommonResources.CloudTrailSNSSubscription
             - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
             - CreateCommonResources.LambdaHelperARN
             - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.BucketName
             - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.BucketName
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
             CollectorName: 'Sourabh Collector Install Log Source'
             CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'Yes'
-            CreateALBS3Bucket: 'Yes'
-            ALBLogsSourceName: 'Source ALB Logs'
+            CreateCloudTrailLogSource: 'Yes'
+            CreateCloudTrailBucket: 'Yes'
+            CloudTrailLogsSourceName: 'Source CloudTrail Logs'
   - TestName: onlylogsourcewithoutbucket
     Regions:
       - us-east-2
     Parameters:
       Values:
-        Section5cCreateALBLogSource: 'Yes'
+        Section5cCreateCloudTrailLogSource: 'Yes'
         Section3bCollectorName: 'Sourabh Collector Without Bucket Log Source'
-        Section5eALBLogsSourceName: 'Source ALB Logs'
-        Section5bS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+        Section5eCloudTrailLogsSourceName: 'Source CloudTrail Logs'
+        Section5bCloudTrailLogsBucketName: 'sumologiclambdahelper-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -257,22 +265,24 @@ Tests:
           Resources:
             - WaitHandle
             - CreateCommonResources
-            - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
+            - ClusterMetricRule
+            - InstanceMetricRule
+            - UpdateSourceWaitCondition
+            - FieldExtractionRule
             - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
             - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.ALBSNSTopic
-            - CreateCommonResources.ALBSNSpolicy
+            - CreateCommonResources.CloudTrailSNSTopic
+            - CreateCommonResources.CloudTrailSNSpolicy
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - CreateCommonResources.SumoLogicSourceRole
             - CreateCommonResources.SumoLogicHostedCollector
             - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
             - CreateCommonResources.ALBSourceWaitCondition
-            - CreateCommonResources.ALBSource
-            - CreateCommonResources.ALBSNSSubscription
             - CreateCommonResources.CloudTrailSourceWaitCondition
+            - CreateCommonResources.CloudTrailSource
+            - CreateCommonResources.CloudTrailSNSSubscription
             - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
@@ -285,9 +295,9 @@ Tests:
           CreateCommonResources:
             CollectorName: 'Sourabh Collector Without Bucket Log Source'
             CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'Yes'
-            CreateALBS3Bucket: 'No'
-            ALBLogsSourceName: 'Source ALB Logs'
+            CreateCloudTrailLogSource: 'Yes'
+            CreateCloudTrailBucket: 'No'
+            CloudTrailLogsSourceName: 'Source CloudTrail Logs'
   - TestName: updatecwmetrics
     Regions:
       - ap-south-1
@@ -301,9 +311,10 @@ Tests:
           Resources:
             - WaitHandle
             - CreateCommonResources
-            - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
-            - SumoALBMetricsUpdateSource
+            - ClusterMetricRule
+            - InstanceMetricRule
+            - UpdateSourceWaitCondition
+            - SumoMetricsUpdateSource
             - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
@@ -324,14 +335,14 @@ Tests:
         Assert:
           CreateCommonResources:
             CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
+            CreateCloudTrailLogSource: 'No'
+            CreateCloudTrailBucket: 'No'
   - TestName: updatelogssource
     Regions:
       - us-east-1
     Parameters:
       Values:
-        Section5fALBLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
+        Section5fCloudTrailLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -339,9 +350,11 @@ Tests:
           Resources:
             - WaitHandle
             - CreateCommonResources
-            - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
-            - SumoALBLogsUpdateSource
+            - ClusterMetricRule
+            - InstanceMetricRule
+            - UpdateSourceWaitCondition
+            - SumoCloudTrailLogsUpdateSource
+            - FieldExtractionRule
             - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
@@ -362,5 +375,5 @@ Tests:
         Assert:
           CreateCommonResources:
             CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
+            CreateCloudTrailLogSource: 'No'
+            CreateCloudTrailBucket: 'No'
