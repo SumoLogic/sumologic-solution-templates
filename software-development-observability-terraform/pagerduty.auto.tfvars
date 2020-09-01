@@ -1,5 +1,5 @@
 # Sumo Logic - SDO Terraform
-# Configure Pagerduty credentials and parameters.
+# Configure Pagerduty credentials and parameters. Arun please change. 
 
 pagerduty_api_key                     = "<YOUR PAGERDUTY API KEY>"
 # Please replace <YOUR PAGERDUTY API KEY> (including brackets) with your Pagerduty key, to generate the key, refer: https://support.pagerduty.com/docs/generating-api-keys#section-generating-a-general-access-rest-api-key
