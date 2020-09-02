@@ -4,7 +4,12 @@ variable "sumo_access_id" {}
 variable "sumo_access_key" {}
 variable "deployment" {}
 variable "sumo_api_endpoint" {}
-variable "app_installation_folder" {}
+variable "app_installation_folder" {
+  default = "Atlassian"
+}
+variable "collector_name" {
+  default = "Atlassian"
+}
 
 #Apps
 variable "install_jira_cloud" {}
@@ -17,6 +22,11 @@ variable "install_sumo_to_jiracloud_webhook" {}
 variable "install_sumo_to_jiraserver_webhook" {}
 variable "install_sumo_to_jiraservicedesk_webhook" {}
 
+#Source Categories
+variable "jira_cloud_sc" {}
+variable "jira_server_sc" {}
+variable "bitbucket_sc" {}
+variable "opsgenie_sc" {}
 
 #Jira Cloud
 variable "jira_cloud_url" {}
@@ -62,7 +72,9 @@ variable "bitbucket_cloud_events" {}
 
 # Opsgenie
 variable "opsgenie_key" {}
-variable "opsgenie_api_url" {}
+variable "opsgenie_api_url" {
+  default = "https://api.opsgenie.com"
+}
 
 # Sumologic to Opsgenie Webhook
 variable "opsgenie_priority" {}

@@ -1,0 +1,1092 @@
+{
+    "type": "FolderSyncDefinition",
+    "name": "PagerDuty V2",
+    "description": "The Sumo Logic App for PagerDuty V2 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services. The Sumo Logic App for PagerDuty V2 uses Webhooks V2, providing enhanced context for alert object models.",
+    "children": [
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "PagerDuty V2 - Incidents Overview",
+            "description": "The Incidents Overview Dashboard provides an at-a-glance analysis of triggered, acknowledged, escalated, assigned, and resolved incidents. This dashboard also provides a high-level view of incident trends and comparisons over specified time intervals.",
+            "title": "PagerDuty V2 - Incidents Overview",
+            "rootPanel": null,
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-7B84885A89C6284D",
+                        "structure": "{\"height\":5,\"width\":5,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-285909419649B847",
+                        "structure": "{\"height\":5,\"width\":3,\"x\":5,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-F36B31669AC59A49",
+                        "structure": "{\"height\":5,\"width\":3,\"x\":8,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-FE6B7508956F794C",
+                        "structure": "{\"height\":5,\"width\":3,\"x\":11,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-60F5F6EC89F9AB4A",
+                        "structure": "{\"height\":5,\"width\":3,\"x\":14,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-374871A3B33C9947",
+                        "structure": "{\"height\":5,\"width\":3,\"x\":17,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-88023E28AFD7E947",
+                        "structure": "{\"height\":5,\"width\":4,\"x\":20,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-587D26269EE57B45",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":5}"
+                    },
+                    {
+                        "key": "panelPANE-57E17628A1CC0B4E",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":5,\"y\":5}"
+                    },
+                    {
+                        "key": "panelPANE-1F19AFC6A898F84B",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":11,\"y\":5}"
+                    },
+                    {
+                        "key": "panelPANE-1F7E8AE8A6464A4C",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":17,\"y\":5}"
+                    },
+                    {
+                        "key": "panelPANE-92EE5DE6B904D84B",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":11}"
+                    },
+                    {
+                        "key": "panelPANE-88BF4158B0E03B4E",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":5,\"y\":11}"
+                    },
+                    {
+                        "key": "panelPANE-19B6281A8066194F",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":17,\"y\":11}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": "7B84885A89C6284D",
+                    "key": "panelPANE-7B84885A89C6284D",
+                    "title": "Incidents Breakdown by Type",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}  \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by event\n| sort by _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "285909419649B847",
+                    "key": "panelPANE-285909419649B847",
+                    "title": "Incidents Triggered",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\" \",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":\"0\",\"to\":null,\"color\":\"#8be2ff\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}   \"incident.trigger\"\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by event",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "F36B31669AC59A49",
+                    "key": "panelPANE-F36B31669AC59A49",
+                    "title": "Incidents Resolved",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\" \",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":\"0\",\"to\":null,\"color\":\"#75bf00\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}   \"incident.resolve\"\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.resolve\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by event",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "FE6B7508956F794C",
+                    "key": "panelPANE-FE6B7508956F794C",
+                    "title": "Incidents Escalated",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\" \",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":\"0\",\"to\":\".99\",\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":\"1\",\"to\":\"99999999\",\"color\":\"#f36644\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}   \"incident.escalate\"\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.escalate\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by event",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "60F5F6EC89F9AB4A",
+                    "key": "panelPANE-60F5F6EC89F9AB4A",
+                    "title": "Incidents Acknowledged",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\" \",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":\"0\",\"to\":null,\"color\":\"#75bf00\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}   \"incident.acknowledge\"\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.acknowledge\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by event",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "374871A3B33C9947",
+                    "key": "panelPANE-374871A3B33C9947",
+                    "title": "Incidents Unacknowledged",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\" \",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No Data\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":\"0\",\"to\":\".99\",\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":\"1\",\"to\":\"9999999999\",\"color\":\"#FFB5B5\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}   \"incident.unacknowledge\"\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.unacknowledge\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by event",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "88023E28AFD7E947",
+                    "key": "panelPANE-88023E28AFD7E947",
+                    "title": "Incidents Triggered by Escalation Policy Name",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme1\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}  \"incident.trigger\"  \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by escalation_policy_name\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "587D26269EE57B45",
+                    "key": "panelPANE-587D26269EE57B45",
+                    "title": "Incidents Acknowledged by Escalation Policy Name",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"color\":{\"family\":\"scheme6\"},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}  \"incident.acknowledge\"\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.acknowledge\"\n| count by escalation_policy_name\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "57E17628A1CC0B4E",
+                    "key": "panelPANE-57E17628A1CC0B4E",
+                    "title": "Incidents Resolved by Escalation Policy Name",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}  \"incident.resolve\"\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.resolve\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by escalation_policy_name\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "1F19AFC6A898F84B",
+                    "key": "panelPANE-1F19AFC6A898F84B",
+                    "title": "Incidents Escalated by Escalation Policy Name",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme8\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}  \"incident.escalate\"\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[0].assignee.summary\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assigned_user\n| where event = \"incident.escalate\"\n| count by escalation_policy_name\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "1F7E8AE8A6464A4C",
+                    "key": "panelPANE-1F7E8AE8A6464A4C",
+                    "title": "Type of Incidents Over Time",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| timeslice 1h\n| count by _timeslice , event\n| transpose row _timeslice column event",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "92EE5DE6B904D84B",
+                    "key": "panelPANE-92EE5DE6B904D84B",
+                    "title": "Incidents Type - One Day Time Comparison",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}  \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by event\n| compare with timeshift 1d\n| sort by _count ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "88BF4158B0E03B4E",
+                    "key": "panelPANE-88BF4158B0E03B4E",
+                    "title": "Incidents by Escalation Policy Name - One Day Time Comparison",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory}  \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by event, escalation_policy_name\n| compare with timeshift 1d\n| sort by _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "19B6281A8066194F",
+                    "key": "panelPANE-19B6281A8066194F",
+                    "title": "Type of Incidents Over Time - One Day Time Comparison",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| timeslice 1h\n| count by _timeslice , event\n | compare with timeshift 1d\n| transpose row _timeslice column event",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": "2350D84087693445",
+                    "name": "impacted_service",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "impacted_service"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "063F10C89AE53D70",
+                    "name": "incident_status",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_status"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "6C7A5AE3232D8A46",
+                    "name": "incident_id",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_id, incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_id"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "DC4D1C9D84246917",
+                    "name": "assigned_user",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"assignments[*].assignee\" as  assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi",
+                        "field": "assigned_user"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "4D0BEE51488DD6B7",
+                    "name": "alertedBy_service",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"service.name\" as alertedBy_service",
+                        "field": "alertedBy_service"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "PagerDuty V2 - Incidents by Urgency and Escalation Policy",
+            "description": "The Incidents by Urgency and Escalation Policy Dashboard provides an overview analysis of urgency events, from low to high, as well as a breakdown of the services impacted by high urgency events.",
+            "title": "PagerDuty V2 - Incidents by Urgency and Escalation Policy",
+            "rootPanel": null,
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-B9F3C9018CD6A945",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-5492EE39A99A2940",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-3A128D42BA1CAA49",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-D3387E649FA59B44",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-39882014B335B941",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":14}"
+                    },
+                    {
+                        "key": "panelPANE-87C27D158A2DB943",
+                        "structure": "{\"height\":6,\"width\":16,\"x\":8,\"y\":14}"
+                    },
+                    {
+                        "key": "panelPANE-7D7875EFA91CD940",
+                        "structure": "{\"height\":8,\"width\":6,\"x\":18,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-29C7005F99FF2A41",
+                        "structure": "{\"height\":8,\"width\":5,\"x\":8,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-29A770EB9B234840",
+                        "structure": "{\"height\":8,\"width\":5,\"x\":13,\"y\":6}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": "B9F3C9018CD6A945",
+                    "key": "panelPANE-B9F3C9018CD6A945",
+                    "title": "Incident Urgency - Daily",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme1\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| timeslice 1h \n| count by _timeslice, incident_urgency\n| order by _timeslice asc\n| transpose row _timeslice column incident_urgency\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "5492EE39A99A2940",
+                    "key": "panelPANE-5492EE39A99A2940",
+                    "title": "Incident Urgency - Weekly",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme1\"},\"overrides\":[{\"series\":[\"high\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"line\",\"color\":\"#00a0d6\"}},{\"series\":[\"low\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"line\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| timeslice 1h \n| count by _timeslice, incident_urgency\n| order by _timeslice asc\n| transpose row _timeslice column incident_urgency\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1w"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "3A128D42BA1CAA49",
+                    "key": "panelPANE-3A128D42BA1CAA49",
+                    "title": "High Urgency Incidents by Escalation Policy - Daily",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and incident_urgency =\"high\"  and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| timeslice 1h\n| count by _timeslice,  escalation_policy_name\n| order by _timeslice asc\n| transpose row _timeslice column escalation_policy_name\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "D3387E649FA59B44",
+                    "key": "panelPANE-D3387E649FA59B44",
+                    "title": "Low Urgency Incidents by Escalation Policy - Weekly",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and incident_urgency =\"low\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| timeslice 1h\n| count by _timeslice,  escalation_policy_name\n| order by _timeslice asc\n| transpose row _timeslice column escalation_policy_name\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1w"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "39882014B335B941",
+                    "key": "panelPANE-39882014B335B941",
+                    "title": "Low Urgency Incidents by Escalation Policy - Daily",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and incident_urgency =\"low\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| timeslice 1h\n| count by _timeslice,  escalation_policy_name\n| order by _timeslice asc\n| transpose row _timeslice column escalation_policy_name\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "87C27D158A2DB943",
+                    "key": "panelPANE-87C27D158A2DB943",
+                    "title": "Services Impacted by High Urgency Incidents",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\"  and incident_urgency =\"high\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by created_on, incident_id, escalation_policy_name, impacted_service,  incident_status,  incident_tittle, incident_team_involved, assigned_user\n| order by created_on ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "7D7875EFA91CD940",
+                    "key": "panelPANE-7D7875EFA91CD940",
+                    "title": "High Urgency Incidents by Escalation Policy - Weekly",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and incident_urgency =\"high\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| timeslice 1h\n| count by _timeslice,  escalation_policy_name\n| order by _timeslice asc\n| transpose row _timeslice column escalation_policy_name\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "29C7005F99FF2A41",
+                    "key": "panelPANE-29C7005F99FF2A41",
+                    "title": "Low Urgency Incidents by Escalation Policy",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":true},\"color\":{\"family\":\"scheme4\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and incident_urgency =\"low\"  and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by  escalation_policy_name\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "29A770EB9B234840",
+                    "key": "panelPANE-29A770EB9B234840",
+                    "title": "High Urgency Incidents by Escalation Policy",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":true},\"color\":{\"family\":\"scheme5\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and incident_urgency =\"high\" and alertedBy_service matches \"{{alertedBy_service}}\" and assigned_user matches \"{{assigned_user}}\" and impacted_service matches \"{{impacted_service}}\" and incident_id matches \"{{incident_id}}\" and incident_status matches \"{{incident_status}}\"\n| count by  escalation_policy_name\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1w"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": "FB5E44B59B8BBAAA",
+                    "name": "impacted_service",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "impacted_service"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "01974D878888888A",
+                    "name": "incident_status",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_status"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "BA39A80FBAA88B89",
+                    "name": "incident_id",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_id, incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_id"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "45412DE4B8A9BBA8",
+                    "name": "assigned_user",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"assignments[*].assignee\" as  assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi",
+                        "field": "assigned_user"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "588ED903AABB8989",
+                    "name": "alertedBy_service",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"service.name\" as alertedBy_service",
+                        "field": "alertedBy_service"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "PagerDuty V2 - Overview",
+            "description": "The Overview Dashboard provides a high-level view of top alerts, triggered incidents summary, as well as a breakdown of per-user incident assignments and comparisons over a specified time interval.",
+            "title": "PagerDuty V2 - Overview",
+            "rootPanel": null,
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-8C162F6E983F9A47",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-8A5D72CD99496B47",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":5,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-9CED710397897843",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-3853882D9156BB4E",
+                        "structure": "{\"height\":13,\"width\":16,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-75ADF515AC8AF84F",
+                        "structure": "{\"height\":6,\"width\":11,\"x\":5,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-C7D368A295CF1A4A",
+                        "structure": "{\"height\":19,\"width\":8,\"x\":16,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-F92C70C5B982AA42",
+                        "structure": "{\"height\":6,\"width\":13,\"x\":11,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": "8C162F6E983F9A47",
+                    "key": "panelPANE-8C162F6E983F9A47",
+                    "title": "Top Alerting Services",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and impacted_service matches \"{{impacted_service}}\" and incident_description matches \"{{incident_description}}\" and incident_number matches \"{{incident_number}}\" and incident_status matches \"{{incident_status}}\" and incident_summary matches \"{{incident_summary}}\" and incident_urgency matches \"{{incident_urgency}}\" \n| count by alertedBy_service\n| order by _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "8A5D72CD99496B47",
+                    "key": "panelPANE-8A5D72CD99496B47",
+                    "title": "Top 10 Alerting Incidents",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and impacted_service matches \"{{impacted_service}}\" and incident_description matches \"{{incident_description}}\" and incident_number matches \"{{incident_number}}\" and incident_status matches \"{{incident_status}}\" and incident_summary matches \"{{incident_summary}}\" and incident_urgency matches \"{{incident_urgency}}\" \n| count by incident_title\n| order by _count\n| limit 10\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "9CED710397897843",
+                    "key": "panelPANE-9CED710397897843",
+                    "title": "Top 10 Escalation Policy",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"color\":{\"family\":\"scheme3\"},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and impacted_service matches \"{{impacted_service}}\" and incident_description matches \"{{incident_description}}\" and incident_number matches \"{{incident_number}}\" and incident_status matches \"{{incident_status}}\" and incident_summary matches \"{{incident_summary}}\" and incident_urgency matches \"{{incident_urgency}}\" \n| count by escalation_policy_name\n| order by _count\n| limit 10",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "3853882D9156BB4E",
+                    "key": "panelPANE-3853882D9156BB4E",
+                    "title": "Incidents Triggered - Summary Table",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and impacted_service matches \"{{impacted_service}}\" and incident_description matches \"{{incident_description}}\" and incident_number matches \"{{incident_number}}\" and incident_status matches \"{{incident_status}}\" and incident_summary matches \"{{incident_summary}}\" and incident_urgency matches \"{{incident_urgency}}\" \n| count by created_on, incident_id, incident_number, escalation_policy_name, alertedBy_service,  incident_status, incident_summary,  incident_tittle, incident_urgency,  incident_team_involved, assigned_user\n| order by created_on ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "75ADF515AC8AF84F",
+                    "key": "panelPANE-75ADF515AC8AF84F",
+                    "title": "Top Alerting Services - One Day Time Comparison",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme6\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and impacted_service matches \"{{impacted_service}}\" and incident_description matches \"{{incident_description}}\" and incident_number matches \"{{incident_number}}\" and incident_status matches \"{{incident_status}}\" and incident_summary matches \"{{incident_summary}}\" and incident_urgency matches \"{{incident_urgency}}\" \n| count by alertedBy_service\n| compare with timeshift 1d\n| order by _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "C7D368A295CF1A4A",
+                    "key": "panelPANE-C7D368A295CF1A4A",
+                    "title": "Alerting Incidents - One Day Time Comparison",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and impacted_service matches \"{{impacted_service}}\" and incident_description matches \"{{incident_description}}\" and incident_number matches \"{{incident_number}}\" and incident_status matches \"{{incident_status}}\" and incident_summary matches \"{{incident_summary}}\" and incident_urgency matches \"{{incident_urgency}}\" \n| count by incident_tittle\n| compare with timeshift 1d\n| order by _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": "F92C70C5B982AA42",
+                    "key": "panelPANE-F92C70C5B982AA42",
+                    "title": "Incidents Assigned to User",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "_sourceCategory = ${sourceCategory} \"incident.trigger\" \n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"id\", \"incident_number\", \"escalation_policy.summary\", \"service.name\" , \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\", \"teams[0].summary\", \"assignments[*].assignee\" as incident_id, incident_number, escalation_policy_name, alertedBy_service, impacted_service, incident_status, incident_summary, incident_description, incident_tittle, incident_urgency,  incident_team_involved, assignee \n| parse regex field=assignee \"summary\\\":\\\"(?<assigned_user>.+?)\\\"\" multi\n| where event = \"incident.trigger\" and impacted_service matches \"*\" and incident_description matches \"*\" and incident_number matches \"*\" and incident_status matches \"*\" and incident_summary matches \"*\" and incident_urgency matches \"*\" \n| count by assigned_user, incident_urgency\n| transpose row incident_urgency column assigned_user\n//| order by assigned_user asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": "26E31F76A854A808",
+                    "name": "impacted_service",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "impacted_service"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "96150396756AE68D",
+                    "name": "incident_description",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_description"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "CE26350D81A8777E",
+                    "name": "incident_number",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_number"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "CAB05C0B2AF3469A",
+                    "name": "incident_status",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_status"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "84C336A1EDA85B51",
+                    "name": "incident_summary",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_summary"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": "5357C536558F425E",
+                    "name": "incident_urgency",
+                    "displayName": null,
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory = ${sourceCategory}\n| parse regex \"(?<event>\\{\\\"event\\\":\\\"incident\\..+?\\}(?=,\\{\\\"event\\\":\\\"incident\\..+|\\]\\}$))\" multi\n| json  field=event \"event\",\"log_entries\", \"created_on\", \"incident\", \"webhook\" \n| json field=incident \"incident_number\", \"impacted_services[*].summary\", \"status\", \"summary\", \"description\", \"title\", \"urgency\" as incident_number, impacted_service, incident_status, incident_summary, incident_description, incident_title, incident_urgency",
+                        "field": "incident_urgency"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                }
+            ],
+            "coloringRules": []
+        }
+    ]
+}
