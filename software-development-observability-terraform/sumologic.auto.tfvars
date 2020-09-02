@@ -41,4 +41,5 @@ install_sumo_to_jiraserver_webhook      = "false"
 # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiraserver_webhook.json.tmpl for customizing payload.
 install_sumo_to_jiraservicedesk_webhook = "false"
 # This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiraservicedesk_webhook.json.tmpl for customizing payload.
-install_sumo_to_pagerduty_webhook       = "true"
+install_sumo_to_pagerduty_webhook       = "false"
+
