@@ -1,14 +1,8 @@
 terraform {
   required_providers {
-    aws = {
-      source = "hashicorp/aws"
-    }
-    null = {
-      source = "hashicorp/null"
-    }
-    sumologic = {
-      source = "terraform-providers/sumologic"
-    }
+    aws       = "~> 2.33.0"
+    null      = "~> 2.1"
+    sumologic = "~> 2.1.0"
   }
   required_version = ">= 0.13"
 }

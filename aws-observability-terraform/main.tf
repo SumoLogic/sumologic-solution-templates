@@ -23,35 +23,35 @@ resource "aws_cloudformation_stack" "aws-observability" {
 
   parameters = {
     # Sumo Logic Access Configuration (Required)
-    Section1aSumoLogicDeployment = var.Section1aSumoLogicDeployment
-    Section1bSumoLogicAccessID = var.Section1bSumoLogicAccessID
-    Section1cSumoLogicAccessKey = var.Section1cSumoLogicAccessKey
-    Section1dSumoLogicOrganizationId = var.Section1dSumoLogicOrganizationId
+    Section1aSumoLogicDeployment                  = var.Section1aSumoLogicDeployment
+    Section1bSumoLogicAccessID                    = var.Section1bSumoLogicAccessID
+    Section1cSumoLogicAccessKey                   = var.Section1cSumoLogicAccessKey
+    Section1dSumoLogicOrganizationId              = var.Section1dSumoLogicOrganizationId
     Section1eSumoLogicResourceRemoveOnDeleteStack = var.Section1eSumoLogicResourceRemoveOnDeleteStack
     # AWS Account Alias
     Section2aAccountAlias = var.Section2aAccountAlias
     # Sumo Logic AWS Observability Apps
     Section3aInstallObservabilityApps = var.Section3aInstallObservabilityApps
     # Sumo Logic AWS CloudWatch Metrics and Inventory Source
-    Section4aCreateMetricsSourcesOptions = var.Section4aCreateMetricsSourcesOptions
-    Section4bMetricsNameSpaces = var.Section4bMetricsNameSpaces
+    Section4aCreateMetricsSourcesOptions    = var.Section4aCreateMetricsSourcesOptions
+    Section4bMetricsNameSpaces              = var.Section4bMetricsNameSpaces
     Section4cCloudWatchExistingSourceAPIUrl = var.Section4cCloudWatchExistingSourceAPIUrl
     # Sumo Logic AWS ALB Log Source
     Section5aAutoEnableS3LogsALBResourcesOptions = var.Section5aAutoEnableS3LogsALBResourcesOptions
-    Section5bALBCreateLogSource = var.Section5bALBCreateLogSource
-    Section5cALBLogsSourceUrl = var.Section5cALBLogsSourceUrl
-    Section5dALBS3LogsBucketName = var.Section5dALBS3LogsBucketName
-    Section5eALBS3BucketPathExpression = var.Section5eALBS3BucketPathExpression
+    Section5bALBCreateLogSource                  = var.Section5bALBCreateLogSource
+    Section5cALBLogsSourceUrl                    = var.Section5cALBLogsSourceUrl
+    Section5dALBS3LogsBucketName                 = var.Section5dALBS3LogsBucketName
+    Section5eALBS3BucketPathExpression           = var.Section5eALBS3BucketPathExpression
     # Sumo Logic AWS CloudTrail Source
-    Section6aCreateCloudTrailLogSource = var.Section6aCreateCloudTrailLogSource
-    Section6bCloudTrailLogsSourceUrl = var.Section6bCloudTrailLogsSourceUrl
-    Section6cCloudTrailLogsBucketName = var.Section6cCloudTrailLogsBucketName
+    Section6aCreateCloudTrailLogSource      = var.Section6aCreateCloudTrailLogSource
+    Section6bCloudTrailLogsSourceUrl        = var.Section6bCloudTrailLogsSourceUrl
+    Section6cCloudTrailLogsBucketName       = var.Section6cCloudTrailLogsBucketName
     Section6dCloudTrailBucketPathExpression = var.Section6dCloudTrailBucketPathExpression
     # Sumo Logic AWS Lambda CloudWatch HTTP Source
-    Section7aLambdaCreateCloudWatchLogsSource = var.Section7aLambdaCreateCloudWatchLogsSource
-    Section7bLambdaCloudWatchLogsSourceUrl = var.Section7bLambdaCloudWatchLogsSourceUrl
+    Section7aLambdaCreateCloudWatchLogsSource    = var.Section7aLambdaCreateCloudWatchLogsSource
+    Section7bLambdaCloudWatchLogsSourceUrl       = var.Section7bLambdaCloudWatchLogsSourceUrl
     Section7cAutoSubscribeLogGroupsLambdaOptions = var.Section7cAutoSubscribeLogGroupsLambdaOptions
-    Section7dAutoSubscribeLambdaLogGroupPattern = var.Section7dAutoSubscribeLambdaLogGroupPattern
+    Section7dAutoSubscribeLambdaLogGroupPattern  = var.Section7dAutoSubscribeLambdaLogGroupPattern
     # Sumo Logic AWS X-Ray Source
     Section8aCreateAwsXraySource = var.Section8aCreateAwsXraySource
   }
@@ -61,5 +61,5 @@ resource "aws_cloudformation_stack" "aws-observability" {
   capabilities = [
     "CAPABILITY_IAM",
     "CAPABILITY_NAMED_IAM",
-    "CAPABILITY_AUTO_EXPAND"]
+  "CAPABILITY_AUTO_EXPAND"]
 }
