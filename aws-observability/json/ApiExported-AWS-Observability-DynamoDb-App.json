@@ -1213,12 +1213,12 @@
           "id": "D2E9596B2D679E14",
           "key": "panelpane-da8bb2b4afbc5948",
           "title": "Events Over Time",
-          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+          "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as EventName, Region, Entity, SourceIp, UserName\n| where tolowercase(Entity) matches \"{{entity}}\"\n| timeslice 5m\n| count by EventName, _timeslice\n| transpose row _timeslice column EventName \n| fillmissing timeslice (1h)",
+              "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, Entity, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(Entity) matches \"{{entity}}\"\n| timeslice 5m\n| count by EventName, _timeslice\n| transpose row _timeslice column EventName \n| fillmissing timeslice (1h)",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
@@ -1338,7 +1338,7 @@
       ],
       "variables": [
         {
-          "id": "43B40717079DA05D",
+          "id": "4924EE571364372B",
           "name": "account",
           "displayName": null,
           "defaultValue": "*",
@@ -1352,7 +1352,7 @@
           "hideFromUI": false
         },
         {
-          "id": "BCAE17CFE66DCA6C",
+          "id": "98C7A79721B44C28",
           "name": "region",
           "displayName": null,
           "defaultValue": "*",
@@ -1366,7 +1366,7 @@
           "hideFromUI": false
         },
         {
-          "id": "7476189C8016211D",
+          "id": "471153AD2B0F93C8",
           "name": "namespace",
           "displayName": null,
           "defaultValue": "aws/dynamodb",
@@ -1380,7 +1380,7 @@
           "hideFromUI": false
         },
         {
-          "id": "E79048077059F971",
+          "id": "B2B99CB3CB1CCB6E",
           "name": "entity",
           "displayName": null,
           "defaultValue": "*",
