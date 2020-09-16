@@ -130,3 +130,6 @@ variable "jira_issues_fer_parse" {}
 
 variable "pagerduty_alerts_fer_scope" {}
 variable "pagerduty_alerts_fer_parse" {}
+
+variable "jenkins_build_status_fer_scope" {}
+variable "jenkins_build_status_fer_parse" {}

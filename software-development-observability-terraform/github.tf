@@ -11,7 +11,7 @@ provider "github" {
 
 # Repository Level Webhook
 resource "github_repository_webhook" "github_sumologic_repo_webhook" {
-  count      = "${var.install_github}" && "${var.github_repo_webhook_create}" ? length(var.github_repository_names) : 0
+  count      = ("${var.install_github}" == "collection" || "${var.install_github}" == "both") && "${var.github_repo_webhook_create}" ? length(var.github_repository_names) : 0
   repository = var.github_repository_names[count.index]
 
   configuration {
@@ -27,7 +27,7 @@ resource "github_repository_webhook" "github_sumologic_repo_webhook" {
 
 # Organization Level Webhook
 resource "github_organization_webhook" "github_sumologic_org_webhook" {
-  count = "${var.install_github}" && "${var.github_org_webhook_create}" ? 1 : 0
+  count = ("${var.install_github}" == "collection" || "${var.install_github}" == "both") && "${var.github_org_webhook_create}" ? 1 : 0
 
   configuration {
     url          = sumologic_http_source.github[0].url

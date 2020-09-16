@@ -13,15 +13,17 @@ sumo_api_endpoint       = "<YOUR SUMOLOGIC API ENDPOINT>"
 app_installation_folder = "Software Development Observability"
 # The Sumo Logic apps will be installed in a folder specified by this value under your personal folder in Sumo Logic.
 
-# Sumo Logic Apps, Collection and Webhooks
-install_jira_cloud      = "true"
-install_jira_server     = "true"
-install_bitbucket_cloud = "true"
-install_opsgenie        = "true"
-install_pagerduty       = "true"
-install_github          = "true"
-install_jenkins         = "true"
-install_sdo             = "true"
+# Sumo Logic Apps and Collection. Options are : both, app and collection.
+# For Jenkins, collection is not configured in Jenkins, choosing collection will create the source in Sumo and will configure the FERs.
+# For sdo only app is the valid option.
+install_jira_cloud      = "both"
+install_jira_server     = "both"
+install_bitbucket_cloud = "both"
+install_opsgenie        = "both"
+install_pagerduty       = "both"
+install_github          = "both"
+install_jenkins         = "both"
+install_sdo             = "app"
 
 # Sumo Logic App source category
 jira_cloud_sc  = "SDO/Jira/Cloud"
