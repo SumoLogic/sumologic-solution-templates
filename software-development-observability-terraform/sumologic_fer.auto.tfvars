@@ -9,6 +9,9 @@ jenkins_build_fer_parse = "json \"event_type\", \"team\",  \"service\", \"trace_
 jenkins_deploy_fer_scope = "trace_id"
 jenkins_deploy_fer_parse = "json \"event_type\", \"team\",  \"service\", \"trace_id\", \"user\", \"link\", \"title\", \"timeStamp\", \"message\", \"env_name\", \"result\", \"target_branch\", \"repository_name\", \"commit_id\" as event_type, team, service, trace_id, user, link, title, datetime, message, environment_name, status, target_branch, repository_name, commit_id\n| toLong(datetime) as datetime_epoch\n| \"deploy\" as event_type\n"
 
+jenkins_build_status_fer_scope = "Job_Status"
+jenkins_build_status_fer_parse = "json \"name\", \"number\", \"duration\", \"testResult\", \"jobMetaData\" as name, build_number, build_duration, testResult, jobMetaData\n| \"build_job_results\" as event_type\n"
+
 opsgenie_alerts_fer_scope = "(\"Close\" or \"Create\")"
 opsgenie_alerts_fer_parse = "json \"alert.createdAt\", \"alert.updatedAt\", \"action\", \"alert.team\",  \"alert.priority\", \"alert.source\", \"alert.alertId\" as dateTime, closeddate, alert_type, team, priority, service, alert_id nodrop\n| where alert_type in (\"Close\", \"Create\") \n| toLong(closeddate/1000) as closeddate_epoch\n| toLong(datetime*1000) as datetime_epoch\n| if (priority matches \"p1\", \"high\", if(priority matches \"p2\", \"medium\",  if(priority matches \"p3\", \"medium\",  if(priority matches \"p4\", \"low\",  if(priority matches \"p5\", \"low\", \"other\")))))  as priority\n| if (alert_type matches \"*Create\", \"alert_created\", if(alert_type matches \"*Close\", \"alert_closed\", \"other\") ) as event_type\n"
 
