@@ -48,6 +48,7 @@ Metadata:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
           - Section6aParentStackLambdaARN
+          - Section6bTemplatesBucketName
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -95,6 +96,8 @@ Metadata:
 
       Section6aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
+      Section6bTemplatesBucketName:
+        default: "Bucket name for all nested stacks."
 
 Parameters:
   Section1aSumoDeployment:
@@ -221,56 +224,10 @@ Parameters:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
-
-Mappings:
-  # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
-  # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
-  # Buckets names which are intentional -
-  # 1. appdevzipfiles-eu-north-1s
-  # 2. appdevzipfiles-ap-east-1s
-  # 3. appdevzipfiles-af-south-1s
-  # 4. appdevzipfiles-me-south-1s
-  RegionMap:
-    us-east-1:
-      bucketname: appdevzipfiles-us-east-1
-    us-east-2:
-      bucketname: appdevzipfiles-us-east-2
-    us-west-1:
-      bucketname: appdevzipfiles-us-west-1
-    us-west-2:
-      bucketname: appdevzipfiles-us-west-2
-    ap-south-1:
-      bucketname: appdevzipfiles-ap-south-1
-    ap-northeast-2:
-      bucketname: appdevzipfiles-ap-northeast-2
-    ap-southeast-1:
-      bucketname: appdevzipfiles-ap-southeast-1
-    ap-southeast-2:
-      bucketname: appdevzipfiles-ap-southeast-2
-    ap-northeast-1:
-      bucketname: appdevzipfiles-ap-northeast-1
-    ca-central-1:
-      bucketname: appdevzipfiles-ca-central-1
-    eu-central-1:
-      bucketname: appdevzipfiles-eu-central-1
-    eu-west-1:
-      bucketname: appdevzipfiles-eu-west-1
-    eu-west-2:
-      bucketname: appdevzipfiles-eu-west-2
-    eu-west-3:
-      bucketname: appdevzipfiles-eu-west-3
-    eu-north-1:
-      bucketname: appdevzipfiles-eu-north-1s
-    sa-east-1:
-      bucketname: appdevzipfiles-sa-east-1
-    ap-east-1:
-      bucketname: appdevzipfiles-ap-east-1s
-    af-south-1:
-      bucketname: appdevzipfiles-af-south-1s
-    eu-south-1:
-      bucketname: appdevzipfiles-eu-south-1
-    me-south-1:
-      bucketname: appdevzipfiles-me-south-1s
+  Section6bTemplatesBucketName:
+    Type: String
+    Default: "appdevzipfiles-us-east-1"
+    Description: Bucket Name for all the nested templates.
 
 Conditions:
   do_not_use_parent_stack: !Equals [ !Ref Section6aParentStackLambdaARN, "ParentStackLambdaARN"]
@@ -292,18 +249,11 @@ Conditions:
 
 Resources:
 
-  WaitHandle:
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Condition: do_not_use_parent_stack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
+      TemplateURL: !Sub "https://${Section6bTemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
       Parameters:
         SumoLogicDeployment: !Ref Section1aSumoDeployment
         SumoLogicAccessID: !Ref Section1bSumoAccessID
@@ -362,18 +312,9 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  UpdateSourceWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: MetricRule
-    Properties:
-      Handle: !Ref WaitHandle
-      Timeout: "20"
-      Count: 0
-
   SumoCloudTrailLogsUpdateSource:
     Type: Custom::SumoLogicUpdateFields
     Condition: update_cloudtrail_logs_source
-    DependsOn: UpdateSourceWaitCondition
     Properties:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section6aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
@@ -388,7 +329,6 @@ Resources:
   SumoMetricsUpdateSource:
     Type: Custom::SumoLogicUpdateFields
     Condition: update_metrics_source
-    DependsOn: UpdateSourceWaitCondition
     Properties:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section6aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
@@ -403,17 +343,20 @@ Resources:
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
-    DependsOn: UpdateSourceWaitCondition
     Properties:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section6aParentStackLambdaARN]
       RemoveOnDeleteStack: false
-      FieldExtractionRuleName: "AwsObservabilityFieldExtractionRule"
+      FieldExtractionRuleName: "AwsObservabilityDynamoDBCloudTrailLogsFER"
       FieldExtractionRuleScope: !Join
         - ""
         - - "(_source="
           - !If [update_cloudtrail_logs_source, !Sub "\"${SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5eCloudTrailLogsSourceName]
-          - " (\"lambda.amazonaws.com\" or \"apigateway.amazonaws.com\" or \"dynamodb.amazonaws.com\" or \"rds.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: "| json \"eventSource\", \"awsRegion\" as eventSource, region | where eventSource in (\"rds.amazonaws.com\", \"apigateway.amazonaws.com\", \"lambda.amazonaws.com\", \"dynamodb.amazonaws.com\") | if (eventSource matches \"rds.amazonaws.com\", \"aws/rds\", if (eventSource matches \"apigateway.amazonaws.com\",  \"aws/apigateway\", if (eventSource matches \"lambda.amazonaws.com\",  \"aws/lambda\", if (eventSource matches \"dynamodb.amazonaws.com\",  \"aws/dynamodb\", \"\")))) as Namespace"
+          - " (\"dynamodb.amazonaws.com\"))"
+      FieldExtractionRuleParseExpression: "json \"eventSource\", \"awsRegion\", \"requestParameters.tableName\" as eventSource, region, tablename
+                                            | where eventSource = \"dynamodb.amazonaws.com\"
+                                            | \"aws/dynamodb\" as namespace
+                                            | tolowercase(tablename) as tablename
+                                            | fields region, namespace, tablename"
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey

@@ -306,6 +306,8 @@ Conditions:
 
   # FER Condition
   create_cloudtrail_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
+  create_alb_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
+  create_cloudwatch_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSource, 'Yes' ]
 
   # Condition for S3 Logging enable
   is_bucket_available: !Or
@@ -421,6 +423,7 @@ Resources:
         CloudTrailLogsSourceName: !Sub "${Section2aAccountAlias}-cloudtrail-logs-${AWS::Region}"
         CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSource
         CloudWatchLogsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-logs-${AWS::Region}"
+        TemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   AutoEnableOptions:
     Type: AWS::CloudFormation::Stack
@@ -460,6 +463,7 @@ Resources:
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateMetaDataSource: "No"
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section5bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   ALBWaitHandle:
     DependsOn: sumoEC2MetricsAppStack
@@ -494,8 +498,10 @@ Resources:
         Section4cCloudWatchExistingSourceAPIUrl: !Ref Section4cCloudWatchExistingSourceAPIUrl
         Section5aCreateS3Bucket: "No"
         Section5cCreateALBLogSource: "No"
+        Section5eALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
         Section5fALBLogsAPIUrl: !Ref Section5cALBLogsSourceUrl
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   DynamoDBWaitHandle:
     DependsOn: sumoAlbMetricsAppStack
@@ -529,7 +535,10 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
+        Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   RDSWaitHandle:
     DependsOn: sumoDynamoDBMetricsAppStack
@@ -563,7 +572,10 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
+        Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   ApiWaitHandle:
     DependsOn: sumoRdsMetricsAppStack
@@ -597,7 +609,10 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
+        Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   RootCauseWaitHandle:
     DependsOn: sumoApiGatewayMetricsAppStack
@@ -633,6 +648,7 @@ Resources:
         Section4aCreateAwsXRaySource: !If [install_xray_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section4bAwsXRaySourceName: !Sub "${Section2aAccountAlias}-xray-aws-${AWS::Region}"
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section5bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   LambdaWaitHandle:
     DependsOn: RootCauseAppStack
@@ -669,8 +685,10 @@ Resources:
         Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
         Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
         Section6aCreateCloudWatchLogSource: "No"
+        Section6bCloudWatchLogsSourceName: !If [create_cloudwatch_logs_source, "*cloudtrail-logs*", ""]
         Section6cCloudWatchLogsAPIUrl: !Ref Section7bLambdaCloudWatchLogsSourceUrl
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section7bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   AddAccountField:
     Type: Custom::SumoLogicFieldsSchema
