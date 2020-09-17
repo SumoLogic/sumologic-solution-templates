@@ -14,7 +14,7 @@ data "pagerduty_extension_schema" "webhook" {
 
 # Create Webhook in Pagerduty
 resource "pagerduty_extension" "sumologic_extension" {
-  count             = "${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "both" ? length(var.pagerduty_services_pagerduty_webhooks) : 0
+  count             = "${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all" ? length(var.pagerduty_services_pagerduty_webhooks) : 0
   name              = "Sumo Logic Webhook"
   endpoint_url      = sumologic_http_source.pagerduty[0].url
   extension_schema  = data.pagerduty_extension_schema.webhook.id

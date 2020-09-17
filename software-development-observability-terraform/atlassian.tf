@@ -12,7 +12,7 @@ provider "restapi" {
 }
 
 data "template_file" "data_json" {
-  count      = "${var.install_opsgenie}" == "collection" || "${var.install_opsgenie}" == "both" ? 1 : 0
+  count      = "${var.install_opsgenie}" == "collection" || "${var.install_opsgenie}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.opsgenie]
   template   = "${file("${path.module}/templates/opsgenie_to_sumo_webhook.json.tmpl")}"
   vars = {
@@ -21,7 +21,7 @@ data "template_file" "data_json" {
 }
 
 resource "restapi_object" "ops_to_sumo_webhook" {
-  count = "${var.install_opsgenie}" == "collection" || "${var.install_opsgenie}" == "both" ? 1 : 0
+  count = "${var.install_opsgenie}" == "collection" || "${var.install_opsgenie}" == "all" ? 1 : 0
   path  = "/v2/integrations"
   # debug = true
   id_attribute = "data/id"
@@ -37,7 +37,7 @@ provider "jira" {
 
 # Create/Delete Jira Cloud to Sumo Logic Webhook
 resource "jira_webhook" "sumo_jira" {
-  count  = "${var.install_jira_cloud}" == "collection" || "${var.install_jira_cloud}" == "both" ? 1 : 0
+  count  = "${var.install_jira_cloud}" == "collection" || "${var.install_jira_cloud}" == "all" ? 1 : 0
   name   = "Sumologic Hook"
   url    = sumologic_http_source.jira_cloud[0].url
   jql    = var.jira_cloud_jql
@@ -55,7 +55,7 @@ provider "jira" {
 # Create/Delete Jira Server to Sumo Logic Webhook
 resource "jira_webhook" "sumo_jira_server" {
   provider = jira.server
-  count    = "${var.install_jira_server}" == "collection" || "${var.install_jira_server}" == "both" ? 1 : 0
+  count    = "${var.install_jira_server}" == "collection" || "${var.install_jira_server}" == "all" ? 1 : 0
   name     = "Sumologic Hook"
   url      = sumologic_http_source.jira_server[0].url
   jql      = var.jira_server_jql
@@ -70,7 +70,7 @@ provider "bitbucket" {
 
 # Create/Delete BitBucket to Sumo Logic Webhook
 resource "bitbucket_hook" "sumo_bitbucket" {
-  count       = "${var.install_bitbucket_cloud}" == "collection" || "${var.install_bitbucket_cloud}" == "both" ? length(var.bitbucket_cloud_repos) : 0
+  count       = "${var.install_bitbucket_cloud}" == "collection" || "${var.install_bitbucket_cloud}" == "all" ? length(var.bitbucket_cloud_repos) : 0
   owner       = var.bitbucket_cloud_owner
   repository  = var.bitbucket_cloud_repos[count.index]
   url         = sumologic_http_source.bitbucket_cloud[0].url
