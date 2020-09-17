@@ -16,7 +16,7 @@ resource "sumologic_collector" "sdo_collector" {
 
 # Create/Delete Jira Cloud Source
 resource "sumologic_http_source" "jira_cloud" {
-  count        = "${var.install_jira_cloud}" == "collection" || "${var.install_jira_cloud}" == "both" ? 1 : 0
+  count        = "${var.install_jira_cloud}" == "collection" || "${var.install_jira_cloud}" == "all" ? 1 : 0
   name         = "Jira Cloud"
   category     = var.jira_cloud_sc
   collector_id = sumologic_collector.sdo_collector.id
@@ -24,7 +24,7 @@ resource "sumologic_http_source" "jira_cloud" {
 
 # Create/Delete BitBucket Cloud Source
 resource "sumologic_http_source" "bitbucket_cloud" {
-  count        = "${var.install_bitbucket_cloud}" == "collection" || "${var.install_bitbucket_cloud}" == "both" ? 1 : 0
+  count        = "${var.install_bitbucket_cloud}" == "collection" || "${var.install_bitbucket_cloud}" == "all" ? 1 : 0
   name         = "Bitbucket Cloud"
   category     = var.bitbucket_sc
   fields       = { "_convertHeadersToFields" = "true" }
@@ -33,7 +33,7 @@ resource "sumologic_http_source" "bitbucket_cloud" {
 
 # Create/Delete Jira Server Source
 resource "sumologic_http_source" "jira_server" {
-  count        = "${var.install_jira_server}" == "collection" || "${var.install_jira_server}" == "both" ? 1 : 0
+  count        = "${var.install_jira_server}" == "collection" || "${var.install_jira_server}" == "all" ? 1 : 0
   name         = "Jira Server"
   category     = var.jira_server_sc
   collector_id = sumologic_collector.sdo_collector.id
@@ -41,7 +41,7 @@ resource "sumologic_http_source" "jira_server" {
 
 # Create/Delete OpsGenie Source
 resource "sumologic_http_source" "opsgenie" {
-  count        = "${var.install_opsgenie}" == "collection" || "${var.install_opsgenie}" == "both" ? 1 : 0
+  count        = "${var.install_opsgenie}" == "collection" || "${var.install_opsgenie}" == "all" ? 1 : 0
   name         = "OpsGenie"
   category     = var.opsgenie_sc
   collector_id = sumologic_collector.sdo_collector.id
@@ -49,7 +49,7 @@ resource "sumologic_http_source" "opsgenie" {
 
 # Create/Delete Pagerduty Source
 resource "sumologic_http_source" "pagerduty" {
-  count        = "${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "both" ? 1 : 0
+  count        = "${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all" ? 1 : 0
   name         = "Pagerduty"
   category     = var.pagerduty_sc
   collector_id = sumologic_collector.sdo_collector.id
@@ -57,7 +57,7 @@ resource "sumologic_http_source" "pagerduty" {
 
 # Create/Delete Github Source
 resource "sumologic_http_source" "github" {
-  count        = "${var.install_github}" == "collection" || "${var.install_github}" == "both" ? 1 : 0
+  count        = "${var.install_github}" == "collection" || "${var.install_github}" == "all" ? 1 : 0
   name         = "Github"
   category     = var.github_sc
   fields       = { "_convertHeadersToFields" = "true" }
@@ -66,7 +66,7 @@ resource "sumologic_http_source" "github" {
 
 # Create/Delete Jenkins Source
 resource "sumologic_http_source" "jenkins" {
-  count        = "${var.install_jenkins}" == "collection" || "${var.install_jenkins}" == "both" ? 1 : 0
+  count        = "${var.install_jenkins}" == "collection" || "${var.install_jenkins}" == "all" ? 1 : 0
   name         = "Jenkins"
   category     = var.jenkins_sc
   fields       = { "_convertHeadersToFields" = "true" }
@@ -97,7 +97,7 @@ locals {
 # Install Apps
 # Install Jira Cloud
 resource "null_resource" "install_jira_cloud_app" {
-  count      = "${var.install_jira_cloud}" == "app" || "${var.install_jira_cloud}" == "both" ? 1 : 0
+  count      = "${var.install_jira_cloud}" == "app" || "${var.install_jira_cloud}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jira_cloud]
 
   provisioner "local-exec" {
@@ -113,7 +113,7 @@ resource "null_resource" "install_jira_cloud_app" {
 
 # Install Jira Server
 resource "null_resource" "install_jira_server_app" {
-  count      = "${var.install_jira_server}" == "app" || "${var.install_jira_server}" == "both" ? 1 : 0
+  count      = "${var.install_jira_server}" == "app" || "${var.install_jira_server}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jira_server]
 
   provisioner "local-exec" {
@@ -129,7 +129,7 @@ resource "null_resource" "install_jira_server_app" {
 
 # Install Bitbucket
 resource "null_resource" "install_bitbucket_cloud_app" {
-  count      = "${var.install_bitbucket_cloud}" == "app" || "${var.install_bitbucket_cloud}" == "both"? 1 : 0
+  count      = "${var.install_bitbucket_cloud}" == "app" || "${var.install_bitbucket_cloud}" == "all"? 1 : 0
   depends_on = [sumologic_http_source.bitbucket_cloud]
 
   provisioner "local-exec" {
@@ -145,7 +145,7 @@ resource "null_resource" "install_bitbucket_cloud_app" {
 
 # Install Opsgenie
 resource "null_resource" "install_Opsgenie_app" {
-  count      = "${var.install_opsgenie}" == "app" || "${var.install_opsgenie}" == "both" ? 1 : 0
+  count      = "${var.install_opsgenie}" == "app" || "${var.install_opsgenie}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.opsgenie]
 
   provisioner "local-exec" {
@@ -161,7 +161,7 @@ resource "null_resource" "install_Opsgenie_app" {
 
 # Install Pagerduty App - Uncomment after GA
 # resource "null_resource" "install_pagerduty_app" {
-#   count      = "${var.install_pagerduty}" == "app" || "${var.install_pagerduty}" == "both" ? 1 : 0
+#   count      = "${var.install_pagerduty}" == "app" || "${var.install_pagerduty}" == "all" ? 1 : 0
 #   depends_on = [sumologic_http_source.pagerduty]
 
 #   provisioner "local-exec" {
@@ -177,7 +177,7 @@ resource "null_resource" "install_Opsgenie_app" {
 
 # # Install Github App - Uncomment after GA
 # resource "null_resource" "install_github_app" {
-#   count      = "${var.install_github}" == "app" || "${var.install_github}" == "both" ? 1 : 0
+#   count      = "${var.install_github}" == "app" || "${var.install_github}" == "all" ? 1 : 0
 #   depends_on = [sumologic_http_source.github]
 
 #   provisioner "local-exec" {
@@ -193,7 +193,7 @@ resource "null_resource" "install_Opsgenie_app" {
 
 # # Install Jenkins App - Uncomment after GA
 # resource "null_resource" "install_jenkins_app" {
-#   count      = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "both" ? 1 : 0
+#   count      = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "all" ? 1 : 0
 #   depends_on = [sumologic_http_source.jenkins]
 
 #   provisioner "local-exec" {
@@ -233,7 +233,7 @@ resource "sumologic_content" "install_sdo_app" {
 # REMOVE AFTER BETA
 # Install PagerDuty App by importing JSON
 data "template_file" "pagerduty_json" {
-  count      = "${var.install_pagerduty}" == "app" || "${var.install_pagerduty}" == "both" ? 1 : 0
+  count      = "${var.install_pagerduty}" == "app" || "${var.install_pagerduty}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.pagerduty]
   template   = "${file("${path.module}/sdo_app_artifacts/pagerduty.json.tmpl")}"
   vars = {
@@ -244,7 +244,7 @@ data "template_file" "pagerduty_json" {
 # REMOVE AFTER BETA
 # Install PagerDuty App by importing JSON
 resource "sumologic_content" "install_pagerduty_app" {
-  count = "${var.install_pagerduty}" == "app" || "${var.install_pagerduty}" == "both" ? 1 : 0
+  count = "${var.install_pagerduty}" == "app" || "${var.install_pagerduty}" == "all" ? 1 : 0
   parent_id = sumologic_folder.folder.id
   config = data.template_file.pagerduty_json[0].rendered
 }
@@ -252,7 +252,7 @@ resource "sumologic_content" "install_pagerduty_app" {
 # REMOVE AFTER BETA
 # Install jenkins App by importing JSON
 data "template_file" "jenkins_json" {
-  count      = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "both" ? 1 : 0
+  count      = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jenkins]
   template   = "${file("${path.module}/sdo_app_artifacts/jenkins.json.tmpl")}"
   vars = {
@@ -263,7 +263,7 @@ data "template_file" "jenkins_json" {
 # REMOVE AFTER BETA
 # Install Jenkins App by importing JSON
 resource "sumologic_content" "install_jenkins_app" {
-  count = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "both" ? 1 : 0
+  count = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "all" ? 1 : 0
   parent_id = sumologic_folder.folder.id
   config = data.template_file.jenkins_json[0].rendered
 }
@@ -271,7 +271,7 @@ resource "sumologic_content" "install_jenkins_app" {
 # REMOVE AFTER BETA
 # Install github App by importing JSON
 data "template_file" "github_json" {
-  count      = "${var.install_github}" == "app" || "${var.install_github}" == "both" ? 1 : 0
+  count      = "${var.install_github}" == "app" || "${var.install_github}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.github]
   template   = "${file("${path.module}/sdo_app_artifacts/github.json.tmpl")}"
   vars = {
@@ -282,7 +282,7 @@ data "template_file" "github_json" {
 # REMOVE AFTER BETA
 # Install Github App by importing JSON
 resource "sumologic_content" "install_github_app" {
-  count = "${var.install_github}" == "app" || "${var.install_github}" == "both" ? 1 : 0
+  count = "${var.install_github}" == "app" || "${var.install_github}" == "all" ? 1 : 0
   parent_id = sumologic_folder.folder.id
   config = data.template_file.github_json[0].rendered
 }
@@ -301,7 +301,7 @@ provider "restapi" {
 # Create/Delete Field required by BitBucket App in Sumo Logic by calling REST API
 resource "restapi_object" "bitbucket_field" {
   provider     = restapi.sumo
-  count        = "${var.install_bitbucket_cloud}" == "collection" || "${var.install_bitbucket_cloud}" == "both" ? 1 : 0
+  count        = "${var.install_bitbucket_cloud}" == "collection" || "${var.install_bitbucket_cloud}" == "all" ? 1 : 0
   path         = "/v1/fields"
   destroy_path = "/v1/fields/{id}"
   id_attribute = "fieldId"
@@ -315,7 +315,7 @@ resource "restapi_object" "bitbucket_field" {
 # Create/Delete Field required by Github App in Sumo Logic by calling REST API
 resource "restapi_object" "github_field" {
   provider     = restapi.sumo
-  count        = "${var.install_github}" == "collection" || "${var.install_github}" == "both" ? 1 : 0
+  count        = "${var.install_github}" == "collection" || "${var.install_github}" == "all" ? 1 : 0
   path         = "/v1/fields"
   destroy_path = "/v1/fields/{id}"
   id_attribute = "fieldId"
