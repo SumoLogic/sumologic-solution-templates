@@ -157,6 +157,11 @@ Parameters:
     Description: "Provide a CloudWatch Logs Source Name"
     Default: ""
 
+  TemplatesBucketName:
+    Type: String
+    Default: "appdevzipfiles-us-east-1"
+    Description: Bucket Name for all the nested templates.
+
 Conditions:
   # Sources Conditions
   install_metadata_source: !Equals [!Ref CreateMetaDataSource, 'Yes']
@@ -195,55 +200,6 @@ Conditions:
     - !Condition install_cloudtrail_logs_source
 
 Mappings:
-  # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
-  # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
-  # Buckets names which are intentional -
-  # 1. appdevzipfiles-eu-north-1s
-  # 2. appdevzipfiles-ap-east-1s
-  # 3. appdevzipfiles-af-south-1s
-  # 4. appdevzipfiles-me-south-1s
-  RegionMap:
-    us-east-1:
-      bucketname: appdevzipfiles-us-east-1
-    us-east-2:
-      bucketname: appdevzipfiles-us-east-2
-    us-west-1:
-      bucketname: appdevzipfiles-us-west-1
-    us-west-2:
-      bucketname: appdevzipfiles-us-west-2
-    ap-south-1:
-      bucketname: appdevzipfiles-ap-south-1
-    ap-northeast-2:
-      bucketname: appdevzipfiles-ap-northeast-2
-    ap-southeast-1:
-      bucketname: appdevzipfiles-ap-southeast-1
-    ap-southeast-2:
-      bucketname: appdevzipfiles-ap-southeast-2
-    ap-northeast-1:
-      bucketname: appdevzipfiles-ap-northeast-1
-    ca-central-1:
-      bucketname: appdevzipfiles-ca-central-1
-    eu-central-1:
-      bucketname: appdevzipfiles-eu-central-1
-    eu-west-1:
-      bucketname: appdevzipfiles-eu-west-1
-    eu-west-2:
-      bucketname: appdevzipfiles-eu-west-2
-    eu-west-3:
-      bucketname: appdevzipfiles-eu-west-3
-    eu-north-1:
-      bucketname: appdevzipfiles-eu-north-1s
-    sa-east-1:
-      bucketname: appdevzipfiles-sa-east-1
-    ap-east-1:
-      bucketname: appdevzipfiles-ap-east-1s
-    af-south-1:
-      bucketname: appdevzipfiles-af-south-1s
-    eu-south-1:
-      bucketname: appdevzipfiles-eu-south-1
-    me-south-1:
-      bucketname: appdevzipfiles-me-south-1s
-
   Region2ELBAccountId:
     us-east-1:
       AccountId: "127311923021"
@@ -297,8 +253,6 @@ Mappings:
       AccountId: "037604701340"
 
 Resources:
-  WaitHandle:
-    Type: "AWS::CloudFormation::WaitConditionHandle"
 
   LambdaRole:
     Type: AWS::IAM::Role
@@ -334,8 +288,8 @@ Resources:
       Handler: main.handler
       Runtime: python3.7
       CodeUri:
-        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.9.zip"
+        Bucket: !Ref TemplatesBucketName
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.10.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -496,12 +450,9 @@ Resources:
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: false
-      ExplorerName: "AWS Observability"
-      MetadataKeys:
-        - "account"
-        - "region"
-        - "namespace"
-        - "entity"
+      HierarchyName: "AWS Observability"
+      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}}]}}}
+      HierarchyFilter: { "key": "_contentType", "value": "AwsCloudWatch" }
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
@@ -571,14 +522,6 @@ Resources:
 
   ############# START - RESOURCES FOR CLOUD WATCH METRICS SOURCE #################
 
-  SumoLogicCloudwatchMetricsSourceWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: CreateSumoLogicAWSExplorerView
-    Properties:
-      Handle: !Ref WaitHandle
-      Timeout: "3"
-      Count: 0
-
   LambdaToDecideCWMetricsSources:
     Type: AWS::Lambda::Function
     Properties:
@@ -635,13 +578,8 @@ Resources:
   CloudWatchMetricsFirstStack:
     Type: AWS::CloudFormation::Stack
     Condition: install_cloud_watch_metric_source
-    DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
       Parameters:
         SumoLogicDeployment: !Ref SumoLogicDeployment
         SumoLogicAccessID: !Ref SumoLogicAccessID
@@ -666,13 +604,8 @@ Resources:
   CloudWatchMetricsSecondStack:
     Type: AWS::CloudFormation::Stack
     Condition: install_cloud_watch_metric_source
-    DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
       Parameters:
         SumoLogicDeployment: !Ref SumoLogicDeployment
         SumoLogicAccessID: !Ref SumoLogicAccessID
@@ -694,18 +627,10 @@ Resources:
         CreateFifthMetricsSource: "No"
 
   ############# START - RESOURCES FOR ALB SOURCE #################
-  ALBSourceWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: SumoLogicCloudwatchMetricsSourceWaitCondition
-    Properties:
-      Handle: !Ref WaitHandle
-      Timeout: "5"
-      Count: 0
 
   ALBSource:
     Condition: install_alb_logs_source
     Type: Custom::AWSSource
-    DependsOn: ALBSourceWaitCondition
     Properties:
       SourceType: AwsElbBucket
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -780,18 +705,10 @@ Resources:
         - Ref: ALBSNSTopic
 
   ############# START - RESOURCES FOR CLOUD TRAIL SOURCE #################
-  CloudTrailSourceWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: ALBSourceWaitCondition
-    Properties:
-      Handle: !Ref WaitHandle
-      Timeout: "7"
-      Count: 0
 
   CloudTrailSource:
     Condition: install_cloudtrail_logs_source
     Type: Custom::AWSSource
-    DependsOn: CloudTrailSourceWaitCondition
     Properties:
       SourceType: AwsCloudTrailBucket
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -864,13 +781,6 @@ Resources:
         - Ref: CloudTrailSNSTopic
 
   ############# START - RESOURCES FOR CLOUD WATCH LOGS SOURCE #################
-  CloudWatchHTTPSourceWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    DependsOn: CloudTrailSourceWaitCondition
-    Properties:
-      Handle: !Ref WaitHandle
-      Timeout: "9"
-      Count: 0
 
   CloudWatchEventFunction:
     Type: AWS::CloudFormation::Stack
@@ -884,7 +794,6 @@ Resources:
   CloudWatchHTTPSource:
     Condition: install_cloudwatch_logs_source
     Type: Custom::HTTPSource
-    DependsOn: CloudWatchHTTPSourceWaitCondition
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
