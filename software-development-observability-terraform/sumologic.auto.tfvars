@@ -13,15 +13,17 @@ sumo_api_endpoint       = "<YOUR SUMOLOGIC API ENDPOINT>"
 app_installation_folder = "Software Development Observability"
 # The Sumo Logic apps will be installed in a folder specified by this value under your personal folder in Sumo Logic.
 
-# Sumo Logic Apps, Collection and Webhooks
-install_jira_cloud      = "true"
-install_jira_server     = "true"
-install_bitbucket_cloud = "true"
-install_opsgenie        = "true"
-install_pagerduty       = "true"
-install_github          = "true"
-install_jenkins         = "true"
-install_sdo             = "true"
+# Sumo Logic Apps and Collection. Options are : all, app, fer and collection.
+# For Jenkins, collection is not configured in Jenkins, choosing collection will create the source in Sumo and will configure the FERs.
+# For sdo only app is the valid option.
+install_jira_cloud      = "all"
+install_jira_server     = "all"
+install_bitbucket_cloud = "all"
+install_opsgenie        = "all"
+install_pagerduty       = "all"
+install_github          = "all"
+install_jenkins         = "all"
+install_sdo             = "app"
 
 # Sumo Logic App source category
 jira_cloud_sc  = "SDO/Jira/Cloud"
@@ -33,13 +35,13 @@ github_sc      = "SDO/Github"
 jenkins_sc     = "SDO/Jenkins"
 
 # install_opsgenie should be true for the below option install_sumo_to_opsgenie_webhook to be true. https://help.sumologic.com/Manage/Connections-and-Integrations/Webhook-Connections/Webhook_Connection_for_Opsgenie
-install_sumo_to_opsgenie_webhook        = "false"
-# This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_opsgenie_webhook.json.tmpl for customizing payload.
-install_sumo_to_jiracloud_webhook       = "false"
-# This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiracloud_webhook.json.tmpl for customizing payload.
-install_sumo_to_jiraserver_webhook      = "false"
-# This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiraserver_webhook.json.tmpl for customizing payload.
-install_sumo_to_jiraservicedesk_webhook = "false"
-# This feature is in Beta. To participate contact your Sumo account executive. You can modify the file sumo_to_jiraservicedesk_webhook.json.tmpl for customizing payload.
-install_sumo_to_pagerduty_webhook       = "false"
+install_sumo_to_opsgenie_webhook        = "true"
+# You can modify the file sumo_to_opsgenie_webhook.json.tmpl for customizing payload.
+install_sumo_to_jiracloud_webhook       = "true"
+# You can modify the file sumo_to_jiracloud_webhook.json.tmpl for customizing payload.
+install_sumo_to_jiraserver_webhook      = "true"
+# You can modify the file sumo_to_jiraserver_webhook.json.tmpl for customizing payload.
+install_sumo_to_jiraservicedesk_webhook = "true"
+# You can modify the file sumo_to_jiraservicedesk_webhook.json.tmpl for customizing payload.
+install_sumo_to_pagerduty_webhook       = "true"
 
