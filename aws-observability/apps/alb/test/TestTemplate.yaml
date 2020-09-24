@@ -4,10 +4,10 @@ Global:
   TestProjectName: BasicTestProject
   ParallelTestsRun: 8
   GlobalParameters:
-    Section1aSumoDeployment: us1
-    Section1bSumoAccessID: '${ADMIN_ROLE_ACCESS_ID}'
-    Section1cSumoAccessKey: '${ADMIN_ROLE_ACCESS_KEY}'
-    Section1dSumoOrganizationId: '${US1_ORG_ID}'
+    Section1aSumoDeployment: us2
+    Section1bSumoAccessID: '${ACCESS_ID_6}'
+    Section1cSumoAccessKey: '${ACCESS_KEY_6}'
+    Section1dSumoOrganizationId: '${US2_PROF_ORG_ID}'
     Section1eRemoveSumoResourcesOnDeleteStack: 'true'
     Section2bAccountAlias: 'testenv'
     Section3aInstallApp: 'No'
@@ -29,21 +29,25 @@ Tests:
         Section3bCollectorName: 'Sourabh Collector Install All'
         Section4bCloudWatchMetricsSourceName: 'Source CloudWatch Metrics All'
         Section5eALBLogsSourceName: 'Source ALB Logs All'
+        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - WaitHandle
             - CreateCommonResources
             - TagAWSResources
             - ALBMetricRule
             - sumoApp
-            - ALBUpdateSourceWaitCondition
-            - CreateCommonResources.WaitHandle
+            - AlbLogsFieldExtractionRule
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.AccountCheck
+            - CreateCommonResources.CloudWatchMetricsFirstStack
+            - CreateCommonResources.CloudWatchMetricsFirstStack.FirstCloudwatchMetricsSource
+            - CreateCommonResources.CloudWatchMetricsSecondStack
+            - CreateCommonResources.LambdaToDecideCWMetricsSources
+            - CreateCommonResources.Primerinvoke
             - CreateCommonResources.CommonBucketSNSTopic
             - CreateCommonResources.CommonS3Bucket
             - CreateCommonResources.CommonBucketPolicy
@@ -51,13 +55,8 @@ Tests:
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - CreateCommonResources.SumoLogicSourceRole
             - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSource
-            - CreateCommonResources.ALBSourceWaitCondition
             - CreateCommonResources.ALBSource
             - CreateCommonResources.ALBSNSSubscription
-            - CreateCommonResources.CloudTrailSourceWaitCondition
-            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -65,6 +64,8 @@ Tests:
             - CreateCommonResources.LambdaRoleARN
             - CreateCommonResources.BucketName
             - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.PaidAccountCheck
+            - CreateCommonResources.Namespaces
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
@@ -80,31 +81,29 @@ Tests:
     Parameters:
       Values:
         Section2aTagExistingAWSResources: 'Yes'
+        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - WaitHandle
             - CreateCommonResources
             - TagAWSResources
             - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
-            - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.AccountCheck
+            - CreateCommonResources.LambdaToDecideCWMetricsSources
+            - CreateCommonResources.Primerinvoke
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.ALBSourceWaitCondition
-            - CreateCommonResources.CloudTrailSourceWaitCondition
-            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
             - CreateCommonResources.LambdaHelperARN
             - CreateCommonResources.LambdaRoleARN
             - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.PaidAccountCheck
+            - CreateCommonResources.Namespaces
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
@@ -119,33 +118,33 @@ Tests:
         Section4aCreateCloudWatchMetricsSource: 'Yes'
         Section3bCollectorName: 'Sourabh Collector Install CW Source'
         Section4bCloudWatchMetricsSourceName: 'Source CloudWatch Metrics'
+        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - WaitHandle
             - CreateCommonResources
             - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
-            - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.AccountCheck
+            - CreateCommonResources.CloudWatchMetricsFirstStack
+            - CreateCommonResources.CloudWatchMetricsFirstStack.FirstCloudwatchMetricsSource
+            - CreateCommonResources.CloudWatchMetricsSecondStack
+            - CreateCommonResources.LambdaToDecideCWMetricsSources
+            - CreateCommonResources.Primerinvoke
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - CreateCommonResources.SumoLogicSourceRole
             - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSource
-            - CreateCommonResources.ALBSourceWaitCondition
-            - CreateCommonResources.CloudTrailSourceWaitCondition
-            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
             - CreateCommonResources.LambdaHelperARN
             - CreateCommonResources.LambdaRoleARN
             - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.PaidAccountCheck
+            - CreateCommonResources.Namespaces
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
@@ -160,6 +159,7 @@ Tests:
     Parameters:
       Values:
         Section3aInstallApp: 'Yes'
+        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -168,23 +168,20 @@ Tests:
             - CreateCommonResources
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.AccountCheck
+            - CreateCommonResources.LambdaToDecideCWMetricsSources
+            - CreateCommonResources.Primerinvoke
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.ALBSourceWaitCondition
-            - CreateCommonResources.CloudTrailSourceWaitCondition
-            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
-            - CreateCommonResources.WaitHandle
-            - WaitHandle
             - ALBMetricRule
             - sumoApp
-            - ALBUpdateSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
             - CreateCommonResources.LambdaHelperARN
             - CreateCommonResources.LambdaRoleARN
             - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.PaidAccountCheck
+            - CreateCommonResources.Namespaces
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
@@ -200,19 +197,20 @@ Tests:
         Section5cCreateALBLogSource: 'Yes'
         Section3bCollectorName: 'Sourabh Collector Install Log Source'
         Section5eALBLogsSourceName: 'Source ALB Logs'
+        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - WaitHandle
             - CreateCommonResources
             - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
-            - CreateCommonResources.WaitHandle
+            - AlbLogsFieldExtractionRule
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.AccountCheck
+            - CreateCommonResources.LambdaToDecideCWMetricsSources
+            - CreateCommonResources.Primerinvoke
             - CreateCommonResources.CommonBucketSNSTopic
             - CreateCommonResources.CommonBucketPolicy
             - CreateCommonResources.CommonS3Bucket
@@ -220,12 +218,8 @@ Tests:
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - CreateCommonResources.SumoLogicSourceRole
             - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
-            - CreateCommonResources.ALBSourceWaitCondition
             - CreateCommonResources.ALBSource
             - CreateCommonResources.ALBSNSSubscription
-            - CreateCommonResources.CloudTrailSourceWaitCondition
-            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -233,6 +227,8 @@ Tests:
             - CreateCommonResources.LambdaRoleARN
             - CreateCommonResources.BucketName
             - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.PaidAccountCheck
+            - CreateCommonResources.Namespaces
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
@@ -249,37 +245,36 @@ Tests:
         Section5cCreateALBLogSource: 'Yes'
         Section3bCollectorName: 'Sourabh Collector Without Bucket Log Source'
         Section5eALBLogsSourceName: 'Source ALB Logs'
-        Section5bS3LogsBucketName: 'sumologiclambdahelper-ap-south-1'
+        Section5bS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - WaitHandle
             - CreateCommonResources
             - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
-            - CreateCommonResources.WaitHandle
+            - AlbLogsFieldExtractionRule
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.AccountCheck
+            - CreateCommonResources.LambdaToDecideCWMetricsSources
+            - CreateCommonResources.Primerinvoke
             - CreateCommonResources.ALBSNSTopic
             - CreateCommonResources.ALBSNSpolicy
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - CreateCommonResources.SumoLogicSourceRole
             - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
-            - CreateCommonResources.ALBSourceWaitCondition
             - CreateCommonResources.ALBSource
             - CreateCommonResources.ALBSNSSubscription
-            - CreateCommonResources.CloudTrailSourceWaitCondition
-            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
             - CreateCommonResources.LambdaHelperARN
             - CreateCommonResources.LambdaRoleARN
             - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.PaidAccountCheck
+            - CreateCommonResources.Namespaces
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
@@ -293,26 +288,22 @@ Tests:
       - ap-south-1
     Parameters:
       Values:
-        Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779514196'
+        Section4cCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631121'
+        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - WaitHandle
             - CreateCommonResources
             - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
-            - SumoALBMetricsUpdateSource
-            - CreateCommonResources.WaitHandle
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.AccountCheck
+            - CreateCommonResources.LambdaToDecideCWMetricsSources
+            - CreateCommonResources.Primerinvoke
+            - SumoALBMetricsUpdateSource
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
-            - CreateCommonResources.ALBSourceWaitCondition
-            - CreateCommonResources.CloudTrailSourceWaitCondition
-            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -320,6 +311,8 @@ Tests:
             - CreateCommonResources.LambdaRoleARN
             - CreateCommonResources.EnterpriseCheck
             - ExistingMetricSourceName
+            - CreateCommonResources.PaidAccountCheck
+            - CreateCommonResources.Namespaces
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:
@@ -331,26 +324,23 @@ Tests:
       - us-east-1
     Parameters:
       Values:
-        Section5fALBLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
+        Section5fALBLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631970'
+        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - WaitHandle
             - CreateCommonResources
             - ALBMetricRule
-            - ALBUpdateSourceWaitCondition
             - SumoALBLogsUpdateSource
-            - CreateCommonResources.WaitHandle
+            - AlbLogsFieldExtractionRule
             - CreateCommonResources.LambdaRole
             - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.EnterpriseCheck
+            - CreateCommonResources.AccountCheck
+            - CreateCommonResources.LambdaToDecideCWMetricsSources
+            - CreateCommonResources.Primerinvoke
             - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicCloudwatchMetricsSourceWaitCondition
-            - CreateCommonResources.ALBSourceWaitCondition
-            - CreateCommonResources.CloudTrailSourceWaitCondition
-            - CreateCommonResources.CloudWatchHTTPSourceWaitCondition
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -358,6 +348,8 @@ Tests:
             - CreateCommonResources.LambdaRoleARN
             - CreateCommonResources.EnterpriseCheck
             - ExistingLogSourceName
+            - CreateCommonResources.PaidAccountCheck
+            - CreateCommonResources.Namespaces
       - AssertType: ParameterCheck
         Assert:
           CreateCommonResources:

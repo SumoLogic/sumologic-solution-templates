@@ -5,7 +5,7 @@ export AWS_PROFILE="personal"
 
 if [[ "${AWS_PROFILE}" == "personal" ]]
 then
-    SAM_S3_BUCKET="sumologiclambdahelper-us-east-1"
+    SAM_S3_BUCKET="cf-templates-1qpf3unpuo1hw-us-east-1"
 else
     SAM_S3_BUCKET="appdevstore"
 fi
