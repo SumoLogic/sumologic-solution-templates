@@ -355,9 +355,9 @@ Resources:
         - - "(_source="
           - !If [update_alb_logs_source, !Sub "\"${SumoALBLogsUpdateSource.source_name}\"", !Ref Section5eALBLogsSourceName]
           - ")"
-      FieldExtractionRuleParseExpression: "parse \"* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"\" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
+      FieldExtractionRuleParseExpression: '| parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
                                             | tolowercase(loadbalancer) as loadbalancer
-                                            | fields loadbalancer"
+                                            | fields loadbalancer'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey

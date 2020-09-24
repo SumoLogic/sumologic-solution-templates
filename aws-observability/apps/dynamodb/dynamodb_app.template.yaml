@@ -353,11 +353,11 @@ Resources:
         - - "(_source="
           - !If [update_cloudtrail_logs_source, !Sub "\"${SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5eCloudTrailLogsSourceName]
           - " (\"dynamodb.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: "json \"eventSource\", \"awsRegion\", \"requestParameters.tableName\" as eventSource, region, tablename
-                                            | where eventSource = \"dynamodb.amazonaws.com\"
-                                            | \"aws/dynamodb\" as namespace
-                                            | tolowercase(tablename) as tablename
-                                            | fields region, namespace, tablename"
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters.tableName" as eventSource, region, tablename
+                                           | where eventSource = "dynamodb.amazonaws.com"
+                                           | "aws/dynamodb" as namespace
+                                           | tolowercase(tablename) as tablename
+                                           | fields region, namespace, tablename'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey

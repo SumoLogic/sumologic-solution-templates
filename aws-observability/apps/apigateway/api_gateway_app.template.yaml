@@ -353,12 +353,12 @@ Resources:
         - - "(_source="
           - !If [update_cloudtrail_logs_source, !Sub "\"${SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5eCloudTrailLogsSourceName]
           - " (\"apigateway.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: "json \"eventSource\", \"awsRegion\", \"responseElements\" as eventSource, region, responseElements nodrop
-                                            | where eventSource = \"apigateway.amazonaws.com\"
-                                            | \"aws/apigateway\" as namespace
-                                            | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName
-                                            | tolowercase(ApiName) as apiname
-                                            | fields region, namespace, apiname"
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "responseElements" as eventSource, region, responseElements nodrop
+                                           | where eventSource = "apigateway.amazonaws.com"
+                                           | "aws/apigateway" as namespace
+                                           | json field=responseElements "name" as ApiName nodrop
+                                           | tolowercase(ApiName) as apiname
+                                           | fields region, namespace, apiname'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey

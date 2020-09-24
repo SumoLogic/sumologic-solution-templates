@@ -292,7 +292,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: do_not_use_parent_stack
     Properties:
-      TemplateURL: !Sub "https://${Section6bTemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
+      TemplateURL: !Sub "https://${Section7bTemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
       Parameters:
         SumoLogicDeployment: !Ref Section1aSumoDeployment
         SumoLogicAccessID: !Ref Section1bSumoAccessID
@@ -410,15 +410,15 @@ Resources:
         - - "(_source="
           - !If [update_cloudtrail_logs_source, !Sub "\"${SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5eCloudTrailLogsSourceName]
           - " (\"lambda.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: "json \"eventSource\", \"awsRegion\", \"requestParameters\" as eventSource, region, requestParameters nodrop
-                                            | where eventSource = \"lambda.amazonaws.com\"
-                                            | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop
-                                            | parse regex field=functionname \"\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$\" nodrop
-                                            | parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop
-                                            | if (isEmpty(functionname), functionname2, functionname) as functionname
-                                            | \"aws/lambda\" as namespace
-                                            | tolowercase(functionname) as functionname
-                                            | fields region, namespace, functionname"
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters" as eventSource, region, requestParameters nodrop
+                                           | where eventSource = "lambda.amazonaws.com"
+                                           | json field=requestParameters "functionName", "resource" as functionname, resource nodrop
+                                           | parse regex field=functionname "\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$" nodrop
+                                           | parse field=resource "arn:aws:lambda:*:function:*" as f1, functionname2 nodrop
+                                           | if (isEmpty(functionname), functionname2, functionname) as functionname
+                                           | "aws/lambda" as namespace
+                                           | tolowercase(functionname) as functionname
+                                           | fields region, namespace, functionname'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
@@ -436,10 +436,10 @@ Resources:
         - - "(_source="
           - !If [update_cloudwatch_logs_source, !Sub "\"${SumoHTTPUpdateSource.source_name}\"", !Ref Section6bCloudWatchLogsSourceName]
           - " message logGroup aws*lambda*)"
-      FieldExtractionRuleParseExpression: "json \"logGroup\"
-                                            | parse field=loggroup \"/aws/lambda/*\" as functionname
-                                            | tolowercase(functionname) as functionname
-                                            | fields functionname"
+      FieldExtractionRuleParseExpression: '| json "logGroup"
+                                           | parse field=loggroup "/aws/lambda/*" as functionname
+                                           | tolowercase(functionname) as functionname
+                                           | fields functionname'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
