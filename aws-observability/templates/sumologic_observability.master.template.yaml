@@ -308,6 +308,9 @@ Conditions:
   create_cloudtrail_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
   create_alb_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
   create_cloudwatch_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSource, 'Yes' ]
+  update_cloudtrail_logs_source: !And
+    - !Not [!Equals [!Ref Section6bCloudTrailLogsSourceUrl, '']]
+    - !Not [!Equals [!Ref Section6aCreateCloudTrailLogSource, 'Yes']]
 
   # Condition for S3 Logging enable
   is_bucket_available: !Or
@@ -343,15 +346,15 @@ Mappings:
   # 4. appdevzipfiles-me-south-1s
   RegionMap:
     us-east-1:
-      bucketname: appdevzipfiles-us-east-1
+      bucketname: cf-templates-1qpf3unpuo1hw-us-east-1
     us-east-2:
-      bucketname: appdevzipfiles-us-east-2
+      bucketname: cf-templates-1qpf3unpuo1hw-us-east-2
     us-west-1:
       bucketname: appdevzipfiles-us-west-1
     us-west-2:
       bucketname: appdevzipfiles-us-west-2
     ap-south-1:
-      bucketname: appdevzipfiles-ap-south-1
+      bucketname: cf-templates-1qpf3unpuo1hw-ap-south-1
     ap-northeast-2:
       bucketname: appdevzipfiles-ap-northeast-2
     ap-southeast-1:
@@ -384,10 +387,6 @@ Mappings:
       bucketname: appdevzipfiles-me-south-1s
 
 Resources:
-
-  WaitHandle:
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
   # Create a Lambda and check for Enterprise by using Custom resource. Use the value to create inventory and root cause app.
 
   CreateCommonResources:
@@ -465,20 +464,9 @@ Resources:
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section5bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
-  ALBWaitHandle:
-    DependsOn: sumoEC2MetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  ALBWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref ALBWaitHandle
-      Timeout: "2"
-      Count: 0
-
   sumoAlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: ALBWaitCondition
+    DependsOn: sumoEC2MetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -503,20 +491,9 @@ Resources:
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
-  DynamoDBWaitHandle:
-    DependsOn: sumoAlbMetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  DynamoDBWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref DynamoDBWaitHandle
-      Timeout: "2"
-      Count: 0
-
   sumoDynamoDBMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: DynamoDBWaitCondition
+    DependsOn: sumoAlbMetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -535,25 +512,13 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
-        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
-        Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
-  RDSWaitHandle:
-    DependsOn: sumoDynamoDBMetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  RDSWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref RDSWaitHandle
-      Timeout: "2"
-      Count: 0
-
   sumoRdsMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: RDSWaitCondition
+    DependsOn: sumoLambdaMetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -572,25 +537,13 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
-        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
-        Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
-  ApiWaitHandle:
-    DependsOn: sumoRdsMetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  ApiWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref ApiWaitHandle
-      Timeout: "2"
-      Count: 0
-
   sumoApiGatewayMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: ApiWaitCondition
+    DependsOn: sumoDynamoDBMetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -609,25 +562,13 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
-        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
-        Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
-  RootCauseWaitHandle:
-    DependsOn: sumoApiGatewayMetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  RootCauseWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref RootCauseWaitHandle
-      Timeout: "2"
-      Count: 0
-
   RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: RootCauseWaitCondition
+    DependsOn: sumoRdsMetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -650,20 +591,9 @@ Resources:
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section5bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
-  LambdaWaitHandle:
-    DependsOn: RootCauseAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  LambdaWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref LambdaWaitHandle
-      Timeout: "2"
-      Count: 0
-
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: LambdaWaitCondition
+    DependsOn: sumoEC2MetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -685,7 +615,7 @@ Resources:
         Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
         Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
         Section6aCreateCloudWatchLogSource: "No"
-        Section6bCloudWatchLogsSourceName: !If [create_cloudwatch_logs_source, "*cloudtrail-logs*", ""]
+        Section6bCloudWatchLogsSourceName: !If [create_cloudwatch_logs_source, "*cloudwatch-logs*", ""]
         Section6cCloudWatchLogsAPIUrl: !Ref Section7bLambdaCloudWatchLogsSourceUrl
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section7bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
