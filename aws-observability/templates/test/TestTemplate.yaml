@@ -10,13 +10,13 @@ Tests:
   - TestName: defaultparameters
     Regions:
       - ap-south-1
-    Skip: true
+    Skip: false
     Parameters:
       Values:
         Section1aSumoLogicDeployment: 'us1'
-        Section1bSumoLogicAccessID: '${ACCESS_ID_1}'
-        Section1cSumoLogicAccessKey: '${ACCESS_KEY_1}'
-        Section1dSumoLogicOrganizationId: '${US1_ORG_ID}'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test1env'
         Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache'
     Assertions:
@@ -190,14 +190,14 @@ Tests:
             Section6aCreateCloudWatchLogSource: 'No'
   - TestName: nothingtoinstall
     Regions:
-      - us-east-2
-    Skip: true
+      - us-east-1
+    Skip: false
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us1'
-        Section1bSumoLogicAccessID: '${ACCESS_ID_2}'
-        Section1cSumoLogicAccessKey: '${ACCESS_KEY_2}'
-        Section1dSumoLogicOrganizationId: '${US1_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us2'
+        Section1bSumoLogicAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US2_PROFESSIONAL_ORG_ID}'
         Section2aAccountAlias: 'test2env'
         Section3aInstallObservabilityApps: 'No'
         Section4aCreateMetricsSourcesOptions: 'None'
@@ -246,17 +246,17 @@ Tests:
             CollectorName: "aws-observability-test2env"
             CreateMetaDataSource: 'No'
             CreateCloudWatchMetricsSource:  'No'
-            CloudWatchMetricsSourceName: 'test2env-cloudwatch-metrics-us-east-2'
+            CloudWatchMetricsSourceName: 'test2env-cloudwatch-metrics-us-east-1'
             CreateALBLogSource: 'No'
             CreateALBS3Bucket: 'No'
             ALBS3BucketPathExpression: ''
-            ALBLogsSourceName: "test2env-alb-logs-us-east-2"
+            ALBLogsSourceName: "test2env-alb-logs-us-east-1"
             CreateCloudTrailLogSource: 'No'
             CreateCloudTrailBucket: 'No'
             CloudTrailBucketPathExpression: ''
-            CloudTrailLogsSourceName: "test2env-cloudtrail-logs-us-east-2"
+            CloudTrailLogsSourceName: "test2env-cloudtrail-logs-us-east-1"
             CreateCloudWatchLogSource: 'No'
-            CloudWatchLogsSourceName: "test2env-cloudwatch-logs-us-east-2"
+            CloudWatchLogsSourceName: "test2env-cloudwatch-logs-us-east-1"
           sumoEC2MetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
             Section3aInstallApp: 'No'
@@ -299,14 +299,14 @@ Tests:
             Section6aCreateCloudWatchLogSource: 'No'
   - TestName: nocloudtrailandinventory
     Regions:
-      - us-west-2
-    Skip: true
+      - us-east-2
+    Skip: false
     Parameters:
       Values:
         Section1aSumoLogicDeployment: 'us2'
         Section1bSumoLogicAccessID: '${FREE_ACCOUNT_ACCESS_ID}'
         Section1cSumoLogicAccessKey: '${FREE_ACCOUNT_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${US2_ORG_ID}'
+        Section1dSumoLogicOrganizationId: '${US2_FREE_ORG_ID}'
         Section2aAccountAlias: 'test3env'
         Section3aInstallObservabilityApps: 'Yes'
         Section4aCreateMetricsSourcesOptions: 'CloudWatchMetrics'
@@ -404,17 +404,17 @@ Tests:
             CollectorName: "aws-observability-test3env"
             CreateMetaDataSource: 'No'
             CreateCloudWatchMetricsSource:  'Yes'
-            CloudWatchMetricsSourceName: 'test3env-cloudwatch-metrics-us-west-2'
+            CloudWatchMetricsSourceName: 'test3env-cloudwatch-metrics-us-east-2'
             CreateALBLogSource: 'Yes'
             CreateALBS3Bucket: 'Yes'
-            ALBS3BucketPathExpression: '/elasticloadbalancing/us-west-2/*'
-            ALBLogsSourceName: "test3env-alb-logs-us-west-2"
+            ALBS3BucketPathExpression: '/elasticloadbalancing/us-east-2/*'
+            ALBLogsSourceName: "test3env-alb-logs-us-east-2"
             CreateCloudTrailLogSource: 'No'
             CreateCloudTrailBucket: 'No'
             CloudTrailBucketPathExpression: ''
-            CloudTrailLogsSourceName: "test3env-cloudtrail-logs-us-west-2"
+            CloudTrailLogsSourceName: "test3env-cloudtrail-logs-us-east-2"
             CreateCloudWatchLogSource: 'Yes'
-            CloudWatchLogsSourceName: "test3env-cloudwatch-logs-us-west-2"
+            CloudWatchLogsSourceName: "test3env-cloudwatch-logs-us-east-2"
           AutoEnableOptions:
             ALBAutoEnableS3Logs: 'Yes'
             ALBS3LogsBucketName: 'aws-observability-logs'
@@ -456,7 +456,7 @@ Tests:
             Section2aInstallApp: 'No'
             Section3aCreateAwsInventorySource: 'No'
             Section4aCreateAwsXRaySource: 'No'
-            Section4bAwsXRaySourceName: 'test3env-xray-aws-us-west-2'
+            Section4bAwsXRaySourceName: 'test3env-xray-aws-us-east-2'
           sumoLambdaMetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
             Section3aInstallApp: 'No'
@@ -467,14 +467,14 @@ Tests:
             Section6aCreateCloudWatchLogSource: 'No'
   - TestName: onlycloudtrailinventorysource
     Regions:
-      - us-west-1
-    Skip: true
+      - ap-south-1
+    Skip: false
     Parameters:
       Values:
         Section1aSumoLogicDeployment: 'us1'
-        Section1bSumoLogicAccessID: '${ACCESS_ID_3}'
-        Section1cSumoLogicAccessKey: '${ACCESS_KEY_3}'
-        Section1dSumoLogicOrganizationId: '${US1_ORG_ID}'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID_1}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY_1}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test4env'
         Section3aInstallObservabilityApps: 'No'
         Section4aCreateMetricsSourcesOptions: 'InventorySource'
@@ -557,17 +557,17 @@ Tests:
             CollectorName: "aws-observability-test4env"
             CreateMetaDataSource: 'No'
             CreateCloudWatchMetricsSource:  'No'
-            CloudWatchMetricsSourceName: 'test4env-cloudwatch-metrics-us-west-1'
+            CloudWatchMetricsSourceName: 'test4env-cloudwatch-metrics-ap-south-1'
             CreateALBLogSource: 'No'
             CreateALBS3Bucket: 'No'
             ALBS3BucketPathExpression: ''
-            ALBLogsSourceName: "test4env-alb-logs-us-west-1"
+            ALBLogsSourceName: "test4env-alb-logs-ap-south-1"
             CreateCloudTrailLogSource: 'Yes'
             CreateCloudTrailBucket: 'Yes'
-            CloudTrailBucketPathExpression: '/CloudTrail/us-west-1/*'
-            CloudTrailLogsSourceName: "test4env-cloudtrail-logs-us-west-1"
+            CloudTrailBucketPathExpression: '/CloudTrail/ap-south-1/*'
+            CloudTrailLogsSourceName: "test4env-cloudtrail-logs-ap-south-1"
             CreateCloudWatchLogSource: 'Yes'
-            CloudWatchLogsSourceName: "test4env-cloudwatch-logs-us-west-1"
+            CloudWatchLogsSourceName: "test4env-cloudwatch-logs-ap-south-1"
           sumoEC2MetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
             Section3aInstallApp: 'No'
@@ -599,7 +599,7 @@ Tests:
           RootCauseAppStack:
             Section2aInstallApp: 'No'
             Section3aCreateAwsInventorySource: 'Yes'
-            Section3bAwsInventorySourceName: 'test4env-inventory-aws-us-west-1'
+            Section3bAwsInventorySourceName: 'test4env-inventory-aws-ap-south-1'
             Section4aCreateAwsXRaySource: 'No'
           sumoLambdaMetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
@@ -611,25 +611,25 @@ Tests:
             Section6aCreateCloudWatchLogSource: 'No'
   - TestName: existingresourcetestcase1
     Regions:
-      - ap-south-1
-    Skip: true
+      - us-east-1
+    Skip: false
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us1'
-        Section1bSumoLogicAccessID: '${ACCESS_ID_4}'
-        Section1cSumoLogicAccessKey: '${ACCESS_KEY_4}'
-        Section1dSumoLogicOrganizationId: '${US1_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us2'
+        Section1bSumoLogicAccessID: '${FREE_ACCOUNT_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${FREE_ACCOUNT_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US2_FREE_ORG_ID}'
         Section2aAccountAlias: 'test5env'
         Section3aInstallObservabilityApps: 'No'
         Section4aCreateMetricsSourcesOptions: 'None'
-        Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
+        Section4cCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/167776029/sources/841621157'
         Section5aAutoEnableS3LogsALBResourcesOptions: 'Existing'
         Section5bALBCreateLogSource: 'Yes'
-        Section5dALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+        Section5dALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
         Section5eALBS3BucketPathExpression: '*abc*'
         Section6aCreateCloudTrailLogSource: 'Yes'
         Section7aLambdaCreateCloudWatchLogsSource: 'No'
-        Section7bLambdaCloudWatchLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779514196'
+        Section7bLambdaCloudWatchLogsSourceUrl: 'https://api.us2.sumologic.com/api/v1/collectors/167776029/sources/1169994000'
         Section7cAutoSubscribeLogGroupsLambdaOptions: 'Existing'
         Section8aCreateAwsXraySource: 'Yes'
     Assertions:
@@ -676,9 +676,6 @@ Tests:
             - sumoRdsMetricsAppStack.ClusterMetricRule
             - sumoRdsMetricsAppStack.InstanceMetricRule
             - sumoApiGatewayMetricsAppStack.MetricRule
-            - RootCauseAppStack.RootCauseRole
-            - RootCauseAppStack.SumoLogicHostedCollector
-            - RootCauseAppStack.XraySource
             - sumoLambdaMetricsAppStack.LambdaMetricRule
             - sumoLambdaMetricsAppStack.SumoHTTPUpdateSource
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
@@ -705,24 +702,24 @@ Tests:
             CollectorName: "aws-observability-test5env"
             CreateMetaDataSource: 'No'
             CreateCloudWatchMetricsSource:  'No'
-            CloudWatchMetricsSourceName: 'test5env-cloudwatch-metrics-ap-south-1'
+            CloudWatchMetricsSourceName: 'test5env-cloudwatch-metrics-us-east-1'
             CreateALBLogSource: 'Yes'
             CreateALBS3Bucket: 'No'
-            ALBS3BucketPathExpression: '/elasticloadbalancing/ap-south-1/*'
-            ALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
-            ALBLogsSourceName: "test5env-alb-logs-ap-south-1"
+            ALBS3BucketPathExpression: '/elasticloadbalancing/us-east-1/*'
+            ALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
+            ALBLogsSourceName: "test5env-alb-logs-us-east-1"
             CreateCloudTrailLogSource: 'Yes'
             CreateCloudTrailBucket: 'Yes'
-            CloudTrailBucketPathExpression: '/CloudTrail/ap-south-1/*'
-            CloudTrailLogsSourceName: "test5env-cloudtrail-logs-ap-south-1"
+            CloudTrailBucketPathExpression: '/CloudTrail/us-east-1/*'
+            CloudTrailLogsSourceName: "test5env-cloudtrail-logs-us-east-1"
             CreateCloudWatchLogSource: 'No'
-            CloudWatchLogsSourceName: "test5env-cloudwatch-logs-ap-south-1"
+            CloudWatchLogsSourceName: "test5env-cloudwatch-logs-us-east-1"
           AutoEnableOptions:
             ALBAutoEnableS3Logs: 'Yes'
-            ALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+            ALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
             AutoSubscribeLogGroups: 'No'
           AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
-            BucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+            BucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
             AutoEnableResourceOptions: 'Existing'
           sumoEC2MetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
@@ -734,7 +731,7 @@ Tests:
             Section4aCreateCloudWatchMetricsSource: 'No'
             Section5aCreateS3Bucket: 'No'
             Section5cCreateALBLogSource: 'No'
-            Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289'
+            Section4cCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/167776029/sources/841621157'
           sumoDynamoDBMetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
             Section3aInstallApp: 'No'
@@ -756,8 +753,7 @@ Tests:
           RootCauseAppStack:
             Section2aInstallApp: 'No'
             Section3aCreateAwsInventorySource: 'No'
-            Section4aCreateAwsXRaySource: 'Yes'
-            Section4bAwsXRaySourceName: 'test5env-xray-aws-ap-south-1'
+            Section4aCreateAwsXRaySource: 'No'
           sumoLambdaMetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
             Section3aInstallApp: 'No'
@@ -766,24 +762,24 @@ Tests:
             Section5cCreateCloudTrailLogSource: 'No'
             Section5eCloudTrailLogsSourceName: ""
             Section6aCreateCloudWatchLogSource: 'No'
-            Section6cCloudWatchLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/170503459/sources/779514196'
+            Section6cCloudWatchLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/167776029/sources/1169994000'
   - TestName: existingbuckets
     Regions:
-      - ap-east-1
-    Skip: true
+      - us-east-2
+    Skip: false
     Parameters:
       Values:
         Section1aSumoLogicDeployment: 'us1'
-        Section1bSumoLogicAccessID: '${ACCESS_ID_5}'
-        Section1cSumoLogicAccessKey: '${ACCESS_KEY_5}'
-        Section1dSumoLogicOrganizationId: '${US1_ORG_ID}'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID_2}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY_2}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test6env'
         Section3aInstallObservabilityApps: 'No'
         Section4aCreateMetricsSourcesOptions: 'Both'
         Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
         Section5bALBCreateLogSource: 'Yes'
         Section6aCreateCloudTrailLogSource: 'Yes'
-        Section6cCloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
+        Section6cCloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
         Section6dCloudTrailBucketPathExpression: '*abc*'
         Section7aLambdaCreateCloudWatchLogsSource: 'No'
         Section8aCreateAwsXraySource: 'No'
@@ -854,18 +850,18 @@ Tests:
             CollectorName: "aws-observability-test6env"
             CreateMetaDataSource: 'No'
             CreateCloudWatchMetricsSource:  'Yes'
-            CloudWatchMetricsSourceName: 'test6env-cloudwatch-metrics-ap-east-1'
+            CloudWatchMetricsSourceName: 'test6env-cloudwatch-metrics-us-east-2'
             CreateALBLogSource: 'Yes'
             CreateALBS3Bucket: 'Yes'
             ALBS3BucketPathExpression: '*AWSLogs/*/elasticloadbalancing/*'
-            ALBLogsSourceName: "test6env-alb-logs-ap-east-1"
+            ALBLogsSourceName: "test6env-alb-logs-us-east-2"
             CreateCloudTrailLogSource: 'Yes'
             CreateCloudTrailBucket: 'No'
-            CloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
+            CloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
             CloudTrailBucketPathExpression: '*abc*'
-            CloudTrailLogsSourceName: "test6env-cloudtrail-logs-ap-east-1"
+            CloudTrailLogsSourceName: "test6env-cloudtrail-logs-us-east-2"
             CreateCloudWatchLogSource: 'No'
-            CloudWatchLogsSourceName: "test6env-cloudwatch-logs-ap-east-1"
+            CloudWatchLogsSourceName: "test6env-cloudwatch-logs-us-east-2"
           sumoEC2MetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
             Section3aInstallApp: 'No'
@@ -898,7 +894,7 @@ Tests:
             Section2aInstallApp: 'No'
             Section3aCreateAwsInventorySource: 'Yes'
             Section4aCreateAwsXRaySource: 'No'
-            Section3bAwsInventorySourceName: 'test6env-inventory-aws-ap-east-1'
+            Section3bAwsInventorySourceName: 'test6env-inventory-aws-us-east-2'
           sumoLambdaMetricsAppStack:
             Section2aTagExistingAWSResources: 'No'
             Section3aInstallApp: 'No'
@@ -910,13 +906,13 @@ Tests:
   - TestName: existingsourcestestcase2
     Regions:
       - ap-south-1
-    Skip: true
+    Skip: false
     Parameters:
       Values:
         Section1aSumoLogicDeployment: 'us2'
-        Section1bSumoLogicAccessID: '${ACCESS_ID_6}'
-        Section1cSumoLogicAccessKey: '${ACCESS_KEY_6}'
-        Section1dSumoLogicOrganizationId: '${US2_PROF_ORG_ID}'
+        Section1bSumoLogicAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US2_PROFESSIONAL_ORG_ID}'
         Section2aAccountAlias: 'test7env'
         Section3aInstallObservabilityApps: 'Yes'
         Section4aCreateMetricsSourcesOptions: 'InventorySource'
