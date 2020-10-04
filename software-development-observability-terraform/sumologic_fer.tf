@@ -27,9 +27,9 @@ resource "sumologic_field_extraction_rule" "jenkins_deploy_fer" {
   enabled          = true
 }
 
-resource "sumologic_field_extraction_rule" "jenkins_build_status_fer" {
+resource "sumologic_field_extraction_rule" "jenkins_pipeline_stages_fer" {
   count            = "${var.install_jenkins}" == "fer" || "${var.install_jenkins}" == "collection" || "${var.install_jenkins}" == "all" ? 1 : 0
-  name             = "SDO - Jenkins Build Status"
+  name             = "SDO - Jenkins Pipeline Stages"
   scope            = "_sourceCategory=${var.jenkins_sc} ${var.jenkins_build_status_fer_scope}"
   parse_expression = var.jenkins_build_status_fer_parse
   enabled          = true
