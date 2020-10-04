@@ -202,7 +202,7 @@ resource "null_resource" "install_jenkins_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Jenkins", "description": "Jenkins is an open source automation server for automating tasks related to building, testing, and delivering software.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"paramId123": "_sourceCategory = ${var.jenkins_sc}"}}'
+            --data-raw '{ "name": "Jenkins", "description": "Jenkins is an open source automation server for automating tasks related to building, testing, and delivering software.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jenkinslogsrc": "_sourceCategory = ${var.jenkins_sc}"}}'
     EOT
   }
 }

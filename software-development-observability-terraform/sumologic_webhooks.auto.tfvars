@@ -28,5 +28,6 @@ jira_servicedesk_projectkey = "<JIRA SERVICE DESK PROJECT KEY>"                #
 jira_servicedesk_auth       = "<JIRA SERVICE DESK BASIC AUTHORIZATION HEADER>" # Please replace <JIRA SERVICE DESK BASIC AUTHORIZATION HEADER> (including brackets) with the Basic Authorization Header for JIRA Service Desk as explained here: https://help.sumologic.com/Beta/Webhook_Connection_for_Jira_Service_Desk#prerequisite
 
 # Sumo Logic to Pagerduty Webhook
-pagerduty_services_sumo_webhooks = ["<SERVICE1>", "<SERVICE2>"]
 # Please replace <SERVICE1> and <SERVICE2> (including brackets) with your Pagerduty service IDs. You can get these from the URL after opening a specific service. These are used for Sumo Logic to Pagerduty webhooks.
+# Examples: ["P6HHD","PHGBUY"] or ["P76GFB"]
+pagerduty_services_sumo_webhooks = ["<SERVICE1>", "<SERVICE2>"]
