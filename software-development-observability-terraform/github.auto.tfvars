@@ -2,9 +2,13 @@
 # Configure Github credentials and parameters.
 
 # https://github.com/settings/tokens
-github_token               = "<YOUR GITHUB TOKEN>"              # Please replace <YOUR GITHUB TOKEN> (including brackets) with your Github token.
-github_organization        = "<YOUR GITHUB ORGANIZATION>"       # Please replace <YOUR GITHUB ORGANIZATION> (including brackets) with your Github organization.
-github_repository_names    = ["<REPOSITORY1>", "<REPOSITORY2>"] # Please replace <REPOSITORY1>, <REPOSITORY2> (including brackets) with your Github repositories. If no repositories are mentioned, no repo webhooks are created.
+# Please replace <YOUR GITHUB TOKEN> (including brackets) with your Github token.
+github_token               = "<YOUR GITHUB TOKEN>"
+# Please replace <YOUR GITHUB ORGANIZATION> (including brackets) with your Github organization.
+github_organization        = "<YOUR GITHUB ORGANIZATION>"
+# Please replace <REPOSITORY1>, <REPOSITORY2> (including brackets) with your Github repositories. If no repositories are mentioned, no repo webhooks are created.
+# Examples: ["repo1","repo2"] or ["repo1"]
+github_repository_names    = ["<REPOSITORY1>", "<REPOSITORY2>"]
 github_org_webhook_create  = "false"
 github_repo_webhook_create = "true"
 
