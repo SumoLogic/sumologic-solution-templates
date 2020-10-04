@@ -3,9 +3,15 @@
 # This script creates Webhooks to Sumo Logic in Atlassian Systems.
 # Configure the Atlassian credentials in the atlassian.auto.tfvars.
 
+# Remove slash from Sumo Logic opsgenie_api_url
+
+locals {
+  opsgenie_api_url_fixed = replace(var.opsgenie_api_url, "com/", "com")
+}
+
 # Create/Delete OpsGenie to Sumo Logic Webhook by calling REST API
 provider "restapi" {
-  uri = var.opsgenie_api_url
+  uri = local.opsgenie_api_url_fixed
   # debug                = true
   write_returns_object = true
   headers              = { Content-Type = "application/json", Authorization = "GenieKey ${var.opsgenie_key}" }
