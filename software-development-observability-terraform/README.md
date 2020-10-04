@@ -1,10 +1,10 @@
 # sumologic-sdo-terraform
 
-The Sumo Logic Software Development Observability (SDO) solution provides an established framework to simplify the monitoring and troubleshooting of your software development infrastructure.
-* This Terraform script installs the Sumo Logic Software Development Observability (SDO) solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
+The Sumo Logic Software Development Optimization (SDO) solution provides an established framework to simplify the monitoring and troubleshooting of your software development infrastructure.
+* This Terraform script installs the Sumo Logic Software Development Optimization (SDO) solution collection and Applications in the personal folder of the Sumo Logic user whose access keys have been used.
 * If you need additional copies of the Applications within Sumo Logic, install the respective Apps from the Sumo Logic App catalog.
 
-For more details, Please look at Sumo Logic Software Development Observability Help Document.
+For more details, Please look at Sumo Logic [Software Development Optimization Help Document](https://help.sumologic.com/Solutions/Software_Development_Optimization_Solution).
 
 ![SDO](https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/master/software-development-observability-terraform/gif/sdo3.gif)
 
