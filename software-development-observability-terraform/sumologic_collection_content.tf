@@ -217,7 +217,7 @@ resource "null_resource" "install_sdo_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Software Development Optimization", "description": "The Sumo Logic Software Development Optimization Solution helps you increase release velocity, improve reliability, and comprehensively monitor your software development pipelines with industry leading metrics and actionable insights generated automatically from development tools such as Jira, GitHub, Jenkins, PagerDuty, Bitbucket, Opsgenie, and more.", "destinationFolderId": "${sumologic_folder.folder.id}"}'
+            --data-raw '{ "name": "Software Development Optimization", "description": "The Sumo Logic Software Development Optimization Solution helps you increase release velocity, improve reliability, and comprehensively monitor your software development pipelines.", "destinationFolderId": "${sumologic_folder.folder.id}"}'
     EOT
   }
 }
