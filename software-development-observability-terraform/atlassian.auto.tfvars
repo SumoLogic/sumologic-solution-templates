@@ -44,7 +44,7 @@ jira_server_events = ["jira:issue_created", "jira:issue_updated", "jira:issue_de
 bitbucket_cloud_user     = "<YOUR BITBUCKET CLOUD USERNAME>"                                          # Please replace <YOUR BITBUCKET CLOUD USERNAME> (including brackets) with your Bitbucket cloud username.
 bitbucket_cloud_password = "<YOUR BITBUCKET CLOUD PASSWORD>"                                          # Please replace <YOUR BITBUCKET CLOUD PASSWORD> (including brackets) with your Bitbucket cloud password. App Passwords also work. To generate App Password see: https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html
 bitbucket_cloud_owner    = "<YOUR BITBUCKET CLOUD OWNER>"                                             # Please replace <YOUR BITBUCKET CLOUD OWNER> (including brackets) with the Bitbucket repository owner. Can be you or any team you have write access to.
-bitbucket_cloud_repos    = ["<YOUR BITBUCKET CLOUD REPO_NAME1>", "<YOUR BITBUCKET CLOUD REPO_NAME2>"] # Please replace <YOUR BITBUCKET CLOUD REPO_NAME1> and <YOUR BITBUCKET CLOUD REPO_NAME2> (including <> brackets) with your Bitbucket cloud repositories for which the WebHooks should be created. Example: ["repo1","repo2"]
+bitbucket_cloud_repos    = ["<YOUR BITBUCKET CLOUD REPO_NAME1>", "<YOUR BITBUCKET CLOUD REPO_NAME2>"] # Please replace <YOUR BITBUCKET CLOUD REPO_NAME1> and <YOUR BITBUCKET CLOUD REPO_NAME2> (including <> brackets) with your Bitbucket cloud repositories for which the WebHooks should be created. Example: ["repo1","repo2"] or ["repo1"]
 bitbucket_cloud_desc     = "Send events to Sumo Logic"                                                # The name / description to show in the UI.
 # Events: https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html
 bitbucket_cloud_events = [
@@ -57,7 +57,7 @@ bitbucket_cloud_events = [
 
 
 # OpsGenie
+# Default: https://api.opsgenie.com. If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed. https://docs.opsgenie.com/docs/api-overview
 opsgenie_api_url = "https://api.opsgenie.com"
-# Do not add the trailing /. If using the EU instance of Opsgenie, the URL needs to be https://api.eu.opsgenie.com for requests to be executed. https://docs.opsgenie.com/docs/api-overview
-opsgenie_key = "<YOUR OPSGENIE KEY>"
 # Please replace <YOUR OPSGENIE KEY> (including brackets) with your Opsgenie key, to generate the key, refer: https://docs.opsgenie.com/docs/api-key-management
+opsgenie_key = "<YOUR OPSGENIE KEY>"
