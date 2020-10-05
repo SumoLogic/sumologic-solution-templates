@@ -16,6 +16,10 @@ The AWS Observability is licensed under the apache v2.0 license.
 
 Raise issues at [Issues](https://github.com/SumoLogic/sumologic-solution-templates/issues)
 
+## Change Log
+
+For Full Change Log, [Visit](./CHANGELOG.md).
+
 ## Contributing
 
 * Fork the project on [Github](https://github.com/SumoLogic/sumologic-solution-templates).
