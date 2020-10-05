@@ -620,11 +620,99 @@ Resources:
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section7bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
+  # Adding Fields to SumoLogic Fields Schema
   AddAccountField:
     Type: Custom::SumoLogicFieldsSchema
     Properties:
       ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
       FieldName: "account"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddRegionField:
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "region"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddNamespaceField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddAccountField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "namespace"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddTableNameField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddRegionField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "tablename"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddLoadBalancerField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddNamespaceField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "loadbalancer"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddFunctionNameField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddTableNameField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "functionname"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddApiNameField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddLoadBalancerField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "apiname"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddDBIdentifierField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddFunctionNameField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "dbidentifier"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddInstanceIdField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddApiNameField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "instanceid"
       RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoLogicAccessID
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
