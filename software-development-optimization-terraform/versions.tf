@@ -2,7 +2,7 @@
 
 # Increment for each app update.
 variable "folder_version" {
-    default = "2"
+    default = "1"
 }
 
 variable "jira_cloud_version" {
@@ -12,7 +12,7 @@ variable "jira_server_version" {
     default = "1"
 }
 variable "bitbucket_version" {
-    default = "2"
+    default = "1"
 }
 variable "opsgenie_version" {
     default = "1"
@@ -27,5 +27,5 @@ variable "jenkins_version" {
     default = "1"
 }
 variable "sdo_version" {
-    default = "2"
+    default = "1"
 }
