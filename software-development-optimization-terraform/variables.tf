@@ -34,8 +34,7 @@ variable "sumo_api_endpoint" {
   type        = string
   validation {
   condition = contains([
-    "https://nite-api.sumologic.net/api/","https://api.au.sumologic.com/api/",
-  "https://api.ca.sumologic.com/api/","https://api.de.sumologic.com/api/","https://api.eu.sumologic.com/api/","https://api.fed.sumologic.com/api/","https://api.in.sumologic.com/api/","https://api.jp.sumologic.com/api/","https://api.sumologic.com/api/","https://api.us2.sumologic.com/api/"], var.sumo_api_endpoint)
+    "https://api.ca.sumologic.com/api/","https://api.de.sumologic.com/api/","https://api.eu.sumologic.com/api/","https://api.fed.sumologic.com/api/","https://api.in.sumologic.com/api/","https://api.jp.sumologic.com/api/","https://api.sumologic.com/api/","https://api.us2.sumologic.com/api/"], var.sumo_api_endpoint)
   error_message = "Argument \"sumo_api_endpoint\" must be one of the values specified at https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security."
 }
 }
