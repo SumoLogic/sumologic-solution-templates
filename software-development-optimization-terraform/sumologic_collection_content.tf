@@ -81,22 +81,64 @@ locals {
   time_stamp = formatdate("DD-MMM-YYYY hh:mm:ss", timestamp())
 }
 
-resource "sumologic_folder" "folder" {
-  name        = "${var.app_installation_folder} - ${local.time_stamp}"
-  description = "SDO Applications"
-  parent_id   = data.sumologic_personal_folder.personalFolder.id
-  depends_on  = [sumologic_collector.sdo_collector]
-}
+# resource "sumologic_folder" "folder" {
+#   name        = "${var.app_installation_folder} - ${local.time_stamp}"
+#   description = "SDO Applications"
+#   parent_id   = data.sumologic_personal_folder.personalFolder.id
+#   depends_on  = [sumologic_collector.sdo_collector]
+# }
 
 # Remove slash from Sumo Logic sumo_api_endpoint
-
 locals {
   sumo_api_endpoint_fixed = replace(var.sumo_api_endpoint, "api/", "api")
+}
+
+# Create Folder
+resource "null_resource" "create_folder" {
+  depends_on = [sumologic_collector.sdo_collector]
+  triggers = {
+        version = var.folder_version
+  }
+  provisioner "local-exec" {
+    command = <<EOT
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v2/content/folders' \
+            --header 'Accept: application/json' \
+            --header 'Content-Type: application/json' \
+            -u ${var.sumo_access_id}:${var.sumo_access_key} \
+            --data-raw '{ "name": "${var.app_installation_folder} - ${local.time_stamp}", "description": "SDO Applications", "parentId": "${data.sumologic_personal_folder.personalFolder.id}"}' \
+            -o sumo_folder.json
+    EOT
+  }
+}
+
+# Extract Id as Terraform doesn't support complex jsons involving arrays and lists
+resource "null_resource" "process_folder_result" {
+  depends_on = [null_resource.create_folder]
+  triggers = {
+        version = var.folder_version
+  }
+  provisioner "local-exec" {
+    command = "python extract_id.py"
+  }
+}
+
+# Load processed json
+data "local_file" "folder_json" {
+  depends_on = [null_resource.process_folder_result]
+  filename = "${path.module}/sumo_folder_id.json"
+}
+
+# Make the json data available
+data "external" "folder_data_json" {
+  program = ["echo", data.local_file.folder_json.content]
 }
 
 # Install Apps
 # Install Jira Cloud
 resource "null_resource" "install_jira_cloud_app" {
+  triggers = {
+        version = var.jira_cloud_version
+  }
   count      = "${var.install_jira_cloud}" == "app" || "${var.install_jira_cloud}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jira_cloud]
 
@@ -106,7 +148,7 @@ resource "null_resource" "install_jira_cloud_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Jira Cloud", "description": "The Sumo Logic App for Jira Cloud provides insights into project management issues that enable you to more effectively plan, assign, track, report, and manage work across multiple teams.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_cloud_sc}" }}'
+            --data-raw '{ "name": "Jira Cloud", "description": "The Sumo Logic App for Jira Cloud provides insights into project management issues that enable you to more effectively plan, assign, track, report, and manage work across multiple teams.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_cloud_sc}" }}'
     EOT
   }
 }
@@ -115,6 +157,9 @@ resource "null_resource" "install_jira_cloud_app" {
 resource "null_resource" "install_jira_server_app" {
   count      = "${var.install_jira_server}" == "app" || "${var.install_jira_server}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jira_server]
+  triggers = {
+        version = var.jira_server_version
+  }
 
   provisioner "local-exec" {
     command = <<EOT
@@ -122,7 +167,7 @@ resource "null_resource" "install_jira_server_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Jira", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_server_access_logs_sourcecategory}", "jirawebhooklogsrc": "_sourceCategory = ${var.jira_server_sc}" }}'
+            --data-raw '{ "name": "Jira", "description": "The Sumo Logic App for Jira provides insight into Jira usage, request activity, issues, security, sprint events, and user events.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"jiralogsrc": "_sourceCategory = ${var.jira_server_access_logs_sourcecategory}", "jirawebhooklogsrc": "_sourceCategory = ${var.jira_server_sc}" }}'
     EOT
   }
 }
@@ -131,6 +176,9 @@ resource "null_resource" "install_jira_server_app" {
 resource "null_resource" "install_bitbucket_cloud_app" {
   count      = "${var.install_bitbucket_cloud}" == "app" || "${var.install_bitbucket_cloud}" == "all"? 1 : 0
   depends_on = [sumologic_http_source.bitbucket_cloud]
+  triggers = {
+        version = var.bitbucket_version
+  }
 
   provisioner "local-exec" {
     command = <<EOT
@@ -138,7 +186,7 @@ resource "null_resource" "install_bitbucket_cloud_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Bitbucket", "description": "The Sumo Logic App for Bitbucket provides insights into project management to more effectively plan the deployments.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"bblogsrc": "_sourceCategory = ${var.bitbucket_sc}" }}'
+            --data-raw '{ "name": "Bitbucket", "description": "The Sumo Logic App for Bitbucket provides insights into project management to more effectively plan the deployments.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"bblogsrc": "_sourceCategory = ${var.bitbucket_sc}" }}'
     EOT
   }
 }
@@ -147,6 +195,9 @@ resource "null_resource" "install_bitbucket_cloud_app" {
 resource "null_resource" "install_Opsgenie_app" {
   count      = "${var.install_opsgenie}" == "app" || "${var.install_opsgenie}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.opsgenie]
+  triggers = {
+        version = var.opsgenie_version
+  }
 
   provisioner "local-exec" {
     command = <<EOT
@@ -154,7 +205,7 @@ resource "null_resource" "install_Opsgenie_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Opsgenie", "description": "The Opsgenie App provides at-a-glance views and detailed analytics for alerts on your DevOps environment.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"opsgenieLogSrc": "_sourceCategory = ${var.opsgenie_sc}" }}'
+            --data-raw '{ "name": "Opsgenie", "description": "The Opsgenie App provides at-a-glance views and detailed analytics for alerts on your DevOps environment.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"opsgenieLogSrc": "_sourceCategory = ${var.opsgenie_sc}" }}'
     EOT
   }
 }
@@ -163,6 +214,9 @@ resource "null_resource" "install_Opsgenie_app" {
 resource "null_resource" "install_pagerduty_app" {
   count      = "${var.install_pagerduty}" == "app" || "${var.install_pagerduty}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.pagerduty]
+  triggers = {
+        version = var.pagerduty_version
+  }
 
   provisioner "local-exec" {
     command = <<EOT
@@ -170,7 +224,7 @@ resource "null_resource" "install_pagerduty_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Pagerduty V2", "description": "The Sumo Logic App for PagerDuty V2 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"logsrcpd": "_sourceCategory = ${var.pagerduty_sc}"}}'
+            --data-raw '{ "name": "Pagerduty V2", "description": "The Sumo Logic App for PagerDuty V2 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"logsrcpd": "_sourceCategory = ${var.pagerduty_sc}"}}'
     EOT
   }
 }
@@ -179,6 +233,9 @@ resource "null_resource" "install_pagerduty_app" {
 resource "null_resource" "install_github_app" {
   count      = "${var.install_github}" == "app" || "${var.install_github}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.github]
+  triggers = {
+        version = var.github_version
+  }
 
   provisioner "local-exec" {
     command = <<EOT
@@ -186,7 +243,7 @@ resource "null_resource" "install_github_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Github", "description": "The Sumo Logic App for GitHub connects to your GitHub repository at the Organization or Repository level, and ingests GitHub events via a webhook.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"paramId123": "_sourceCategory = ${var.github_sc}"}}'
+            --data-raw '{ "name": "Github", "description": "The Sumo Logic App for GitHub connects to your GitHub repository at the Organization or Repository level, and ingests GitHub events via a webhook.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"paramId123": "_sourceCategory = ${var.github_sc}"}}'
     EOT
   }
 }
@@ -195,6 +252,9 @@ resource "null_resource" "install_github_app" {
 resource "null_resource" "install_jenkins_app" {
   count      = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jenkins]
+  triggers = {
+        version = var.jenkins_version
+  }
 
   provisioner "local-exec" {
     command = <<EOT
@@ -202,7 +262,7 @@ resource "null_resource" "install_jenkins_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Jenkins", "description": "Jenkins is an open source automation server for automating tasks related to building, testing, and delivering software.", "destinationFolderId": "${sumologic_folder.folder.id}","dataSourceValues": {"jenkinslogsrc": "_sourceCategory = ${var.jenkins_sc}"}}'
+            --data-raw '{ "name": "Jenkins", "description": "Jenkins is an open source automation server for automating tasks related to building, testing, and delivering software.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"jenkinslogsrc": "_sourceCategory = ${var.jenkins_sc}"}}'
     EOT
   }
 }
@@ -210,6 +270,9 @@ resource "null_resource" "install_jenkins_app" {
 # Install SDO App
 resource "null_resource" "install_sdo_app" {
   count = "${var.install_sdo}" == "app" ? 1 : 0
+  triggers = {
+        version = var.sdo_version
+  }
 
   provisioner "local-exec" {
     command = <<EOT
@@ -217,7 +280,7 @@ resource "null_resource" "install_sdo_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Software Development Optimization", "description": "The Sumo Logic Software Development Optimization Solution helps you increase release velocity, improve reliability, and comprehensively monitor your software development pipelines.", "destinationFolderId": "${sumologic_folder.folder.id}"}'
+            --data-raw '{ "name": "Software Development Optimization", "description": "The Sumo Logic Software Development Optimization Solution helps you increase release velocity, improve reliability, and comprehensively monitor your software development pipelines.", "destinationFolderId": "${data.external.folder_data_json.result.id}"}'
     EOT
   }
 }
