@@ -24,13 +24,17 @@ JSON
   webhook_type    = "PagerDuty"
 }
 
+locals {
+  opsgenie_api_url_fix = replace(var.opsgenie_api_url, "com/", "com")
+}
+
 # Create/Delete Sumo Logic to OpsGenie Webhook
 resource "sumologic_connection" "opsgenie_connection" {
   count       = "${var.install_sumo_to_opsgenie_webhook}" ? 1 : 0
   type        = "WebhookConnection"
   name        = "Opsgenie Webhook"
   description = "Created via Sumo Logic SDO Terraform Script."
-  url         = "${var.opsgenie_api_url}/v1/json/sumologic?apiKey=${jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey}"
+  url         = "${local.opsgenie_api_url_fix}/v1/json/sumologic?apiKey=${jsondecode(restapi_object.ops_to_sumo_webhook[0].create_response).data.apiKey}"
 
   default_payload = <<JSON
 {
