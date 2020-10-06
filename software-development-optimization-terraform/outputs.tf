@@ -27,12 +27,12 @@ output "github_source_id" {
 }
 
 output "folder_id" {
-  value = sumologic_folder.folder.id
+  value = data.external.folder_data_json.result.id
 }
 
-output "folder_name" {
-  value = sumologic_folder.folder.name
-}
+# output "folder_name" {
+#   value = sumologic_folder.folder.name
+# }
 
 # output "folder_path" {
 #   value = sumologic_folder.folder.path
