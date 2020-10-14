@@ -1,13 +1,14 @@
 #!/bin/sh
 
+# AWS CLI Configuration. Provide the Region and Profile where the CloudFormation Template needs to be deployed.
+export AWS_REGION=$1
+export AWS_PROFILE=$2
+
 # Env Name. Provide Input parameter for env name.
-export ENV_NAME=$1
+export ENV_NAME=$3
 if [ ! "${ENV_NAME}" ];then
    export ENV_NAME="default"
 fi
-# AWS CLI Configuration. Provide the Region and Profile where the CloudFormation Template needs to be deployed.
-export AWS_REGION=""
-export AWS_PROFILE=""
 
 # Provide an Stack Name which will be shown in AWS. Change the Default name if required.
 export CF_STACK_NAME="SumoLogic-Aws-Observability-${AWS_REGION}"
