@@ -295,7 +295,7 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.9.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.10.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -477,12 +477,8 @@ Resources:
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: true
-      ExplorerName: "AWS Test Observability"
-      MetadataKeys:
-        - "account"
-        - "region"
-        - "namespace"
-        - "entity"
+      HierarchyName: "AWS Test Observability"
+      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}}]}}}
       SumoAccessID: !Ref Section1bSumoLogicAccessID
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
       SumoDeployment: !Ref Section1aSumoLogicDeployment
@@ -506,7 +502,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Lambda App"
-      Version: "V1.0.0"
+      Version: "V1.0.1"
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: true
       SumoAccessID: !Ref Section1bSumoLogicAccessID
