@@ -37,6 +37,7 @@ Metadata:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
           - Section5aParentStackLambdaARN
+          - Section5bTemplatesBucketName
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -69,6 +70,8 @@ Metadata:
 
       Section5aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
+      Section5bTemplatesBucketName:
+        default: "Bucket name for all nested stacks."
 
 Parameters:
   Section1aSumoDeployment:
@@ -154,6 +157,10 @@ Parameters:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
+  Section5bTemplatesBucketName:
+    Type: String
+    Default: "appdevzipfiles-us-east-1"
+    Description: Bucket Name for all the nested templates.
 
 Conditions:
   do_not_use_parent_stack: !Equals [ !Ref Section5aParentStackLambdaARN, "ParentStackLambdaARN"]
@@ -168,67 +175,13 @@ Conditions:
     - !Condition install_inventory_source
     - !Condition install_xray_source
 
-Mappings:
-  # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
-  # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
-  # Buckets names which are intentional -
-  # 1. appdevzipfiles-eu-north-1s
-  # 2. appdevzipfiles-ap-east-1s
-  # 3. appdevzipfiles-af-south-1s
-  # 4. appdevzipfiles-me-south-1s
-  RegionMap:
-    us-east-1:
-      bucketname: appdevzipfiles-us-east-1
-    us-east-2:
-      bucketname: appdevzipfiles-us-east-2
-    us-west-1:
-      bucketname: appdevzipfiles-us-west-1
-    us-west-2:
-      bucketname: appdevzipfiles-us-west-2
-    ap-south-1:
-      bucketname: appdevzipfiles-ap-south-1
-    ap-northeast-2:
-      bucketname: appdevzipfiles-ap-northeast-2
-    ap-southeast-1:
-      bucketname: appdevzipfiles-ap-southeast-1
-    ap-southeast-2:
-      bucketname: appdevzipfiles-ap-southeast-2
-    ap-northeast-1:
-      bucketname: appdevzipfiles-ap-northeast-1
-    ca-central-1:
-      bucketname: appdevzipfiles-ca-central-1
-    eu-central-1:
-      bucketname: appdevzipfiles-eu-central-1
-    eu-west-1:
-      bucketname: appdevzipfiles-eu-west-1
-    eu-west-2:
-      bucketname: appdevzipfiles-eu-west-2
-    eu-west-3:
-      bucketname: appdevzipfiles-eu-west-3
-    eu-north-1:
-      bucketname: appdevzipfiles-eu-north-1s
-    sa-east-1:
-      bucketname: appdevzipfiles-sa-east-1
-    ap-east-1:
-      bucketname: appdevzipfiles-ap-east-1s
-    af-south-1:
-      bucketname: appdevzipfiles-af-south-1s
-    eu-south-1:
-      bucketname: appdevzipfiles-eu-south-1
-    me-south-1:
-      bucketname: appdevzipfiles-me-south-1s
-
 Resources:
 
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Condition: do_not_use_parent_stack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
+      TemplateURL: !Sub "https://${Section5bTemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
       Parameters:
         SumoLogicDeployment: !Ref Section1aSumoDeployment
         SumoLogicAccessID: !Ref Section1bSumoAccessID
@@ -236,6 +189,7 @@ Resources:
         SumoLogicOrganizationId: !Ref Section1dSumoOrganizationId
         RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
         AccountAlias: "rootcause"
+        TemplatesBucketName: !Ref Section5bTemplatesBucketName
 
   sumoOverview:
     Type: Custom::App
@@ -244,7 +198,7 @@ Resources:
       ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App Tsat"
-      Version: "V1.0.0"
+      Version: "V1.0.1"
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack

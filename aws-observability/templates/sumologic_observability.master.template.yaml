@@ -306,6 +306,11 @@ Conditions:
 
   # FER Condition
   create_cloudtrail_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
+  create_alb_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
+  create_cloudwatch_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSource, 'Yes' ]
+  update_cloudtrail_logs_source: !And
+    - !Not [!Equals [!Ref Section6bCloudTrailLogsSourceUrl, '']]
+    - !Not [!Equals [!Ref Section6aCreateCloudTrailLogSource, 'Yes']]
 
   # Condition for S3 Logging enable
   is_bucket_available: !Or
@@ -382,10 +387,6 @@ Mappings:
       bucketname: appdevzipfiles-me-south-1s
 
 Resources:
-
-  WaitHandle:
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
   # Create a Lambda and check for Enterprise by using Custom resource. Use the value to create inventory and root cause app.
 
   CreateCommonResources:
@@ -421,6 +422,7 @@ Resources:
         CloudTrailLogsSourceName: !Sub "${Section2aAccountAlias}-cloudtrail-logs-${AWS::Region}"
         CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSource
         CloudWatchLogsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-logs-${AWS::Region}"
+        TemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   AutoEnableOptions:
     Type: AWS::CloudFormation::Stack
@@ -460,21 +462,11 @@ Resources:
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCreateMetaDataSource: "No"
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-
-  ALBWaitHandle:
-    DependsOn: sumoEC2MetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  ALBWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref ALBWaitHandle
-      Timeout: "2"
-      Count: 0
+        Section5bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoAlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: ALBWaitCondition
+    DependsOn: sumoEC2MetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -494,23 +486,14 @@ Resources:
         Section4cCloudWatchExistingSourceAPIUrl: !Ref Section4cCloudWatchExistingSourceAPIUrl
         Section5aCreateS3Bucket: "No"
         Section5cCreateALBLogSource: "No"
+        Section5eALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
         Section5fALBLogsAPIUrl: !Ref Section5cALBLogsSourceUrl
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-
-  DynamoDBWaitHandle:
-    DependsOn: sumoAlbMetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  DynamoDBWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref DynamoDBWaitHandle
-      Timeout: "2"
-      Count: 0
+        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoDynamoDBMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: DynamoDBWaitCondition
+    DependsOn: sumoAlbMetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -529,22 +512,13 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-
-  RDSWaitHandle:
-    DependsOn: sumoDynamoDBMetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  RDSWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref RDSWaitHandle
-      Timeout: "2"
-      Count: 0
+        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoRdsMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: RDSWaitCondition
+    DependsOn: RootCauseAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -563,22 +537,13 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-
-  ApiWaitHandle:
-    DependsOn: sumoRdsMetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  ApiWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref ApiWaitHandle
-      Timeout: "2"
-      Count: 0
+        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoApiGatewayMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: ApiWaitCondition
+    DependsOn: sumoDynamoDBMetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -597,22 +562,13 @@ Resources:
         Section4aCreateCloudWatchMetricsSource: "No"
         Section5aCreateCloudTrailBucket: "No"
         Section5cCreateCloudTrailLogSource: "No"
+        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-
-  RootCauseWaitHandle:
-    DependsOn: sumoApiGatewayMetricsAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  RootCauseWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref RootCauseWaitHandle
-      Timeout: "2"
-      Count: 0
+        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: RootCauseWaitCondition
+    DependsOn: sumoLambdaMetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -633,21 +589,11 @@ Resources:
         Section4aCreateAwsXRaySource: !If [install_xray_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section4bAwsXRaySourceName: !Sub "${Section2aAccountAlias}-xray-aws-${AWS::Region}"
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-
-  LambdaWaitHandle:
-    DependsOn: RootCauseAppStack
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  LambdaWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !Ref LambdaWaitHandle
-      Timeout: "2"
-      Count: 0
+        Section5bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: LambdaWaitCondition
+    DependsOn: sumoEC2MetricsAppStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -669,14 +615,104 @@ Resources:
         Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
         Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
         Section6aCreateCloudWatchLogSource: "No"
+        Section6bCloudWatchLogsSourceName: !If [create_cloudwatch_logs_source, "*cloudwatch-logs*", ""]
         Section6cCloudWatchLogsAPIUrl: !Ref Section7bLambdaCloudWatchLogsSourceUrl
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section7bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
+  # Adding Fields to SumoLogic Fields Schema
   AddAccountField:
     Type: Custom::SumoLogicFieldsSchema
     Properties:
       ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
       FieldName: "account"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddRegionField:
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "region"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddNamespaceField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddAccountField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "namespace"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddTableNameField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddRegionField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "tablename"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddLoadBalancerField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddNamespaceField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "loadbalancer"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddFunctionNameField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddTableNameField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "functionname"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddApiNameField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddLoadBalancerField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "apiname"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddDBIdentifierField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddFunctionNameField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "dbidentifier"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  AddInstanceIdField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddApiNameField
+    Properties:
+      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+      FieldName: "instanceid"
       RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoLogicAccessID
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
