@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets."
+Description: "The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets. (MPCT-ibieokba)"
 
 Globals:
   Function:
@@ -142,6 +142,11 @@ Resources:
 
   LambdaRoleToCaptureEvents:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Access to all resources is required to get the AWS Observability CloudFormation template from a public bucket."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
