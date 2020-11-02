@@ -6,7 +6,7 @@ The Sumo Logic Software Development Optimization (SDO) solution provides an esta
 
 For more details, Please look at Sumo Logic [Software Development Optimization Help Document](https://help.sumologic.com/Solutions/Software_Development_Optimization_Solution).
 
-![SDO](https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/master/software-development-observability-terraform/gif/sdo3.gif)
+![SDO](https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/master/software-development-optimization-terraform/gif/sdo3.gif)
 
 ## License
 
