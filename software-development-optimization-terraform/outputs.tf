@@ -70,13 +70,13 @@ output "pagerduty_webhook_id" {
   value = pagerduty_extension.sumologic_extension.*.id
 }
 
-output "github_repo_webhook_id" {
-  value = "${zipmap(github_repository_webhook.github_sumologic_repo_webhook.*.repository, github_repository_webhook.github_sumologic_repo_webhook.*.id)}"
-}
+# output "github_repo_webhook_id" {
+#   value = "${zipmap(github_repository_webhook.github_sumologic_repo_webhook.*.repository, github_repository_webhook.github_sumologic_repo_webhook.*.id)}"
+# }
 
-output "github_org_webhook_id" {
-  value = github_organization_webhook.github_sumologic_org_webhook.*.id
-}
+# output "github_org_webhook_id" {
+#   value = github_organization_webhook.github_sumologic_org_webhook.*.id
+# }
 
 output "sumo_github_field_id" {
   value = restapi_object.github_field.*.id
