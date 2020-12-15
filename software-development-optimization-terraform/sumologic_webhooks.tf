@@ -3,7 +3,7 @@
 
 # Create/Delete Sumo Logic to Pagerduty Webhook
 resource "sumologic_connection" "pagerduty_connection" {
-  count       = "${var.install_sumo_to_pagerduty_webhook}" ? length(var.pagerduty_services_sumo_webhooks) : 0
+  count       = length(data.pagerduty_vendor.sumologic) > 0 && "${var.install_sumo_to_pagerduty_webhook}" ? length(var.pagerduty_services_sumo_webhooks) : 0
   type        = "WebhookConnection"
   name        = "Pagerduty Connection for Service - ${var.pagerduty_services_sumo_webhooks[count.index]}"
   description = "Created via Sumo Logic SDO Terraform Script."
