@@ -26,18 +26,19 @@ Metadata:
           - Section3aCreateAwsInventorySource
           - Section3bAwsInventorySourceName
           - Section3cNamespaces
+          - Section3dInventorySourceCategory
 
       - Label:
           default: "AWS XRay Source Details"
         Parameters:
           - Section4aCreateAwsXRaySource
           - Section4bAwsXRaySourceName
+          - Section4cXraySourceCategory
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
           - Section5aParentStackLambdaARN
-          - Section5bTemplatesBucketName
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -62,16 +63,18 @@ Metadata:
         default: "Sumo Logic AWS Inventory Source Name"
       Section3cNamespaces:
         default: "Limit Inventory collection to following namespaces"
+      Section3dInventorySourceCategory:
+        default: "Sumo Logic AWS Inventory Source Category"
 
       Section4aCreateAwsXRaySource:
         default: "Create Sumo Logic AWS XRay Source"
       Section4bAwsXRaySourceName:
         default: "Sumo Logic AWS XRay Source Name"
+      Section4cXraySourceCategory:
+        default: "Sumo Logic AWS Xray Source Category"
 
       Section5aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
-      Section5bTemplatesBucketName:
-        default: "Bucket name for all nested stacks."
 
 Parameters:
   Section1aSumoDeployment:
@@ -140,6 +143,10 @@ Parameters:
     Default: ""
     Description: "Provide Comma delimited list of the namespaces to collect. For Eg.- AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS"
     Type: CommaDelimitedList
+  Section3dInventorySourceCategory:
+    Type: String
+    Description: "Change the Aws Inventory Source Category to be created else default name will be used."
+    Default: ""
 
   Section4aCreateAwsXRaySource:
     Type: String
@@ -152,18 +159,17 @@ Parameters:
     Type: String
     Description: "Change the Aws XRay Source name to be created else default name will be used."
     Default: ""
+  Section4cXraySourceCategory:
+    Type: String
+    Description: "Change the Aws Xray Source Category to be created else default name will be used."
+    Default: ""
 
   Section5aParentStackLambdaARN:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
-  Section5bTemplatesBucketName:
-    Type: String
-    Default: "appdevzipfiles-us-east-1"
-    Description: Bucket Name for all the nested templates.
 
 Conditions:
-  do_not_use_parent_stack: !Equals [ !Ref Section5aParentStackLambdaARN, "ParentStackLambdaARN"]
 
   install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
 
@@ -177,25 +183,11 @@ Conditions:
 
 Resources:
 
-  CreateCommonResources:
-    Type: AWS::CloudFormation::Stack
-    Condition: do_not_use_parent_stack
-    Properties:
-      TemplateURL: !Sub "https://${Section5bTemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
-      Parameters:
-        SumoLogicDeployment: !Ref Section1aSumoDeployment
-        SumoLogicAccessID: !Ref Section1bSumoAccessID
-        SumoLogicAccessKey: !Ref Section1cSumoAccessKey
-        SumoLogicOrganizationId: !Ref Section1dSumoOrganizationId
-        RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-        AccountAlias: "rootcause"
-        TemplatesBucketName: !Ref Section5bTemplatesBucketName
-
   sumoOverview:
     Type: Custom::App
     Condition: install_app
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      ServiceToken: !Ref Section5aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App Tsat"
       Version: "V1.0.1"
@@ -210,10 +202,10 @@ Resources:
     Type: Custom::Collector
     Condition: install_collector
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      ServiceToken: !Ref Section5aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
-      RemoveOnDeleteStack: !If [do_not_use_parent_stack, !Ref Section1eRemoveSumoResourcesOnDeleteStack, false]
+      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       CollectorName: !Ref Section2bCollectorName
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
@@ -292,13 +284,13 @@ Resources:
     Type: Custom::AWSSource
     Condition: install_inventory_source
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      ServiceToken: !Ref Section5aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       SourceType: AwsInventory
       Namespaces: !Ref Section3cNamespaces
       SourceName: !Ref Section3bAwsInventorySourceName
-      SourceCategory: "aws/observability/inventory"
+      SourceCategory: !Ref Section3dInventorySourceCategory
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
@@ -309,12 +301,12 @@ Resources:
     Type: Custom::AWSSource
     Condition: install_xray_source
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      ServiceToken: !Ref Section5aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       SourceType: AwsXRay
       SourceName: !Ref Section4bAwsXRaySourceName
-      SourceCategory: "aws/observability/xray"
+      SourceCategory: !Ref Section4cXraySourceCategory
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
