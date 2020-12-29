@@ -5,328 +5,88 @@ Global:
   ParallelTestsRun: 8
   GlobalParameters:
     Section1aSumoDeployment: us2
-    Section1bSumoAccessID: '${ACCESS_ID_6}'
-    Section1cSumoAccessKey: '${ACCESS_KEY_6}'
-    Section1dSumoOrganizationId: '${US2_PROF_ORG_ID}'
-    Section1eRemoveSumoResourcesOnDeleteStack: 'true'
-    Section2bAccountAlias: 'testenv'
+    Section1bSumoAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
+    Section1cSumoAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
+    Section1dRemoveSumoResourcesOnDeleteStack: 'true'
+    Section2aAccountAlias: 'testenv'
     Section3aInstallApp: 'No'
-    Section2aTagExistingAWSResources: 'No'
-    Section4aCreateCloudWatchMetricsSource: 'No'
-    Section5aCreateCloudTrailBucket: 'No'
-    Section5cCreateCloudTrailLogSource: 'No'
+    Section6aParentStackLambdaARN: ''
 Tests:
-  - TestName: installall
+  - TestName: appferandmetricupdate
     Regions:
       - ap-south-1
     Parameters:
       Values:
         Section3aInstallApp: 'Yes'
-        Section2aTagExistingAWSResources: 'No'
-        Section4aCreateCloudWatchMetricsSource: 'Yes'
-        Section5aCreateCloudTrailBucket: 'Yes'
-        Section5cCreateCloudTrailLogSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Install All'
-        Section4bCloudWatchMetricsSourceName: 'Source CloudWatch Metrics All'
-        Section5eCloudTrailLogsSourceName: 'Source CloudTrail Logs All'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1166309542'
+        Section5bCloudTrailLogsSourceName: 'Tests'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
             - MetricRule
             - sumoApp
             - FieldExtractionRule
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.CloudWatchMetricsFirstStack
-            - CreateCommonResources.CloudWatchMetricsFirstStack.SecondCloudwatchMetricsSource
-            - CreateCommonResources.CloudWatchMetricsSecondStack
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CommonBucketSNSTopic
-            - CreateCommonResources.CommonS3Bucket
-            - CreateCommonResources.CommonBucketPolicy
-            - CreateCommonResources.CommonSNSpolicy
-            - CreateCommonResources.CommonCloudTrail
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.CloudTrailSource
-            - CreateCommonResources.CloudTrailSNSSubscription
+            - SumoMetricsUpdateSource
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.BucketName
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Install All'
-            CreateCloudWatchMetricsSource: 'Yes'
-            CloudWatchMetricsSourceName:  'Source CloudWatch Metrics All'
-            CreateCloudTrailLogSource: 'Yes'
-            CreateCloudTrailBucket: 'Yes'
-            CloudTrailLogsSourceName: 'Source CloudTrail Logs All'
-  - TestName: onlytagging
+            - ExistingMetricSourceName
+  - TestName: installnothing
     Regions:
-      - us-east-1
+      - ap-south-1
     Parameters:
       Values:
-        Section2aTagExistingAWSResources: 'Yes'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
-    Skip: true
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - TagAWSResources
-            - MetricRule
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateCloudWatchMetricsSource: 'No'
-            CreateCloudTrailLogSource: 'No'
-            CreateCloudTrailBucket: 'No'
-  - TestName: onlycwsource
-    Regions:
-      - us-east-2
-    Parameters:
-      Values:
-        Section4aCreateCloudWatchMetricsSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Install CW Source'
-        Section4bCloudWatchMetricsSourceName: 'Source CloudWatch Metrics'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
+        Section3aInstallApp: 'No'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
             - MetricRule
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.CloudWatchMetricsFirstStack
-            - CreateCommonResources.CloudWatchMetricsFirstStack.SecondCloudwatchMetricsSource
-            - CreateCommonResources.CloudWatchMetricsSecondStack
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Install CW Source'
-            CreateCloudWatchMetricsSource: 'Yes'
-            CloudWatchMetricsSourceName: 'Source CloudWatch Metrics'
-            CreateCloudTrailLogSource: 'No'
-            CreateCloudTrailBucket: 'No'
   - TestName: onlyappinstall
     Regions:
       - ap-south-1
     Parameters:
       Values:
         Section3aInstallApp: 'Yes'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - MetricRule
             - sumoApp
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateCloudWatchMetricsSource: 'No'
-            CreateCloudTrailLogSource: 'No'
-            CreateCloudTrailBucket: 'No'
-  - TestName: onlylogsourcewithbucket
-    Regions:
-      - us-east-1
-    Parameters:
-      Values:
-        Section5aCreateCloudTrailBucket: 'Yes'
-        Section5cCreateCloudTrailLogSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Install Log Source'
-        Section5eCloudTrailLogsSourceName: 'Source CloudTrail Logs'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - MetricRule
-            - FieldExtractionRule
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CommonBucketSNSTopic
-            - CreateCommonResources.CommonBucketPolicy
-            - CreateCommonResources.CommonS3Bucket
-            - CreateCommonResources.CommonSNSpolicy
-            - CreateCommonResources.CommonCloudTrail
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.CloudTrailSource
-            - CreateCommonResources.CloudTrailSNSSubscription
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.BucketName
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Install Log Source'
-            CreateCloudWatchMetricsSource: 'No'
-            CreateCloudTrailLogSource: 'Yes'
-            CreateCloudTrailBucket: 'Yes'
-            CloudTrailLogsSourceName: 'Source CloudTrail Logs'
-  - TestName: onlylogsourcewithoutbucket
-    Regions:
-      - us-east-2
-    Parameters:
-      Values:
-        Section5cCreateCloudTrailLogSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Without Bucket Log Source'
-        Section5eCloudTrailLogsSourceName: 'Source CloudTrail Logs'
-        Section5bCloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - MetricRule
-            - FieldExtractionRule
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CloudTrailSNSTopic
-            - CreateCommonResources.CloudTrailSNSpolicy
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.CloudTrailSource
-            - CreateCommonResources.CloudTrailSNSSubscription
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Without Bucket Log Source'
-            CreateCloudWatchMetricsSource: 'No'
-            CreateCloudTrailLogSource: 'Yes'
-            CreateCloudTrailBucket: 'No'
-            CloudTrailLogsSourceName: 'Source CloudTrail Logs'
   - TestName: updatecwmetrics
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section4cCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631121'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631121'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
             - MetricRule
             - SumoMetricsUpdateSource
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
             - ExistingMetricSourceName
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateCloudWatchMetricsSource: 'No'
-            CreateCloudTrailLogSource: 'No'
-            CreateCloudTrailBucket: 'No'
   - TestName: updatelogssource
     Regions:
-      - us-east-1
+      - ap-south-1
     Parameters:
       Values:
-        Section5fCloudTrailLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631970'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
+        Section5aCloudTrailLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631970'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -336,24 +96,28 @@ Tests:
             - MetricRule
             - SumoCloudTrailLogsUpdateSource
             - FieldExtractionRule
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
             - ExistingLogSourceName
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
+  - TestName: updatebothsources
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section5aALBLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1167287836'
+        Section4aCloudWatchExistingSourceAPIUrl: "https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1269239693"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
         Assert:
-          CreateCommonResources:
-            CreateCloudWatchMetricsSource: 'No'
-            CreateCloudTrailLogSource: 'No'
-            CreateCloudTrailBucket: 'No'
+          Resources:
+            - MetricRule
+            - SumoMetricsUpdateSource
+            - FieldExtractionRule
+            - SumoCloudTrailLogsUpdateSource
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - ExistingLogSourceName
+            - ExistingMetricSourceName

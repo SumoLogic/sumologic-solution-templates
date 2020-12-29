@@ -2,357 +2,121 @@
 Global:
   TemplatePath: "../alb_app.template.yaml"
   TestProjectName: BasicTestProject
-  ParallelTestsRun: 8
+  ParallelTestsRun: 6
   GlobalParameters:
     Section1aSumoDeployment: us2
-    Section1bSumoAccessID: '${ACCESS_ID_6}'
-    Section1cSumoAccessKey: '${ACCESS_KEY_6}'
-    Section1dSumoOrganizationId: '${US2_PROF_ORG_ID}'
-    Section1eRemoveSumoResourcesOnDeleteStack: 'true'
-    Section2bAccountAlias: 'testenv'
+    Section1bSumoAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
+    Section1cSumoAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
+    Section1dRemoveSumoResourcesOnDeleteStack: 'true'
+    Section2aAccountAlias: 'testenv'
     Section3aInstallApp: 'No'
-    Section2aTagExistingAWSResources: 'No'
-    Section4aCreateCloudWatchMetricsSource: 'No'
-    Section5aCreateS3Bucket: 'No'
-    Section5cCreateALBLogSource: 'No'
+    Section6aParentStackLambdaARN: ''
 Tests:
-  - TestName: installall
+  - TestName: appferandmetricupdate
     Regions:
       - ap-south-1
     Parameters:
       Values:
         Section3aInstallApp: 'Yes'
-        Section2aTagExistingAWSResources: 'Yes'
-        Section4aCreateCloudWatchMetricsSource: 'Yes'
-        Section5aCreateS3Bucket: 'Yes'
-        Section5cCreateALBLogSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Install All'
-        Section4bCloudWatchMetricsSourceName: 'Source CloudWatch Metrics All'
-        Section5eALBLogsSourceName: 'Source ALB Logs All'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1166309542'
+        Section5bALBLogsSourceName: 'Tests'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
-            - TagAWSResources
             - ALBMetricRule
             - sumoApp
             - AlbLogsFieldExtractionRule
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.CloudWatchMetricsFirstStack
-            - CreateCommonResources.CloudWatchMetricsFirstStack.FirstCloudwatchMetricsSource
-            - CreateCommonResources.CloudWatchMetricsSecondStack
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CommonBucketSNSTopic
-            - CreateCommonResources.CommonS3Bucket
-            - CreateCommonResources.CommonBucketPolicy
-            - CreateCommonResources.CommonSNSpolicy
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.ALBSource
-            - CreateCommonResources.ALBSNSSubscription
+            - SumoALBMetricsUpdateSource
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.BucketName
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Install All'
-            CreateCloudWatchMetricsSource: 'Yes'
-            CloudWatchMetricsSourceName:  'Source CloudWatch Metrics All'
-            CreateALBLogSource: 'Yes'
-            CreateALBS3Bucket: 'Yes'
-            ALBLogsSourceName: 'Source ALB Logs All'
-  - TestName: onlytagging
+            - ExistingMetricSourceName
+  - TestName: installnothing
     Regions:
-      - us-east-1
+      - ap-south-1
     Parameters:
       Values:
-        Section2aTagExistingAWSResources: 'Yes'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
+        Section3aInstallApp: 'No'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
-            - TagAWSResources
             - ALBMetricRule
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
-  - TestName: onlycwsource
-    Regions:
-      - us-east-2
-    Parameters:
-      Values:
-        Section4aCreateCloudWatchMetricsSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Install CW Source'
-        Section4bCloudWatchMetricsSourceName: 'Source CloudWatch Metrics'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - ALBMetricRule
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.CloudWatchMetricsFirstStack
-            - CreateCommonResources.CloudWatchMetricsFirstStack.FirstCloudwatchMetricsSource
-            - CreateCommonResources.CloudWatchMetricsSecondStack
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Install CW Source'
-            CreateCloudWatchMetricsSource: 'Yes'
-            CloudWatchMetricsSourceName: 'Source CloudWatch Metrics'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
   - TestName: onlyappinstall
     Regions:
       - ap-south-1
     Parameters:
       Values:
         Section3aInstallApp: 'Yes'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
             - ALBMetricRule
             - sumoApp
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
-  - TestName: onlylogsourcewithbucket
-    Regions:
-      - us-east-1
-    Parameters:
-      Values:
-        Section5aCreateS3Bucket: 'Yes'
-        Section5cCreateALBLogSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Install Log Source'
-        Section5eALBLogsSourceName: 'Source ALB Logs'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - ALBMetricRule
-            - AlbLogsFieldExtractionRule
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CommonBucketSNSTopic
-            - CreateCommonResources.CommonBucketPolicy
-            - CreateCommonResources.CommonS3Bucket
-            - CreateCommonResources.CommonSNSpolicy
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.ALBSource
-            - CreateCommonResources.ALBSNSSubscription
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.BucketName
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Install Log Source'
-            CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'Yes'
-            CreateALBS3Bucket: 'Yes'
-            ALBLogsSourceName: 'Source ALB Logs'
-  - TestName: onlylogsourcewithoutbucket
-    Regions:
-      - us-east-2
-    Parameters:
-      Values:
-        Section5cCreateALBLogSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Without Bucket Log Source'
-        Section5eALBLogsSourceName: 'Source ALB Logs'
-        Section5bS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - ALBMetricRule
-            - AlbLogsFieldExtractionRule
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.ALBSNSTopic
-            - CreateCommonResources.ALBSNSpolicy
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.ALBSource
-            - CreateCommonResources.ALBSNSSubscription
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Without Bucket Log Source'
-            CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'Yes'
-            CreateALBS3Bucket: 'No'
-            ALBLogsSourceName: 'Source ALB Logs'
   - TestName: updatecwmetrics
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section4cCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631121'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631121'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
             - ALBMetricRule
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
             - SumoALBMetricsUpdateSource
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
             - ExistingMetricSourceName
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
   - TestName: updatelogssource
     Regions:
-      - us-east-1
+      - ap-south-1
     Parameters:
       Values:
-        Section5fALBLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631970'
-        Section6bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
+        Section5aALBLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631970'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
             - ALBMetricRule
             - SumoALBLogsUpdateSource
             - AlbLogsFieldExtractionRule
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
             - ExistingLogSourceName
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
+  - TestName: updatebothsources
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section5aALBLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1167287836'
+        Section4aCloudWatchExistingSourceAPIUrl: "https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1269239693"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
         Assert:
-          CreateCommonResources:
-            CreateCloudWatchMetricsSource: 'No'
-            CreateALBLogSource: 'No'
-            CreateALBS3Bucket: 'No'
+          Resources:
+            - ALBMetricRule
+            - SumoALBLogsUpdateSource
+            - AlbLogsFieldExtractionRule
+            - SumoALBMetricsUpdateSource
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - ExistingLogSourceName
+            - ExistingMetricSourceName
