@@ -5,9 +5,9 @@ Global:
   ParallelTestsRun: 10
   GlobalParameters:
     SumoLogicDeployment: us2
-    SumoLogicOrganizationId: '${US2_PROF_ORG_ID}'
-    SumoLogicAccessID: '${ACCESS_ID_6}'
-    SumoLogicAccessKey: '${ACCESS_KEY_6}'
+    SumoLogicOrganizationId: '${US2_PROFESSIONAL_ORG_ID}'
+    SumoLogicAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
+    SumoLogicAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
     RemoveSumoLogicResourcesOnDeleteStack: 'true'
     AccountAlias: 'testenv'
     CreateMetaDataSource: 'No'
@@ -17,6 +17,13 @@ Global:
     CreateCloudTrailLogSource: 'No'
     CreateCloudTrailBucket: 'No'
     CreateCloudWatchLogSource: 'No'
+    MetaDataSourceCategory: "aws/test/metadata"
+    CloudWatchMetricSourceCategory: "aws/test/metrics"
+    ALBLogsSourceCategory: "aws/test/alb"
+    CloudTrailLogsSourceCategory: "aws/test/cloudtrail"
+    CloudWatchLogsSourceCategory: "aws/test/cloudwatch"
+    TemplatesBucketName: 'sumologic-appdev-aws-sam-apps'
+    NestedTemplateVersion: 'v2.0.1'
 Tests:
   - TestName: installall
     Regions:
@@ -40,7 +47,6 @@ Tests:
         CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
         CreateCloudWatchLogSource: 'Yes'
         CloudWatchLogsSourceName: 'Sourabh CW Logs Source'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -99,6 +105,34 @@ Tests:
             - BucketName
             - CloudWatchLambdaARN
             - CloudWatchEventFunction.SumoCWLogsLambdaArn
+      - AssertType: ParameterCheck
+        Assert:
+          CloudWatchMetricsFirstStack:
+            CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
+            CloudWatchMetricSourceCategory: "aws/test/metrics"
+            CreateFirstMetricsSource: 'Yes'
+            FirstMetricsSourceNamespace: 'ApplicationELB'
+            CreateSecondMetricsSource: 'Yes'
+            SecondMetricsSourceNamespace: 'ApiGateway'
+            CreateThirdMetricsSource: 'Yes'
+            ThirdMetricsSourceNamespace: 'DynamoDB'
+            CreateFourthMetricsSource: 'Yes'
+            FourthMetricsSourceNamespace: 'Lambda'
+            CreateFifthMetricsSource: 'Yes'
+            FifthMetricsSourceNamespace: 'RDS'
+          CloudWatchMetricsSecondStack:
+            CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
+            CloudWatchMetricSourceCategory: "aws/test/metrics"
+            CreateFirstMetricsSource: 'Yes'
+            FirstMetricsSourceNamespace: 'ECS'
+            CreateSecondMetricsSource: 'Yes'
+            SecondMetricsSourceNamespace: 'ElastiCache'
+            CreateThirdMetricsSource: 'Yes'
+            ThirdMetricsSourceNamespace: 'ELB'
+            CreateFourthMetricsSource: 'Yes'
+            FourthMetricsSourceNamespace: 'NetworkELB'
+            CreateFifthMetricsSource: 'No'
+            FifthMetricsSourceNamespace: ''
   - TestName: installmetadata
     Regions:
       - us-east-1
@@ -107,7 +141,6 @@ Tests:
         CollectorName: 'Sourabh Collector Install MetaData'
         CreateMetaDataSource: 'Yes'
         MetaDataSourceName: 'Sourabh MetaData Source'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -139,7 +172,6 @@ Tests:
         CreateCloudWatchMetricsSource: 'Yes'
         CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
         CloudWatchMetricsNameSpaces: 'AWS/ApplicationELB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ELB, AWS/NetworkELB'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -169,6 +201,34 @@ Tests:
             - EnterpriseCheck
             - PaidAccountCheck
             - Namespaces
+      - AssertType: ParameterCheck
+        Assert:
+          CloudWatchMetricsFirstStack:
+            CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
+            CloudWatchMetricSourceCategory: "aws/test/metrics"
+            CreateFirstMetricsSource: 'Yes'
+            FirstMetricsSourceNamespace: 'ApplicationELB'
+            CreateSecondMetricsSource: 'No'
+            SecondMetricsSourceNamespace: 'ApiGateway'
+            CreateThirdMetricsSource: 'No'
+            ThirdMetricsSourceNamespace: 'DynamoDB'
+            CreateFourthMetricsSource: 'Yes'
+            FourthMetricsSourceNamespace: 'Lambda'
+            CreateFifthMetricsSource: 'Yes'
+            FifthMetricsSourceNamespace: 'RDS'
+          CloudWatchMetricsSecondStack:
+            CloudWatchMetricsSourceName: 'Sourabh CW Metrics Source'
+            CloudWatchMetricSourceCategory: "aws/test/metrics"
+            CreateFirstMetricsSource: 'Yes'
+            FirstMetricsSourceNamespace: 'ECS'
+            CreateSecondMetricsSource: 'No'
+            SecondMetricsSourceNamespace: 'ElastiCache'
+            CreateThirdMetricsSource: 'Yes'
+            ThirdMetricsSourceNamespace: 'ELB'
+            CreateFourthMetricsSource: 'Yes'
+            FourthMetricsSourceNamespace: 'NetworkELB'
+            CreateFifthMetricsSource: 'No'
+            FifthMetricsSourceNamespace: ''
   - TestName: installalbsourcewithbucket
     Regions:
       - ap-south-1
@@ -179,7 +239,6 @@ Tests:
         CreateALBS3Bucket: 'Yes'
         ALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
         ALBLogsSourceName: 'Sourabh ALB Source'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -218,7 +277,6 @@ Tests:
         CreateCloudTrailBucket: 'Yes'
         CloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
         CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -256,7 +314,6 @@ Tests:
         CollectorName: 'Sourabh Collector Install CW Logs'
         CreateCloudWatchLogSource: 'Yes'
         CloudWatchLogsSourceName: 'Sourabh CW Logs Source'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -306,7 +363,6 @@ Tests:
         CreateCloudTrailBucket: 'Yes'
         CloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
         CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -354,7 +410,6 @@ Tests:
         CreateCloudTrailBucket: 'No'
         CloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
         CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -401,7 +456,6 @@ Tests:
         CreateCloudTrailBucket: 'No'
         CloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
         CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -437,7 +491,6 @@ Tests:
     Parameters:
       Values:
         CollectorName: 'Sourabh Collector Install Nothing'
-        TemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
