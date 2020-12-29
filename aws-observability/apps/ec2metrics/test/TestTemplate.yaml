@@ -5,193 +5,41 @@ Global:
   ParallelTestsRun: 5
   GlobalParameters:
     Section1aSumoDeployment: us2
-    Section1bSumoAccessID: '${ACCESS_ID_6}'
-    Section1cSumoAccessKey: '${ACCESS_KEY_6}'
-    Section1dSumoOrganizationId: '${US2_PROF_ORG_ID}'
-    Section1eRemoveSumoResourcesOnDeleteStack: 'true'
-    Section2bAccountAlias: 'testenv'
-    Section3aInstallApp: 'No'
-    Section2aTagExistingAWSResources: 'No'
-    Section4aCreateMetaDataSource: 'No'
+    Section1bSumoAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
+    Section1cSumoAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
+    Section1dRemoveSumoResourcesOnDeleteStack: 'true'
+    Section2aInstallApp: 'No'
+    Section3aParentStackLambdaARN: ''
 Tests:
   - TestName: installall
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section3aInstallApp: 'Yes'
-        Section2aTagExistingAWSResources: 'No'
-        Section4aCreateMetaDataSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Install All'
-        Section4bMetaDataSourceName: 'Source MetaData'
-        Section5bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+        Section2aInstallApp: 'Yes'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
             - EC2MetricRule
             - sumoApp
             - sumoOverview
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.SumoLogicMetaDataSource
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Install All'
-            CreateMetaDataSource: 'Yes'
-            MetaDataSourceName: 'Source MetaData'
-  - TestName: onlytagging
-    Regions:
-      - us-east-1
-    Parameters:
-      Values:
-        Section2aTagExistingAWSResources: 'Yes'
-        Section5bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
-    Skip: true
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - TagAWSResources
-            - MetricRule
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateMetaDataSource: 'No'
-  - TestName: onlymetadatasource
-    Regions:
-      - us-east-2
-    Parameters:
-      Values:
-        Section4aCreateMetaDataSource: 'Yes'
-        Section3bCollectorName: 'Sourabh Collector Install All'
-        Section4bMetaDataSourceName: 'Source MetaData'
-        Section5bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-2'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - EC2MetricRule
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-            - CreateCommonResources.SumoLogicSourceRole
-            - CreateCommonResources.SumoLogicHostedCollector
-            - CreateCommonResources.SumoLogicMetaDataSource
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CollectorName: 'Sourabh Collector Install All'
-            CreateMetaDataSource: 'Yes'
-            MetaDataSourceName: 'Source MetaData'
-  - TestName: onlyappinstall
+  - TestName: nothing
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section3aInstallApp: 'Yes'
-        Section5bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1'
+        Section2aInstallApp: 'No'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - CreateCommonResources
             - EC2MetricRule
-            - sumoApp
-            - sumoOverview
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateMetaDataSource: 'No'
-  - TestName: nothing
-    Regions:
-      - us-east-1
-    Parameters:
-      Values:
-        Section3aInstallApp: 'No'
-        Section5bTemplatesBucketName: 'cf-templates-1qpf3unpuo1hw-us-east-1'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - CreateCommonResources
-            - EC2MetricRule
-            - CreateCommonResources.AccountCheck
-            - CreateCommonResources.LambdaHelper
-            - CreateCommonResources.LambdaRole
-            - CreateCommonResources.LambdaToDecideCWMetricsSources
-            - CreateCommonResources.Primerinvoke
-            - CreateCommonResources.CreateSumoLogicAWSExplorerView
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - CreateCommonResources.LambdaHelperARN
-            - CreateCommonResources.LambdaRoleARN
-            - CreateCommonResources.EnterpriseCheck
-            - CreateCommonResources.PaidAccountCheck
-            - CreateCommonResources.Namespaces
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateMetaDataSource: 'No'
