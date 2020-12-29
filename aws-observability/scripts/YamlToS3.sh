@@ -26,7 +26,7 @@ done
 # Upload Control Tower and Permission Check template to sumologic-appdev-aws-sam-apps bucket
 export bucket_name=sumologic-appdev-aws-sam-apps
 
-if [[ ${AWS_PROFILE} == 'personal' ]]
+if [[ ${AWS_PROFILE} == 'default' ]]
 then
     aws s3 cp apps/permissionchecker/permissioncheck.template.yaml s3://${bucket_name}/ --acl public-read --profile ${AWS_PROFILE}
     echo "Upload complete for Permission check Template to Bucket Name -> ${bucket_name}"
@@ -36,7 +36,7 @@ then
 fi
 
 # Upload all templates to sumologic-appdev-aws-sam-apps bucket with version information.
-if [[ ${AWS_PROFILE} == 'personal' ]]
+if [[ ${AWS_PROFILE} == 'default' ]]
 then
     export version=2.0.1
 
