@@ -573,6 +573,40 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
 
+  ############# START - FIELDS #################
+
+  AddAccountField:
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "account"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  AddRegionField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddAccountField
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "region"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  AddNamespaceField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddRegionField
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "namespace"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
   ############# START - RESOURCES FOR METADATA SOURCE #################
 
   SumoLogicMetaDataSource:
