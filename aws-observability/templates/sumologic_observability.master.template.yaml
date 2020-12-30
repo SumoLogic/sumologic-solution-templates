@@ -337,54 +337,18 @@ Conditions:
   install_overview_dashboards: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
 
 Mappings:
-  # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
-  # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
-  # Buckets names which are intentional -
-  # 1. appdevzipfiles-eu-north-1s
-  # 2. appdevzipfiles-ap-east-1s
-  # 3. appdevzipfiles-af-south-1s
-  # 4. appdevzipfiles-me-south-1s
-  RegionMap:
-    us-east-1:
-      bucketname: appdevzipfiles-us-east-1
-    us-east-2:
-      bucketname: appdevzipfiles-us-east-2
-    us-west-1:
-      bucketname: appdevzipfiles-us-west-1
-    us-west-2:
-      bucketname: appdevzipfiles-us-west-2
-    ap-south-1:
-      bucketname: appdevzipfiles-ap-south-1
-    ap-northeast-2:
-      bucketname: appdevzipfiles-ap-northeast-2
-    ap-southeast-1:
-      bucketname: appdevzipfiles-ap-southeast-1
-    ap-southeast-2:
-      bucketname: appdevzipfiles-ap-southeast-2
-    ap-northeast-1:
-      bucketname: appdevzipfiles-ap-northeast-1
-    ca-central-1:
-      bucketname: appdevzipfiles-ca-central-1
-    eu-central-1:
-      bucketname: appdevzipfiles-eu-central-1
-    eu-west-1:
-      bucketname: appdevzipfiles-eu-west-1
-    eu-west-2:
-      bucketname: appdevzipfiles-eu-west-2
-    eu-west-3:
-      bucketname: appdevzipfiles-eu-west-3
-    eu-north-1:
-      bucketname: appdevzipfiles-eu-north-1s
-    sa-east-1:
-      bucketname: appdevzipfiles-sa-east-1
-    ap-east-1:
-      bucketname: appdevzipfiles-ap-east-1s
-    af-south-1:
-      bucketname: appdevzipfiles-af-south-1s
-    eu-south-1:
-      bucketname: appdevzipfiles-eu-south-1
-    me-south-1:
-      bucketname: appdevzipfiles-me-south-1s
+  CommonData:
+    NestedTemplate:
+      BucketName: "sumologic-appdev-aws-sam-apps"
+      Version: "v2.1.0"
+    CollectorDetails:
+      CollectorNamePrefix: "aws-observability"
+      CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
+      ALBLogsSourceCategory: "aws/observability/alb/logs"
+      CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
+      CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
+      InventorySourceCategory: "aws/observability/inventory"
+      XraySourceCategory: "aws/observability/xray"
 
 Resources:
   # Create a Lambda and check for Enterprise by using Custom resource. Use the value to create inventory and root cause app.
@@ -392,11 +356,10 @@ Resources:
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/common/resources.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         SumoLogicDeployment: !Ref Section1aSumoLogicDeployment
         SumoLogicAccessID: !Ref Section1bSumoLogicAccessID
@@ -404,35 +367,42 @@ Resources:
         SumoLogicOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         AccountAlias: !Ref Section2aAccountAlias
-        CollectorName: !Sub "aws-observability-${Section2aAccountAlias}"
+        CollectorName: !Sub
+          - "${Prefix}-${Alias}"
+          - Prefix: !FindInMap [CommonData, CollectorDetails, CollectorNamePrefix]
+            Alias: !Ref Section2aAccountAlias
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: !If [install_cloudwatch_metrics_source, "Yes", "No"]
         CloudWatchMetricsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-metrics-${AWS::Region}"
         CloudWatchMetricsNameSpaces: !Ref Section4bMetricsNameSpaces
+        CloudWatchMetricSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudWatchMetricSourceCategory]
         ScanInterval: 300000
         CreateALBLogSource: !Ref Section5bALBCreateLogSource
         CreateALBS3Bucket: !If [create_alb_bucket, "Yes", "No"]
         ALBS3LogsBucketName: !Ref Section5dALBS3LogsBucketName
         ALBS3BucketPathExpression: !If [auto_enable_s3_logs, !Sub "*AWSLogs/${AWS::AccountId}/elasticloadbalancing/${AWS::Region}/*", !Ref Section5eALBS3BucketPathExpression]
         ALBLogsSourceName: !Sub "${Section2aAccountAlias}-alb-logs-${AWS::Region}"
+        ALBLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, ALBLogsSourceCategory]
         CreateCloudTrailLogSource: !Ref Section6aCreateCloudTrailLogSource
         CreateCloudTrailBucket: !If [create_cloudtrail_bucket, "Yes", "No"]
         CloudTrailLogsBucketName: !Ref Section6cCloudTrailLogsBucketName
         CloudTrailBucketPathExpression: !If [create_cloudtrail_bucket, !Sub "AWSLogs/${AWS::AccountId}/CloudTrail/${AWS::Region}/*", !Ref Section6dCloudTrailBucketPathExpression]
         CloudTrailLogsSourceName: !Sub "${Section2aAccountAlias}-cloudtrail-logs-${AWS::Region}"
+        CloudTrailLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudTrailLogsSourceCategory]
         CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSource
         CloudWatchLogsSourceName: !Sub "${Section2aAccountAlias}-cloudwatch-logs-${AWS::Region}"
-        TemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+        CloudWatchLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudWatchLogsSourceCategory]
+        TemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+        NestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
 
   AutoEnableOptions:
     Type: AWS::CloudFormation::Stack
     Condition: call_auto_enable
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/autoenable/auto_enable.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/autoenable/auto_enable.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         SumoLogicResourceRemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         ALBAutoEnableS3Logs: !If [auto_enable_s3_logs, "Yes", "No"]
@@ -446,135 +416,100 @@ Resources:
   sumoEC2MetricsAppStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/ec2metrics/ec2_metrics_app.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/ec2metrics/ec2_metrics_app.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aTagExistingAWSResources: "No"
-        Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCreateMetaDataSource: "No"
-        Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section5bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+        Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
+        Section3aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
   sumoAlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: sumoEC2MetricsAppStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/alb/alb_app.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/alb/alb_app.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aTagExistingAWSResources: "No"
-        Section2bAccountAlias: !Ref Section2aAccountAlias
+        Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCreateCloudWatchMetricsSource: "No"
-        Section4cCloudWatchExistingSourceAPIUrl: !Ref Section4cCloudWatchExistingSourceAPIUrl
-        Section5aCreateS3Bucket: "No"
-        Section5cCreateALBLogSource: "No"
-        Section5eALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
-        Section5fALBLogsAPIUrl: !Ref Section5cALBLogsSourceUrl
+        Section4aCloudWatchExistingSourceAPIUrl: !If [install_cloudwatch_metrics_source, "", !Ref Section4cCloudWatchExistingSourceAPIUrl]
+        Section5aALBLogsAPIUrl: !If [create_alb_source, "", !Ref Section5cALBLogsSourceUrl]
+        Section5bALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoDynamoDBMetricsAppStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: sumoAlbMetricsAppStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/dynamodb/dynamodb_app.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/dynamodb/dynamodb_app.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aTagExistingAWSResources: "No"
-        Section2bAccountAlias: !Ref Section2aAccountAlias
-        Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCreateCloudWatchMetricsSource: "No"
-        Section5aCreateCloudTrailBucket: "No"
-        Section5cCreateCloudTrailLogSource: "No"
-        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
+        Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aAccountAlias: !Ref Section2aAccountAlias
+        Section3aInstallApps: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
+        Section5bCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoRdsMetricsAppStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: RootCauseAppStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/rds/rds_app.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/rds/rds_app.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aTagExistingAWSResources: "No"
-        Section2bAccountAlias: !Ref Section2aAccountAlias
+        Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCreateCloudWatchMetricsSource: "No"
-        Section5aCreateCloudTrailBucket: "No"
-        Section5cCreateCloudTrailLogSource: "No"
-        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
+        Section5bCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoApiGatewayMetricsAppStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: sumoDynamoDBMetricsAppStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/apigateway/api_gateway_app.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/apigateway/api_gateway_app.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aTagExistingAWSResources: "No"
-        Section2bAccountAlias: !Ref Section2aAccountAlias
+        Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCreateCloudWatchMetricsSource: "No"
-        Section5aCreateCloudTrailBucket: "No"
-        Section5cCreateCloudTrailLogSource: "No"
-        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
+        Section5bCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section6bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: sumoLambdaMetricsAppStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/rootcause/rootcauseexplorer.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/rootcause/rootcauseexplorer.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
@@ -582,138 +517,36 @@ Resources:
         Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
-        Section2bCollectorName: !Sub "aws-observability-${Section2aAccountAlias}"
+        Section2bCollectorName: !Sub
+          - "${Prefix}-${Alias}"
+          - Prefix: !FindInMap [CommonData, CollectorDetails, CollectorNamePrefix]
+            Alias: !Ref Section2aAccountAlias
         Section3aCreateAwsInventorySource: !If [install_inventory_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section3bAwsInventorySourceName: !Sub "${Section2aAccountAlias}-inventory-aws-${AWS::Region}"
         Section3cNamespaces: !GetAtt CreateCommonResources.Outputs.Namespaces
+        Section3dInventorySourceCategory: !FindInMap [CommonData, CollectorDetails, InventorySourceCategory]
         Section4aCreateAwsXRaySource: !If [install_xray_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section4bAwsXRaySourceName: !Sub "${Section2aAccountAlias}-xray-aws-${AWS::Region}"
+        Section4cXraySourceCategory: !FindInMap [CommonData, CollectorDetails, XraySourceCategory]
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section5bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: sumoEC2MetricsAppStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-          - ".s3.amazonaws.com/sumologic-aws-observability/apps/lambda/lambda_app.template.yaml"
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/lambda/lambda_app.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aTagExistingAWSResources: "No"
-        Section2bAccountAlias: !Ref Section2aAccountAlias
+        Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCreateCloudWatchMetricsSource: "No"
-        Section5aCreateCloudTrailBucket: "No"
-        Section5cCreateCloudTrailLogSource: "No"
-        Section5eCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
-        Section5fCloudTrailLogsAPIUrl: !Ref Section6bCloudTrailLogsSourceUrl
-        Section6aCreateCloudWatchLogSource: "No"
+        Section5bCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
+        Section5aCloudTrailLogsAPIUrl: !If [create_cloudtrail_source, "", !Ref Section6bCloudTrailLogsSourceUrl]
         Section6bCloudWatchLogsSourceName: !If [create_cloudwatch_logs_source, "*cloudwatch-logs*", ""]
-        Section6cCloudWatchLogsAPIUrl: !Ref Section7bLambdaCloudWatchLogsSourceUrl
+        Section6aCloudWatchLogsAPIUrl: !If [create_cloudwatch_logs_source, "", !Ref Section7bLambdaCloudWatchLogsSourceUrl]
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section7bTemplatesBucketName: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-
-  # Adding Fields to SumoLogic Fields Schema
-  AddAccountField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "account"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddRegionField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "region"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddNamespaceField:
-    Type: Custom::SumoLogicFieldsSchema
-    DependsOn: AddAccountField
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "namespace"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddTableNameField:
-    Type: Custom::SumoLogicFieldsSchema
-    DependsOn: AddRegionField
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "tablename"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddLoadBalancerField:
-    Type: Custom::SumoLogicFieldsSchema
-    DependsOn: AddNamespaceField
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "loadbalancer"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddFunctionNameField:
-    Type: Custom::SumoLogicFieldsSchema
-    DependsOn: AddTableNameField
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "functionname"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddApiNameField:
-    Type: Custom::SumoLogicFieldsSchema
-    DependsOn: AddLoadBalancerField
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "apiname"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddDBIdentifierField:
-    Type: Custom::SumoLogicFieldsSchema
-    DependsOn: AddFunctionNameField
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "dbidentifier"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
-  AddInstanceIdField:
-    Type: Custom::SumoLogicFieldsSchema
-    DependsOn: AddApiNameField
-    Properties:
-      ServiceToken: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-      FieldName: "instanceid"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
