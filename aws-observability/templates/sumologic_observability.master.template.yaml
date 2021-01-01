@@ -342,6 +342,7 @@ Mappings:
       BucketName: "sumologic-appdev-aws-sam-apps"
       Version: "v2.1.0"
     CollectorDetails:
+      SumoLogicAccountID: 926226587429
       CollectorNamePrefix: "aws-observability"
       CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
       ALBLogsSourceCategory: "aws/observability/alb/logs"
@@ -372,6 +373,7 @@ Resources:
           - Prefix: !FindInMap [CommonData, CollectorDetails, CollectorNamePrefix]
             Alias: !Ref Section2aAccountAlias
             Number: !Ref AWS::AccountId
+        SumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: !If [install_cloudwatch_metrics_source, "Yes", "No"]
         CloudWatchMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
@@ -523,6 +525,7 @@ Resources:
           - Prefix: !FindInMap [CommonData, CollectorDetails, CollectorNamePrefix]
             Alias: !Ref Section2aAccountAlias
             Number: !Ref AWS::AccountId
+        Section2cSumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
         Section3aCreateAwsInventorySource: !If [install_inventory_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section3bAwsInventorySourceName: !Sub "inventory-${AWS::Region}"
         Section3cNamespaces: !GetAtt CreateCommonResources.Outputs.Namespaces
