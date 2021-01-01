@@ -43,6 +43,10 @@ Parameters:
     Type: String
     Description: "Provide a Collector Name"
     Default: ""
+  SumoLogicAccountID:
+    Type: String
+    Description: "Provide the Sumo Logic Account ID for trust relationship."
+    Default: ""
 
   CreateMetaDataSource:
     Type: String
@@ -528,7 +532,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::926226587429:root
+              AWS: !Sub "arn:aws:iam::${SumoLogicAccountID}:root"
             Action: sts:AssumeRole
             Condition:
               StringEquals:
