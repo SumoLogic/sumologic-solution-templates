@@ -19,6 +19,7 @@ Metadata:
         Parameters:
           - Section2aInstallApp
           - Section2bCollectorName
+          - Section2cSumoLogicAccountID
 
       - Label:
           default: "AWS Inventory Source Details"
@@ -56,6 +57,8 @@ Metadata:
         default: "Create AWS Root Cause Explorer App"
       Section2bCollectorName:
         default: "Collector Name"
+      Section2cSumoLogicAccountID:
+        default: "Sumo Logic Account ID"
 
       Section3aCreateAwsInventorySource:
         default: "Create Sumo Logic AWS Inventory Source"
@@ -117,6 +120,10 @@ Parameters:
   Section2bCollectorName:
     Type: String
     Description: "Change the collector name to be created else default name will be used."
+    Default: ""
+  Section2cSumoLogicAccountID:
+    Type: String
+    Description: "Provide the Sumo Logic Account ID for trust relationship."
     Default: ""
 
   Section3aCreateAwsInventorySource:
@@ -211,7 +218,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::926226587429:root
+              AWS: !Sub "arn:aws:iam::${Section2cSumoLogicAccountID}:root"
             Action: sts:AssumeRole
             Condition:
               StringEquals:
