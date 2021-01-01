@@ -2,14 +2,14 @@
 
 echo "Start S3 upload Script....."
 
-export AWS_PROFILE="prod"
+export AWS_PROFILE="default"
 
 declare -a regions=("us-east-2" "us-east-1" "us-west-1" "us-west-2" "ap-south-1" "ap-northeast-2" "ap-southeast-1" "ap-southeast-2" "ap-northeast-1" "ca-central-1" "eu-central-1" "eu-west-1" "eu-west-2" "eu-west-3" "eu-north-1s" "sa-east-1" "ap-east-1s" "af-south-1s" "eu-south-1" "me-south-1s")
 
 cd ..\/
 
 # Upload the ZIP file to bucket appdevzipfiles- in every region with the new version.
-if [[ ${AWS_PROFILE} == 'default' ]]
+if [[ ${AWS_PROFILE} == 'personal' ]]
 then
   for region in "${regions[@]}"
   do
@@ -29,7 +29,7 @@ fi
 # Upload Control Tower and Permission Check template to sumologic-appdev-aws-sam-apps bucket
 export bucket_name=sumologic-appdev-aws-sam-apps
 
-if [[ ${AWS_PROFILE} == 'default' ]]
+if [[ ${AWS_PROFILE} == 'personal' ]]
 then
     aws s3 cp apps/permissionchecker/permissioncheck.template.yaml s3://${bucket_name}/ --acl public-read --profile ${AWS_PROFILE}
     echo "Upload complete for Permission check Template to Bucket Name -> ${bucket_name}"
