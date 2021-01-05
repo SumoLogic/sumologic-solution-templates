@@ -8,18 +8,16 @@ Global:
     Section1bSumoAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
     Section1cSumoAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
     Section1dRemoveSumoResourcesOnDeleteStack: 'true'
-    Section2aAccountAlias: 'testenv'
-    Section3aInstallApp: 'No'
-    Section6aParentStackLambdaARN: ''
+    Section2aInstallApp: 'No'
+    Section4aParentStackLambdaARN: 'arn:aws:lambda:ap-south-1:668508221233:function:lambdafunction-LambdaHelper-134BQ61J00GG9'
 Tests:
-  - TestName: appferandmetricupdate
+  - TestName: installall
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section3aInstallApp: 'Yes'
-        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1166309542'
-        Section5bCloudTrailLogsSourceName: 'Tests'
+        Section2aInstallApp: 'Yes'
+        Section3aCloudTrailLogsSourceName: 'Tests'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -28,18 +26,16 @@ Tests:
             - MetricRule
             - sumoApp
             - FieldExtractionRule
-            - SumoMetricsUpdateSource
             - AddCacheClusterIdField
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - ExistingMetricSourceName
   - TestName: installnothing
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section3aInstallApp: 'No'
+        Section2aInstallApp: 'No'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -55,7 +51,7 @@ Tests:
       - ap-south-1
     Parameters:
       Values:
-        Section3aInstallApp: 'Yes'
+        Section2aInstallApp: 'Yes'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -67,62 +63,20 @@ Tests:
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-  - TestName: updatecwmetrics
+  - TestName: onlyfer
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631121'
+        Section3aCloudTrailLogsSourceName: 'Tests'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
             - MetricRule
-            - SumoMetricsUpdateSource
-            - AddCacheClusterIdField
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - ExistingMetricSourceName
-  - TestName: updatelogssource
-    Regions:
-      - ap-south-1
-    Parameters:
-      Values:
-        Section5aCloudTrailLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631970'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - MetricRule
-            - SumoCloudTrailLogsUpdateSource
             - FieldExtractionRule
             - AddCacheClusterIdField
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - ExistingLogSourceName
-  - TestName: updatebothsources
-    Regions:
-      - ap-south-1
-    Parameters:
-      Values:
-        Section5aCloudTrailLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1167287836'
-        Section4aCloudWatchExistingSourceAPIUrl: "https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1269239693"
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - MetricRule
-            - SumoMetricsUpdateSource
-            - FieldExtractionRule
-            - SumoCloudTrailLogsUpdateSource
-            - AddCacheClusterIdField
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - ExistingLogSourceName
-            - ExistingMetricSourceName

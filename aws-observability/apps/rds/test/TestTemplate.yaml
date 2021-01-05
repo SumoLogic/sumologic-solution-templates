@@ -8,18 +8,16 @@ Global:
     Section1bSumoAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
     Section1cSumoAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
     Section1dRemoveSumoResourcesOnDeleteStack: 'true'
-    Section2aAccountAlias: 'testenv'
-    Section3aInstallApp: 'No'
-    Section6aParentStackLambdaARN: ''
+    Section2aInstallApp: 'No'
+    Section4aParentStackLambdaARN: ''
 Tests:
-  - TestName: appferandmetricupdate
+  - TestName: installall
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section3aInstallApp: 'Yes'
-        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1166309542'
-        Section5bCloudTrailLogsSourceName: 'Tests'
+        Section2aInstallApp: 'Yes'
+        Section3aCloudTrailLogsSourceName: 'Tests'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -28,19 +26,17 @@ Tests:
             - ClusterMetricRule
             - InstanceMetricRule
             - sumoApp
-            - SumoMetricsUpdateSource
             - FieldExtractionRule
             - AddDBIdentifierField
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - ExistingMetricSourceName
   - TestName: installnothing
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section3aInstallApp: 'No'
+        Section2aInstallApp: 'No'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -57,7 +53,7 @@ Tests:
       - ap-south-1
     Parameters:
       Values:
-        Section3aInstallApp: 'Yes'
+        Section2aInstallApp: 'Yes'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -70,12 +66,12 @@ Tests:
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-  - TestName: updatecwmetrics
+  - TestName: onlyfer
     Regions:
       - ap-south-1
     Parameters:
       Values:
-        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631970'
+        Section3aCloudTrailLogsSourceName: 'Tests'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -83,52 +79,8 @@ Tests:
           Resources:
             - ClusterMetricRule
             - InstanceMetricRule
-            - SumoMetricsUpdateSource
-            - AddDBIdentifierField
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - ExistingMetricSourceName
-  - TestName: updatelogssource
-    Regions:
-      - ap-south-1
-    Parameters:
-      Values:
-        Section5aCloudTrailLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1135631121'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - ClusterMetricRule
-            - InstanceMetricRule
-            - SumoCloudTrailLogsUpdateSource
             - FieldExtractionRule
             - AddDBIdentifierField
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - ExistingLogSourceName
-  - TestName: updatebothsources
-    Regions:
-      - ap-south-1
-    Parameters:
-      Values:
-        Section5aCloudTrailLogsAPIUrl: 'https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1167287836'
-        Section4aCloudWatchExistingSourceAPIUrl: "https://api.us2.sumologic.com/api/v1/collectors/194268335/sources/1269239693"
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - ClusterMetricRule
-            - InstanceMetricRule
-            - SumoMetricsUpdateSource
-            - FieldExtractionRule
-            - SumoCloudTrailLogsUpdateSource
-            - AddDBIdentifierField
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-            - ExistingLogSourceName
-            - ExistingMetricSourceName

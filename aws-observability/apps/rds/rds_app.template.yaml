@@ -14,30 +14,19 @@ Metadata:
           - Section1dRemoveSumoResourcesOnDeleteStack
 
       - Label:
-          default: "Sumo Logic AWS Resources Tagging Configuration (Required)"
-        Parameters:
-          - Section2aAccountAlias
-
-      - Label:
           default: "App Details - Sumo Logic App Configuration"
         Parameters:
-          - Section3aInstallApp
-
-      - Label:
-          default: "App Details - CloudWatch Metrics Source Configuration"
-        Parameters:
-          - Section4aCloudWatchExistingSourceAPIUrl
+          - Section2aInstallApp
 
       - Label:
           default: "App Details - CloudTrail Log Source Configuration"
         Parameters:
-          - Section5aCloudTrailLogsAPIUrl
-          - Section5bCloudTrailLogsSourceName
+          - Section3aCloudTrailLogsSourceName
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
-          - Section6aParentStackLambdaARN
+          - Section4aParentStackLambdaARN
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -49,21 +38,13 @@ Metadata:
       Section1dRemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
-      Section2aAccountAlias:
-        default: "Alias for AWS Account Identification"
-
-      Section3aInstallApp:
+      Section2aInstallApp:
         default: "Install Sumo Logic App"
 
-      Section4aCloudWatchExistingSourceAPIUrl:
-        default: "Existing Sumo Logic CloudWatch Metrics Source API URL"
-
-      Section5bCloudTrailLogsSourceName:
+      Section3aCloudTrailLogsSourceName:
         default: "Sumo Logic CloudTrail Logs Source Name"
-      Section5aCloudTrailLogsAPIUrl:
-        default: "Existing Sumo Logic CloudTrail Logs Source API URL"
 
-      Section6aParentStackLambdaARN:
+      Section4aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
 
 Parameters:
@@ -91,14 +72,7 @@ Parameters:
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
-  Section2aAccountAlias:
-    Type: String
-    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-z0-9]+"
-    ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
-    MaxLength: 30
-
-  Section3aInstallApp:
+  Section2aInstallApp:
     Type: String
     Description: "Yes - Installs the RDS App for the Sumo Logic AWS Observability Solution.
                   No - Skips the installation of this app."
@@ -107,42 +81,27 @@ Parameters:
       - 'Yes'
       - 'No'
 
-  Section4aCloudWatchExistingSourceAPIUrl:
-    Type: String
-    Description: "Required when already collecting RDS Metrics. Provide the existing Sumo Logic RDS Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
-    Default: ""
-
-  Section5bCloudTrailLogsSourceName:
+  Section3aCloudTrailLogsSourceName:
     Type: String
     Description: Change the CloudTrail Source name to be created else default name will be used.
     Default: ""
-  Section5aCloudTrailLogsAPIUrl:
-    Type: String
-    Description: "Required when already collecting CloudTrail logs. Provide the existing Sumo Logic CloudTrail Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
-    Default: ""
 
-  Section6aParentStackLambdaARN:
+  Section4aParentStackLambdaARN:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
 
 Conditions:
-  install_app: !Equals [!Ref Section3aInstallApp, 'Yes']
+  install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
 
-  update_cloudtrail_logs_source: !Not [!Equals [!Ref Section5aCloudTrailLogsAPIUrl, '']]
-
-  update_metrics_source: !Not [!Equals [!Ref Section4aCloudWatchExistingSourceAPIUrl, '']]
-
-  create_fer: !Or
-    - !Condition update_cloudtrail_logs_source
-    - !Not [!Equals [!Ref Section5bCloudTrailLogsSourceName, '']]
+  create_fer: !Not [!Equals [!Ref Section3aCloudTrailLogsSourceName, '']]
 
 Resources:
 
   ClusterMetricRule:
     Type: Custom::SumoLogicMetricRules
     Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
+      ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
       MetricRuleName: "AwsObservabilityRDSClusterMetricsEntityRule"
       MatchExpression: "Namespace=AWS/RDS DBClusterIdentifier=*"
@@ -157,7 +116,7 @@ Resources:
     Type: Custom::SumoLogicMetricRules
     DependsOn: ClusterMetricRule
     Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
+      ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
       MetricRuleName: "AwsObservabilityRDSInstanceMetricsEntityRule"
       MatchExpression: "Namespace=AWS/RDS DBInstanceIdentifier=*"
@@ -172,7 +131,7 @@ Resources:
     Type: Custom::App
     Condition: install_app
     Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
+      ServiceToken: !Ref Section4aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Rds App"
       Version: "V1.0.1"
@@ -183,45 +142,17 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  SumoCloudTrailLogsUpdateSource:
-    Type: Custom::SumoLogicUpdateFields
-    Condition: update_cloudtrail_logs_source
-    Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
-      Region: !Ref "AWS::Region"
-      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
-      SourceApiUrl: !Ref Section5aCloudTrailLogsAPIUrl
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-      Fields:
-        account: !Ref Section2aAccountAlias
-
-  SumoMetricsUpdateSource:
-    Type: Custom::SumoLogicUpdateFields
-    Condition: update_metrics_source
-    Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
-      Region: !Ref "AWS::Region"
-      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
-      SourceApiUrl: !Ref Section4aCloudWatchExistingSourceAPIUrl
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-      Fields:
-        account: !Ref Section2aAccountAlias
-
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
     Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
+      ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
       FieldExtractionRuleName: "AwsObservabilityRdsCloudTrailLogsFER"
       FieldExtractionRuleScope: !Join
         - ""
         - - "(_source="
-          - !If [update_cloudtrail_logs_source, !Sub "\"${SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5bCloudTrailLogsSourceName]
+          - !Ref Section3aCloudTrailLogsSourceName
           - " (\"rds.amazonaws.com\"))"
       FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters", "responseElements" as eventSource, region, requestParameters, responseElements nodrop
                                            | where eventSource = "rds.amazonaws.com"
@@ -242,19 +173,9 @@ Resources:
   AddDBIdentifierField:
     Type: Custom::SumoLogicFieldsSchema
     Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
+      ServiceToken: !Ref Section4aParentStackLambdaARN
       FieldName: "dbidentifier"
       RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
-
-Outputs:
-  ExistingMetricSourceName:
-    Description: "Existing CloudWatch Metrics Source Name"
-    Condition: update_metrics_source
-    Value: !GetAtt SumoMetricsUpdateSource.source_name
-  ExistingLogSourceName:
-    Description: "Existing CloudTrail Logs Source Name"
-    Condition: update_cloudtrail_logs_source
-    Value: !GetAtt SumoCloudTrailLogsUpdateSource.source_name
