@@ -22,6 +22,8 @@ Metadata:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
           - Section3aParentStackLambdaARN
+          - Section3bTemplatesBucketName
+          - Section3cNestedTemplateVersion
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -38,6 +40,10 @@ Metadata:
 
       Section3aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
+      Section3bTemplatesBucketName:
+        default: "Nested Templates Bucket Name"
+      Section3cNestedTemplateVersion:
+        default: "Nested Templates Version"
 
 Parameters:
   Section1aSumoDeployment:
@@ -77,6 +83,14 @@ Parameters:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
+  Section3bTemplatesBucketName:
+    Type: String
+    AllowedPattern: ".+"
+    Description: Bucket Name for all the nested templates.
+  Section3cNestedTemplateVersion:
+    Type: String
+    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
 
 Conditions:
   install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
@@ -103,13 +117,13 @@ Resources:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability EC2 Metrics App"
-      Version: "V1.0.1"
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
+      AppJsonS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/EC2-Metrics-App.json"
 
   sumoOverview:
     Type: Custom::App
@@ -118,13 +132,13 @@ Resources:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App"
-      Version: "V1.0.1"
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
+      AppJsonS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/Overview-App.json"
 
   AddInstanceIdField:
     Type: Custom::SumoLogicFieldsSchema

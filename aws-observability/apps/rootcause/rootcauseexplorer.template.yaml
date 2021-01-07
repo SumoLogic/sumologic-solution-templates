@@ -40,6 +40,8 @@ Metadata:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
           - Section5aParentStackLambdaARN
+          - Section5bTemplatesBucketName
+          - Section5cNestedTemplateVersion
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -78,6 +80,10 @@ Metadata:
 
       Section5aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
+      Section5bTemplatesBucketName:
+        default: "Nested Templates Bucket Name"
+      Section5cNestedTemplateVersion:
+        default: "Nested Templates Version"
 
 Parameters:
   Section1aSumoDeployment:
@@ -166,6 +172,14 @@ Parameters:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
+  Section5bTemplatesBucketName:
+    Type: String
+    AllowedPattern: ".+"
+    Description: Bucket Name for all the nested templates.
+  Section5cNestedTemplateVersion:
+    Type: String
+    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
 
 Conditions:
 
@@ -188,13 +202,13 @@ Resources:
       ServiceToken: !Ref Section5aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App Tsat"
-      Version: "V1.0.1"
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
+      AppJsonS3Url: !Sub "https://${Section5bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section5cNestedTemplateVersion}/appjson/Rce-App.json"
 
   SumoLogicHostedCollector:
     Type: Custom::Collector
