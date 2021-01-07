@@ -6,7 +6,7 @@ export AWS_PROFILE="prod"
 
 export bucket_name=sumologic-appdev-aws-sam-apps
 export version=v2.1.0
-export match_case="AWS"
+export match_case="App"
 
 if [[ ${AWS_PROFILE} == 'default' ]]
 then

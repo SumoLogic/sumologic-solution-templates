@@ -27,6 +27,8 @@ Metadata:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
           - Section4aParentStackLambdaARN
+          - Section4bTemplatesBucketName
+          - Section4cNestedTemplateVersion
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -46,6 +48,10 @@ Metadata:
 
       Section4aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
+      Section4bTemplatesBucketName:
+        default: "Nested Templates Bucket Name"
+      Section4cNestedTemplateVersion:
+        default: "Nested Templates Version"
 
 Parameters:
   Section1aSumoDeployment:
@@ -90,6 +96,14 @@ Parameters:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
+  Section4bTemplatesBucketName:
+    Type: String
+    AllowedPattern: ".+"
+    Description: Bucket Name for all the nested templates.
+  Section4cNestedTemplateVersion:
+    Type: String
+    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
 
 Conditions:
   install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
@@ -118,13 +132,13 @@ Resources:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Api Gateway App"
-      Version: "V1.0.1"
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
+      AppJsonS3Url: !Sub "https://${Section4bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section4cNestedTemplateVersion}/appjson/Api-Gateway-App.json"
 
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
