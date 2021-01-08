@@ -22,6 +22,7 @@ Metadata:
           default: "App Details - CloudTrail Log Source Configuration"
         Parameters:
           - Section3aCloudTrailLogsSourceName
+          - Section3bCloudTrailSourceUpdated
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
@@ -45,6 +46,8 @@ Metadata:
 
       Section3aCloudTrailLogsSourceName:
         default: "Sumo Logic CloudTrail Logs Source Name"
+      Section3bCloudTrailSourceUpdated:
+        default: "Existing Source Updated"
 
       Section4aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
@@ -91,6 +94,14 @@ Parameters:
     Type: String
     Description: Change the CloudTrail Source name to be created else default name will be used.
     Default: ""
+  Section3bCloudTrailSourceUpdated:
+    Type: String
+    Description: "Yes - If fields are added to the existing source.
+                  No - If a new source was created."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
 
   Section4aParentStackLambdaARN:
     Type: String
@@ -109,6 +120,8 @@ Conditions:
   install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
 
   create_fer: !Not [!Equals [!Ref Section3aCloudTrailLogsSourceName, '']]
+
+  source_updated: !Equals [!Ref Section3bCloudTrailSourceUpdated, 'Yes']
 
 Resources:
 
@@ -150,7 +163,7 @@ Resources:
       FieldExtractionRuleScope: !Join
         - ""
         - - "(_source="
-          - !Ref Section3aCloudTrailLogsSourceName
+          - !If [source_updated, !Sub "\"${Section3aCloudTrailLogsSourceName}\"", !Ref Section3aCloudTrailLogsSourceName]
           - " (\"dynamodb.amazonaws.com\"))"
       FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters.tableName" as eventSource, region, tablename
                                            | where eventSource = "dynamodb.amazonaws.com"
