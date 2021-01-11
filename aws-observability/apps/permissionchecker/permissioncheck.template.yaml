@@ -91,12 +91,44 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Effect: Allow
+              - Effect: "Allow"
                 Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: '*'
+                  - "cloudformation:DeleteChangeSet"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:ListStackResources"
+                  - "cloudtrail:DeleteTrail"
+                  - "cloudwatch:DeleteAlarms"
+                  - "events:DeleteRule"
+                  - "events:RemoveTargets"
+                  - "iam:DeletePolicy"
+                  - "iam:DeleteRole"
+                  - "iam:DeleteRolePolicy"
+                  - "iam:DetachRolePolicy"
+                  - "iam:UntagRole"
+                  - "lambda:DeleteFunction"
+                  - "lambda:RemovePermission"
+                  - "lambda:InvokeFunction"
+                  - "logs:DeleteDestination"
+                  - "logs:DeleteLogDelivery"
+                  - "logs:DeleteLogGroup"
+                  - "logs:DeleteLogStream"
+                  - "logs:DeleteResourcePolicy"
+                  - "logs:DeleteRetentionPolicy"
+                  - "logs:DeleteSubscriptionFilter"
+                  - "logs:UntagLogGroup"
+                  - "s3:DeleteBucket"
+                  - "s3:DeleteObject"
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                  - "sns:DeleteEndpoint"
+                  - "sns:SetTopicAttributes"
+                  - "sns:GetTopicAttributes"
+                  - "sns:DeleteTopic"
+                  - "sqs:DeleteQueue"
+                Resource: "*"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
   DeleteCFNLambda:
     Type: "AWS::Lambda::Function"
@@ -143,7 +175,7 @@ Resources:
                           if resource["ResourceType"] == "AWS::S3::Bucket":
                               s3 = boto3.resource('s3')
                               bucket = s3.Bucket(resource["PhysicalResourceId"])
-                              bucket.objects.all().delete()
+                              bucket.objects.delete()
                               bucket.delete()
               return response
 
@@ -158,8 +190,8 @@ Resources:
                       cf_client.delete_stack(StackName=stack_identifier)
                   stack_status = get_status(cf_client, stack_identifier)
                   if stack_status != "DELETE_COMPLETE":
-                      print("Stack Status is %s, sleep for 30 Seconds." % stack_status)
-                      time.sleep(30)
+                      print("Stack Status is %s, sleep for 60 Seconds." % stack_status)
+                      time.sleep(60)
                       continue
                   else:
                       print("Complete Stack %s deletion with current status as DELETE_COMPLETE" % stack_identifier)
