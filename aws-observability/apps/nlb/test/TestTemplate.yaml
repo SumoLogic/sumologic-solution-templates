@@ -1,0 +1,86 @@
+---
+Global:
+  TemplatePath: "../nlb_app.template.yaml"
+  TestProjectName: BasicTestProject
+  ParallelTestsRun: 2
+  GlobalParameters:
+    Section1aSumoDeployment: us2
+    Section1bSumoAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
+    Section1cSumoAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
+    Section1dRemoveSumoResourcesOnDeleteStack: 'true'
+    Section2aInstallApp: 'No'
+    Section3bNLBSourceUpdated: 'No'
+    Section4aParentStackLambdaARN: '${lambda_arn}'
+    Section4bTemplatesBucketName: '${template_bucket}'
+    Section4cNestedTemplateVersion: '${template_version}'
+Tests:
+  - TestName: installall
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallApp: 'Yes'
+        Section3aNLBLogsSourceName: 'Tests With Space'
+        Section3bNLBSourceUpdated: 'Yes'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - MetricRule
+            - sumoApp
+            - FieldExtractionRule
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+  - TestName: installnothing
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallApp: 'No'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - MetricRule
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+  - TestName: onlyappinstall
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallApp: 'Yes'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - MetricRule
+            - sumoApp
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+  - TestName: onlyfer
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section3aNLBLogsSourceName: 'Tests'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - MetricRule
+            - FieldExtractionRule
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
