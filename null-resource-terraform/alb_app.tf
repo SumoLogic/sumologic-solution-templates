@@ -203,6 +203,7 @@ resource "null_resource" "add_fields_to_metric_source" {
   }
 }
 
+# Field Extraction Rule
 resource "null_resource" "field_extraction_rule" {
   count = local.source_created || local.source_updated ? 1 : 0
   triggers = {
