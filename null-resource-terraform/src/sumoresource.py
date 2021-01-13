@@ -77,7 +77,6 @@ class SumoResource(object):
 
 
 class App(SumoResource):
-
     ENTERPRISE_ONLY_APPS = {"Amazon GuardDuty Benchmark", "Global Intelligence for AWS CloudTrail"}
 
     def _convert_to_hour(self, timeoffset):
@@ -255,7 +254,8 @@ class App(SumoResource):
             # Copy the app_folder_id to OLD APPS.
             new_folder_details = self.sumologic_cli.get_folder_by_id(new_app_folder_id)
             parent_folder_id = new_folder_details["parentId"]
-            backup_folder_id = self._get_app_folder({"name": "BackUpOldApps", "description": "The folder contains back up of all the apps that are updated using CloudFormation template."},
+            backup_folder_id = self._get_app_folder({"name": "BackUpOldApps",
+                                                     "description": "The folder contains back up of all the apps that are updated using CloudFormation template."},
                                                     parent_folder_id)
             # Starting Folder Copy
             response = self.sumologic_cli.copy_folder(app_folder_id, backup_folder_id)
@@ -264,7 +264,9 @@ class App(SumoResource):
             copied_folder_id = self._wait_for_folder_copy(app_folder_id, job_id)
             # Updating copied folder name with suffix BackUp.
             copied_folder_details = self.sumologic_cli.get_folder_by_id(copied_folder_id)
-            copied_folder_details = {"name": copied_folder_details["name"].replace("(Copy)", "- BackUp_" + datetime.now().strftime("%H:%M:%S")),
+            copied_folder_details = {"name": copied_folder_details["name"].replace("(Copy)",
+                                                                                   "- BackUp_" + datetime.now().strftime(
+                                                                                       "%H:%M:%S")),
                                      "description": copied_folder_details["description"][:255]}
             self.sumologic_cli.update_folder_by_id(copied_folder_id, copied_folder_details)
         self.delete(app_folder_id, True)
@@ -332,36 +334,29 @@ class SumoLogicAWSExplorer(SumoResource):
 
     # Use the new update API.
     def update(self, hierarchy_id, hierarchy_name, level, hierarchy_filter, *args, **kwargs):
-        data, hierarchy_id = self.create(hierarchy_name, level, hierarchy_filter)
+        data, new_hierarchy_id = self.create(hierarchy_name, level, hierarchy_filter)
+        if hierarchy_id != new_hierarchy_id:
+            self.delete(hierarchy_id, True)
         print("Hierarchy -  update successful with ID %s" % hierarchy_id)
-        return data, hierarchy_id
+        return data, new_hierarchy_id
 
-    # handling exception during delete, as update can fail if the previous explorer, metric rule or field has
-    # already been deleted. This is required in case of multiple installation of
-    # CF template with same names for metric rule, explorer view or fields
-    def delete(self, hierarchy_id, hierarchy_name, remove_on_delete_stack, *args, **kwargs):
+    def delete(self, hierarchy_id, remove_on_delete_stack, *args, **kwargs):
         if remove_on_delete_stack:
-            # Backward Compatibility for 2.0.2 Versions.
-            # If id is duplicate then get the id from explorer name and delete it.
-            if hierarchy_id == "Duplicate":
-                hierarchy_id = self.get_explorer_id(hierarchy_name)
             response = self.sumologic_cli.delete_hierarchy(hierarchy_id)
             print("Hierarchy - Completed the Hierarchy deletion for Name %s, response - %s"
-                  % (hierarchy_name, response.text))
+                  % (hierarchy_id, response.text))
         else:
             print("Hierarchy - Skipping the Hierarchy deletion.")
 
-    def extract_params(self, event):
-        props = event.get("ResourceProperties")
-        hierarchy_id = None
-        if event.get('PhysicalResourceId'):
-            _, hierarchy_id = event['PhysicalResourceId'].split("/")
+    def extract_params(self, environment_variables):
+        old_hierarchy_id = self.file.get_key(self.key)
 
         return {
-            "hierarchy_name": props.get("HierarchyName"),
-            "level": props.get("HierarchyLevel"),
-            "hierarchy_filter": props.get("HierarchyFilter"),
-            "hierarchy_id": hierarchy_id
+            "hierarchy_name": environment_variables.get("HierarchyName"),
+            "level": json.loads(environment_variables.get("HierarchyLevel")),
+            "hierarchy_filter": environment_variables.get("HierarchyFilter"),
+            "hierarchy_id": old_hierarchy_id,
+            "update_flag": True if old_hierarchy_id else False
         }
 
 
@@ -458,7 +453,8 @@ class SumoLogicUpdateFields(SumoResource):
             data = resp.json()['source']
             print("SUMO LOGIC ADD FIELDS - Added Fields %s in Source %s." % (fields, data["name"]))
 
-            return "AddField", {"collector_id": collector_id, "source_id": source_id, "fields": fields, "source_name": data["name"]}
+            return "AddField", {"collector_id": collector_id, "source_id": source_id, "fields": fields,
+                                "source_name": data["name"]}
         return "AddField", {}
 
     def create(self, collector_id, source_id, fields, *args, **kwargs):
@@ -647,10 +643,11 @@ class SumoLogicFieldsSchema(SumoResource):
         return self.add_field(field_name)
 
     def update(self, field_id, field_name, *args, **kwargs):
-        self.delete(field_id, True)
-        data, field_id = self.create(field_name)
+        data, new_field_id = self.create(field_name)
+        if new_field_id != field_id:
+            self.delete(field_id, True)
         print("SUMO LOGIC FIELD - Update successful with Name %s." % field_name)
-        return data, field_id
+        return data, new_field_id
 
     def delete(self, field_id, remove_on_delete_stack, *args, **kwargs):
         if remove_on_delete_stack and field_id:
@@ -700,6 +697,7 @@ class EnterpriseOrTrialAccountCheck(SumoResource):
     def delete(self, *args, **kwargs):
         print("In Delete method for Enterprise or Trial account")
 
-    def extract_params(self, event):
-        props = event.get("ResourceProperties")
-        return props
+    def extract_params(self, environment_variables):
+        return {
+            "update_flag": True
+        }

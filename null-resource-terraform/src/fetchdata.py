@@ -28,9 +28,9 @@ def main():
         if fields["Section"] in input_data and key in input_data[fields["Section"]]:
             key_data = input_data[fields["Section"]][key]
             if "FetchKey" in fields and fields["FetchKey"] in key_data:
-                return sys.stdout.write("{\"id\": \"" + key_data[fields["FetchKey"]] + "\"}")
+                return sys.stdout.write("{\"id\": \"" + str(key_data[fields["FetchKey"]]) + "\"}")
             else:
-                return sys.stdout.write("{\"id\": \"" + key_data + "\"}")
+                return sys.stdout.write("{\"id\": \"" + str(key_data) + "\"}")
     return sys.stdout.write("{}")
 
 
