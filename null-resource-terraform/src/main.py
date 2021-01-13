@@ -16,15 +16,22 @@ def main():
     # Setting Flag for remove
     params["remove_on_delete_stack"] = True if props.get("Delete") == "True" else False
 
+    some_processing_done = False
     if params["remove_on_delete_stack"]:
         resource.delete(**params)
+        resource.file.remove_key(resource.key)
+        some_processing_done = True
     else:
         if params["update_flag"]:
             data, value = resource.update(**params)
+            some_processing_done = True
         else:
             data, value = resource.create(**params)
+            some_processing_done = True
         resource.file.write_data(resource.key, value)
 
+    if not some_processing_done:
+        resource.file.remove_key(resource.key)
 
 if __name__ == "__main__":
     main()

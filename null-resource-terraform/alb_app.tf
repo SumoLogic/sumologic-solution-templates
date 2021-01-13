@@ -10,8 +10,8 @@ locals {
   access_key = ""
   deployment = "us1"
   install_app = "Yes"
-  metric_source_api_url = "https://api.sumologic.com/api/v1/collectors/170503459/sources/779400289"
-  alb_log_source_api_url = "https://api.sumologic.com/api/v1/collectors/177457427/sources/839230890"
+  metric_source_api_url = ""
+  alb_log_source_api_url = ""
   alb_log_source_name = ""
   bucket_name = "sumologic-appdev-aws-sam-apps"
   apps_version = "v2.1.0"
@@ -151,13 +151,17 @@ resource "null_resource" "add_fields_to_log_source" {
 
 data "external" "existing_source_name" {
   depends_on = [null_resource.add_fields_to_log_source]
-  program = ["python", "${path.module}/src/fetchid.py"]
+  program = ["python", "${path.module}/src/fetchdata.py"]
   query = {
     Section = local.section
     KeyPrefix = "1"
     Key = "SumoLogicUpdateFields"
     FetchKey = "source_name"
   }
+}
+
+output "log_source_name" {
+  value = data.external.existing_source_name.result
 }
 
 # Another Source updated to add fields. Key_Prefix is made as 2.
@@ -234,3 +238,62 @@ resource "null_resource" "field_extraction_rule" {
   }
 }
 
+# This should go in Common module
+resource "null_resource" "enterprise_check" {
+  triggers = {
+    SumoAccessID = local.access_id
+    SumoAccessKey = local.access_key
+    SumoDeployment = local.deployment
+    Section = local.section
+  }
+
+  provisioner "local-exec" {
+    command = "python3 ${path.module}/src/main.py"
+    environment = {
+      ResourceType = "EnterpriseOrTrialAccountCheck"
+      Section = self.triggers.Section
+      KeyPrefix = "1"
+      SumoAccessID = self.triggers.SumoAccessID
+      SumoAccessKey = self.triggers.SumoAccessKey
+      SumoDeployment = self.triggers.SumoDeployment
+    }
+  }
+}
+
+data "external" "is_enterprise" {
+  depends_on = [null_resource.enterprise_check]
+  program = ["python", "${path.module}/src/fetchdata.py"]
+  query = {
+    Section = local.section
+    KeyPrefix = "1"
+    Key = "EnterpriseOrTrialAccountCheck"
+  }
+}
+
+output "is_enterprise" {
+  value = data.external.is_enterprise.result
+}
+
+# Hierarchy
+resource "null_resource" "hierarchy" {
+  triggers = {
+    SumoAccessID = local.access_id
+    SumoAccessKey = local.access_key
+    SumoDeployment = local.deployment
+    Section = local.section
+  }
+
+  provisioner "local-exec" {
+    command = "python3 ${path.module}/src/main.py"
+    environment = {
+      ResourceType = "SumoLogicAWSExplorer"
+      Section = self.triggers.Section
+      KeyPrefix = "1"
+      HierarchyName = "AWS Observability"
+      HierarchyLevel = "{\"entityType\": \"account\", \"nextLevelsWithConditions\": [], \"nextLevel\": {\"entityType\": \"region\", \"nextLevelsWithConditions\": [], \"nextLevel\": {\"entityType\": \"namespace\", \"nextLevelsWithConditions\": [{\"condition\": \"AWS/ApplicationElb\", \"level\": {\"entityType\": \"loadbalancer\", \"nextLevelsWithConditions\": []}}, {\"condition\": \"AWS/ApiGateway\", \"level\": {\"entityType\": \"apiname\", \"nextLevelsWithConditions\": []}}, {\"condition\": \"AWS/DynamoDB\", \"level\": {\"entityType\": \"tablename\", \"nextLevelsWithConditions\": []}}, {\"condition\": \"AWS/EC2\", \"level\": {\"entityType\": \"instanceid\", \"nextLevelsWithConditions\": []}}, {\"condition\": \"AWS/RDS\", \"level\": {\"entityType\": \"dbidentifier\", \"nextLevelsWithConditions\": []}}, {\"condition\": \"AWS/Lambda\", \"level\": {\"entityType\": \"functionname\", \"nextLevelsWithConditions\": []}}]}}}"
+      SumoAccessID = self.triggers.SumoAccessID
+      SumoAccessKey = self.triggers.SumoAccessKey
+      SumoDeployment = self.triggers.SumoDeployment
+    }
+  }
+}
