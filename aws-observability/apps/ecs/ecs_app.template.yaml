@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the RDS app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Template to setup the ECS app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -83,7 +83,7 @@ Parameters:
 
   Section2aInstallApp:
     Type: String
-    Description: "Yes - Installs the RDS App for the Sumo Logic AWS Observability Solution.
+    Description: "Yes - Installs the Amazon ECS App for the Sumo Logic AWS Observability Solution.
                   No - Skips the installation of this app."
     Default: 'Yes'
     AllowedValues:
@@ -125,31 +125,26 @@ Conditions:
 
 Resources:
 
-  ClusterMetricRule:
-    Type: Custom::SumoLogicMetricRules
+  AddClusterNameField:
+    Type: Custom::SumoLogicFieldsSchema
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
+      FieldName: "clustername"
       RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityRDSClusterMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/RDS DBClusterIdentifier=*"
-      ExtractVariables:
-        entity: "$DBClusterIdentifier._1"
-        dbidentifier: "$DBClusterIdentifier._1"
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  InstanceMetricRule:
+  MetricRule:
     Type: Custom::SumoLogicMetricRules
-    DependsOn: ClusterMetricRule
+    DependsOn: AddClusterNameField
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityRDSInstanceMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/RDS DBInstanceIdentifier=*"
+      MetricRuleName: "AwsObservabilityECSMetricsEntityRule"
+      MatchExpression: "Namespace=AWS/ECS ClusterName=*"
       ExtractVariables:
-        entity: "$DBInstanceIdentifier._1"
-        dbidentifier: "$DBInstanceIdentifier._1"
+        entity: "$ClusterName._1"
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
@@ -160,14 +155,14 @@ Resources:
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Rds App"
+      AppName: "AWS Observability Ecs App"
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
-      AppJsonS3Url: !Sub "https://${Section4bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section4cNestedTemplateVersion}/appjson/Rds-App.json"
+      AppJsonS3Url: !Sub "https://${Section4bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section4cNestedTemplateVersion}/appjson/Ecs-App.json"
 
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
@@ -175,34 +170,18 @@ Resources:
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
-      FieldExtractionRuleName: "AwsObservabilityRdsCloudTrailLogsFER"
+      FieldExtractionRuleName: "AwsObservabilityECSCloudTrailLogsFER"
       FieldExtractionRuleScope: !Join
         - ""
         - - "(_source="
           - !If [source_updated, !Sub "\"${Section3aCloudTrailLogsSourceName}\"", !Ref Section3aCloudTrailLogsSourceName]
-          - " (\"rds.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters", "responseElements" as eventSource, region, requestParameters, responseElements nodrop
-                                           | where eventSource = "rds.amazonaws.com"
-                                           | "aws/rds" as namespace
-                                           | json field=requestParameters "dBInstanceIdentifier", "resourceName", "dBClusterIdentifier" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop
-                                           | json field=responseElements "dBInstanceIdentifier" as dBInstanceIdentifier3 nodrop | json field=responseElements "dBClusterIdentifier" as dBClusterIdentifier3 nodrop
-                                           | parse field=resourceName "arn:aws:rds:*:db:*" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName "arn:aws:rds:*:cluster:*" as f1, dBClusterIdentifier2 nodrop
-                                           | if (resourceName matches "arn:aws:rds:*:db:*", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier
-                                           | if (resourceName matches "arn:aws:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
-                                           | if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier
-                                           | tolowercase(dbidentifier) as dbidentifier
-                                           | fields region, namespace, dBInstanceIdentifier, dBClusterIdentifier, dbidentifier'
+          - " (\"ecs.amazonaws.com\"))"
+      FieldExtractionRuleParseExpression: 'json "eventSource", "awsRegion", "requestParameters" as eventSource, region, requestParameters nodrop
+                                           | json field=requestParameters "cluster" as clustername nodrop
+                                           | where eventSource = "ecs.amazonaws.com"
+                                           | "aws/ecs" as namespace
+                                           | fields region, namespace, clustername'
       FieldExtractionRuleParseEnabled: true
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  AddDBIdentifierField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !Ref Section4aParentStackLambdaARN
-      FieldName: "dbidentifier"
-      RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment

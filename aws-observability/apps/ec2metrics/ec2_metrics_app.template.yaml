@@ -11,33 +11,19 @@ Metadata:
           - Section1aSumoDeployment
           - Section1bSumoAccessID
           - Section1cSumoAccessKey
-          - Section1dSumoOrganizationId
-          - Section1eRemoveSumoResourcesOnDeleteStack
-
-      - Label:
-          default: "Sumo Logic AWS Resources Tagging Configuration (Required)"
-        Parameters:
-          - Section2aTagExistingAWSResources
-          - Section2bAccountAlias
-          - Section2cFilterExpression
+          - Section1dRemoveSumoResourcesOnDeleteStack
 
       - Label:
           default: "App Details - Sumo Logic Collector Configuration"
         Parameters:
-          - Section3aInstallApp
-          - Section3bCollectorName
-
-      - Label:
-          default: "App Details - Sumo Logic MetaData Source Configuration"
-        Parameters:
-          - Section4aCreateMetaDataSource
-          - Section4bMetaDataSourceName
+          - Section2aInstallApp
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
-          - Section5aParentStackLambdaARN
-          - Section5bTemplatesBucketName
+          - Section3aParentStackLambdaARN
+          - Section3bTemplatesBucketName
+          - Section3cNestedTemplateVersion
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -46,46 +32,23 @@ Metadata:
         default: "Sumo Logic Access ID"
       Section1cSumoAccessKey:
         default: "Sumo Logic Access Key"
-      Section1dSumoOrganizationId:
-        default: "Sumo Logic Organization Id"
-      Section1eRemoveSumoResourcesOnDeleteStack:
+      Section1dRemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
-      Section2aTagExistingAWSResources:
-        default: "Tag Existing AWS EC2 Resources."
-      Section2bAccountAlias:
-        default: "Alias for AWS Account Identification"
-      Section2cFilterExpression:
-        default: "Filter Regular expression"
-
-      Section3aInstallApp:
+      Section2aInstallApp:
         default: "Install Sumo Logic App"
-      Section3bCollectorName:
-        default: "Collector Name"
 
-      Section4aCreateMetaDataSource:
-        default: "Create Sumo Logic MetaData Source"
-      Section4bMetaDataSourceName:
-        default: "Sumo Logic Metadata Source Name"
-
-      Section5aParentStackLambdaARN:
+      Section3aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
-      Section5bTemplatesBucketName:
-        default: "Bucket name for all nested stacks."
+      Section3bTemplatesBucketName:
+        default: "Nested Templates Bucket Name"
+      Section3cNestedTemplateVersion:
+        default: "Nested Templates Version"
 
 Parameters:
   Section1aSumoDeployment:
     Type: String
-    AllowedValues:
-      - au
-      - ca
-      - de
-      - eu
-      - jp
-      - us2
-      - us1
-      - in
-      - fed
+    Default: ""
     Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
   Section1bSumoAccessID:
     Type: String
@@ -98,12 +61,7 @@ Parameters:
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Access Key can not be empty."
     NoEcho: true
-  Section1dSumoOrganizationId:
-    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
-    Type: String
-    AllowedPattern: ".+"
-    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
-  Section1eRemoveSumoResourcesOnDeleteStack:
+  Section1dRemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
       - false
@@ -112,26 +70,7 @@ Parameters:
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
-  Section2aTagExistingAWSResources:
-    Type: String
-    Description: "Yes - Tags the existing AWS EC2 resources with key - Value as account - account alias and Namespace - AWS/EC2.
-                  No - Skip AWS Resources tagging."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  Section2bAccountAlias:
-    Type: String
-    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-z0-9]+"
-    ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
-    MaxLength: 30
-  Section2cFilterExpression:
-    Type: String
-    Default: ""
-    Description: "Provide regular expression for matching aws resources. For eg;- 'InstanceType': 't1.micro.*?'|'name': 'Test.*?']|'stageName': 'prod.*?'|'FunctionName': 'Test.*?'|TableName.*?|'LoadBalancerName': 'Test.*?'|'DBClusterIdentifier': 'Test.*?'|'DBInstanceIdentifier': 'Test.*?'"
-
-  Section3aInstallApp:
+  Section2aInstallApp:
     Type: String
     Description: "Yes - Installs the EC2 App for the Sumo Logic AWS Observability Solution.
                   No - Skips the installation of this app."
@@ -139,76 +78,29 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section3bCollectorName:
-    Type: String
-    Description: "Change the collector name to be created else default name will be used."
-    Default: AWS-EC2-Collector
 
-  Section4aCreateMetaDataSource:
-    Type: String
-    Description: "Yes - Creates Sumo Logic MetaData Source. A common metadata source will be created with the region selected.
-                  No - If you already have a MetaData Source configured."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  Section4bMetaDataSourceName:
-    Type: String
-    Description: "Change the MetaData Source name to be created else default name will be used."
-    Default: AWS-EC2-MetaData-Source
-
-  Section5aParentStackLambdaARN:
+  Section3aParentStackLambdaARN:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
-  Section5bTemplatesBucketName:
+  Section3bTemplatesBucketName:
     Type: String
-    Default: "appdevzipfiles-us-east-1"
+    AllowedPattern: ".+"
     Description: Bucket Name for all the nested templates.
+  Section3cNestedTemplateVersion:
+    Type: String
+    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
 
 Conditions:
-  do_not_use_parent_stack: !Equals [ !Ref Section5aParentStackLambdaARN, "ParentStackLambdaARN"]
-
-  install_app: !Equals [!Ref Section3aInstallApp, 'Yes']
-  tag_existing_aws_resources: !Equals [!Ref Section2aTagExistingAWSResources, 'Yes']
+  install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
 
 Resources:
-
-  CreateCommonResources:
-    Type: AWS::CloudFormation::Stack
-    Condition: do_not_use_parent_stack
-    Properties:
-      TemplateURL: !Sub "https://${Section5bTemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/common/resources.template.yaml"
-      Parameters:
-        SumoLogicDeployment: !Ref Section1aSumoDeployment
-        SumoLogicAccessID: !Ref Section1bSumoAccessID
-        SumoLogicAccessKey: !Ref Section1cSumoAccessKey
-        SumoLogicOrganizationId: !Ref Section1dSumoOrganizationId
-        RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-        AccountAlias: !Ref Section2bAccountAlias
-        CollectorName: !Ref Section3bCollectorName
-        CreateMetaDataSource: !Ref Section4aCreateMetaDataSource
-        MetaDataSourceName: !Ref Section4bMetaDataSourceName
-        TemplatesBucketName: !Ref Section5bTemplatesBucketName
-
-  TagAWSResources:
-    Type: Custom::TagAWSResources
-    Condition: tag_existing_aws_resources
-    Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      Region: !Ref "AWS::Region"
-      AWSResource: ec2
-      Tags:
-        account: !Ref Section2bAccountAlias
-        Namespace: "AWS/EC2"
-      AccountID: !Ref "AWS::AccountId"
-      Filter: !Ref Section2cFilterExpression
 
   EC2MetricRule:
     Type: Custom::SumoLogicMetricRules
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      ServiceToken: !Ref Section3aParentStackLambdaARN
       RemoveOnDeleteStack: false
       MetricRuleName: "AwsObservabilityEC2MetricsEntityRule"
       MatchExpression: "Namespace=AWS/EC2 InstanceId=*"
@@ -222,29 +114,38 @@ Resources:
     Type: Custom::App
     Condition: install_app
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability EC2 Metrics App"
-      Version: "V1.0.1"
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
+      AppJsonS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/EC2-Metrics-App.json"
 
   sumoOverview:
     Type: Custom::App
     Condition: install_app
-    DependsOn: sumoApp
     Properties:
-      ServiceToken: !If [do_not_use_parent_stack, !GetAtt CreateCommonResources.Outputs.LambdaHelperARN, !Ref Section5aParentStackLambdaARN]
+      ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App"
-      Version: "V1.0.1"
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      AppJsonS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/Overview-App.json"
+
+  AddInstanceIdField:
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !Ref Section3aParentStackLambdaARN
+      FieldName: "instanceid"
+      RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment

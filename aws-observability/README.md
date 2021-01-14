@@ -18,7 +18,7 @@ Raise issues at [Issues](https://github.com/SumoLogic/sumologic-solution-templat
 
 ## Change Log
 
-For Full Change Log, [Visit](./CHANGELOG.md).
+For Full Change Log, please visit [Releases](https://github.com/SumoLogic/sumologic-solution-templates/releases) page.
 
 ## Contributing
 

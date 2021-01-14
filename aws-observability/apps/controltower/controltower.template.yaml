@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets."
+Description: "The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets. (MPCT-ibieokba)"
 
 Globals:
   Function:
@@ -14,8 +14,9 @@ Metadata:
           default: "1. Sumo Logic Access Configuration (Required)"
         Parameters:
           - Section1aSumoLogicDeployment
-          - Section1bKmsKeyID
-          - Section1cSumoLogicOrganizationId
+          - Section1bSumoLogicAccessID
+          - Section1cSumoLogicAccessKey
+          - Section1dSumoLogicOrganizationId
 
       - Label:
           default: "2. Regions to Monitor"
@@ -25,9 +26,11 @@ Metadata:
     ParameterLabels:
       Section1aSumoLogicDeployment:
         default: "Sumo Logic Deployment Name"
-      Section1bKmsKeyID:
-        default: "AWS Key Management Service Key ID"
-      Section1cSumoLogicOrganizationId:
+      Section1bSumoLogicAccessID:
+        default: "Sumo Logic Access ID"
+      Section1cSumoLogicAccessKey:
+        default: "Sumo Logic Access Key"
+      Section1dSumoLogicOrganizationId:
         default: "Sumo Logic Organization Id"
 
       Section2aRegions:
@@ -47,23 +50,29 @@ Parameters:
       - in
       - fed
     Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
-  Section1bKmsKeyID:
+  Section1bSumoLogicAccessID:
     Type: String
-    Description: "Provide the AWS KMS (Key Management Service) Key ID used to Encrypt the Sumo Logic Access ID and Access Key. Make sure the name of the Parameters are Sumo-Logic-Access-Id and Sumo-Logic-Access-Key."
+    Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
     AllowedPattern: ".+"
-    ConstraintDescription: "AWS KMS Key ID can not be Empty."
-  Section1cSumoLogicOrganizationId:
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  Section1cSumoLogicAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  Section1dSumoLogicOrganizationId:
     Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
     Type: String
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
   Section2aRegions:
-    Description: "Provide a list of Comma Separated AWS Regions where you would like to deploy Sumo Logic AWS Observability Solution when a new AWS account is created using Control Tower Account Factory settings. Default value is :- us-east-1, us-east-2, us-west-1, us-west-2, af-south-1, ap-east-1, ap-south-1, ap-northeast-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, eu-south-1, eu-north-1, me-south-1, sa-east-1"
+    Description: "Provide a list of Comma Separated AWS Regions where you would like to deploy Sumo Logic AWS Observability Solution when a new AWS account is created using Control Tower Account Factory settings. Default value is :- us-east-1, us-east-2, us-west-1, us-west-2, ap-south-1, ap-northeast-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, eu-north-1, sa-east-1"
     Type: String
     ConstraintDescription: "Regions list cannot be empty."
     AllowedPattern: ".+"
-    Default: "us-east-1, us-east-2, us-west-1, us-west-2, af-south-1, ap-east-1, ap-south-1, ap-northeast-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, eu-south-1, eu-north-1, me-south-1, sa-east-1"
+    Default: "us-east-1, us-east-2, us-west-1, us-west-2, ap-south-1, ap-northeast-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ca-central-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, eu-north-1, sa-east-1"
 
 Mappings:
   AWSControlTower:
@@ -72,8 +81,72 @@ Mappings:
 
 Resources:
 
+  SumoLogicControlTowerKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub "This is KMS Key Id used to encrypt and decrypt the Secret SumoLogic-Control-Tower-${AWS::StackName} for CloudFormation Stack ${AWS::StackName}."
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: key-default-1
+        Statement:
+        - Sid: Allow administration of the key
+          Effect: Allow
+          Principal:
+            AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+          Action:
+            - kms:Create*
+            - kms:Describe*
+            - kms:Enable*
+            - kms:List*
+            - kms:Put*
+            - kms:Update*
+            - kms:Revoke*
+            - kms:Disable*
+            - kms:Get*
+            - kms:Delete*
+            - kms:ScheduleKeyDeletion
+            - kms:CancelKeyDeletion
+          Resource: '*'
+        - Sid: Allow use of the key
+          Effect: Allow
+          Principal:
+            AWS: !Sub ${AWS::AccountId}
+          Action:
+            - kms:Encrypt
+            - kms:Decrypt
+            - kms:ReEncrypt
+            - kms:GenerateDataKey
+            - kms:CreateGrant
+            - kms:DescribeKey
+          Resource: '*'
+          Condition:
+            StringEquals:
+              kms:ViaService: !Sub secretsmanager.${AWS::Region}.amazonaws.com
+              kms:CallerAccount: !Sub ${AWS::AccountId}
+
+  SumoLogicControlTowerKMSAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/SumoLogic-Control-Tower-${AWS::StackName}"
+      TargetKeyId:
+        Ref: SumoLogicControlTowerKMSKey
+
+  SumoLogicControlTowerSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "SumoLogic-Control-Tower-${AWS::StackName}"
+      Description: !Sub "This is Secret Manager to Store SumoLogic Access Key and Access ID for CloudFormation Stack ${AWS::StackName}."
+      SecretString: !Sub '{"ACCESS_ID": "${Section1bSumoLogicAccessID}", "ACCESS_KEY": "${Section1cSumoLogicAccessKey}"}'
+      KmsKeyId: !GetAtt SumoLogicControlTowerKMSKey.Arn
+
   LambdaRoleToCaptureEvents:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Access to all resources is required to get the AWS Observability CloudFormation template from a public bucket."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -117,16 +190,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref SumoLogicControlTowerSecret
+              - Effect: Allow
+                Action:
                   - kms:Decrypt
-                Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${Section1bKmsKeyID}
-              - Effect: Allow
-                Action:
-                  - ssm:GetParameter
-                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/Sumo-Logic-Access-Key
-              - Effect: Allow
-                Action:
-                  - ssm:GetParameter
-                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/Sumo-Logic-Access-Id
+                Resource: !GetAtt SumoLogicControlTowerKMSKey.Arn
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
@@ -139,23 +208,38 @@ Resources:
           import os
           import re
           import cfnresponse
+          import json
+          from botocore.exceptions import ClientError
 
-          stackSetName = 'SUMO-LOGIC-AWS-OBSERVABILITY'
-          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/sumologic_observability.master.template.yaml"
+          name = 'SUMO-LOGIC-AWS-OBSERVABILITY'
+          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.1.0/sumologic_observability.master.template.yaml"
           ALL = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
 
-          def lambda_handler(event, context):
-              ssm = boto3.client('ssm')
+
+          def get_secret():
+              session = boto3.session.Session()
+              client = session.client(service_name='secretsmanager', region_name=session.region_name)
+              data = {}
               try:
-                  print('Event is {}'.format(event))
-                  a_k_param = ssm.get_parameter(Name='Sumo-Logic-Access-Key', WithDecryption=True)
-                  a_key = a_k_param['Parameter']['Value']
-                  a_id_param = ssm.get_parameter(Name='Sumo-Logic-Access-Id', WithDecryption=True)
-                  a_id = a_id_param['Parameter']['Value']
-              except (ssm.exceptions.InvalidKeyId, ssm.exceptions.ParameterNotFound, Exception):
-                  cfnresponse.send(event, context, cfnresponse.FAILED, {"Error": "Make Sure AWS KMS Key ID, Parameter with Required names present in Systems Manager."}, "Primerinvoke")
-                  return
+                  secret = client.get_secret_value(SecretId=os.environ['Secret'])
+              except ClientError as e:
+                  code = e.response['Error']['Code']
+                  if code == 'DecryptionFailureException':
+                      print("Secrets Manager can't decrypt using the provided KMS key {} Error: {}".format(os.environ['Secret'], e))
+                      raise e
+                  else:
+                      raise e
+              else:
+                  if 'SecretString' in secret:
+                      data = json.loads(secret['SecretString'])
+              return data
+
+
+          def lambda_handler(event, context):
+              print('Event is {}'.format(event))
+
               if "LogicalResourceId" in event and 'Primerinvoke' in event['LogicalResourceId']:
+                  get_secret()
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, "Primerinvoke")
                   return
               else:
@@ -166,34 +250,31 @@ Resources:
                       info = details['serviceEventDetails']['createManagedAccountStatus']
                   elif event == 'UpdateManagedAccount':
                       info = details['serviceEventDetails']['updateManagedAccountStatus']
-
                   if info['state'] == 'SUCCEEDED':
+                      data = get_secret()
                       acc_name = info['account']['accountName']
                       acc_id = info['account']['accountId']
                       acc_name = re.sub('[^a-z0-9]+', '', acc_name.lower())
                       params = [{"ParameterKey": "Section1aSumoLogicDeployment", "ParameterValue": os.environ['Deployment']},
-                                {"ParameterKey": "Section1bSumoLogicAccessID", "ParameterValue": a_id},
-                                {"ParameterKey": "Section1cSumoLogicAccessKey", "ParameterValue": a_key},
+                                {"ParameterKey": "Section1bSumoLogicAccessID", "ParameterValue": data["ACCESS_ID"]},
+                                {"ParameterKey": "Section1cSumoLogicAccessKey", "ParameterValue": data["ACCESS_KEY"]},
                                 {"ParameterKey": "Section1dSumoLogicOrganizationId", "ParameterValue": os.environ['OrgId']},
                                 {"ParameterKey": "Section3aInstallObservabilityApps", "ParameterValue": "No"},
                                 {"ParameterKey": "Section6aCreateCloudTrailLogSource", "ParameterValue": "No"},
                                 {"ParameterKey": "Section2aAccountAlias", "ParameterValue": acc_name[0:30]}]
-
                       regions = [x.strip() for x in os.environ['Regions'].split(",")]
                       cf_client = boto3.client('cloudformation', region)
                       if event == 'CreateManagedAccount':
                           try:
                               description = "The Stack Sets sets up the AWS Observability CloudFormation template on the New AWS accounts and AWS Regions."
-                              cf_client.create_stack_set(StackSetName=stackSetName, Description=description,
-                                                         TemplateURL=templateURL, Capabilities=ALL, Parameters=params,
-                                                         AdministrationRoleARN=os.environ['AdminRole'],
-                                                         ExecutionRoleName=os.environ['ExecutionRole'])
-                              print('Stack Set Created Name {} Region {}'.format(stackSetName, region))
-                              cf_client.create_stack_instances(StackSetName=stackSetName, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
+                              cf_client.create_stack_set(StackSetName=name, Description=description, TemplateURL=templateURL, Capabilities=ALL, Parameters=params,
+                                                         AdministrationRoleARN=os.environ['AdminRole'], ExecutionRoleName=os.environ['ExecutionRole'])
+                              print('Stack Set Created Name {} Region {}'.format(name, region))
+                              cf_client.create_stack_instances(StackSetName=name, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
                           except cf_client.exceptions.NameAlreadyExistsException:
-                              cf_client.create_stack_instances(StackSetName=stackSetName, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
+                              cf_client.create_stack_instances(StackSetName=name, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
                       elif event == 'UpdateManagedAccount':
-                          cf_client.update_stack_instances(StackSetName=stackSetName, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
+                          cf_client.update_stack_instances(StackSetName=name, Accounts=[acc_id], Regions=regions, ParameterOverrides=params)
                       print('Stack Instance updated to Stack Set parameters')
                   else:
                       print('Unsuccessful Event Received {}'.format(event))
@@ -206,17 +287,18 @@ Resources:
       Environment:
         Variables:
           Deployment: !Ref Section1aSumoLogicDeployment
-          OrgId: !Ref Section1cSumoLogicOrganizationId
+          OrgId: !Ref Section1dSumoLogicOrganizationId
           AdminRole: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
           ExecutionRole: !FindInMap [AWSControlTower, ExecutionRole, Name]
           Regions: !Ref Section2aRegions
+          Secret: !Ref SumoLogicControlTowerSecret
 
   Primerinvoke:
     Type: AWS::CloudFormation::CustomResource
     Version: "1.0"
     Properties:
       ServiceToken: !GetAtt TriggerCustomizationsOnLifeCycleEvent.Arn
-      Section1bKmsKeyID: !Ref Section1bKmsKeyID
+      Secret: !Ref SumoLogicControlTowerSecret
 
   CreateManagedAccountPermission:
     Type: AWS::Lambda::Permission

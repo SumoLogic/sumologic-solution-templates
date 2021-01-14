@@ -5,16 +5,7 @@ Description: "Template to Setup Sumo Logic Sources and supporting AWS Resources 
 Parameters:
   SumoLogicDeployment:
     Type: String
-    AllowedValues:
-      - au
-      - ca
-      - de
-      - eu
-      - jp
-      - us2
-      - us1
-      - in
-      - fed
+    Default: ""
     Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
   SumoLogicAccessID:
     Type: String
@@ -52,6 +43,10 @@ Parameters:
     Type: String
     Description: "Provide a Collector Name"
     Default: ""
+  SumoLogicAccountID:
+    Type: String
+    Description: "Provide the Sumo Logic Account ID for trust relationship."
+    Default: ""
 
   CreateMetaDataSource:
     Type: String
@@ -64,6 +59,10 @@ Parameters:
   MetaDataSourceName:
     Type: String
     Description: "Change the MetaData Source name to be created else default name will be used."
+    Default: ""
+  MetaDataSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the MetaData Source."
     Default: ""
 
   CreateCloudWatchMetricsSource:
@@ -88,6 +87,10 @@ Parameters:
     Default: 300000
     Description: "Provide the scan interval to fetch metrics into Sumo Logic."
     Type: String
+  CloudWatchMetricSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the CloudWatch Metrics Source."
+    Default: ""
 
   CreateALBLogSource:
     Type: String
@@ -115,6 +118,10 @@ Parameters:
   ALBLogsSourceName:
     Type: String
     Description: "Provide a ALB Logs Source Name"
+    Default: ""
+  ALBLogsSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the ALB Logs Source."
     Default: ""
 
   CreateCloudTrailLogSource:
@@ -144,6 +151,10 @@ Parameters:
     Type: String
     Description: "Provide a CloudTrail Source Name"
     Default: ""
+  CloudTrailLogsSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the CloudTrail Logs Source."
+    Default: ""
 
   CreateCloudWatchLogSource:
     Type: String
@@ -156,11 +167,19 @@ Parameters:
     Type: String
     Description: "Provide a CloudWatch Logs Source Name"
     Default: ""
+  CloudWatchLogsSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the CloudTrail Logs Source."
+    Default: ""
 
   TemplatesBucketName:
     Type: String
-    Default: "appdevzipfiles-us-east-1"
+    AllowedPattern: ".+"
     Description: Bucket Name for all the nested templates.
+  NestedTemplateVersion:
+    Type: String
+    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
 
 Conditions:
   # Sources Conditions
@@ -200,6 +219,54 @@ Conditions:
     - !Condition install_cloudtrail_logs_source
 
 Mappings:
+  # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
+  # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
+  # Buckets names which are intentional -
+  # 1. appdevzipfiles-eu-north-1s
+  # 2. appdevzipfiles-ap-east-1s
+  # 3. appdevzipfiles-af-south-1s
+  # 4. appdevzipfiles-me-south-1s
+  RegionMap:
+    us-east-1:
+      bucketname: appdevzipfiles-us-east-1
+    us-east-2:
+      bucketname: appdevzipfiles-us-east-2
+    us-west-1:
+      bucketname: appdevzipfiles-us-west-1
+    us-west-2:
+      bucketname: appdevzipfiles-us-west-2
+    ap-south-1:
+      bucketname: appdevzipfiles-ap-south-1
+    ap-northeast-2:
+      bucketname: appdevzipfiles-ap-northeast-2
+    ap-southeast-1:
+      bucketname: appdevzipfiles-ap-southeast-1
+    ap-southeast-2:
+      bucketname: appdevzipfiles-ap-southeast-2
+    ap-northeast-1:
+      bucketname: appdevzipfiles-ap-northeast-1
+    ca-central-1:
+      bucketname: appdevzipfiles-ca-central-1
+    eu-central-1:
+      bucketname: appdevzipfiles-eu-central-1
+    eu-west-1:
+      bucketname: appdevzipfiles-eu-west-1
+    eu-west-2:
+      bucketname: appdevzipfiles-eu-west-2
+    eu-west-3:
+      bucketname: appdevzipfiles-eu-west-3
+    eu-north-1:
+      bucketname: appdevzipfiles-eu-north-1s
+    sa-east-1:
+      bucketname: appdevzipfiles-sa-east-1
+    ap-east-1:
+      bucketname: appdevzipfiles-ap-east-1s
+    af-south-1:
+      bucketname: appdevzipfiles-af-south-1s
+    eu-south-1:
+      bucketname: appdevzipfiles-eu-south-1
+    me-south-1:
+      bucketname: appdevzipfiles-me-south-1s
   Region2ELBAccountId:
     us-east-1:
       AccountId: "127311923021"
@@ -288,8 +355,8 @@ Resources:
       Handler: main.handler
       Runtime: python3.7
       CodeUri:
-        Bucket: !Ref TemplatesBucketName
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.10.zip"
+        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.11.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -451,7 +518,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: false
       HierarchyName: "AWS Observability"
-      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}}]}}}
+      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}},{"condition":"AWS/ECS","level":{"entityType":"clustername","nextLevelsWithConditions":[]}},{"condition":"AWS/ElastiCache","level":{"entityType":"cacheclusterid","nextLevelsWithConditions":[]}},{"condition":"AWS/NetworkELB","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}}]}}}
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
@@ -465,7 +532,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::926226587429:root
+              AWS: !Sub "arn:aws:iam::${SumoLogicAccountID}:root"
             Action: sts:AssumeRole
             Condition:
               StringEquals:
@@ -501,6 +568,40 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
 
+  ############# START - FIELDS #################
+
+  AddAccountField:
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "account"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  AddRegionField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddAccountField
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "region"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  AddNamespaceField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddRegionField
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "namespace"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
   ############# START - RESOURCES FOR METADATA SOURCE #################
 
   SumoLogicMetaDataSource:
@@ -512,7 +613,7 @@ Resources:
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
       SourceType: AwsMetadata
       SourceName: !Ref MetaDataSourceName
-      SourceCategory: "aws/observability/ec2/metadata"
+      SourceCategory: !Ref MetaDataSourceCategory
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -578,7 +679,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_cloud_watch_metric_source
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
       Parameters:
         SumoLogicDeployment: !Ref SumoLogicDeployment
         SumoLogicAccessID: !Ref SumoLogicAccessID
@@ -589,6 +690,7 @@ Resources:
         LambdaARN: !GetAtt LambdaHelper.Arn
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
         CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
+        CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
         CreateFirstMetricsSource: !GetAtt Primerinvoke.ApplicationELB
         FirstMetricsSourceNamespace: "ApplicationELB"
         CreateSecondMetricsSource: !GetAtt Primerinvoke.ApiGateway
@@ -604,7 +706,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_cloud_watch_metric_source
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/sumologic-aws-observability/apps/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
       Parameters:
         SumoLogicDeployment: !Ref SumoLogicDeployment
         SumoLogicAccessID: !Ref SumoLogicAccessID
@@ -615,6 +717,7 @@ Resources:
         LambdaARN: !GetAtt LambdaHelper.Arn
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
         CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
+        CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
         CreateFirstMetricsSource: !GetAtt Primerinvoke.ECS
         FirstMetricsSourceNamespace: "ECS"
         CreateSecondMetricsSource: !GetAtt Primerinvoke.ElastiCache
@@ -636,7 +739,7 @@ Resources:
       Region: !Ref "AWS::Region"
       SourceName: !Ref ALBLogsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SourceCategory: "aws/observability/alb/logs"
+      SourceCategory: !Ref ALBLogsSourceCategory
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -715,7 +818,7 @@ Resources:
       SourceName: !Ref CloudTrailLogsSourceName
       TargetBucketName: !If [create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName]
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SourceCategory: "aws/observability/cloudtrail/logs"
+      SourceCategory: !Ref CloudTrailLogsSourceCategory
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -798,7 +901,7 @@ Resources:
       Region: !Ref "AWS::Region"
       SourceName: !Ref CloudWatchLogsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SourceCategory: "aws/observability/cloudwatch/logs"
+      SourceCategory: !Ref CloudWatchLogsSourceCategory
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey

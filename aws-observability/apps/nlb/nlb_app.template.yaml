@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the RDS app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Template to setup the NLB app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -19,10 +19,10 @@ Metadata:
           - Section2aInstallApp
 
       - Label:
-          default: "App Details - CloudTrail Log Source Configuration"
+          default: "App Details - NLB Source Log Source Configuration"
         Parameters:
-          - Section3aCloudTrailLogsSourceName
-          - Section3bCloudTrailSourceUpdated
+          - Section3aNLBLogsSourceName
+          - Section3bNLBSourceUpdated
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
@@ -44,9 +44,9 @@ Metadata:
       Section2aInstallApp:
         default: "Install Sumo Logic App"
 
-      Section3aCloudTrailLogsSourceName:
-        default: "Sumo Logic CloudTrail Logs Source Name"
-      Section3bCloudTrailSourceUpdated:
+      Section3aNLBLogsSourceName:
+        default: "Sumo Logic NLB Logs Source Name"
+      Section3bNLBSourceUpdated:
         default: "Existing Source Updated"
 
       Section4aParentStackLambdaARN:
@@ -59,8 +59,8 @@ Metadata:
 Parameters:
   Section1aSumoDeployment:
     Type: String
-    Default: ""
     Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+    Default: ""
   Section1bSumoAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
@@ -83,18 +83,18 @@ Parameters:
 
   Section2aInstallApp:
     Type: String
-    Description: "Yes - Installs the RDS App for the Sumo Logic AWS Observability Solution.
+    Description: "Yes - Installs the ALB App for the Sumo Logic AWS Observability Solution.
                   No - Skips the installation of this app."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
       - 'No'
 
-  Section3aCloudTrailLogsSourceName:
+  Section3aNLBLogsSourceName:
     Type: String
-    Description: Change the CloudTrail Source name to be created else default name will be used.
+    Description: Change the NLB Source name to be created else default name will be used.
     Default: ""
-  Section3bCloudTrailSourceUpdated:
+  Section3bNLBSourceUpdated:
     Type: String
     Description: "Yes - If fields are added to the existing source.
                   No - If a new source was created."
@@ -119,55 +119,50 @@ Parameters:
 Conditions:
   install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
 
-  create_fer: !Not [!Equals [!Ref Section3aCloudTrailLogsSourceName, '']]
+  create_fer: !Not [!Equals [!Ref Section3aNLBLogsSourceName, '']]
 
-  source_updated: !Equals [!Ref Section3bCloudTrailSourceUpdated, 'Yes']
+  source_updated: !Equals [!Ref Section3bNLBSourceUpdated, 'Yes']
 
 Resources:
 
-  ClusterMetricRule:
-    Type: Custom::SumoLogicMetricRules
+  AddLoadBalancerField:
+    Type: Custom::SumoLogicFieldsSchema
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
+      FieldName: "loadbalancer"
       RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityRDSClusterMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/RDS DBClusterIdentifier=*"
-      ExtractVariables:
-        entity: "$DBClusterIdentifier._1"
-        dbidentifier: "$DBClusterIdentifier._1"
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  InstanceMetricRule:
+  MetricRule:
     Type: Custom::SumoLogicMetricRules
-    DependsOn: ClusterMetricRule
+    DependsOn: AddLoadBalancerField
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityRDSInstanceMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/RDS DBInstanceIdentifier=*"
+      MetricRuleName: "AwsObservabilityNLBMetricsEntityRule"
+      MatchExpression: "Namespace=AWS/NetworkELB LoadBalancer=*"
       ExtractVariables:
-        entity: "$DBInstanceIdentifier._1"
-        dbidentifier: "$DBInstanceIdentifier._1"
+        entity: "$LoadBalancer._1"
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
   sumoApp:
-    Type: Custom::App
     Condition: install_app
+    Type: Custom::App
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Rds App"
+      AppName: "AWS Observability Nlb App"
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       FolderName: "Sumo Logic AWS Observability Apps "
       RetainOldAppOnUpdate: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
-      AppJsonS3Url: !Sub "https://${Section4bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section4cNestedTemplateVersion}/appjson/Rds-App.json"
+      AppJsonS3Url: !Sub "https://${Section4bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section4cNestedTemplateVersion}/appjson/Nlb-App.json"
 
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
@@ -175,34 +170,16 @@ Resources:
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
-      FieldExtractionRuleName: "AwsObservabilityRdsCloudTrailLogsFER"
+      FieldExtractionRuleName: "AwsObservabilityNlbAccessLogsFER"
       FieldExtractionRuleScope: !Join
         - ""
         - - "(_source="
-          - !If [source_updated, !Sub "\"${Section3aCloudTrailLogsSourceName}\"", !Ref Section3aCloudTrailLogsSourceName]
-          - " (\"rds.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters", "responseElements" as eventSource, region, requestParameters, responseElements nodrop
-                                           | where eventSource = "rds.amazonaws.com"
-                                           | "aws/rds" as namespace
-                                           | json field=requestParameters "dBInstanceIdentifier", "resourceName", "dBClusterIdentifier" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop
-                                           | json field=responseElements "dBInstanceIdentifier" as dBInstanceIdentifier3 nodrop | json field=responseElements "dBClusterIdentifier" as dBClusterIdentifier3 nodrop
-                                           | parse field=resourceName "arn:aws:rds:*:db:*" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName "arn:aws:rds:*:cluster:*" as f1, dBClusterIdentifier2 nodrop
-                                           | if (resourceName matches "arn:aws:rds:*:db:*", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier
-                                           | if (resourceName matches "arn:aws:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
-                                           | if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier
-                                           | tolowercase(dbidentifier) as dbidentifier
-                                           | fields region, namespace, dBInstanceIdentifier, dBClusterIdentifier, dbidentifier'
+          - !If [source_updated, !Sub "\"${Section3aNLBLogsSourceName}\"", !Ref Section3aNLBLogsSourceName]
+          - ")"
+      FieldExtractionRuleParseExpression: '| parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
+                                            | tolowercase(loadbalancer) as loadbalancer
+                                            | fields loadbalancer'
       FieldExtractionRuleParseEnabled: true
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  AddDBIdentifierField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !Ref Section4aParentStackLambdaARN
-      FieldName: "dbidentifier"
-      RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
