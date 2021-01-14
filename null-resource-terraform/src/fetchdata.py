@@ -22,11 +22,15 @@ def read_in():
 def main():
     fields = read_in()
     key = fields["KeyPrefix"] + "_" + fields["Key"]
-    if os.path.exists("sumo_data.json"):
-        input_file = open("sumo_data.json", "r")
+    details = fields["Section"].split("|")
+    section = details[0]
+    directory_path = os.path.join("sumologic-state", details[1])
+    file_name = os.path.join(directory_path, "sumo_data.json")
+    if os.path.exists(file_name):
+        input_file = open(file_name, "r")
         input_data = json.load(input_file)
-        if fields["Section"] in input_data and key in input_data[fields["Section"]]:
-            key_data = input_data[fields["Section"]][key]
+        if section in input_data and key in input_data[section]:
+            key_data = input_data[section][key]
             if "FetchKey" in fields and fields["FetchKey"] in key_data:
                 return sys.stdout.write("{\"id\": \"" + str(key_data[fields["FetchKey"]]) + "\"}")
             else:

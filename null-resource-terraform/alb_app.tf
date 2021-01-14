@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 locals {
-  section = "ALB"
+  section = "ALB|${terraform.workspace}"
   # Below values will come from Variables
   account_alias = "dev"
   access_id = ""

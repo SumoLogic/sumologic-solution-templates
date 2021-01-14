@@ -7,11 +7,21 @@ from filelock import FileLock
 class FileUtils(object):
 
     def __init__(self, section, key_prefix):
-        self.file_name = "sumo_data.json"
-        self.file_lock = "sumo_data.json.lock"
+        details = section.split("|")
+        directory_path = os.path.join("sumologic-state", details[1])
+        self.create_directory(directory_path)
+        self.file_name = os.path.join(directory_path, "sumo_data.json")
+        self.file_lock = os.path.join(directory_path, "sumo_data.json.lock")
         self.lock = FileLock(self.file_lock)
-        self.section = section
+        self.section = details[0]
         self.key_prefix = key_prefix
+
+    def create_directory(self, directory_path):
+        if not os.path.exists(directory_path):
+            try:
+                os.makedirs(directory_path)
+            except FileExistsError as e:
+                pass
 
     def get_key(self, key):
         value = ""
