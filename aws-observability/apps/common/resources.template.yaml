@@ -635,7 +635,7 @@ Resources:
           LOGGER.setLevel(logging.INFO)
           # Update the Default value whenever CF starts supporting More Namespaces
           default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS",
-                     "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB"]
+                     "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS"]
 
 
           def lambda_handler(event, context):
@@ -726,6 +726,31 @@ Resources:
         ThirdMetricsSourceNamespace: "ELB"
         CreateFourthMetricsSource: !GetAtt Primerinvoke.NetworkELB
         FourthMetricsSourceNamespace: "NetworkELB"
+        CreateFifthMetricsSource: "No"
+
+  CloudWatchMetricsThirdStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: install_cloud_watch_metric_source
+    DependsOn: CloudWatchMetricsFirstStack
+    Properties:
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      Parameters:
+        SumoLogicDeployment: !Ref SumoLogicDeployment
+        SumoLogicAccessID: !Ref SumoLogicAccessID
+        SumoLogicAccessKey: !Ref SumoLogicAccessKey
+        RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+        AccountAlias: !Ref AccountAlias
+        SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+        LambdaARN: !GetAtt LambdaHelper.Arn
+        SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
+        CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
+        CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
+        CreateFirstMetricsSource: !GetAtt Primerinvoke.SQS
+        FirstMetricsSourceNamespace: "SQS"
+        CreateSecondMetricsSource: !GetAtt Primerinvoke.SNS
+        SecondMetricsSourceNamespace: "SNS"
+        CreateThirdMetricsSource: "No"
+        CreateFourthMetricsSource: "No"
         CreateFifthMetricsSource: "No"
 
   ############# START - RESOURCES FOR ALB SOURCE #################
