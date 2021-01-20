@@ -140,6 +140,21 @@ Resources:
       SumoDeployment: !Ref Section1aSumoDeployment
       AppJsonS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/Overview-App.json"
 
+  sumoMonitorAlerts:
+    Type: Custom::AlertsMonitor
+    Condition: install_app
+    Properties:
+      ServiceToken: !Ref Section3aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      FolderName: !Sub "AWS Observability ${Section3cNestedTemplateVersion} "
+      MonitorsS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/Alerts-App.json"
+      SuffixDateTime: true
+      RetainOldAlerts: true
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
   AddInstanceIdField:
     Type: Custom::SumoLogicFieldsSchema
     Properties:
