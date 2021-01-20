@@ -1,0 +1,403 @@
+{
+  "name": "Kubernetes",
+  "description": "Folder for Kubernetes Monitors",
+  "type": "MonitorsLibraryFolderExport",
+  "children": [
+    {
+      "name": "KubeControllerManagerDown",
+      "description": "KubeControllerManager has disappeared from Prometheus target discovery.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=up job=kube-controller-manager"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "Critical",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "ResolvedCritical",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "MissingData",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "ResolvedMissingData",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": false,
+      "groupNotifications": true
+    },
+    {
+      "name": "PrometheusRemoteStorageFailures",
+      "description": "Prometheus fails to send samples to remote storage.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=prometheus_remote_storage_failed_samples_total (job=collection-kube-prometheus-prometheus  or job=collection-prometheus-oper-prometheus) | quantize 5m | rate"
+        },
+        {
+          "rowId": "B",
+          "query": "metric=prometheus_remote_storage_succeeded_samples_total (job=collection-kube-prometheus-prometheus  or job=collection-prometheus-oper-prometheus) | quantize 5m | rate"
+        },
+        {
+          "rowId": "C",
+          "query": "100*(#A/(#A+#B)) along namespace,pod"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "Critical",
+          "threshold": 1,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "ResolvedCritical",
+          "threshold": 1,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": false,
+      "groupNotifications": true
+    },
+    {
+      "name": "KubeNodeNotReady",
+      "description": "Node is not ready.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=kube_node_status_condition job=kube-state-metrics condition=ready status=true"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "Critical",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "ResolvedCritical",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "MissingData",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "ResolvedMissingData",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": false,
+      "groupNotifications": true
+    },
+    {
+      "name": "KubeSchedulerDown",
+      "description": "Kube Scheduler has disappeared from Prometheus target discovery.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=up job=scheduler"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "Critical",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "ResolvedCritical",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "MissingData",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "ResolvedMissingData",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": false,
+      "groupNotifications": true
+    },
+    {
+      "name": "Multiple Terminated pods founds",
+      "description": "Alerts when there are pods that have been terminated.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=kube_pod_container_status_terminated_reason !reason=completed | sum"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "Critical",
+          "threshold": 5,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "AtLeastOnce",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "ResolvedCritical",
+          "threshold": 5,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": false,
+      "groupNotifications": true
+    },
+    {
+      "name": "KubeletDown",
+      "description": "Kubelet has disappeared from Prometheus target discovery.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=up job=kubelet metrics_path=/metrics"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "Critical",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "ResolvedCritical",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "MissingData",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "ResolvedMissingData",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": false,
+      "groupNotifications": true
+    },
+    {
+      "name": "Cluster CPU utilization High",
+      "description": "Alert when Cluster CPU utlization is high.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=node:node_cpu_utilisation:avg1m"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "Critical",
+          "threshold": 0.9,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "AtLeastOnce",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "ResolvedCritical",
+          "threshold": 0.9,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "Warning",
+          "threshold": 0.75,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "AtLeastOnce",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-5m",
+          "triggerType": "ResolvedWarning",
+          "threshold": 0.75,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": false,
+      "groupNotifications": true
+    },
+    {
+      "name": "KubeAPIDown",
+      "description": "KubeAPI disappeared from Prometheus target discovery.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=up job=apiserver"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "Critical",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "MissingData",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "ResolvedCritical",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "timeRange": "-15m",
+          "triggerType": "ResolvedMissingData",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "MissingData",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": false,
+      "groupNotifications": true
+    }
+  ]
+}
