@@ -57,49 +57,6 @@
       "groupNotifications": true
     },
     {
-      "name": "PrometheusRemoteStorageFailures",
-      "description": "Prometheus fails to send samples to remote storage.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "metric=prometheus_remote_storage_failed_samples_total (job=collection-kube-prometheus-prometheus  or job=collection-prometheus-oper-prometheus) | quantize 5m | rate"
-        },
-        {
-          "rowId": "B",
-          "query": "metric=prometheus_remote_storage_succeeded_samples_total (job=collection-kube-prometheus-prometheus  or job=collection-prometheus-oper-prometheus) | quantize 5m | rate"
-        },
-        {
-          "rowId": "C",
-          "query": "100*(#A/(#A+#B)) along namespace,pod"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "timeRange": "-5m",
-          "triggerType": "Critical",
-          "threshold": 1,
-          "thresholdType": "GreaterThan",
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "timeRange": "-5m",
-          "triggerType": "ResolvedCritical",
-          "threshold": 1,
-          "thresholdType": "LessThan",
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": false,
-      "groupNotifications": true
-    },
-    {
       "name": "KubeNodeNotReady",
       "description": "Node is not ready.",
       "type": "MonitorsLibraryMonitorExport",
@@ -395,7 +352,8 @@
           "triggerSource": "AnyTimeSeries"
         }
       ],
-      "notifications": [],
+      "notifications": [
+      ],
       "isDisabled": false,
       "groupNotifications": true
     }
