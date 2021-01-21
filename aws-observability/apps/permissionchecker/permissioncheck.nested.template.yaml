@@ -13,6 +13,12 @@ Metadata:
           - Section1cSumoLogicAccessKey
           - Section1dSumoLogicOrganizationId
 
+      - Label:
+          default: "Local Parameters. Do Not Edit the values."
+        Parameters:
+          - TemplatesBucketName
+          - NestedTemplateVersion
+
     ParameterLabels:
       Section1aSumoLogicDeployment:
         default: "Sumo Logic Deployment Name"
@@ -22,6 +28,11 @@ Metadata:
         default: "Sumo Logic Access Key"
       Section1dSumoLogicOrganizationId:
         default: "Sumo Logic Organization Id"
+
+      TemplatesBucketName:
+        default: "Nested Templates Bucket Name"
+      NestedTemplateVersion:
+        default: "Nested Templates Version"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -53,6 +64,15 @@ Parameters:
     Type: String
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+
+  TemplatesBucketName:
+    Type: String
+    AllowedPattern: ".+"
+    Description: Bucket Name for all the nested templates.
+  NestedTemplateVersion:
+    Type: String
+    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -478,7 +498,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: true
       HierarchyName: "AWS Test Observability"
-      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}}]}}}
+      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}},{"condition":"AWS/ECS","level":{"entityType":"clustername","nextLevelsWithConditions":[]}},{"condition":"AWS/ElastiCache","level":{"entityType":"cacheclusterid","nextLevelsWithConditions":[]}},{"condition":"AWS/NetworkELB","level":{"entityType":"networkloadbalancer","nextLevelsWithConditions":[]}}]}}}
       SumoAccessID: !Ref Section1bSumoLogicAccessID
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
       SumoDeployment: !Ref Section1aSumoLogicDeployment
@@ -496,13 +516,28 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
       SumoDeployment: !Ref Section1aSumoLogicDeployment
 
-  sumoApp:
+  sumoOverview:
     Type: Custom::App
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Lambda App"
+      AppName: "AWS Observability Overview App"
       RetainOldAppOnUpdate: true
+      RemoveOnDeleteStack: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      AppJsonS3Url: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/appjson/Overview-App.json"
+
+  sumoMonitorAlerts:
+    Type: Custom::AlertsMonitor
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      FolderName: !Sub "AWS Observability ${NestedTemplateVersion} "
+      MonitorsS3Url: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/appjson/Alerts-App.json"
+      SuffixDateTime: true
+      RetainOldAlerts: true
       RemoveOnDeleteStack: true
       SumoAccessID: !Ref Section1bSumoLogicAccessID
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
