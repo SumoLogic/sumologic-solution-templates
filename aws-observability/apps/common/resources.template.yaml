@@ -636,7 +636,7 @@ Resources:
           # Update the Default value whenever CF starts supporting More Namespaces
           default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS",
                      "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS"]
-          cw_metrics_specific = ["AWS/SQS", "AWS/SNS"]
+          cw_metrics_specific = ["SQS", "SNS"]
 
           def lambda_handler(event, context):
               unique_namespaces = set(["AWS/AutoScaling"])
@@ -650,9 +650,10 @@ Resources:
               if namespaces:
                   namespace_list = namespaces.split(",")
                   for namespace in namespace_list:
-                      if namespace not in cw_metrics_specific:
+                      name = namespace.split("/")[1]
+                      response_value[name] = "Yes"
+                      if name not in cw_metrics_specific:
                           unique_namespaces.add(namespace.replace(" ", ""))
-                      response_value[namespace.split("/")[1]] = "Yes"
 
               response_value["namespaces"] = ", ".join(unique_namespaces)
               LOGGER.info("Response is {}".format(response_value))
