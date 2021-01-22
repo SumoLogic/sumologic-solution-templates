@@ -518,7 +518,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: false
       HierarchyName: "AWS Observability"
-      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}},{"condition":"AWS/ECS","level":{"entityType":"clustername","nextLevelsWithConditions":[]}},{"condition":"AWS/ElastiCache","level":{"entityType":"cacheclusterid","nextLevelsWithConditions":[]}},{"condition":"AWS/NetworkELB","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}}]}}}
+      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}},{"condition":"AWS/ECS","level":{"entityType":"clustername","nextLevelsWithConditions":[]}},{"condition":"AWS/ElastiCache","level":{"entityType":"cacheclusterid","nextLevelsWithConditions":[]}},{"condition":"AWS/NetworkELB","level":{"entityType":"networkloadbalancer","nextLevelsWithConditions":[]}}]}}}
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
@@ -636,10 +636,11 @@ Resources:
           # Update the Default value whenever CF starts supporting More Namespaces
           default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS",
                      "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS"]
-
+          cw_metrics_specific = ["AWS/SQS", "AWS/SNS"]
 
           def lambda_handler(event, context):
               unique_namespaces = set(["AWS/AutoScaling"])
+
               response_value = {}
               for value in default:
                   response_value[value.split("/")[1]] = 'No'
@@ -649,7 +650,8 @@ Resources:
               if namespaces:
                   namespace_list = namespaces.split(",")
                   for namespace in namespace_list:
-                      unique_namespaces.add(namespace.replace(" ", ""))
+                      if namespace not in cw_metrics_specific:
+                          unique_namespaces.add(namespace.replace(" ", ""))
                       response_value[namespace.split("/")[1]] = "Yes"
 
               response_value["namespaces"] = ", ".join(unique_namespaces)
