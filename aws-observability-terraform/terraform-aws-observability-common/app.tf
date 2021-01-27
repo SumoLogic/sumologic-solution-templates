@@ -1,4 +1,3 @@
-# TODO: try to fix up
 resource "null_resource" "install_apps" {
   for_each = var.managed_apps
 

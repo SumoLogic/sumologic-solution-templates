@@ -1,7 +1,7 @@
 resource "sumologic_collector" "hosted" {
   for_each = toset(local.manage_collector ? ["this"] : [])
 
-  name     = "${var.collector_name}-${var.account_alias}"
+  name     = "${var.collector_name}-${var.account_alias}-${data.aws_region.current.id}"
   timezone = "UTC"
 }
 
@@ -15,7 +15,6 @@ resource "sumologic_collector" "hosted" {
 resource "aws_iam_role" "sumologic_source" {
   for_each = toset(local.manage_sumologic_source_role ? ["this"] : [])
 
-  #TODO: current sumologic workaround replication; later best practices
   name = "SumoLogicSource-${data.aws_region.current.id}"
   path = "/"
 
@@ -25,7 +24,6 @@ resource "aws_iam_role" "sumologic_source" {
 resource "aws_iam_policy" "sumologic_source" {
   for_each = toset(local.manage_sumologic_source_role ? ["this"] : [])
 
-  #TODO: current sumologic workaround replication; later best practices
   name   = "SumoLogicAwsSources-${data.aws_region.current.id}"
   policy = templatefile("${path.module}/templates/iam/sumologic_source.tmpl", {})
 }
@@ -35,12 +33,16 @@ resource "aws_iam_role_policy_attachment" "sumologic_source" {
 
   role       = aws_iam_role.sumologic_source["this"].name
   policy_arn = aws_iam_policy.sumologic_source["this"].arn
+
+  # workaround for delay in sumologic source authentication against permissions
+  provisioner "local-exec" {
+    command = "python3 -c 'import time; time.sleep(15)'"
+  }
 }
 
 resource "aws_iam_policy" "sumologic_inventory" {
   for_each = toset((local.manage_sumologic_source_role && var.manage_aws_inventory_source) ? ["this"] : [])
 
-  #TODO: current sumologic workaround replication; later best practices
   name   = "SumoInventory-${data.aws_region.current.id}"
   policy = templatefile("${path.module}/templates/iam/sumologic_inventory.tmpl", {})
 }
@@ -50,4 +52,9 @@ resource "aws_iam_role_policy_attachment" "sumologic_inventory" {
 
   role       = aws_iam_role.sumologic_source["this"].name
   policy_arn = aws_iam_policy.sumologic_inventory["this"].arn
+
+  # workaround for delay in sumologic source authentication against permissions
+  provisioner "local-exec" {
+    command = "python3 -c 'import time; time.sleep(15)'"
+  }
 }
