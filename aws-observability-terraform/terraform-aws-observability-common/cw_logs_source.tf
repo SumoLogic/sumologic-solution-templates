@@ -16,7 +16,6 @@ resource "sumologic_http_source" "cloudwatch_logs" {
 resource "aws_iam_role" "cloudwatch_logs_source_lambda" {
   for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
 
-  #TODO: current sumologic workaround replication; later best practices
   name = "SumoCWLambdaExecutionRole-${data.aws_region.current.id}"
   path = "/"
 
@@ -26,7 +25,6 @@ resource "aws_iam_role" "cloudwatch_logs_source_lambda" {
 resource "aws_iam_policy" "cloudwatch_logs_source_lambda_sqs" {
   for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
 
-  #TODO: current sumologic workaround replication; later best practices
   name   = "SQSCreateLogs-${data.aws_region.current.id}"
   policy = templatefile("${path.module}/templates/iam/cloudwatch_logs_source_lambda_sqs.tmpl", { cloudwatch_logs_source_deadletter_arn = aws_sqs_queue.cloudwatch_logs_source_deadletter["this"].arn })
 }
@@ -41,7 +39,6 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_logs_source_lambda_sqs" {
 resource "aws_iam_policy" "cloudwatch_logs_source_lambda_logs" {
   for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
 
-  #TODO: current sumologic workaround replication; later best practices
   name   = "CloudWatchCreateLogs-${data.aws_region.current.id}"
   policy = templatefile("${path.module}/templates/iam/cloudwatch_logs_source_lambda_logs.tmpl", { cloudwatch_logs_source_log_group_arn = aws_cloudwatch_log_group.cloudwatch_logs_source["this"].arn })
 }
@@ -56,7 +53,6 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_logs_source_lambda_logs" {
 resource "aws_iam_policy" "cloudwatch_logs_source_lambda_lambda" {
   for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
 
-  #TODO: current sumologic workaround replication; later best practices
   name   = "InvokeLambda-${data.aws_region.current.id}"
   policy = templatefile("${path.module}/templates/iam/cloudwatch_logs_source_lambda_lambda.tmpl", { cloudwatch_logs_source_lambda_arn = aws_lambda_function.cloudwatch_logs_source_process_deadletter["this"].arn })
 }
@@ -172,29 +168,11 @@ resource "aws_sns_topic" "cloudwatch_logs_source_email" {
   for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
 
   endpoint  = var.email_id
-  protocol  = "email" #TODO: will not work
+  protocol  = "email" #TODO: will not work due to no generated arn
   topic_arn = aws_sns_topic.cloudwatch_logs_source_email["this"].arn
-}*/
-
-resource "aws_cloudwatch_log_subscription_filter" "cloudwatch_logs_source" {
-  for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
-
-  destination_arn = aws_lambda_function.cloudwatch_logs_source_logs["this"].arn
-  filter_pattern  = ""
-  log_group_name  = aws_cloudwatch_log_group.cloudwatch_logs_source["this"].name
-  name            = "SumoCWLogSubscriptionFilter"
-
-  depends_on = [aws_lambda_permission.cloudwatch_logs_source_logs]
 }
 
-resource "aws_cloudwatch_log_group" "cloudwatch_logs_source" {
-  for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
-
-  name              = "SumoCWLogGroup"
-  retention_in_days = 7
-}
-
-/*resource "aws_cloudwatch_metric_alarm" "cloudwatch_logs_source" {
+resource "aws_cloudwatch_metric_alarm" "cloudwatch_logs_source" {
   for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
 
   alarm_actions       = [aws_sns_topic.cloudwatch_logs_source_email["this"].arn]
@@ -209,3 +187,21 @@ resource "aws_cloudwatch_log_group" "cloudwatch_logs_source" {
   statistic           = "Sum"
   threshold           = 100000
 }*/
+
+resource "aws_cloudwatch_log_group" "cloudwatch_logs_source" {
+  for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
+
+  name              = "SumoCWLogGroup"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_subscription_filter" "cloudwatch_logs_source" {
+  for_each = toset(var.manage_cloudwatch_logs_source ? ["this"] : [])
+
+  destination_arn = aws_lambda_function.cloudwatch_logs_source_logs["this"].arn
+  filter_pattern  = ""
+  log_group_name  = aws_cloudwatch_log_group.cloudwatch_logs_source["this"].name
+  name            = "SumoCWLogSubscriptionFilter"
+
+  depends_on = [aws_lambda_permission.cloudwatch_logs_source_logs]
+}

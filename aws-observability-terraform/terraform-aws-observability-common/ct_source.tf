@@ -19,7 +19,7 @@ resource "sumologic_cloudtrail_source" "this" {
   path {
     type            = "S3BucketPathExpression"
     bucket_name     = var.manage_cloudtrail_bucket ? aws_s3_bucket.common["this"].id : var.cloudtrail_logs_s3_bucket
-    path_expression = "AWSLogs/${data.aws_caller_identity.current.id}/CloudTrail/${data.aws_region.current.id}/${var.cloudtrail_s3_bucket_path_expression}"
+    path_expression = local.manage_target_s3_bucket ? "AWSLogs/${data.aws_caller_identity.current.id}/CloudTrail/${data.aws_region.current.id}/*" : var.cloudtrail_s3_bucket_path_expression
   }
 
   depends_on = [aws_iam_role_policy_attachment.sumologic_source, aws_s3_bucket_policy.common]

@@ -22,21 +22,13 @@ resource "sumologic_metadata_source" "this" {
   depends_on = [aws_iam_role_policy_attachment.sumologic_source]
 }
 
-data "external" "sumologic_account" {
-  program = ["echo", "-e", "{\"enterprise\":\"true\",\"paid\":\"true\"}"]
-
-  query = {
-    account_id = "id"
-  }
-}
-
-/* TODO: combo into single external data
+#TODO: combo into single external data
 resource "null_resource" "enterprise_check" {
   triggers = {
     sumologic_access_id   = var.sumologic_access_id
     sumologic_access_key  = var.sumologic_access_key
     sumologic_environment = var.sumologic_organization_id
-    section               = "ALB|${terraform.workspace}" #TODO
+    section               = "Account|${terraform.workspace}"
   }
 
   provisioner "local-exec" {
@@ -53,12 +45,12 @@ resource "null_resource" "enterprise_check" {
 }
 
 data "external" "sumologic_account" {
-  depends_on = [null_resource.enterprise_check]
-  program    = ["python3", "${path.module}/src/fetchdata.py"]
+  program = ["python3", "${path.module}/src/fetchdata.py"]
   query = {
-    Section   = "ALB|${terraform.workspace}" #TODO
+    Section   = "Account|${terraform.workspace}"
     KeyPrefix = "1"
     Key       = "EnterpriseOrTrialAccountCheck"
   }
+
+  depends_on = [null_resource.enterprise_check]
 }
-*/
