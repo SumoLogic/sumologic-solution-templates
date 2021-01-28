@@ -47,5 +47,5 @@ locals {
 
   manage_alb_sns_topic = var.manage_alb_logs_source && ! (var.manage_alb_s3_bucket)
 
-  manage_sumologic_source_role = var.manage_metadata_source || var.manage_cloudwatch_metrics_source || var.manage_alb_logs_source || var.manage_cloudtrail_logs_source
+  manage_sumologic_source_role = var.manage_metadata_source || var.manage_cloudwatch_metrics_source || var.manage_alb_logs_source || var.manage_cloudtrail_logs_source || var.manage_aws_inventory_source || var.manage_aws_xray_source
 }

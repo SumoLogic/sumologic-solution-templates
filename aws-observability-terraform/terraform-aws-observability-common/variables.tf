@@ -208,7 +208,7 @@ variable "cloudwatch_logs_source_category" {
 # aws inventory source
 variable "manage_aws_inventory_source" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to manage the Sumo Logic AWS Inventory Source"
 }
 
@@ -227,7 +227,7 @@ variable "aws_inventory_source_category" {
 # aws xray source
 variable "manage_aws_xray_source" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to manage the Sumo Logic AWS XRay Source"
 }
 
@@ -250,13 +250,7 @@ variable "managed_apps" {
     config_version = string
     json           = string
   }))
-  default = {
-    "RootCause" = {
-      app_version    = "V1.0.1"
-      config_version = "v2.1.0"
-      json           = "Rce-App"
-    }
-  }
+  default     = {}
   description = "The list of applications to manage within the Sumo Logic AWS Observability Solution"
 }
 
@@ -315,4 +309,8 @@ variable "templates_bucket" {
   default     = "appdevzipfiles"
 }
 
-#TODO: re-arch for multi-region
+variable "target_bucket_force_destroy" {
+  type        = bool
+  description = "Whether to force the deletion of the common target S3 bucket (will delete even if not empty)."
+  default     = false
+}

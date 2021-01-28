@@ -23,20 +23,20 @@ resource "sumologic_elb_source" "this" {
   path {
     type            = "S3BucketPathExpression"
     bucket_name     = var.manage_alb_s3_bucket ? aws_s3_bucket.common["this"].id : var.alb_s3_bucket
-    path_expression = "*AWSLogs/*/elasticloadbalancing/${var.alb_s3_bucket_path_expression}"
+    path_expression = local.manage_target_s3_bucket ? "*AWSLogs/*/elasticloadbalancing/*" : var.alb_s3_bucket_path_expression
   }
 
-  depends_on = [aws_iam_role_policy_attachment.sumologic_source, aws_s3_bucket_policy.common] #TODO: problem if not managing role or bucket? same for other four sources
+  depends_on = [aws_iam_role_policy_attachment.sumologic_source, aws_s3_bucket_policy.common]
 }
 
 resource "aws_sns_topic" "alb_source" {
-  for_each = toset(var.manage_alb_logs_source ? ["this"] : [])
+  for_each = toset(local.manage_alb_sns_topic ? ["this"] : [])
 
   name = "alb-sumo-sns-${var.account_alias}"
 }
 
 resource "aws_sns_topic_policy" "alb_source" {
-  for_each = toset(var.manage_alb_logs_source ? ["this"] : [])
+  for_each = toset(local.manage_alb_sns_topic ? ["this"] : [])
 
   arn    = aws_sns_topic.alb_source["this"].arn
   policy = templatefile("${path.module}/templates/sns/policy.tmpl", { bucket_arn = var.manage_alb_s3_bucket ? aws_s3_bucket.common["this"].arn : "arn:aws:s3:::${var.alb_s3_bucket}", sns_topic_arn = aws_sns_topic.alb_source["this"].arn, aws_account = data.aws_caller_identity.current.id })
