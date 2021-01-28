@@ -14,8 +14,15 @@ resource "aws_sns_topic_policy" "common" {
 resource "aws_s3_bucket" "common" {
   for_each = toset(local.manage_target_s3_bucket ? ["this"] : [])
 
-  bucket = "aws-observability-logs-${var.account_alias}-${data.aws_region.current.id}"
-  #force_delete = true
+  bucket        = "aws-observability-logs-${var.account_alias}-${data.aws_region.current.id}"
+  force_destroy = var.target_bucket_force_destroy
+}
+
+resource "aws_s3_bucket_policy" "common" {
+  for_each = toset(local.manage_target_s3_bucket ? ["this"] : [])
+
+  bucket = aws_s3_bucket.common["this"].id
+  policy = templatefile("${path.module}/templates/s3/common.tmpl", { common_s3_bucket_arn = aws_s3_bucket.common["this"].arn, elb_account_id = local.region_to_elb_account_id[data.aws_region.current.id] })
 }
 
 resource "aws_s3_bucket_notification" "common" {
@@ -27,13 +34,8 @@ resource "aws_s3_bucket_notification" "common" {
     topic_arn = aws_sns_topic.common["this"].arn
     events    = ["s3:ObjectCreated:Put"]
   }
-}
 
-resource "aws_s3_bucket_policy" "common" {
-  for_each = toset(local.manage_target_s3_bucket ? ["this"] : [])
-
-  bucket = aws_s3_bucket.common["this"].id
-  policy = templatefile("${path.module}/templates/s3/common.tmpl", { common_s3_bucket_arn = aws_s3_bucket.common["this"].arn, elb_account_id = local.region_to_elb_account_id[data.aws_region.current.id] })
+  depends_on = [aws_s3_bucket_policy.common]
 }
 
 resource "aws_cloudtrail" "common" {
