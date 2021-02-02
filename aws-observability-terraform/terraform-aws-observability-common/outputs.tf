@@ -9,13 +9,8 @@ output "cloudwatch_logs_source_lambda_arn" {
 }
 
 output "enterprise_account" {
-  value       = data.external.sumologic_account.result.enterprise
+  value       = data.external.sumologic_account.result.id
   description = "Check whether SumoLogic account is enterprise."
-}
-
-output "paid_account" {
-  value       = data.external.sumologic_account.result.paid
-  description = "Check whether SumoLogic account is paid."
 }
 
 output "cloudwatch_metrics_namespaces" {
