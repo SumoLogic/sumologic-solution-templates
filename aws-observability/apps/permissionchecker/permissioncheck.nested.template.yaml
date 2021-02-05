@@ -1,0 +1,622 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
+Transform: 'AWS::Serverless-2016-10-31'
+
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: "1. Sumo Logic Access Configuration (Required)"
+        Parameters:
+          - Section1aSumoLogicDeployment
+          - Section1bSumoLogicAccessID
+          - Section1cSumoLogicAccessKey
+          - Section1dSumoLogicOrganizationId
+
+      - Label:
+          default: "Local Parameters. Do Not Edit the values."
+        Parameters:
+          - TemplatesBucketName
+          - NestedTemplateVersion
+
+    ParameterLabels:
+      Section1aSumoLogicDeployment:
+        default: "Sumo Logic Deployment Name"
+      Section1bSumoLogicAccessID:
+        default: "Sumo Logic Access ID"
+      Section1cSumoLogicAccessKey:
+        default: "Sumo Logic Access Key"
+      Section1dSumoLogicOrganizationId:
+        default: "Sumo Logic Organization Id"
+
+      TemplatesBucketName:
+        default: "Nested Templates Bucket Name"
+      NestedTemplateVersion:
+        default: "Nested Templates Version"
+
+Parameters:
+  Section1aSumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  Section1bSumoLogicAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  Section1cSumoLogicAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  Section1dSumoLogicOrganizationId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+
+  TemplatesBucketName:
+    Type: String
+    AllowedPattern: ".+"
+    Description: Bucket Name for all the nested templates.
+  NestedTemplateVersion:
+    Type: String
+    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
+
+Mappings:
+  # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
+  # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
+  # Buckets names which are intentional -
+  # 1. appdevzipfiles-eu-north-1s
+  # 2. appdevzipfiles-ap-east-1s
+  # 3. appdevzipfiles-af-south-1s
+  # 4. appdevzipfiles-me-south-1s
+  RegionMap:
+    us-east-1:
+      bucketname: appdevzipfiles-us-east-1
+    us-east-2:
+      bucketname: appdevzipfiles-us-east-2
+    us-west-1:
+      bucketname: appdevzipfiles-us-west-1
+    us-west-2:
+      bucketname: appdevzipfiles-us-west-2
+    ap-south-1:
+      bucketname: appdevzipfiles-ap-south-1
+    ap-northeast-2:
+      bucketname: appdevzipfiles-ap-northeast-2
+    ap-southeast-1:
+      bucketname: appdevzipfiles-ap-southeast-1
+    ap-southeast-2:
+      bucketname: appdevzipfiles-ap-southeast-2
+    ap-northeast-1:
+      bucketname: appdevzipfiles-ap-northeast-1
+    ca-central-1:
+      bucketname: appdevzipfiles-ca-central-1
+    eu-central-1:
+      bucketname: appdevzipfiles-eu-central-1
+    eu-west-1:
+      bucketname: appdevzipfiles-eu-west-1
+    eu-west-2:
+      bucketname: appdevzipfiles-eu-west-2
+    eu-west-3:
+      bucketname: appdevzipfiles-eu-west-3
+    eu-north-1:
+      bucketname: appdevzipfiles-eu-north-1s
+    sa-east-1:
+      bucketname: appdevzipfiles-sa-east-1
+    ap-east-1:
+      bucketname: appdevzipfiles-ap-east-1s
+    af-south-1:
+      bucketname: appdevzipfiles-af-south-1s
+    eu-south-1:
+      bucketname: appdevzipfiles-eu-south-1
+    me-south-1:
+      bucketname: appdevzipfiles-me-south-1s
+
+  Region2ELBAccountId:
+    us-east-1:
+      AccountId: "127311923021"
+    us-east-2:
+      AccountId: "033677994240"
+    us-west-1:
+      AccountId: "027434742980"
+    us-west-2:
+      AccountId: "797873946194"
+    af-south-1:
+      AccountId: "098369216593"
+    ca-central-1:
+      AccountId: "985666609251"
+    eu-central-1:
+      AccountId: "054676820928"
+    eu-west-1:
+      AccountId: "156460612806"
+    eu-west-2:
+      AccountId: "652711504416"
+    eu-south-1:
+      AccountId: "635631232127"
+    eu-west-3:
+      AccountId: "009996457667"
+    eu-north-1:
+      AccountId: "897822967062"
+    ap-east-1:
+      AccountId: "754344448648"
+    ap-northeast-1:
+      AccountId: "582318560864"
+    ap-northeast-2:
+      AccountId: "600734575887"
+    ap-northeast-3:
+      AccountId: "383597477331"
+    ap-southeast-1:
+      AccountId: "114774131450"
+    ap-southeast-2:
+      AccountId: "783225319266"
+    ap-south-1:
+      AccountId: "718504428378"
+    me-south-1:
+      AccountId: "076674570225"
+    sa-east-1:
+      AccountId: "507241528517"
+    us-gov-west-1:
+      AccountId: "048591011584"
+    us-gov-east-1:
+      AccountId: "190560391635"
+    cn-north-1:
+      AccountId: "638102146993"
+    cn-northwest-1:
+      AccountId: "037604701340"
+
+Resources:
+
+  ################# Create Lambda Role and Lambda Function to create Sumo Logic Custom Resources #################
+  ################# Checks for IAM and Lambda Permissions #################
+  ################# Checks for IAM ROLE - Sumo Source, Inventory Source also #################
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: AwsObservabilityLambdaExecutePolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:DescribeLoadBalancerAttributes
+                  - elasticloadbalancing:DescribeLoadBalancers
+                  - elasticloadbalancing:ModifyLoadBalancerAttributes
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - s3:GetBucketPolicy
+                  - s3:PutBucketPolicy
+                Resource: '*'
+
+  SumoLogicSourceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${Section1aSumoLogicDeployment}:${Section1dSumoLogicOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoLogicAwsSourcesPolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucketVersions
+                  - s3:ListBucket
+                  - tag:GetResources
+                  - cloudwatch:ListMetrics
+                  - cloudwatch:GetMetricStatistics
+                Resource:
+                  "*"
+
+  RootCauseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${Section1aSumoLogicDeployment}:${Section1dSumoLogicOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoInventoryPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - apigateway:GET
+                  - autoscaling:Describe*
+                  - cloudfront:GetDistributionConfig
+                  - cloudfront:ListDistributions
+                  - cloudtrail:DescribeTrails
+                  - cloudtrail:GetTrailStatus
+                  - cloudwatch:Describe*
+                  - cloudwatch:Get*
+                  - cloudwatch:List*
+                  - codedeploy:List*
+                  - codedeploy:BatchGet*
+                  - dynamodb:Describe*
+                  - dynamodb:List*
+                  - ec2:Describe*
+                  - ecs:Describe*
+                  - ecs:List*
+                  - elasticache:Describe*
+                  - elasticache:List*
+                  - elasticfilesystem:Describe*
+                  - elasticloadbalancing:Describe*
+                  - elasticmapreduce:Describe*
+                  - elasticmapreduce:List*
+                  - es:Describe*
+                  - es:List*
+                  - health:Describe*
+                  - kinesis:Describe*
+                  - kinesis:List*
+                  - lambda:List*
+                  - mq:Describe*
+                  - mq:List*
+                  - rds:Describe*
+                  - rds:List*
+                  - redshift:Describe*
+                  - route53:List*
+                  - sqs:ListQueues
+                  - ses:GetSendStatistics
+                  - ses:GetSendQuota
+                  - sns:List*
+                  - tag:GetResources
+                  - tag:GetTagKeys
+                  - tag:GetTagValues
+                  - xray:BatchGetTraces
+                  - xray:Get*
+                  - pi:DescribeDimensionKeys
+                  - pi:GetResourceMetrics
+                Effect: Allow
+                Resource: "*"
+
+  LambdaHelper:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.11.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - LambdaRole
+          - Arn
+
+  EnterpriseCheck:
+    Type: Custom::EnterpriseOrTrialAccountCheck
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  ################# START - AWS RESOURCES Permission Check #################
+  ################# Checks for SNS, S3, Trail, ALB Permissions #################
+  CommonBucketSNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      TopicName: !Join
+        - ""
+        - - "sumo-sns-topic-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+
+  CommonS3Bucket:
+    Type: AWS::S3::Bucket
+    DependsOn: CommonSNSpolicy
+    Properties:
+      BucketName: !Join
+        - ""
+        - - "aws-test-observability-logs-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Topic: !Ref CommonBucketSNSTopic
+
+  CommonBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CommonS3Bucket
+      PolicyDocument:
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:PutObject
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Sid: AWSBucketExistenceCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:ListBucket
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+          - Sid: AWSAlbLogsPutObjects
+            Effect: Allow
+            Principal:
+              AWS: !Join
+                - ""
+                - - "arn:aws:iam::"
+                  - !FindInMap [Region2ELBAccountId, !Ref 'AWS::Region', AccountId]
+                  - ":root"
+            Action: s3:PutObject
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+          - Sid: AWSAlbLogDeliveryAclCheck
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+          - Sid: AWSAlbLogDeliveryWrite
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action: s3:PutObject
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+
+  CommonSNSpolicy:
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: SumoTopicPolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Join
+                  - ""
+                  - - "arn:aws:s3:::aws-test-observability-logs-"
+                    - !Select
+                      - 0
+                      - !Split
+                        - "-"
+                        - !Select
+                          - 2
+                          - !Split ["/", !Ref "AWS::StackId"]
+            Effect: Allow
+            Principal:
+              "Service": "s3.amazonaws.com"
+            Resource:
+              - !Ref CommonBucketSNSTopic
+      Topics:
+        - Ref: CommonBucketSNSTopic
+
+  CommonCloudTrail:
+    Type: AWS::CloudTrail::Trail
+    DependsOn: CommonBucketPolicy
+    Properties:
+      IsLogging: true
+      IsMultiRegionTrail: false
+      S3BucketName: !Ref CommonS3Bucket
+      TrailName: "Aws-Observability-test"
+
+  AutoEnableS3LogsAlbAWSResources:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
+        SemanticVersion: 1.0.2
+      Parameters:
+        BucketName: !Ref CommonS3Bucket
+        BucketPrefix: "elasticloadbalancing"
+        AutoEnableLogging: "ALB"
+        AutoEnableResourceOptions: "Existing"
+        FilterExpression: "'Type': 'application'"
+        RemoveOnDeleteStack: true
+
+  ################# START - Sumo Logic RESOURCES Permission Check (Create SNS, S3, CloudTrail) #################
+  ################# Checks for Collector, App, FER, Metric Rule and Field Permissions #################
+
+  AddAccountField:
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "test_field"
+      RemoveOnDeleteStack: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  CreateSumoLogicAWSExplorerView:
+    Type: Custom::SumoLogicAWSExplorer
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      RemoveOnDeleteStack: true
+      HierarchyName: "AWS Test Observability"
+      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}},{"condition":"AWS/ECS","level":{"entityType":"clustername","nextLevelsWithConditions":[]}},{"condition":"AWS/ElastiCache","level":{"entityType":"cacheclusterid","nextLevelsWithConditions":[]}},{"condition":"AWS/NetworkELB","level":{"entityType":"networkloadbalancer","nextLevelsWithConditions":[]}}]}}}
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  LambdaMetricRule:
+    Type: Custom::SumoLogicMetricRules
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      RemoveOnDeleteStack: true
+      MetricRuleName: "AwsObservabilityTestRule"
+      MatchExpression: "Namespace=AWS/Lambda Test=*"
+      ExtractVariables:
+        entity: "$Test._1"
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  sumoOverview:
+    Type: Custom::App
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      AppName: "AWS Observability Overview App"
+      RetainOldAppOnUpdate: true
+      RemoveOnDeleteStack: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      AppJsonS3Url: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/appjson/Overview-App.json"
+
+  sumoMonitorAlerts:
+    Type: Custom::AlertsMonitor
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      FolderName: !Sub "AWS Observability ${NestedTemplateVersion} "
+      MonitorsS3Url: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/appjson/Alerts-App.json"
+      SuffixDateTime: true
+      RetainOldAlerts: true
+      RemoveOnDeleteStack: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  LambdaFieldExtractionRule:
+    Type: Custom::SumoLogicFieldExtractionRule
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      RemoveOnDeleteStack: true
+      FieldExtractionRuleName: "AwsObservabilityTestFERRule"
+      FieldExtractionRuleScope: "_source=test-logs"
+      FieldExtractionRuleParseExpression: "| json \"eventSource\", \"awsRegion\" as eventSource, region | where eventSource in (\"rds.amazonaws.com\", \"apigateway.amazonaws.com\", \"lambda.amazonaws.com\", \"dynamodb.amazonaws.com\") | if (eventSource matches \"rds.amazonaws.com\", \"aws/rds\", if (eventSource matches \"apigateway.amazonaws.com\",  \"aws/apigateway\", if (eventSource matches \"lambda.amazonaws.com\",  \"aws/lambda\", if (eventSource matches \"dynamodb.amazonaws.com\",  \"aws/dynamodb\", \"\")))) as Namespace"
+      FieldExtractionRuleParseEnabled: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  SumoLogicHostedCollector:
+    Type: Custom::Collector
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      CollectorType: Hosted
+      RemoveOnDeleteStack: true
+      CollectorName: "aws-observability-test-collector"
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  CloudWatchHTTPSource:
+    Type: Custom::HTTPSource
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SourceName: "aws-observability-test-source"
+      RemoveOnDeleteStack: true
+      SourceCategory: "aws/observability/cloudwatch/logs"
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      Fields:
+        account: "Test"
+        namespace: "aws/lambda"
+        region: !Ref "AWS::Region"
+
+  CloudWatchEventFunction:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/appdev-cloudformation-templates/DLQLambdaCloudFormation.json"
+      Parameters:
+        SumoEndPointURL: "test-url"
+        IncludeLogGroupInfo: true
+
+  AutoSubscribeLambdaLogGroupsAWSResources:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
+        SemanticVersion: 1.0.2
+      Parameters:
+        LambdaARN: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
+        LogGroupPattern: "lambda"
+        UseExistingLogs: "false"
+
+Outputs:
+  LambdaHelperARN:
+    Description: "Sumo Logic Lambda Helper ARN"
+    Value: !GetAtt LambdaHelper.Arn
+  LambdaRoleARN:
+    Description: "Sumo Logic Lambda Helper Role ARN"
+    Value: !GetAtt LambdaRole.Arn
+  BucketName:
+    Description: "BucketName"
+    Value: !Ref CommonS3Bucket
+  CloudWatchLambdaARN:
+    Description: "Cloud Watch Lambda ARN"
+    Value: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
+  EnterpriseCheck:
+    Description: "Check If Account is Enterprise or Not"
+    Value: !GetAtt EnterpriseCheck.is_enterprise

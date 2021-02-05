@@ -5,16 +5,7 @@ Description: "Template to Setup Sumo Logic CloudWatch Metric Source. The templat
 Parameters:
   SumoLogicDeployment:
     Type: String
-    AllowedValues:
-      - au
-      - ca
-      - de
-      - eu
-      - jp
-      - us2
-      - us1
-      - in
-      - fed
+    Default: ""
     Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
   SumoLogicAccessID:
     Type: String
@@ -58,6 +49,10 @@ Parameters:
   CloudWatchMetricsSourceName:
     Type: String
     Description: "Provide a Cloud Watch Metrics Source Name"
+    Default: ""
+  CloudWatchMetricSourceCategory:
+    Type: String
+    Description: "Provide a Source Category for CloudWatch Metrics Source"
     Default: ""
 
   CreateFirstMetricsSource:
@@ -141,6 +136,10 @@ Mappings:
       ScanInterval: 300000
     NetworkELB:
       ScanInterval: 60000
+    SQS:
+      ScanInterval: 300000
+    SNS:
+      ScanInterval: 300000
 
 Conditions:
   # Sources Conditions
@@ -163,7 +162,7 @@ Resources:
       Namespaces: !Split [ "," , !Sub "AWS/${FirstMetricsSourceNamespace}" ]
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${FirstMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref FirstMetricsSourceNamespace, ScanInterval]
-      SourceCategory: "aws/observability/cloudwatch/metrics"
+      SourceCategory: !Ref CloudWatchMetricSourceCategory
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -183,7 +182,7 @@ Resources:
       Namespaces: !Split [ "," , !Sub "AWS/${SecondMetricsSourceNamespace}" ]
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${SecondMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref SecondMetricsSourceNamespace, ScanInterval]
-      SourceCategory: "aws/observability/cloudwatch/metrics"
+      SourceCategory: !Ref CloudWatchMetricSourceCategory
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -203,7 +202,7 @@ Resources:
       Namespaces: !Split [ "," , !Sub "AWS/${ThirdMetricsSourceNamespace}" ]
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${ThirdMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref ThirdMetricsSourceNamespace, ScanInterval]
-      SourceCategory: "aws/observability/cloudwatch/metrics"
+      SourceCategory: !Ref CloudWatchMetricSourceCategory
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -223,7 +222,7 @@ Resources:
       Namespaces: !Split [ "," , !Sub "AWS/${FourthMetricsSourceNamespace}" ]
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${FourthMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref FourthMetricsSourceNamespace, ScanInterval]
-      SourceCategory: "aws/observability/cloudwatch/metrics"
+      SourceCategory: !Ref CloudWatchMetricSourceCategory
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -243,7 +242,7 @@ Resources:
       Namespaces: !Split [ "," , !Sub "AWS/${FifthMetricsSourceNamespace}" ]
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${FifthMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref FifthMetricsSourceNamespace, ScanInterval]
-      SourceCategory: "aws/observability/cloudwatch/metrics"
+      SourceCategory: !Ref CloudWatchMetricSourceCategory
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey

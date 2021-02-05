@@ -1,21 +1,33 @@
 #!/bin/sh
 
-declare -a apps=('alb' 'rootcause' 'apigateway' 'autoenable' 'AutoTagAWSResources' 'common' 'dynamodb' 'ec2metrics' 'hostmetricsfields' 'permissionchecker' 'controltower' 'lambda' 'rds' 'master')
+match_case=".template.yaml"
+
+walk_dir() {
+  shopt -s nullglob dotglob
+
+  for pathname in "$1"/*; do
+    if [ -d "$pathname" ]; then
+      walk_dir "$pathname"
+    else
+      if [[ "${pathname}" == *"${match_case}"* ]]; then
+        echo "**************** Performing Checks for ${pathname} ****************"
+
+        output=$(cfn-lint ${pathname})
+        echo "Validation complete for File -> app with Output as "
+        echo "${output}"
+
+        output=$(cfn_nag ${pathname})
+        echo "Security Validation complete for File -> app with Output as "
+        echo "${output}"
+
+        echo "**************** Checks Complete for ${pathname} ****************"
+        echo
+        echo
+      fi
+    fi
+  done
+}
 
 cd ..\/
 
-for app in "${apps[@]}"
-do
-
-    if [[ "${app}" != "master" ]]
-    then
-        path=apps/${app}
-    else
-        path=templates
-    fi
-    output=`cfn-lint ./${path}/*.yaml`
-    echo "Validation complete for File -> app with Output as ${output}"
-
-    output=`cfn_nag ./${path}/*.yaml`
-    echo "Security Validation complete for File -> app with Output as \n ${output}"
-done
+walk_dir "apps/"
