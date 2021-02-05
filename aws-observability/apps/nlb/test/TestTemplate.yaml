@@ -1,6 +1,6 @@
 ---
 Global:
-  TemplatePath: "../rds_app.template.yaml"
+  TemplatePath: "../nlb_app.template.yaml"
   TestProjectName: BasicTestProject
   ParallelTestsRun: 2
   GlobalParameters:
@@ -9,7 +9,7 @@ Global:
     Section1cSumoAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
     Section1dRemoveSumoResourcesOnDeleteStack: 'true'
     Section2aInstallApp: 'No'
-    Section3bCloudTrailSourceUpdated: 'No'
+    Section3bNLBSourceUpdated: 'No'
     Section4aParentStackLambdaARN: '${lambda_arn}'
     Section4bTemplatesBucketName: '${template_bucket}'
     Section4cNestedTemplateVersion: '${template_version}'
@@ -20,18 +20,17 @@ Tests:
     Parameters:
       Values:
         Section2aInstallApp: 'Yes'
-        Section3aCloudTrailLogsSourceName: 'Tests With Space'
-        Section3bCloudTrailSourceUpdated: 'Yes'
+        Section3aNLBLogsSourceName: 'Tests With Space'
+        Section3bNLBSourceUpdated: 'Yes'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - ClusterMetricRule
-            - InstanceMetricRule
+            - MetricRule
             - sumoApp
             - FieldExtractionRule
-            - AddDBIdentifierField
+            - AddLoadBalancerField
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -46,9 +45,8 @@ Tests:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - ClusterMetricRule
-            - InstanceMetricRule
-            - AddDBIdentifierField
+            - MetricRule
+            - AddLoadBalancerField
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -63,10 +61,9 @@ Tests:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - ClusterMetricRule
-            - InstanceMetricRule
+            - MetricRule
             - sumoApp
-            - AddDBIdentifierField
+            - AddLoadBalancerField
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -75,16 +72,15 @@ Tests:
       - ap-south-1
     Parameters:
       Values:
-        Section3aCloudTrailLogsSourceName: 'Tests'
+        Section3aNLBLogsSourceName: 'Tests'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - ClusterMetricRule
-            - InstanceMetricRule
+            - MetricRule
             - FieldExtractionRule
-            - AddDBIdentifierField
+            - AddLoadBalancerField
       - AssertType: OutputsCheck
         Assert:
           Outputs:
