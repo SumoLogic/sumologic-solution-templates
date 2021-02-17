@@ -17,6 +17,7 @@ Metadata:
           default: "App Details - Sumo Logic Collector Configuration"
         Parameters:
           - Section2aInstallApp
+          - Section2bInstallAlerts
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
@@ -37,6 +38,8 @@ Metadata:
 
       Section2aInstallApp:
         default: "Install Sumo Logic App"
+      Section2bInstallAlerts:
+        default: "Install Sumo Logic Alerts"
 
       Section3aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
@@ -78,6 +81,14 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
+  Section2bInstallAlerts:
+    Type: String
+    Description: "Yes - Installs the Alerts for the Sumo Logic AWS Observability Solution.
+                  No - Skips the installation of this Alerts."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
 
   Section3aParentStackLambdaARN:
     Type: String
@@ -94,6 +105,7 @@ Parameters:
 
 Conditions:
   install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
+  install_alerts: !Equals [!Ref Section2bInstallAlerts, 'Yes']
 
 Resources:
 
@@ -142,7 +154,7 @@ Resources:
 
   sumoMonitorAlerts:
     Type: Custom::AlertsMonitor
-    Condition: install_app
+    Condition: install_alerts
     Properties:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
