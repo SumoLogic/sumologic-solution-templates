@@ -19,12 +19,12 @@ Metadata:
           - Section2aAccountAlias
 
       - Label:
-          default: "3. Sumo Logic AWS Observability Apps"
+          default: "3. Sumo Logic AWS Observability Apps and Alerts"
         Parameters:
-          - Section3aInstallObservabilityApps
+          - Section3aInstallObservabilityAppsAndAlerts
 
       - Label:
-          default: "4. Sumo Logic AWS CloudWatch Metrics and Inventory Source"
+          default: "4. Sumo Logic AWS CloudWatch Metrics Source"
         Parameters:
           - Section4aCreateMetricsSourcesOptions
           - Section4bMetricsNameSpaces
@@ -50,15 +50,15 @@ Metadata:
       - Label:
           default: "7. Sumo Logic AWS Lambda CloudWatch HTTP Source"
         Parameters:
-          - Section7aLambdaCreateCloudWatchLogsSource
+          - Section7aLambdaCreateCloudWatchLogsSourceOptions
           - Section7bLambdaCloudWatchLogsSourceUrl
           - Section7cAutoSubscribeLogGroupsLambdaOptions
           - Section7dAutoSubscribeLambdaLogGroupPattern
 
       - Label:
-          default: "8. Sumo Logic AWS X-Ray Source"
+          default: "8. Sumo Logic Root Cause Explorer Sources"
         Parameters:
-          - Section8aCreateAwsXraySource
+          - Section8aRootCauseExplorerOptions
 
     ParameterLabels:
       Section1aSumoLogicDeployment:
@@ -75,11 +75,11 @@ Metadata:
       Section2aAccountAlias:
         default: "Alias for your AWS Account"
 
-      Section3aInstallObservabilityApps:
+      Section3aInstallObservabilityAppsAndAlerts:
         default: "Install AWS Observability Apps and Alerts"
 
       Section4aCreateMetricsSourcesOptions:
-        default: "Select the Sumo Logic Metrics Sources to create"
+        default: "Select the Sumo Logic Metrics Source to create"
       Section4bMetricsNameSpaces:
         default: "Sumo Logic AWS Metrics Namespaces"
       Section4cCloudWatchExistingSourceAPIUrl:
@@ -105,8 +105,8 @@ Metadata:
       Section6dCloudTrailBucketPathExpression:
         default: "Path Expression for existing CloudTrail logs"
 
-      Section7aLambdaCreateCloudWatchLogsSource:
-        default: "Create Sumo Logic CloudWatch Logs Source"
+      Section7aLambdaCreateCloudWatchLogsSourceOptions:
+        default: "Select the Sumo Logic CloudWatch Logs Sources to create"
       Section7bLambdaCloudWatchLogsSourceUrl:
         default: "Existing Sumo Logic Lambda CloudWatch Logs Source API URL"
       Section7cAutoSubscribeLogGroupsLambdaOptions:
@@ -114,8 +114,8 @@ Metadata:
       Section7dAutoSubscribeLambdaLogGroupPattern:
         default: "Regex for AWS Lambda Log Groups"
 
-      Section8aCreateAwsXraySource:
-        default: "Create Sumo Logic AWS X-Ray Source"
+      Section8aRootCauseExplorerOptions:
+        default: "Select the Sumo Logic Root Cause Explorer Sources to create"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -163,23 +163,25 @@ Parameters:
     ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
     MaxLength: 30
 
-  Section3aInstallObservabilityApps:
+  Section3aInstallObservabilityAppsAndAlerts:
     Type: String
-    Default: 'Yes'
-    Description: "Yes - Installs Apps (EC2, Application Load Balancer, RDS, API Gateway, Lambda, Dynamo DB, ECS, ElastiCache and NLB) and Alerts for the Sumo Logic AWS Observability Solution. All the Apps are installed in the folder 'AWS Observability'.
-                  No - Skips the installation of Apps and Alerts."
+    Default: 'Both'
+    Description: "Apps - Installs Apps (EC2, Application Load Balancer, RDS, API Gateway, Lambda, Dynamo DB, ECS, ElastiCache and NLB). All the Apps are installed in the folder 'AWS Observability'
+                  Alerts - Alerts for the Sumo Logic AWS Observability Solution. All the Alerts are installed in the folder 'AWS Observability."
     AllowedValues:
-      - 'Yes'
-      - 'No'
+      - 'Apps'
+      - 'Alerts'
+      - 'Both'
+      - 'None'
 
   Section4aCreateMetricsSourcesOptions:
     Type: String
-    Description: "CloudWatchMetrics - Creates a Sumo Logic CloudWatch Metrics Source, which collects metrics for multiple namespaces from the region selected.
-                  InventorySource - Creates a Sumo Logic Inventory Source used by Root Cause Explorer."
+    Description: "CloudWatchMetricSource - Creates a Sumo Logic CloudWatch Metrics Source, which collects metrics for multiple namespaces from the region selected.
+                  KinesisFirehoseSource - Creates a Sumo Logic Kinesis Firehose Source, which collects metrics from multiple namespaces from the region."
     Default: 'Both'
     AllowedValues:
-      - 'CloudWatchMetrics'
-      - 'InventorySource'
+      - 'CloudWatchMetricSource'
+      - 'KinesisFirehoseSource'
       - 'Both'
       - 'None'
   Section4bMetricsNameSpaces:
@@ -247,14 +249,16 @@ Parameters:
     Description: "This is required in case the above existing bucket is already configured to receive CloudTrail logs. If this is blank, Sumo Logic will store logs in the path expression: AWSLogs/*/CloudTrail/*"
     Default: "AWSLogs/*/CloudTrail/*"
 
-  Section7aLambdaCreateCloudWatchLogsSource:
+  Section7aLambdaCreateCloudWatchLogsSourceOptions:
     Type: String
-    Description: "Yes - Creates the Sumo Logic CloudWatch Log Source that collects Lambda logs from AWS.
-                  No - If you already have a CloudWatch Log source collecting Lambda logs into Sumo Logic."
-    Default: 'Yes'
+    Description: "HttpSource - Creates the Sumo Logic CloudWatch Log Source that collects Lambda logs from AWS using Sumo Logic Lambda Forwarder.
+                  KinesisFirehoseSource - Creates the Sumo Logic Kinesis Firehose source for Logs to collect cloudwatch logs."
+    Default: 'Both'
     AllowedValues:
-      - 'Yes'
-      - 'No'
+      - 'HttpSource'
+      - 'KinesisFirehoseSource'
+      - 'Both'
+      - 'None'
   Section7bLambdaCloudWatchLogsSourceUrl:
     Type: String
     Description: "Required when already collecting Lambda CloudWatch logs in Sumo Logic. Provide the existing Sumo Logic Lambda CloudWatch Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
@@ -276,24 +280,25 @@ Parameters:
     Default: "lambda"
     Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
 
-  Section8aCreateAwsXraySource:
+  Section8aRootCauseExplorerOptions:
     Type: String
-    Description: "Yes - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account.
-                  No - If you already have a Sumo Logic AWS X-Ray source configured or skip the source creation."
-    Default: 'Yes'
+    Description: "InventorySource - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.
+                  XraySource - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account."
+    Default: 'Both'
     AllowedValues:
-      - 'Yes'
-      - 'No'
+      - 'InventorySource'
+      - 'XraySource'
+      - 'Both'
+      - 'None'
 
 Conditions:
   # Condition for Metrics Source
-  install_cloudwatch_metrics_source: !Or
-    - !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'CloudWatchMetrics' ]
-    - !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'Both' ]
   install_inventory_source: !Or
-    - !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'InventorySource' ]
-    - !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'Both' ]
-  install_xray_source: !Equals [ !Ref Section8aCreateAwsXraySource, 'Yes' ]
+    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'InventorySource' ]
+    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Both' ]
+  install_xray_source: !Or
+    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'XraySource' ]
+    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Both' ]
 
   # Conditions for Bucket
   create_alb_bucket: !And
@@ -307,7 +312,12 @@ Conditions:
   # FER Condition
   create_cloudtrail_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
   create_alb_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
-  create_cloudwatch_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSource, 'Yes' ]
+  update_cloudwatch_logs_source: !And
+    - !Not [!Equals [!Ref Section7bLambdaCloudWatchLogsSourceUrl, '']]
+    - !Equals [!Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'None']
+  update_cloudwatch_metrics_source: !And
+    - !Not [!Equals [!Ref Section4cCloudWatchExistingSourceAPIUrl, '']]
+    - !Equals [!Ref Section4aCreateMetricsSourcesOptions, 'None']
   update_cloudtrail_logs_source: !And
     - !Not [!Equals [!Ref Section6bCloudTrailLogsSourceUrl, '']]
     - !Not [!Equals [!Ref Section6aCreateCloudTrailLogSource, 'Yes']]
@@ -326,7 +336,7 @@ Conditions:
     - !Equals [ !Ref Section7cAutoSubscribeLogGroupsLambdaOptions, 'New' ]
     - !Equals [ !Ref Section7cAutoSubscribeLogGroupsLambdaOptions, 'Both' ]
   auto_subscribe_lambda_log_groups: !And
-    - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSource, 'Yes' ]
+    - !Not [!Condition update_cloudwatch_logs_source]
     - !Condition auto_subscribe_new_lambda_log_groups
 
   call_auto_enable: !Or
@@ -334,7 +344,12 @@ Conditions:
     - !Condition auto_subscribe_lambda_log_groups
 
   # Condition for Stacks creation. Calling Nested Stack EveryTime to create FER and Metric Rule. If already present, marked as duplicate in Resource.
-  install_overview_dashboards: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
+  install_overview_dashboards: !Or
+    - !Equals [ !Ref Section3aInstallObservabilityAppsAndAlerts, 'Apps' ]
+    - !Equals [ !Ref Section3aInstallObservabilityAppsAndAlerts, 'Both' ]
+  install_alerts: !Or
+    - !Equals [ !Ref Section3aInstallObservabilityAppsAndAlerts, 'Alerts' ]
+    - !Equals [ !Ref Section3aInstallObservabilityAppsAndAlerts, 'Both' ]
 
 Mappings:
   CommonData:
@@ -353,7 +368,6 @@ Mappings:
 
 Resources:
   # Create a Lambda and check for Enterprise by using Custom resource. Use the value to create inventory and root cause app.
-
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -375,7 +389,7 @@ Resources:
             Number: !Ref AWS::AccountId
         SumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
         CreateMetaDataSource: "No"
-        CreateCloudWatchMetricsSource: !If [install_cloudwatch_metrics_source, "Yes", "No"]
+        CreateCloudWatchMetricsSource: !Ref Section4aCreateMetricsSourcesOptions
         CloudWatchMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
         CloudWatchMetricsNameSpaces: !Ref Section4bMetricsNameSpaces
         CloudWatchMetricSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudWatchMetricSourceCategory]
@@ -392,7 +406,7 @@ Resources:
         CloudTrailBucketPathExpression: !If [create_cloudtrail_bucket, !Sub "AWSLogs/${AWS::AccountId}/CloudTrail/${AWS::Region}/*", !Ref Section6dCloudTrailBucketPathExpression]
         CloudTrailLogsSourceName: !Sub "cloudtrail-logs-${AWS::Region}"
         CloudTrailLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudTrailLogsSourceCategory]
-        CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSource
+        CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions
         CloudWatchLogsSourceName: !Sub "cloudwatch-logs-${AWS::Region}"
         CloudWatchLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudWatchLogsSourceCategory]
         TemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
@@ -429,6 +443,7 @@ Resources:
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
+        Section2bInstallAlerts: !If [install_alerts, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section3bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section3cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
@@ -448,7 +463,7 @@ Resources:
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCloudWatchExistingSourceAPIUrl: !If [install_cloudwatch_metrics_source, "", !Ref Section4cCloudWatchExistingSourceAPIUrl]
+        Section4aCloudWatchExistingSourceAPIUrl: !If [update_cloudwatch_metrics_source, !Ref Section4cCloudWatchExistingSourceAPIUrl, ""]
         Section5aALBLogsAPIUrl: !If [create_alb_source, "", !Ref Section5cALBLogsSourceUrl]
         Section5bALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
@@ -564,8 +579,8 @@ Resources:
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section5bCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
         Section5aCloudTrailLogsAPIUrl: !If [create_cloudtrail_source, "", !Ref Section6bCloudTrailLogsSourceUrl]
-        Section6bCloudWatchLogsSourceName: !If [create_cloudwatch_logs_source, "*cloudwatch-logs*", ""]
-        Section6aCloudWatchLogsAPIUrl: !If [create_cloudwatch_logs_source, "", !Ref Section7bLambdaCloudWatchLogsSourceUrl]
+        Section6bCloudWatchLogsSourceName: !If [update_cloudwatch_logs_source, "", "*cloudwatch-logs*"]
+        Section6aCloudWatchLogsAPIUrl: !If [update_cloudwatch_logs_source, !Ref Section7bLambdaCloudWatchLogsSourceUrl, ""]
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section7bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section7cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]

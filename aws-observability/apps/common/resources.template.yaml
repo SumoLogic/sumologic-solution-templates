@@ -92,6 +92,23 @@ Parameters:
     Description: "Provide a source Category for the CloudWatch Metrics Source."
     Default: ""
 
+  CreateKinesisFirehoseMetricsSource:
+    Type: String
+    Description: "Yes - Creates a Sumo Logic Kinesis Firehose source for Metrics which collects Metrics for multiple Namespaces from the region selected.
+                  No - If you already have a Kinesis Firehose source for Metrics collecting metrics."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  KinesisFirehoseMetricsSourceName:
+    Type: String
+    Description: "Provide a Kinesis Firehose source for Metrics Source Name"
+    Default: ""
+  KinesisFirehoseMetricSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the Kinesis Firehose source for Metrics Source."
+    Default: ""
+
   CreateALBLogSource:
     Type: String
     Description: "Choose Yes to create Sumo Logic ALB Log Source with provided bucket Name."
@@ -169,7 +186,23 @@ Parameters:
     Default: ""
   CloudWatchLogsSourceCategory:
     Type: String
-    Description: "Provide a source Category for the CloudTrail Logs Source."
+    Description: "Provide a source Category for the CloudWatch Logs Source."
+    Default: ""
+
+  CreateKinesisFirehoseLogSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic Kinesis Firehose source for Logs Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  KinesisFirehoseLogsSourceName:
+    Type: String
+    Description: "Provide a Kinesis Firehose source for Logs Source Name"
+    Default: ""
+  KinesisFirehoseLogsSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the Kinesis Firehose source for Logs Source."
     Default: ""
 
   TemplatesBucketName:
@@ -188,6 +221,8 @@ Conditions:
   install_alb_logs_source: !Equals [!Ref CreateALBLogSource, 'Yes']
   install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
   install_cloudwatch_logs_source: !Equals [!Ref CreateCloudWatchLogSource, 'Yes']
+  install_kf_metric_source: !Equals [!Ref CreateKinesisFirehoseMetricsSource, 'Yes']
+  install_kf_logs_source: !Equals [!Ref CreateKinesisFirehoseLogSource, 'Yes']
 
   install_collector: !Or
     - !Condition install_metadata_source
@@ -195,6 +230,8 @@ Conditions:
     - !Condition install_alb_logs_source
     - !Condition install_cloudtrail_logs_source
     - !Condition install_cloudwatch_logs_source
+    - !Condition install_kf_metric_source
+    - !Condition install_kf_logs_source
 
   # Bucket Condition and Trail
   create_alb_bucket: !Equals [!Ref CreateALBS3Bucket, 'Yes']
@@ -217,6 +254,7 @@ Conditions:
     - !Condition install_cloud_watch_metric_source
     - !Condition install_alb_logs_source
     - !Condition install_cloudtrail_logs_source
+    - !Condition install_kf_metric_source
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -757,6 +795,8 @@ Resources:
         CreateFourthMetricsSource: "No"
         CreateFifthMetricsSource: "No"
 
+  # TODO: Add source and SAM app for kinesis firehose
+
   ############# START - RESOURCES FOR ALB SOURCE #################
 
   ALBSource:
@@ -939,6 +979,8 @@ Resources:
         account: !Ref AccountAlias
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
+
+  # TODO: Add source and SAM app for kinesis firehose Logs
 
 Outputs:
   LambdaHelperARN:
