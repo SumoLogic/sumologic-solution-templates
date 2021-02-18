@@ -418,6 +418,7 @@ Resources:
 
   sumoEC2MetricsAppStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: sumoElasticCacheMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/ec2metrics/ec2_metrics_app.template.yaml"
@@ -435,7 +436,6 @@ Resources:
 
   sumoAlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoEC2MetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/alb/alb_app.template.yaml"
@@ -477,7 +477,7 @@ Resources:
 
   sumoRdsMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: RootCauseAppStack
+    DependsOn: sumoLambdaMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/rds/rds_app.template.yaml"
@@ -517,7 +517,7 @@ Resources:
 
   RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoLambdaMetricsAppStack
+    DependsOn: sumoNlbMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/rootcause/rootcauseexplorer.template.yaml"
@@ -549,7 +549,6 @@ Resources:
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoEC2MetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/lambda/lambda_app.template.yaml"
@@ -612,7 +611,7 @@ Resources:
 
   sumoNlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoApiGatewayMetricsAppStack
+    DependsOn: sumoECSMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/nlb/nlb_app.template.yaml"
