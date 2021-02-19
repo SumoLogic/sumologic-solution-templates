@@ -9,7 +9,6 @@ Global:
     Section1cSumoAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
     Section1dRemoveSumoResourcesOnDeleteStack: 'true'
     Section2aInstallApp: 'No'
-    Section2bInstallAlerts: 'No'
     Section3aParentStackLambdaARN: '${lambda_arn}'
     Section3bTemplatesBucketName: '${template_bucket}'
     Section3cNestedTemplateVersion: '${template_version}'
@@ -20,7 +19,6 @@ Tests:
     Parameters:
       Values:
         Section2aInstallApp: 'Yes'
-        Section2bInstallAlerts: 'Yes'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -40,48 +38,12 @@ Tests:
     Parameters:
       Values:
         Section2aInstallApp: 'No'
-        Section2bInstallAlerts: 'No'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
         Assert:
           Resources:
             - EC2MetricRule
-            - AddInstanceIdField
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-  - TestName: installapp
-    Regions:
-      - ap-south-1
-    Parameters:
-      Values:
-        Section2aInstallApp: 'Yes'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - EC2MetricRule
-            - sumoApp
-            - sumoOverview
-            - AddInstanceIdField
-      - AssertType: OutputsCheck
-        Assert:
-          Outputs:
-  - TestName: installalerts
-    Regions:
-      - ap-south-1
-    Parameters:
-      Values:
-        Section2bInstallAlerts: 'Yes'
-    Skip: false
-    Assertions:
-      - AssertType: ResourceExistence
-        Assert:
-          Resources:
-            - EC2MetricRule
-            - sumoMonitorAlerts
             - AddInstanceIdField
       - AssertType: OutputsCheck
         Assert:
