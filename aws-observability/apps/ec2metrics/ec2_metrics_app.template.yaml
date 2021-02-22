@@ -128,6 +128,7 @@ Resources:
   sumoOverview:
     Type: Custom::App
     Condition: install_app
+    DependsOn: sumoApp
     Properties:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
@@ -143,6 +144,7 @@ Resources:
   sumoMonitorAlerts:
     Type: Custom::AlertsMonitor
     Condition: install_app
+    DependsOn: sumoOverview
     Properties:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
