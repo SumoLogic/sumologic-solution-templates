@@ -19,7 +19,7 @@ export parameters_path=parameters-${ENV_NAME}.json
 
 # Downloading the template to local for use. Remove if the template with same name if already present.
 rm sumologic_observability_template.yaml
-aws s3 cp s3://sumologic-appdev-aws-sam-apps/aws-observability-versions/v2.1.1/sumologic_observability.master.template.yaml sumologic_observability_template.yaml
+aws s3 cp s3://sumologic-appdev-aws-sam-apps/aws-observability-versions/v2.2.0-Beta/sumologic_observability.master.template.yaml sumologic_observability_template.yaml
 
 # Deploy the template. If the Stack name already exist, stack will be updated else created.
 aws cloudformation deploy --profile ${AWS_PROFILE} --region ${AWS_REGION} \
