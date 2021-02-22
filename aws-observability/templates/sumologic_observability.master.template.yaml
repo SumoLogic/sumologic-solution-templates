@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version: v2.1.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
+Description: "Version: v2.1.1. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -355,7 +355,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.1.0"
+      Version: "v2.1.1"
     CollectorDetails:
       SumoLogicAccountID: 926226587429
       CollectorNamePrefix: "aws-observability"
@@ -432,6 +432,7 @@ Resources:
 
   sumoEC2MetricsAppStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: sumoElasticCacheMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/ec2metrics/ec2_metrics_app.template.yaml"
@@ -450,7 +451,6 @@ Resources:
 
   sumoAlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoEC2MetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/alb/alb_app.template.yaml"
@@ -564,7 +564,6 @@ Resources:
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoEC2MetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/lambda/lambda_app.template.yaml"
@@ -627,7 +626,7 @@ Resources:
 
   sumoNlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoApiGatewayMetricsAppStack
+    DependsOn: sumoECSMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/nlb/nlb_app.template.yaml"
