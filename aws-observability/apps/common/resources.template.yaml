@@ -216,13 +216,13 @@ Parameters:
 
 Conditions:
   # Sources Conditions
-  install_metadata_source: !Equals [!Ref CreateMetaDataSource, 'Yes']
-  install_cloud_watch_metric_source: !Equals [!Ref CreateCloudWatchMetricsSource, 'Yes']
-  install_alb_logs_source: !Equals [!Ref CreateALBLogSource, 'Yes']
-  install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
-  install_cloudwatch_logs_source: !Equals [!Ref CreateCloudWatchLogSource, 'Yes']
-  install_kf_metric_source: !Equals [!Ref CreateKinesisFirehoseMetricsSource, 'Yes']
-  install_kf_logs_source: !Equals [!Ref CreateKinesisFirehoseLogSource, 'Yes']
+  install_metadata_source: !Equals [ !Ref CreateMetaDataSource, 'Yes' ]
+  install_cloud_watch_metric_source: !Equals [ !Ref CreateCloudWatchMetricsSource, 'Yes' ]
+  install_alb_logs_source: !Equals [ !Ref CreateALBLogSource, 'Yes' ]
+  install_cloudtrail_logs_source: !Equals [ !Ref CreateCloudTrailLogSource, 'Yes' ]
+  install_cloudwatch_logs_source: !Equals [ !Ref CreateCloudWatchLogSource, 'Yes' ]
+  install_kf_metric_source: !Equals [ !Ref CreateKinesisFirehoseMetricsSource, 'Yes' ]
+  install_kf_logs_source: !Equals [ !Ref CreateKinesisFirehoseLogSource, 'Yes' ]
 
   install_collector: !Or
     - !Condition install_metadata_source
@@ -234,18 +234,18 @@ Conditions:
     - !Condition install_kf_logs_source
 
   # Bucket Condition and Trail
-  create_alb_bucket: !Equals [!Ref CreateALBS3Bucket, 'Yes']
-  create_cloudtrail_bucket: !Equals [!Ref CreateCloudTrailBucket, 'Yes']
+  create_alb_bucket: !Equals [ !Ref CreateALBS3Bucket, 'Yes' ]
+  create_cloudtrail_bucket: !Equals [ !Ref CreateCloudTrailBucket, 'Yes' ]
   create_target_s3_bucket: !Or
     - !Condition create_alb_bucket
     - !Condition create_cloudtrail_bucket
 
   # SNS
   create_cloudtrail_sns_topic: !And
-    - !Not [!Condition create_cloudtrail_bucket]
+    - !Not [ !Condition create_cloudtrail_bucket ]
     - !Condition install_cloudtrail_logs_source
   create_alb_sns_topic: !And
-    - !Not [!Condition create_alb_bucket]
+    - !Not [ !Condition create_alb_bucket ]
     - !Condition install_alb_logs_source
 
   # Sumo Logic Role
@@ -393,7 +393,7 @@ Resources:
       Handler: main.handler
       Runtime: python3.7
       CodeUri:
-        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+        Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
         Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.11.zip"
       MemorySize: 128
       Timeout: 900
@@ -426,7 +426,7 @@ Resources:
               - "-"
               - !Select
                 - 2
-                - !Split ["/", !Ref "AWS::StackId"]
+                - !Split [ "/", !Ref "AWS::StackId" ]
 
   CommonS3Bucket:
     Condition: create_target_s3_bucket
@@ -442,7 +442,7 @@ Resources:
               - "-"
               - !Select
                 - 2
-                - !Split ["/", !Ref "AWS::StackId"]
+                - !Split [ "/", !Ref "AWS::StackId" ]
       NotificationConfiguration:
         TopicConfigurations:
           - Event: s3:ObjectCreated:Put
@@ -485,7 +485,7 @@ Resources:
               AWS: !Join
                 - ""
                 - - "arn:aws:iam::"
-                  - !FindInMap [Region2ELBAccountId, !Ref 'AWS::Region', AccountId]
+                  - !FindInMap [ Region2ELBAccountId, !Ref 'AWS::Region', AccountId ]
                   - ":root"
             Action: s3:PutObject
             Resource:
@@ -530,7 +530,7 @@ Resources:
                         - "-"
                         - !Select
                           - 2
-                          - !Split ["/", !Ref "AWS::StackId"]
+                          - !Split [ "/", !Ref "AWS::StackId" ]
             Effect: Allow
             Principal:
               "Service": "s3.amazonaws.com"
@@ -556,7 +556,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: false
       HierarchyName: "AWS Observability"
-      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}},{"condition":"AWS/ECS","level":{"entityType":"clustername","nextLevelsWithConditions":[]}},{"condition":"AWS/ElastiCache","level":{"entityType":"cacheclusterid","nextLevelsWithConditions":[]}},{"condition":"AWS/NetworkELB","level":{"entityType":"networkloadbalancer","nextLevelsWithConditions":[]}}]}}}
+      HierarchyLevel: { "entityType": "account","nextLevelsWithConditions": [ ],"nextLevel": { "entityType": "region","nextLevelsWithConditions": [ ],"nextLevel": { "entityType": "namespace","nextLevelsWithConditions": [ { "condition": "AWS/ApplicationElb","level": { "entityType": "loadbalancer","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ApiGateway","level": { "entityType": "apiname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/DynamoDB","level": { "entityType": "tablename","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/EC2","level": { "entityType": "instanceid","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/RDS","level": { "entityType": "dbidentifier","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/Lambda","level": { "entityType": "functionname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ECS","level": { "entityType": "clustername","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ElastiCache","level": { "entityType": "cacheclusterid","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/NetworkELB","level": { "entityType": "networkloadbalancer","nextLevelsWithConditions": [ ] } } ] } } }
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
@@ -795,7 +795,45 @@ Resources:
         CreateFourthMetricsSource: "No"
         CreateFifthMetricsSource: "No"
 
-  # TODO: Add source and SAM app for kinesis firehose
+  KinesisFirehoseMetricsSAMApp:
+    Type: AWS::Serverless::Application
+    Condition: install_kf_metric_source
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
+        SemanticVersion: 1.0.0
+      Parameters:
+        Section1aCollectMetrics: "Yes"
+        Section1bSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
+        Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", "Yes" ]
+        Section2bFailedDataS3Bucket: !Join
+          - ""
+          - - "aws-observability-logs-"
+            - !Select
+              - 0
+              - !Split
+                - "-"
+                - !Select
+                  - 2
+                  - !Split [ "/", !Ref "AWS::StackId" ]
+
+  KinesisFirehoseMetricsSource:
+    Condition: install_kf_metric_source
+    Type: Custom::AWSSource
+    Properties:
+      SourceType:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref KinesisFirehoseMetricsSourceName
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceCategory: !Ref KinesisFirehoseMetricSourceCategory
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !Ref AccountAlias
+      RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
   ############# START - RESOURCES FOR ALB SOURCE #################
 
@@ -813,7 +851,7 @@ Resources:
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
-      TargetBucketName: !If [create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName]
+      TargetBucketName: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ]
       PathExpression: !Ref ALBS3BucketPathExpression
       Fields:
         account: !Ref AccountAlias
@@ -834,13 +872,13 @@ Resources:
               - "-"
               - !Select
                 - 2
-                - !Split ["/", !Ref "AWS::StackId"]
+                - !Split [ "/", !Ref "AWS::StackId" ]
 
   ALBSNSSubscription:
     Condition: install_alb_logs_source
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn: !If [create_alb_bucket, !Ref CommonBucketSNSTopic, !Ref ALBSNSTopic]
+      TopicArn: !If [ create_alb_bucket, !Ref CommonBucketSNSTopic, !Ref ALBSNSTopic ]
       Endpoint: !GetAtt ALBSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -885,7 +923,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
       SourceName: !Ref CloudTrailLogsSourceName
-      TargetBucketName: !If [create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName]
+      TargetBucketName: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
       SourceCategory: !Ref CloudTrailLogsSourceCategory
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
@@ -910,13 +948,13 @@ Resources:
               - "-"
               - !Select
                 - 2
-                - !Split ["/", !Ref "AWS::StackId"]
+                - !Split [ "/", !Ref "AWS::StackId" ]
 
   CloudTrailSNSSubscription:
     Condition: install_cloudtrail_logs_source
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn: !If [create_cloudtrail_bucket, !Ref CommonBucketSNSTopic, !Ref CloudTrailSNSTopic]
+      TopicArn: !If [ create_cloudtrail_bucket, !Ref CommonBucketSNSTopic, !Ref CloudTrailSNSTopic ]
       Endpoint: !GetAtt CloudTrailSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -980,7 +1018,46 @@ Resources:
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
 
-  # TODO: Add source and SAM app for kinesis firehose Logs
+  KinesisFirehoseLogsSAMApp:
+    Type: AWS::Serverless::Application
+    Condition: install_kf_logs_source
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
+        SemanticVersion: 1.0.0
+      Parameters:
+        Section1aCollectLogs: "Yes"
+        Section1bSumoLogicKinesisLogsURL: !GetAtt KinesisFirehoseLogsSource.SUMO_ENDPOINT
+        Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", !If [ install_kf_logs_source, "No", "Yes" ] ]
+        Section2bFailedDataS3Bucket: !Join
+          - ""
+          - - "aws-observability-logs-"
+            - !Select
+              - 0
+              - !Split
+                - "-"
+                - !Select
+                  - 2
+                  - !Split [ "/", !Ref "AWS::StackId" ]
+
+    KinesisFirehoseLogsSource:
+      Condition: install_kf_logs_source
+      Type: Custom::HTTPSource
+      Properties:
+        ServiceToken: !GetAtt LambdaHelper.Arn
+        Region: !Ref "AWS::Region"
+        ContentType: ""
+        SourceName: !Ref KinesisFirehoseLogsSourceName
+        RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+        SourceCategory: !Ref KinesisFirehoseLogsSourceCategory
+        CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+        SumoAccessID: !Ref SumoLogicAccessID
+        SumoAccessKey: !Ref SumoLogicAccessKey
+        SumoDeployment: !Ref SumoLogicDeployment
+        Fields:
+          account: !Ref AccountAlias
+          namespace: "aws/lambda"
+          region: !Ref "AWS::Region"
 
 Outputs:
   LambdaHelperARN:
