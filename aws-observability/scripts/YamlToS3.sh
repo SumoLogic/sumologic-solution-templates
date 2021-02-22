@@ -41,7 +41,7 @@ fi
 # Upload all templates to sumologic-appdev-aws-sam-apps bucket with version information.
 if [[ ${AWS_PROFILE} == 'default' ]]
 then
-    export version=v2.1.0
+    export version=v2.1.1
 
     aws s3 cp apps/ s3://${bucket_name}/aws-observability-versions/${version}/ --recursive --include "*.template.yaml" --exclude '*.zip' --exclude '*.sh' --exclude 'apps/*/test/*' --exclude '*/test/*' --acl public-read --profile ${AWS_PROFILE}
 
