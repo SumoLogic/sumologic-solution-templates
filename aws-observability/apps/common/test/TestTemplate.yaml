@@ -48,6 +48,12 @@ Tests:
         CloudTrailLogsSourceName: 'Sourabh CloudTrail Source'
         CreateCloudWatchLogSource: 'Yes'
         CloudWatchLogsSourceName: 'Sourabh CW Logs Source'
+        CreateKinesisFirehoseMetricsSource: "Yes"
+        KinesisFirehoseMetricsSourceName: "Sourabh KF Metrics Source"
+        KinesisFirehoseMetricSourceCategory: "Labs/Sourabh/Metrics"
+        CreateKinesisFirehoseLogSource: "Yes"
+        KinesisFirehoseLogsSourceName: "Sourabh KF Logs Source"
+        KinesisFirehoseLogsSourceCategory: "Labs/Sourabh/Logs"
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -101,6 +107,30 @@ Tests:
             - AddAccountField
             - AddRegionField
             - AddNamespaceField
+            - KinesisFirehoseMetricsStack
+            - KinesisFirehoseMetricsSource
+            - KinesisFirehoseLogsStack
+            - KinesisFirehoseLogsSource
+            - KinesisFirehoseMetricsStack.AttachBucketPolicyToFirehoseLogsRole
+            - KinesisFirehoseMetricsStack.FirehoseLogsRole
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsFirehoseRolePolicy
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogGroup
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
+            - KinesisFirehoseMetricsStack.KinesisMetricsRole
+            - KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
+            - KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
+            - KinesisFirehoseLogsStack.FirehoseLogsRole
+            - KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
+            - KinesisFirehoseLogsStack.KinesisLogsFirehoseRolePolicy
+            - KinesisFirehoseLogsStack.KinesisLogsLogGroup
+            - KinesisFirehoseLogsStack.KinesisLogsLogStream
+            - KinesisFirehoseLogsStack.KinesisLogsLogStreamS3
+            - KinesisFirehoseLogsStack.KinesisLogsRole
+            - KinesisFirehoseLogsStack.KinesisLogsRolePolicy
+            - KinesisFirehoseLogsStack.SubscriptionFilter
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -112,6 +142,16 @@ Tests:
             - BucketName
             - CloudWatchLambdaARN
             - CloudWatchEventFunction.SumoCWLogsLambdaArn
+            - KinesisLogsDeliveryStreamARN
+            - KinesisLogsRoleARN
+            - KinesisMetricsDeliveryStreamARN
+            - KinesisMetricsRoleARN
+            - KinesisFirehoseMetricsStack.KinesisMetricsRoleARN
+            - KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStreamARN
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogGroupARN
+            - KinesisFirehoseLogsStack.KinesisLogsLogGroupARN
+            - KinesisFirehoseLogsStack.KinesisLogsDeliveryStreamARN
+            - KinesisFirehoseLogsStack.KinesisLogsRoleARN
       - AssertType: ParameterCheck
         Assert:
           CloudWatchMetricsFirstStack:
@@ -140,6 +180,12 @@ Tests:
             FourthMetricsSourceNamespace: 'NetworkELB'
             CreateFifthMetricsSource: 'No'
             FifthMetricsSourceNamespace: ''
+          KinesisFirehoseMetricsStack:
+            Section2aCreateS3Bucket: 'No'
+            Section2bFailedDataS3Bucket: "aws-observability-logs"
+          KinesisFirehoseLogsStack:
+            Section2aCreateS3Bucket: 'No'
+            Section2bFailedDataS3Bucket: "aws-observability-logs"
   - TestName: installmetadata
     Regions:
       - us-east-1
@@ -548,7 +594,7 @@ Tests:
             - Namespaces
   - TestName: installkfmetricsource
     Regions:
-      - ap-south-1
+      - us-east-1
     Parameters:
       Values:
         AccountAlias: "kfsource"
@@ -572,6 +618,19 @@ Tests:
             - AddNamespaceField
             - KinesisFirehoseMetricsStack
             - KinesisFirehoseMetricsSource
+            - SumoLogicHostedCollector
+            - SumoLogicSourceRole
+            - KinesisFirehoseMetricsStack.AttachBucketPolicyToFirehoseLogsRole
+            - KinesisFirehoseMetricsStack.FailedDataBucket
+            - KinesisFirehoseMetricsStack.FirehoseLogsRole
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsFirehoseRolePolicy
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogGroup
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
+            - KinesisFirehoseMetricsStack.KinesisMetricsRole
+            - KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -582,6 +641,10 @@ Tests:
             - Namespaces
             - KinesisMetricsDeliveryStreamARN
             - KinesisMetricsRoleARN
+            - KinesisFirehoseMetricsStack.KinesisMetricsRoleARN
+            - KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStreamARN
+            - KinesisFirehoseMetricsStack.FailedDataBucketArn
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogGroupARN
       - AssertType: ParameterCheck
         Assert:
           KinesisFirehoseMetricsStack:
@@ -613,6 +676,18 @@ Tests:
             - AddNamespaceField
             - KinesisFirehoseLogsStack
             - KinesisFirehoseLogsSource
+            - SumoLogicHostedCollector
+            - KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
+            - KinesisFirehoseLogsStack.FailedDataBucket
+            - KinesisFirehoseLogsStack.FirehoseLogsRole
+            - KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
+            - KinesisFirehoseLogsStack.KinesisLogsFirehoseRolePolicy
+            - KinesisFirehoseLogsStack.KinesisLogsLogGroup
+            - KinesisFirehoseLogsStack.KinesisLogsLogStream
+            - KinesisFirehoseLogsStack.KinesisLogsLogStreamS3
+            - KinesisFirehoseLogsStack.KinesisLogsRole
+            - KinesisFirehoseLogsStack.KinesisLogsRolePolicy
+            - KinesisFirehoseLogsStack.SubscriptionFilter
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -623,6 +698,10 @@ Tests:
             - Namespaces
             - KinesisLogsDeliveryStreamARN
             - KinesisLogsRoleARN
+            - KinesisFirehoseLogsStack.KinesisLogsLogGroupARN
+            - KinesisFirehoseLogsStack.KinesisLogsDeliveryStreamARN
+            - KinesisFirehoseLogsStack.FailedDataBucketArn
+            - KinesisFirehoseLogsStack.KinesisLogsRoleARN
       - AssertType: ParameterCheck
         Assert:
           KinesisFirehoseLogsStack:
@@ -630,11 +709,11 @@ Tests:
             Section2bFailedDataS3Bucket: "aws-observability-logs"
   - TestName: installbothkfsource
     Regions:
-      - ap-south-1
+      - us-east-1
     Parameters:
       Values:
         AccountAlias: "kfsource"
-        CollectorName: 'Sourabh Collector Install KF Logs'
+        CollectorName: 'Sourabh Collector Install ALL KF Logs'
         CreateKinesisFirehoseMetricsSource: "Yes"
         KinesisFirehoseMetricsSourceName: "Sourabh KF Metrics Source"
         KinesisFirehoseMetricSourceCategory: "Labs/Sourabh/Metrics"
@@ -659,6 +738,29 @@ Tests:
             - KinesisFirehoseMetricsSource
             - KinesisFirehoseLogsStack
             - KinesisFirehoseLogsSource
+            - SumoLogicHostedCollector
+            - SumoLogicSourceRole
+            - KinesisFirehoseMetricsStack.AttachBucketPolicyToFirehoseLogsRole
+            - KinesisFirehoseMetricsStack.FailedDataBucket
+            - KinesisFirehoseMetricsStack.FirehoseLogsRole
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsFirehoseRolePolicy
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogGroup
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogStream
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
+            - KinesisFirehoseMetricsStack.KinesisMetricsRole
+            - KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
+            - KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
+            - KinesisFirehoseLogsStack.FirehoseLogsRole
+            - KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
+            - KinesisFirehoseLogsStack.KinesisLogsFirehoseRolePolicy
+            - KinesisFirehoseLogsStack.KinesisLogsLogGroup
+            - KinesisFirehoseLogsStack.KinesisLogsLogStream
+            - KinesisFirehoseLogsStack.KinesisLogsLogStreamS3
+            - KinesisFirehoseLogsStack.KinesisLogsRole
+            - KinesisFirehoseLogsStack.KinesisLogsRolePolicy
+            - KinesisFirehoseLogsStack.SubscriptionFilter
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -671,6 +773,13 @@ Tests:
             - KinesisLogsRoleARN
             - KinesisMetricsDeliveryStreamARN
             - KinesisMetricsRoleARN
+            - KinesisFirehoseMetricsStack.KinesisMetricsRoleARN
+            - KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStreamARN
+            - KinesisFirehoseMetricsStack.FailedDataBucketArn
+            - KinesisFirehoseMetricsStack.KinesisMetricsLogGroupARN
+            - KinesisFirehoseLogsStack.KinesisLogsLogGroupARN
+            - KinesisFirehoseLogsStack.KinesisLogsDeliveryStreamARN
+            - KinesisFirehoseLogsStack.KinesisLogsRoleARN
       - AssertType: ParameterCheck
         Assert:
           KinesisFirehoseMetricsStack:
