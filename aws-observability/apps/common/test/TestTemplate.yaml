@@ -546,3 +546,136 @@ Tests:
             - EnterpriseCheck
             - PaidAccountCheck
             - Namespaces
+  - TestName: installkfmetricsource
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        AccountAlias: "kfsource"
+        CollectorName: 'Sourabh Collector Install KF Metrics'
+        CreateKinesisFirehoseMetricsSource: "Yes"
+        KinesisFirehoseMetricsSourceName: "Sourabh KF Metrics Source"
+        KinesisFirehoseMetricSourceCategory: "Labs/Sourabh/Metrics"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - LambdaRole
+            - LambdaHelper
+            - AccountCheck
+            - CreateSumoLogicAWSExplorerView
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
+            - AddAccountField
+            - AddRegionField
+            - AddNamespaceField
+            - KinesisFirehoseMetricsStack
+            - KinesisFirehoseMetricsSource
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
+            - KinesisMetricsDeliveryStreamARN
+            - KinesisMetricsRoleARN
+      - AssertType: ParameterCheck
+        Assert:
+          KinesisFirehoseMetricsStack:
+            Section2aCreateS3Bucket: 'Yes'
+            Section2bFailedDataS3Bucket: "aws-observability-logs"
+  - TestName: installkflogsource
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        AccountAlias: "kfsource"
+        CollectorName: 'Sourabh Collector Install KF Logs'
+        CreateKinesisFirehoseLogSource: "Yes"
+        KinesisFirehoseLogsSourceName: "Sourabh KF Logs Source"
+        KinesisFirehoseLogsSourceCategory: "Labs/Sourabh/Logs"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - LambdaRole
+            - LambdaHelper
+            - AccountCheck
+            - CreateSumoLogicAWSExplorerView
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
+            - AddAccountField
+            - AddRegionField
+            - AddNamespaceField
+            - KinesisFirehoseLogsStack
+            - KinesisFirehoseLogsSource
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
+            - KinesisLogsDeliveryStreamARN
+            - KinesisLogsRoleARN
+      - AssertType: ParameterCheck
+        Assert:
+          KinesisFirehoseLogsStack:
+            Section2aCreateS3Bucket: 'Yes'
+            Section2bFailedDataS3Bucket: "aws-observability-logs"
+  - TestName: installbothkfsource
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        AccountAlias: "kfsource"
+        CollectorName: 'Sourabh Collector Install KF Logs'
+        CreateKinesisFirehoseMetricsSource: "Yes"
+        KinesisFirehoseMetricsSourceName: "Sourabh KF Metrics Source"
+        KinesisFirehoseMetricSourceCategory: "Labs/Sourabh/Metrics"
+        CreateKinesisFirehoseLogSource: "Yes"
+        KinesisFirehoseLogsSourceName: "Sourabh KF Logs Source"
+        KinesisFirehoseLogsSourceCategory: "Labs/Sourabh/Logs"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - LambdaRole
+            - LambdaHelper
+            - AccountCheck
+            - CreateSumoLogicAWSExplorerView
+            - LambdaToDecideCWMetricsSources
+            - Primerinvoke
+            - AddAccountField
+            - AddRegionField
+            - AddNamespaceField
+            - KinesisFirehoseMetricsStack
+            - KinesisFirehoseMetricsSource
+            - KinesisFirehoseLogsStack
+            - KinesisFirehoseLogsSource
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - LambdaHelperARN
+            - LambdaRoleARN
+            - EnterpriseCheck
+            - PaidAccountCheck
+            - Namespaces
+            - KinesisLogsDeliveryStreamARN
+            - KinesisLogsRoleARN
+            - KinesisMetricsDeliveryStreamARN
+            - KinesisMetricsRoleARN
+      - AssertType: ParameterCheck
+        Assert:
+          KinesisFirehoseMetricsStack:
+            Section2aCreateS3Bucket: 'Yes'
+            Section2bFailedDataS3Bucket: "aws-observability-logs"
+          KinesisFirehoseLogsStack:
+            Section2aCreateS3Bucket: 'No'
+            Section2bFailedDataS3Bucket: "aws-observability-logs"
