@@ -795,16 +795,13 @@ Resources:
         CreateFourthMetricsSource: "No"
         CreateFifthMetricsSource: "No"
 
-  KinesisFirehoseMetricsSAMApp:
-    Type: AWS::Serverless::Application
+  KinesisFirehoseMetricsStack:
+    Type: AWS::CloudFormation::Stack
     Condition: install_kf_metric_source
     Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.0
+      TemplateURL: "https://sumologic-aws-observability-templates.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
       Parameters:
-        Section1aCollectMetrics: "Yes"
-        Section1bSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
+        Section1aSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
         Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", "Yes" ]
         Section2bFailedDataS3Bucket: !Join
           - ""
@@ -819,11 +816,11 @@ Resources:
 
   KinesisFirehoseMetricsSource:
     Condition: install_kf_metric_source
-    Type: Custom::AWSSource
+    Type: Custom::HTTPSource
     Properties:
-      SourceType:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
+      SourceType: "KinesisMetric"
       SourceName: !Ref KinesisFirehoseMetricsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
       SourceCategory: !Ref KinesisFirehoseMetricSourceCategory
@@ -1018,17 +1015,14 @@ Resources:
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
 
-  KinesisFirehoseLogsSAMApp:
-    Type: AWS::Serverless::Application
+  KinesisFirehoseLogsStack:
+    Type: AWS::CloudFormation::Stack
     Condition: install_kf_logs_source
     Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.0
+      TemplateURL: "https://sumologic-aws-observability-templates.s3.amazonaws.com/KinesisFirehoseCWLogs.template.yaml"
       Parameters:
-        Section1aCollectLogs: "Yes"
-        Section1bSumoLogicKinesisLogsURL: !GetAtt KinesisFirehoseLogsSource.SUMO_ENDPOINT
-        Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", !If [ install_kf_logs_source, "No", "Yes" ] ]
+        Section1aSumoLogicKinesisLogsURL: !GetAtt KinesisFirehoseLogsSource.SUMO_ENDPOINT
+        Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", !If [ install_kf_metric_source, "No", "Yes" ] ]
         Section2bFailedDataS3Bucket: !Join
           - ""
           - - "aws-observability-logs-"
@@ -1046,7 +1040,7 @@ Resources:
       Properties:
         ServiceToken: !GetAtt LambdaHelper.Arn
         Region: !Ref "AWS::Region"
-        ContentType: ""
+        SourceType: "KinesisLog"
         SourceName: !Ref KinesisFirehoseLogsSourceName
         RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
         SourceCategory: !Ref KinesisFirehoseLogsSourceCategory
@@ -1083,3 +1077,19 @@ Outputs:
   Namespaces:
     Description: "Comma Delimited String of CloudWatch Metrics Namespaces for Inventory Source."
     Value: !GetAtt Primerinvoke.namespaces
+  KinesisLogsDeliveryStreamARN:
+    Description: "The ARN for your Kinesis Firehose Delivery Stream, use this as the destination when adding CloudWatch Logs subscription filters."
+    Condition: install_kf_logs_source
+    Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisLogsDeliveryStreamARN
+  KinesisLogsRoleARN:
+    Description: "The ARN for your CloudWatch Logs role to write to your delivery stream, use this as the role-arn when adding CloudWatch Logs subscription filters."
+    Condition: install_kf_logs_source
+    Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisLogsRoleARN
+  KinesisMetricsDeliveryStreamARN:
+    Description: "The ARN for your Kinesis Firehose Delivery Stream, use this as the destination when adding CloudWatch Metrics subscription filters."
+    Condition: install_kf_logs_source
+    Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisMetricsDeliveryStreamARN
+  KinesisMetricsRoleARN:
+    Description: "The ARN for your CloudWatch Logs role to write to your delivery stream, use this as the role-arn when adding CloudWatch Logs subscription filters."
+    Condition: install_kf_logs_source
+    Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisMetricsRoleARN
