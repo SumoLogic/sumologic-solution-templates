@@ -83,7 +83,7 @@ Metadata:
       Section4bMetricsNameSpaces:
         default: "Sumo Logic AWS Metrics Namespaces"
       Section4cCloudWatchExistingSourceAPIUrl:
-        default: "Existing Sumo Logic CloudWatch Metrics Source API URL"
+        default: "Existing Sumo Logic Metrics Source API URL"
 
       Section5aAutoEnableS3LogsALBResourcesOptions:
         default: "Enable ALB Access logging"
@@ -110,7 +110,7 @@ Metadata:
       Section7bLambdaCloudWatchLogsSourceUrl:
         default: "Existing Sumo Logic Lambda CloudWatch Logs Source API URL"
       Section7cAutoSubscribeLogGroupsLambdaOptions:
-        default: "Subscribe log groups to Sumo Logic Lambda Forwarder"
+        default: "Subscribe log groups to Sumo Logic CloudWatch Logs Forwarder"
       Section7dAutoSubscribeLambdaLogGroupPattern:
         default: "Regex for AWS Lambda Log Groups"
 
@@ -174,13 +174,12 @@ Parameters:
 
   Section4aCreateMetricsSourcesOptions:
     Type: String
-    Description: "CloudWatchMetricSource - Creates a Sumo Logic CloudWatch Metrics Source, which collects metrics for multiple namespaces from the region selected.
-                  KinesisFirehoseSource - Creates a Sumo Logic Kinesis Firehose Source, which collects metrics from multiple namespaces from the region."
-    Default: 'Both'
+    Description: "CloudWatchMetricSource - Creates a Sumo Logic CloudWatch Metrics Source, which collects metrics for provided namespaces from the region selected.
+                  KinesisFirehoseSource - Creates a Sumo Logic Kinesis Firehose Source, which collects metrics from all namespaces from the region."
+    Default: 'KinesisFirehoseSource'
     AllowedValues:
       - 'CloudWatchMetricSource'
       - 'KinesisFirehoseSource'
-      - 'Both'
       - 'None'
   Section4bMetricsNameSpaces:
     Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
@@ -190,7 +189,7 @@ Parameters:
     ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
   Section4cCloudWatchExistingSourceAPIUrl:
     Type: String
-    Description: "Required when already collecting CloudWatch Metrics. Provide the existing Sumo Logic CloudWatch Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Description: "Required when already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
 
   Section5aAutoEnableS3LogsALBResourcesOptions:
@@ -251,11 +250,10 @@ Parameters:
     Type: String
     Description: "HttpSource - Creates the Sumo Logic CloudWatch Log Source that collects Lambda logs from AWS using Sumo Logic Lambda Forwarder.
                   KinesisFirehoseSource - Creates the Sumo Logic Kinesis Firehose source for Logs to collect cloudwatch logs."
-    Default: 'Both'
+    Default: 'KinesisFirehoseSource'
     AllowedValues:
       - 'HttpSource'
       - 'KinesisFirehoseSource'
-      - 'Both'
       - 'None'
   Section7bLambdaCloudWatchLogsSourceUrl:
     Type: String
@@ -263,8 +261,8 @@ Parameters:
     Default: ""
   Section7cAutoSubscribeLogGroupsLambdaOptions:
     Type: String
-    Description: "New - Automatically subscribes new log groups to lambda to send logs to Sumo Logic.
-                  Existing - Automatically subscribes existing log groups to lambda to send logs to Sumo Logic.
+    Description: "New - Automatically subscribes new log groups to send logs to Sumo Logic.
+                  Existing - Automatically subscribes existing log groups to send logs to Sumo Logic.
                   Both - Automatically subscribes new and existing log groups.
                   None - Skips Automatic subscription."
     Default: 'Both'
@@ -307,15 +305,21 @@ Conditions:
     - !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
     - !Equals [ !Ref Section6cCloudTrailLogsBucketName, '' ]
 
-  # FER Condition
+  # Sources Create Condition
   create_cloudtrail_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
   create_alb_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
-  update_cloudwatch_logs_source: !And
-    - !Not [!Equals [!Ref Section7bLambdaCloudWatchLogsSourceUrl, '']]
-    - !Equals [!Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'None']
-  update_cloudwatch_metrics_source: !And
-    - !Not [!Equals [!Ref Section4cCloudWatchExistingSourceAPIUrl, '']]
-    - !Equals [!Ref Section4aCreateMetricsSourcesOptions, 'None']
+  create_kf_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'KinesisFirehoseSource' ]
+  create_kf_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'KinesisFirehoseSource' ]
+  create_cw_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'CloudWatchMetricSource' ]
+  create_cw_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'HttpSource' ]
+
+  # Sources Update Condition
+  install_cloudwatch_metrics_source: !Or
+    - !Condition create_kf_metrics_source
+    - !Condition create_cw_metrics_source
+  create_cloudwatch_logs_source: !Or
+    - !Condition create_kf_logs_source
+    - !Condition create_cw_logs_source
   update_cloudtrail_logs_source: !And
     - !Not [!Equals [!Ref Section6bCloudTrailLogsSourceUrl, '']]
     - !Not [!Equals [!Ref Section6aCreateCloudTrailLogSource, 'Yes']]
@@ -334,7 +338,7 @@ Conditions:
     - !Equals [ !Ref Section7cAutoSubscribeLogGroupsLambdaOptions, 'New' ]
     - !Equals [ !Ref Section7cAutoSubscribeLogGroupsLambdaOptions, 'Both' ]
   auto_subscribe_lambda_log_groups: !And
-    - !Not [!Condition update_cloudwatch_logs_source]
+    - !Condition create_cloudwatch_logs_source
     - !Condition auto_subscribe_new_lambda_log_groups
 
   call_auto_enable: !Or
@@ -382,11 +386,14 @@ Resources:
             Number: !Ref AWS::AccountId
         SumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
         CreateMetaDataSource: "No"
-        CreateCloudWatchMetricsSource: !Ref Section4aCreateMetricsSourcesOptions
+        CreateCloudWatchMetricsSource: !If [ create_cw_metrics_source, "Yes", "No" ]
         CloudWatchMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
         CloudWatchMetricsNameSpaces: !Ref Section4bMetricsNameSpaces
         CloudWatchMetricSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudWatchMetricSourceCategory]
         ScanInterval: 300000
+        CreateKinesisFirehoseMetricsSource: !If [ create_kf_metrics_source, "Yes", "No" ]
+        KinesisFirehoseMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
+        KinesisFirehoseMetricSourceCategory: !FindInMap [ CommonData, CollectorDetails, CloudWatchMetricSourceCategory ]
         CreateALBLogSource: !Ref Section5bALBCreateLogSource
         CreateALBS3Bucket: !If [create_alb_bucket, "Yes", "No"]
         ALBS3LogsBucketName: !Ref Section5dALBS3LogsBucketName
@@ -399,9 +406,12 @@ Resources:
         CloudTrailBucketPathExpression: !If [create_cloudtrail_bucket, !Sub "AWSLogs/${AWS::AccountId}/CloudTrail/${AWS::Region}/*", !Ref Section6dCloudTrailBucketPathExpression]
         CloudTrailLogsSourceName: !Sub "cloudtrail-logs-${AWS::Region}"
         CloudTrailLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudTrailLogsSourceCategory]
-        CreateCloudWatchLogSource: !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions
+        CreateCloudWatchLogSource: !If [ create_cw_logs_source, "Yes", "No" ]
         CloudWatchLogsSourceName: !Sub "cloudwatch-logs-${AWS::Region}"
         CloudWatchLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudWatchLogsSourceCategory]
+        CreateKinesisFirehoseLogSource: !If [ create_kf_logs_source, "Yes", "No" ]
+        KinesisFirehoseLogsSourceName: !Sub "kinesis-firehose-cloudwatch-logs-${AWS::Region}"
+        KinesisFirehoseLogsSourceCategory: !FindInMap [ CommonData, CollectorDetails, CloudWatchLogsSourceCategory ]
         TemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         NestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
 
@@ -420,7 +430,7 @@ Resources:
         ALBS3LogsBucketName: !If [create_alb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section5dALBS3LogsBucketName]
         AutoSubscribeLogGroups: !If [auto_subscribe_lambda_log_groups, "Yes", "No"]
         AutoSubscribeLogGroupsLambdaOptions: !Ref Section7cAutoSubscribeLogGroupsLambdaOptions
-        AutoSubscribeLambdaARN: !If [auto_subscribe_lambda_log_groups, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, ""]
+        AutoSubscribeLambdaARN: !If [create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, !If [ create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, "" ] ]
         AutoSubscribeLambdaLogGroupPattern: !Ref Section7dAutoSubscribeLambdaLogGroupPattern
 
   sumoEC2MetricsAppStack:
@@ -455,7 +465,7 @@ Resources:
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCloudWatchExistingSourceAPIUrl: !If [update_cloudwatch_metrics_source, !Ref Section4cCloudWatchExistingSourceAPIUrl, ""]
+        Section4aCloudWatchExistingSourceAPIUrl: !If [install_cloudwatch_metrics_source, "", !Ref Section4cCloudWatchExistingSourceAPIUrl]
         Section5aALBLogsAPIUrl: !If [create_alb_source, "", !Ref Section5cALBLogsSourceUrl]
         Section5bALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
@@ -570,8 +580,8 @@ Resources:
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section5bCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
         Section5aCloudTrailLogsAPIUrl: !If [create_cloudtrail_source, "", !Ref Section6bCloudTrailLogsSourceUrl]
-        Section6bCloudWatchLogsSourceName: !If [update_cloudwatch_logs_source, "", "*cloudwatch-logs*"]
-        Section6aCloudWatchLogsAPIUrl: !If [update_cloudwatch_logs_source, !Ref Section7bLambdaCloudWatchLogsSourceUrl, ""]
+        Section6bCloudWatchLogsSourceName: !If [create_cloudwatch_logs_source, "*cloudwatch-logs*", ""]
+        Section6aCloudWatchLogsAPIUrl: !If [create_cloudwatch_logs_source, "", !Ref Section7bLambdaCloudWatchLogsSourceUrl]
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section7bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section7cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
