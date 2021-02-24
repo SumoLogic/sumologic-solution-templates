@@ -361,6 +361,11 @@ Resources:
 
   LambdaRole:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across a lot of resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -416,6 +421,11 @@ Resources:
   CommonBucketSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_target_s3_bucket
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -432,6 +442,13 @@ Resources:
     Condition: create_target_s3_bucket
     Type: AWS::S3::Bucket
     DependsOn: CommonSNSpolicy
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W35
+            reason: "Access logging not required for AWS S3 Bucket."
+          - id: W41
+            reason: "Encryption not required for AWS S3 Bucket."
     Properties:
       BucketName: !Join
         - ""
@@ -564,6 +581,11 @@ Resources:
   SumoLogicSourceRole:
     Type: AWS::IAM::Role
     Condition: install_sumo_logic_role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Metrics are collected for all available resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -859,6 +881,11 @@ Resources:
   ALBSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_alb_sns_topic
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -935,6 +962,11 @@ Resources:
   CloudTrailSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_cloudtrail_sns_topic
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -1034,24 +1066,24 @@ Resources:
                   - 2
                   - !Split [ "/", !Ref "AWS::StackId" ]
 
-    KinesisFirehoseLogsSource:
-      Condition: install_kf_logs_source
-      Type: Custom::HTTPSource
-      Properties:
-        ServiceToken: !GetAtt LambdaHelper.Arn
-        Region: !Ref "AWS::Region"
-        SourceType: "KinesisLog"
-        SourceName: !Ref KinesisFirehoseLogsSourceName
-        RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-        SourceCategory: !Ref KinesisFirehoseLogsSourceCategory
-        CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
-        SumoAccessID: !Ref SumoLogicAccessID
-        SumoAccessKey: !Ref SumoLogicAccessKey
-        SumoDeployment: !Ref SumoLogicDeployment
-        Fields:
-          account: !Ref AccountAlias
-          namespace: "aws/lambda"
-          region: !Ref "AWS::Region"
+  KinesisFirehoseLogsSource:
+    Condition: install_kf_logs_source
+    Type: Custom::HTTPSource
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SourceType: "KinesisLog"
+      SourceName: !Ref KinesisFirehoseLogsSourceName
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceCategory: !Ref KinesisFirehoseLogsSourceCategory
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !Ref AccountAlias
+        namespace: "aws/lambda"
+        region: !Ref "AWS::Region"
 
 Outputs:
   LambdaHelperARN:
@@ -1087,9 +1119,9 @@ Outputs:
     Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisLogsRoleARN
   KinesisMetricsDeliveryStreamARN:
     Description: "The ARN for your Kinesis Firehose Delivery Stream, use this as the destination when adding CloudWatch Metrics subscription filters."
-    Condition: install_kf_logs_source
-    Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisMetricsDeliveryStreamARN
+    Condition: install_kf_metric_source
+    Value: !GetAtt KinesisFirehoseMetricsStack.Outputs.KinesisMetricsDeliveryStreamARN
   KinesisMetricsRoleARN:
     Description: "The ARN for your CloudWatch Logs role to write to your delivery stream, use this as the role-arn when adding CloudWatch Logs subscription filters."
-    Condition: install_kf_logs_source
-    Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisMetricsRoleARN
+    Condition: install_kf_metric_source
+    Value: !GetAtt KinesisFirehoseMetricsStack.Outputs.KinesisMetricsRoleARN
