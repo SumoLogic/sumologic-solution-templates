@@ -323,6 +323,11 @@ Resources:
 
   LambdaRole:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -378,6 +383,11 @@ Resources:
   CommonBucketSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_target_s3_bucket
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -394,6 +404,13 @@ Resources:
     Condition: create_target_s3_bucket
     Type: AWS::S3::Bucket
     DependsOn: CommonSNSpolicy
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W35
+            reason: "Access logging not required for AWS S3 Bucket."
+          - id: W41
+            reason: "Encryption not required for AWS S3 Bucket."
     Properties:
       BucketName: !Join
         - ""
@@ -526,6 +543,11 @@ Resources:
   SumoLogicSourceRole:
     Type: AWS::IAM::Role
     Condition: install_sumo_logic_role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Metrics are collected for all available resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -784,6 +806,11 @@ Resources:
   ALBSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_alb_sns_topic
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -860,6 +887,11 @@ Resources:
   CloudTrailSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_cloudtrail_sns_topic
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
