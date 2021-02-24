@@ -183,6 +183,11 @@ Resources:
   ################# Checks for IAM ROLE - Sumo Source, Inventory Source also #################
   LambdaRole:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -211,6 +216,11 @@ Resources:
 
   SumoLogicSourceRole:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -242,6 +252,11 @@ Resources:
 
   RootCauseRole:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -336,6 +351,11 @@ Resources:
   ################# Checks for SNS, S3, Trail, ALB Permissions #################
   CommonBucketSNSTopic:
     Type: 'AWS::SNS::Topic'
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -351,6 +371,13 @@ Resources:
   CommonS3Bucket:
     Type: AWS::S3::Bucket
     DependsOn: CommonSNSpolicy
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W35
+            reason: "Access logging not required for AWS S3 Bucket."
+          - id: W41
+            reason: "Encryption not required for AWS S3 Bucket."
     Properties:
       BucketName: !Join
         - ""
