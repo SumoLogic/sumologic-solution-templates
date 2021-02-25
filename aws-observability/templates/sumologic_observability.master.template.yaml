@@ -79,7 +79,7 @@ Metadata:
         default: "Install AWS Observability Apps and Alerts"
 
       Section4aCreateMetricsSourcesOptions:
-        default: "Select the Sumo Logic Metrics Source to create"
+        default: "Select the Sumo Logic Metrics Source"
       Section4bMetricsNameSpaces:
         default: "Sumo Logic AWS Metrics Namespaces"
       Section4cCloudWatchExistingSourceAPIUrl:
@@ -106,7 +106,7 @@ Metadata:
         default: "Path Expression for existing CloudTrail logs"
 
       Section7aLambdaCreateCloudWatchLogsSourceOptions:
-        default: "Select the Sumo Logic CloudWatch Logs Sources to create"
+        default: "Select the Sumo Logic CloudWatch Logs Sources"
       Section7bLambdaCloudWatchLogsSourceUrl:
         default: "Existing Sumo Logic Lambda CloudWatch Logs Source API URL"
       Section7cAutoSubscribeLogGroupsLambdaOptions:
@@ -115,7 +115,7 @@ Metadata:
         default: "Regex for AWS Lambda Log Groups"
 
       Section8aRootCauseExplorerOptions:
-        default: "Select the Sumo Logic Root Cause Explorer Sources to create"
+        default: "Select the Sumo Logic Root Cause Explorer Sources"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -174,12 +174,12 @@ Parameters:
 
   Section4aCreateMetricsSourcesOptions:
     Type: String
-    Description: "CloudWatchMetricSource - Creates a Sumo Logic CloudWatch Metrics Source, which collects metrics for provided namespaces from the region selected.
-                  KinesisFirehoseSource - Creates a Sumo Logic Kinesis Firehose Source, which collects metrics from all namespaces from the region."
-    Default: 'CloudWatchMetricSource'
+    Description: "CloudWatch Metrics Source - Creates a Sumo Logic CloudWatch Metrics Source, that collects metrics for the listed namespaces.
+                  Kinesis Firehose Metrics Source - Creates a Sumo Logic Kinesis Firehose Source, which collects metrics from all available namespaces."
+    Default: 'CloudWatch Metric Source'
     AllowedValues:
-      - 'CloudWatchMetricSource'
-      - 'KinesisFirehoseSource'
+      - 'CloudWatch Metrics Source'
+      - 'Kinesis Firehose Metrics Source'
       - 'None'
   Section4bMetricsNameSpaces:
     Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
@@ -248,12 +248,12 @@ Parameters:
 
   Section7aLambdaCreateCloudWatchLogsSourceOptions:
     Type: String
-    Description: "HttpSource - Creates the Sumo Logic CloudWatch Log Source that collects Lambda logs from AWS using Sumo Logic Lambda Forwarder.
-                  KinesisFirehoseSource - Creates the Sumo Logic Kinesis Firehose source for Logs to collect cloudwatch logs."
+    Description: "Lambda Log Forwarder - Creates a Sumo Logic CloudWatch Log Source that collects CloudWatch logs via a Lambda function.
+                  Kinesis Firehose Log Source - Creates a Sumo Logic Kinesis Firehose Source to collect CloudWatch logs."
     Default: 'HttpSource'
     AllowedValues:
-      - 'HttpSource'
-      - 'KinesisFirehoseSource'
+      - 'Lambda Log Forwarder'
+      - 'Kinesis Firehose Log Source'
       - 'None'
   Section7bLambdaCloudWatchLogsSourceUrl:
     Type: String
@@ -278,22 +278,22 @@ Parameters:
 
   Section8aRootCauseExplorerOptions:
     Type: String
-    Description: "InventorySource - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.
-                  XraySource - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account."
+    Description: "Inventory Source - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.
+                  Xray Source - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account."
     Default: 'Both'
     AllowedValues:
-      - 'InventorySource'
-      - 'XraySource'
+      - 'Inventory Source'
+      - 'Xray Source'
       - 'Both'
       - 'None'
 
 Conditions:
   # Condition for Metrics Source
   install_inventory_source: !Or
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'InventorySource' ]
+    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Inventory Source' ]
     - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Both' ]
   install_xray_source: !Or
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'XraySource' ]
+    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Xray Source' ]
     - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Both' ]
 
   # Conditions for Bucket
@@ -308,10 +308,10 @@ Conditions:
   # Sources Create Condition
   create_cloudtrail_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
   create_alb_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
-  create_kf_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'KinesisFirehoseSource' ]
-  create_kf_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'KinesisFirehoseSource' ]
-  create_cw_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'CloudWatchMetricSource' ]
-  create_cw_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'HttpSource' ]
+  create_kf_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'Kinesis Firehose Metrics Source' ]
+  create_kf_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Kinesis Firehose Log Source' ]
+  create_cw_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourcesOptions, 'CloudWatch Metrics Source' ]
+  create_cw_logs_source: !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Lambda Log Forwarder' ]
 
   # Sources Update Condition
   install_cloudwatch_metrics_source: !Or
