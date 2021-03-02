@@ -176,7 +176,7 @@ Parameters:
     Type: String
     Description: "CloudWatch Metrics Source - Creates a Sumo Logic CloudWatch Metrics Source, that collects metrics for the listed namespaces.
                   Kinesis Firehose Metrics Source - Creates a Sumo Logic Kinesis Firehose Source, which collects metrics from all available namespaces."
-    Default: 'CloudWatch Metric Source'
+    Default: 'CloudWatch Metrics Source'
     AllowedValues:
       - 'CloudWatch Metrics Source'
       - 'Kinesis Firehose Metrics Source'
@@ -250,7 +250,7 @@ Parameters:
     Type: String
     Description: "Lambda Log Forwarder - Creates a Sumo Logic CloudWatch Log Source that collects CloudWatch logs via a Lambda function.
                   Kinesis Firehose Log Source - Creates a Sumo Logic Kinesis Firehose Source to collect CloudWatch logs."
-    Default: 'HttpSource'
+    Default: 'Lambda Log Forwarder'
     AllowedValues:
       - 'Lambda Log Forwarder'
       - 'Kinesis Firehose Log Source'
@@ -428,7 +428,7 @@ Resources:
         ALBAutoEnableS3Logs: !If [auto_enable_s3_logs, "Yes", "No"]
         ALBAutoEnableS3LogsOptions: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
         ALBS3LogsBucketName: !If [create_alb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section5dALBS3LogsBucketName]
-        AutoSubscribeLogGroups: !If [auto_subscribe_lambda_log_groups, "Yes", "No"]
+        AutoSubscribeLogGroups: !If [create_cw_logs_source, "Yes", !If [ create_kf_logs_source, "No", "No" ] ]
         AutoSubscribeLogGroupsLambdaOptions: !Ref Section7cAutoSubscribeLogGroupsLambdaOptions
         AutoSubscribeLambdaARN: !If [create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, !If [ create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, "" ] ]
         AutoSubscribeLambdaLogGroupPattern: !Ref Section7dAutoSubscribeLambdaLogGroupPattern
