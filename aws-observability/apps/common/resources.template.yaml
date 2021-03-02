@@ -821,7 +821,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_kf_metric_source
     Properties:
-      TemplateURL: "https://sumologic-aws-observability-templates.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
       Parameters:
         Section1aSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
         Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", "Yes" ]
@@ -1051,7 +1051,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_kf_logs_source
     Properties:
-      TemplateURL: "https://sumologic-aws-observability-templates.s3.amazonaws.com/KinesisFirehoseCWLogs.template.yaml"
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWLogs.template.yaml"
       Parameters:
         Section1aSumoLogicKinesisLogsURL: !GetAtt KinesisFirehoseLogsSource.SUMO_ENDPOINT
         Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", !If [ install_kf_metric_source, "No", "Yes" ] ]
