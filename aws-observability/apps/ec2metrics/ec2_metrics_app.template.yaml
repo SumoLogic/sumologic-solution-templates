@@ -97,19 +97,6 @@ Conditions:
 
 Resources:
 
-  EC2MetricRule:
-    Type: Custom::SumoLogicMetricRules
-    Properties:
-      ServiceToken: !Ref Section3aParentStackLambdaARN
-      RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityEC2MetricsEntityRule"
-      MatchExpression: "Namespace=AWS/EC2 InstanceId=*"
-      ExtractVariables:
-        entity: "$InstanceId._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
   sumoApp:
     Type: Custom::App
     Condition: install_app
@@ -144,7 +131,6 @@ Resources:
   sumoMonitorAlerts:
     Type: Custom::AlertsMonitor
     Condition: install_app
-    DependsOn: sumoOverview
     Properties:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"

@@ -153,19 +153,6 @@ Conditions:
 
 Resources:
 
-  ALBMetricRule:
-    Type: Custom::SumoLogicMetricRules
-    Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
-      RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityALBMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/ApplicationELB LoadBalancer=*"
-      ExtractVariables:
-        entity: "$LoadBalancer._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
   sumoApp:
     Condition: install_app
     Type: Custom::App

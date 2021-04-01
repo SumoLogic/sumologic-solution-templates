@@ -179,20 +179,6 @@ Conditions:
 
 Resources:
 
-  LambdaMetricRule:
-    Type: Custom::SumoLogicMetricRules
-    DependsOn: AddFunctionNameField
-    Properties:
-      ServiceToken: !Ref Section7aParentStackLambdaARN
-      RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityLambdaMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/Lambda FunctionName=*"
-      ExtractVariables:
-        entity: "$FunctionName._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
   sumoApp:
     Type: Custom::App
     Condition: install_app
@@ -291,9 +277,8 @@ Resources:
         - ""
         - - "(_source="
           - !If [update_cloudwatch_logs_source, !Sub "\"${SumoHTTPUpdateSource.source_name}\"", !Ref Section6bCloudWatchLogsSourceName]
-          - " message logGroup /aws/lambda)"
-      FieldExtractionRuleParseExpression: '| json "logGroup"
-                                           | parse field=loggroup "/aws/lambda/*" as functionname
+          - " _sourceHost=/aws/lambda/*)"
+      FieldExtractionRuleParseExpression: '| parse field=_sourceHost "/aws/lambda/*" as functionname
                                            | tolowercase(functionname) as functionname
                                            | fields functionname'
       FieldExtractionRuleParseEnabled: true
