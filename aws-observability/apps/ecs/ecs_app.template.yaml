@@ -135,20 +135,6 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  MetricRule:
-    Type: Custom::SumoLogicMetricRules
-    DependsOn: AddClusterNameField
-    Properties:
-      ServiceToken: !Ref Section4aParentStackLambdaARN
-      RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityECSMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/ECS ClusterName=*"
-      ExtractVariables:
-        entity: "$ClusterName._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
   sumoApp:
     Type: Custom::App
     Condition: install_app
