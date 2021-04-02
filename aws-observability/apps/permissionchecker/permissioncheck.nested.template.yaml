@@ -625,11 +625,65 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.2
+        SemanticVersion: 1.0.5
       Parameters:
-        LambdaARN: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
+        DestinationArnType: "Lambda"
+        DestinationArnValue: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
         LogGroupPattern: "lambda"
         UseExistingLogs: "false"
+
+  KinesisFirehoseMetricsStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
+      Parameters:
+        Section1aSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
+        Section2aCreateS3Bucket: "No"
+        Section2bFailedDataS3Bucket: !Ref CommonS3Bucket
+
+  KinesisFirehoseMetricsSource:
+    Type: Custom::HTTPSource
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SourceType: "KinesisMetric"
+      SourceName: "aws-observability-kf-metrics-source"
+      RemoveOnDeleteStack: true
+      SourceCategory: "Labs/Test"
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      Fields:
+        account: "Test"
+      RoleArn: !GetAtt SumoLogicSourceRole.Arn
+
+  KinesisFirehoseLogsStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWLogs.template.yaml"
+      Parameters:
+        Section1aSumoLogicKinesisLogsURL: !GetAtt KinesisFirehoseLogsSource.SUMO_ENDPOINT
+        Section2aCreateS3Bucket: "No"
+        Section2bFailedDataS3Bucket: !Ref CommonS3Bucket
+
+  KinesisFirehoseLogsSource:
+    Type: Custom::HTTPSource
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SourceType: "KinesisLog"
+      SourceName: "aws-observability-kf-logs-source"
+      RemoveOnDeleteStack: true
+      SourceCategory: "Labs/Test"
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      Fields:
+        account: "Test"
+        namespace: "aws/lambda"
+        region: !Ref "AWS::Region"
 
 Outputs:
   LambdaHelperARN:
