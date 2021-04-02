@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version: v2.2.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
+Description: "Version - v2.2.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -388,7 +388,7 @@ Resources:
         SumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: "No"
-        CloudWatchMetricsNameSpaces: !Ref Section4bMetricsNameSpaces
+        CloudWatchMetricsNameSpaces: !Ref Section8bMetricsNameSpaces
         CreateKinesisFirehoseMetricsSource: !If [ create_kf_metrics_source, "Yes", "No" ]
         KinesisFirehoseMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
         KinesisFirehoseMetricSourceCategory: !FindInMap [ CommonData, CollectorDetails, CloudWatchMetricSourceCategory ]
@@ -429,7 +429,7 @@ Resources:
         AutoSubscribeLogGroups: !If [create_kf_logs_source, "Yes", !If [ create_cw_logs_source, "Yes", "No" ] ]
         AutoSubscribeLogGroupsLambdaOptions: !Ref Section7cAutoSubscribeLogGroupsLambdaOptions
         AutoSubscribeDestinationARNType: !If [create_kf_logs_source, "Kinesis",  "Lambda" ]
-        AutoSubscribeLambdaARN: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, !If [ create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, "" ] ]
+        AutoSubscribeDestinationARN: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, !If [ create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, "" ] ]
         AutoSubscribeLambdaLogGroupPattern: !Ref Section7dAutoSubscribeLambdaLogGroupPattern
         AutoSubscribeRoleArn: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsRoleARN,  "" ]
 
@@ -465,7 +465,7 @@ Resources:
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCloudWatchExistingSourceAPIUrl: !If [install_cloudwatch_metrics_source, "", !Ref Section4bCloudWatchExistingSourceAPIUrl]
+        Section4aCloudWatchExistingSourceAPIUrl: !If [create_kf_metrics_source, "", !Ref Section4bCloudWatchExistingSourceAPIUrl]
         Section5aALBLogsAPIUrl: !If [create_alb_source, "", !Ref Section5cALBLogsSourceUrl]
         Section5bALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
