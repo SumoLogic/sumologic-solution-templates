@@ -143,7 +143,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -164,21 +167,30 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} functionname={{functionname}} Resource=* | sum by account, region, namespace | timeshift -1d",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} functionname={{functionname}} Resource=* | sum by account, region, namespace | timeshift -7d ",
               "queryType": "Metrics",
               "queryKey": "C",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -199,21 +211,30 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Errors statistic=Sum account={{account}} region={{region}} functionname={{functionname}} Resource=* | sum by account, region, namespace | timeshift 1d",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Errors statistic=Sum account={{account}} region={{region}} functionname={{functionname}} Resource=* | sum by account, region, namespace | timeshift 7d",
               "queryType": "Metrics",
               "queryKey": "C",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -234,21 +255,30 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Duration statistic=average account={{account}} region={{region}} functionname={{functionname}} Resource=* | avg by account, region, namespace | timeshift 1d",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Duration statistic=average account={{account}} region={{region}} functionname={{functionname}} Resource=* | avg by account, region, namespace | timeshift 7d",
               "queryType": "Metrics",
               "queryKey": "C",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -269,21 +299,30 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Throttles statistic=average account={{account}} region={{region}} functionname={{functionname}} Resource=* | avg by account, region, namespace | timeshift 1d",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Throttles statistic=average account={{account}} region={{region}} functionname={{functionname}} Resource=* | avg by account, region, namespace | timeshift 7d",
               "queryType": "Metrics",
               "queryKey": "C",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -300,11 +339,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Duration\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| sum(Duration) as %\"Total Duration\", avg(Duration) as %\"Avg Duration\", count as Invocations by functionname\n| top 10 functionname by %\"Avg Duration\", %\"Total Duration\", Invocations\n| format( \"%.2f\",%\"Avg Duration\") as %\"Avg Duration\"\n| format( \"%.2f\",%\"Total Duration\") as %\"Total Duration\"",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| sum(Duration) as %\"Total Duration\", avg(Duration) as %\"Avg Duration\", count as Invocations by functionname\n| top 10 functionname by %\"Avg Duration\", %\"Total Duration\", Invocations\n| format( \"%.2f\",%\"Avg Duration\") as %\"Avg Duration\"\n| format( \"%.2f\",%\"Total Duration\") as %\"Total Duration\"",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -321,11 +363,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Memory Used Size\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| max(MaxMemoryUsed) as MaxMemoryUsed, avg(MemorySize) as AvgMemorySize by functionname\n| top 10 functionname by MaxMemoryUsed, functionname asc, AvgMemorySize",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Memory Used Size\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| max(MaxMemoryUsed) as MaxMemoryUsed, avg(MemorySize) as AvgMemorySize by functionname\n| top 10 functionname by MaxMemoryUsed, functionname asc, AvgMemorySize",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -342,11 +387,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as eventCount",
+              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as eventCount",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -363,11 +411,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Memory Size Used\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| avg(MemorySize) as MemorySizeAvg, avg(MaxMemoryUsed) as MaxMemoryUsedAvg by functionname\n| (MemorySizeAvg - MaxMemoryUsedAvg) as RemainingMemory\n| RemainingMemory/MemorySizeAvg as wastageRatio\n| top 5 functionname by wastageRatio, RemainingMemory, MaxMemoryUsedAvg\n| fields -wastageRatio",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Memory Size Used\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| avg(MemorySize) as MemorySizeAvg, avg(MaxMemoryUsed) as MaxMemoryUsedAvg by functionname\n| (MemorySizeAvg - MaxMemoryUsedAvg) as RemainingMemory\n| RemainingMemory/MemorySizeAvg as wastageRatio\n| top 5 functionname by wastageRatio, RemainingMemory, MaxMemoryUsedAvg\n| fields -wastageRatio",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -406,7 +457,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -423,11 +477,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as num_errors by errorMessage, functionname \n| top 30 errorMessage, functionname by num_errors desc, errorMessage asc, functionname asc",
+              "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as num_errors by errorMessage, functionname\n| top 30 errorMessage, functionname by num_errors desc, errorMessage asc, functionname asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -448,14 +505,20 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=ProvisionedConcurrencyInvocations statistic=Sum account={{account}} region={{region}} functionname={{functionname}} Resource=* | sum by account, region, namespace",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -476,7 +539,10 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "The number of events that are being processed on provisioned concurrency. For each invocation of an alias or version with provisioned concurrency, Lambda emits the current count.",
@@ -497,7 +563,10 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "The number of events that are being processed on provisioned concurrency, divided by the total amount of provisioned concurrency allocated. For example, .5 indicates that 50 percent of allocated provisioned concurrency is in use. For each invocation of an alias or version with provisioned concurrency, Lambda emits the current count.",
@@ -518,7 +587,10 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "The number of invocations that are run on nonprovisioned concurrency, when all provisioned concurrency is in use. For a version or alias that is configured to use provisioned concurrency, Lambda increments the count once for each invocation that runs on non-provisioned concurrency.",
@@ -539,7 +611,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -556,11 +631,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (!isEmpty(errorMessage), 1, 0) as haserror\n| if (!isEmpty(errorMessage), 0, 1) as noerror\n| sum(haserror) as failures, sum(noerror) as successes by functionname\n| top 10 functionname by failures, successes",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (!isEmpty(errorMessage), 1, 0) as haserror\n| if (!isEmpty(errorMessage), 0, 1) as noerror\n| sum(haserror) as failures, sum(noerror) as successes by functionname\n| top 10 functionname by failures, successes",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -577,11 +655,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count by functionname, version\n| transpose row functionname column version",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count by functionname, version\n| transpose row functionname column version",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -620,7 +701,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -807,14 +891,20 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} functionname=* Resource=* | avg",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -835,7 +925,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -856,7 +949,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -877,7 +973,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -898,7 +997,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -915,11 +1017,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId2,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| if (eventStatus matches \"Success\", RequestId, RequestId2) as RequestId\n| count as frequency by functionname, version, eventStatus, requestId\n| sort by functionname asc\n| limit 100",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId2>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId2>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| json \"requestID\", \"record.requestId\" as RequestId3, RequestId4 nodrop\n| if (isEmpty(RequestId), RequestId2, RequestId) as RequestId | if (isEmpty(RequestId), RequestId3, RequestId) as RequestId | if (isEmpty(RequestId), RequestId4, RequestId) as RequestId\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as frequency by functionname, version, eventStatus, requestId\n| sort by functionname asc\n| limit 100",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -940,7 +1045,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -957,11 +1065,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count as events by version\n| sort by events, version asc",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count as events by version\n| sort by events, version asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -982,7 +1093,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1017,11 +1131,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| timeslice 15m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| timeslice 15m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1038,11 +1155,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count by functionname, version\n| transpose row version column functionname",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count by functionname, version\n| transpose row version column functionname",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1059,11 +1179,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1080,11 +1203,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message Duration aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n| sum(Duration) as Duration by functionname, _timeslice\n| transpose row _timeslice column functionname",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n| sum(Duration) as Duration by functionname, _timeslice\n| transpose row _timeslice column functionname",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1236,7 +1362,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1257,7 +1386,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1278,7 +1410,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1299,7 +1434,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1320,7 +1458,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1341,7 +1482,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1362,7 +1506,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1383,7 +1530,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1555,11 +1705,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as eventCount",
+              "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as eventCount",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1576,11 +1729,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as Frequency by errorMessage, functionname, version\n| top 30 errorMessage, functionname, version by Frequency desc, errorMessage asc, functionname asc, version asc",
+              "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as Frequency by errorMessage, functionname, version\n| top 30 errorMessage, functionname, version by Frequency desc, errorMessage asc, functionname asc, version asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1601,14 +1757,20 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Errors Statistic=Sum account={{account}} region={{region}} functionname=* Resource=* | avg ",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1629,14 +1791,20 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=IteratorAge Statistic=Maximum account={{account}} region={{region}} functionname=* | avg",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1657,14 +1825,20 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Throttles Statistic=Sum account={{account}} region={{region}} functionname=* Resource=*  | avg ",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1685,14 +1859,20 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=DeadLetterErrors Statistic=Sum account={{account}} region={{region}} functionname=* Resource=* | avg ",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1709,11 +1889,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}} message aws lambda\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Error .*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count by version\n| sort by _count, version asc",
+              "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count by version\n| sort by _count, version asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1752,7 +1935,10 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1773,7 +1959,10 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1790,11 +1979,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda WARNING\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>WARNING):(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>WARNING)]\\s(?<warningMessage>.*)\" nodrop\n| where !isEmpty(warningMessage)\n| count as eventCount",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} WARNING\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL|WARNING):(?<warningMessage>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL|WARNING)]\\s(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL|WARNING)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL|WARNING) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<warningMessage>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| where !isEmpty(warningMessage)\n| count as eventCount",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1811,11 +2003,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda WARNING\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>WARNING):(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>WARNING)]\\s(?<warningMessage>.*)\" nodrop\n| where !isEmpty(warningMessage)\n| count by version\n| sort by _count, version asc",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} WARNING\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL|WARNING):(?<warningMessage>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL|WARNING)]\\s(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL|WARNING)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL|WARNING) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<warningMessage>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| where !isEmpty(warningMessage)\n| count by version\n| sort by _count, version asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1832,11 +2027,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda WARNING\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse field=message \"*\\t*\\t*\" as time,RequestId,errorObj nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>WARNING):(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>WARNING)]\\s(?<warningMessage>.*)\" nodrop\n| where !isEmpty(warningMessage)\n| count as Frequency by warningMessage, functionname, version\n| top 30 warningMessage, functionname, version by Frequency desc, warningMessage asc, functionname asc, version asc",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} WARNING\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL|WARNING):(?<warningMessage>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL|WARNING)]\\s(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL|WARNING)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<warningMessage>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL|WARNING) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<warningMessage>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| where !isEmpty(warningMessage)\n| count as Frequency by warningMessage, functionname, version\n| top 30 warningMessage, functionname, version by Frequency desc, warningMessage asc, functionname asc, version asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2000,11 +2198,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Memory Used\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n| sum(MaxMemoryUsed) as MaxMemoryUsedSum by functionname, _timeslice\n| transpose row _timeslice column functionname",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Memory Used\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n| sum(MaxMemoryUsed) as MaxMemoryUsedSum by functionname, _timeslice\n| transpose row _timeslice column functionname",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2021,11 +2222,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Duration\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| sum(Duration) as TotalDuration, avg(Duration) as AvgDuration, min(Duration) as MinDuration, max(Duration) as MaxDuration by functionname\n| sort by TotalDuration, functionname asc",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| sum(Duration) as TotalDuration, avg(Duration) as AvgDuration, min(Duration) as MinDuration, max(Duration) as MaxDuration by functionname\n| sort by TotalDuration, functionname asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2042,11 +2246,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Duration Memory Used Size\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count as Frequency by functionname, RequestId, Duration, BilledDuration, MemorySize, MaxMemoryUsed, _messagetime \n| sort by _messagetime | limit 20\n| formatDate(_messagetime, \"yyyy/MM/dd HH:mm:ss Z\") as time\n| fields -Frequency\n| fields -_messagetime\n",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration Memory Used Size\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count as Frequency by functionname, RequestId, Duration, BilledDuration, MemorySize, MaxMemoryUsed, _messagetime \n| sort by _messagetime | limit 20\n| formatDate(_messagetime, \"yyyy/MM/dd HH:mm:ss Z\") as time\n| fields -Frequency\n| fields -_messagetime\n",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2063,11 +2270,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Memory Used\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| sum(MaxMemoryUsed) as MemoryUsed by functionname\n| sort by MemoryUsed, functionname asc",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Memory Used\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| sum(MaxMemoryUsed) as MemoryUsed by functionname\n| sort by MemoryUsed, functionname asc",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2084,11 +2294,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Duration\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| avg(BilledDuration) as BilledDurationAvg, avg(Duration) as AvgDuration by functionname\n| BilledDurationAvg-AvgDuration as BilledUnusedDuration\n| BilledUnusedDuration/BilledDurationAvg as wastageRatio\n| top 5 functionname by wastageRatio, BilledUnusedDuration, AvgDuration\n| fields -wastageRatio",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| avg(BilledDuration) as BilledDurationAvg, avg(Duration) as AvgDuration by functionname\n| BilledDurationAvg-AvgDuration as BilledUnusedDuration\n| BilledUnusedDuration/BilledDurationAvg as wastageRatio\n| top 5 functionname by wastageRatio, BilledUnusedDuration, AvgDuration\n| fields -wastageRatio",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2105,11 +2318,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Memory Size Used\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| avg(MemorySize) as MemorySizeAvg, avg(MaxMemoryUsed) as MaxMemoryUsedAvg by functionname\n| (MemorySizeAvg-MaxMemoryUsedAvg) as AvgUnusedAllocatedMemory\n| AvgUnusedAllocatedMemory/MemorySizeAvg as wastageRatio\n| top 5 functionname by wastageRatio, AvgUnusedAllocatedMemory, MaxMemoryUsedAvg\n| fields -wastageRatio",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Memory Size Used\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| avg(MemorySize) as MemorySizeAvg, avg(MaxMemoryUsed) as MaxMemoryUsedAvg by functionname\n| (MemorySizeAvg-MaxMemoryUsedAvg) as AvgUnusedAllocatedMemory\n| AvgUnusedAllocatedMemory/MemorySizeAvg as wastageRatio\n| top 5 functionname by wastageRatio, AvgUnusedAllocatedMemory, MaxMemoryUsedAvg\n| fields -wastageRatio",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2126,11 +2342,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Duration Memory\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by functionname\n| sort by ComputeUsage, functionname",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration Memory\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by functionname\n| sort by ComputeUsage, functionname",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2147,11 +2366,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Duration Memory\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by functionname, _timeslice\n| transpose row _timeslice column functionname",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration Memory\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by functionname, _timeslice\n| transpose row _timeslice column functionname",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2347,14 +2569,20 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=Duration Statistic=Average account={{account}} region={{region}} functionname=* | avg",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2366,7 +2594,7 @@
           "id": "993CBEB1F9DB9F9F",
           "key": "panelpane-4fda36319f35b841",
           "title": "Note:",
-          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"markdown\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+          "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"markdown\",\"text\":\"\"},\"series\":{},\"title\":{\"fontSize\":20}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "TextPanel",
           "text": "Concurrent Executions: This shows you the concurrent executions at an account level, and for any function with a custom concurrency limit. Both graphs will be same if none of the functions are configured with concurrency limit. Not applicable for versions or aliases.\n\nUnreservedConcurrentExecutions: This shows you the total concurrent executions for functions assigned to the default unreserved concurrency pool. Not applicable for functions, versions, or aliases.\n\nInvocations vs Errors vs Throttle: It's important to distinguish between an invocation request and an actual invocation. It is possible for the error rate to exceed the number of billed Lambda function invocations. Lambda reports an invocation metric only if the Lambda function code is executed. If the invocation request yields a throttling or other initialization error that prevents the Lambda function code from being invoked, Lambda will report an error, but it does not log an invocation metric."
@@ -2393,21 +2621,30 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=UnreservedConcurrentExecutions Statistic=Average account={{account}} region={{region}} | avg by namespace, region, account | timeshift -1d",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=UnreservedConcurrentExecutions Statistic=Average account={{account}} region={{region}} | avg by namespace, region, account | timeshift -7d",
               "queryType": "Metrics",
               "queryKey": "C",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2428,14 +2665,20 @@
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             },
             {
               "queryString": "Namespace={{namespace}} metric=ConcurrentExecutions Statistic=Average account={{account}} region={{region}} functionname=* |  sum",
               "queryType": "Metrics",
               "queryKey": "B",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2461,11 +2704,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Memory Size Used\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 10m\n| sum(MemorySize) as MemorySize, sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| MemorySize - MaxMemoryUsed as UnusedMemory\n| predict UnusedMemory by 10m model=ar, forecast=18\n| fields - MaxMemoryUsed, MemorySize, UnusedMemory_error, UnusedMemory_linear",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Memory Size Used\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 10m\n| sum(MemorySize) as MemorySize, sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| MemorySize - MaxMemoryUsed as UnusedMemory\n| predict UnusedMemory by 10m model=ar, forecast=18\n| fields - MaxMemoryUsed, MemorySize, UnusedMemory_error, UnusedMemory_linear",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2482,11 +2728,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Memory Used\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 10m\n| sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| predict MaxMemoryUsed by 10m model=ar, forecast=18\n| fields - MaxMemoryUsed_error, MaxMemoryUsed_linear",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Memory Used\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 10m\n| sum(MaxMemoryUsed) as MaxMemoryUsed by _timeslice\n| predict MaxMemoryUsed by 10m model=ar, forecast=18\n| fields - MaxMemoryUsed_error, MaxMemoryUsed_linear",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2503,11 +2752,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Duration Memory Size\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 10m\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by _timeslice\n| predict ComputeUsage by 10m model=ar, forecast=18\n| fields - ComputeUsage_linear, ComputeUsage_error",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration Memory Size\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 10m\n// AWS Billing Calculation\n| BilledDuration/1000 as BillDurationSeconds\n| MemorySize/1024 as MemorySizeGB\n| BillDurationSeconds * MemorySizeGB as ComputeUsage\n| sum(ComputeUsage) as ComputeUsage by _timeslice\n| predict ComputeUsage by 10m model=ar, forecast=18\n| fields - ComputeUsage_linear, ComputeUsage_error",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2524,11 +2776,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} message aws lambda Duration\n| json \"message\"\n| json \"logStream\", \"logGroup\"\n// | _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 10m\n| sum(BilledDuration) as BilledDuration by _timeslice\n| predict BilledDuration by 10m model=ar, forecast=18\n| fields - BilledDuration_error, BilledDuration_linear",
+              "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionName\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 10m\n| sum(BilledDuration) as BilledDuration by _timeslice\n| predict BilledDuration by 10m model=ar, forecast=18\n| fields - BilledDuration_error, BilledDuration_linear",
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Auto",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2672,7 +2927,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2693,7 +2951,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2714,7 +2975,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2735,7 +2999,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2756,7 +3023,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -2777,7 +3047,10 @@
               "queryType": "Logs",
               "queryKey": "A",
               "metricsQueryMode": null,
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
