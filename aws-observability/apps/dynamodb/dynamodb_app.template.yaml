@@ -153,7 +153,7 @@ Resources:
         - - "(_source="
           - !If [source_updated, !Sub "\"${Section3aCloudTrailLogsSourceName}\"", !Ref Section3aCloudTrailLogsSourceName]
           - " (\"dynamodb.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters.tableName" as eventSource, region, tablename
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters.tableName" as eventSource, region, tablename nodrop
                                            | where eventSource = "dynamodb.amazonaws.com"
                                            | "aws/dynamodb" as namespace
                                            | tolowercase(tablename) as tablename
