@@ -121,6 +121,8 @@ Tests:
             - KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
             - KinesisFirehoseMetricsStack.KinesisMetricsRole
             - KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambda
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambdaRole
             - KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
             - KinesisFirehoseLogsStack.FirehoseLogsRole
             - KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
@@ -181,6 +183,7 @@ Tests:
             CreateFifthMetricsSource: 'No'
             FifthMetricsSourceNamespace: ''
           KinesisFirehoseMetricsStack:
+            Section1bNamespaceFilter: 'AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS'
             Section2aCreateS3Bucket: 'No'
             Section2bFailedDataS3Bucket: "aws-observability-logs"
           KinesisFirehoseLogsStack:
@@ -602,6 +605,7 @@ Tests:
         CreateKinesisFirehoseMetricsSource: "Yes"
         KinesisFirehoseMetricsSourceName: "Sourabh KF Metrics Source"
         KinesisFirehoseMetricSourceCategory: "Labs/Sourabh/Metrics"
+        CloudWatchMetricsNameSpaces: 'AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -631,6 +635,8 @@ Tests:
             - KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
             - KinesisFirehoseMetricsStack.KinesisMetricsRole
             - KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambda
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambdaRole
       - AssertType: OutputsCheck
         Assert:
           Outputs:
@@ -648,6 +654,7 @@ Tests:
       - AssertType: ParameterCheck
         Assert:
           KinesisFirehoseMetricsStack:
+            Section1bNamespaceFilter: 'AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS'
             Section2aCreateS3Bucket: 'Yes'
             Section2bFailedDataS3Bucket: "aws-observability-logs"
   - TestName: installkflogsource
@@ -720,6 +727,7 @@ Tests:
         CreateKinesisFirehoseLogSource: "Yes"
         KinesisFirehoseLogsSourceName: "Sourabh KF Logs Source"
         KinesisFirehoseLogsSourceCategory: "Labs/Sourabh/Logs"
+        CloudWatchMetricsNameSpaces: 'AWS/ApplicationELB'
     Skip: false
     Assertions:
       - AssertType: ResourceExistence
@@ -751,6 +759,8 @@ Tests:
             - KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
             - KinesisFirehoseMetricsStack.KinesisMetricsRole
             - KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambda
+            - KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambdaRole
             - KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
             - KinesisFirehoseLogsStack.FirehoseLogsRole
             - KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
@@ -783,6 +793,7 @@ Tests:
       - AssertType: ParameterCheck
         Assert:
           KinesisFirehoseMetricsStack:
+            Section1bNamespaceFilter: 'AWS/ApplicationELB'
             Section2aCreateS3Bucket: 'Yes'
             Section2bFailedDataS3Bucket: "aws-observability-logs"
           KinesisFirehoseLogsStack:

@@ -27,7 +27,8 @@ Metadata:
           default: "4. Sumo Logic AWS CloudWatch Metrics Source"
         Parameters:
           - Section4aCreateMetricsSource
-          - Section4bCloudWatchExistingSourceAPIUrl
+          - Section4bMetricsNameSpaces
+          - Section4cCloudWatchExistingSourceAPIUrl
 
       - Label:
           default: "5. Sumo Logic AWS ALB Log Source"
@@ -58,7 +59,6 @@ Metadata:
           default: "8. Sumo Logic Root Cause Explorer Sources"
         Parameters:
           - Section8aRootCauseExplorerOptions
-          - Section8bMetricsNameSpaces
 
     ParameterLabels:
       Section1aSumoLogicDeployment:
@@ -80,7 +80,9 @@ Metadata:
 
       Section4aCreateMetricsSource:
         default: "Create the Sumo Logic AWS Kinesis Firehose Source for Metrics"
-      Section4bCloudWatchExistingSourceAPIUrl:
+      Section4bMetricsNameSpaces:
+        default: "Sumo Logic AWS Metrics Namespaces"
+      Section4cCloudWatchExistingSourceAPIUrl:
         default: "Existing Source API URL for a Sumo Logic AWS Kinesis Firehose Metrics Source"
 
       Section5aAutoEnableS3LogsALBResourcesOptions:
@@ -114,8 +116,6 @@ Metadata:
 
       Section8aRootCauseExplorerOptions:
         default: "Select the Sumo Logic Root Cause Explorer Sources"
-      Section8bMetricsNameSpaces:
-        default: "Sumo Logic AWS Metrics Namespaces"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -180,7 +180,13 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section4bCloudWatchExistingSourceAPIUrl:
+  Section4bMetricsNameSpaces:
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
+    Description: "Provide Comma delimited list of the namespaces which will be used for Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
+    Type: String
+    AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS)\\s*(,|$))+"
+    ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
+  Section4cCloudWatchExistingSourceAPIUrl:
     Type: String
     Description: "Required when already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
@@ -280,13 +286,6 @@ Parameters:
       - 'Xray Source'
       - 'Both'
       - 'None'
-  Section8bMetricsNameSpaces:
-    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
-    Description: "Provide Comma delimited list of the namespaces which will be used for Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
-    Type: String
-    AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS)\\s*(,|$))+"
-    ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
-
 
 Conditions:
   # Condition for Metrics Source
@@ -388,7 +387,7 @@ Resources:
         SumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: "No"
-        CloudWatchMetricsNameSpaces: !Ref Section8bMetricsNameSpaces
+        CloudWatchMetricsNameSpaces: !Ref Section4bMetricsNameSpaces
         CreateKinesisFirehoseMetricsSource: !If [ create_kf_metrics_source, "Yes", "No" ]
         KinesisFirehoseMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
         KinesisFirehoseMetricSourceCategory: !FindInMap [ CommonData, CollectorDetails, CloudWatchMetricSourceCategory ]
@@ -465,7 +464,7 @@ Resources:
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCloudWatchExistingSourceAPIUrl: !If [create_kf_metrics_source, "", !Ref Section4bCloudWatchExistingSourceAPIUrl]
+        Section4aCloudWatchExistingSourceAPIUrl: !If [create_kf_metrics_source, "", !Ref Section4cCloudWatchExistingSourceAPIUrl]
         Section5aALBLogsAPIUrl: !If [create_alb_source, "", !Ref Section5cALBLogsSourceUrl]
         Section5bALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
