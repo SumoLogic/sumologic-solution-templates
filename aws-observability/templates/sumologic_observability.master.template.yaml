@@ -24,9 +24,9 @@ Metadata:
           - Section3aInstallObservabilityApps
 
       - Label:
-          default: "4. Sumo Logic AWS CloudWatch Metrics Source"
+          default: "4. Sumo Logic AWS CloudWatch Metrics Sources"
         Parameters:
-          - Section4aCreateMetricsSource
+          - Section4aCreateMetricsSourceOptions
           - Section4bMetricsNameSpaces
           - Section4cCloudWatchExistingSourceAPIUrl
 
@@ -78,12 +78,12 @@ Metadata:
       Section3aInstallObservabilityApps:
         default: "Install AWS Observability Apps and Alerts"
 
-      Section4aCreateMetricsSource:
-        default: "Create the Sumo Logic AWS Kinesis Firehose Source for Metrics"
+      Section4aCreateMetricsSourceOptions:
+        default: "Select the kind of CloudWatch Metrics Source to create"
       Section4bMetricsNameSpaces:
         default: "Sumo Logic AWS Metrics Namespaces"
       Section4cCloudWatchExistingSourceAPIUrl:
-        default: "Existing Source API URL for a Sumo Logic AWS Kinesis Firehose Metrics Source"
+        default: "Existing Sumo Logic Metrics Source API URL"
 
       Section5aAutoEnableS3LogsALBResourcesOptions:
         default: "Enable ALB Access logging"
@@ -172,17 +172,18 @@ Parameters:
       - 'Yes'
       - 'No'
 
-  Section4aCreateMetricsSource:
+  Section4aCreateMetricsSourceOptions:
     Type: String
-    Description: "Yes - Creates a Sumo Logic AWS Kinesis Firehose for Metrics Source that collects CloudWatch metrics from an AWS account.
-                  No - If you already have an AWS Kinesis Firehose for Metrics Source collecting CloudWatch metrics into Sumo Logic."
-    Default: 'Yes'
+    Description: "CloudWatch Metrics Source - Creates Sumo Logic AWS CloudWatch Metrics Sources.
+                  Kinesis Firehose Metrics Source -  Creates a Sumo Logic AWS Kinesis Firehose for Metrics Source."
+    Default: 'Kinesis Firehose Metrics Source'
     AllowedValues:
-      - 'Yes'
-      - 'No'
+      - 'CloudWatch Metrics Source'
+      - 'Kinesis Firehose Metrics Source'
+      - 'None'
   Section4bMetricsNameSpaces:
     Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
-    Description: "Provide Comma delimited list of the namespaces which will be used for Inventory and Kinesis Firehose Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
+    Description: "Provide Comma delimited list of the namespaces which will be used for both AWS CLoudWatch Metrics and Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
     Type: String
     AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS)\\s*(,|$))+"
     ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
@@ -308,7 +309,8 @@ Conditions:
   # Sources Create Condition
   create_cloudtrail_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
   create_alb_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
-  create_kf_metrics_source: !Equals [ !Ref Section4aCreateMetricsSource, 'Yes' ]
+  create_kf_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourceOptions, 'Kinesis Firehose Metrics Source' ]
+  create_cw_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourceOptions, 'CloudWatch Metrics Source' ]
   create_kf_logs_source: !Or
     - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Kinesis Firehose Log Source' ]
     - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)' ]
@@ -317,6 +319,9 @@ Conditions:
     - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)' ]
 
   # Sources Update Condition
+  install_cloudwatch_metrics_source: !Or
+    - !Condition create_kf_metrics_source
+    - !Condition create_cw_metrics_source
   create_cloudwatch_logs_source: !Or
     - !Condition create_kf_logs_source
     - !Condition create_cw_logs_source
@@ -386,8 +391,11 @@ Resources:
             Number: !Ref AWS::AccountId
         SumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
         CreateMetaDataSource: "No"
-        CreateCloudWatchMetricsSource: "No"
+        CreateCloudWatchMetricsSource: !If [ create_cw_metrics_source, "Yes", "No" ]
+        CloudWatchMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
         CloudWatchMetricsNameSpaces: !Ref Section4bMetricsNameSpaces
+        CloudWatchMetricSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudWatchMetricSourceCategory]
+        ScanInterval: 300000
         CreateKinesisFirehoseMetricsSource: !If [ create_kf_metrics_source, "Yes", "No" ]
         KinesisFirehoseMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
         KinesisFirehoseMetricSourceCategory: !FindInMap [ CommonData, CollectorDetails, CloudWatchMetricSourceCategory ]
@@ -464,7 +472,7 @@ Resources:
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aAccountAlias: !Ref Section2aAccountAlias
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
-        Section4aCloudWatchExistingSourceAPIUrl: !If [create_kf_metrics_source, "", !Ref Section4cCloudWatchExistingSourceAPIUrl]
+        Section4aCloudWatchExistingSourceAPIUrl: !If [install_cloudwatch_metrics_source, "", !Ref Section4cCloudWatchExistingSourceAPIUrl]
         Section5aALBLogsAPIUrl: !If [create_alb_source, "", !Ref Section5cALBLogsSourceUrl]
         Section5bALBLogsSourceName: !If [create_alb_source, "*alb-logs*", ""]
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
