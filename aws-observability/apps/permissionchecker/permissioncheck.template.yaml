@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Note: Before deploying this template, please select the appropriate region. This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
+Description: "Version - v2.2.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
 Transform: 'AWS::Serverless-2016-10-31'
 
 Metadata:
@@ -58,7 +58,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.1.0"
+      Version: "v2.2.0"
 
 Resources:
 
@@ -79,6 +79,11 @@ Resources:
 
   LambdaRole:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -123,11 +128,16 @@ Resources:
                   - "s3:DeleteObject"
                   - "s3:GetObject"
                   - "s3:ListBucket"
+                  - "s3:DeleteBucketPolicy"
                   - "sns:DeleteEndpoint"
                   - "sns:SetTopicAttributes"
                   - "sns:GetTopicAttributes"
                   - "sns:DeleteTopic"
                   - "sqs:DeleteQueue"
+                  - "firehose:DescribeDeliveryStream"
+                  - "firehose:DeleteDeliveryStream"
+                  - "cloudwatch:GetMetricStream"
+                  - "cloudwatch:DeleteMetricStream"
                 Resource: "*"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
