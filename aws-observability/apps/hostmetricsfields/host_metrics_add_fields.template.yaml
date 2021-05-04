@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Lambda Function to add fields to host metrics sources based on the available instances in all regions of the current AWS account."
+Description: "Version - v2.2.0: Lambda Function to add fields to host metrics sources based on the available instances in all regions of the current AWS account."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -130,6 +130,11 @@ Resources:
 
   LambdaRole:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -159,7 +164,7 @@ Resources:
       Runtime: python3.7
       Code:
         S3Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        S3Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.11.zip"
+        S3Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.12.zip"
       MemorySize: 128
       Timeout: 900
       Role: !GetAtt LambdaRole.Arn

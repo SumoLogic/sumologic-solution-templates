@@ -23,10 +23,10 @@ Section2aAccountAlias                         = "<YOUR AWS ACCOUNT ALIAS>" # Ple
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-aws-observability-apps
 Section3aInstallObservabilityApps = "Yes"
 
-## Sumo Logic AWS CloudWatch Metrics and Inventory Source ##
+## Sumo Logic AWS CloudWatch Metrics Sources ##
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-aws-cloudwatch-metrics-and-inventory-source
-Section4aCreateMetricsSourcesOptions    = "Both"
-Section4bMetricsNameSpaces              = "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
+Section4aCreateMetricsSourceOptions     = "Kinesis Firehose Metrics Source"
+Section4bMetricsNameSpaces              = "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
 Section4cCloudWatchExistingSourceAPIUrl = ""
 
 ## Sumo Logic AWS ALB Log Source ##
@@ -46,11 +46,11 @@ Section6dCloudTrailBucketPathExpression = "AWSLogs/*/CloudTrail/*"
 
 ## Sumo Logic AWS Lambda CloudWatch HTTP Source ##
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-aws-lambda-cloudwatch-logs
-Section7aLambdaCreateCloudWatchLogsSource    = "Yes"
-Section7bLambdaCloudWatchLogsSourceUrl       = ""
-Section7cAutoSubscribeLogGroupsLambdaOptions = "Both"
-Section7dAutoSubscribeLambdaLogGroupPattern  = "lambda"
+Section7aLambdaCreateCloudWatchLogsSourceOptions = "Kinesis Firehose Log Source"
+Section7bLambdaCloudWatchLogsSourceUrl           = ""
+Section7cAutoSubscribeLogGroupsLambdaOptions     = "Both"
+Section7dAutoSubscribeLambdaLogGroupPattern      = "lambda"
 
-## Sumo Logic AWS X-Ray Source ##
+## Sumo Logic Root Cause Explorer Sources ##
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-aws-x-ray-source
-Section8aCreateAwsXraySource = "Yes"
+Section8aRootCauseExplorerOptions = "Both"

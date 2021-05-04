@@ -71,11 +71,11 @@ variable "Section2aAccountAlias" {
     error_message = "The \"Section2aAccountAlias\" must only contain lowercase letters, number and length less than or equal to 30 characters."
   }
 }
-# Sumo Logic AWS Observability Apps
+# Sumo Logic AWS Observability Apps and Alerts
 variable "Section3aInstallObservabilityApps" {
   type        = string
   default     = "Yes"
-  description = "Yes - Installs Apps (EC2, Application Load Balancer, RDS, API Gateway, Lambda and Dynamo DB) for the Sumo Logic AWS Observability Solution. All the Apps are installed in the folder 'Sumo Logic AWS Observability Apps'. No - Skips the installation of Apps."
+  description = "Yes - Installs Apps (EC2, Application Load Balancer, RDS, API Gateway, Lambda, Dynamo DB, ECS, ElastiCache and NLB) and Alerts for the Sumo Logic AWS Observability Solution. All the Apps are installed in the folder 'AWS Observability'. No - Skips the installation of Apps and Alerts."
   validation {
     condition = contains([
       "Yes",
@@ -83,24 +83,23 @@ variable "Section3aInstallObservabilityApps" {
     error_message = "Argument \"Section3aInstallObservabilityApps\" must be either \"Yes\", or \"No\"."
   }
 }
-# Sumo Logic AWS CloudWatch Metrics and Inventory Source
-variable "Section4aCreateMetricsSourcesOptions" {
+# Sumo Logic AWS CloudWatch Metrics Sources
+variable "Section4aCreateMetricsSourceOptions" {
   type        = string
-  default     = "Both"
-  description = "CloudWatchMetrics - Creates a Sumo Logic CloudWatch Metrics Source, which collects metrics for multiple namespaces from the region selected. InventorySource - Creates a Sumo Logic Inventory Source used by Root Cause Explorer."
+  default     = "Kinesis Firehose Metrics Source"
+  description = "CloudWatch Metrics Source - Creates Sumo Logic AWS CloudWatch Metrics Sources. Kinesis Firehose Metrics Source -  Creates a Sumo Logic AWS Kinesis Firehose for Metrics Source."
   validation {
     condition = contains([
-      "CloudWatchMetrics",
-      "InventorySource",
-      "Both",
-    "None"], var.Section4aCreateMetricsSourcesOptions)
-    error_message = "Argument \"Section4aCreateMetricsSourcesOptions\" must be either \"CloudWatchMetrics\", \"InventorySource\", \"Both\" or \"None\"."
+      "CloudWatch Metrics Source",
+      "Kinesis Firehose Metrics Source",
+    "None"], var.Section4aCreateMetricsSourceOptions)
+    error_message = "Argument \"Section4aCreateMetricsSourceOptions\" must be either \"Kinesis Firehose Metrics Source\", \"CloudWatch Metrics Source\" or \"None\"."
   }
 }
 variable "Section4bMetricsNameSpaces" {
   type        = string
-  default     = "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
-  description = "Provide Comma delimited list of the namespaces which will be used for both AWS CLoudWatch Metrics and Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
+  default     = "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
+  description = "Provide Comma delimited list of the namespaces which will be used for both AWS CLoudWatch Metrics and Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
 }
 variable "Section4cCloudWatchExistingSourceAPIUrl" {
   type        = string
@@ -140,7 +139,7 @@ variable "Section5cALBLogsSourceUrl" {
 variable "Section5dALBS3LogsBucketName" {
   type        = string
   default     = ""
-  description = "Provide a name of existing S3 bucket name where you would like to store ALB logs. If this is empty, a new bucket will be created in the region."
+  description = "If you selected 'No' to creating a new source above, skip this step. Provide a name of existing S3 bucket name where you would like to store ALB logs. If this is empty, a new bucket will be created in the region."
 }
 variable "Section5eALBS3BucketPathExpression" {
   type        = string
@@ -167,7 +166,7 @@ variable "Section6bCloudTrailLogsSourceUrl" {
 variable "Section6cCloudTrailLogsBucketName" {
   type        = string
   default     = ""
-  description = "Provide a name of existing S3 bucket name where you would like to store CloudTrail logs. If this is empty, a new bucket will be created in the region."
+  description = "If you selected 'No' to creating a new source above, skip this step. Provide a name of existing S3 bucket name where you would like to store CloudTrail logs. If this is empty, a new bucket will be created in the region."
 }
 variable "Section6dCloudTrailBucketPathExpression" {
   type        = string
@@ -175,15 +174,17 @@ variable "Section6dCloudTrailBucketPathExpression" {
   description = "This is required in case the above existing bucket is already configured to receive CloudTrail logs. If this is blank, Sumo Logic will store logs in the path expression: AWSLogs/*/CloudTrail/*"
 }
 # Sumo Logic AWS Lambda CloudWatch HTTP Source
-variable "Section7aLambdaCreateCloudWatchLogsSource" {
+variable "Section7aLambdaCreateCloudWatchLogsSourceOptions" {
   type        = string
-  default     = "Yes"
-  description = "Yes - Creates the Sumo Logic CloudWatch Log Source that collects Lambda logs from AWS. No - If you already have a CloudWatch Log source collecting Lambda logs into Sumo Logic."
+  default     = "Kinesis Firehose Log Source"
+  description = "Lambda Log Forwarder - Creates a Sumo Logic CloudWatch Log Source that collects CloudWatch logs via a Lambda function. Kinesis Firehose Log Source - Creates a Sumo Logic Kinesis Firehose Source to collect CloudWatch logs."
   validation {
     condition = contains([
-      "Yes",
-    "No"], var.Section7aLambdaCreateCloudWatchLogsSource)
-    error_message = "Argument \"Section7aLambdaCreateCloudWatchLogsSource\" must be either \"Yes\", or \"No\"."
+      "Kinesis Firehose Log Source",
+      "Lambda Log Forwarder",
+      "Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)",
+    "None"], var.Section7aLambdaCreateCloudWatchLogsSourceOptions)
+    error_message = "Argument \"Section7aLambdaCreateCloudWatchLogsSourceOptions\" must be either \"Kinesis Firehose Log Source\", \"Lambda Log Forwarder\", \"Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)\" or \"None\"."
   }
 }
 variable "Section7bLambdaCloudWatchLogsSourceUrl" {
@@ -209,15 +210,17 @@ variable "Section7dAutoSubscribeLambdaLogGroupPattern" {
   default     = "lambda"
   description = "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
 }
-# Sumo Logic AWS X-Ray Source
-variable "Section8aCreateAwsXraySource" {
+# Sumo Logic Root Cause Explorer Sources
+variable "Section8aRootCauseExplorerOptions" {
   type        = string
-  default     = "Yes"
-  description = "Yes - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account. No - If you already have a Sumo Logic AWS X-Ray source configured or skip the source creation."
+  default     = "Both"
+  description = "Inventory Source - Creates a Sumo Logic Inventory Source used by Root Cause Explorer. Xray Source - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account."
   validation {
     condition = contains([
-      "Yes",
-    "No"], var.Section8aCreateAwsXraySource)
-    error_message = "Argument \"Section8aCreateAwsXraySource\" must be either \"Yes\", or \"No\"."
+      "Inventory Source",
+      "Xray Source",
+      "Both",
+    "None"], var.Section8aRootCauseExplorerOptions)
+    error_message = "Argument \"Section8aRootCauseExplorerOptions\" must be either \"Inventory Source\", \"Xray Source\", \"Both\" or \"None\"."
   }
 }
