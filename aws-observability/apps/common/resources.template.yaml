@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.2.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
@@ -78,10 +78,10 @@ Parameters:
     Description: "Provide a Cloud Watch Metrics Source Name"
     Default: ""
   CloudWatchMetricsNameSpaces:
-    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
-    Description: "Provide Comma delimited list of the namespaces. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB."
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
+    Description: "Provide Comma delimited list of the namespaces. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS."
     Type: String
-    AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB)\\s*(,|$))+"
+    AllowedPattern: "(\\s*AWS/(ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS)\\s*(,|$))+"
     ConstraintDescription: "Namespaces should be from provided default list and separated by a ,(for list))"
   ScanInterval:
     Default: 300000
@@ -90,6 +90,23 @@ Parameters:
   CloudWatchMetricSourceCategory:
     Type: String
     Description: "Provide a source Category for the CloudWatch Metrics Source."
+    Default: ""
+
+  CreateKinesisFirehoseMetricsSource:
+    Type: String
+    Description: "Yes - Creates a Sumo Logic Kinesis Firehose source for Metrics which collects Metrics for multiple Namespaces from the region selected.
+                  No - If you already have a Kinesis Firehose source for Metrics collecting metrics."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  KinesisFirehoseMetricsSourceName:
+    Type: String
+    Description: "Provide a Kinesis Firehose source for Metrics Source Name"
+    Default: ""
+  KinesisFirehoseMetricSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the Kinesis Firehose source for Metrics Source."
     Default: ""
 
   CreateALBLogSource:
@@ -169,7 +186,23 @@ Parameters:
     Default: ""
   CloudWatchLogsSourceCategory:
     Type: String
-    Description: "Provide a source Category for the CloudTrail Logs Source."
+    Description: "Provide a source Category for the CloudWatch Logs Source."
+    Default: ""
+
+  CreateKinesisFirehoseLogSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic Kinesis Firehose source for Logs Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  KinesisFirehoseLogsSourceName:
+    Type: String
+    Description: "Provide a Kinesis Firehose source for Logs Source Name"
+    Default: ""
+  KinesisFirehoseLogsSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the Kinesis Firehose source for Logs Source."
     Default: ""
 
   TemplatesBucketName:
@@ -183,11 +216,13 @@ Parameters:
 
 Conditions:
   # Sources Conditions
-  install_metadata_source: !Equals [!Ref CreateMetaDataSource, 'Yes']
-  install_cloud_watch_metric_source: !Equals [!Ref CreateCloudWatchMetricsSource, 'Yes']
-  install_alb_logs_source: !Equals [!Ref CreateALBLogSource, 'Yes']
-  install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
-  install_cloudwatch_logs_source: !Equals [!Ref CreateCloudWatchLogSource, 'Yes']
+  install_metadata_source: !Equals [ !Ref CreateMetaDataSource, 'Yes' ]
+  install_cloud_watch_metric_source: !Equals [ !Ref CreateCloudWatchMetricsSource, 'Yes' ]
+  install_alb_logs_source: !Equals [ !Ref CreateALBLogSource, 'Yes' ]
+  install_cloudtrail_logs_source: !Equals [ !Ref CreateCloudTrailLogSource, 'Yes' ]
+  install_cloudwatch_logs_source: !Equals [ !Ref CreateCloudWatchLogSource, 'Yes' ]
+  install_kf_metric_source: !Equals [ !Ref CreateKinesisFirehoseMetricsSource, 'Yes' ]
+  install_kf_logs_source: !Equals [ !Ref CreateKinesisFirehoseLogSource, 'Yes' ]
 
   install_collector: !Or
     - !Condition install_metadata_source
@@ -195,20 +230,22 @@ Conditions:
     - !Condition install_alb_logs_source
     - !Condition install_cloudtrail_logs_source
     - !Condition install_cloudwatch_logs_source
+    - !Condition install_kf_metric_source
+    - !Condition install_kf_logs_source
 
   # Bucket Condition and Trail
-  create_alb_bucket: !Equals [!Ref CreateALBS3Bucket, 'Yes']
-  create_cloudtrail_bucket: !Equals [!Ref CreateCloudTrailBucket, 'Yes']
+  create_alb_bucket: !Equals [ !Ref CreateALBS3Bucket, 'Yes' ]
+  create_cloudtrail_bucket: !Equals [ !Ref CreateCloudTrailBucket, 'Yes' ]
   create_target_s3_bucket: !Or
     - !Condition create_alb_bucket
     - !Condition create_cloudtrail_bucket
 
   # SNS
   create_cloudtrail_sns_topic: !And
-    - !Not [!Condition create_cloudtrail_bucket]
+    - !Not [ !Condition create_cloudtrail_bucket ]
     - !Condition install_cloudtrail_logs_source
   create_alb_sns_topic: !And
-    - !Not [!Condition create_alb_bucket]
+    - !Not [ !Condition create_alb_bucket ]
     - !Condition install_alb_logs_source
 
   # Sumo Logic Role
@@ -217,6 +254,7 @@ Conditions:
     - !Condition install_cloud_watch_metric_source
     - !Condition install_alb_logs_source
     - !Condition install_cloudtrail_logs_source
+    - !Condition install_kf_metric_source
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -323,6 +361,11 @@ Resources:
 
   LambdaRole:
     Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -355,8 +398,8 @@ Resources:
       Handler: main.handler
       Runtime: python3.7
       CodeUri:
-        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.11.zip"
+        Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.12.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -378,6 +421,11 @@ Resources:
   CommonBucketSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_target_s3_bucket
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -388,12 +436,19 @@ Resources:
               - "-"
               - !Select
                 - 2
-                - !Split ["/", !Ref "AWS::StackId"]
+                - !Split [ "/", !Ref "AWS::StackId" ]
 
   CommonS3Bucket:
     Condition: create_target_s3_bucket
     Type: AWS::S3::Bucket
     DependsOn: CommonSNSpolicy
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W35
+            reason: "Access logging not required for AWS S3 Bucket."
+          - id: W41
+            reason: "Encryption not required for AWS S3 Bucket."
     Properties:
       BucketName: !Join
         - ""
@@ -404,7 +459,7 @@ Resources:
               - "-"
               - !Select
                 - 2
-                - !Split ["/", !Ref "AWS::StackId"]
+                - !Split [ "/", !Ref "AWS::StackId" ]
       NotificationConfiguration:
         TopicConfigurations:
           - Event: s3:ObjectCreated:Put
@@ -447,7 +502,7 @@ Resources:
               AWS: !Join
                 - ""
                 - - "arn:aws:iam::"
-                  - !FindInMap [Region2ELBAccountId, !Ref 'AWS::Region', AccountId]
+                  - !FindInMap [ Region2ELBAccountId, !Ref 'AWS::Region', AccountId ]
                   - ":root"
             Action: s3:PutObject
             Resource:
@@ -492,7 +547,7 @@ Resources:
                         - "-"
                         - !Select
                           - 2
-                          - !Split ["/", !Ref "AWS::StackId"]
+                          - !Split [ "/", !Ref "AWS::StackId" ]
             Effect: Allow
             Principal:
               "Service": "s3.amazonaws.com"
@@ -518,7 +573,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: false
       HierarchyName: "AWS Observability"
-      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}},{"condition":"AWS/ECS","level":{"entityType":"clustername","nextLevelsWithConditions":[]}},{"condition":"AWS/ElastiCache","level":{"entityType":"cacheclusterid","nextLevelsWithConditions":[]}},{"condition":"AWS/NetworkELB","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}}]}}}
+      HierarchyLevel: { "entityType": "account","nextLevelsWithConditions": [ ],"nextLevel": { "entityType": "region","nextLevelsWithConditions": [ ],"nextLevel": { "entityType": "namespace","nextLevelsWithConditions": [ { "condition": "AWS/ApplicationElb","level": { "entityType": "loadbalancer","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ApiGateway","level": { "entityType": "apiname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/DynamoDB","level": { "entityType": "tablename","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/EC2","level": { "entityType": "instanceid","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/RDS","level": { "entityType": "dbidentifier","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/Lambda","level": { "entityType": "functionname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ECS","level": { "entityType": "clustername","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ElastiCache","level": { "entityType": "cacheclusterid","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/NetworkELB","level": { "entityType": "networkloadbalancer","nextLevelsWithConditions": [ ] } } ] } } }
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
@@ -526,6 +581,11 @@ Resources:
   SumoLogicSourceRole:
     Type: AWS::IAM::Role
     Condition: install_sumo_logic_role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Metrics are collected for all available resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
@@ -635,11 +695,12 @@ Resources:
           LOGGER.setLevel(logging.INFO)
           # Update the Default value whenever CF starts supporting More Namespaces
           default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS",
-                     "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB"]
-
+                     "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS"]
+          cw_metrics_specific = ["SQS", "SNS"]
 
           def lambda_handler(event, context):
               unique_namespaces = set(["AWS/AutoScaling"])
+
               response_value = {}
               for value in default:
                   response_value[value.split("/")[1]] = 'No'
@@ -649,8 +710,10 @@ Resources:
               if namespaces:
                   namespace_list = namespaces.split(",")
                   for namespace in namespace_list:
-                      unique_namespaces.add(namespace.replace(" ", ""))
-                      response_value[namespace.split("/")[1]] = "Yes"
+                      name = namespace.split("/")[1]
+                      response_value[name] = "Yes"
+                      if name not in cw_metrics_specific:
+                          unique_namespaces.add(namespace.replace(" ", ""))
 
               response_value["namespaces"] = ", ".join(unique_namespaces)
               LOGGER.info("Response is {}".format(response_value))
@@ -672,6 +735,7 @@ Resources:
       ServiceToken: !GetAtt LambdaToDecideCWMetricsSources.Arn
       CloudWatchMetricsNameSpaces: !Ref CloudWatchMetricsNameSpaces
       ScanInterval: !Ref ScanInterval
+      Version: !Ref NestedTemplateVersion
 
   # Each Stack can create up to 5 Metrics sources. To support more namespaces keep on adding more nested stacks.
   # This is done in order to limit number of API calls and handle API limit exceeded exception from Sumo Logic.
@@ -728,6 +792,69 @@ Resources:
         FourthMetricsSourceNamespace: "NetworkELB"
         CreateFifthMetricsSource: "No"
 
+  CloudWatchMetricsThirdStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: install_cloud_watch_metric_source
+    DependsOn: CloudWatchMetricsFirstStack
+    Properties:
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/cloudwatchmetrics/cloudwatchmetrics.template.yaml"
+      Parameters:
+        SumoLogicDeployment: !Ref SumoLogicDeployment
+        SumoLogicAccessID: !Ref SumoLogicAccessID
+        SumoLogicAccessKey: !Ref SumoLogicAccessKey
+        RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+        AccountAlias: !Ref AccountAlias
+        SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+        LambdaARN: !GetAtt LambdaHelper.Arn
+        SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
+        CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
+        CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
+        CreateFirstMetricsSource: !GetAtt Primerinvoke.SQS
+        FirstMetricsSourceNamespace: "SQS"
+        CreateSecondMetricsSource: !GetAtt Primerinvoke.SNS
+        SecondMetricsSourceNamespace: "SNS"
+        CreateThirdMetricsSource: "No"
+        CreateFourthMetricsSource: "No"
+        CreateFifthMetricsSource: "No"
+
+  KinesisFirehoseMetricsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: install_kf_metric_source
+    Properties:
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
+      Parameters:
+        Section1aSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
+        Section1bNamespaceFilter: !Ref CloudWatchMetricsNameSpaces
+        Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", "Yes" ]
+        Section2bFailedDataS3Bucket: !Join
+          - ""
+          - - "aws-observability-logs-"
+            - !Select
+              - 0
+              - !Split
+                - "-"
+                - !Select
+                  - 2
+                  - !Split [ "/", !Ref "AWS::StackId" ]
+
+  KinesisFirehoseMetricsSource:
+    Condition: install_kf_metric_source
+    Type: Custom::HTTPSource
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SourceType: "KinesisMetric"
+      SourceName: !Ref KinesisFirehoseMetricsSourceName
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceCategory: !Ref KinesisFirehoseMetricSourceCategory
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !Ref AccountAlias
+      RoleArn: !GetAtt SumoLogicSourceRole.Arn
+
   ############# START - RESOURCES FOR ALB SOURCE #################
 
   ALBSource:
@@ -744,7 +871,7 @@ Resources:
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
-      TargetBucketName: !If [create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName]
+      TargetBucketName: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ]
       PathExpression: !Ref ALBS3BucketPathExpression
       Fields:
         account: !Ref AccountAlias
@@ -755,6 +882,11 @@ Resources:
   ALBSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_alb_sns_topic
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -765,13 +897,13 @@ Resources:
               - "-"
               - !Select
                 - 2
-                - !Split ["/", !Ref "AWS::StackId"]
+                - !Split [ "/", !Ref "AWS::StackId" ]
 
   ALBSNSSubscription:
     Condition: install_alb_logs_source
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn: !If [create_alb_bucket, !Ref CommonBucketSNSTopic, !Ref ALBSNSTopic]
+      TopicArn: !If [ create_alb_bucket, !Ref CommonBucketSNSTopic, !Ref ALBSNSTopic ]
       Endpoint: !GetAtt ALBSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -816,7 +948,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
       SourceName: !Ref CloudTrailLogsSourceName
-      TargetBucketName: !If [create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName]
+      TargetBucketName: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
       SourceCategory: !Ref CloudTrailLogsSourceCategory
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
@@ -831,6 +963,11 @@ Resources:
   CloudTrailSNSTopic:
     Type: 'AWS::SNS::Topic'
     Condition: create_cloudtrail_sns_topic
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
     Properties:
       TopicName: !Join
         - ""
@@ -841,13 +978,13 @@ Resources:
               - "-"
               - !Select
                 - 2
-                - !Split ["/", !Ref "AWS::StackId"]
+                - !Split [ "/", !Ref "AWS::StackId" ]
 
   CloudTrailSNSSubscription:
     Condition: install_cloudtrail_logs_source
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn: !If [create_cloudtrail_bucket, !Ref CommonBucketSNSTopic, !Ref CloudTrailSNSTopic]
+      TopicArn: !If [ create_cloudtrail_bucket, !Ref CommonBucketSNSTopic, !Ref CloudTrailSNSTopic ]
       Endpoint: !GetAtt CloudTrailSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -911,6 +1048,44 @@ Resources:
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
 
+  KinesisFirehoseLogsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: install_kf_logs_source
+    Properties:
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWLogs.template.yaml"
+      Parameters:
+        Section1aSumoLogicKinesisLogsURL: !GetAtt KinesisFirehoseLogsSource.SUMO_ENDPOINT
+        Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", !If [ install_kf_metric_source, "No", "Yes" ] ]
+        Section2bFailedDataS3Bucket: !Join
+          - ""
+          - - "aws-observability-logs-"
+            - !Select
+              - 0
+              - !Split
+                - "-"
+                - !Select
+                  - 2
+                  - !Split [ "/", !Ref "AWS::StackId" ]
+
+  KinesisFirehoseLogsSource:
+    Condition: install_kf_logs_source
+    Type: Custom::HTTPSource
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SourceType: "KinesisLog"
+      SourceName: !Ref KinesisFirehoseLogsSourceName
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceCategory: !Ref KinesisFirehoseLogsSourceCategory
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !Ref AccountAlias
+        namespace: "aws/lambda"
+        region: !Ref "AWS::Region"
+
 Outputs:
   LambdaHelperARN:
     Description: "Sumo Logic Lambda Helper ARN"
@@ -935,3 +1110,19 @@ Outputs:
   Namespaces:
     Description: "Comma Delimited String of CloudWatch Metrics Namespaces for Inventory Source."
     Value: !GetAtt Primerinvoke.namespaces
+  KinesisLogsDeliveryStreamARN:
+    Description: "The ARN for your Kinesis Firehose Delivery Stream, use this as the destination when adding CloudWatch Logs subscription filters."
+    Condition: install_kf_logs_source
+    Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisLogsDeliveryStreamARN
+  KinesisLogsRoleARN:
+    Description: "The ARN for your CloudWatch Logs role to write to your delivery stream, use this as the role-arn when adding CloudWatch Logs subscription filters."
+    Condition: install_kf_logs_source
+    Value: !GetAtt KinesisFirehoseLogsStack.Outputs.KinesisLogsRoleARN
+  KinesisMetricsDeliveryStreamARN:
+    Description: "The ARN for your Kinesis Firehose Delivery Stream, use this as the destination when adding CloudWatch Metrics subscription filters."
+    Condition: install_kf_metric_source
+    Value: !GetAtt KinesisFirehoseMetricsStack.Outputs.KinesisMetricsDeliveryStreamARN
+  KinesisMetricsRoleARN:
+    Description: "The ARN for your CloudWatch Logs role to write to your delivery stream, use this as the role-arn when adding CloudWatch Logs subscription filters."
+    Condition: install_kf_metric_source
+    Value: !GetAtt KinesisFirehoseMetricsStack.Outputs.KinesisMetricsRoleARN

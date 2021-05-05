@@ -1,20 +1,17 @@
 {
   "type": "FolderSyncDefinition",
   "name": "AWS Network Load Balancer",
-  "description": "",
+  "description": "The AWS Network Load Balancer service is distributed in OSI Layer 4 (i.e., network) traffic (e.g., TCP, UDP, TLS) and can handle over a million requests per second. \n\nThe AWS Network Load Balancer dashboards provide insights to ensure that your network load-balancers are operating as expected, backend hosts are healthy and to quickly identify errors.",
   "children": [
     {
       "type": "DashboardV2SyncDefinition",
       "name": "1. AWS Network Load Balancer - Active and New Flows",
-      "description": "",
+      "description": "The AWS Network Load Balancer - Active and New Flows dashboard provides detailed insights for new flows, and active flows for TCP, TLS, and UDP traffic.",
       "title": "1. AWS Network Load Balancer - Active and New Flows",
       "rootPanel": null,
       "theme": "Light",
       "topologyLabelMap": {
         "data": {
-          "loadbalancer": [
-            "*"
-          ],
           "namespace": [
             "aws/networkelb"
           ],
@@ -22,6 +19,9 @@
             "*"
           ],
           "account": [
+            "*"
+          ],
+          "networkloadbalancer": [
             "*"
           ]
         }
@@ -82,19 +82,22 @@
       },
       "panels": [
         {
-          "id": "0A80C46B4D14942F",
+          "id": null,
           "key": "panelPANE-189058059223F848",
           "title": "Active Flow Count",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount Statistic=Sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by loadbalancer, account, region, namespace, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount Statistic=Sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -103,19 +106,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "16D1332B10E6A603",
+          "id": null,
           "key": "panel27BCAC0AB2617849",
           "title": "Active Flow Count TCP",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow Count TCP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow Count TCP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount_TCP Statistic=Sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by loadbalancer, account, region, namespace, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount_TCP Statistic=Sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -124,19 +130,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "D29B35E1C8949680",
+          "id": null,
           "key": "panelC8EEA6B78D4AB943",
           "title": "Active Flow Count UDP",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow Count UDP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow Count UDP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount_UDP Statistic=Sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by loadbalancer, account, region, namespace, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount_UDP Statistic=Sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -145,19 +154,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "E49C7315AA3A4F94",
+          "id": null,
           "key": "panelB42DE669AC848A41",
           "title": "Active Flow Count TLS",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow Count TLS\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow Count TLS\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount_TLS Statistic=Sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by loadbalancer, account, region, namespace, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount_TLS Statistic=Sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -166,19 +178,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "FDDF99DA49EFDEC4",
+          "id": null,
           "key": "panelEB8866F6B9A7B84A",
           "title": "New Flow Count",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"New Flow Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"New Flow Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=NewFlowCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by loadbalancer, account, region, namespace, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=NewFlowCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -187,19 +202,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "2BCEA8B48F6882EA",
+          "id": null,
           "key": "panel4C302868A2082A46",
           "title": "New Flow Count TCP",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"New Flow Count TCP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"New Flow Count TCP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=NewFlowCount_TCP Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by loadbalancer, account, region, namespace, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=NewFlowCount_TCP Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -208,19 +226,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "43F17E18A998DCE4",
+          "id": null,
           "key": "panel707E3FC09AF3D84F",
           "title": "New Flow Count TLS",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"New Flow Count TLS\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"New Flow Count TLS\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=NewFlowCount_TLS Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by loadbalancer, account, region, namespace, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=NewFlowCount_TLS Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -229,19 +250,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "C66F7B1685A287C1",
+          "id": null,
           "key": "panelF8C139BCBECE294F",
           "title": "New Flow Count UDP",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"New Flow Count UDP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"New Flow Count UDP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=NewFlowCount_UDP Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by loadbalancer, account, region, namespace, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=NewFlowCount_UDP Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -250,7 +274,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "38CF7B5441CDC8D5",
+          "id": null,
           "key": "panelPANE-A133BD608B9CF848",
           "title": "Active Flows",
           "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
@@ -259,7 +283,7 @@
           "text": "Active Flow Count represents the total number of concurrent flows (or connections) from clients to targets in a given time.<br>"
         },
         {
-          "id": "035865523276B777",
+          "id": null,
           "key": "panel40FED14D822EA945",
           "title": "New Flows",
           "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
@@ -270,7 +294,7 @@
       ],
       "variables": [
         {
-          "id": "CC778ABCE3C1E13B",
+          "id": "E87324297F47D929",
           "name": "account",
           "displayName": "account",
           "defaultValue": "*",
@@ -284,7 +308,7 @@
           "hideFromUI": false
         },
         {
-          "id": "ABA5E8B34B872CD2",
+          "id": "A61483F5EA208FF2",
           "name": "region",
           "displayName": "region",
           "defaultValue": "*",
@@ -298,7 +322,7 @@
           "hideFromUI": false
         },
         {
-          "id": "611475004798F865",
+          "id": "362A652C06FB75A8",
           "name": "namespace",
           "displayName": "namespace",
           "defaultValue": "aws/networkelb",
@@ -312,21 +336,21 @@
           "hideFromUI": false
         },
         {
-          "id": "967965608FB57935",
-          "name": "loadbalancer",
-          "displayName": "loadbalancer",
+          "id": "A2737F27D07320B7",
+          "name": "networkloadbalancer",
+          "displayName": "networkloadbalancer",
           "defaultValue": "*",
           "sourceDefinition": {
             "variableSourceType": "MetadataVariableSourceDefinition",
             "filter": "account={{account}} region={{region}} namespace={{namespace}}",
-            "key": "loadbalancer"
+            "key": "networkloadbalancer"
           },
           "allowMultiSelect": false,
           "includeAllOption": true,
           "hideFromUI": false
         },
         {
-          "id": "D08C1ACE0AB472BC",
+          "id": "4C3ABD503751A7ED",
           "name": "availabilityzone",
           "displayName": "availabilityzone",
           "defaultValue": "*",
@@ -345,7 +369,7 @@
     {
       "type": "DashboardV2SyncDefinition",
       "name": "1. AWS Network Load Balancer - Overview",
-      "description": "",
+      "description": "The AWS Network Load Balancer - Overview dashboard provides detailed insights into a view of network utilization and performance. The dashboard provides information about the errors, health, and traffic handled by the load balancer.",
       "title": "1. AWS Network Load Balancer - Overview",
       "rootPanel": null,
       "theme": "Light",
@@ -414,7 +438,7 @@
       },
       "panels": [
         {
-          "id": "2694D7B83AA022AD",
+          "id": null,
           "key": "panelPANE-B783C42895F01841",
           "title": "Client TLS Negotiation Errors",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"Errors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -422,11 +446,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -435,7 +462,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "140C26E20C4DE812",
+          "id": null,
           "key": "panelPANE-34953014A4481A4A",
           "title": "Target TLS Negotiation Error",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Errors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -443,11 +470,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -456,7 +486,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "101F4F9F8B5F4953",
+          "id": null,
           "key": "panel386F017C878D5841",
           "title": "Healthy Hosts (Current)",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Hosts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -464,11 +494,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone=* TargetGroup=* | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone=* TargetGroup=* | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -477,19 +510,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "3C50498D84C53C2F",
+          "id": null,
           "key": "panel4AD8EFE2BB4B3846",
-          "title": "UnHealthy Hosts (Current)",
+          "title": "Unhealthy Hosts (Current)",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Hosts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"\"},\"gauge\":{\"show\":false}},\"series\":{}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone=* TargetGroup=* | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone=* TargetGroup=* | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -498,19 +534,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "8F1F086C564870D3",
+          "id": null,
           "key": "panelPANE-37E902BBB2FA6B4F",
           "title": "Active Flows (Connections) by Load Balancer",
-          "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow (Connection) Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Active Flow (Connection) Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount Statistic=Sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum by account, region, namespace, LoadBalancer",
+              "queryString": "Namespace=aws/NetworkELB metric=ActiveFlowCount Statistic=Sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum by account, region, namespace, LoadBalancer",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -519,7 +558,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "2AA9012E079AB282",
+          "id": null,
           "key": "panelPANE-9DA7EDA9BA89FB4B",
           "title": "Bytes Processed by Load Balancer",
           "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Bytes Processed\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
@@ -527,11 +566,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum by account, region, namespace, LoadBalancer",
+              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum by account, region, namespace, LoadBalancer",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -540,19 +582,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "F3FAEBB09DC3205E",
+          "id": null,
           "key": "panelPANE-35FB0983AD5AB948",
-          "title": "Max UnHealthy Hosts Observed by Load Balancer",
+          "title": "Max Unhealthy Hosts Observed by Load Balancer",
           "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0,\"aggregationType\":\"max\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Hosts\"}}],\"series\":{}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=maximum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | max by loadbalancer | filter max > 0",
+              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=maximum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | max by loadbalancer | filter max > 0",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -561,19 +606,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "93E5B7506D45BF44",
+          "id": null,
           "key": "panel40DF804DB965B847",
           "title": "TLS Negotiation Errors by Load Balancer",
-          "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TLS Negotiation Error Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TLS Negotiation Error Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=*TLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum by account, region, namespace, loadbalancer",
+              "queryString": "Namespace=aws/NetworkELB metric=*TLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum by account, region, namespace, LoadBalancer",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -582,19 +630,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "1EE46087F6B0D66D",
+          "id": null,
           "key": "panelCF6450A3ADF0A848",
           "title": "Reset (RST) Packets Generated by Load Balancer",
-          "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TCP ELB Reset Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TCP ELB Reset Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TCP_ELB_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum by account, region, namespace, loadbalancer",
+              "queryString": "Namespace=aws/NetworkELB metric=TCP_ELB_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum by account, region, namespace, LoadBalancer",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -605,7 +656,7 @@
       ],
       "variables": [
         {
-          "id": "FD83D4A989961BC4",
+          "id": "504E6D1D7CFB1BF2",
           "name": "account",
           "displayName": "account",
           "defaultValue": "*",
@@ -619,7 +670,7 @@
           "hideFromUI": false
         },
         {
-          "id": "9D1CD7EA54DACBCF",
+          "id": "EFD3EE3FF6070D0F",
           "name": "region",
           "displayName": "region",
           "defaultValue": "*",
@@ -633,7 +684,7 @@
           "hideFromUI": false
         },
         {
-          "id": "B71BADC735A88773",
+          "id": "FCFCD83CEAE9DEC8",
           "name": "namespace",
           "displayName": "namespace",
           "defaultValue": "aws/networkelb",
@@ -647,14 +698,14 @@
           "hideFromUI": false
         },
         {
-          "id": "FBC24C067CF10E88",
-          "name": "loadbalancer",
-          "displayName": "loadbalancer",
+          "id": "1329DE61CF85070B",
+          "name": "networkloadbalancer",
+          "displayName": "networkloadbalancer",
           "defaultValue": "*",
           "sourceDefinition": {
             "variableSourceType": "MetadataVariableSourceDefinition",
             "filter": "account={{account}} region={{region}} namespace={{namespace}}",
-            "key": "loadbalancer"
+            "key": "networkloadbalancer"
           },
           "allowMultiSelect": false,
           "includeAllOption": true,
@@ -666,15 +717,12 @@
     {
       "type": "DashboardV2SyncDefinition",
       "name": "2. AWS Network Load Balancer - Host Health Status",
-      "description": "",
+      "description": "The AWS Network Load Balancer - Host Health Status dashboard provides detailed insights into the number of healthy and unhealthy hosts.",
       "title": "2. AWS Network Load Balancer - Host Health Status",
       "rootPanel": null,
       "theme": "Light",
       "topologyLabelMap": {
         "data": {
-          "loadbalancer": [
-            "*"
-          ],
           "namespace": [
             "aws/networkelb"
           ],
@@ -682,6 +730,9 @@
             "*"
           ],
           "account": [
+            "*"
+          ],
+          "networkloadbalancer": [
             "*"
           ]
         }
@@ -734,7 +785,7 @@
       },
       "panels": [
         {
-          "id": "650602836F7DFF3B",
+          "id": null,
           "key": "panelPANE-A8B06EE987093949",
           "title": "Maximum Healthy Hosts",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Maximum\",\"label\":\"Hosts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -742,11 +793,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=maximum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=maximum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -755,7 +809,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "ABF0644DFF1D2DBF",
+          "id": null,
           "key": "panelC5327885B1BFFA41",
           "title": "Minimum Healthy Hosts",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Minimum\",\"label\":\"Hosts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -763,11 +817,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=minimum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=minimum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -776,7 +833,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "C528375CFF53A451",
+          "id": null,
           "key": "panelBA3E4E7BA3BFEA47",
           "title": "Current Healthy Hosts",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Hosts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -784,11 +841,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -797,19 +857,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "4809E3286374B619",
+          "id": null,
           "key": "panelFD2921F7A1FA1846",
-          "title": "Maximum UnHealthy Hosts",
+          "title": "Maximum Unhealthy Hosts",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Maximum\",\"label\":\"Hosts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=maximum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=maximum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -818,19 +881,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "752C0EEC029DE593",
+          "id": null,
           "key": "panel8D55B304B57A4844",
-          "title": "Minimum UnHealthy Hosts",
+          "title": "Minimum Unhealthy Hosts",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Minimum\",\"label\":\"Hosts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=minimum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=minimum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -839,19 +905,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "0ADA15FC553A816A",
+          "id": null,
           "key": "panel7C5DA2FA91826B4D",
-          "title": "Current UnHealthy Hosts",
+          "title": "Current Unhealthy Hosts",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Hosts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -860,19 +929,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "A051CE5C413E0379",
+          "id": null,
           "key": "panelD5793C5B9BF5A846",
           "title": "Healthy Hosts Over Time",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Healthy Host Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Healthy Host Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}:{{AvailabilityZone}}:{{TargetGroup}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum by loadbalancer, account, region, namespace, availabilityzone, targetgroup",
+              "queryString": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone, TargetGroup",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -881,19 +953,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "3EC6734A4190363F",
+          "id": null,
           "key": "panelCBEF96D69714BA4A",
-          "title": "UnHealthy Hosts Over Time",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"UnHealthy Host Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}:{{AvailabilityZone}}:{{TargetGroup}}\"}}]}",
+          "title": "Unhealthy Hosts Over Time",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"UnHealthy Host Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}:{{AvailabilityZone}}:{{TargetGroup}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum by loadbalancer, account, region, namespace, availabilityzone, targetgroup",
+              "queryString": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} TargetGroup={{targetgroup}} | sum by LoadBalancer, account, region, namespace, AvailabilityZone, TargetGroup",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -904,7 +979,7 @@
       ],
       "variables": [
         {
-          "id": "26C88F5178A625FE",
+          "id": "16284FE08555F3AB",
           "name": "account",
           "displayName": "account",
           "defaultValue": "*",
@@ -918,7 +993,7 @@
           "hideFromUI": false
         },
         {
-          "id": "2A5BE948C927BB61",
+          "id": "E1882E7ADAD5EEC0",
           "name": "region",
           "displayName": "region",
           "defaultValue": "*",
@@ -932,7 +1007,7 @@
           "hideFromUI": false
         },
         {
-          "id": "0C2864C1F4EA88FB",
+          "id": "7303C3286817A082",
           "name": "namespace",
           "displayName": "namespace",
           "defaultValue": "aws/networkelb",
@@ -946,21 +1021,21 @@
           "hideFromUI": false
         },
         {
-          "id": "5F3CF718EE55E7D0",
-          "name": "loadbalancer",
-          "displayName": "loadbalancer",
+          "id": "8981CE1B7AD717F5",
+          "name": "networkloadbalancer",
+          "displayName": "networkloadbalancer",
           "defaultValue": "*",
           "sourceDefinition": {
             "variableSourceType": "MetadataVariableSourceDefinition",
             "filter": "account={{account}} region={{region}} namespace={{namespace}}",
-            "key": "loadbalancer"
+            "key": "networkloadbalancer"
           },
           "allowMultiSelect": false,
           "includeAllOption": true,
           "hideFromUI": false
         },
         {
-          "id": "2EA625E8E562939E",
+          "id": "F6E3C97BCB2D37A1",
           "name": "availabilityzone",
           "displayName": "availabilityzone",
           "defaultValue": "*",
@@ -974,7 +1049,7 @@
           "hideFromUI": false
         },
         {
-          "id": "D2EE65FFE86519D6",
+          "id": "DB9ED033AFA58807",
           "name": "targetgroup",
           "displayName": "targetgroup",
           "defaultValue": "*",
@@ -993,15 +1068,12 @@
     {
       "type": "DashboardV2SyncDefinition",
       "name": "3. AWS Network Load Balancer - Errors",
-      "description": "",
+      "description": "The AWS Network Load Balancer - Errors dashboard provides detailed insights into the errors reported by the network load balancer. This dashboard shows information for the total number of TLS handshakes that failed during negotiation between a client and a TLS listener, and the total number of TLS handshakes that failed during negotiation between a TLS listener and a target.",
       "title": "3. AWS Network Load Balancer - Errors",
       "rootPanel": null,
       "theme": "Light",
       "topologyLabelMap": {
         "data": {
-          "loadbalancer": [
-            "*"
-          ],
           "namespace": [
             "aws/networkelb"
           ],
@@ -1009,6 +1081,9 @@
             "*"
           ],
           "account": [
+            "*"
+          ],
+          "networkloadbalancer": [
             "*"
           ]
         }
@@ -1049,19 +1124,22 @@
       },
       "panels": [
         {
-          "id": "A4E46B236E2FA44C",
+          "id": null,
           "key": "panelB42DE669AC848A41",
           "title": "TLS Listener <--> Target - Failed TLS Handshakes Over Time",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Target TLS Negotiation Error Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Target TLS Negotiation Error Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum by loadbalancer, account, region, namespace",
+              "queryString": "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum by LoadBalancer, account, region, namespace",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1070,19 +1148,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "98A0502A43AA41F0",
+          "id": null,
           "key": "panelF70F63039D95E945",
           "title": "Client <--> TLS Listener - Failed TLS Handshakes Over Time",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Client TLS Negotiation Error Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Client TLS Negotiation Error Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum by loadbalancer, account, region, namespace",
+              "queryString": "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum by LoadBalancer, account, region, namespace",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1091,7 +1172,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "FAD1C377732AE69B",
+          "id": null,
           "key": "panelPANE-933CB6069C593942",
           "title": "Note",
           "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"alignment\":\"left\",\"format\":\"markdown\"}}",
@@ -1100,7 +1181,7 @@
           "text": "ClientTLSNegotiationErrorCount: The total number of TLS handshakes that failed during negotiation between a client and a TLS listener.\n<br><br>\nTargetTLSNegotiationErrorCount: The total number of TLS handshakes that failed during negotiation between a TLS listener and a target."
         },
         {
-          "id": "8296FEAEC25224E2",
+          "id": null,
           "key": "panelPANE-925F14A7BD81B948",
           "title": "Client <--> TLS Listener - Total Failed TLS Handshakes",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"Errors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -1108,11 +1189,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1121,7 +1205,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "868A6BAF7A5DFD93",
+          "id": null,
           "key": "panel06904E5989D9A94A",
           "title": "TLS Listener <--> Target - Total Failed TLS Handshakes",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"Errors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -1129,11 +1213,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1144,7 +1231,7 @@
       ],
       "variables": [
         {
-          "id": "732A5E0201C0C73A",
+          "id": "A7738727DA6162C8",
           "name": "account",
           "displayName": "account",
           "defaultValue": "*",
@@ -1158,7 +1245,7 @@
           "hideFromUI": false
         },
         {
-          "id": "4DDE96CFE0E0F13A",
+          "id": "0D81924EFE82FED0",
           "name": "region",
           "displayName": "region",
           "defaultValue": "*",
@@ -1172,7 +1259,7 @@
           "hideFromUI": false
         },
         {
-          "id": "CD1C997213348A44",
+          "id": "27E738FBAF4DB249",
           "name": "namespace",
           "displayName": "namespace",
           "defaultValue": "aws/networkelb",
@@ -1186,14 +1273,14 @@
           "hideFromUI": false
         },
         {
-          "id": "9DA66C57E7C92350",
-          "name": "loadbalancer",
-          "displayName": "loadbalancer",
+          "id": "3B5DCB5E2D2ACBA5",
+          "name": "networkloadbalancer",
+          "displayName": "networkloadbalancer",
           "defaultValue": "*",
           "sourceDefinition": {
             "variableSourceType": "MetadataVariableSourceDefinition",
             "filter": "account={{account}} region={{region}} namespace={{namespace}}",
-            "key": "loadbalancer"
+            "key": "networkloadbalancer"
           },
           "allowMultiSelect": false,
           "includeAllOption": true,
@@ -1204,16 +1291,13 @@
     },
     {
       "type": "DashboardV2SyncDefinition",
-      "name": "4. AWS Network Load Balancer - RESET (RST) Packet Count",
-      "description": "",
-      "title": "4. AWS Network Load Balancer - RESET (RST) Packet Count",
+      "name": "4. AWS Network Load Balancer - Reset (RST) Packets",
+      "description": "The AWS Network Load Balancer - Reset (RST) Packets dashboard provides detailed insights into the number reset (RST) packets received by the network load balancer. The dashboard shows the information for the total number of reset (RST) packets sent from a client to a target , the total number of reset (RST) packets generated by the load balancer, and the total number of reset (RST) packets sent from a target to a client.",
+      "title": "4. AWS Network Load Balancer - Reset (RST) Packets",
       "rootPanel": null,
       "theme": "Light",
       "topologyLabelMap": {
         "data": {
-          "loadbalancer": [
-            "*"
-          ],
           "namespace": [
             "aws/networkelb"
           ],
@@ -1221,6 +1305,9 @@
             "*"
           ],
           "account": [
+            "*"
+          ],
+          "networkloadbalancer": [
             "*"
           ]
         }
@@ -1269,19 +1356,22 @@
       },
       "panels": [
         {
-          "id": "9B0A13AD4F483247",
+          "id": null,
           "key": "panel19BBFED8B9FFAB42",
           "title": "Reset (RST) Packets Sent from a \u001dClient to a Target",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TCP Client Reset Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TCP Client Reset Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TCP_Client_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, loadbalancer, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=TCP_Client_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, LoadBalancer, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1290,19 +1380,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "73256F539EABD569",
+          "id": null,
           "key": "panelCA1D60DCBF8ED942",
           "title": "Reset (RST) Packets Generated by the Load Balancer",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TCP ELB Reset Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TCP ELB Reset Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TCP_ELB_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, loadbalancer, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=TCP_ELB_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, LoadBalancer, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1311,19 +1404,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "3C5BA3A5923A62FA",
+          "id": null,
           "key": "panel9BDEA0AA9A87084A",
           "title": "Reset (RST) Packets Sent from a Target to a Client",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TCP Target Reset Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"TCP Target Reset Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TCP_Target_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, loadbalancer, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=TCP_Target_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, LoadBalancer, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1332,7 +1428,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "BBE10DB60011C05E",
+          "id": null,
           "key": "panelPANE-2C072B2F8F5D6A48",
           "title": "Note",
           "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"alignment\":\"left\",\"format\":\"markdown\"}}",
@@ -1341,7 +1437,7 @@
           "text": "Reset (RST) packets are responsible for the immediate termination of a TCP connection.  An abnormal rise in the number of reset packets generated by the load balancer likely requires an immediate response, as this means that the load balancer is dropping a significant amount of connections. <br>\n\nTCP_Client_Reset_Count: The total number of reset (RST) packets sent from a client to a target. These resets are generated by the client and forwarded by the load balancer.\n<br>\nTCP_ELB_Reset_Count: The total number of reset (RST) packets generated by the load balancer.\n<br>\nTCP_Target_Reset_Count: The total number of reset (RST) packets sent from a target to a client. These resets are generated by the target and forwarded by the load balancer.\n<br>\n<br>\n"
         },
         {
-          "id": "86F797B6FBB0F5D8",
+          "id": null,
           "key": "panelPANE-F5B1358399E67B42",
           "title": "Total Reset (RST) Packets Generated by the Load Balancer",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"RESET Packets\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -1349,11 +1445,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TCP_ELB_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=TCP_ELB_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1362,7 +1461,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "742BEF2FFF81C65D",
+          "id": null,
           "key": "panel3D350340B35D794B",
           "title": "Total Reset (RST) Packets Sent from a \u001dClient to a Target",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"RESET Packets\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -1370,11 +1469,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TCP_Client_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=TCP_Client_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1383,7 +1485,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "1ECA7262CDD1490A",
+          "id": null,
           "key": "panel786DB7449D04FA4C",
           "title": "Total Reset (RST) Packets Sent from a Target to a Client",
           "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"RESET Packets\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{}}",
@@ -1391,11 +1493,14 @@
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=TCP_Target_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum",
+              "queryString": "Namespace=aws/NetworkELB metric=TCP_Target_Reset_Count Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1406,7 +1511,7 @@
       ],
       "variables": [
         {
-          "id": "E7CB6E8B420E4409",
+          "id": "C8AF31A6C36BCA9E",
           "name": "account",
           "displayName": "account",
           "defaultValue": "*",
@@ -1420,7 +1525,7 @@
           "hideFromUI": false
         },
         {
-          "id": "A3B2D8C2635ED614",
+          "id": "681D59180C352E0B",
           "name": "region",
           "displayName": "region",
           "defaultValue": "*",
@@ -1434,7 +1539,7 @@
           "hideFromUI": false
         },
         {
-          "id": "591ED211AE6D80BE",
+          "id": "0281A0A02CCBA11B",
           "name": "namespace",
           "displayName": "namespace",
           "defaultValue": "aws/networkelb",
@@ -1448,21 +1553,21 @@
           "hideFromUI": false
         },
         {
-          "id": "5CCB6E641C4E23DB",
-          "name": "loadbalancer",
-          "displayName": "loadbalancer",
+          "id": "9EAD875AABB72A67",
+          "name": "networkloadbalancer",
+          "displayName": "networkloadbalancer",
           "defaultValue": "*",
           "sourceDefinition": {
             "variableSourceType": "MetadataVariableSourceDefinition",
             "filter": "account={{account}} region={{region}} namespace={{namespace}}",
-            "key": "loadbalancer"
+            "key": "networkloadbalancer"
           },
           "allowMultiSelect": false,
           "includeAllOption": true,
           "hideFromUI": false
         },
         {
-          "id": "ACBA12542F16DECB",
+          "id": "C79720951E346A42",
           "name": "availabilityzone",
           "displayName": "availabilityzone",
           "defaultValue": "*",
@@ -1481,15 +1586,12 @@
     {
       "type": "DashboardV2SyncDefinition",
       "name": "5. AWS Network Load Balancer - Processed Bytes",
-      "description": "",
+      "description": "The AWS Network Load Balancer - Processed Bytes dashboard provides detailed insights into the amount of bytes processed by the load balancer for total, UDP, TCP and TLS traffic.",
       "title": "5. AWS Network Load Balancer - Processed Bytes",
       "rootPanel": null,
       "theme": "Light",
       "topologyLabelMap": {
         "data": {
-          "loadbalancer": [
-            "*"
-          ],
           "namespace": [
             "aws/networkelb"
           ],
@@ -1497,6 +1599,9 @@
             "*"
           ],
           "account": [
+            "*"
+          ],
+          "networkloadbalancer": [
             "*"
           ]
         }
@@ -1537,19 +1642,22 @@
       },
       "panels": [
         {
-          "id": "6292B3975C3C8C0C",
+          "id": null,
           "key": "panelPANE-189058059223F848",
           "title": "Total Processed Bytes",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Processed Bytes\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Processed Bytes\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, loadbalancer, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, LoadBalancer, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1558,19 +1666,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "707DF25D16F70F3A",
+          "id": null,
           "key": "panel27BCAC0AB2617849",
           "title": "Processed Bytes by TCP Listener",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Processed Bytes TCP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Processed Bytes TCP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes_TCP Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, loadbalancer, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes_TCP Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, LoadBalancer, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1579,19 +1690,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "03EE2178DEDE16AB",
+          "id": null,
           "key": "panelC8EEA6B78D4AB943",
           "title": "Processed Bytes by UDP Listener",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Processed Bytes UDP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Processed Bytes UDP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes_UDP Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, loadbalancer, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes_UDP Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, LoadBalancer, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1600,19 +1714,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "B4D0AF03A84A47F9",
+          "id": null,
           "key": "panelB42DE669AC848A41",
           "title": "Processed Bytes by TLS Listener",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Processed Bytes TLS\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Processed Bytes TLS\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes_TLS Statistic=sum account={{account}} region={{region}} LoadBalancer={{loadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, loadbalancer, availabilityzone",
+              "queryString": "Namespace=aws/NetworkELB metric=ProcessedBytes_TLS Statistic=sum account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} AvailabilityZone={{availabilityzone}} | sum by account, region, namespace, LoadBalancer, AvailabilityZone",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1621,7 +1738,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "6083A6EE484A5629",
+          "id": null,
           "key": "panelPANE-A239472497B9F94F",
           "title": "Note",
           "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
@@ -1632,7 +1749,7 @@
       ],
       "variables": [
         {
-          "id": "B7D347F52AAF8733",
+          "id": "EE2479C97D33C3B0",
           "name": "account",
           "displayName": "account",
           "defaultValue": "*",
@@ -1646,7 +1763,7 @@
           "hideFromUI": false
         },
         {
-          "id": "B45DD550FB87E53F",
+          "id": "CFC81A439792405B",
           "name": "region",
           "displayName": "region",
           "defaultValue": "*",
@@ -1660,7 +1777,7 @@
           "hideFromUI": false
         },
         {
-          "id": "FD1DB95887A14951",
+          "id": "B9A3A7B1451FE47F",
           "name": "namespace",
           "displayName": "namespace",
           "defaultValue": "aws/networkelb",
@@ -1674,21 +1791,21 @@
           "hideFromUI": false
         },
         {
-          "id": "21F499CC97976D0C",
-          "name": "loadbalancer",
-          "displayName": "loadbalancer",
+          "id": "9E34BC91EECCBCD5",
+          "name": "networkloadbalancer",
+          "displayName": "networkloadbalancer",
           "defaultValue": "*",
           "sourceDefinition": {
             "variableSourceType": "MetadataVariableSourceDefinition",
             "filter": "account={{account}} region={{region}} namespace={{namespace}}",
-            "key": "loadbalancer"
+            "key": "networkloadbalancer"
           },
           "allowMultiSelect": false,
           "includeAllOption": true,
           "hideFromUI": false
         },
         {
-          "id": "0FC69ACD8FA1A808",
+          "id": "E81AD8D8AB8D10E0",
           "name": "availabilityzone",
           "displayName": "availabilityzone",
           "defaultValue": "*",
@@ -1707,22 +1824,22 @@
     {
       "type": "DashboardV2SyncDefinition",
       "name": "6. AWS Network Load Balancer - Consumed LCUs",
-      "description": "",
+      "description": "The AWS Network Load Balancer - Consumed LCUs dashboard shows you the total number of load balancer capacity units (LCU) used by your load balancer by network protocol.",
       "title": "6. AWS Network Load Balancer - Consumed LCUs",
       "rootPanel": null,
       "theme": "Light",
       "topologyLabelMap": {
         "data": {
-          "loadbalancer": [
-            "*"
-          ],
           "namespace": [
-            "aws/networknlb"
+            "aws/networkelb"
           ],
           "region": [
             "*"
           ],
           "account": [
+            "*"
+          ],
+          "networkloadbalancer": [
             "*"
           ]
         }
@@ -1763,19 +1880,22 @@
       },
       "panels": [
         {
-          "id": "45D0F52FBF1CFB83",
+          "id": null,
           "key": "panelPANE-189058059223F848",
           "title": "Consumed LCUs",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Consumed LCUs\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Consumed LCUs\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ConsumedLCUs Statistic=average account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | avg by loadbalancer, account, region, namespace",
+              "queryString": "Namespace=aws/NetworkELB metric=ConsumedLCUs Statistic=average account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | avg by LoadBalancer, account, region, namespace",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1784,19 +1904,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "57D2032B2B4587F0",
+          "id": null,
           "key": "panel27BCAC0AB2617849",
           "title": "Consumed LCUs For TCP",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Consumed LCUs TCP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Consumed LCUs TCP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ConsumedLCUs_TCP Statistic=average account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | avg by loadbalancer, account, region, namespace",
+              "queryString": "Namespace=aws/NetworkELB metric=ConsumedLCUs_TCP Statistic=average account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | avg by LoadBalancer, account, region, namespace",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1805,19 +1928,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "928A2257C42CD5A7",
+          "id": null,
           "key": "panelC8EEA6B78D4AB943",
           "title": "Consumed LCUs For UDP",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Consumed LCUs UDP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Consumed LCUs UDP\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ConsumedLCUs_UDP Statistic=average account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | avg by loadbalancer, account, region, namespace",
+              "queryString": "Namespace=aws/NetworkELB metric=ConsumedLCUs_UDP Statistic=average account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | avg by LoadBalancer, account, region, namespace",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1826,19 +1952,22 @@
           "linkedDashboards": []
         },
         {
-          "id": "828C0C14736DF876",
+          "id": null,
           "key": "panelB42DE669AC848A41",
           "title": "Consumed LCUs For  TLS",
-          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Consumed LCUs TLS\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+          "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"showLabels\":true,\"title\":\"Consumed LCUs TLS\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{LoadBalancer}}\"}}]}",
           "keepVisualSettingsConsistentWithParent": true,
           "panelType": "SumoSearchPanel",
           "queries": [
             {
-              "queryString": "Namespace=aws/NetworkELB metric=ConsumedLCUs_TLS Statistic=average account={{account}} region={{region}} LoadBalancer={{loadbalancer}} | avg by loadbalancer, account, region, namespace",
+              "queryString": "Namespace=aws/NetworkELB metric=ConsumedLCUs_TLS Statistic=average account={{account}} region={{region}} LoadBalancer={{networkloadbalancer}} | avg by LoadBalancer, account, region, namespace",
               "queryType": "Metrics",
               "queryKey": "A",
               "metricsQueryMode": "Advanced",
-              "metricsQueryData": null
+              "metricsQueryData": null,
+              "tracesQueryData": null,
+              "parseMode": "Manual",
+              "timeSource": "Message"
             }
           ],
           "description": "",
@@ -1847,7 +1976,7 @@
           "linkedDashboards": []
         },
         {
-          "id": "46A8045AD4F27A16",
+          "id": null,
           "key": "panelPANE-BC46700A8145E848",
           "title": "Note",
           "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"alignment\":\"left\",\"format\":\"markdown\"}}",
@@ -1858,7 +1987,7 @@
       ],
       "variables": [
         {
-          "id": "EB401E2C8DD9FBDA",
+          "id": "C7E05418E950265D",
           "name": "account",
           "displayName": "account",
           "defaultValue": "*",
@@ -1872,7 +2001,7 @@
           "hideFromUI": false
         },
         {
-          "id": "3015A58C22E974F8",
+          "id": "CDD003E9EDAB2DE5",
           "name": "region",
           "displayName": "region",
           "defaultValue": "*",
@@ -1886,7 +2015,7 @@
           "hideFromUI": false
         },
         {
-          "id": "08EF3EF920E2DD5E",
+          "id": "5D5C47313E3B237F",
           "name": "namespace",
           "displayName": "namespace",
           "defaultValue": "aws/networkelb",
@@ -1900,14 +2029,14 @@
           "hideFromUI": false
         },
         {
-          "id": "D78EB87DA58B1FA4",
-          "name": "loadbalancer",
-          "displayName": "loadbalancer",
+          "id": "0739201B595435E8",
+          "name": "networkloadbalancer",
+          "displayName": "networkloadbalancer",
           "defaultValue": "*",
           "sourceDefinition": {
             "variableSourceType": "MetadataVariableSourceDefinition",
             "filter": "account={{account}} region={{region}} namespace={{namespace}}",
-            "key": "loadbalancer"
+            "key": "networkloadbalancer"
           },
           "allowMultiSelect": false,
           "includeAllOption": true,

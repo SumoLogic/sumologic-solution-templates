@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets. (MPCT-ibieokba)"
+Description: "Version - v2.2.0: The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets. (MPCT-ibieokba)"
 
 Globals:
   Function:
@@ -212,7 +212,7 @@ Resources:
           from botocore.exceptions import ClientError
 
           name = 'SUMO-LOGIC-AWS-OBSERVABILITY'
-          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.1.0/sumologic_observability.master.template.yaml"
+          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.2.0/sumologic_observability.master.template.yaml"
           ALL = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
 
 
@@ -266,7 +266,7 @@ Resources:
                       cf_client = boto3.client('cloudformation', region)
                       if event == 'CreateManagedAccount':
                           try:
-                              description = "The Stack Sets sets up the AWS Observability CloudFormation template on the New AWS accounts and AWS Regions."
+                              description = "Sets up the AWS Observability CloudFormation template."
                               cf_client.create_stack_set(StackSetName=name, Description=description, TemplateURL=templateURL, Capabilities=ALL, Parameters=params,
                                                          AdministrationRoleARN=os.environ['AdminRole'], ExecutionRoleName=os.environ['ExecutionRole'])
                               print('Stack Set Created Name {} Region {}'.format(name, region))

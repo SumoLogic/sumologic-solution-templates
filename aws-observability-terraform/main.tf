@@ -33,7 +33,7 @@ resource "aws_cloudformation_stack" "aws-observability" {
     # Sumo Logic AWS Observability Apps
     Section3aInstallObservabilityApps = var.Section3aInstallObservabilityApps
     # Sumo Logic AWS CloudWatch Metrics and Inventory Source
-    Section4aCreateMetricsSourcesOptions    = var.Section4aCreateMetricsSourcesOptions
+    Section4aCreateMetricsSourceOptions     = var.Section4aCreateMetricsSourceOptions
     Section4bMetricsNameSpaces              = var.Section4bMetricsNameSpaces
     Section4cCloudWatchExistingSourceAPIUrl = var.Section4cCloudWatchExistingSourceAPIUrl
     # Sumo Logic AWS ALB Log Source
@@ -48,15 +48,15 @@ resource "aws_cloudformation_stack" "aws-observability" {
     Section6cCloudTrailLogsBucketName       = var.Section6cCloudTrailLogsBucketName
     Section6dCloudTrailBucketPathExpression = var.Section6dCloudTrailBucketPathExpression
     # Sumo Logic AWS Lambda CloudWatch HTTP Source
-    Section7aLambdaCreateCloudWatchLogsSource    = var.Section7aLambdaCreateCloudWatchLogsSource
-    Section7bLambdaCloudWatchLogsSourceUrl       = var.Section7bLambdaCloudWatchLogsSourceUrl
-    Section7cAutoSubscribeLogGroupsLambdaOptions = var.Section7cAutoSubscribeLogGroupsLambdaOptions
-    Section7dAutoSubscribeLambdaLogGroupPattern  = var.Section7dAutoSubscribeLambdaLogGroupPattern
+    Section7aLambdaCreateCloudWatchLogsSourceOptions = var.Section7aLambdaCreateCloudWatchLogsSourceOptions
+    Section7bLambdaCloudWatchLogsSourceUrl           = var.Section7bLambdaCloudWatchLogsSourceUrl
+    Section7cAutoSubscribeLogGroupsLambdaOptions     = var.Section7cAutoSubscribeLogGroupsLambdaOptions
+    Section7dAutoSubscribeLambdaLogGroupPattern      = var.Section7dAutoSubscribeLambdaLogGroupPattern
     # Sumo Logic AWS X-Ray Source
-    Section8aCreateAwsXraySource = var.Section8aCreateAwsXraySource
+    Section8aRootCauseExplorerOptions = var.Section8aRootCauseExplorerOptions
   }
 
-  template_url = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/sumologic_observability.master.template.yaml"
+  template_url = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.2.0/sumologic_observability.master.template.yaml"
 
   capabilities = [
     "CAPABILITY_IAM",
