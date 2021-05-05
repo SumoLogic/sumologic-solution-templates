@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
+Description: "Version - v2.2.0: Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
 
 Parameters:
   SumoLogicResourceRemoveOnDeleteStack:
@@ -55,14 +55,25 @@ Parameters:
       - 'Existing'
       - 'Both'
       - 'None'
-  AutoSubscribeLambdaARN:
+  AutoSubscribeDestinationARNType:
     Type: String
-    Description: "Lambda ARN for Cloudwatch Log Sender."
+    Description: "Destination ARN Type for Cloudwatch Log Sender."
+    Default: 'Lambda'
+    AllowedValues:
+      - 'Lambda'
+      - 'Kinesis'
+  AutoSubscribeDestinationARN:
+    Type: String
+    Description: "Destination ARN for Cloudwatch Log Sender."
     Default: ""
   AutoSubscribeLambdaLogGroupPattern:
     Type: String
     Default: "lambda"
     Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
+  AutoSubscribeRoleArn:
+    Type: String
+    Default: ""
+    Description: "Enter AWS IAM Role arn in case the destination is Kinesis Firehose stream."
 
 Conditions:
   auto_enable_s3_logs: !Equals [ !Ref ALBAutoEnableS3Logs, 'Yes' ]
@@ -96,8 +107,10 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.2
+        SemanticVersion: 1.0.5
       Parameters:
-        LambdaARN: !Ref AutoSubscribeLambdaARN
+        DestinationArnType: !Ref AutoSubscribeDestinationARNType
+        DestinationArnValue: !Ref AutoSubscribeDestinationARN
         LogGroupPattern: !Ref AutoSubscribeLambdaLogGroupPattern
         UseExistingLogs: !If [auto_subscribe_exisitng_lambda_log_groups, "true", "false"]
+        RoleArn: !Ref AutoSubscribeRoleArn

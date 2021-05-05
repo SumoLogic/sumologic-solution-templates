@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the Sumo Logic AWS Inventory Source and Root Cause Explorer app."
+Description: "Version - v2.2.0: Template to setup the Sumo Logic AWS Inventory Source and Root Cause Explorer app."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -202,13 +202,30 @@ Resources:
       ServiceToken: !Ref Section5aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App Tsat"
-      FolderName: "Sumo Logic AWS Observability Apps "
+      FolderName: !Sub "AWS Observability ${Section5cNestedTemplateVersion} "
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       AppJsonS3Url: !Sub "https://${Section5bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section5cNestedTemplateVersion}/appjson/Rce-App.json"
+
+  CloudTrailDevOps:
+    Type: Custom::App
+    Condition: install_app
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "Global Intelligence for CloudTrail DevOps"
+      AppId: "c7e195de-f169-460a-8e8b-7bb23af0ee5e"
+      AppSources:
+        CloudTrailLogSrc: "account=* eventSource"
+      FolderName: !Sub "AWS Observability ${Section5cNestedTemplateVersion} "
+      RetainOldAppOnUpdate: true
+      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
 
   SumoLogicHostedCollector:
     Type: Custom::Collector
@@ -226,6 +243,11 @@ Resources:
   RootCauseRole:
     Type: AWS::IAM::Role
     Condition: install_collector
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'

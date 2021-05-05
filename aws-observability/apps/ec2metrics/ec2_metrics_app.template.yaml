@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the EC2 Metrics app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.2.0: Template to setup the EC2 Metrics app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -97,19 +97,6 @@ Conditions:
 
 Resources:
 
-  EC2MetricRule:
-    Type: Custom::SumoLogicMetricRules
-    Properties:
-      ServiceToken: !Ref Section3aParentStackLambdaARN
-      RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityEC2MetricsEntityRule"
-      MatchExpression: "Namespace=AWS/EC2 InstanceId=*"
-      ExtractVariables:
-        entity: "$InstanceId._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
   sumoApp:
     Type: Custom::App
     Condition: install_app
@@ -117,7 +104,7 @@ Resources:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability EC2 Metrics App"
-      FolderName: "Sumo Logic AWS Observability Apps "
+      FolderName: !Sub "AWS Observability ${Section3cNestedTemplateVersion} "
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
@@ -128,17 +115,33 @@ Resources:
   sumoOverview:
     Type: Custom::App
     Condition: install_app
+    DependsOn: sumoApp
     Properties:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability Overview App"
-      FolderName: "Sumo Logic AWS Observability Apps "
+      FolderName: !Sub "AWS Observability ${Section3cNestedTemplateVersion} "
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       AppJsonS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/Overview-App.json"
+
+  sumoMonitorAlerts:
+    Type: Custom::AlertsMonitor
+    Condition: install_app
+    Properties:
+      ServiceToken: !Ref Section3aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      FolderName: !Sub "AWS Observability ${Section3cNestedTemplateVersion} "
+      MonitorsS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/Alerts-App.json"
+      SuffixDateTime: true
+      RetainOldAlerts: true
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
 
   AddInstanceIdField:
     Type: Custom::SumoLogicFieldsSchema

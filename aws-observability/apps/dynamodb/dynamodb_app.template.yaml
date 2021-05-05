@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the DynamoDB app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.2.0: Template to setup the DynamoDB app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -125,19 +125,6 @@ Conditions:
 
 Resources:
 
-  MetricRule:
-    Type: Custom::SumoLogicMetricRules
-    Properties:
-      ServiceToken: !Ref Section4aParentStackLambdaARN
-      RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityDynamoDBMetricsEntityRule"
-      MatchExpression: "Namespace=AWS/DynamoDB TableName=*"
-      ExtractVariables:
-        entity: "$TableName._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
   sumoApp:
     Type: Custom::App
     Condition: install_app
@@ -146,7 +133,7 @@ Resources:
       Region: !Ref "AWS::Region"
       AppName: "AWS Observability DynamoDb App"
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
-      FolderName: "Sumo Logic AWS Observability Apps "
+      FolderName: !Sub "AWS Observability ${Section4cNestedTemplateVersion} "
       RetainOldAppOnUpdate: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
@@ -156,6 +143,7 @@ Resources:
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
+    DependsOn: AddTableNameField
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
@@ -165,7 +153,7 @@ Resources:
         - - "(_source="
           - !If [source_updated, !Sub "\"${Section3aCloudTrailLogsSourceName}\"", !Ref Section3aCloudTrailLogsSourceName]
           - " (\"dynamodb.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters.tableName" as eventSource, region, tablename
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters.tableName" as eventSource, region, tablename nodrop
                                            | where eventSource = "dynamodb.amazonaws.com"
                                            | "aws/dynamodb" as namespace
                                            | tolowercase(tablename) as tablename
