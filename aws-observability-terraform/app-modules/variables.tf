@@ -45,7 +45,7 @@ variable "apps_folder_name" {
 
 variable "parent_folder_id" {
   type        = string
-  description = "Please provide a folder ID where you would like the apps to be installed. A folder with name provided in \"apps_folder_name\" will be created. If folder ID is empty, apps will be installed in Personal folder."
+  description = "Please provide a HexaDecimal folder ID where you would like the apps to be installed. A folder with name provided in \"apps_folder_name\" will be created. If folder ID is empty, apps will be installed in Personal folder."
   default     = ""
 }
 
