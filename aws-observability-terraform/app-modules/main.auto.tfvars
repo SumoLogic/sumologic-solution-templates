@@ -1,0 +1,10 @@
+environment              = "us2"
+access_id                = ""
+access_key               = ""
+apps_folder_name         = ""
+parent_folder_id         = ""
+monitors_folder_name     = ""
+connection_notifications = []
+email_notifications      = []
+group_notifications      = true
+rds_monitors_disabled    = true
