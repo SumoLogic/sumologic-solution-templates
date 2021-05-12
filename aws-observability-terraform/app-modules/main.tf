@@ -4,7 +4,7 @@ data "sumologic_personal_folder" "personalFolder" {}
 resource "sumologic_folder" "apps_folder" {
   description = "This folder contains all the apps for AWS Observability solution."
   name        = var.apps_folder_name
-  parent_id   = var.parent_folder_id != "" ? var.parent_folder_id : data.sumologic_personal_folder.personalFolder.id
+  parent_id   = var.parent_folder_id != "" ? format("%x", var.parent_folder_id) : data.sumologic_personal_folder.personalFolder.id
 }
 
 # Create a folder to install all monitors.

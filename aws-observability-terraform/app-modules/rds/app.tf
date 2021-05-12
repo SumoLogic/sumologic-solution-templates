@@ -49,7 +49,7 @@ module "rds_module" {
       name             = "AwsObservabilityRdsCloudTrailLogsFER"
       scope            = "account=* eventname eventsource \"rds.amazonaws.com\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters", "responseElements" as eventSource, region, requestParameters, responseElements nodrop
+              json "eventSource", "awsRegion", "requestParameters", "responseElements" as eventSource, region, requestParameters, responseElements nodrop
               | where eventSource = "rds.amazonaws.com"
               | "aws/rds" as namespace
               | json field=requestParameters "dBInstanceIdentifier", "resourceName", "dBClusterIdentifier" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop
