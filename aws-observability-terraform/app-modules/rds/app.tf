@@ -6,7 +6,6 @@ module "rds_module" {
   environment = var.environment
 
   # ********************** Metric Rules ********************** #
-
   managed_metric_rules = {
     "ClusterMetricRule" = {
       metric_rule_name = "AwsObservabilityRDSClusterMetricsEntityRule"
@@ -33,7 +32,6 @@ module "rds_module" {
   }
 
   # ********************** Fields ********************** #
-
   managed_fields = {
     "DBIdentifier" = {
       field_name = "dbidentifier"
@@ -43,7 +41,6 @@ module "rds_module" {
   }
 
   # ********************** FERs ********************** #
-
   managed_field_extraction_rules = {
     "CloudTrailFieldExtractionRule" = {
       name             = "AwsObservabilityRdsCloudTrailLogsFER"
@@ -66,7 +63,6 @@ module "rds_module" {
   }
 
   # ********************** Apps ********************** #
-
   managed_apps = {
     "RdsApp" = {
       content_json = "/aws-observability/json/Rds-App.json"
@@ -75,7 +71,6 @@ module "rds_module" {
   }
 
   # ********************** Monitors ********************** #
-
   managed_monitors = {
     "RdsBufferCacheHitRatio" = {
       monitor_name         = "Amazon RDS - Low Aurora Buffer Cache Hit Ratio"
