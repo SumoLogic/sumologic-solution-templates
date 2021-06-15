@@ -89,6 +89,54 @@ variable "group_notifications" {
   default     = true
 }
 
+variable "alb_monitors_disabled" {
+  type        = bool
+  description = "Whether the ALB Apps monitors are enabled or not?"
+  default     = true
+}
+
+variable "apigateway_monitors_disabled" {
+  type        = bool
+  description = "Whether the API Gateway Apps monitors are enabled or not?"
+  default     = true
+}
+
+variable "dynamodb_monitors_disabled" {
+  type        = bool
+  description = "Whether the DynamoDB Apps monitors are enabled or not?"
+  default     = true
+}
+
+variable "ec2metrics_monitors_disabled" {
+  type        = bool
+  description = "Whether the EC2 Metrics Apps monitors are enabled or not?"
+  default     = true
+}
+
+variable "ecs_monitors_disabled" {
+  type        = bool
+  description = "Whether the ECS Apps monitors are enabled or not?"
+  default     = true
+}
+
+variable "elasticache_monitors_disabled" {
+  type        = bool
+  description = "Whether the Elasticache Apps monitors are enabled or not?"
+  default     = true
+}
+
+variable "lambda_monitors_disabled" {
+  type        = bool
+  description = "Whether the Lambda Apps monitors are enabled or not?"
+  default     = true
+}
+
+variable "nlb_monitors_disabled" {
+  type        = bool
+  description = "Whether the NLB Apps monitors are enabled or not?"
+  default     = true
+}
+
 variable "rds_monitors_disabled" {
   type        = bool
   description = "Whether the RDS Apps monitors are enabled or not?"
