@@ -49,7 +49,6 @@ module "overview_app" {
   access_key               = var.access_key
   environment              = var.environment
   app_folder_id            = sumologic_folder.apps_folder.id
-  monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
 }
 
 # Install the alb app and resources.
@@ -205,5 +204,4 @@ module "rce_app" {
   access_key               = var.access_key
   environment              = var.environment
   app_folder_id            = sumologic_folder.apps_folder.id
-  monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
 }

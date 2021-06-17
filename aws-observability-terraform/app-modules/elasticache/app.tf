@@ -35,7 +35,7 @@ module "elasticache_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "ElastiCacheApp" = {
-      content_json = "/aws-observability/json/ElastiCache-App.json.json"
+      content_json = "/aws-observability/json/ElastiCache-App.json"
       folder_id    = var.app_folder_id
     }
   }
