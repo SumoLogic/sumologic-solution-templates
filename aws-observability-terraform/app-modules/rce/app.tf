@@ -1,5 +1,5 @@
 module "rce_module" {
-  source = "../common"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -14,7 +14,7 @@ module "rce_module" {
   # ********************** Apps - RCE dashboards only ********************** #
   managed_apps = {
     "OverviewApp" = {
-      content_json = "/aws-observability/json/Rce-App.json"
+      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Rce-App.json"])
       folder_id    = var.app_folder_id
     }
   }

@@ -1,5 +1,5 @@
 module "lambda_module" {
-  source = "../common"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -49,7 +49,7 @@ module "lambda_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "LambdaApp" = {
-      content_json = "/aws-observability/json/Lambda-App.json"
+      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Lambda-App.json"])
       folder_id    = var.app_folder_id
     }
   }

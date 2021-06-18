@@ -1,5 +1,5 @@
 module "apigateway_module" {
-  source = "../common"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -36,7 +36,7 @@ module "apigateway_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "APIGatewayApp" = {
-      content_json = "/aws-observability/json/Api-Gateway-App.json"
+      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Api-Gateway-App.json"])
       folder_id    = var.app_folder_id
     }
   }

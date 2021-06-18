@@ -13,36 +13,8 @@ resource "sumologic_monitor_folder" "monitor_folder" {
   description = "This folder contains all the monitors for AWS Observability solution."
 }
 
-# Create common fields and Explorer hierarchy
-module "common" {
-  source = "./common"
-
-  access_id   = var.access_id
-  access_key  = var.access_key
-  environment = var.environment
-
-  managed_fields = {
-    "Account" = {
-      field_name = "account"
-      data_type  = "String"
-      state      = true
-    },
-    "Region" = {
-      field_name = "region"
-      data_type  = "String"
-      state      = true
-    },
-    "Namespace" = {
-      field_name = "namespace"
-      data_type  = "String"
-      state      = true
-    }
-  }
-}
-
 # Install the overview app and resources.
 module "overview_app" {
-  depends_on = [module.common]
   source     = "./overview"
 
   access_id                = var.access_id
@@ -53,7 +25,6 @@ module "overview_app" {
 
 # Install the alb app and resources.
 module "alb_app" {
-  depends_on = [module.common]
   source     = "./alb"
 
   access_id                = var.access_id
@@ -69,7 +40,7 @@ module "alb_app" {
 
 # Install the apigateway app and resources.
 module "apigateway_app" {
-  depends_on = [module.common]
+  depends_on = [module.overview_app]
   source     = "./apigateway"
 
   access_id                = var.access_id
@@ -85,7 +56,7 @@ module "apigateway_app" {
 
 # Install the dynamodb app and resources.
 module "dynamodb_app" {
-  depends_on = [module.common]
+  depends_on = [module.alb_app]
   source     = "./dynamodb"
 
   access_id                = var.access_id
@@ -101,7 +72,7 @@ module "dynamodb_app" {
 
 # Install the ec2metrics app and resources.
 module "ec2metrics_app" {
-  depends_on = [module.common]
+  depends_on = [module.apigateway_app]
   source     = "./ec2metrics"
 
   access_id                = var.access_id
@@ -117,7 +88,7 @@ module "ec2metrics_app" {
 
 # Install the ecs app and resources.
 module "ecs_app" {
-  depends_on = [module.common]
+  depends_on = [module.dynamodb_app]
   source     = "./ecs"
 
   access_id                = var.access_id
@@ -133,7 +104,7 @@ module "ecs_app" {
 
 # Install the elasticache app and resources.
 module "elasticache_app" {
-  depends_on = [module.common]
+  depends_on = [module.ec2metrics_app]
   source     = "./elasticache"
 
   access_id                = var.access_id
@@ -149,7 +120,7 @@ module "elasticache_app" {
 
 # Install the lambda app and resources.
 module "lambda_app" {
-  depends_on = [module.common]
+  depends_on = [module.ecs_app]
   source     = "./lambda"
 
   access_id                = var.access_id
@@ -165,7 +136,7 @@ module "lambda_app" {
 
 # Install the nlb app and resources.
 module "nlb_app" {
-  depends_on = [module.common]
+  depends_on = [module.elasticache_app]
   source     = "./nlb"
 
   access_id                = var.access_id
@@ -181,7 +152,7 @@ module "nlb_app" {
 
 # Install the RDS app and resources.
 module "rds_app" {
-  depends_on = [module.common]
+  depends_on = [module.lambda_app]
   source     = "./rds"
 
   access_id                = var.access_id
@@ -197,7 +168,7 @@ module "rds_app" {
 
 # Install the rce app and resources.
 module "rce_app" {
-  depends_on = [module.common]
+  depends_on = [module.nlb_app]
   source     = "./rce"
 
   access_id                = var.access_id
