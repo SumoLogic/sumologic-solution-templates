@@ -86,17 +86,17 @@ module "ec2metrics_app" {
   group_notifications      = var.group_notifications
 }
 
-# Install the ecs app and resources.
-module "ecs_app" {
+# Install the RDS app and resources.
+module "rds_app" {
   depends_on = [module.dynamodb_app]
-  source     = "./ecs"
+  source     = "./rds"
 
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
-  monitors_disabled        = var.ecs_monitors_disabled
+  monitors_disabled        = var.rds_monitors_disabled
   connection_notifications = var.connection_notifications
   email_notifications      = var.email_notifications
   group_notifications      = var.group_notifications
@@ -120,7 +120,7 @@ module "elasticache_app" {
 
 # Install the lambda app and resources.
 module "lambda_app" {
-  depends_on = [module.ecs_app]
+  depends_on = [module.rds_app]
   source     = "./lambda"
 
   access_id                = var.access_id
@@ -150,17 +150,17 @@ module "nlb_app" {
   group_notifications      = var.group_notifications
 }
 
-# Install the RDS app and resources.
-module "rds_app" {
+# Install the ecs app and resources.
+module "ecs_app" {
   depends_on = [module.lambda_app]
-  source     = "./rds"
+  source     = "./ecs"
 
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
-  monitors_disabled        = var.rds_monitors_disabled
+  monitors_disabled        = var.ecs_monitors_disabled
   connection_notifications = var.connection_notifications
   email_notifications      = var.email_notifications
   group_notifications      = var.group_notifications
