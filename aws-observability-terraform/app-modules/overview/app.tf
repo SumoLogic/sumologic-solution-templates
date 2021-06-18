@@ -1,5 +1,5 @@
 module "overview_module" {
-  source = "../common"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -31,7 +31,7 @@ module "overview_module" {
   # ********************** Apps - Account and Region Level dashboards only ********************** #
   managed_apps = {
     "OverviewApp" = {
-      content_json = "/aws-observability/json/Overview-App.json"
+      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Overview-App.json"])
       folder_id    = var.app_folder_id
     }
   }

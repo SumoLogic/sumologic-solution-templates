@@ -1,5 +1,5 @@
 module "rds_module" {
-  source = "../common"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -21,7 +21,8 @@ module "rds_module" {
     "InstanceMetricRule" = {
       metric_rule_name = "AwsObservabilityRDSInstanceMetricsEntityRule"
       match_expression = "Namespace=AWS/RDS DBInstanceIdentifier=*"
-      sleep            = 3
+      # Issue with metric rules creation when created in parallel. To handle that sleep is added.
+      sleep            = 5
       variables_to_extract = [
         {
           name        = "dbidentifier"
@@ -65,7 +66,7 @@ module "rds_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "RdsApp" = {
-      content_json = "/aws-observability/json/Rds-App.json"
+      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Rds-App.json"])
       folder_id    = var.app_folder_id
     }
   }

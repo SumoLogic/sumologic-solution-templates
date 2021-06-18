@@ -1,5 +1,5 @@
 module "elasticache_module" {
-  source = "../common"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -35,7 +35,7 @@ module "elasticache_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "ElastiCacheApp" = {
-      content_json = "/aws-observability/json/ElastiCache-App.json"
+      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/ElastiCache-App.json"])
       folder_id    = var.app_folder_id
     }
   }

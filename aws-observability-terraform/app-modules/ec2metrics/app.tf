@@ -1,5 +1,5 @@
 module "ec2metrics_module" {
-  source = "../common"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -21,7 +21,7 @@ module "ec2metrics_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "EC2MetricsApp" = {
-      content_json = "/aws-observability/json/EC2-Metrics-App.json"
+      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/EC2-Metrics-App.json"])
       folder_id    = var.app_folder_id
     }
   }

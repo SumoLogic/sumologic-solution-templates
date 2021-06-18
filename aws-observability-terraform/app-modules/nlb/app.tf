@@ -1,5 +1,5 @@
 module "nlb_module" {
-  source = "../common"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -10,7 +10,8 @@ module "nlb_module" {
     "NLBMetricRule" = {
       metric_rule_name = "AwsObservabilityNLBMetricsEntityRule"
       match_expression = "Namespace=AWS/NetworkELB LoadBalancer=*"
-      sleep            = 0
+      # Issue with metric rules creation when created in parallel. To handle that sleep is added.
+      sleep            = 11 
       variables_to_extract = [
         {
           name        = "networkloadbalancer"
@@ -46,7 +47,7 @@ module "nlb_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "NlbApp" = {
-      content_json = "/aws-observability/json/Nlb-App.json"
+      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Nlb-App.json"])
       folder_id    = var.app_folder_id
     }
   }
