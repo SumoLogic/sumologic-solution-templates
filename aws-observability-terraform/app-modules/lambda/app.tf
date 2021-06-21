@@ -36,7 +36,7 @@ module "lambda_module" {
     },
     "CloudWatchFieldExtractionRule" = {
       name             = "AwsObservabilityLambdaCloudWatchLogsFER"
-      scope            = "account=* _sourceHost=/aws/lambda/*"
+      scope            = "account=* region=* namespace=aws/lambda _sourceHost=/aws/lambda/*"
       parse_expression = <<EOT
               | parse field=_sourceHost "/aws/lambda/*" as functionname
               | tolowercase(functionname) as functionname

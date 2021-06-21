@@ -30,19 +30,19 @@ module "nlb_module" {
     }
   }
 
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "NLBAccessLogsFieldExtractionRule" = {
-      name             = "AwsObservabilityNlbAccessLogsFER"
-      scope            = "account=* region=* namespace=aws/networkloadbalancer"
-      parse_expression = <<EOT
-              | parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
-              | tolowercase(loadbalancer) as loadbalancer
-              | fields loadbalancer
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** No FERs for Network Load Balancers ********************** #
+  # managed_field_extraction_rules = {
+  #   "NLBAccessLogsFieldExtractionRule" = {
+  #     name             = "AwsObservabilityNlbAccessLogsFER"
+  #     scope            = "account=* region=* namespace=aws/networkloadbalancer"
+  #     parse_expression = <<EOT
+  #             | parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
+  #             | tolowercase(loadbalancer) as loadbalancer
+  #             | fields loadbalancer
+  #     EOT
+  #     enabled          = true
+  #   }
+  # }
 
   # ********************** Apps ********************** #
   managed_apps = {
