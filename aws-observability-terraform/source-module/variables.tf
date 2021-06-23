@@ -185,7 +185,7 @@ variable "cloudwatch_metrics_source_details" {
     source_name         = "CloudWatch Metrics (Region)"
     source_category     = "aws/observability/cloudwatch/metrics"
     description         = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch metrics."
-    limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB"]
+    limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS"]
     fields              = {}
     bucket_details = {
       create_bucket        = true
@@ -195,8 +195,8 @@ variable "cloudwatch_metrics_source_details" {
   }
   validation {
     # regex check that each element of the input namespaces is one of the accepted values, contains check if any of the can function returns was false, return false from logical if any of the returns were false
-    condition     = contains([for namespace in var.cloudwatch_metrics_source_details.limit_to_namespaces : can(regex("AWS/(?:ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB)", namespace))], false) != true
-    error_message = "Namespaces should be from provided default list \"AWS/ApplicationELB\", \"AWS/ApiGateway\", \"AWS/DynamoDB\", \"AWS/Lambda\", \"AWS/RDS\", \"AWS/ECS\", \"AWS/ElastiCache\", \"AWS/ELB\", \"AWS/NetworkELB\"."
+    condition     = contains([for namespace in var.cloudwatch_metrics_source_details.limit_to_namespaces : can(regex("AWS/(?:ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS)", namespace))], false) != true
+    error_message = "Namespaces should be from provided default list \"AWS/ApplicationELB\", \"AWS/ApiGateway\", \"AWS/DynamoDB\", \"AWS/Lambda\", \"AWS/RDS\", \"AWS/ECS\", \"AWS/ElastiCache\", \"AWS/ELB\", \"AWS/NetworkELB\", \"AWS/SQS\", \"AWS/SNS\"."
   }
 }
 
@@ -319,13 +319,13 @@ variable "inventory_source_details" {
     source_name         = "AWS Inventory (Region)"
     source_category     = "aws/observability/inventory"
     description         = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS inventory metadata."
-    limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/AutoScaling"]
+    limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/AutoScaling"]
     fields              = {}
   }
   validation {
     # regex check that each element of the input namespaces is one of the accepted values, contains check if any of the can function returns was false, return false from logical if any of the returns were false
-    condition     = contains([for namespace in var.inventory_source_details.limit_to_namespaces : can(regex("AWS/(?:ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|AutoScaling)", namespace))], false) != true
-    error_message = "Namespaces should be from provided default list \"AWS/ApplicationELB\", \"AWS/ApiGateway\", \"AWS/DynamoDB\", \"AWS/Lambda\", \"AWS/RDS\", \"AWS/ECS\", \"AWS/ElastiCache\", \"AWS/ELB\", \"AWS/NetworkELB\", \"AWS/AutoScaling\"."
+    condition     = contains([for namespace in var.inventory_source_details.limit_to_namespaces : can(regex("AWS/(?:ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS|AutoScaling)", namespace))], false) != true
+    error_message = "Namespaces should be from provided default list \"AWS/ApplicationELB\", \"AWS/ApiGateway\", \"AWS/DynamoDB\", \"AWS/Lambda\", \"AWS/RDS\", \"AWS/ECS\", \"AWS/ElastiCache\", \"AWS/ELB\", \"AWS/NetworkELB\", \"AWS/SQS\", \"AWS/SNS\", \"AWS/AutoScaling\"."
   }
 }
 
