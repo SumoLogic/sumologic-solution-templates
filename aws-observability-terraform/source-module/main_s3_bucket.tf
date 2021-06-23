@@ -9,25 +9,9 @@ resource "aws_s3_bucket" "s3_bucket" {
   bucket        = local.common_bucket_name
   force_destroy = local.common_force_destroy
   acl           = "private"
-}
-
-resource "aws_s3_bucket_policy" "cloudtrail_policy" {
-  for_each = toset(var.cloudtrail_source_details.bucket_details.create_bucket ? ["cloudtrail_policy"] : [])
-
-  bucket = aws_s3_bucket.s3_bucket["s3_bucket"].id
-
-  policy = templatefile("${path.module}/templates/cloudtrail_bucket_policy.tmpl", {
+  
+  policy = templatefile("${path.module}/templates/s3_bucket_policy.tmpl", {
     BUCKET_NAME = local.common_bucket_name
-  })
-}
-
-resource "aws_s3_bucket_policy" "elb_policy" {
-  for_each = toset(var.elb_source_details.bucket_details.create_bucket ? ["elb_policy"] : [])
-
-  bucket = aws_s3_bucket.s3_bucket["s3_bucket"].id
-
-  policy = templatefile("${path.module}/templates/elb_bucket_policy.tmpl", {
-    BUCKET_NAME     = local.common_bucket_name
     ELB_ACCCOUNT_ID = local.region_to_elb_account_id[local.aws_region]
   })
 }
