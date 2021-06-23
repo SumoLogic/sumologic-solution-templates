@@ -205,7 +205,7 @@ module "kinesis_firehose_for_logs_module" {
 }
 
 module "root_cause_sources_module" {
-  for_each = toset(local.create_xray_source || local.create_inventory_source ? ["root_cause_sources_module"] : [])
+  for_each = toset(local.create_root_cause_source ? ["root_cause_sources_module"] : [])
   
   source = "../../../terraform-sumologic-sumo-logic-integrations/aws/rootcause"
   

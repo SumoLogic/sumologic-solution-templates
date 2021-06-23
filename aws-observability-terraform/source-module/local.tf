@@ -40,11 +40,12 @@ locals {
   # Root Cause sources updated details
   create_inventory_source = var.collect_root_cause_data == "Inventory Source" || var.collect_root_cause_data == "Both"
   create_xray_source = var.collect_root_cause_data == "Xray Source" || var.collect_root_cause_data == "Both"
+  create_root_cause_source = local.create_inventory_source || local.create_xray_source
   inventory_source_name = var.inventory_source_details.source_name == "AWS Inventory (Region)" ? "AWS Inventory ${local.aws_region}" : var.inventory_source_details.source_name
   xray_source_name = var.xray_source_details.source_name == "AWS Xray (Region)" ? "AWS Xray ${local.aws_region}" : var.xray_source_details.source_name
   
   # Create any Sumo Logic source. Keep on adding to this if any new source is added.
-  create_any_source = var.collect_cloudtrail_logs || var.collect_elb_logs || local.create_metric_source || local.create_cw_logs_source || local.create_xray_source || local.create_inventory_source
+  create_any_source = var.collect_cloudtrail_logs || var.collect_elb_logs || local.create_metric_source || local.create_cw_logs_source || local.create_root_cause_source
   
   # Create a new Sumo Logic hosted collector
   create_collector = var.sumologic_existing_collector_id == "" && local.create_any_source
