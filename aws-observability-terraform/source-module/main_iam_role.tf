@@ -6,7 +6,7 @@
 # 5. Add Root Cause sources policy
 
 resource "aws_iam_role" "sumologic_iam_role" {
-  for_each = toset(local.create_iam_role ? ["source_iam_role"] : [])
+  for_each = toset(local.create_iam_role ? ["sumologic_iam_role"] : [])
 
   name = "SumoLogic-Aws-Observability-Module-${random_string.aws_random.id}"
   path = "/"
@@ -48,19 +48,19 @@ resource "aws_iam_policy" "elb_policy" {
 resource "aws_iam_role_policy_attachment" "elb_policy_attach" {
   for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy_attach"] : [])
 
-  policy_arn = aws_iam_policy.cloudtrail_policy["elb_policy"].arn
+  policy_arn = aws_iam_policy.elb_policy["elb_policy"].arn
   role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn
 }
 
 # Sumo Logic CloudWatch Metrics Source Policy Attachment
 resource "aws_iam_policy" "cw_metrics_policy" {
-  for_each = toset(var.collect_cloudwatch_metrics && local.create_iam_role ? ["cw_metrics_policy"] : [])
+  for_each = toset(local.create_metric_source && local.create_iam_role ? ["cw_metrics_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_cw_metrics_source_policy.tmpl", {})
 }
 
 resource "aws_iam_role_policy_attachment" "cw_metrics_policy_attach" {
-  for_each = toset(var.collect_cloudwatch_metrics && local.create_iam_role ? ["cw_metrics_policy_attach"] : [])
+  for_each = toset(local.create_metric_source && local.create_iam_role ? ["cw_metrics_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.cw_metrics_policy["cw_metrics_policy"].arn
   role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn
