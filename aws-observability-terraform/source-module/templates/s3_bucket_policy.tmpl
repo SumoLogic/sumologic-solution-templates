@@ -31,6 +31,35 @@
       },
       "Action": "s3:ListBucket",
       "Resource": "arn:aws:s3:::${BUCKET_NAME}"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${ELB_ACCCOUNT_ID}:root"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${BUCKET_NAME}/*"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${BUCKET_NAME}/*",
+      "Condition": {
+        "StringEquals": {
+          "s3:x-amz-acl": "bucket-owner-full-control"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:GetBucketAcl",
+      "Resource": "arn:aws:s3:::${BUCKET_NAME}"
     }
   ],
   "Version": "2008-10-17"

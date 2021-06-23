@@ -23,7 +23,6 @@ resource "aws_iam_policy" "cloudtrail_policy" {
   for_each = toset(var.collect_cloudtrail_logs && local.create_iam_role ? ["cloudtrail_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
-    POLICY_NAME = "CloudTrailSourcePolicy"
     BUCKET_NAME = local.create_common_bucket ? local.common_bucket_name : var.cloudtrail_source_details.bucket_details.bucket_name
   })
 }
@@ -32,7 +31,7 @@ resource "aws_iam_role_policy_attachment" "cloudtrail_policy_attach" {
   for_each = toset(var.collect_cloudtrail_logs && local.create_iam_role ? ["cloudtrail_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.cloudtrail_policy["cloudtrail_policy"].arn
-  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn
+  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
 }
 
 # Sumo Logic ELB Source Policy Attachment
@@ -40,7 +39,6 @@ resource "aws_iam_policy" "elb_policy" {
   for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
-    POLICY_NAME = "ElbSourcePolicy"
     BUCKET_NAME = local.create_common_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
   })
 }
@@ -49,7 +47,7 @@ resource "aws_iam_role_policy_attachment" "elb_policy_attach" {
   for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.elb_policy["elb_policy"].arn
-  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn
+  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
 }
 
 # Sumo Logic CloudWatch Metrics Source Policy Attachment
@@ -63,7 +61,7 @@ resource "aws_iam_role_policy_attachment" "cw_metrics_policy_attach" {
   for_each = toset(local.create_metric_source && local.create_iam_role ? ["cw_metrics_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.cw_metrics_policy["cw_metrics_policy"].arn
-  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn
+  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
 }
 
 # Sumo Logic Root Cause Source Policy Attachment
@@ -77,5 +75,5 @@ resource "aws_iam_role_policy_attachment" "root_cause_policy_attach" {
   for_each = toset(local.create_root_cause_source && local.create_iam_role ? ["root_cause_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.root_cause_policy["root_cause_policy"].arn
-  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn
+  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
 }

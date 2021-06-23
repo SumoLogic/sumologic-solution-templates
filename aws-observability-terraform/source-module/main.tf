@@ -164,11 +164,11 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
   workers = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.workers
   
   source_details = {
-    source_name = var.cloudwatch_logs_source_details.source_name
+    source_name = local.cloudwatch_logs_source_name
     source_category = var.cloudwatch_logs_source_details.source_category
     description = var.cloudwatch_logs_source_details.description
     collector_id = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
-    fields = var.cloudwatch_logs_source_details.fields
+    fields = local.cloudwatch_logs_fields
   }
   
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
@@ -185,11 +185,11 @@ module "kinesis_firehose_for_logs_module" {
   create_collector = false
   
   source_details = {
-    source_name = var.cloudwatch_logs_source_details.source_name
+    source_name = local.cloudwatch_logs_source_name
     source_category = var.cloudwatch_logs_source_details.source_category
     description = var.cloudwatch_logs_source_details.description
     collector_id = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
-    fields = var.cloudwatch_logs_source_details.fields
+    fields = local.cloudwatch_logs_fields
   }
   
   create_bucket = false
