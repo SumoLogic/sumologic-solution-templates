@@ -31,6 +31,8 @@ module "cloudtrail_module" {
   create_collector          = false
   create_trail              = var.cloudtrail_source_details.bucket_details.create_bucket ? true : false
   sumologic_organization_id = var.sumologic_organization_id
+  wait_for_seconds = 1
+  
   source_details = {
     source_name     = local.cloudtrail_source_name
     source_category = var.cloudtrail_source_details.source_category
@@ -66,7 +68,8 @@ module "elb_module" {
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
-
+  wait_for_seconds = 1
+  
   source_details = {
     source_name     = local.elb_source_name
     source_category = var.elb_source_details.source_category
@@ -108,7 +111,8 @@ module "cloudwatch_metrics_source_module" {
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
-
+  wait_for_seconds = 1
+  
   source_details = {
     source_name         = "${local.metrics_source_name} ${regex("^AWS/(\\w+)$", each.value)[0]}"
     source_category     = var.cloudwatch_metrics_source_details.source_category
@@ -135,7 +139,8 @@ module "kinesis_firehose_for_metrics_source_module" {
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
-
+  wait_for_seconds = 1
+  
   source_details = {
     source_name         = local.metrics_source_name
     source_category     = var.cloudwatch_metrics_source_details.source_category
@@ -223,6 +228,7 @@ module "root_cause_sources_module" {
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
 
+  wait_for_seconds = 1
   iam_details = {
     create_iam_role = false
     iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
