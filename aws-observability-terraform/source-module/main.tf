@@ -21,16 +21,16 @@ resource "sumologic_collector" "collector" {
 module "cloudtrail_module" {
   for_each = toset(var.collect_cloudtrail_logs ? ["cloudtrail_module"] : [])
 
-  source = "../../../terraform-sumologic-sumo-logic-integrations/aws/cloudtrail"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
 
   create_collector          = false
-  create_trail              = local.create_common_bucket ? true : false
+  create_trail              = var.cloudtrail_source_details.bucket_details.create_bucket ? true : false
   sumologic_organization_id = var.sumologic_organization_id
   source_details = {
     source_name     = local.cloudtrail_source_name
     source_category = var.cloudtrail_source_details.source_category
     description     = var.cloudtrail_source_details.description
-    collector_id    = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
+    collector_id    = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
     bucket_details = {
       create_bucket        = false
       bucket_name          = var.cloudtrail_source_details.bucket_details.create_bucket ? aws_s3_bucket.s3_bucket["s3_bucket"].bucket : var.cloudtrail_source_details.bucket_details.bucket_name
@@ -44,11 +44,11 @@ module "cloudtrail_module" {
     fields               = local.cloudtrail_fields
     iam_details = {
       create_iam_role = false
-      iam_role_arn = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.iam_role_arn
+      iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
     }
     sns_topic_details = {
-      create_sns_topic = local.create_common_bucket ? false : true
-      sns_topic_arn = local.create_common_bucket ? aws_sns_topic.sns_topic["sns_topic"].arn : ""
+      create_sns_topic = var.cloudtrail_source_details.bucket_details.create_bucket ? false : true
+      sns_topic_arn    = var.cloudtrail_source_details.bucket_details.create_bucket ? aws_sns_topic.sns_topic["sns_topic"].arn : ""
     }
   }
 }
@@ -56,7 +56,7 @@ module "cloudtrail_module" {
 module "elb_module" {
   for_each = toset(var.collect_elb_logs ? ["elb_module"] : [])
 
-  source = "../../../terraform-sumologic-sumo-logic-integrations/aws/elb"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -65,7 +65,7 @@ module "elb_module" {
     source_name     = local.elb_source_name
     source_category = var.elb_source_details.source_category
     description     = var.elb_source_details.description
-    collector_id    = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
+    collector_id    = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
     bucket_details = {
       create_bucket        = false
       bucket_name          = var.elb_source_details.bucket_details.create_bucket ? aws_s3_bucket.s3_bucket["s3_bucket"].bucket : var.elb_source_details.bucket_details.bucket_name
@@ -79,11 +79,11 @@ module "elb_module" {
     fields               = local.elb_fields
     iam_details = {
       create_iam_role = false
-      iam_role_arn = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.iam_role_arn
+      iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
     }
     sns_topic_details = {
-      create_sns_topic = local.create_common_bucket ? false : true
-      sns_topic_arn = local.create_common_bucket ? aws_sns_topic.sns_topic["sns_topic"].arn : ""
+      create_sns_topic = var.elb_source_details.bucket_details.create_bucket ? false : true
+      sns_topic_arn    = var.elb_source_details.bucket_details.create_bucket ? aws_sns_topic.sns_topic["sns_topic"].arn : ""
     }
   }
 
@@ -96,81 +96,81 @@ module "elb_module" {
 
 module "cloudwatch_metrics_source_module" {
   for_each = local.create_cw_metrics_source ? toset(var.cloudwatch_metrics_source_details.limit_to_namespaces) : []
-  
-  source = "../../../terraform-sumologic-sumo-logic-integrations/aws/cloudwatchmetrics"
-  
-  create_collector = false
+
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
+
+  create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
-  
+
   source_details = {
-    source_name = "${local.metrics_source_name} ${regex("^AWS/(\\w+)$", each.value)[0]}"
-    source_category = var.cloudwatch_metrics_source_details.source_category
-    description = var.cloudwatch_metrics_source_details.description
-    collector_id = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
+    source_name         = "${local.metrics_source_name} ${regex("^AWS/(\\w+)$", each.value)[0]}"
+    source_category     = var.cloudwatch_metrics_source_details.source_category
+    description         = var.cloudwatch_metrics_source_details.description
+    collector_id        = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
     limit_to_namespaces = [each.value]
-    limit_to_regions = [local.aws_region]
-    paused = false
-    scan_interval = local.namespace_scan_interval[regex("^AWS/(\\w+)$", each.value)[0]]
-    sumo_account_id = local.sumo_account_id
-    fields = local.metrics_fields
+    limit_to_regions    = [local.aws_region]
+    paused              = false
+    scan_interval       = local.namespace_scan_interval[regex("^AWS/(\\w+)$", each.value)[0]]
+    sumo_account_id     = local.sumo_account_id
+    fields              = local.metrics_fields
     iam_details = {
       create_iam_role = false
-      iam_role_arn = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.iam_role_arn
+      iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
     }
   }
 }
 
 module "kinesis_firehose_for_metrics_source_module" {
   for_each = toset(local.create_kf_metrics_source ? ["kinesis_firehose_for_metrics_source_module"] : [])
-  
-  source = "../../../terraform-sumologic-sumo-logic-integrations/aws/kinesisfirehoseformetrics"
-  
-  create_collector = false
+
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
+
+  create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
-  
+
   source_details = {
-    source_name = local.metrics_source_name
-    source_category = var.cloudwatch_metrics_source_details.source_category
-    description = var.cloudwatch_metrics_source_details.description
-    collector_id = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
+    source_name         = local.metrics_source_name
+    source_category     = var.cloudwatch_metrics_source_details.source_category
+    description         = var.cloudwatch_metrics_source_details.description
+    collector_id        = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
     limit_to_namespaces = var.cloudwatch_metrics_source_details.limit_to_namespaces
-    sumo_account_id = local.sumo_account_id
-    fields = local.metrics_fields
+    sumo_account_id     = local.sumo_account_id
+    fields              = local.metrics_fields
     iam_details = {
       create_iam_role = false
-      iam_role_arn = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.iam_role_arn
+      iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
     }
   }
-  
+
   create_bucket = false
   bucket_details = {
-    bucket_name = var.cloudwatch_metrics_source_details.bucket_details.create_bucket ? aws_s3_bucket.s3_bucket["s3_bucket"].bucket : var.cloudwatch_metrics_source_details.bucket_details.bucket_name
+    bucket_name          = var.cloudwatch_metrics_source_details.bucket_details.create_bucket ? aws_s3_bucket.s3_bucket["s3_bucket"].bucket : var.cloudwatch_metrics_source_details.bucket_details.bucket_name
     force_destroy_bucket = false
   }
 }
 
 module "cloudwatch_logs_lambda_log_forwarder_module" {
   for_each = toset(local.create_llf_logs_source ? ["cloudwatch_logs_lambda_log_forwarder_module"] : [])
-  
-  source = "../../../terraform-sumologic-sumo-logic-integrations/aws/cloudwatchlogsforwarder"
-  
+
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder"
+
   create_collector = false
-  
+
   # Lambda Log Forwarder configurations
-  email_id = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.email_id
-  log_format = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.log_format
-  log_stream_prefix = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.log_stream_prefix
+  email_id               = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.email_id
+  log_format             = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.log_format
+  log_stream_prefix      = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.log_stream_prefix
   include_log_group_info = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.include_log_group_info
-  workers = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.workers
-  
+  workers                = var.cloudwatch_logs_source_details.lambda_log_forwarder_config.workers
+
   source_details = {
-    source_name = local.cloudwatch_logs_source_name
+    source_name     = local.cloudwatch_logs_source_name
     source_category = var.cloudwatch_logs_source_details.source_category
-    description = var.cloudwatch_logs_source_details.description
-    collector_id = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
-    fields = local.cloudwatch_logs_fields
+    description     = var.cloudwatch_logs_source_details.description
+    collector_id    = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
+    fields          = local.cloudwatch_logs_fields
   }
-  
+
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
   auto_enable_logs_subscription_options = {
     filter = var.auto_enable_logs_subscription_options.filter
@@ -179,25 +179,25 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
 
 module "kinesis_firehose_for_logs_module" {
   for_each = toset(local.create_kf_logs_source ? ["kinesis_firehose_for_logs_module"] : [])
-  
-  source = "../../../terraform-sumologic-sumo-logic-integrations/aws/kinesisfirehoseforlogs"
-  
+
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs"
+
   create_collector = false
-  
+
   source_details = {
-    source_name = local.cloudwatch_logs_source_name
+    source_name     = local.cloudwatch_logs_source_name
     source_category = var.cloudwatch_logs_source_details.source_category
-    description = var.cloudwatch_logs_source_details.description
-    collector_id = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
-    fields = local.cloudwatch_logs_fields
+    description     = var.cloudwatch_logs_source_details.description
+    collector_id    = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
+    fields          = local.cloudwatch_logs_fields
   }
-  
+
   create_bucket = false
   bucket_details = {
-    bucket_name = var.cloudwatch_logs_source_details.bucket_details.create_bucket ? aws_s3_bucket.s3_bucket["s3_bucket"].bucket : var.cloudwatch_logs_source_details.bucket_details.bucket_name
+    bucket_name          = var.cloudwatch_logs_source_details.bucket_details.create_bucket ? aws_s3_bucket.s3_bucket["s3_bucket"].bucket : var.cloudwatch_logs_source_details.bucket_details.bucket_name
     force_destroy_bucket = false
   }
-  
+
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
   auto_enable_logs_subscription_options = {
     filter = var.auto_enable_logs_subscription_options.filter
@@ -206,41 +206,41 @@ module "kinesis_firehose_for_logs_module" {
 
 module "root_cause_sources_module" {
   for_each = toset(local.create_root_cause_source ? ["root_cause_sources_module"] : [])
-  
-  source = "../../../terraform-sumologic-sumo-logic-integrations/aws/rootcause"
-  
-  create_collector = false
+
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/rootcause"
+
+  create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
-  
+
   iam_details = {
     create_iam_role = false
-    iam_role_arn = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.iam_role_arn
+    iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
   }
-  
+
   create_inventory_source = local.create_inventory_source
   inventory_source_details = {
-    source_name = local.inventory_source_name
-    source_category = var.inventory_source_details.source_category
-    collector_id = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
-    description = var.inventory_source_details.description
+    source_name         = local.inventory_source_name
+    source_category     = var.inventory_source_details.source_category
+    collector_id        = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
+    description         = var.inventory_source_details.description
     limit_to_namespaces = var.inventory_source_details.limit_to_namespaces
-    limit_to_regions = [local.aws_region]
-    paused = false
-    scan_interval = 300000
-    sumo_account_id = local.sumo_account_id
-    fields = var.inventory_source_details.fields
+    limit_to_regions    = [local.aws_region]
+    paused              = false
+    scan_interval       = 300000
+    sumo_account_id     = local.sumo_account_id
+    fields              = var.inventory_source_details.fields
   }
-  
+
   create_xray_source = local.create_xray_source
   xray_source_details = {
-    source_name = local.xray_source_name
-    source_category = var.xray_source_details.source_category
-    collector_id = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_id
-    description = var.xray_source_details.description
+    source_name      = local.xray_source_name
+    source_category  = var.xray_source_details.source_category
+    collector_id     = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
+    description      = var.xray_source_details.description
     limit_to_regions = [local.aws_region]
-    paused = false
-    scan_interval = 300000
-    sumo_account_id = local.sumo_account_id
-    fields = var.xray_source_details.fields
+    paused           = false
+    scan_interval    = 300000
+    sumo_account_id  = local.sumo_account_id
+    fields           = var.xray_source_details.fields
   }
 }
