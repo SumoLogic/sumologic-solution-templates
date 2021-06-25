@@ -5,14 +5,6 @@ locals {
 
   sumo_account_id = "926226587429"
 
-  # Create an IAM role that provides trust relationship with AWS account
-  create_iam_role = var.iam_role_arn == ""
-
-  # Common Bucket details
-  create_common_bucket = var.cloudtrail_source_details.bucket_details.create_bucket || var.elb_source_details.bucket_details.create_bucket || var.cloudwatch_metrics_source_details.bucket_details.create_bucket || var.cloudwatch_logs_source_details.bucket_details.create_bucket
-  common_bucket_name   = local.create_common_bucket ? "aws-observability-${random_string.aws_random.id}" : ""
-  common_force_destroy = local.create_common_bucket && (var.cloudtrail_source_details.bucket_details.force_destroy_bucket || var.elb_source_details.bucket_details.force_destroy_bucket || var.cloudwatch_metrics_source_details.bucket_details.force_destroy_bucket || var.cloudwatch_logs_source_details.bucket_details.force_destroy_bucket)
-
   # CloudTrail Source updated Details
   cloudtrail_source_name = var.cloudtrail_source_details.source_name == "CloudTrail Logs (Region)" ? "CloudTrail Logs ${local.aws_region}" : var.cloudtrail_source_details.source_name
   cloudtrail_path_exp    = var.cloudtrail_source_details.bucket_details.create_bucket ? "AWSLogs/${local.aws_account_id}/CloudTrail/${local.aws_region}/*" : var.cloudtrail_source_details.bucket_details.path_expression
@@ -26,29 +18,43 @@ locals {
   # CloudWatch metrics source updated details
   create_cw_metrics_source = var.collect_cloudwatch_metrics == "CloudWatch Metrics Source"
   create_kf_metrics_source = var.collect_cloudwatch_metrics == "Kinesis Firehose Metrics Source"
-  create_metric_source = local.create_cw_metrics_source || local.create_kf_metrics_source
-  metrics_source_name = var.cloudwatch_metrics_source_details.source_name == "CloudWatch Metrics (Region)" ? "CloudWatch Metrics ${local.aws_region}" : var.cloudwatch_metrics_source_details.source_name
-  metrics_fields      = merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias })
-  
+  create_metric_source     = local.create_cw_metrics_source || local.create_kf_metrics_source
+  metrics_source_name      = var.cloudwatch_metrics_source_details.source_name == "CloudWatch Metrics (Region)" ? "CloudWatch Metrics ${local.aws_region}" : var.cloudwatch_metrics_source_details.source_name
+  metrics_fields           = merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias })
+
   # CloudWatch logs source updated details
-  create_llf_logs_source = var.collect_cloudwatch_logs == "Lambda Log Forwarder"
-  create_kf_logs_source = var.collect_cloudwatch_logs == "Kinesis Firehose Log Source"
-  create_cw_logs_source = local.create_llf_logs_source || local.create_kf_logs_source
+  create_llf_logs_source      = var.collect_cloudwatch_logs == "Lambda Log Forwarder"
+  create_kf_logs_source       = var.collect_cloudwatch_logs == "Kinesis Firehose Log Source"
+  create_cw_logs_source       = local.create_llf_logs_source || local.create_kf_logs_source
   cloudwatch_logs_source_name = var.cloudwatch_logs_source_details.source_name == "CloudWatch Logs (Region)" ? "CloudWatch Logs ${local.aws_region}" : var.cloudwatch_logs_source_details.source_name
   cloudwatch_logs_fields      = merge(var.cloudwatch_logs_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/lambda" })
-  
+
   # Root Cause sources updated details
-  create_inventory_source = var.collect_root_cause_data == "Inventory Source" || var.collect_root_cause_data == "Both"
-  create_xray_source = var.collect_root_cause_data == "Xray Source" || var.collect_root_cause_data == "Both"
+  create_inventory_source  = var.collect_root_cause_data == "Inventory Source" || var.collect_root_cause_data == "Both"
+  create_xray_source       = var.collect_root_cause_data == "Xray Source" || var.collect_root_cause_data == "Both"
   create_root_cause_source = local.create_inventory_source || local.create_xray_source
-  inventory_source_name = var.inventory_source_details.source_name == "AWS Inventory (Region)" ? "AWS Inventory ${local.aws_region}" : var.inventory_source_details.source_name
-  xray_source_name = var.xray_source_details.source_name == "AWS Xray (Region)" ? "AWS Xray ${local.aws_region}" : var.xray_source_details.source_name
-  
+  inventory_source_name    = var.inventory_source_details.source_name == "AWS Inventory (Region)" ? "AWS Inventory ${local.aws_region}" : var.inventory_source_details.source_name
+  xray_source_name         = var.xray_source_details.source_name == "AWS Xray (Region)" ? "AWS Xray ${local.aws_region}" : var.xray_source_details.source_name
+
+  # Common Bucket details
+  create_cloudtrail_bucket      = var.collect_cloudtrail_logs && var.cloudtrail_source_details.bucket_details.create_bucket
+  create_elb_bucket             = var.collect_elb_logs && var.elb_source_details.bucket_details.create_bucket
+  create_kf_metrics_fail_bucket = local.create_kf_metrics_source && var.cloudwatch_metrics_source_details.bucket_details.create_bucket
+  create_kf_logs_fail_bucket    = local.create_kf_logs_source && var.cloudwatch_logs_source_details.bucket_details.create_bucket
+  create_common_bucket          = local.create_cloudtrail_bucket || local.create_elb_bucket || local.create_kf_metrics_fail_bucket || local.create_kf_logs_fail_bucket
+  common_bucket_name            = local.create_common_bucket ? "aws-observability-${random_string.aws_random.id}" : ""
+  common_force_destroy          = local.create_common_bucket && (var.cloudtrail_source_details.bucket_details.force_destroy_bucket || var.elb_source_details.bucket_details.force_destroy_bucket || var.cloudwatch_metrics_source_details.bucket_details.force_destroy_bucket || var.cloudwatch_logs_source_details.bucket_details.force_destroy_bucket)
+
+  create_common_sns_topic = local.create_common_bucket && (var.collect_elb_logs || var.collect_cloudtrail_logs)
+
+  # Create an IAM role that provides trust relationship with AWS account
+  create_iam_role = var.existing_iam_details.create_iam_role && (var.collect_elb_logs || var.collect_cloudtrail_logs || local.create_kf_metrics_source || local.create_cw_metrics_source || local.create_root_cause_source)
+
   # Create any Sumo Logic source. Keep on adding to this if any new source is added.
   create_any_source = var.collect_cloudtrail_logs || var.collect_elb_logs || local.create_metric_source || local.create_cw_logs_source || local.create_root_cause_source
-  
+
   # Create a new Sumo Logic hosted collector
-  create_collector = var.sumologic_existing_collector_id == "" && local.create_any_source
+  create_collector = var.sumologic_existing_collector_details.create_collector && local.create_any_source
 
   # Collector Name
   collector_name = local.create_collector && var.sumologic_collector_details.collector_name == "AWS Observability (AWS Account Alias) (Account ID)" ? "AWS Observability ${var.aws_account_alias} ${local.aws_account_id}" : var.sumologic_collector_details.collector_name
@@ -81,7 +87,7 @@ locals {
     "cn-north-1"     = "638102146993",
     "cn-northwest-1" = "037604701340"
   }
-  
+
   namespace_scan_interval = {
     "ApplicationELB" = 60000,
     "ApiGateway"     = 300000,
@@ -91,6 +97,8 @@ locals {
     "ECS"            = 300000,
     "ElastiCache"    = 300000,
     "ELB"            = 300000,
-    "NetworkELB"     = 60000
+    "NetworkELB"     = 60000,
+    "SQS"            = 300000,
+    "SNS"            = 300000,
   }
 }
