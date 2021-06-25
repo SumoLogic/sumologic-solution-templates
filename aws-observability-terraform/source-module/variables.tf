@@ -17,24 +17,36 @@ variable "sumologic_organization_id" {
   }
 }
 
-variable "iam_role_arn" {
-  type        = string
+variable "existing_iam_details" {
+  type = object({
+    create_iam_role = bool
+    iam_role_arn    = string
+  })
   description = <<EOT
 			Provide an existing AWS IAM role arn value which provides access to AWS S3 Buckets, AWS CloudWatch Metrics API and Sumo Logic Inventory data.
 			If kept empty, a new IAM role will be created with the required permissions.
 			For more details on permission, check /source-modules/template/sumologic_aws_permissions.tmpl file.
 		EOT
-  default     = ""
+  default = {
+    create_iam_role = true
+    iam_role_arn    = ""
+  }
 }
 
-variable "sumologic_existing_collector_id" {
-  type        = string
+variable "sumologic_existing_collector_details" {
+  type = object({
+    create_collector = bool
+    collector_id     = string
+  })
   description = <<EOT
 			Provide an existing Sumo Logic Collector ID. For more details, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration
 			If provided, all the provided sources will be created within the collector.
 			If kept empty, a new Collector will be created and all provided sources will be created within that collector.
 		EOT
-  default     = ""
+  default = {
+    create_collector = true
+    collector_id     = ""
+  }
 }
 
 variable "sumologic_collector_details" {
@@ -156,9 +168,9 @@ variable "auto_enable_access_logs" {
 }
 
 variable "collect_cloudwatch_metrics" {
-  type = string
+  type        = string
   description = ""
-    validation {
+  validation {
     condition = contains([
       "CloudWatch Metrics Source",
       "Kinesis Firehose Metrics Source",
@@ -201,9 +213,9 @@ variable "cloudwatch_metrics_source_details" {
 }
 
 variable "collect_cloudwatch_logs" {
-  type = string
+  type        = string
   description = ""
-    validation {
+  validation {
     condition = contains([
       "Lambda Log Forwarder",
       "Kinesis Firehose Log Source",
@@ -214,40 +226,40 @@ variable "collect_cloudwatch_logs" {
 
 variable "cloudwatch_logs_source_details" {
   type = object({
-    source_name         = string
-    source_category     = string
-    description         = string
-    fields              = map(string)
+    source_name     = string
+    source_category = string
+    description     = string
+    fields          = map(string)
     bucket_details = object({
       create_bucket        = bool
       bucket_name          = string
       force_destroy_bucket = bool
     })
     lambda_log_forwarder_config = object({
-      email_id        = string
-      workers          = number
-      log_format = string
+      email_id               = string
+      workers                = number
+      log_format             = string
       include_log_group_info = bool
-      log_stream_prefix = list(string)
+      log_stream_prefix      = list(string)
     })
   })
   description = "Provide details for the Sumo Logic Cloudwatch Logs source. If not provided, then defaults will be used."
   default = {
-    source_name         = "CloudWatch Logs (Region)"
-    source_category     = "aws/observability/cloudwatch/logs"
-    description         = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch Logs."
-    fields              = {}
+    source_name     = "CloudWatch Logs (Region)"
+    source_category = "aws/observability/cloudwatch/logs"
+    description     = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch Logs."
+    fields          = {}
     bucket_details = {
       create_bucket        = true
       bucket_name          = "aws-observability-random-id"
       force_destroy_bucket = true
     }
     lambda_log_forwarder_config = {
-      email_id = "test@gmail.com"
-      workers = 4
-      log_format = "Others"
+      email_id               = "test@gmail.com"
+      workers                = 4
+      log_format             = "Others"
       include_log_group_info = true
-      log_stream_prefix = []
+      log_stream_prefix      = []
     }
   }
   validation {
@@ -294,9 +306,9 @@ variable "auto_enable_logs_subscription_options" {
 }
 
 variable "collect_root_cause_data" {
-    type = string
+  type        = string
   description = ""
-    validation {
+  validation {
     condition = contains([
       "Inventory Source",
       "Xray Source",
@@ -331,16 +343,16 @@ variable "inventory_source_details" {
 
 variable "xray_source_details" {
   type = object({
-    source_name      = string
-    source_category  = string
-    description      = string
-    fields           = map(string)
+    source_name     = string
+    source_category = string
+    description     = string
+    fields          = map(string)
   })
   description = "Provide details for the Sumo Logic AWS XRAY source. If not provided, then defaults will be used."
   default = {
-    source_name      = "AWS Xray (Region)"
-    source_category  = "aws/observability/xray"
-    description      = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Xray metrics."
-    fields           = {}
+    source_name     = "AWS Xray (Region)"
+    source_category = "aws/observability/xray"
+    description     = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Xray metrics."
+    fields          = {}
   }
 }
