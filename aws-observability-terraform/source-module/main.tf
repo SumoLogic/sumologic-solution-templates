@@ -18,8 +18,13 @@ resource "sumologic_collector" "collector" {
   timezone    = "UTC"
 }
 
+resource "time_sleep" "wait_for_minutes" {
+  create_duration = "${var.wait_for_seconds}s"
+}
+
 module "cloudtrail_module" {
-  for_each = toset(var.collect_cloudtrail_logs ? ["cloudtrail_module"] : [])
+  depends_on = [time_sleep.wait_for_minutes]
+  for_each   = toset(var.collect_cloudtrail_logs ? ["cloudtrail_module"] : [])
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
 
@@ -54,7 +59,8 @@ module "cloudtrail_module" {
 }
 
 module "elb_module" {
-  for_each = toset(var.collect_elb_logs ? ["elb_module"] : [])
+  depends_on = [time_sleep.wait_for_minutes]
+  for_each   = toset(var.collect_elb_logs ? ["elb_module"] : [])
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
 
@@ -95,7 +101,8 @@ module "elb_module" {
 }
 
 module "cloudwatch_metrics_source_module" {
-  for_each = local.create_cw_metrics_source ? toset(var.cloudwatch_metrics_source_details.limit_to_namespaces) : []
+  depends_on = [time_sleep.wait_for_minutes]
+  for_each   = local.create_cw_metrics_source ? toset(var.cloudwatch_metrics_source_details.limit_to_namespaces) : []
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
 
@@ -121,7 +128,8 @@ module "cloudwatch_metrics_source_module" {
 }
 
 module "kinesis_firehose_for_metrics_source_module" {
-  for_each = toset(local.create_kf_metrics_source ? ["kinesis_firehose_for_metrics_source_module"] : [])
+  depends_on = [time_sleep.wait_for_minutes]
+  for_each   = toset(local.create_kf_metrics_source ? ["kinesis_firehose_for_metrics_source_module"] : [])
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
 
@@ -150,7 +158,8 @@ module "kinesis_firehose_for_metrics_source_module" {
 }
 
 module "cloudwatch_logs_lambda_log_forwarder_module" {
-  for_each = toset(local.create_llf_logs_source ? ["cloudwatch_logs_lambda_log_forwarder_module"] : [])
+  depends_on = [time_sleep.wait_for_minutes]
+  for_each   = toset(local.create_llf_logs_source ? ["cloudwatch_logs_lambda_log_forwarder_module"] : [])
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder"
 
@@ -178,7 +187,8 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
 }
 
 module "kinesis_firehose_for_logs_module" {
-  for_each = toset(local.create_kf_logs_source ? ["kinesis_firehose_for_logs_module"] : [])
+  depends_on = [time_sleep.wait_for_minutes]
+  for_each   = toset(local.create_kf_logs_source ? ["kinesis_firehose_for_logs_module"] : [])
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs"
 
@@ -205,7 +215,8 @@ module "kinesis_firehose_for_logs_module" {
 }
 
 module "root_cause_sources_module" {
-  for_each = toset(local.create_root_cause_source ? ["root_cause_sources_module"] : [])
+  depends_on = [time_sleep.wait_for_minutes]
+  for_each   = toset(local.create_root_cause_source ? ["root_cause_sources_module"] : [])
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/rootcause"
 
