@@ -83,6 +83,7 @@ variable "collect_cloudtrail_logs" {
 			Please provide \"cloudtrail_source_details\" if would like to ingest cloudtrail logs.
 			Provide \"false\" if you are already ingesting logs into Sumo Logic.
 		EOT
+  default     = true
 }
 
 variable "cloudtrail_source_details" {
@@ -124,6 +125,7 @@ variable "collect_elb_logs" {
 			Please provide \"elb_source_details\" if would like to ingest load balancer logs.
 			Provide \"false\" if you are already ingesting logs into Sumo Logic.
 		EOT
+  default     = true
 }
 
 variable "elb_source_details" {
@@ -187,6 +189,7 @@ variable "collect_cloudwatch_metrics" {
     "None", ], var.collect_cloudwatch_metrics)
     error_message = "The value must be one of \"CloudWatch Metrics Source\", \"Kinesis Firehose Metrics Source\", and None."
   }
+  default = "Kinesis Firehose Metrics Source"
 }
 
 variable "cloudwatch_metrics_source_details" {
@@ -232,6 +235,7 @@ variable "collect_cloudwatch_logs" {
     "None", ], var.collect_cloudwatch_logs)
     error_message = "The value must be one of \"Lambda Log Forwarder\", \"Kinesis Firehose Log Source\", and None."
   }
+  default = "Kinesis Firehose Log Source"
 }
 
 variable "cloudwatch_logs_source_details" {
@@ -326,6 +330,7 @@ variable "collect_root_cause_data" {
     "None", ], var.collect_root_cause_data)
     error_message = "The value must be one of \"Inventory Source\", \"Xray Source\", \"Both\" and None."
   }
+  default = "Both"
 }
 
 variable "inventory_source_details" {
