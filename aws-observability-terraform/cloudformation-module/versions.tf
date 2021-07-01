@@ -10,7 +10,7 @@ terraform {
     }
     sumologic = {
       version = "~> 2.6.2"
-      source = "SumoLogic/sumologic"
+      source  = "SumoLogic/sumologic"
     }
   }
 }
