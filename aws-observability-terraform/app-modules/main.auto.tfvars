@@ -1,6 +1,7 @@
 environment              = "us2"
 access_id                = ""
 access_key               = ""
+json_file_directory_path = dirname(dirname(path.cwd))
 apps_folder_name         = ""
 parent_folder_id         = ""
 monitors_folder_name     = ""

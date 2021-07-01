@@ -31,7 +31,7 @@ module "overview_module" {
   # ********************** Apps - Account and Region Level dashboards only ********************** #
   managed_apps = {
     "OverviewApp" = {
-      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Overview-App.json"])
+      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/Overview-App.json"])
       folder_id    = var.app_folder_id
     }
   }
