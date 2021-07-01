@@ -37,6 +37,11 @@ variable "access_key" {
   }
 }
 
+variable "json_file_directory_path" {
+    type = string
+    description = "Directory path where all the JSONs are present."
+}
+
 variable "app_folder_id" {
   type        = string
   description = "Please provide a folder ID where you would like the app to be installed."

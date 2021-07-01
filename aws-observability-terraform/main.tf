@@ -7,6 +7,7 @@ module "sumo-module" {
   access_id   = var.sumologic_access_id
   access_key  = var.sumologic_access_key
   environment = var.sumologic_environment
+  json_file_directory_path = dirname(path.cwd)
 }
 
 #

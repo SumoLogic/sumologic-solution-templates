@@ -21,7 +21,7 @@ module "ec2metrics_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "EC2MetricsApp" = {
-      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/EC2-Metrics-App.json"])
+      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/EC2-Metrics-App.json"])
       folder_id    = var.app_folder_id
     }
   }

@@ -47,7 +47,7 @@ module "nlb_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "NlbApp" = {
-      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Nlb-App.json"])
+      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/Nlb-App.json"])
       folder_id    = var.app_folder_id
     }
   }

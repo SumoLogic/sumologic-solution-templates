@@ -37,6 +37,11 @@ variable "access_key" {
   }
 }
 
+variable "json_file_directory_path" {
+    type = string
+    description = "Directory path where all the JSONs are present."
+}
+
 variable "apps_folder_name" {
   type        = string
   description = "Provide a folder name where all the apps will be installed. Default value will be \"AWS Observability Apps\"."

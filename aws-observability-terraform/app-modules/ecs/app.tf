@@ -35,7 +35,7 @@ module "ecs_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "ecsApp" = {
-      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/Ecs-App.json"])
+      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/Ecs-App.json"])
       folder_id    = var.app_folder_id
     }
   }

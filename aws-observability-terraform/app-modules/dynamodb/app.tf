@@ -35,7 +35,7 @@ module "dynamodb_module" {
   # ********************** Apps ********************** #
   managed_apps = {
     "DynamoDBApp" = {
-      content_json = join("", [dirname(dirname(path.cwd)), "/aws-observability/json/DynamoDb-App.json"])
+      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/DynamoDb-App.json"])
       folder_id    = var.app_folder_id
     }
   }

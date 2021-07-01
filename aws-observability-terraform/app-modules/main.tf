@@ -20,6 +20,7 @@ module "overview_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
 }
 
@@ -30,6 +31,7 @@ module "alb_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.alb_monitors_disabled
@@ -46,6 +48,7 @@ module "apigateway_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.apigateway_monitors_disabled
@@ -62,6 +65,7 @@ module "dynamodb_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.dynamodb_monitors_disabled
@@ -78,6 +82,7 @@ module "ec2metrics_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.ec2metrics_monitors_disabled
@@ -94,6 +99,7 @@ module "rds_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.rds_monitors_disabled
@@ -110,6 +116,7 @@ module "elasticache_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.elasticache_monitors_disabled
@@ -126,6 +133,7 @@ module "lambda_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.lambda_monitors_disabled
@@ -142,6 +150,7 @@ module "nlb_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.nlb_monitors_disabled
@@ -158,6 +167,7 @@ module "ecs_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
   monitors_disabled        = var.ecs_monitors_disabled
@@ -174,5 +184,6 @@ module "rce_app" {
   access_id                = var.access_id
   access_key               = var.access_key
   environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
 }
