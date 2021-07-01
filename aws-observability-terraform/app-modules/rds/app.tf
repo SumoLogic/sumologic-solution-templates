@@ -22,7 +22,7 @@ module "rds_module" {
       metric_rule_name = "AwsObservabilityRDSInstanceMetricsEntityRule"
       match_expression = "Namespace=AWS/RDS DBInstanceIdentifier=*"
       # Issue with metric rules creation when created in parallel. To handle that sleep is added.
-      sleep            = 5
+      sleep = 5
       variables_to_extract = [
         {
           name        = "dbidentifier"

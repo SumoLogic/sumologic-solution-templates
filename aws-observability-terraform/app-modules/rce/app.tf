@@ -10,7 +10,7 @@ module "rce_module" {
   # ********************** No Fields for RCE ********************** #
 
   # ********************** No FERs for RCE ********************** #
-  
+
   # ********************** Apps - RCE dashboards only ********************** #
   managed_apps = {
     "OverviewApp" = {
@@ -28,7 +28,7 @@ locals {
   app_name        = "Global Intelligence for CloudTrail DevOps"
   app_description = "Global Intelligence for AWS CloudTrail - DevOps helps infrastructure engineers configure managed AWS services for outage-resistance and on-call staff to accelerate RCA for incidents by providing insights sourced from error rates and config practices."
   app_id          = "c7e195de-f169-460a-8e8b-7bb23af0ee5e"
-  app_datasource  = jsonencode({"CloudTrailLogSrc": "account=* eventSource"})
+  app_datasource  = jsonencode({ "CloudTrailLogSrc" : "account=* eventSource" })
 }
 resource "null_resource" "SumoLogicCatalogApps" {
   triggers = {

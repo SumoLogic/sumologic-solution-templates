@@ -15,7 +15,7 @@ resource "sumologic_monitor_folder" "monitor_folder" {
 
 # Install the overview app and resources.
 module "overview_app" {
-  source     = "./overview"
+  source = "./overview"
 
   access_id                = var.access_id
   access_key               = var.access_key
@@ -27,6 +27,7 @@ module "overview_app" {
 # Install the alb app and resources.
 module "alb_app" {
   source     = "./alb"
+  depends_on = [module.overview_app]
 
   access_id                = var.access_id
   access_key               = var.access_key
