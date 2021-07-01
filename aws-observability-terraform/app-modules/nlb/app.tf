@@ -11,7 +11,7 @@ module "nlb_module" {
       metric_rule_name = "AwsObservabilityNLBMetricsEntityRule"
       match_expression = "Namespace=AWS/NetworkELB LoadBalancer=*"
       # Issue with metric rules creation when created in parallel. To handle that sleep is added.
-      sleep            = 11 
+      sleep = 11
       variables_to_extract = [
         {
           name        = "networkloadbalancer"

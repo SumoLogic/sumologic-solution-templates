@@ -27,7 +27,7 @@ module "overview_module" {
   }
 
   # ********************** No FERs for Overview ********************** #
-  
+
   # ********************** Apps - Account and Region Level dashboards only ********************** #
   managed_apps = {
     "OverviewApp" = {

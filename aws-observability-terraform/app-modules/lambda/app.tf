@@ -96,10 +96,10 @@ module "lambda_module" {
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-          A = "Namespace=aws/lambda metric=Errors Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
-          B = "Namespace=aws/lambda metric=Invocations Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
-          C = "#A * 100 / #B along functionname, account, region, namespace"
-        }
+        A = "Namespace=aws/lambda metric=Errors Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
+        B = "Namespace=aws/lambda metric=Invocations Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
+        C = "#A * 100 / #B along functionname, account, region, namespace"
+      }
       triggers = [
         {
           detection_method = "StaticCondition",

@@ -50,10 +50,10 @@ module "apigateway_module" {
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-          A = "Namespace=aws/apigateway metric=5xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-          B = "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-          C = "#A * 100 / #B along account, region, namespace"
-        }
+        A = "Namespace=aws/apigateway metric=5xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
+        B = "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
+        C = "#A * 100 / #B along account, region, namespace"
+      }
       triggers = [
         {
           detection_method = "StaticCondition",
@@ -85,10 +85,10 @@ module "apigateway_module" {
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-          A = "Namespace=aws/apigateway metric=4xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-          B = "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-          C = "#A * 100 / #B along apiname, account, region, namespace"
-        }
+        A = "Namespace=aws/apigateway metric=4xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
+        B = "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
+        C = "#A * 100 / #B along apiname, account, region, namespace"
+      }
       triggers = [
         {
           detection_method = "StaticCondition",
@@ -120,8 +120,8 @@ module "apigateway_module" {
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-          A = "Namespace=aws/apigateway metric=IntegrationLatency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
-        }
+        A = "Namespace=aws/apigateway metric=IntegrationLatency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
+      }
       triggers = [
         {
           detection_method = "StaticCondition",
@@ -153,8 +153,8 @@ module "apigateway_module" {
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-          A = "Namespace=aws/apigateway metric=Latency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
-        }
+        A = "Namespace=aws/apigateway metric=Latency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
+      }
       triggers = [
         {
           detection_method = "StaticCondition",
