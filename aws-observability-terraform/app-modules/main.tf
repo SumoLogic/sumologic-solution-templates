@@ -13,6 +13,10 @@ resource "sumologic_monitor_folder" "monitor_folder" {
   description = "This folder contains all the monitors for AWS Observability solution."
 }
 
+resource "time_sleep" "wait_for_5_minutes" {
+  create_duration = "300s"
+}
+
 # Install the overview app and resources.
 module "overview_app" {
   source = "./overview"
@@ -26,7 +30,7 @@ module "overview_app" {
 
 # Install the ec2metrics app and resources.
 module "ec2metrics_app" {
-  depends_on = [module.overview_app]
+  depends_on = [module.overview_app, time_sleep.wait_for_5_minutes]
   source     = "./ec2metrics"
 
   access_id                = var.access_id
@@ -43,7 +47,7 @@ module "ec2metrics_app" {
 
 # Install the apigateway app and resources.
 module "apigateway_app" {
-  depends_on = [module.overview_app]
+  depends_on = [module.ec2metrics_app]
   source     = "./apigateway"
 
   access_id                = var.access_id
