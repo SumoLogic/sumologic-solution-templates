@@ -6,7 +6,7 @@ The AWS Observability Solution provides an established framework to simplify the
 - identifying elements that are subject to specific operational issues across your AWS infrastructure.
 - minimizing the time it takes to assign operational to the correct business units and functional teams in your AWS infrastructure.
 
-For more details, Please look at [Sumo Logic AWS Observability Help Document](https://help.sumologic.com/Solutions/AWS_Observability_Solution/About_the_AWS_Observability_Solution).
+For more details, Please look at [Sumo Logic AWS Observability Help Document](https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution).
 
 ## License
 
