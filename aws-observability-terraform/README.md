@@ -7,9 +7,9 @@ The AWS Observability Solution provides an established framework to simplify the
 
 *This Terraform script installs the Sumo Logic AWS Observability solution CloudFormation template in your AWS account to setup all necessary Sumo Logic and AWS Resources.*
 
-*The Terraform solution will deploy the Solution Per AWS Account Per AWS Region only. For deploying as multiple AWS account Multiple AWS regions, please [visit](https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/07_Deploy_to_Multiple_Accounts_and_Regions).*
+*The Terraform solution will deploy the Solution Per AWS Account Per AWS Region only. For deploying as multiple AWS account Multiple AWS regions, please [visit](https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#Multi_Account.2C_Multi_Region_installation_using_Stack_Sets).*
 
-For more details, Please look at [Sumo Logic AWS Observability Help Document](https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution).
+For more details, Please look at [Sumo Logic AWS Observability Help Document](https://help.sumologic.com/Solutions/AWS_Observability_Solution/About_the_AWS_Observability_Solution).
 
 ## Getting Started
 
@@ -58,7 +58,7 @@ $ terraform destroy
 
 ## Configurable Parameters
 
-Configure the following parameters in `main_variables.auto.tfvars`. For more details on the parameters, [visit](https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability#step-2-sumo-logic-access-configuration).
+Configure the following parameters in `main_variables.auto.tfvars`. For more details on the parameters, [visit](https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#Configuration_prompts_and_input).
 
 | Parameter |Description |Default Value
 | --- | --- | --- |
