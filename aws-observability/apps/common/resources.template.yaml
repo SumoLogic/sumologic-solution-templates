@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.2.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.3.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
@@ -662,6 +662,17 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
 
+  AddAccountIdField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddNamespaceField
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "accountid"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
   ############# START - RESOURCES FOR METADATA SOURCE #################
 
   SumoLogicMetaDataSource:
@@ -877,6 +888,7 @@ Resources:
         account: !Ref AccountAlias
         namespace: "aws/applicationelb"
         region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
   ALBSNSTopic:
@@ -1047,6 +1059,7 @@ Resources:
         account: !Ref AccountAlias
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
 
   KinesisFirehoseLogsStack:
     Type: AWS::CloudFormation::Stack
@@ -1085,6 +1098,7 @@ Resources:
         account: !Ref AccountAlias
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
 
 Outputs:
   LambdaHelperARN:
