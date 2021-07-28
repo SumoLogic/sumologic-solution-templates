@@ -22,11 +22,11 @@ module "elasticache_module" {
       name             = "AwsObservabilityElastiCacheCloudTrailLogsFERs"
       scope            = "account=* eventname eventsource \"elasticache.amazonaws.com\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters.cacheClusterId", "responseElements.cacheClusterId" as eventSource, region, req_cacheClusterId, res_cacheClusterId nodrop
+              | json "eventSource", "awsRegion", "requestParameters.cacheClusterId", "responseElements.cacheClusterId", "recipientAccountId" as eventSource, region, req_cacheClusterId, res_cacheClusterId, accountid nodrop
               | where eventSource = "elasticache.amazonaws.com"
               | if (!isEmpty(req_cacheClusterId), req_cacheClusterId, res_cacheClusterId) as cacheclusterid
               | "aws/elasticache" as namespace
-              | fields region, namespace, cacheclusterid
+              | fields region, namespace, cacheclusterid, accountid
       EOT
       enabled          = true
     }

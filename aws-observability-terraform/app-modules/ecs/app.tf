@@ -22,11 +22,11 @@ module "ecs_module" {
       name             = "AwsObservabilityECSCloudTrailLogsFER"
       scope            = "account=* eventname eventsource \"ecs.amazonaws.com\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters" as eventSource, region, requestParameters nodrop
+              | json "eventSource", "awsRegion", "requestParameters", "recipientAccountId" as eventSource, region, requestParameters, accountid nodrop
               | json field=requestParameters "cluster" as clustername nodrop
               | where eventSource = "ecs.amazonaws.com"
               | "aws/ecs" as namespace
-              | fields region, namespace, clustername
+              | fields region, namespace, clustername, accountid
       EOT
       enabled          = true
     }
