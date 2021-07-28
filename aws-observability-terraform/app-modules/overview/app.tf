@@ -23,6 +23,11 @@ module "overview_module" {
       field_name = "namespace"
       data_type  = "String"
       state      = true
+    },
+    "AccountId" = {
+      field_name = "accountid"
+      data_type  = "String"
+      state      = true
     }
   }
 

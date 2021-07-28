@@ -22,7 +22,7 @@ module "lambda_module" {
       name             = "AwsObservabilityFieldExtractionRule"
       scope            = "account=* eventname eventsource \"lambda.amazonaws.com\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters" as eventSource, region, requestParameters nodrop
+              | json "eventSource", "awsRegion", "requestParameters", "recipientAccountId" as eventSource, region, requestParameters, accountid nodrop
               | where eventSource = "lambda.amazonaws.com"
               | json field=requestParameters "functionName", "resource" as functionname, resource nodrop
               | parse regex field=functionname "\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$" nodrop
@@ -30,7 +30,7 @@ module "lambda_module" {
               | if (isEmpty(functionname), functionname2, functionname) as functionname
               | "aws/lambda" as namespace
               | tolowercase(functionname) as functionname
-              | fields region, namespace, functionname
+              | fields region, namespace, functionname, accountid
       EOT
       enabled          = true
     },
