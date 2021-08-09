@@ -388,9 +388,28 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: AwsObservabilityLambdaExecutePoliciesS3
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
-                Resource: '*'
+                Resource:
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}"
+                    - S3Bucket: !If [install_alb_logs_source, !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ], ""] 
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}/*"
+                    - S3Bucket: !If [install_alb_logs_source, !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ], ""]
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}"
+                    - S3Bucket: !If [install_cloudtrail_logs_source, !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ], ""]
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}/*"
+                    - S3Bucket: !If [install_cloudtrail_logs_source, !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ], ""]
 
   LambdaHelper:
     Type: 'AWS::Serverless::Function'
@@ -578,6 +597,54 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
 
+  SumoLogicALBS3Policy:
+    Type: AWS::IAM::Policy
+    Condition: install_alb_logs_source
+    Properties:
+      PolicyName: SumoLogicAwsSourcesPoliciesS3ALB
+      Roles:
+        - !Ref SumoLogicSourceRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}"
+                - S3Bucket: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ] 
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}/*"
+                - S3Bucket: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ]
+            
+  SumoLogicCloudTrailS3Policy:
+    Type: AWS::IAM::Policy
+    Condition: install_cloudtrail_logs_source
+    Properties:  
+      PolicyName: SumoLogicAwsSourcesPoliciesS3CloudTrail
+      Roles:
+        - !Ref SumoLogicSourceRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}"
+                - S3Bucket: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}/*"
+                - S3Bucket: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
+  
   SumoLogicSourceRole:
     Type: AWS::IAM::Role
     Condition: install_sumo_logic_role
@@ -605,16 +672,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:ListBucketVersions
-                  - s3:ListBucket
                   - tag:GetResources
                   - cloudwatch:ListMetrics
                   - cloudwatch:GetMetricStatistics
                 Resource:
                   "*"
-
+        
   SumoLogicHostedCollector:
     Type: Custom::Collector
     Condition: install_collector
@@ -832,7 +895,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_kf_metric_source
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
+      TemplateURL: !Sub "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
       Parameters:
         Section1aSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
         Section1bNamespaceFilter: !Ref CloudWatchMetricsNameSpaces
@@ -871,6 +934,7 @@ Resources:
   ALBSource:
     Condition: install_alb_logs_source
     Type: Custom::AWSSource
+    DependsOn: SumoLogicALBS3Policy
     Properties:
       SourceType: AwsElbBucket
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -955,6 +1019,7 @@ Resources:
   CloudTrailSource:
     Condition: install_cloudtrail_logs_source
     Type: Custom::AWSSource
+    DependsOn: SumoLogicCloudTrailS3Policy
     Properties:
       SourceType: AwsCloudTrailBucket
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -1065,7 +1130,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_kf_logs_source
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWLogs.template.yaml"
+      TemplateURL: !Sub "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/KinesisFirehoseCWLogs.template.yaml"
       Parameters:
         Section1aSumoLogicKinesisLogsURL: !GetAtt KinesisFirehoseLogsSource.SUMO_ENDPOINT
         Section2aCreateS3Bucket: !If [ create_target_s3_bucket, "No", !If [ install_kf_metric_source, "No", "Yes" ] ]
