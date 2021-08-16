@@ -17,6 +17,7 @@ Metadata:
           default: "Sumo Logic AWS Resources Tagging Configuration (Required)"
         Parameters:
           - Section2aAccountAlias
+          - Section2bAccountAliasMappingS3URL
 
       - Label:
           default: "App Details - Sumo Logic App Configuration"
@@ -52,7 +53,10 @@ Metadata:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
       Section2aAccountAlias:
-        default: "Alias for AWS Account Identification"
+        default: "Alias for AWS Account Identification. Please leave this blank if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
+
+      Section2bAccountAliasMappingS3URL:
+        default: "S3 URL of a CSV file that maps AWS Account IDs to an Account Alias"
 
       Section3aInstallApp:
         default: "Install Sumo Logic App"
@@ -100,9 +104,14 @@ Parameters:
   Section2aAccountAlias:
     Type: String
     Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-z0-9]+"
+    AllowedPattern: "[a-z0-9]*"
     ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
     MaxLength: 30
+
+  Section2bAccountAliasMappingS3URL:
+    Type: String
+    Description: "Required only if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
+    Default: ""
 
   Section3aInstallApp:
     Type: String
@@ -151,7 +160,113 @@ Conditions:
     - !Condition update_alb_logs_source
     - !Not [!Equals [!Ref Section5bALBLogsSourceName, '']]
 
+Mappings:
+  # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
+  # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
+  # Buckets names which are intentional -
+  # 1. appdevzipfiles-eu-north-1s
+  # 2. appdevzipfiles-ap-east-1s
+  # 3. appdevzipfiles-af-south-1s
+  # 4. appdevzipfiles-me-south-1s
+  RegionMap:
+    us-east-1:
+      bucketname: appdevzipfiles-us-east-1
+    us-east-2:
+      bucketname: appdevzipfiles-us-east-2
+    us-west-1:
+      bucketname: appdevzipfiles-us-west-1
+    us-west-2:
+      bucketname: appdevzipfiles-us-west-2
+    ap-south-1:
+      bucketname: appdevzipfiles-ap-south-1
+    ap-northeast-2:
+      bucketname: appdevzipfiles-ap-northeast-2
+    ap-southeast-1:
+      bucketname: appdevzipfiles-ap-southeast-1
+    ap-southeast-2:
+      bucketname: appdevzipfiles-ap-southeast-2
+    ap-northeast-1:
+      bucketname: appdevzipfiles-ap-northeast-1
+    ca-central-1:
+      bucketname: appdevzipfiles-ca-central-1
+    eu-central-1:
+      bucketname: appdevzipfiles-eu-central-1
+    eu-west-1:
+      bucketname: appdevzipfiles-eu-west-1
+    eu-west-2:
+      bucketname: appdevzipfiles-eu-west-2
+    eu-west-3:
+      bucketname: appdevzipfiles-eu-west-3
+    eu-north-1:
+      bucketname: appdevzipfiles-eu-north-1s
+    sa-east-1:
+      bucketname: appdevzipfiles-sa-east-1
+    ap-east-1:
+      bucketname: appdevzipfiles-ap-east-1s
+    af-south-1:
+      bucketname: appdevzipfiles-af-south-1s
+    eu-south-1:
+      bucketname: appdevzipfiles-eu-south-1
+    me-south-1:
+      bucketname: appdevzipfiles-me-south-1s
+
 Resources:
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaExecutePolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - ec2:DescribeInstances
+                Resource: '*'
+
+  LambdaHelper:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.13.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - LambdaRole
+          - Arn
+
+  AccountAliasValue:
+    Type: Custom::AccountAlias
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      AccountID: !Ref "AWS::AccountId"
+      AccountAlias: !Ref Section2aAccountAlias
+      AccountAliasMappingS3Url: !Ref Section2bAccountAliasMappingS3URL
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
 
   sumoApp:
     Condition: install_app
@@ -180,7 +295,7 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
-        account: !Ref Section2aAccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         namespace: "AWS/ApplicationELB"
         region: !Ref "AWS::Region"
 
@@ -196,7 +311,7 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
-        account: !Ref Section2aAccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
 
   AlbLogsFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
