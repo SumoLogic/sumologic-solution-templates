@@ -17,6 +17,7 @@ Metadata:
           default: "2. AWS Account Alias"
         Parameters:
           - Section2aAccountAlias
+          - Section2bAccountAliasMappingS3URL
 
       - Label:
           default: "3. Sumo Logic AWS Observability Apps and Alerts"
@@ -73,7 +74,9 @@ Metadata:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
       Section2aAccountAlias:
-        default: "Alias for your AWS Account"
+        default: "Alias for AWS Account Identification. Please leave this blank if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
+      Section2bAccountAliasMappingS3URL:
+        default: "S3 URL of a CSV file that maps AWS Account IDs to an Account Alias"
 
       Section3aInstallObservabilityApps:
         default: "Install AWS Observability Apps and Alerts"
@@ -159,9 +162,14 @@ Parameters:
   Section2aAccountAlias:
     Type: String
     Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-z0-9]+"
+    AllowedPattern: "[a-z0-9]*"
     ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
     MaxLength: 30
+
+  Section2bAccountAliasMappingS3URL:
+    Type: String
+    Description: "Required only if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
+    Default: ""
 
   Section3aInstallObservabilityApps:
     Type: String
@@ -369,7 +377,6 @@ Mappings:
       XraySourceCategory: "aws/observability/xray"
 
 Resources:
-  # Create a Lambda and check for Enterprise by using Custom resource. Use the value to create inventory and root cause app.
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -384,11 +391,8 @@ Resources:
         SumoLogicOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         AccountAlias: !Ref Section2aAccountAlias
-        CollectorName: !Sub
-          - "${Prefix}-${Alias}-${Number}"
-          - Prefix: !FindInMap [CommonData, CollectorDetails, CollectorNamePrefix]
-            Alias: !Ref Section2aAccountAlias
-            Number: !Ref AWS::AccountId
+        AccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
+        CollectorName: ''
         SumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: !If [ create_cw_metrics_source, "Yes", "No" ]
@@ -471,6 +475,7 @@ Resources:
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aAccountAlias: !Ref Section2aAccountAlias
+        Section2bAccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section4aCloudWatchExistingSourceAPIUrl: !If [install_cloudwatch_metrics_source, "", !Ref Section4cCloudWatchExistingSourceAPIUrl]
         Section5aALBLogsAPIUrl: !If [create_alb_source, "", !Ref Section5cALBLogsSourceUrl]
@@ -554,12 +559,10 @@ Resources:
         Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
-        Section2bCollectorName: !Sub
-          - "${Prefix}-${Alias}-${Number}"
-          - Prefix: !FindInMap [CommonData, CollectorDetails, CollectorNamePrefix]
-            Alias: !Ref Section2aAccountAlias
-            Number: !Ref AWS::AccountId
+        Section2bCollectorName: ''
         Section2cSumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
+        Section2dAccountAlias: !Ref Section2aAccountAlias
+        Section2eAccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
         Section3aCreateAwsInventorySource: !If [install_inventory_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section3bAwsInventorySourceName: !Sub "inventory-${AWS::Region}"
         Section3cNamespaces: !GetAtt CreateCommonResources.Outputs.Namespaces
@@ -584,6 +587,7 @@ Resources:
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aAccountAlias: !Ref Section2aAccountAlias
+        Section2bAccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section5bCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", ""]
         Section5aCloudTrailLogsAPIUrl: !If [create_cloudtrail_source, "", !Ref Section6bCloudTrailLogsSourceUrl]
