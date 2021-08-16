@@ -63,10 +63,10 @@ module "apigateway_app" {
   group_notifications      = var.group_notifications
 }
 
-# Install the lambda app and resources.
-module "lambda_app" {
-  depends_on = [module.ec2metrics_app]
-  source     = "./lambda"
+# Install the ecs app and resources.
+module "ecs_app" {
+    depends_on = [module.ec2metrics_app]
+  source     = "./ecs"
 
   access_id                = var.access_id
   access_key               = var.access_key
@@ -74,7 +74,7 @@ module "lambda_app" {
   json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
-  monitors_disabled        = var.lambda_monitors_disabled
+  monitors_disabled        = var.ecs_monitors_disabled
   connection_notifications = var.connection_notifications
   email_notifications      = var.email_notifications
   group_notifications      = var.group_notifications
@@ -97,10 +97,10 @@ module "rds_app" {
   group_notifications      = var.group_notifications
 }
 
-# Install the ecs app and resources.
-module "ecs_app" {
-  depends_on = [module.lambda_app]
-  source     = "./ecs"
+# Install the lambda app and resources.
+module "lambda_app" {
+  depends_on = [module.ecs_app]
+  source     = "./lambda"
 
   access_id                = var.access_id
   access_key               = var.access_key
@@ -108,7 +108,7 @@ module "ecs_app" {
   json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
   monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
-  monitors_disabled        = var.ecs_monitors_disabled
+  monitors_disabled        = var.lambda_monitors_disabled
   connection_notifications = var.connection_notifications
   email_notifications      = var.email_notifications
   group_notifications      = var.group_notifications
@@ -128,7 +128,7 @@ module "rce_app" {
 
 # Install the alb app and resources.
 module "alb_app" {
-  depends_on = [module.ecs_app]
+  depends_on = [module.lambda_app]
   source     = "./alb"
 
   access_id                = var.access_id
