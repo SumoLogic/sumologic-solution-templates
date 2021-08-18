@@ -47,7 +47,7 @@ module "rds_module" {
       name             = "AwsObservabilityRdsCloudTrailLogsFER"
       scope            = "account=* eventname eventsource \"rds.amazonaws.com\""
       parse_expression = <<EOT
-              json "eventSource", "awsRegion", "requestParameters", "responseElements" as eventSource, region, requestParameters, responseElements nodrop
+              | json "eventSource", "awsRegion", "requestParameters", "responseElements", "recipientAccountId" as eventSource, region, requestParameters, responseElements, accountid nodrop
               | where eventSource = "rds.amazonaws.com"
               | "aws/rds" as namespace
               | json field=requestParameters "dBInstanceIdentifier", "resourceName", "dBClusterIdentifier" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop
@@ -57,7 +57,7 @@ module "rds_module" {
               | if (resourceName matches "arn:aws:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
               | if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier
               | tolowercase(dbidentifier) as dbidentifier
-              | fields region, namespace, dBInstanceIdentifier, dBClusterIdentifier, dbidentifier
+              | fields region, namespace, dBInstanceIdentifier, dBClusterIdentifier, dbidentifier, accountid
       EOT
       enabled          = true
     }

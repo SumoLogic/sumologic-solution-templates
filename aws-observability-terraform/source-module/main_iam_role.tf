@@ -23,7 +23,7 @@ resource "aws_iam_policy" "cloudtrail_policy" {
   for_each = toset(var.collect_cloudtrail_logs && local.create_iam_role ? ["cloudtrail_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
-    BUCKET_NAME = local.create_common_bucket ? local.common_bucket_name : var.cloudtrail_source_details.bucket_details.bucket_name
+    BUCKET_NAME = local.create_cloudtrail_bucket ? local.common_bucket_name : var.cloudtrail_source_details.bucket_details.bucket_name
   })
 }
 
@@ -39,7 +39,7 @@ resource "aws_iam_policy" "elb_policy" {
   for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
-    BUCKET_NAME = local.create_common_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
+    BUCKET_NAME = local.create_elb_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
   })
 }
 

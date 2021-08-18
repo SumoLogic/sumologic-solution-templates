@@ -22,12 +22,12 @@ module "apigateway_module" {
       name             = "AwsObservabilityApiGatewayCloudTrailLogsFER"
       scope            = "account=* eventname eventsource \"apigateway.amazonaws.com\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "responseElements" as eventSource, region, responseElements nodrop
+              | json "eventSource", "awsRegion", "responseElements", "recipientAccountId" as eventSource, region, responseElements, accountid nodrop
               | where eventSource = "apigateway.amazonaws.com"
               | "aws/apigateway" as namespace
               | json field=responseElements "name" as ApiName nodrop
               | tolowercase(ApiName) as apiname
-              | fields region, namespace, apiname
+              | fields region, namespace, apiname, accountid
       EOT
       enabled          = true
     }
