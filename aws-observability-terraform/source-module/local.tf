@@ -13,21 +13,21 @@ locals {
   # ELB Source updated Details
   elb_source_name = var.elb_source_details.source_name == "Elb Logs (Region)" ? "Elb Logs ${local.aws_region}" : var.elb_source_details.source_name
   elb_path_exp    = var.elb_source_details.bucket_details.create_bucket ? "*AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*" : var.elb_source_details.bucket_details.path_expression
-  elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/applicationelb" })
+  elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/applicationelb", accountid = local.aws_account_id })
 
   # CloudWatch metrics source updated details
   create_cw_metrics_source = var.collect_cloudwatch_metrics == "CloudWatch Metrics Source"
   create_kf_metrics_source = var.collect_cloudwatch_metrics == "Kinesis Firehose Metrics Source"
   create_metric_source     = local.create_cw_metrics_source || local.create_kf_metrics_source
   metrics_source_name      = var.cloudwatch_metrics_source_details.source_name == "CloudWatch Metrics (Region)" ? "CloudWatch Metrics ${local.aws_region}" : var.cloudwatch_metrics_source_details.source_name
-  metrics_fields           = merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias })
+  metrics_fields           = local.create_kf_metrics_source ? merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias }) : merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias, accountid = local.aws_account_id })
 
   # CloudWatch logs source updated details
   create_llf_logs_source      = var.collect_cloudwatch_logs == "Lambda Log Forwarder"
   create_kf_logs_source       = var.collect_cloudwatch_logs == "Kinesis Firehose Log Source"
   create_cw_logs_source       = local.create_llf_logs_source || local.create_kf_logs_source
   cloudwatch_logs_source_name = var.cloudwatch_logs_source_details.source_name == "CloudWatch Logs (Region)" ? "CloudWatch Logs ${local.aws_region}" : var.cloudwatch_logs_source_details.source_name
-  cloudwatch_logs_fields      = merge(var.cloudwatch_logs_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/lambda" })
+  cloudwatch_logs_fields      = merge(var.cloudwatch_logs_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/lambda", accountid = local.aws_account_id })
 
   # Root Cause sources updated details
   create_inventory_source  = var.collect_root_cause_data == "Inventory Source" || var.collect_root_cause_data == "Both"

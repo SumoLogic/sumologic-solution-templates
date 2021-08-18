@@ -28,14 +28,47 @@ module "ec2metrics_module" {
 
   # ********************** Monitors ********************** #
   managed_monitors = {
-    "AWSEC2HighCPUUtilization" = {
-      monitor_name         = "AWS EC2 - High CPU Utilization"
-      monitor_description  = "This alert fires when the average CPU utilization within a 5 minute interval for an EC2 instance is high (>=85%)."
+    "AWSEC2HighCPUSysUtilization" = {
+      monitor_name         = "AWS EC2 - High CPU Sys Utilization"
+      monitor_description  = "This alert fires when the average CPU Sys utilization within a 5 minute interval for an EC2 instance is high (>=85%)."
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
         A = "Namespace=aws/ec2 metric=CPU_Sys account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
+      }
+      triggers = [
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 85,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 85,
+          threshold_type   = "LessThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        }
+      ]
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "AWSEC2HighCPUTotalUtilization" = {
+      monitor_name         = "AWS EC2 - High CPU Total Utilization"
+      monitor_description  = "This alert fires when the average CPU Total utilization within a 5 minute interval for an EC2 instance is high (>=85%)."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      queries = {
+        A = "Namespace=aws/ec2 metric=CPU_Total account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
       }
       triggers = [
         {
@@ -101,7 +134,7 @@ module "ec2metrics_module" {
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-        A = "Namespace=aws/ec2 metric=Disk_UsedPercent account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
+        A = "Namespace=aws/ec2 metric=Disk_UsedPercent account=* region=* instanceid=* | avg by account, region, namespace, instanceid, devname"
       }
       triggers = [
         {

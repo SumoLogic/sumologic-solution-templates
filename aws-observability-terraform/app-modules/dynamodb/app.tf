@@ -22,11 +22,11 @@ module "dynamodb_module" {
       name             = "AwsObservabilityDynamoDBCloudTrailLogsFER"
       scope            = "account=* eventname eventsource \"dynamodb.amazonaws.com\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters.tableName" as eventSource, region, tablename nodrop
+              | json "eventSource", "awsRegion", "requestParameters.tableName", "recipientAccountId" as eventSource, region, tablename, accountid nodrop
               | where eventSource = "dynamodb.amazonaws.com"
               | "aws/dynamodb" as namespace
               | tolowercase(tablename) as tablename
-              | fields region, namespace, tablename
+              | fields region, namespace, tablename, accountid
       EOT
       enabled          = true
     }

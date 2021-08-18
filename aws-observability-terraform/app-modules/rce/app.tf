@@ -13,7 +13,7 @@ module "rce_module" {
 
   # ********************** Apps - RCE dashboards only ********************** #
   managed_apps = {
-    "OverviewApp" = {
+    "RceApp" = {
       content_json = join("", [var.json_file_directory_path, "/aws-observability/json/Rce-App.json"])
       folder_id    = var.app_folder_id
     }
