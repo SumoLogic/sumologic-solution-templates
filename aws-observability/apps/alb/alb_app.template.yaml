@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.2.0: Template to setup the ALB app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.3.0: Template to setup the ALB app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -298,6 +298,7 @@ Resources:
         account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         namespace: "AWS/ApplicationELB"
         region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
 
   SumoALBMetricsUpdateSource:
     Type: Custom::SumoLogicUpdateFields
@@ -312,6 +313,7 @@ Resources:
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
         account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+        accountid: !Ref "AWS::AccountId"
 
   AlbLogsFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
