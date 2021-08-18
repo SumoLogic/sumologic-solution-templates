@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.2.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.3.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
@@ -388,9 +388,28 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: AwsObservabilityLambdaExecutePoliciesS3
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
-                Resource: '*'
+                Resource:
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}"
+                    - S3Bucket: !If [install_alb_logs_source, !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ], ""] 
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}/*"
+                    - S3Bucket: !If [install_alb_logs_source, !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ], ""]
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}"
+                    - S3Bucket: !If [install_cloudtrail_logs_source, !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ], ""]
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}/*"
+                    - S3Bucket: !If [install_cloudtrail_logs_source, !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ], ""]
 
   LambdaHelper:
     Type: 'AWS::Serverless::Function'
@@ -578,6 +597,54 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
 
+  SumoLogicALBS3Policy:
+    Type: AWS::IAM::Policy
+    Condition: install_alb_logs_source
+    Properties:
+      PolicyName: SumoLogicAwsSourcesPoliciesS3ALB
+      Roles:
+        - !Ref SumoLogicSourceRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}"
+                - S3Bucket: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ] 
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}/*"
+                - S3Bucket: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ]
+            
+  SumoLogicCloudTrailS3Policy:
+    Type: AWS::IAM::Policy
+    Condition: install_cloudtrail_logs_source
+    Properties:  
+      PolicyName: SumoLogicAwsSourcesPoliciesS3CloudTrail
+      Roles:
+        - !Ref SumoLogicSourceRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}"
+                - S3Bucket: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}/*"
+                - S3Bucket: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
+  
   SumoLogicSourceRole:
     Type: AWS::IAM::Role
     Condition: install_sumo_logic_role
@@ -605,16 +672,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:ListBucketVersions
-                  - s3:ListBucket
                   - tag:GetResources
                   - cloudwatch:ListMetrics
                   - cloudwatch:GetMetricStatistics
                 Resource:
                   "*"
-
+        
   SumoLogicHostedCollector:
     Type: Custom::Collector
     Condition: install_collector
@@ -657,6 +720,17 @@ Resources:
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       FieldName: "namespace"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  AddAccountIdField:
+    Type: Custom::SumoLogicFieldsSchema
+    DependsOn: AddNamespaceField
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "accountid"
       RemoveOnDeleteStack: false
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -860,6 +934,7 @@ Resources:
   ALBSource:
     Condition: install_alb_logs_source
     Type: Custom::AWSSource
+    DependsOn: SumoLogicALBS3Policy
     Properties:
       SourceType: AwsElbBucket
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -877,6 +952,7 @@ Resources:
         account: !Ref AccountAlias
         namespace: "aws/applicationelb"
         region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
   ALBSNSTopic:
@@ -943,6 +1019,7 @@ Resources:
   CloudTrailSource:
     Condition: install_cloudtrail_logs_source
     Type: Custom::AWSSource
+    DependsOn: SumoLogicCloudTrailS3Policy
     Properties:
       SourceType: AwsCloudTrailBucket
       ServiceToken: !GetAtt LambdaHelper.Arn
@@ -1047,6 +1124,7 @@ Resources:
         account: !Ref AccountAlias
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
 
   KinesisFirehoseLogsStack:
     Type: AWS::CloudFormation::Stack
@@ -1085,6 +1163,7 @@ Resources:
         account: !Ref AccountAlias
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
 
 Outputs:
   LambdaHelperARN:
