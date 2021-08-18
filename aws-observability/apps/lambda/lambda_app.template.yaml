@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.2.0: Template to setup the Lambda app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.3.0: Template to setup the Lambda app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -221,6 +221,7 @@ Resources:
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
         account: !Ref Section2aAccountAlias
+        accountid: !Ref "AWS::AccountId"
 
   SumoHTTPUpdateSource:
     Type: Custom::SumoLogicUpdateFields
@@ -237,6 +238,7 @@ Resources:
         account: !Ref Section2aAccountAlias
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
 
   LambdaFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
@@ -251,7 +253,7 @@ Resources:
         - - "(_source="
           - !If [update_cloudtrail_logs_source, !Sub "\"${SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5bCloudTrailLogsSourceName]
           - " (\"lambda.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters" as eventSource, region, requestParameters nodrop
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters", "recipientAccountId" as eventSource, region, requestParameters, accountid nodrop
                                            | where eventSource = "lambda.amazonaws.com"
                                            | json field=requestParameters "functionName", "resource" as functionname, resource nodrop
                                            | parse regex field=functionname "\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$" nodrop
@@ -259,7 +261,7 @@ Resources:
                                            | if (isEmpty(functionname), functionname2, functionname) as functionname
                                            | "aws/lambda" as namespace
                                            | tolowercase(functionname) as functionname
-                                           | fields region, namespace, functionname'
+                                           | fields region, namespace, functionname, accountid'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
@@ -306,6 +308,6 @@ Outputs:
     Condition: update_cloudtrail_logs_source
     Value: !GetAtt SumoCloudTrailLogsUpdateSource.source_name
   ExistingCloudWatchLogSourceName:
-    Description: "Existing CloudTrail Logs Source Name"
+    Description: "Existing CloudWatch Logs Source Name"
     Condition: update_cloudwatch_logs_source
     Value: !GetAtt SumoHTTPUpdateSource.source_name
