@@ -238,58 +238,10 @@ Mappings:
 
 Resources:
 
-  LambdaRole:
-    Type: AWS::IAM::Role
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W11
-            reason: "Operations are performed across resources."
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Path: /
-      Policies:
-        - PolicyName: AwsObservabilityLambdaExecutePolicies
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - elasticloadbalancing:DescribeLoadBalancerAttributes
-                  - elasticloadbalancing:DescribeLoadBalancers
-                  - elasticloadbalancing:ModifyLoadBalancerAttributes
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  - s3:GetBucketPolicy
-                  - s3:PutBucketPolicy
-                Resource: '*'
-
-  LambdaHelper:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Handler: main.handler
-      Runtime: python3.7
-      CodeUri:
-        Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.13.zip"
-      MemorySize: 128
-      Timeout: 900
-      Role:
-        Fn::GetAtt:
-          - LambdaRole
-          - Arn
-
   AccountAliasValue:
     Type: Custom::AccountAlias
     Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
+      ServiceToken: !Ref Section7aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       AccountID: !Ref "AWS::AccountId"
       AccountAlias: !Ref Section2aAccountAlias
