@@ -17,6 +17,7 @@ Metadata:
           default: "Sumo Logic AWS Resources Tagging Configuration (Required)"
         Parameters:
           - Section2aAccountAlias
+          - Section2bAccountAliasMappingS3URL
 
       - Label:
           default: "App Details - Sumo Logic App Configuration"
@@ -58,7 +59,10 @@ Metadata:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
       Section2aAccountAlias:
-        default: "Alias for AWS Account Identification"
+        default: "Alias for AWS Account Identification. Please leave this blank if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
+
+      Section2bAccountAliasMappingS3URL:
+        default: "S3 URL of a CSV file that maps AWS Account IDs to an Account Alias"
 
       Section3aInstallApp:
         default: "Install Sumo Logic App"
@@ -111,9 +115,14 @@ Parameters:
   Section2aAccountAlias:
     Type: String
     Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-z0-9]+"
+    AllowedPattern: "[a-z0-9]*"
     ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
     MaxLength: 30
+
+  Section2bAccountAliasMappingS3URL:
+    Type: String
+    Description: "Required only if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
+    Default: ""
 
   Section3aInstallApp:
     Type: String
@@ -179,6 +188,18 @@ Conditions:
 
 Resources:
 
+  AccountAliasValue:
+    Type: Custom::AccountAlias
+    Properties:
+      ServiceToken: !Ref Section7aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AccountID: !Ref "AWS::AccountId"
+      AccountAlias: !Ref Section2aAccountAlias
+      AccountAliasMappingS3Url: !Ref Section2bAccountAliasMappingS3URL
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
   sumoApp:
     Type: Custom::App
     Condition: install_app
@@ -206,7 +227,7 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
-        account: !Ref Section2aAccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
 
   SumoMetricsUpdateSource:
     Type: Custom::SumoLogicUpdateFields
@@ -220,7 +241,7 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
-        account: !Ref Section2aAccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         accountid: !Ref "AWS::AccountId"
 
   SumoHTTPUpdateSource:
@@ -235,7 +256,7 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
-        account: !Ref Section2aAccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"

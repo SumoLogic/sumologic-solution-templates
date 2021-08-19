@@ -13,10 +13,11 @@ Metadata:
           - Section1dRemoveSumoResourcesOnDeleteStack
 
       - Label:
-          default: "AWS Account Alias (Required)"
+          default: "AWS Account Alias"
         Parameters:
           - Section2aAccountAlias
           - Section2bUpdateVersion
+          - Section2cAccountAliasMappingS3URL
 
     ParameterLabels:
       Section1aSumoDeployment:
@@ -29,9 +30,11 @@ Metadata:
         default: "Delete Fields when stack is deleted"
 
       Section2aAccountAlias:
-        default: "Alias for your AWS Account"
+        default: "Alias for AWS Account Identification. Please leave this blank if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
       Section2bUpdateVersion:
         default: "Force Update the Stack"
+      Section2cAccountAliasMappingS3URL:
+        default: "S3 URL of a CSV file that maps AWS Account IDs to an Account Alias"
 
 Parameters:
   Section1aSumoDeployment:
@@ -69,12 +72,20 @@ Parameters:
 
   Section2aAccountAlias:
     Type: String
-    Description: "Enter a name for the AWS environment from which you are collecting data. This name will appear in the Sumo Logic Explorer View, metrics and logs. Do not include special characters in the alias."
-    AllowedPattern: "[a-z0-9]+"
+    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
+    AllowedPattern: "[a-z0-9]*"
+    ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
+    MaxLength: 30
+
   Section2bUpdateVersion:
     Type: String
     Description: "Increment the value in case you want to force update the stack."
     Default: "1"
+
+  Section2cAccountAliasMappingS3URL:
+    Type: String
+    Description: "Required only if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
+    Default: ""
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -157,22 +168,34 @@ Resources:
                   - ec2:DescribeInstances
                 Resource: '*'
 
-  LambdaToAddFields:
+  LambdaHelper:
     Type: AWS::Lambda::Function
     Properties:
       Handler: main.handler
       Runtime: python3.7
       Code:
         S3Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        S3Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.12.zip"
+        S3Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.13.zip"
       MemorySize: 128
       Timeout: 900
       Role: !GetAtt LambdaRole.Arn
 
+  AccountAliasValue:
+    Type: Custom::AccountAlias
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      AccountID: !Ref "AWS::AccountId"
+      AccountAlias: !Ref Section2aAccountAlias
+      AccountAliasMappingS3Url: !Ref Section2cAccountAliasMappingS3URL
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
   AddFields:
     Type: Custom::AddFieldsInHostMetricsSources
     Properties:
-      ServiceToken: !GetAtt LambdaToAddFields.Arn
+      ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
@@ -182,6 +205,6 @@ Resources:
       Region: !Ref "AWS::Region"
       AddFields: "Yes"
       Fields:
-        account: !Ref Section2aAccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         Namespace: "AWS/EC2"
         accountid: !Ref "AWS::AccountId"
