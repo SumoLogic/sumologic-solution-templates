@@ -35,9 +35,14 @@ Parameters:
   AccountAlias:
     Type: String
     Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
-    AllowedPattern: "[a-z0-9]+"
+    AllowedPattern: "[a-z0-9]*"
     ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
     MaxLength: 30
+
+  AccountAliasMappingS3URL:
+    Type: String
+    Description: "Required only if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
+    Default: ""
 
   CollectorName:
     Type: String
@@ -256,6 +261,9 @@ Conditions:
     - !Condition install_cloudtrail_logs_source
     - !Condition install_kf_metric_source
 
+  # Collector Name Check
+  # collector_name_available: !Not [!Equals [ !Ref CollectorName, '']]
+
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
   # Some buckets names have 's' in the region suffix. It is kept intentional as bucket names were not available.
@@ -418,7 +426,7 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.12.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.13.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -431,6 +439,18 @@ Resources:
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  AccountAliasValue:
+    Type: Custom::AccountAlias
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      AccountID: !Ref "AWS::AccountId"
+      AccountAlias: !Ref AccountAlias
+      AccountAliasMappingS3Url: !Ref AccountAliasMappingS3URL
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
@@ -448,7 +468,9 @@ Resources:
     Properties:
       TopicName: !Join
         - ""
-        - - !Sub "sumo-sns-topic-${AccountAlias}-"
+        - - "sumo-sns-topic-"
+          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+          - "-"
           - !Select
             - 0
             - !Split
@@ -583,7 +605,10 @@ Resources:
       IsLogging: true
       IsMultiRegionTrail: false
       S3BucketName: !Ref CommonS3Bucket
-      TrailName: !Sub "Aws-Observability-${AccountAlias}"
+      TrailName: !Join
+        - ""
+        - - "Aws-Observability-"
+          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
 
   ############# START - RESOURCES FOR COLLECTOR #################
   CreateSumoLogicAWSExplorerView:
@@ -686,7 +711,10 @@ Resources:
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      CollectorName: !Ref CollectorName
+      CollectorName: !Sub
+        - "aws-observability-${Alias}-${Number}"
+        - Alias: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+          Number: !Ref AWS::AccountId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
@@ -823,7 +851,7 @@ Resources:
         SumoLogicAccessID: !Ref SumoLogicAccessID
         SumoLogicAccessKey: !Ref SumoLogicAccessKey
         RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-        AccountAlias: !Ref AccountAlias
+        AccountAlias: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
         LambdaARN: !GetAtt LambdaHelper.Arn
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
@@ -850,7 +878,7 @@ Resources:
         SumoLogicAccessID: !Ref SumoLogicAccessID
         SumoLogicAccessKey: !Ref SumoLogicAccessKey
         RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-        AccountAlias: !Ref AccountAlias
+        AccountAlias: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
         LambdaARN: !GetAtt LambdaHelper.Arn
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
@@ -877,7 +905,7 @@ Resources:
         SumoLogicAccessID: !Ref SumoLogicAccessID
         SumoLogicAccessKey: !Ref SumoLogicAccessKey
         RemoveSumoLogicResourcesOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-        AccountAlias: !Ref AccountAlias
+        AccountAlias: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         SumoLogicCollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
         LambdaARN: !GetAtt LambdaHelper.Arn
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
@@ -926,7 +954,7 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
       Fields:
-        account: !Ref AccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
   ############# START - RESOURCES FOR ALB SOURCE #################
@@ -949,7 +977,7 @@ Resources:
       TargetBucketName: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ]
       PathExpression: !Ref ALBS3BucketPathExpression
       Fields:
-        account: !Ref AccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         namespace: "aws/applicationelb"
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
@@ -966,7 +994,8 @@ Resources:
     Properties:
       TopicName: !Join
         - ""
-        - - !Sub "alb-sumo-sns-${AccountAlias}-"
+        - - "alb-sumo-sns-"
+          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
           - !Select
             - 0
             - !Split
@@ -1034,7 +1063,7 @@ Resources:
       SumoDeployment: !Ref SumoLogicDeployment
       PathExpression: !Ref CloudTrailBucketPathExpression
       Fields:
-        account: !Ref AccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
   CloudTrailSNSTopic:
@@ -1048,7 +1077,8 @@ Resources:
     Properties:
       TopicName: !Join
         - ""
-        - - !Sub "cloudtrail-sumo-sns-${AccountAlias}-"
+        - - "cloudtrail-sumo-sns-"
+          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
           - !Select
             - 0
             - !Split
@@ -1121,7 +1151,7 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
       Fields:
-        account: !Ref AccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
@@ -1160,12 +1190,21 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
       Fields:
-        account: !Ref AccountAlias
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
         namespace: "aws/lambda"
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
 
 Outputs:
+  AccountAlias:
+    Description: "Account Alias"
+    Value: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+  CollectorName:
+    Description: "Collector Name"
+    Value: !Sub
+      - "aws-observability-${Alias}-${Number}"
+      - Alias: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+        Number: !Ref AWS::AccountId
   LambdaHelperARN:
     Description: "Sumo Logic Lambda Helper ARN"
     Value: !GetAtt LambdaHelper.Arn
