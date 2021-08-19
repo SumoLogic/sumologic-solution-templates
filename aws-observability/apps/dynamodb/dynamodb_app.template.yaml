@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.2.0: Template to setup the DynamoDB app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.3.0: Template to setup the DynamoDB app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -153,11 +153,11 @@ Resources:
         - - "(_source="
           - !If [source_updated, !Sub "\"${Section3aCloudTrailLogsSourceName}\"", !Ref Section3aCloudTrailLogsSourceName]
           - " (\"dynamodb.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters.tableName" as eventSource, region, tablename nodrop
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters.tableName", "recipientAccountId" as eventSource, region, tablename, accountid nodrop
                                            | where eventSource = "dynamodb.amazonaws.com"
                                            | "aws/dynamodb" as namespace
                                            | tolowercase(tablename) as tablename
-                                           | fields region, namespace, tablename'
+                                           | fields region, namespace, tablename, accountid'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
