@@ -218,11 +218,7 @@ variable "cloudwatch_metrics_source_details" {
       force_destroy_bucket = true
     }
   }
-  validation {
-    # regex check that each element of the input namespaces is one of the accepted values, contains check if any of the can function returns was false, return false from logical if any of the returns were false
-    condition     = contains([for namespace in var.cloudwatch_metrics_source_details.limit_to_namespaces : can(regex("AWS/(?:ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS)", namespace))], false) != true
-    error_message = "Namespaces should be from provided default list \"AWS/ApplicationELB\", \"AWS/ApiGateway\", \"AWS/DynamoDB\", \"AWS/Lambda\", \"AWS/RDS\", \"AWS/ECS\", \"AWS/ElastiCache\", \"AWS/ELB\", \"AWS/NetworkELB\", \"AWS/SQS\", \"AWS/SNS\"."
-  }
+
 }
 
 variable "collect_cloudwatch_logs" {
