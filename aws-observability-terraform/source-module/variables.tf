@@ -205,7 +205,7 @@ variable "cloudwatch_metrics_source_details" {
       force_destroy_bucket = bool
     })
   })
-  description = "Provide details for the Sumo Logic Cloudwatch Metrics source. If not provided, then defaults will be used."
+  description = "Provide details for the Sumo Logic Cloudwatch Metrics source. If not provided, then defaults will be used. Refer list of AWS services that publish CloudWatch metrics: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
   default = {
     source_name         = "CloudWatch Metrics (Region)"
     source_category     = "aws/observability/cloudwatch/metrics"
@@ -218,11 +218,7 @@ variable "cloudwatch_metrics_source_details" {
       force_destroy_bucket = true
     }
   }
-  validation {
-    # regex check that each element of the input namespaces is one of the accepted values, contains check if any of the can function returns was false, return false from logical if any of the returns were false
-    condition     = contains([for namespace in var.cloudwatch_metrics_source_details.limit_to_namespaces : can(regex("AWS/(?:ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS)", namespace))], false) != true
-    error_message = "Namespaces should be from provided default list \"AWS/ApplicationELB\", \"AWS/ApiGateway\", \"AWS/DynamoDB\", \"AWS/Lambda\", \"AWS/RDS\", \"AWS/ECS\", \"AWS/ElastiCache\", \"AWS/ELB\", \"AWS/NetworkELB\", \"AWS/SQS\", \"AWS/SNS\"."
-  }
+
 }
 
 variable "collect_cloudwatch_logs" {
