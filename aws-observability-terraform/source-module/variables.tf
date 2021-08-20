@@ -205,7 +205,7 @@ variable "cloudwatch_metrics_source_details" {
       force_destroy_bucket = bool
     })
   })
-  description = "Provide details for the Sumo Logic Cloudwatch Metrics source. If not provided, then defaults will be used."
+  description = "Provide details for the Sumo Logic Cloudwatch Metrics source. If not provided, then defaults will be used. Refer list of AWS services that publish CloudWatch metrics: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
   default = {
     source_name         = "CloudWatch Metrics (Region)"
     source_category     = "aws/observability/cloudwatch/metrics"
