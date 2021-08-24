@@ -1,6 +1,6 @@
 variable "environment" {
   type        = string
-  description = "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  description = "Enter au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
 
   validation {
     condition = contains([
@@ -29,7 +29,7 @@ variable "access_id" {
 
 variable "access_key" {
   type        = string
-  description = "Sumo Logic Access Key."
+  description = "Sumo Logic Access Key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
 
   validation {
     condition     = can(regex("\\w+", var.access_key))
@@ -44,7 +44,10 @@ variable "json_file_directory_path" {
 
 variable "apps_folder_name" {
   type        = string
-  description = "Provide a folder name where all the apps will be installed. Default value will be \"AWS Observability Apps\"."
+  description = <<EOT
+            Provide a folder name where all the apps will be installed under the Personal folder of the user whose access keys you have entered.
+            Default value will be: AWS Observability Apps
+        EOT
   default     = "AWS Observability Apps"
 }
 
@@ -56,7 +59,10 @@ variable "parent_folder_id" {
 
 variable "monitors_folder_name" {
   type        = string
-  description = "Provide a folder name where all the monitors will be installed. Default value will be \"AWS Observability Monitors\"."
+  description = <<EOT
+            Provide a folder name where all the monitors will be installed under Monitor Folder.
+            Default value will be: AWS Observability Monitors
+        EOT
   default     = "AWS Observability Monitors"
 }
 
@@ -96,55 +102,55 @@ variable "group_notifications" {
 
 variable "alb_monitors_disabled" {
   type        = bool
-  description = "Whether the ALB Apps monitors are enabled or not?"
+  description = "Indicates if the ALB Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
 variable "apigateway_monitors_disabled" {
   type        = bool
-  description = "Whether the API Gateway Apps monitors are enabled or not?"
+  description = "Indicates if the API Gateway Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
 variable "dynamodb_monitors_disabled" {
   type        = bool
-  description = "Whether the DynamoDB Apps monitors are enabled or not?"
+  description = "Indicates if DynamoDB Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
 variable "ec2metrics_monitors_disabled" {
   type        = bool
-  description = "Whether the EC2 Metrics Apps monitors are enabled or not?"
+  description = "Indicates if EC2 Metrics Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
 variable "ecs_monitors_disabled" {
   type        = bool
-  description = "Whether the ECS Apps monitors are enabled or not?"
+  description = "Indicates if ECS Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
 variable "elasticache_monitors_disabled" {
   type        = bool
-  description = "Whether the Elasticache Apps monitors are enabled or not?"
+  description = "Indicates if Elasticache Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
 variable "lambda_monitors_disabled" {
   type        = bool
-  description = "Whether the Lambda Apps monitors are enabled or not?"
+  description = "Indicates if Lambda Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
 variable "nlb_monitors_disabled" {
   type        = bool
-  description = "Whether the NLB Apps monitors are enabled or not?"
+  description = "Indicates if NLB Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
 variable "rds_monitors_disabled" {
   type        = bool
-  description = "Whether the RDS Apps monitors are enabled or not?"
+  description = "Indicates if RDS Apps monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 

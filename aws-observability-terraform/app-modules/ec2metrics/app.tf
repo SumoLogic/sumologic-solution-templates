@@ -29,8 +29,8 @@ module "ec2metrics_module" {
   # ********************** Monitors ********************** #
   managed_monitors = {
     "AWSEC2HighCPUSysUtilization" = {
-      monitor_name         = "AWS EC2 - High CPU Sys Utilization"
-      monitor_description  = "This alert fires when the average CPU Sys utilization within a 5 minute interval for an EC2 instance is high (>=85%)."
+      monitor_name         = "AWS EC2 - High System CPU Utilization"
+      monitor_description  = "This alert fires when the average system CPU utilization within a 5 minute interval for an EC2 instance is high (>=85%)."
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
@@ -62,8 +62,8 @@ module "ec2metrics_module" {
       email_notifications      = var.email_notifications
     },
     "AWSEC2HighCPUTotalUtilization" = {
-      monitor_name         = "AWS EC2 - High CPU Total Utilization"
-      monitor_description  = "This alert fires when the average CPU Total utilization within a 5 minute interval for an EC2 instance is high (>=85%)."
+      monitor_name         = "AWS EC2 - High Total CPU Utilization"
+      monitor_description  = "This alert fires when the average total CPU utilization within a 5 minute interval for an EC2 instance is high (>=85%)."
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
