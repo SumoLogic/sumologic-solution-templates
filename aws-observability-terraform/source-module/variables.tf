@@ -1,16 +1,22 @@
 variable "aws_account_alias" {
   type        = string
-  description = "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
+  description = <<EOT
+            Provide the Name/Alias for the AWS environment from which you are collecting data. This name will appear in the Sumo Logic Explorer View, metrics, and logs.
+            Please leave this blank if you are going to deploy the solution in multiple AWS accounts.
+            Do not include special characters in the alias.
+        EOT
   validation {
-    condition     = can(regex("[a-z0-9]+", var.aws_account_alias))
+    condition     = can(regex("[a-z0-9]*", var.aws_account_alias))
     error_message = "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
   }
 }
 
 variable "sumologic_organization_id" {
   type        = string
-  description = "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
-
+  description = <<EOT
+            You can find your org on the Preferences page in the Sumo Logic UI. For more information, see the Preferences Page topic. Your org ID will be used to configure the IAM Role for Sumo Logic AWS Sources."
+            For more details, visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page
+        EOT
   validation {
     condition     = can(regex("\\w+", var.sumologic_organization_id))
     error_message = "The organization ID must contain valid characters."
@@ -25,7 +31,7 @@ variable "existing_iam_details" {
   description = <<EOT
 			Provide an existing AWS IAM role arn value which provides access to AWS S3 Buckets, AWS CloudWatch Metrics API and Sumo Logic Inventory data.
 			If kept empty, a new IAM role will be created with the required permissions.
-			For more details on permission, check /source-modules/template/sumologic_aws_permissions.tmpl file.
+			For more details on permissions, check the iam policy tmpl files at /source-module/templates folder.
 		EOT
   default = {
     create_iam_role = true
@@ -36,10 +42,10 @@ variable "existing_iam_details" {
 variable "wait_for_seconds" {
   type        = number
   description = <<EOT
-        wait_for_seconds is used to delay sumo logic source creation. This helps persisting IAM role in AWS system.
-        Default value is 180 seconds.
-        If the AWS IAM role is created outside the module, the value can be decreased to 1 second.
-    EOT
+            wait_for_seconds is used to delay sumo logic source creation. The value is in seconds. This helps persisting the IAM role in the AWS system.
+            Default value is 180 seconds.
+            If the AWS IAM role is created outside the module, the value can be decreased to 1 second.
+        EOT
   default     = 180
 }
 
@@ -67,7 +73,7 @@ variable "sumologic_collector_details" {
   })
   description = <<EOT
 			Provide details for the Sumo Logic collector. If not provided, then defaults will be used.
-			Collector will be created if any new source will be created and \"sumologic_existing_collector_id\" is empty.
+			The Collector will be created if any new source will be created and \"sumologic_existing_collector_id\" is empty.
 		EOT
   default = {
     collector_name = "AWS Observability (AWS Account Alias) (Account ID)"
@@ -79,9 +85,11 @@ variable "sumologic_collector_details" {
 variable "collect_cloudtrail_logs" {
   type        = bool
   description = <<EOT
-			Provide \"true\" if you would like to ingest cloudtrail logs into Sumo Logic.
-			Please provide \"cloudtrail_source_details\" if would like to ingest cloudtrail logs.
-			Provide \"false\" if you are already ingesting logs into Sumo Logic.
+            Create a Sumo Logic CloudTrail Logs Source.
+            You have the following options:
+			true - to ingest cloudtrail logs into Sumo Logic. Creates a Sumo Logic CloudTrail Log Source that collects CloudTrail logs from an existing bucket or new bucket.
+			If true, please configure \"cloudtrail_source_details\" with configuration information to ingest cloudtrail logs.
+			false - you are already ingesting cloudtrail logs into Sumo Logic.
 		EOT
   default     = true
 }
@@ -99,7 +107,13 @@ variable "cloudtrail_source_details" {
     })
     fields = map(string)
   })
-  description = "Provide details for the Sumo Logic CloudTrail source. If not provided, then defaults will be used."
+  description = <<EOT
+            Provide details for the Sumo Logic CloudTrail source. If not provided, then defaults will be used.
+            To enable, set collect_cloudtrail_logs to true and provide configuration information for the bucket at bucket_details.
+            If create_bucket is false, provide a name of an existing S3 bucket where you would like to store CloudTrail logs. If this is empty, a new bucket will be created in the region.
+            If create_bucket is true, the script creates a bucket, the name of the bucket has to be unique; this is achieved internally by generating a random-id and then post-fixing it to the “aws-observability-” string.
+            path_expression - This is required in case the above existing bucket is already configured to receive CloudTrail logs. If this is blank, Sumo Logic will store logs in the path expression AWSLogs/*/CloudTrail/*/*.
+        EOT
   default = {
     source_name     = "CloudTrail Logs (Region)"
     source_category = "aws/observability/cloudtrail/logs"
@@ -121,9 +135,11 @@ variable "cloudtrail_source_details" {
 variable "collect_elb_logs" {
   type        = bool
   description = <<EOT
-			Provide \"true\" if you would like to ingest Load Balancer logs into Sumo Logic.
-			Please provide \"elb_source_details\" if would like to ingest load balancer logs.
-			Provide \"false\" if you are already ingesting logs into Sumo Logic.
+            Create a Sumo Logic ALB Logs Source.
+            You have the following options:
+			true - to ingest load balancer logs into Sumo Logic. Creates a Sumo Logic Log Source that collects application load balancer logs from an existing bucket or a new bucket.
+			If true, please configure \"elb_source_details\" with configuration information including the bucket name and path expression to ingest load balancer logs.
+			false - you are already ingesting load balancer logs into Sumo Logic.
 		EOT
   default     = true
 }
@@ -141,11 +157,17 @@ variable "elb_source_details" {
     })
     fields = map(string)
   })
-  description = "Provide details for the Sumo Logic Elb source. If not provided, then defaults will be used."
+  description = <<EOT
+            Provide details for the Sumo Logic ALB source. If not provided, then defaults will be used.
+            To enable collection of application load balancer logs, set collect_elb_logs to true and provide configuration information for the bucket.
+            If create_bucket is false, provide a name of an existing S3 bucket where you would like to store loadbalancer logs. If this is empty, a new bucket will be created in the region.
+            If create_bucket is true, the script creates a bucket, the name of the bucket has to be unique; this is achieved internally by generating a random-id and then post-fixing it to the “aws-observability-” string.
+            path_expression - This is required in case the above existing bucket is already configured to receive ALB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/elasticloadbalancing/*/*
+        EOT
   default = {
     source_name     = "Elb Logs (Region)"
     source_category = "aws/observability/alb/logs"
-    description     = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS ELB logs."
+    description     = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Application LoadBalancer logs."
     bucket_details = {
       create_bucket        = true
       bucket_name          = "aws-observability-random-id"
@@ -163,11 +185,13 @@ variable "elb_source_details" {
 variable "auto_enable_access_logs" {
   type        = string
   description = <<EOT
-				New - Automatically enables access logging for newly created ALB resources to collect logs for ALB resources. This does not affect ALB resources already collecting logs.
-				Existing - Automatically enables access logging for existing ALB resources to collect logs for ALB resources.
-				Both - Automatically enables access logging for new and existing ALB resources.
-				None - Skips Automatic access Logging enable for ALB resources.
-		  EOT
+            Enable Application Load Balancer (ALB) Access logging.
+            You have the following options:
+            New - Automatically enables access logging for newly created ALB resources to collect logs for ALB resources. This does not affect ALB resources already collecting logs.
+            Existing - Automatically enables access logging for existing ALB resources to collect logs for ALB resources.
+            Both - Automatically enables access logging for new and existing ALB resources.
+            None - Skips Automatic access Logging enable for ALB resources.
+        EOT
   validation {
     condition = contains([
       "New",
@@ -181,7 +205,13 @@ variable "auto_enable_access_logs" {
 
 variable "collect_cloudwatch_metrics" {
   type        = string
-  description = ""
+  description = <<EOT
+            Select the kind of CloudWatch Metrics Source to create
+            You have the following options:
+            "CloudWatch Metrics Source" - Creates Sumo Logic AWS CloudWatch Metrics Sources.
+            "Kinesis Firehose Metrics Source" (Recommended) - Creates a Sumo Logic AWS Kinesis Firehose for Metrics Source. Note: This new source has cost and performance benefits over the CloudWatch Metrics Source and is therefore recommended.
+            "None" - Skips the Installation of both the Sumo Logic Metric Sources
+        EOT
   validation {
     condition = contains([
       "CloudWatch Metrics Source",
@@ -205,7 +235,11 @@ variable "cloudwatch_metrics_source_details" {
       force_destroy_bucket = bool
     })
   })
-  description = "Provide details for the Sumo Logic Cloudwatch Metrics source. If not provided, then defaults will be used. Refer list of AWS services that publish CloudWatch metrics: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
+  description = <<EOT
+            Provide details for the Sumo Logic Cloudwatch Metrics source. If not provided, then defaults will be used.
+            limit_to_namespaces - Enter a comma-delimited list of the namespaces which will be used for both AWS CloudWatch Metrics Source.
+            See this list of AWS services that publish CloudWatch metrics: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
+        EOT
   default = {
     source_name         = "CloudWatch Metrics (Region)"
     source_category     = "aws/observability/cloudwatch/metrics"
@@ -218,12 +252,17 @@ variable "cloudwatch_metrics_source_details" {
       force_destroy_bucket = true
     }
   }
-
 }
 
 variable "collect_cloudwatch_logs" {
   type        = string
-  description = ""
+  description = <<EOT
+            Select the kind of Sumo Logic CloudWatch Logs Sources to create
+            You have the following options:
+            "Lambda Log Forwarder" - Creates a Sumo Logic CloudWatch Log Source that collects CloudWatch logs via a Lambda function.
+            "Kinesis Firehose Log Source" - Creates a Sumo Logic Kinesis Firehose Log Source to collect CloudWatch logs.
+            "None" - Skips installation of both sources.
+        EOT
   validation {
     condition = contains([
       "Lambda Log Forwarder",
@@ -253,7 +292,20 @@ variable "cloudwatch_logs_source_details" {
       log_stream_prefix      = list(string)
     })
   })
-  description = "Provide details for the Sumo Logic Cloudwatch Logs source. If not provided, then defaults will be used."
+  description = <<EOT
+            Provide details for the Sumo Logic Cloudwatch Logs source. If not provided, then defaults will be used.
+
+            Use bucket_details section with Kinesis Firehose Log Source:
+            If create_bucket is false, provide a name of an existing S3 bucket where you would like to store cloudwatch logs. If this is empty, a new bucket will be created.
+            If create_bucket is true, the script creates a bucket, the name of the bucket has to be unique; this is achieved internally by generating a random-id and then post-fixing it to the “aws-observability-” string.
+
+            Use lambda_log_forwarder_config section with Lambda Log Forwarder:
+            Provide your email_id to receive alerts. You will receive a confirmation email after the deployment is complete. Follow the instructions in this email to validate the address.
+            IncludeLogGroupInfo:  Set to true to include loggroup/logstream values in logs. For AWS Lambda logs, IncludeLogGroupInfo must be set to true
+            logformat: For Lambda, the value should be set to “Others”.
+            log_stream_prefix: Enter a comma-separated list of logStream name prefixes to filter by logStream. Please note this is separate from a logGroup. This is used to only send certain logStreams within a CloudWatch logGroup(s). LogGroup(s) still need to be subscribed to the created Lambda function.
+            workers: Number of lambda function invocations for Cloudwatch logs source Dead Letter Queue processing.
+        EOT
   default = {
     source_name     = "CloudWatch Logs (Region)"
     source_category = "aws/observability/cloudwatch/logs"
@@ -285,11 +337,13 @@ variable "cloudwatch_logs_source_details" {
 variable "auto_enable_logs_subscription" {
   type        = string
   description = <<EOT
-				New - Automatically subscribes new log groups to send logs to Sumo Logic.
-				Existing - Automatically subscribes existing log groups to send logs to Sumo Logic.
-				Both - Automatically subscribes new and existing log groups.
-				None - Skips Automatic subscription.
-		  EOT
+            Subscribe log groups to Sumo Logic Lambda Forwarder.
+            You have the following options:
+            New - Automatically subscribes new log groups to send logs to Sumo Logic.
+            Existing - Automatically subscribes existing log groups to send logs to Sumo Logic.
+            Both - Automatically subscribes new and existing log groups.
+            None - Skips Automatic subscription.
+        EOT
   validation {
     condition = contains([
       "New",
@@ -305,11 +359,9 @@ variable "auto_enable_logs_subscription_options" {
   type = object({
     filter = string
   })
-
   description = <<EOT
-		filter - Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters
-	EOT
-
+		    filter - Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters
+	    EOT
   default = {
     filter = "lambda"
   }
@@ -317,7 +369,14 @@ variable "auto_enable_logs_subscription_options" {
 
 variable "collect_root_cause_data" {
   type        = string
-  description = ""
+  description = <<EOT
+            Select the Sumo Logic Root Cause Explorer Source.
+            You have the following options:
+            Inventory Source - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.
+            Xray Source - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account.
+            Both - Install both Inventory and Xray sources.
+            None - Skips installation of both sources.
+        EOT
   validation {
     condition = contains([
       "Inventory Source",
