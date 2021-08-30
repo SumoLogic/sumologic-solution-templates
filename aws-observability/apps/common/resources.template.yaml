@@ -44,10 +44,6 @@ Parameters:
     Description: "Required only if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
     Default: ""
 
-  CollectorName:
-    Type: String
-    Description: "Provide a Collector Name"
-    Default: ""
   SumoLogicAccountID:
     Type: String
     Description: "Provide the Sumo Logic Account ID for trust relationship."
@@ -434,6 +430,49 @@ Resources:
           - LambdaRole
           - Arn
 
+  LambdaRoleAlias:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: AwsObservabilityLambdaExecutePolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  LambdaHelperAlias:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.13.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - LambdaRoleAlias
+          - Arn
+
   AccountCheck:
     Type: Custom::EnterpriseOrTrialAccountCheck
     Properties:
@@ -446,7 +485,7 @@ Resources:
   AccountAliasValue:
     Type: Custom::AccountAlias
     Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
+      ServiceToken: !GetAtt LambdaHelperAlias.Arn
       Region: !Ref "AWS::Region"
       AccountID: !Ref "AWS::AccountId"
       AccountAlias: !Ref AccountAlias
