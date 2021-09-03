@@ -24,7 +24,8 @@ resource "time_sleep" "wait_for_minutes" {
 
 module "cloudtrail_module" {
   depends_on = [time_sleep.wait_for_minutes]
-  for_each   = toset(var.collect_cloudtrail_logs ? ["cloudtrail_module"] : [])
+  for_each   = toset(local.create_cloudtrail_source ? ["cloudtrail_module"] : [])
+  #for_each   = toset(var.collect_cloudtrail_logs ? ["cloudtrail_module"] : [])
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
 
@@ -62,7 +63,8 @@ module "cloudtrail_module" {
 
 module "elb_module" {
   depends_on = [time_sleep.wait_for_minutes]
-  for_each   = toset(var.collect_elb_logs ? ["elb_module"] : [])
+  for_each   = toset(local.create_elb_source ? ["elb_module"] : [])
+  #for_each   = toset(var.collect_elb_logs ? ["elb_module"] : [])
 
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
 

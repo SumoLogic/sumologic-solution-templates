@@ -1,3 +1,62 @@
+#himanshu
+variable "environment" {
+ type        = string
+ description = "Enter au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+
+ validation {
+   condition = contains([
+     "au",
+     "ca",
+     "de",
+     "eu",
+     "jp",
+     "us1",
+     "us2",
+     "in",
+   "fed"], var.environment)
+   error_message = "The value must be one of au, ca, de, eu, jp, us1, us2, in, or fed."
+ }
+}
+#himanshu
+variable "access_id" {
+ type        = string
+ description = "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+
+ validation {
+   condition     = can(regex("\\w+", var.access_id))
+   error_message = "The SumoLogic access ID must contain valid characters."
+ }
+}
+#himanshu
+variable "access_key" {
+ type        = string
+ description = "Sumo Logic Access Key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+
+ validation {
+   condition     = can(regex("\\w+", var.access_key))
+   error_message = "The SumoLogic access key must contain valid characters."
+ }
+}
+variable "metric_source_url" {
+  type        = string
+  description = "You must supply this URL if you are already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. The account field will be added to the Source. For information on how to determine the URL, see View or Download Source JSON Configuration"
+  default = ""
+}
+variable "cloudtrail_source_url" {
+  type        = string
+  description = "Required if you are already collecting CloudTrail logs. Provide the existing Sumo Logic CloudTrail Source API URL. The account field will be added to the Source. For information on how to determine the URL, see View or Download Source JSON Configuration."
+  default = ""
+}
+variable "elb_source_url" {
+  type        = string
+  description = "You must supply this URL if you are already collecting ALB logs. Enter the existing Sumo Logic ALB Source API URL. The account, region and namespace fields will be added to the Source. For information on how to determine the URL, see View or Download Source JSON Configuration."
+  default = ""
+}
+variable "logs_source_url" {
+  type        = string
+  description = "Required you already collect AWS Lambda CloudWatch logs. Provide the existing Sumo Logic AWS Lambda CloudWatch Source API URL. The account, region and namespace fields will be added to the Source. For information on how to determine the URL, see View or Download Source JSON Configuration."
+  default = ""
+}
 variable "aws_account_alias" {
   type        = string
   description = <<EOT
@@ -216,6 +275,7 @@ variable "collect_cloudwatch_metrics" {
     condition = contains([
       "CloudWatch Metrics Source",
       "Kinesis Firehose Metrics Source",
+      "Existing Source",
     "None", ], var.collect_cloudwatch_metrics)
     error_message = "The value must be one of \"CloudWatch Metrics Source\", \"Kinesis Firehose Metrics Source\", and None."
   }
