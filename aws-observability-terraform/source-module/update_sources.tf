@@ -2,10 +2,10 @@
 resource "null_resource" "AddFieldsToMetricSource" {
    for_each   = toset(local.update_metrics_source ? ["add_fields_to_source"] : [])
    triggers = {
-       access_id         = var.access_id           #added new variable
-       access_key        = var.access_key          #added new variable
-       env               = var.environment         #added new variable
-       source_url        = var.metric_source_url   #added new variable
+       access_id         = var.access_id
+       access_key        = var.access_key
+       env               = var.environment
+       source_url        = var.metric_source_url
    }
    provisioner "local-exec" {
        when    = create
