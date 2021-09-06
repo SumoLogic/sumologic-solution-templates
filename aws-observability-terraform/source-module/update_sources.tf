@@ -5,7 +5,7 @@ resource "null_resource" "AddFieldsToMetricSource" {
        access_id         = var.access_id
        access_key        = var.access_key
        env               = var.environment
-       source_url        = var.metric_source_url
+       source_url        = var.cloudwatch_metrics_source_url
    }
    provisioner "local-exec" {
        when    = create
@@ -49,7 +49,7 @@ resource "null_resource" "AddFieldsToELBSource" {
        access_id         = var.access_id
        access_key        = var.access_key
        env               = var.environment
-       source_url        = var.elb_source_url
+       source_url        = var.elb_log_source_url
    }
    provisioner "local-exec" {
        when    = create
@@ -71,7 +71,7 @@ resource "null_resource" "AddFieldsToLogSource" {
        access_id         = var.access_id
        access_key        = var.access_key
        env               = var.environment
-       source_url        = var.logs_source_url
+       source_url        = var.cloudwatch_logs_source_url
    }
    provisioner "local-exec" {
        when    = create

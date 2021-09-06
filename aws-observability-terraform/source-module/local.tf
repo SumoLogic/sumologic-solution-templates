@@ -13,26 +13,26 @@ locals {
   cloudtrail_fields      = merge(var.cloudtrail_source_details.fields, { account = var.aws_account_alias })
 
   # ELB Source updated Details
-  create_elb_source = var.collect_elb_logs && var.elb_source_url == ""
-  update_elb_source = var.collect_elb_logs ? (var.elb_source_url == "" ? false : true) : false
+  create_elb_source = var.collect_elb_logs && var.elb_log_source_url == ""
+  update_elb_source = var.collect_elb_logs ? (var.elb_log_source_url == "" ? false : true) : false
   elb_source_name = var.elb_source_details.source_name == "Elb Logs (Region)" ? "Elb Logs ${local.aws_region}" : var.elb_source_details.source_name
   elb_path_exp    = var.elb_source_details.bucket_details.create_bucket ? "*AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*" : var.elb_source_details.bucket_details.path_expression
   elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/applicationelb", accountid = local.aws_account_id })
 
   # CloudWatch metrics source updated details
-  create_cw_metrics_source = var.collect_cloudwatch_metrics == "CloudWatch Metrics Source" && var.metric_source_url == ""
-  create_kf_metrics_source = var.collect_cloudwatch_metrics == "Kinesis Firehose Metrics Source" && var.metric_source_url == ""
+  create_cw_metrics_source = var.collect_cloudwatch_metrics == "CloudWatch Metrics Source" && var.cloudwatch_metrics_source_url == ""
+  create_kf_metrics_source = var.collect_cloudwatch_metrics == "Kinesis Firehose Metrics Source" && var.cloudwatch_metrics_source_url == ""
   use_cw_metrics_source = var.collect_cloudwatch_metrics == "CloudWatch Metrics Source"
   use_kf_metrics_source = var.collect_cloudwatch_metrics == "Kinesis Firehose Metrics Source"
-  update_metrics_source      = var.collect_cloudwatch_metrics == "None" ? false : (var.metric_source_url == "" ? false : true)
+  update_metrics_source      = var.collect_cloudwatch_metrics == "None" ? false : (var.cloudwatch_metrics_source_url == "" ? false : true)
   create_metric_source     = var.collect_cloudwatch_metrics == "None" ? false : (local.update_metrics_source ? false : true)
   metrics_source_name      = var.cloudwatch_metrics_source_details.source_name == "CloudWatch Metrics (Region)" ? "CloudWatch Metrics ${local.aws_region}" : var.cloudwatch_metrics_source_details.source_name
   metrics_fields           = local.use_kf_metrics_source ? merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias }) : merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias, accountid = local.aws_account_id })
 
   # CloudWatch logs source updated details
-  create_llf_logs_source      = var.collect_cloudwatch_logs == "Lambda Log Forwarder" && var.logs_source_url == ""
-  create_kf_logs_source       = var.collect_cloudwatch_logs == "Kinesis Firehose Log Source" && var.logs_source_url == ""
-  update_logs_source          = var.collect_cloudwatch_logs == "None" ? false : (var.logs_source_url == "" ? false : true)
+  create_llf_logs_source      = var.collect_cloudwatch_logs == "Lambda Log Forwarder" && var.cloudwatch_logs_source_url == ""
+  create_kf_logs_source       = var.collect_cloudwatch_logs == "Kinesis Firehose Log Source" && var.cloudwatch_logs_source_url == ""
+  update_logs_source          = var.collect_cloudwatch_logs == "None" ? false : (var.cloudwatch_logs_source_url == "" ? false : true)
   create_cw_logs_source       = var.collect_cloudwatch_logs == "None" ? false : (local.update_logs_source ? false : true)
   cloudwatch_logs_source_name = var.cloudwatch_logs_source_details.source_name == "CloudWatch Logs (Region)" ? "CloudWatch Logs ${local.aws_region}" : var.cloudwatch_logs_source_details.source_name
   cloudwatch_logs_fields      = merge(var.cloudwatch_logs_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/lambda", accountid = local.aws_account_id })
