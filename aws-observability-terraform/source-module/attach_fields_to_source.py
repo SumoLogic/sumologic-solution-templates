@@ -85,12 +85,8 @@ if __name__ == "__main__":
     prop["SumoAccessKey"]=access_key
     prop["SumoDeployment"]=deployment
     
-    fields_to_delete = ['him']
-    #fields = {'account-new':'himanshu6'}
+    fields_to_delete = ['account']
     fields = json.loads(env_vars.get("Fields"))
-    #print(type(fields))
     source = SumoLogicUpdateFields(prop)
-    him = source.add_fields_to_source(collector_id,source_id,fields)
-    #him = source.delete_fields_of_source(collector_id,source_id,fields_to_delete)
-    print(him)
+    source.add_fields_to_source(collector_id,source_id,fields)
     
