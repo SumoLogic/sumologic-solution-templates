@@ -85,7 +85,7 @@ if __name__ == "__main__":
     prop["SumoAccessKey"]=access_key
     prop["SumoDeployment"]=deployment
     
-    fields_to_delete = ['account']
+    fields_to_delete = [] # Please add keys of the fields that needs to be removed on terraform destroy e.g ['FieldKeyName']
     fields = json.loads(env_vars.get("Fields"))
     source = SumoLogicUpdateFields(prop)
     source.add_fields_to_source(collector_id,source_id,fields)
