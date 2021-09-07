@@ -272,7 +272,6 @@ variable "collect_cloudwatch_metrics" {
     condition = contains([
       "CloudWatch Metrics Source",
       "Kinesis Firehose Metrics Source",
-      "Existing Source",
     "None", ], var.collect_cloudwatch_metrics)
     error_message = "The value must be one of \"CloudWatch Metrics Source\", \"Kinesis Firehose Metrics Source\", and None."
   }
