@@ -64,7 +64,7 @@ resource "null_resource" "AddFieldsToELBSource" {
    }
 }
 
-# Add fields to source if LoadBalancer source already exists
+# Add fields to source if CloudWatch Logs source already exists
 resource "null_resource" "AddFieldsToLogSource" {
    for_each   = toset(local.update_logs_source ? ["add_fields_to_source"] : [])
    triggers = {
