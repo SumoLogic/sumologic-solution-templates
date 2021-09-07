@@ -1,7 +1,5 @@
 from sumologic import SumoLogic
 import json
-import sys
-import re
 import os
 
 class SumoResource(object):
