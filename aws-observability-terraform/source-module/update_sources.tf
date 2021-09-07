@@ -9,7 +9,7 @@ resource "null_resource" "AddFieldsToMetricSource" {
    }
    provisioner "local-exec" {
        when    = create
-       command = "python3 ${path.module}/attach_fields_to_source.py"
+       command = "python ${path.module}/attach_fields_to_source.py"
        environment = {
            SumoAccessID = self.triggers.access_id
            SumoAccessKey = self.triggers.access_key
@@ -31,7 +31,7 @@ resource "null_resource" "AddFieldsToCloudTrailSource" {
    }
    provisioner "local-exec" {
        when    = create
-       command = "python3 ${path.module}/attach_fields_to_source.py"
+       command = "python ${path.module}/attach_fields_to_source.py"
        environment = {
            SumoAccessID = self.triggers.access_id
            SumoAccessKey = self.triggers.access_key
@@ -53,7 +53,7 @@ resource "null_resource" "AddFieldsToELBSource" {
    }
    provisioner "local-exec" {
        when    = create
-       command = "python3 ${path.module}/attach_fields_to_source.py"
+       command = "python ${path.module}/attach_fields_to_source.py"
        environment = {
            SumoAccessID = self.triggers.access_id
            SumoAccessKey = self.triggers.access_key
@@ -75,7 +75,7 @@ resource "null_resource" "AddFieldsToLogSource" {
    }
    provisioner "local-exec" {
        when    = create
-       command = "python3 ${path.module}/attach_fields_to_source.py"
+       command = "python ${path.module}/attach_fields_to_source.py"
        environment = {
            SumoAccessID = self.triggers.access_id
            SumoAccessKey = self.triggers.access_key
