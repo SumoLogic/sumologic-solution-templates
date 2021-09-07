@@ -36,7 +36,7 @@ variable "access_key" {
 }
 variable "cloudwatch_metrics_source_url" {
   type        = string
-  description = "You must supply this URL if you are already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. The account field will be added to the Source. For information on how to determine the URL, see View or Download Source JSON Configuration"
+  description = "Required if you are already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. If the URL is of “CloudWatch Metric source”-  account and accountID fields will be added to the Source.  If the URL is of “Kinesis Firehose Metrics source” - account field will be added to the Source. For information on how to determine the URL, see View or Download Source JSON Configuration."
   default = ""
 }
 variable "cloudtrail_source_url" {
@@ -46,7 +46,7 @@ variable "cloudtrail_source_url" {
 }
 variable "elb_log_source_url" {
   type        = string
-  description = "You must supply this URL if you are already collecting ALB logs. Enter the existing Sumo Logic ALB Source API URL. The account, region and namespace fields will be added to the Source. For information on how to determine the URL, see View or Download Source JSON Configuration."
+  description = "You must supply this URL if you are already collecting ALB logs. Provide the existing Sumo Logic ALB Source API URL. The account, region and namespace fields will be added to the Source. For information on how to determine the URL, see View or Download Source JSON Configuration."
   default = ""
 }
 variable "cloudwatch_logs_source_url" {
