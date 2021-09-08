@@ -19,42 +19,42 @@ output "aws_sns_topic" {
 }
 
 output "aws_cloudtrail" {
-  value       = var.collect_cloudtrail_logs && var.cloudtrail_source_details.bucket_details.create_bucket ? module.cloudtrail_module["cloudtrail_module"].aws_cloudtrail : {}
+  value       = local.create_cloudtrail_source && var.cloudtrail_source_details.bucket_details.create_bucket ? module.cloudtrail_module["cloudtrail_module"].aws_cloudtrail : {}
   description = "AWS Trail created to send CloudTrail logs to AWS S3 bucket."
 }
 
 output "cloudtrail_sns_topic" {
-  value       = var.collect_cloudtrail_logs && !var.cloudtrail_source_details.bucket_details.create_bucket ? module.cloudtrail_module["cloudtrail_module"].aws_sns_topic : {}
+  value       = local.create_cloudtrail_source && !var.cloudtrail_source_details.bucket_details.create_bucket ? module.cloudtrail_module["cloudtrail_module"].aws_sns_topic : {}
   description = "SNS topic created to be attached to an existing cloudtrail bucket."
 }
 
 output "cloudtrail_source" {
-  value       = var.collect_cloudtrail_logs ? module.cloudtrail_module["cloudtrail_module"].sumologic_source : null
+  value       = local.create_cloudtrail_source ? module.cloudtrail_module["cloudtrail_module"].sumologic_source : null
   description = "Sumo Logic AWS CloudTrail source."
 }
 
 output "cloudtrail_sns_subscription" {
-  value       = var.collect_cloudtrail_logs ? module.cloudtrail_module["cloudtrail_module"].aws_sns_subscription : {}
+  value       = local.create_cloudtrail_source ? module.cloudtrail_module["cloudtrail_module"].aws_sns_subscription : {}
   description = "AWS SNS subscription to Sumo Logic AWS CloudTrail source."
 }
 
 output "elb_sns_topic" {
-  value       = var.collect_elb_logs && !var.elb_source_details.bucket_details.create_bucket ? module.elb_module["elb_module"].aws_sns_topic : {}
+  value       = local.create_elb_source && !var.elb_source_details.bucket_details.create_bucket ? module.elb_module["elb_module"].aws_sns_topic : {}
   description = "SNS topic created to be attached to an existing elb logs bucket."
 }
 
 output "elb_source" {
-  value       = var.collect_elb_logs ? module.elb_module["elb_module"].sumologic_source : null
+  value       = local.create_elb_source ? module.elb_module["elb_module"].sumologic_source : null
   description = "Sumo Logic AWS ELB source."
 }
 
 output "elb_sns_subscription" {
-  value       = var.collect_elb_logs ? module.elb_module["elb_module"].aws_sns_subscription : {}
+  value       = local.create_elb_source ? module.elb_module["elb_module"].aws_sns_subscription : {}
   description = "AWS SNS subscription to Sumo Logic AWS ELB source."
 }
 
 output "elb_auto_enable_stack" {
-  value       = var.collect_elb_logs && var.auto_enable_access_logs != "None" ? module.elb_module["elb_module"].aws_serverlessapplicationrepository_cloudformation_stack : {}
+  value       = local.create_elb_source && var.auto_enable_access_logs != "None" ? module.elb_module["elb_module"].aws_serverlessapplicationrepository_cloudformation_stack : {}
   description = "AWS CloudFormation stack for ALB Auto Enable access logs."
 }
 

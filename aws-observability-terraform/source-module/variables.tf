@@ -1,3 +1,66 @@
+variable "environment" {
+ type        = string
+ description = "Enter au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+
+ validation {
+   condition = contains([
+     "au",
+     "ca",
+     "de",
+     "eu",
+     "jp",
+     "us1",
+     "us2",
+     "in",
+   "fed"], var.environment)
+   error_message = "The value must be one of au, ca, de, eu, jp, us1, us2, in, or fed."
+ }
+}
+
+variable "access_id" {
+ type        = string
+ description = "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+
+ validation {
+   condition     = can(regex("\\w+", var.access_id))
+   error_message = "The SumoLogic access ID must contain valid characters."
+ }
+}
+
+variable "access_key" {
+ type        = string
+ description = "Sumo Logic Access Key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+ sensitive = true
+ validation {
+   condition     = can(regex("\\w+", var.access_key))
+   error_message = "The SumoLogic access key must contain valid characters."
+ }
+}
+
+variable "cloudwatch_metrics_source_url" {
+  type        = string
+  description = "Required if you are already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. If the URL is of “CloudWatch Metric source” - account and accountID fields will be added to the Source.  If the URL is of “Kinesis Firehose Metrics source” - account field will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
+  default = ""
+}
+
+variable "cloudtrail_source_url" {
+  type        = string
+  description = "Required if you are already collecting CloudTrail logs. Provide the existing Sumo Logic CloudTrail Source API URL. The account field will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
+  default = ""
+}
+
+variable "elb_log_source_url" {
+  type        = string
+  description = "Required if you are already collecting ALB logs. Provide the existing Sumo Logic ALB Source API URL. The account, accountid, region and namespace fields will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
+  default = ""
+}
+
+variable "cloudwatch_logs_source_url" {
+  type        = string
+  description = "Required if you are already collecting AWS Lambda CloudWatch logs. Provide the existing Sumo Logic AWS Lambda CloudWatch Source API URL. The account, accountid, region and namespace fields will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
+  default = ""
+}
+
 variable "aws_account_alias" {
   type        = string
   description = <<EOT
