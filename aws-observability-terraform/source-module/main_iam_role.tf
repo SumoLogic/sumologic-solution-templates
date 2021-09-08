@@ -20,7 +20,8 @@ resource "aws_iam_role" "sumologic_iam_role" {
 
 # Sumo Logic CloudTrail Source Policy Attachment
 resource "aws_iam_policy" "cloudtrail_policy" {
-  for_each = toset(var.collect_cloudtrail_logs && local.create_iam_role ? ["cloudtrail_policy"] : [])
+  for_each = toset(local.create_cloudtrail_source && local.create_iam_role ? ["cloudtrail_policy"] : [])
+  #for_each = toset(var.collect_cloudtrail_logs && local.create_iam_role ? ["cloudtrail_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME = local.create_cloudtrail_bucket ? local.common_bucket_name : var.cloudtrail_source_details.bucket_details.bucket_name
@@ -28,7 +29,8 @@ resource "aws_iam_policy" "cloudtrail_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "cloudtrail_policy_attach" {
-  for_each = toset(var.collect_cloudtrail_logs && local.create_iam_role ? ["cloudtrail_policy_attach"] : [])
+  for_each = toset(local.create_cloudtrail_source && local.create_iam_role ? ["cloudtrail_policy_attach"] : [])
+  #for_each = toset(var.collect_cloudtrail_logs && local.create_iam_role ? ["cloudtrail_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.cloudtrail_policy["cloudtrail_policy"].arn
   role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
@@ -36,7 +38,8 @@ resource "aws_iam_role_policy_attachment" "cloudtrail_policy_attach" {
 
 # Sumo Logic ELB Source Policy Attachment
 resource "aws_iam_policy" "elb_policy" {
-  for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy"] : [])
+  for_each = toset(local.create_elb_source && local.create_iam_role ? ["elb_policy"] : [])
+  #for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME = local.create_elb_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
@@ -44,7 +47,8 @@ resource "aws_iam_policy" "elb_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "elb_policy_attach" {
-  for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy_attach"] : [])
+  for_each = toset(local.create_elb_source && local.create_iam_role ? ["elb_policy_attach"] : [])
+  #for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.elb_policy["elb_policy"].arn
   role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
