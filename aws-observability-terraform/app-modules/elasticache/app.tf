@@ -19,7 +19,7 @@ module "elasticache_module" {
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {
     "CloudTrailFieldExtractionRule" = {
-      name             = "AwsObservabilityElastiCacheCloudTrailLogsFERs"
+      name             = "AwsObservabilityElastiCacheCloudTrailLogsFER"
       scope            = "account=* eventname eventsource \"elasticache.amazonaws.com\""
       parse_expression = <<EOT
               | json "eventSource", "awsRegion", "requestParameters.cacheClusterId", "responseElements.cacheClusterId", "recipientAccountId" as eventSource, region, req_cacheClusterId, res_cacheClusterId, accountid nodrop
