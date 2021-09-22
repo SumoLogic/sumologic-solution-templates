@@ -33,13 +33,13 @@ module "rds_module" {
   }
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "DBIdentifier" = {
-      field_name = "dbidentifier"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "DBIdentifier" = {
+  #     field_name = "dbidentifier"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {

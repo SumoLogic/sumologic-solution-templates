@@ -8,13 +8,13 @@ module "ecs_module" {
   # ********************** No Metric Rules for ECS ********************** #
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "ClusterName" = {
-      field_name = "clustername"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "ClusterName" = {
+  #     field_name = "clustername"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {

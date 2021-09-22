@@ -8,13 +8,13 @@ module "lambda_module" {
   # ********************** No Metric Rules for Lambda ********************** #
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "FunctionName" = {
-      field_name = "functionname"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "FunctionName" = {
+  #     field_name = "functionname"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {

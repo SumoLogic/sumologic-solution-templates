@@ -8,13 +8,13 @@ module "ec2metrics_module" {
   # ********************** No Metric Rules for EC2 Metrics ********************** #
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "InstanceId" = {
-      field_name = "instanceid"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "InstanceId" = {
+  #     field_name = "instanceid"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** No FERs for EC2 Metrics ********************** #
 
