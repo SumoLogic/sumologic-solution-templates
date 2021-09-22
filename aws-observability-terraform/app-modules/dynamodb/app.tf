@@ -8,13 +8,13 @@ module "dynamodb_module" {
   # ********************** No Metric Rules for DynamoDB ********************** #
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "TableName" = {
-      field_name = "tablename"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "TableName" = {
+  #     field_name = "tablename"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {
