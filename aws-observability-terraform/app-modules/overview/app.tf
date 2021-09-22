@@ -8,28 +8,28 @@ module "overview_module" {
   # ********************** No Metric Rules for Overview ********************** #
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "Account" = {
-      field_name = "account"
-      data_type  = "String"
-      state      = true
-    },
-    "Region" = {
-      field_name = "region"
-      data_type  = "String"
-      state      = true
-    },
-    "Namespace" = {
-      field_name = "namespace"
-      data_type  = "String"
-      state      = true
-    },
-    "AccountId" = {
-      field_name = "accountid"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "account" = {
+  #     field_name = "account"
+  #     data_type  = "String"
+  #     state      = true
+  #   },
+  #   "region" = {
+  #     field_name = "region"
+  #     data_type  = "String"
+  #     state      = true
+  #   },
+  #   "namespace" = {
+  #     field_name = "namespace"
+  #     data_type  = "String"
+  #     state      = true
+  #   },
+  #   "accountId" = {
+  #     field_name = "accountid"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** No FERs for Overview ********************** #
 

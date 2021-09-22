@@ -8,13 +8,13 @@ module "alb_module" {
   # ********************** No Metric Rules for ALB ********************** #
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "LoadBalancer" = {
-      field_name = "loadbalancer"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "LoadBalancer" = {
+  #     field_name = "loadbalancer"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {

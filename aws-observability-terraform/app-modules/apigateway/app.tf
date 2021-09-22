@@ -8,13 +8,13 @@ module "apigateway_module" {
   # ********************** No Metric Rules for API Gateway ********************** #
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "APIName" = {
-      field_name = "apiname"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "APIName" = {
+  #     field_name = "apiname"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {

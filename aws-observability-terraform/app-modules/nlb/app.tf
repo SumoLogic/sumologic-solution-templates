@@ -22,13 +22,13 @@ module "nlb_module" {
   }
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "NetworkLoadBalancer" = {
-      field_name = "networkloadbalancer"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "NetworkLoadBalancer" = {
+  #     field_name = "networkloadbalancer"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** No FERs for Network Load Balancers ********************** #
   # managed_field_extraction_rules = {
