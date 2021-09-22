@@ -8,13 +8,13 @@ module "elasticache_module" {
   # ********************** No Metric Rules for Elasticache ********************** #
 
   # ********************** Fields ********************** #
-  managed_fields = {
-    "CacheClusterId" = {
-      field_name = "cacheclusterid"
-      data_type  = "String"
-      state      = true
-    }
-  }
+  # managed_fields = {
+  #   "CacheClusterId" = {
+  #     field_name = "cacheclusterid"
+  #     data_type  = "String"
+  #     state      = true
+  #   }
+  # }
 
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {
