@@ -19,7 +19,7 @@ fi
 if [ "${SUMOLOGIC_ENV}" == "us1" ];then
     SUMOLOGIC_BASE_URL="https://api.sumologic.com/api/"
 else
-    SUMOLOGIC_BASE_URL="https://api.${SUMOLOGIC_ENV}.sumologic.com/api"
+    SUMOLOGIC_BASE_URL="https://api.${SUMOLOGIC_ENV}.sumologic.com/api/"
 fi
 
 # awso_list contains fields required for AWS Obervablity Solution. Update the list if new field is added to the solution.
