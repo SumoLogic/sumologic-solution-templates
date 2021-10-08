@@ -42,31 +42,32 @@ function should_create_fields() {
 
     if ! jq -e <<< "${RESPONSE}" ; then
         printf "Failed requesting fields API:\n%s\n" "${RESPONSE}"
-        # Function returning with faliure
-        return 1
+        # Credential Issue
+        return 2
     fi
     
     if ! jq -e '.remaining' <<< "${RESPONSE}" ; then
         printf "Failed requesting fields API:\n%s\n" "${RESPONSE}"
-        # Function returning with faliure
-        return 1
+        # Permissions/credential issuses
+        return 3
     fi
 
     local REMAINING
     readonly REMAINING=$(jq -e '.remaining' <<< "${RESPONSE}")
   
-    #if [[ $(( REMAINING - ${#awso_list[*]} )) -ge 13 ]] ; then
     if [ $REMAINING -ge ${#awso_list[*]} ] ; then
         # Function returning with success
         return 0
     else
-        # Function returning with faliure
+        # Capacity not enough to create new fields
         return 1
     fi
 }
 
+should_create_fields
+outputVal=$?
 # Sumo Logic fields in field schema - Decide to import
-if should_create_fields ; then
+if [ $outputVal == 0 ] ; then
     # Get list of all fields present in field schema of user's Sumo Logic org.
     readonly FIELDS_RESPONSE="$(curl -XGET -s \
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
@@ -82,8 +83,19 @@ if should_create_fields ; then
         terraform import \
             sumologic_field."${FIELD}" "${FIELD_ID}"
     done
-else
+elif [ $outputVal == 1 ] ; then
     echo "Couldn't automatically create fields"
     echo "You do not have enough field capacity to create the required fields automatically."
     echo "Please refer to https://help.sumologic.com/Manage/Fields to manually create the fields after you have removed unused fields to free up capacity."
+elif [ $outputVal == 2 ] ; then
+    echo "Error in calling Sumo Logic Fields API."
+    echo "User's credentials (SUMOLOGIC_ACCESSID and SUMOLOGIC_ACCESSKEY) are not valid."
+elif [ $outputVal == 3 ] ; then
+    echo "Error in calling Sumo Logic Fields API. The reasons can be:"
+    echo "1. Credentials could not be verified. Cross check SUMOLOGIC_ACCESSID and SUMOLOGIC_ACCESSKEY."
+    echo "2. You do not have the role capabilities to create Sumo Logic fields. Please see the Sumo Logic docs on role capabilities https://help.sumologic.com/Manage/Users-and-Roles/Manage-Roles/05-Role-Capabilities"
+else
+    echo "Error in calling Sumo Logic Fields API. The reasons can be:"
+    echo "1. User's credentials (SUMOLOGIC_ACCESSID and SUMOLOGIC_ACCESSKEY) are not associated with SUMOLOGIC_ENV"
+    echo "2. You do not have the role capabilities to create Sumo Logic fields. Please see the Sumo Logic docs on role capabilities https://help.sumologic.com/Manage/Users-and-Roles/Manage-Roles/05-Role-Capabilities"
 fi
