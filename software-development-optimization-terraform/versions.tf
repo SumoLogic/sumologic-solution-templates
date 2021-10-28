@@ -21,11 +21,15 @@ variable "pagerduty_version" {
     default = "1"
 }
 variable "github_version" {
+    default = "2"
+}
+
+variable "gitlab_version" {
     default = "1"
 }
 variable "jenkins_version" {
     default = "1"
 }
 variable "sdo_version" {
-    default = "1"
+    default = "2"
 }
