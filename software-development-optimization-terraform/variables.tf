@@ -127,6 +127,16 @@ variable "install_github" {
     error_message = "Argument \"install_github\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
+
+variable "install_gitlab" {
+  type        = string
+  validation {
+    condition = contains([
+      "all","none","fer","app","collection"], var.install_gitlab)
+    error_message = "Argument \"install_gitlab\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
+  }
+}
+
 variable "install_pagerduty" {
   type        = string
   validation {
@@ -151,6 +161,7 @@ variable "bitbucket_sc" {}
 variable "opsgenie_sc" {}
 variable "pagerduty_sc" {}
 variable "github_sc" {}
+variable "gitlab_sc" {}
 variable "jenkins_sc" {}
 
 #Jira Cloud
@@ -243,6 +254,17 @@ variable "github_repo_webhook_create" {
   }
 }
 
+#Gitlab
+variable "gitlab_token" {}
+variable "gitlab_project_names" {}
+variable "gitlab_project_webhook_create" {
+  type        = string
+  validation {
+    condition = contains([
+      "true","false"], var.gitlab_project_webhook_create)
+    error_message = "Argument \"gitlab_project_webhook_create\" must be one of \"true\",\"false\"."
+  }
+}
 #FERs
 variable "github_pull_request_fer_scope" {}
 variable "github_pull_request_fer_parse" {}
@@ -273,3 +295,27 @@ variable "pagerduty_alerts_fer_parse" {}
 
 variable "jenkins_build_status_fer_scope" {}
 variable "jenkins_build_status_fer_parse" {}
+
+variable "gitlab_pull_request_fer_scope" {}
+variable "gitlab_pull_request_fer_parse" {}
+
+variable "gitlab_build_request_fer_scope" {}
+variable "gitlab_build_request_fer_parse" {}
+
+
+variable "gitlab_deploy_request_fer_scope" {}
+variable "gitlab_deploy_request_fer_parse" {}
+
+variable "gitlab_issue_request_fer_scope" {}
+variable "gitlab_issue_request_fer_parse" {}
+
+# User Input varibale names for JobName , DeployName
+
+variable "gitlab_build_jobname" {
+  type        = string
+  description = "Please enter the build job name for your pipeline:"
+  validation {
+    condition     = length(var.gitlab_build_jobname) > 0
+    error_message = "The build name cannot be empty."
+  }
+}

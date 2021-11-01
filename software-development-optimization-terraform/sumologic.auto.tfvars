@@ -22,6 +22,7 @@ install_bitbucket_cloud = "all"
 install_opsgenie        = "all"
 install_pagerduty       = "all"
 install_github          = "all"
+install_gitlab          = "all"
 install_jenkins         = "all"
 install_sdo             = "app"
 
@@ -32,6 +33,7 @@ bitbucket_sc   = "SDO/Bitbucket"
 opsgenie_sc    = "SDO/Opsgenie"
 pagerduty_sc   = "SDO/Pagerduty"
 github_sc      = "SDO/Github"
+gitlab_sc      = "SDO/Gitlab"
 jenkins_sc     = "SDO/Jenkins"
 
 # This feature is in Beta. To participate contact your Sumo account executive.
@@ -52,4 +54,6 @@ install_sumo_to_jiraservicedesk_webhook = "true"
 
 # You can modify the file sumo_to_jiraservicedesk_webhook.json.tmpl for customizing payload.
 install_sumo_to_pagerduty_webhook       = "true"
+
+
 

@@ -104,6 +104,8 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicOpsgenieSource(t, terraformOptions, collectorID)
 	// Validate if the Github Source is created successfully
 	validateSumoLogicGithubSource(t, terraformOptions, collectorID)
+	// Validate if the Gitlab Source is created successfully
+	validateSumoLogicGitlabSource(t, terraformOptions, collectorID)
 	// Validate if the Pagerduty Source is created successfully
 	validateSumoLogicPagerdutySource(t, terraformOptions, collectorID)
 	// Validate if the Sumologic Pagerduty Webhook is created successfully
@@ -128,10 +130,14 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicPagerdutyAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Github App is installed
 	validateSumoLogicGithubAppInstallation(t, terraformOptions, folderName)
+	// Validate if the Gitlab App is installed
+	validateSumoLogicGitlabAppInstallation(t, terraformOptions, folderName)
 	// Validate if the jenkins App is installed
 	validateSumoLogicJenkinsAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Github Field is added successfully
 	validateSumoLogicGithubField(t, terraformOptions)
+	// Validate if the Gitlab Field is added successfully
+	validateSumoLogicGitlabField(t, terraformOptions)
 	// Validate if the Bitbucket Field is added successfully
 	validateSumoLogicBitbucketField(t, terraformOptions)
 	// Validate if the Bitbucket PR FER is added successfully
@@ -148,6 +154,14 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicPagerdutyAlertsFER(t, terraformOptions)
 	// Validate if the Github PR FER is added successfully
 	validateSumoLogicGithubPrFER(t, terraformOptions)
+	// Validate if the Gitlab PR FER is added successfully
+	validateSumoLogicGitlabPrFER(t, terraformOptions)
+	// Validate if the Gitlab Build FER is added successfully
+	validateSumoLogicGitlabBrFER(t, terraformOptions)
+	// Validate if the Gitlab Deploy FER is added successfully
+	validateSumoLogicGitlabDeployFER(t, terraformOptions)	
+	// Validate if the Gitlab Issue FER is added successfully
+	validateSumoLogicGitlabIssueFER(t, terraformOptions)			
 	// Validate if the Opsgenie Alerts FER is added successfully
 	validateSumoLogicOpsgenieAlertsFER(t, terraformOptions)
 	// Validate if the Jira Cloud FER is added successfully
@@ -215,6 +229,17 @@ func validateSumoLogicGithubSource(t *testing.T, terraformOptions *terraform.Opt
 	// Run `terraform output` to get the value of an output variable
 	sourceID := terraform.Output(t, terraformOptions, "github_source_id")
 	if sourceID != "[]" && getProperty("install_github") == "true" {
+		sourceID = strings.Split(sourceID, "\"")[1]
+
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/collectors/%s/sources/%s", sumologicURL, collectorID, sourceID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGitlabSource(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
+	// Run `terraform output` to get the value of an output variable
+	sourceID := terraform.Output(t, terraformOptions, "gitlab_source_id")
+	if sourceID != "[]" && getProperty("install_gitlab") == "true" {
 		sourceID = strings.Split(sourceID, "\"")[1]
 
 		// Verify that we get back a 200 OK
@@ -337,6 +362,14 @@ func validateSumoLogicGithubAppInstallation(t *testing.T, terraformOptions *terr
 	}
 }
 
+func validateSumoLogicGitlabAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+
+	if getProperty("install_gitlab") == "true" {
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Gitlab", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
+	}
+}
 func validateSumoLogicJenkinsAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_jenkins") == "true" {
@@ -351,6 +384,50 @@ func validateSumoLogicGithubPrFER(t *testing.T, terraformOptions *terraform.Opti
 	// Run `terraform output` to get the value of an output variable
 	ferID := terraform.Output(t, terraformOptions, "github_pr_fer_id")
 	if ferID != "[]" && getProperty("install_github") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGitlabPrFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "gitlab_pr_fer_id")
+	if ferID != "[]" && getProperty("install_gitlab") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGitlabBrFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "gitlab_br_fer_id")
+	if ferID != "[]" && getProperty("install_gitlab") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGitlabDeployFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "gitlab_deploy_fer_id")
+	if ferID != "[]" && getProperty("install_gitlab") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGitlabIssueFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "gitlab_issue_fer_id")
+	if ferID != "[]" && getProperty("install_gitlab") == "true" {
 		ferID = strings.Split(ferID, "\"")[1]
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
@@ -450,6 +527,17 @@ func validateSumoLogicGithubField(t *testing.T, terraformOptions *terraform.Opti
 	// Run `terraform output` to get the value of an output variable
 	fieldID := terraform.Output(t, terraformOptions, "sumo_github_field_id")
 	if fieldID != "[]" && getProperty("install_github") == "true" {
+		fieldID = strings.Split(fieldID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/fields/%s", sumologicURL, fieldID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGitlabField(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	fieldID := terraform.Output(t, terraformOptions, "sumo_gitlab_field_id")
+	if fieldID != "[]" && getProperty("install_gitlab") == "true" {
 		fieldID = strings.Split(fieldID, "\"")[1]
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/fields/%s", sumologicURL, fieldID), nil, headers, customValidation, nil)

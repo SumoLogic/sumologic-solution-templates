@@ -26,6 +26,9 @@ output "github_source_id" {
   value = sumologic_http_source.github.*.id
 }
 
+output "gitlab_source_id" {
+  value = sumologic_http_source.gitlab.*.id
+}
 output "folder_id" {
   value = data.external.folder_data_json.result.id
 }
@@ -82,6 +85,10 @@ output "sumo_github_field_id" {
   value = restapi_object.github_field.*.id
 }
 
+output "sumo_gitlab_field_id" {
+  value = restapi_object.gitlab_field.*.id
+}
+
 output "sumo_bitbucket_field_id" {
   value = restapi_object.github_field.*.id
 }
@@ -106,6 +113,21 @@ output "github_pr_fer_id" {
   value = sumologic_field_extraction_rule.github_pr_fer.*.id
 }
 
+output "gitlab_pr_fer_id" {
+  value = sumologic_field_extraction_rule.gitlab_pr_fer.*.id
+}
+
+output "gitlab_br_fer_id" {
+  value = sumologic_field_extraction_rule.gitlab_build_fer.*.id
+}
+
+output "gitlab_deploy_fer_id" {
+  value = sumologic_field_extraction_rule.gitlab_deploy_fer.*.id
+}
+
+output "gitlab_issue_fer_id" {
+  value = sumologic_field_extraction_rule.gitlab_issue_fer.*.id
+}
 output "jenkins_build_fer_id" {
   value = sumologic_field_extraction_rule.jenkins_build_fer.*.id
 }
