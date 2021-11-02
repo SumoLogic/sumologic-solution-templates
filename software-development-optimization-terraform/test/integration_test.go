@@ -87,8 +87,9 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
 	terraformOptions := test_structure.LoadTerraformOptions(t, workingDir)
 	// Get folder where the Apps are installed
-	folderName := strings.Replace(terraform.Output(t, terraformOptions, "folder_name"), " ", "%20", -1)
-	// Run `terraform output` to get the value of an output variable
+	var sumoProps = loadPropertiesFile("../sumologic.auto.tfvars")
+	var folderName = sumoProps["app_installation_folder"]
+	// folderName := strings.Replace(terraform.Output(t, terraformOptions, "folder_name"), " ", "%20", -1)	// Run `terraform output` to get the value of an output variable
 	collectorID := terraform.Output(t, terraformOptions, "sdo_collector_id")
 	// Validate if the collector is created successfully
 	validateSumoLogicCollector(t, terraformOptions, collectorID)
@@ -110,6 +111,12 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicPagerdutySource(t, terraformOptions, collectorID)
 	// Validate if the Sumologic Pagerduty Webhook is created successfully
 	validateSumoLogicPagerdutyWebhook(t, terraformOptions)
+	// Validate if the CircleCI Source is created successfully
+	validateSumoLogicCircleCISource(t, terraformOptions, collectorID)
+	// Validate if the CircleCI Orb Job Source is created successfully
+	validateSumoLogicCircleCIOrbJobSource(t, terraformOptions, collectorID)
+	// Validate if the CircleCI Orb Workflow Source is created successfully
+	validateSumoLogicCircleCIOrbWorkflowSource(t, terraformOptions, collectorID)
 	// Validate if the Sumologic Opsgenie Webhook is created successfully
 	validateSumoLogicOpsgenieWebhook(t, terraformOptions)
 	// Validate if the Jira Cloud Webhook is created successfully
@@ -258,6 +265,39 @@ func validateSumoLogicPagerdutySource(t *testing.T, terraformOptions *terraform.
 	}
 }
 
+func validateSumoLogicCircleCISource(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
+	// Run `terraform output` to get the value of an output variable
+	sourceID := terraform.Output(t, terraformOptions, "circleci_app_source_id")
+	if sourceID != "[]" && getProperty("install_circleci") == "true" {
+		sourceID = strings.Split(sourceID, "\"")[1]
+
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/collectors/%s/sources/%s", sumologicURL, collectorID, sourceID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicCircleCIOrbJobSource(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
+	// Run `terraform output` to get the value of an output variable
+	sourceID := terraform.Output(t, terraformOptions, "circleci_orb_job_source_id")
+	if sourceID != "[]" && getProperty("install_circleci_SDO_plugin") == "true" {
+		sourceID = strings.Split(sourceID, "\"")[1]
+
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/collectors/%s/sources/%s", sumologicURL, collectorID, sourceID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicCircleCIOrbWorkflowSource(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
+	// Run `terraform output` to get the value of an output variable
+	sourceID := terraform.Output(t, terraformOptions, "circleci_orb_workflow_source_id")
+	if sourceID != "[]" && getProperty("install_circleci_SDO_plugin") == "true" {
+		sourceID = strings.Split(sourceID, "\"")[1]
+
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/collectors/%s/sources/%s", sumologicURL, collectorID, sourceID), nil, headers, customValidation, nil)
+	}
+}
+
 func validateSumoLogicPagerdutyWebhook(t *testing.T, terraformOptions *terraform.Options) {
 	// Run `terraform output` to get the value of an output variable
 	webhookID := terraform.Output(t, terraformOptions, "sumo_pagerduty_webhook_id")
@@ -376,6 +416,37 @@ func validateSumoLogicJenkinsAppInstallation(t *testing.T, terraformOptions *ter
 		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Jenkins", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicCircleCIAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+
+	if getProperty("install_circleci") == "true" {
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/CircleCI", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicCircleCIBuildFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "circleci_build_fer_id")
+	if ferID != "[]" && getProperty("install_circleci_SDO_plugin") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicCircleCIDeployFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "circleci_deploy_fer_id")
+	if ferID != "[]" && getProperty("install_circleci_SDO_plugin") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
 	}
 }
 
