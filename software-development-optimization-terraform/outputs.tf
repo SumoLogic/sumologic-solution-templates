@@ -33,6 +33,18 @@ output "folder_id" {
   value = data.external.folder_data_json.result.id
 }
 
+output "circleci_app_source_id" {
+  value = sumologic_http_source.circleci.*.id
+}
+
+output "circleci_orb_job_source_id" {
+  value = sumologic_http_source.circleci_orb_job.*.id
+}
+
+output "circleci_orb_workflow_source_id" {
+  value = sumologic_http_source.circleci_orb_workflow.*.id
+}
+
 # output "folder_name" {
 #   value = sumologic_folder.folder.name
 # }
@@ -142,4 +154,24 @@ output "opsgenie_alerts_fer_id" {
 
 output "bitbucket_pr_fer_id" {
   value = sumologic_field_extraction_rule.bitbucket_pr_fer.*.id
+}
+
+output "circleci_build_fer_id" {
+  value = sumologic_field_extraction_rule.circleci_orb_build_fer.*.id
+}
+
+output "circleci_deploy_fer_id" {
+  value = sumologic_field_extraction_rule.circleci_orb_deploy_fer.*.id
+}
+
+output "circleci_app_source_url" {
+  value = sumologic_http_source.circleci.*.url
+}
+
+output "circleci_orb_job_source_url" {
+  value = sumologic_http_source.circleci_orb_job.*.url
+}
+
+output "circleci_orb_workflow_source_url" {
+  value = sumologic_http_source.circleci_orb_workflow.*.url
 }
