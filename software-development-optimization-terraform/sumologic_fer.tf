@@ -125,3 +125,20 @@ resource "sumologic_field_extraction_rule" "gitlab_issue_fer" {
   enabled          = true
 }
 
+resource "sumologic_field_extraction_rule" "circleci_orb_build_fer" {
+  count            = "${var.install_circleci_SDO_plugin}" == "fer" || "${var.install_circleci_SDO_plugin}" == "collection" || "${var.install_circleci_SDO_plugin}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.circleci_orb_job]
+  name             = "SDO - CircleCi Build "
+  scope            = "_sourceCategory=${var.circleci_build_fer_scope}"
+  parse_expression = replace(var.circleci_build_fer_parse,"BUILDJOBNAME",var.circleci_build_jobname)
+  enabled          = true
+}
+
+resource "sumologic_field_extraction_rule" "circleci_orb_deploy_fer" {
+  count            = "${var.install_circleci_SDO_plugin}" == "fer" || "${var.install_circleci_SDO_plugin}" == "collection" || "${var.install_circleci_SDO_plugin}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.circleci_orb_job]
+  name             = "SDO - CircleCi Deploy "
+  scope            = "_sourceCategory=${var.circleci_deploy_fer_scope}"
+  parse_expression = replace(var.circleci_deploy_fer_parse,"DEPLOYJOBNAME",var.circleci_deploy_jobname)
+  enabled          = true
+} 

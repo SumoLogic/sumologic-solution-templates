@@ -33,3 +33,7 @@ variable "jenkins_version" {
 variable "sdo_version" {
     default = "2"
 }
+
+variable "circleci_version" {
+    default = "1"
+}
