@@ -26,6 +26,16 @@ target_branch, repository_name, commit_id
 | toLong(datetime) as datetime_epoch
 | "deploy" as event_type
 "
+      },
+       "CircleCI":{
+        "Scope" : "_sourcecategory=circleci/job-collector",
+        "Parse" : "json "workflows.job_name" as job_type
+|where toLowerCase(job_type) matches ("*deploy*")
+|json "custom_data.env","custom_data.team","custom_data.service","workflows.job_id","user.login","build_url","start_time","branch","outcome","reponame","vcs_revision","job_name","messages","build_num" as environment_name,team,service,trace_id,user,link,datetime,target_branch,job_status,repository_name,commit_id,job_name,message,job_num nodrop
+| if(job_status == "success", "Success", "Failed") as status
+| toLong(parseDate(datetime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")) as datetime_epoch
+| concat(job_type, " # ",job_num) as title
+|"deploy" as event_type"
       }
     }
   },
@@ -106,6 +116,16 @@ commit_id, reviewers, closeddate nodrop
 | where status in ("SUCCESSFUL", "FAILED")
 | "build" as event_type
 "
+      },
+      "CircleCI":{
+        "Scope" : "_sourcecategory=circleci/job-collector",
+        "Parse" : "| json "workflows.job_name" as job_type
+|where toLowerCase(job_type) matches ("*build*")
+|json "custom_data.env","custom_data.team","custom_data.service","workflows.job_id","user.login","build_url","start_time","branch","outcome","reponame","vcs_revision","job_name","build_num","messages" as environment_name,team,service,trace_id,user,link,datetime,target_branch,job_status,repository_name,commit_id,job_name,build_number,message nodrop
+| if(job_status == "success", "Success", "Failed") as status
+| toLong(parseDate(datetime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")) as datetime_epoch
+| concat(job_type, " # ",build_number) as title
+|"build" as event_type"
       }
     }
   },
