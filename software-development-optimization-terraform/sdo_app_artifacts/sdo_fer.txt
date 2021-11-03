@@ -36,6 +36,21 @@ target_branch, repository_name, commit_id
 | toLong(parseDate(datetime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")) as datetime_epoch
 | concat(job_type, " # ",job_num) as title
 |"deploy" as event_type"
+      },
+      "Gitlab": {
+        "Scope": "_sourceCategory="sumo/gitlab" and %"x-gitlab-event"="Deployment Hook"",
+        "Parse": "json "deployment_id","status","status_changed_at","environment","deployable_url","user.name","commit_url","project.name","project.default_branch","project.path_with_namespace"  as deployment_id,status,datetime,environment_name,link,user ,commit_link,service,target_branch,team nodrop
+|  parse regex field=team "(?<team>.+)\/.+" 
+|concat("deployment # ",deployment_id) as title
+|concat("deploying to ",environment_name," deployment # ",deployment_id) as message
+| parse regex field=commit_link "\/commit\/(?<commit_id>[^\"]+)"
+| commit_id as trace_id
+| service as repository_name
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
+| toLong(datetime_epoch) as datetime_epoch
+| if(status matches "success","Success",if(status matches "failed","Failed",status)) as status
+| "deploy" as event_type
+"
       }
     }
   },
@@ -67,6 +82,20 @@ commit_id, reviewers, closeddate nodrop
             | if (status matches "created", "created", if(status matches "fulfilled", "merged", if(status matches "rejected", "declined", "other"))) as status 
             | "pull_request" as event_type
 "
+      },
+     "Gitlab": {
+        "Scope": "_sourceCategory="sumo/gitlab" %"x-gitlab-event"="Merge Request Hook" ",
+        "Parse": "json "object_attributes.action","object_attributes.state" ,"object_attributes.title", "object_attributes.created_at","object_attributes.updated_at","user.name","project.name","object_attributes.target_branch" ,"object_attributes.url","assignees[*].name","object_attributes.merge_commit_sha","repository.name","project.path_with_namespace"  as action,status, title,createddatetime_epoch , updateddatetime_epoch,user,project_name,target_branch,link,reviewers,commit_id,repository_name,team nodrop
+|  parse regex field=team "(?<team>.+)\/.+" 
+| if (status matches "opened", "created", if(status matches "merged", "merged", if(status matches "closed", "declined", "other"))) as status
+| parseDate(createddatetime_epoch, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
+| parseDate(updateddatetime_epoch, "yyyy-MM-dd HH:mm:ss") as updateddatetime_epoch
+|if(status in ("declined","merged") ,updateddatetime_epoch,000000000)as  closeddate_epoch
+| project_name as service
+| toLong(datetime_epoch)
+| toLong(closeddate_epoch)
+| "pull_request" as event_type
+"
       }
     }
   },
@@ -82,6 +111,22 @@ commit_id, reviewers, closeddate nodrop
 | if (isNull(closeddate) , 00000000000, parseDate(closedDate, "yyyy-MM-dd'T'HH:mm:ss.SSSZ") ) as closeddate_epoch
 | toLong(closeddate_epoch)
 | "issue" as event_type
+"
+      },
+    "Gitlab": {
+        "Scope": "_sourceCategory="sumo/gitlab" and %"x-gitlab-event"="Issue Hook"",
+        "Parse": "json "user.name","project.name","object_attributes.created_at","object_attributes.url","labels[*].title","object_attributes.state","object_attributes.severity","object_attributes.action","repository.name","assignees[*].name","object_attributes.id","object_attributes.closed_at","project.path_with_namespace" as user,project_name,dateTime,link,issue_type,issue_status,priority,issue_event_type,repository,assignees,issue_key,closedDate,team nodrop
+|  parse regex field=team "(?<team>.+)\/.+" 
+| project_name as service
+| substring(issue_type,1,length(issue_type)-1) as issue_type
+|if (issue_type matches "*incident*","incident","issue") as issue_type
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
+| if (isNull(closeddate) , 00000000000, parseDate(closedDate, "yyyy-MM-dd HH:mm:ss")) as closeddate_epoch
+| if(issue_status matches "opened","To Do",if(issue_status matches "closed","Complete",issue_status)) as issue_status
+| toLong(datetime_epoch) as datetime_epoch
+| toLong(closeddate_epoch) as closeddate_epoch
+| "issue" as event_type
+
 "
       }
     }
@@ -126,7 +171,26 @@ commit_id, reviewers, closeddate nodrop
 | toLong(parseDate(datetime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")) as datetime_epoch
 | concat(job_type, " # ",build_number) as title
 |"build" as event_type"
-      }
+      },
+      "Gitlab": {
+        "Scope": "_sourceCategory="sumo/gitlab" and %"x-gitlab-event"="Job Hook" ",
+        "Parse": "json "project_name","build_name","build_status" ,"build_stage","user.name","repository.name","commit.message" , "repository.homepage","commit.sha","build_created_at","environment.name","ref ","pipeline_id" as project_name , build_name ,status,build_stage,user, repository_name,message , homepage,commit_id,datetime,environment_name,target_branch,pipeline_id nodrop
+| where build_name matches "*build*"
+| parse regex field=project_name "\/(?<project_name>[^\"]+)"
+| split homepage delim='/' extract 4 as team 
+| project_name as service
+| commit_id as trace_id
+|concat("build ",build_name," ",status) as message
+|concat("pipeline # ",pipeline_id) as title
+| concat(homepage,"/-/jobs/",trace_id) as link
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
+| toLong(datetime_epoch) as datetime_epoch
+| if(status matches "success","Success",if(status matches "failed","Failed",status)) as status
+| if(isEmpty(environment_name),"n/a",environment_name) as environment_name
+| "build" as event_type
+
+"
+      }  
     }
   },
   {
@@ -159,4 +223,5 @@ link
       }
     }
   }
+
 ]
