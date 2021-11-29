@@ -458,6 +458,8 @@ Resources:
         Section3aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section3bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section3cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section4aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
+        Section4bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
 
   sumoAlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack

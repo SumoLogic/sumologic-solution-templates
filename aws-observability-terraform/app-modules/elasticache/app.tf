@@ -26,6 +26,7 @@ module "elasticache_module" {
               | where eventSource = "elasticache.amazonaws.com"
               | if (!isEmpty(req_cacheClusterId), req_cacheClusterId, res_cacheClusterId) as cacheclusterid
               | "aws/elasticache" as namespace
+              | tolowercase(cacheclusterid) as cacheclusterid
               | fields region, namespace, cacheclusterid, accountid
       EOT
       enabled          = true
