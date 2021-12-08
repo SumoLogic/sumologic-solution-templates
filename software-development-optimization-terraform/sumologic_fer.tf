@@ -87,3 +87,58 @@ resource "sumologic_field_extraction_rule" "pagerduty_alerts_fer" {
   parse_expression = var.pagerduty_alerts_fer_parse
   enabled          = true
 }
+
+resource "sumologic_field_extraction_rule" "gitlab_pr_fer" {
+  count            = "${var.install_gitlab}" == "fer" || "${var.install_gitlab}" == "collection" || "${var.install_gitlab}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.gitlab,restapi_object.gitlab_field]
+  name             = "SDO - Gitlab Pull Request"
+  scope            = "_sourceCategory=${var.gitlab_sc} ${var.gitlab_pull_request_fer_scope}"
+  parse_expression = var.gitlab_pull_request_fer_parse
+  enabled          = true
+}
+
+resource "sumologic_field_extraction_rule" "gitlab_build_fer" {
+  count            = "${var.install_gitlab}" == "fer" || "${var.install_gitlab}" == "collection" || "${var.install_gitlab}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.gitlab,restapi_object.gitlab_field]
+  name             = "SDO - Gitlab Build"
+  scope            = "_sourceCategory=${var.gitlab_sc} ${var.gitlab_build_request_fer_scope}"
+  #parse_expression = var.gitlab_build_request_fer_parse
+  parse_expression = replace(var.gitlab_build_request_fer_parse,"Gitlab_Build_Job_Name",var.gitlab_build_jobname)
+  enabled          = true
+}
+
+resource "sumologic_field_extraction_rule" "gitlab_deploy_fer" {
+  count            = "${var.install_gitlab}" == "fer" || "${var.install_gitlab}" == "collection" || "${var.install_gitlab}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.gitlab,restapi_object.gitlab_field]
+  name             = "SDO - Gitlab Deploy"
+  scope            = "_sourceCategory=${var.gitlab_sc} ${var.gitlab_deploy_request_fer_scope}"
+  parse_expression = var.gitlab_deploy_request_fer_parse
+  enabled          = true
+}
+
+resource "sumologic_field_extraction_rule" "gitlab_issue_fer" {
+  count            = "${var.install_gitlab}" == "fer" || "${var.install_gitlab}" == "collection" || "${var.install_gitlab}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.gitlab,restapi_object.gitlab_field]
+  name             = "SDO - Gitlab Issue"
+  scope            = "_sourceCategory=${var.gitlab_sc} ${var.gitlab_issue_request_fer_scope}"
+  parse_expression = var.gitlab_issue_request_fer_parse
+  enabled          = true
+}
+
+resource "sumologic_field_extraction_rule" "circleci_orb_build_fer" {
+  count            = "${var.install_circleci_SDO_plugin}" == "fer" || "${var.install_circleci_SDO_plugin}" == "collection" || "${var.install_circleci_SDO_plugin}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.circleci_orb_job]
+  name             = "SDO - CircleCi Build "
+  scope            = "_sourceCategory=${var.circleci_build_fer_scope}"
+  parse_expression = replace(var.circleci_build_fer_parse,"BUILDJOBNAME",var.circleci_build_jobname)
+  enabled          = true
+}
+
+resource "sumologic_field_extraction_rule" "circleci_orb_deploy_fer" {
+  count            = "${var.install_circleci_SDO_plugin}" == "fer" || "${var.install_circleci_SDO_plugin}" == "collection" || "${var.install_circleci_SDO_plugin}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.circleci_orb_job]
+  name             = "SDO - CircleCi Deploy "
+  scope            = "_sourceCategory=${var.circleci_deploy_fer_scope}"
+  parse_expression = replace(var.circleci_deploy_fer_parse,"DEPLOYJOBNAME",var.circleci_deploy_jobname)
+  enabled          = true
+} 

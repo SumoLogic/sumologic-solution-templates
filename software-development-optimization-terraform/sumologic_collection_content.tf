@@ -64,6 +64,15 @@ resource "sumologic_http_source" "github" {
   collector_id = sumologic_collector.sdo_collector.id
 }
 
+#Create/Delete Gitlab Source
+resource "sumologic_http_source" "gitlab" {
+  count        = "${var.install_gitlab}" == "collection" || "${var.install_gitlab}" == "all" ? 1 : 0
+  name         = "Gitlab"
+  category     = var.gitlab_sc
+  fields       = { "_convertHeadersToFields" = "true" }
+  collector_id = sumologic_collector.sdo_collector.id
+}
+
 # Create/Delete Jenkins Source
 resource "sumologic_http_source" "jenkins" {
   count        = "${var.install_jenkins}" == "collection" || "${var.install_jenkins}" == "all" ? 1 : 0
@@ -72,6 +81,32 @@ resource "sumologic_http_source" "jenkins" {
   fields       = { "_convertHeadersToFields" = "true" }
   collector_id = sumologic_collector.sdo_collector.id
 }
+
+
+# Create/Delete CircleCI App Source
+resource "sumologic_http_source" "circleci" {
+  count        = "${var.install_circleci}" == "collection" || "${var.install_circleci}" == "all" ? 1 : 0
+  name         = "CircleCI"
+  category     = var.circleci_app_sc
+  collector_id = sumologic_collector.sdo_collector.id
+}
+
+# Create/Delete CircleCI Orb Job Source
+resource "sumologic_http_source" "circleci_orb_job" {
+  count        = "${var.install_circleci_SDO_plugin}" == "all" || "${var.install_circleci_SDO_plugin}" == "collection" ? 1 : 0
+  name         = "CircleCI Orb Job"
+  category     = var.circleci_orb_job_sc
+  collector_id = sumologic_collector.sdo_collector.id
+}
+
+# Create/Delete CircleCI Orb Workflow Source
+resource "sumologic_http_source" "circleci_orb_workflow" {
+  count        = "${var.install_circleci_SDO_plugin}" == "all" || "${var.install_circleci_SDO_plugin}" == "collection" ? 1 : 0
+  name         = "CircleCI Orb Workflow"
+  category     = var.circleci_orb_workflow_sc
+  collector_id = sumologic_collector.sdo_collector.id
+}
+
 
 # Sumo Logic - Create/Delete folder for installing the applications
 data "sumologic_personal_folder" "personalFolder" {}
@@ -248,6 +283,44 @@ resource "null_resource" "install_github_app" {
   }
 }
 
+# Install CircleCI App
+resource "null_resource" "install_circleci_app" {
+  count = "${var.install_circleci}" == "app" || "${var.install_circleci}" == "all" ? 1 : 0
+  triggers = {
+        version = var.circleci_version
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/f58985bd-40a8-4f87-aeeb-5a6a6ab4f703/install' \
+            --header 'Accept: application/json' \
+            --header 'Content-Type: application/json' \
+            -u ${var.sumo_access_id}:${var.sumo_access_key} \
+            --data-raw '{ "name": "CircleCI", "description": "The CircleCI app for Sumo Logic provides advanced views to track the performance and health of your continuous integration and deployment pipelines.", "destinationFolderId": "${data.external.folder_data_json.result.id}"},"dataSourceValues": {"circlecilogsrc": "_sourceCategory = ${var.circleci_app_sc}"}}'
+    EOT
+  }
+}
+
+
+# Install Gitlab App
+resource "null_resource" "install_gitlab_app" {
+  count      = "${var.install_gitlab}" == "app" || "${var.install_gitlab}" == "all" ? 1 : 0
+  depends_on = [sumologic_http_source.gitlab]
+  triggers = {
+        version = var.gitlab_version
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/fd3446f3-2662-4124-bfc0-4b36f0b625d3/install' \
+            --header 'Accept: application/json' \
+            --header 'Content-Type: application/json' \
+            -u ${var.sumo_access_id}:${var.sumo_access_key} \
+            --data-raw '{ "name": "Gitlab", "description": "Gitlab is an open source automation server for automating tasks related to building, testing, and delivering software.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"logsrc": "_sourceCategory = ${var.gitlab_sc}"}}'
+    EOT
+  }
+}
+
 # Install Jenkins App
 resource "null_resource" "install_jenkins_app" {
   count      = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "all" ? 1 : 0
@@ -320,6 +393,20 @@ resource "restapi_object" "github_field" {
   data         = <<JSON
   {
       "fieldName": "x-github-event"
+  }
+  JSON
+}
+
+# Create/Delete Field required by Gitlab App in Sumo Logic by calling REST API
+resource "restapi_object" "gitlab_field" {
+  provider     = restapi.sumo
+  count        = "${var.install_gitlab}" == "collection" || "${var.install_gitlab}" == "all" ? 1 : 0
+  path         = "/v1/fields"
+  destroy_path = "/v1/fields/{id}"
+  id_attribute = "fieldId"
+  data         = <<JSON
+  {
+      "fieldName": "x-gitlab-event"
   }
   JSON
 }

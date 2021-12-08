@@ -127,6 +127,16 @@ variable "install_github" {
     error_message = "Argument \"install_github\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
+
+variable "install_gitlab" {
+  type        = string
+  validation {
+    condition = contains([
+      "all","none","fer","app","collection"], var.install_gitlab)
+    error_message = "Argument \"install_gitlab\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
+  }
+}
+
 variable "install_pagerduty" {
   type        = string
   validation {
@@ -144,6 +154,24 @@ variable "install_sdo" {
   }
 }
 
+variable "install_circleci" {
+  type        = string
+  validation {
+    condition = contains([
+      "all","none","app","collection"], var.install_circleci)
+    error_message = "Argument \"install_circleci\" must be one of \"none\",\"app\",\"all\" and \"collection\"."
+  }
+}
+
+variable "install_circleci_SDO_plugin" {
+  type        = string
+  validation {
+    condition = contains([
+      "all","none","fer","collection"], var.install_circleci_SDO_plugin)
+    error_message = "Argument \"install_circleci_SDO_plugin\" must be one of \"all\",\"none\",\"fer\",\"collection\"."
+  }
+}
+
 #Source Categories
 variable "jira_cloud_sc" {}
 variable "jira_server_sc" {}
@@ -151,8 +179,17 @@ variable "bitbucket_sc" {}
 variable "opsgenie_sc" {}
 variable "pagerduty_sc" {}
 variable "github_sc" {}
+variable "gitlab_sc" {}
 variable "jenkins_sc" {}
-
+variable "circleci_app_sc" {
+  description = "Please enter the _sourceCategory for your app."
+}
+variable "circleci_orb_job_sc" {
+  default = "circleci/job-collector"
+}
+variable "circleci_orb_workflow_sc" {
+  default = "circleci/workflow-collector"
+}
 #Jira Cloud
 variable "jira_cloud_url" {}
 variable "jira_cloud_user" {}
@@ -243,6 +280,37 @@ variable "github_repo_webhook_create" {
   }
 }
 
+#CircleCI
+
+variable "circleci_build_jobname" {
+  type        = string
+  description = "Please enter the build job name for your pipeline:"
+  validation {
+    condition     = length(var.circleci_build_jobname) > 0
+    error_message = "The job name can not be empty."
+  }
+}
+
+variable "circleci_deploy_jobname" {
+  type        = string
+  description = "Please enter the deploy job name for your pipeline:"
+  validation {
+    condition     = length(var.circleci_deploy_jobname) > 0
+    error_message = "The job name can not be empty."
+  }
+}
+
+#Gitlab
+variable "gitlab_token" {}
+variable "gitlab_project_names" {}
+variable "gitlab_project_webhook_create" {
+  type        = string
+  validation {
+    condition = contains([
+      "true","false"], var.gitlab_project_webhook_create)
+    error_message = "Argument \"gitlab_project_webhook_create\" must be one of \"true\",\"false\"."
+  }
+}
 #FERs
 variable "github_pull_request_fer_scope" {}
 variable "github_pull_request_fer_parse" {}
@@ -273,3 +341,32 @@ variable "pagerduty_alerts_fer_parse" {}
 
 variable "jenkins_build_status_fer_scope" {}
 variable "jenkins_build_status_fer_parse" {}
+
+variable "gitlab_pull_request_fer_scope" {}
+variable "gitlab_pull_request_fer_parse" {}
+
+variable "gitlab_build_request_fer_scope" {}
+variable "gitlab_build_request_fer_parse" {}
+
+
+variable "gitlab_deploy_request_fer_scope" {}
+variable "gitlab_deploy_request_fer_parse" {}
+
+variable "gitlab_issue_request_fer_scope" {}
+variable "gitlab_issue_request_fer_parse" {}
+variable "circleci_build_fer_scope" {}
+variable "circleci_build_fer_parse" {}
+
+variable "circleci_deploy_fer_scope" {}
+variable "circleci_deploy_fer_parse" {}
+
+# User Input varibale names for JobName , DeployName
+
+variable "gitlab_build_jobname" {
+  type        = string
+  description = "Please enter the build job name for your pipeline:"
+  validation {
+    condition     = length(var.gitlab_build_jobname) > 0
+    error_message = "The build name cannot be empty."
+  }
+}
