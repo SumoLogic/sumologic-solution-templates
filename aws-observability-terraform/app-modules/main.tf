@@ -143,6 +143,23 @@ module "alb_app" {
   group_notifications      = var.group_notifications
 }
 
+# Install the classic lb app and resources.
+module "elb_app" {
+  depends_on = [module.lambda_app]
+  source     = "./elb"
+
+  access_id                = var.access_id
+  access_key               = var.access_key
+  environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
+  app_folder_id            = sumologic_folder.apps_folder.id
+  monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
+  monitors_disabled        = var.elb_monitors_disabled
+  connection_notifications = var.connection_notifications
+  email_notifications      = var.email_notifications
+  group_notifications      = var.group_notifications
+}
+
 # Install the dynamodb app and resources.
 module "dynamodb_app" {
   depends_on = [module.rce_app]

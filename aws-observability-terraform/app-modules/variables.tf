@@ -107,6 +107,12 @@ variable "alb_monitors_disabled" {
   default     = true
 }
 
+variable "elb_monitors_disabled" {
+  type        = bool
+  description = "Indicates if the ALB Apps monitors should be enabled. true to disable; false to enable."
+  default     = true
+}
+
 variable "apigateway_monitors_disabled" {
   type        = bool
   description = "Indicates if the API Gateway Apps monitors should be enabled. true to disable; false to enable."
