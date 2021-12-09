@@ -38,16 +38,16 @@ resource "aws_iam_role_policy_attachment" "cloudtrail_policy_attach" {
 
 # Sumo Logic ELB Source Policy Attachment
 resource "aws_iam_policy" "elb_policy" {
-  for_each = toset(local.create_elb_source && local.create_iam_role ? ["elb_policy"] : [])
+  for_each = toset((local.create_elb_source || local.create_classic_lb_source) && local.create_iam_role ? ["elb_policy"] : [])
   #for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
-    BUCKET_NAME = local.create_elb_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
+    BUCKET_NAME = (local.create_elb_bucket || local.create_classic_lb_source) ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
   })
 }
 
 resource "aws_iam_role_policy_attachment" "elb_policy_attach" {
-  for_each = toset(local.create_elb_source && local.create_iam_role ? ["elb_policy_attach"] : [])
+  for_each = toset((local.create_elb_source || local.create_classic_lb_source) && local.create_iam_role ? ["elb_policy_attach"] : [])
   #for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.elb_policy["elb_policy"].arn

@@ -55,6 +55,12 @@ variable "elb_log_source_url" {
   default = ""
 }
 
+variable "classic_lb_log_source_url" {
+  type        = string
+  description = "Required if you are already collecting Classic LB logs. Provide the existing Sumo Logic Classic LB Source API URL. The account, accountid, region and namespace fields will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
+  default = ""
+}
+
 variable "cloudwatch_logs_source_url" {
   type        = string
   description = "Required if you are already collecting AWS Lambda CloudWatch logs. Provide the existing Sumo Logic AWS Lambda CloudWatch Source API URL. The account, accountid, region and namespace fields will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
@@ -207,6 +213,18 @@ variable "collect_elb_logs" {
   default     = true
 }
 
+variable "collect_classic_lb_logs" {
+  type        = bool
+  description = <<EOT
+            Create a Sumo Logic ALB Logs Source.
+            You have the following options:
+			true - to ingest load balancer logs into Sumo Logic. Creates a Sumo Logic Log Source that collects classic load balancer logs from an existing bucket or a new bucket.
+			If true, please configure \"elb_source_details\" with configuration information including the bucket name and path expression to ingest load balancer logs.
+			false - you are already ingesting load balancer logs into Sumo Logic.
+		EOT
+  default     = true
+}
+
 variable "elb_source_details" {
   type = object({
     source_name     = string
@@ -241,6 +259,44 @@ variable "elb_source_details" {
   }
   validation {
     condition     = can(regex("[a-z0-9-.]{3,63}$", var.elb_source_details.bucket_details.bucket_name))
+    error_message = "3-63 characters; must contain only lowercase letters, numbers, hyphen or period. For more details - https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html."
+  }
+}
+
+variable "classic_lb_source_details" {
+  type = object({
+    source_name     = string
+    source_category = string
+    description     = string
+    bucket_details = object({
+      create_bucket        = bool
+      bucket_name          = string
+      path_expression      = string
+      force_destroy_bucket = bool
+    })
+    fields = map(string)
+  })
+  description = <<EOT
+            Provide details for the Sumo Logic Classic Load Balancer source. If not provided, then defaults will be used.
+            To enable collection of classic load balancer logs, set collect_classic_lb_logs to true and provide configuration information for the bucket.
+            If create_bucket is false, provide a name of an existing S3 bucket where you would like to store loadbalancer logs. If this is empty, a new bucket will be created in the region.
+            If create_bucket is true, the script creates a bucket, the name of the bucket has to be unique; this is achieved internally by generating a random-id and then post-fixing it to the “aws-observability-” string.
+            path_expression - This is required in case the above existing bucket is already configured to receive ALB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/classicloadbalancing/*/*
+        EOT
+  default = {
+    source_name     = "Classic lb Logs (Region)"
+    source_category = "aws/observability/clb/logs"
+    description     = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Classic LoadBalancer logs."
+    bucket_details = {
+      create_bucket        = true
+      bucket_name          = "aws-observability-random-id"
+      path_expression      = "*AWSLogs/<ACCOUNT-ID>/classicloadbalancing/<REGION-NAME>/*"
+      force_destroy_bucket = true
+    }
+    fields = {}
+  }
+  validation {
+    condition     = can(regex("[a-z0-9-.]{3,63}$", var.classic_lb_source_details.bucket_details.bucket_name))
     error_message = "3-63 characters; must contain only lowercase letters, numbers, hyphen or period. For more details - https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html."
   }
 }
