@@ -141,11 +141,11 @@ module "classic_lb_module" {
     }
   }
   #check with nitin to intro new var or not, I think no need
-  auto_enable_access_logs = var.auto_enable_access_logs
-  auto_enable_access_logs_options = {
-    filter                 = "'Type': 'application'|'type': 'application'"
-    remove_on_delete_stack = true
-  }
+  # auto_enable_access_logs = var.auto_enable_access_logs
+  # auto_enable_access_logs_options = {
+  #   filter                 = "'Type': 'application'|'type': 'application'"
+  #   remove_on_delete_stack = true
+  # }
 }
 
 module "cloudwatch_metrics_source_module" {

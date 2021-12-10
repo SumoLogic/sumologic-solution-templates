@@ -12,10 +12,10 @@ locals {
   cloudtrail_path_exp    = var.cloudtrail_source_details.bucket_details.create_bucket ? "AWSLogs/${local.aws_account_id}/CloudTrail/${local.aws_region}/*" : var.cloudtrail_source_details.bucket_details.path_expression
   cloudtrail_fields      = merge(var.cloudtrail_source_details.fields, { account = var.aws_account_alias })
 
-  # ELB Source updated Details
+  # ALB Source updated Details
   create_elb_source = var.collect_elb_logs && var.elb_log_source_url == ""
   update_elb_source = var.collect_elb_logs ? (var.elb_log_source_url == "" ? false : true) : false
-  elb_source_name = var.elb_source_details.source_name == "Elb Logs (Region)" ? "Elb Logs ${local.aws_region}" : var.elb_source_details.source_name
+  elb_source_name = var.elb_source_details.source_name == "Alb Logs (Region)" ? "Alb Logs ${local.aws_region}" : var.elb_source_details.source_name
   elb_path_exp    = var.elb_source_details.bucket_details.create_bucket ? "*AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*" : var.elb_source_details.bucket_details.path_expression
   elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/applicationelb", accountid = local.aws_account_id })
 
