@@ -60,6 +60,7 @@ module "cloudtrail_module" {
   }
 }
 
+#ALB module
 module "elb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_elb_source ? ["elb_module"] : [])
@@ -103,6 +104,7 @@ module "elb_module" {
   }
 }
 
+#CLB module
 module "classic_lb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_classic_lb_source ? ["classic_lb_module"] : [])
