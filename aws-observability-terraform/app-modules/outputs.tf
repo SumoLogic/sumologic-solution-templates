@@ -23,6 +23,21 @@ output "sumologic_content_alb" {
   description = "This output contains alb App."
 }
 
+output "sumologic_field_elb" {
+  value       = module.elb_app.sumologic_field
+  description = "This output contains fields required for overview app."
+}
+
+output "sumologic_field_extraction_rule_elb" {
+  value       = module.elb_app.sumologic_field_extraction_rule
+  description = "This output contains Field Extraction rules required for alb app."
+}
+
+output "sumologic_content_elb" {
+  value       = module.elb_app.sumologic_content
+  description = "This output contains alb App."
+}
+
 output "sumologic_field_dynamodb" {
   value       = module.dynamodb_app.sumologic_field
   description = "This output contains fields required for dynamodb app."
