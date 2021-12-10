@@ -10,7 +10,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.6.3 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.6.2 |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
@@ -23,6 +23,7 @@
 | <a name="module_ec2metrics_app"></a> [ec2metrics\_app](#module\_ec2metrics\_app) | ./ec2metrics | n/a |
 | <a name="module_ecs_app"></a> [ecs\_app](#module\_ecs\_app) | ./ecs | n/a |
 | <a name="module_elasticache_app"></a> [elasticache\_app](#module\_elasticache\_app) | ./elasticache | n/a |
+| <a name="module_elb_app"></a> [elb\_app](#module\_elb\_app) | ./elb | n/a |
 | <a name="module_lambda_app"></a> [lambda\_app](#module\_lambda\_app) | ./lambda | n/a |
 | <a name="module_nlb_app"></a> [nlb\_app](#module\_nlb\_app) | ./nlb | n/a |
 | <a name="module_overview_app"></a> [overview\_app](#module\_overview\_app) | ./overview | n/a |
@@ -34,6 +35,7 @@
 | Name | Type |
 |------|------|
 | [sumologic_folder.apps_folder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/folder) | resource |
+| [sumologic_hierarchy.awso_hierarchy](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/hierarchy) | resource |
 | [sumologic_monitor_folder.monitor_folder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/monitor_folder) | resource |
 | [time_sleep.wait_for_5_minutes](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [sumologic_personal_folder.personalFolder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/data-sources/personal_folder) | data source |
@@ -52,6 +54,7 @@
 | <a name="input_ec2metrics_monitors_disabled"></a> [ec2metrics\_monitors\_disabled](#input\_ec2metrics\_monitors\_disabled) | Indicates if EC2 Metrics Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_ecs_monitors_disabled"></a> [ecs\_monitors\_disabled](#input\_ecs\_monitors\_disabled) | Indicates if ECS Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_elasticache_monitors_disabled"></a> [elasticache\_monitors\_disabled](#input\_elasticache\_monitors\_disabled) | Indicates if Elasticache Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
+| <a name="input_elb_monitors_disabled"></a> [elb\_monitors\_disabled](#input\_elb\_monitors\_disabled) | Indicates if the ALB Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_email_notifications"></a> [email\_notifications](#input\_email\_notifications) | Email Notifications to be sent by the alert. | <pre>list(object(<br>    {<br>      connection_type       = string,<br>      recipients            = list(string),<br>      subject               = string,<br>      time_zone             = string,<br>      message_body          = string,<br>      run_for_trigger_types = list(string)<br>    }<br>  ))</pre> | `[]` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Enter au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security | `string` | n/a | yes |
 | <a name="input_group_notifications"></a> [group\_notifications](#input\_group\_notifications) | Whether or not to group notifications for individual items that meet the trigger condition. Defaults to true. | `bool` | `true` | no |

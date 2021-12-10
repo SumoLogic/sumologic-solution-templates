@@ -216,10 +216,10 @@ variable "collect_elb_logs" {
 variable "collect_classic_lb_logs" {
   type        = bool
   description = <<EOT
-            Create a Sumo Logic ALB Logs Source.
+            Create a Sumo Logic Classic LB Logs Source.
             You have the following options:
 			true - to ingest load balancer logs into Sumo Logic. Creates a Sumo Logic Log Source that collects classic load balancer logs from an existing bucket or a new bucket.
-			If true, please configure \"elb_source_details\" with configuration information including the bucket name and path expression to ingest load balancer logs.
+			If true, please configure \"classic_lb_source_details\" with configuration information including the bucket name and path expression to ingest load balancer logs.
 			false - you are already ingesting load balancer logs into Sumo Logic.
 		EOT
   default     = true
