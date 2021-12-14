@@ -128,21 +128,3 @@ cd -
 if [ $? -ne 0 ]; then
   echo "Error: unable to initiatlize terraform"
 fi
-
-echo ""
-echo ""
-echo ""
-echo ""
-echo "------------------"
-echo "Now add your GitHub access token to the github.auto.tfvars file"
-echo "Make sure your GitHub access token as the following permissions:"
-echo "  - repo:status"
-echo "  - admin:org_hook"
-echo "  - admin:repo_hook"
-echo "  - read:org"
-echo "  - user"
-echo "Learn more about creating GitHub access keys here: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
-echo ""
-echo ""
-echo "Finally, add your Sumo Logic access id and key to the sumologic.auto.tfvars file"
-echo "Learn more about creating Sumo Logic access keys here: https://help.sumologic.com/Manage/Security/Access-Keys#manage-all-users%E2%80%99-access-keys-on-access-keys-page"
