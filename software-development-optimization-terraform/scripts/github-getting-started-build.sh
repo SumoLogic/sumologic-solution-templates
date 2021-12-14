@@ -13,7 +13,9 @@ set -e
 # Once the bug that prevents TF
 # to run without a gitlab token
 # is fixed, this can be removed
-mv gitlab.tf gitlab.tf.bak
+if [ -e gitlab.tf ]; then
+  mv gitlab.tf gitlab.tf.bak
+fi
 
 ./scripts/update_sdo_variable install_jira_cloud          "none"
 ./scripts/update_sdo_variable install_jira_server         "none"
@@ -53,3 +55,9 @@ echo -n "GitHub Organization name: "
 github_org=""
 read -r github_org
 ./scripts/update_github_variable github_organization $github_org
+
+## Have the users set up the Sumo Logic access keys
+./scripts/set-sumologic-access-keys.sh
+
+## Finally, set up Terraform
+./scripts/prep-local-terraform.sh
