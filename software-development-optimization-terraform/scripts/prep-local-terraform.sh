@@ -119,7 +119,8 @@ ls
 find . -name 'terraform-provider-restapi*zip' | xargs unzip -o
 find . -name 'terraform-provider-jira*zip' | xargs unzip -o
 
-rm *zip
+rm terraform-provider-restapi*zip
+rm terraform-provider-jira*zip
 
 cd -
 
