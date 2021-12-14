@@ -89,7 +89,7 @@ if [ $tf_binary_checksum != $tf_checksum ]; then
   exit 2
 fi
 
-unzip terraform.zip
+unzip -o terraform.zip
 if [ $? != 0 ]; then
   echo "Could not unzip Terraform package"
   exit 1
