@@ -20,16 +20,8 @@ following operating systems and architectures are supported:
 
 Arm architectures for either Linux or Mac are not yet supported.
 
-The scripts require the following system commands be available:
-- curl
-- unzip
-- shasum 
-- sed
-- awk
-- find
-- grep
-
 **Outcomes**
+
 The scripts and Terraform code provided in this guide will have the following outcomes:
 
 - A specific version of Terraform for your OS and architecture will be
