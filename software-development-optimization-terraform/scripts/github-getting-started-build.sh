@@ -50,14 +50,37 @@ echo -n "GitHub Access Token: "
 github_access_token=""
 read -r github_access_token
 ./scripts/update_github_variable github_token $github_access_token
+if [ $? -ne 0 ]; then
+  echo "Error: could not update github token variable"
+  exit 1
+fi
 
 echo -n "GitHub Organization name: "
 github_org=""
 read -r github_org
 ./scripts/update_github_variable github_organization $github_org
+if [ $? -ne 0 ]; then
+  echo "Error: could not update github organization variable"
+  exit 1
+fi
 
 ## Have the users set up the Sumo Logic access keys
 ./scripts/set-sumologic-access-keys.sh
+if [ $? -ne 0 ]; then
+  echo "Error: could not set Sumo Logic access key"
+  exit 1
+fi
 
-## Finally, set up Terraform
+## Set up Terraform
 ./scripts/prep-local-terraform.sh
+if [ $? -ne 0 ]; then
+  echo "Error: Could not configure local Terraform"
+  exit 1
+fi
+
+## Finally, run Terraform
+./terraform apply
+if [ $? -ne 0 ]; then
+  echo "Error: Could not configure GitHub application"
+  exit 1
+fi
