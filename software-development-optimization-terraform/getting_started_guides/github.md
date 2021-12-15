@@ -88,7 +88,7 @@ The access token will need the following permissions:
 In this step, you will use a script that will automatically configure Terraform
 to create all the necessary resources to ingest GitHub data into Sumo Logic.
 
-Run this command `curl -sSL <my URL to the script that downloads the tarball, unpacks it, and runs the helper scripts> | bash`
+Run this command `sh -c "$(curl -sSL https://raw.githubusercontent.com/ccaum/sumologic-solution-templates/github_getting_started_guide/software-development-optimization-terraform/scripts/getting-started)" -- github`
 
 If the above command was successful, you should now have a new folder called
 "Software Development Optimization" in your Sumo Logic Personal folder. There
