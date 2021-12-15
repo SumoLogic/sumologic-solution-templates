@@ -83,7 +83,7 @@ The access token will need the following permissions:
 
 **Copy your access token to another location. You will need it later**
 
-## Step 3 - Prepare the automation
+## Step 4 - Prepare the automation
 
 In this step, you will use a script that will automatically configure Terraform
 to create all the necessary resources to ingest GitHub data into Sumo Logic.
