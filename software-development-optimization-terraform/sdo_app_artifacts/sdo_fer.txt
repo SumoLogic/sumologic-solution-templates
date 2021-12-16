@@ -43,7 +43,7 @@ target_branch, repository_name, commit_id
 | parse regex field=commit_link "\/commit\/(?<commit_id>[^\"]+)"
 | commit_id as trace_id
 | service as repository_name
-| parseDate(datetime, "yyyy-MM-dd HH:mm:ss","etc/utc") as datetime_epoch
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss ZZZZ","etc/utc") as datetime_epoch
 | toLong(datetime_epoch) as datetime_epoch
 | if(status matches "success","Success",if(status matches "failed","Failed",status)) as status
 | "deploy" as event_type
@@ -117,8 +117,8 @@ commit_id, reviewers, updated_date, head_commit_id nodrop
 | project_name as service
 | substring(issue_type,1,length(issue_type)-1) as issue_type
 |if (issue_type matches "*incident*","incident","issue") as issue_type
-| parseDate(datetime, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
-| if (isNull(closeddate) , 00000000000, parseDate(closedDate, "yyyy-MM-dd HH:mm:ss")) as closeddate_epoch
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss","etc/utc") as datetime_epoch
+| if (isNull(closeddate) , 00000000000, parseDate(closedDate, "yyyy-MM-dd HH:mm:ss","etc/utc")) as closeddate_epoch
 | if(issue_status matches "opened","To Do",if(issue_status matches "closed","Complete",issue_status)) as issue_status
 | toLong(datetime_epoch) as datetime_epoch
 | toLong(closeddate_epoch) as closeddate_epoch
@@ -154,7 +154,7 @@ commit_id, reviewers, updated_date, head_commit_id nodrop
 | "n/a" as team
 | parse regex field= datetime
 "(?<datetime_epoch>\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d)"  nodrop   
-| parseDate(datetime_epoch, "yyyy-MM-dd'T'HH:mm:ss") as datetime_epoch
+| parseDate(datetime_epoch, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as datetime_epoch
 | where status in ("SUCCESSFUL", "FAILED")
 | "build" as event_type
 "
@@ -180,7 +180,7 @@ commit_id, reviewers, updated_date, head_commit_id nodrop
 |concat("build ",build_name," ",status) as message
 |concat("pipeline # ",pipeline_id) as title
 | concat(homepage,"/-/jobs/",trace_id) as link
-| parseDate(datetime, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss","etc/utc") as datetime_epoch
 | toLong(datetime_epoch) as datetime_epoch
 | if(status matches "success","Success",if(status matches "failed","Failed",status)) as status
 | if(isEmpty(environment_name),"n/a",environment_name) as environment_name
@@ -243,11 +243,11 @@ link
         "Parse": " json "commits[(@.length-2)].id" as head_commit_id
 | json "commits[(@.length-2)].timestamp" as head_commit_datetime
 | json "commits[(@.length-2)].message" as head_commit_message
-| parseDate(head_commit_datetime, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as head_commit_epoch
+| parseDate(head_commit_datetime, "yyyy-MM-dd'T'HH:mm:ssXXX","etc/utc") as head_commit_epoch
 | json "commits[0].id" as base_commit_id
 | json "commits[0].timestamp" as base_commit_datetime
 | json "commits[0].message" as base_commit_message
-| parseDate(base_commit_datetime, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as base_commit_epoch
+| parseDate(base_commit_datetime, "yyyy-MM-dd'T'HH:mm:ssXXX","etc/utc") as base_commit_epoch
 | json "repository.full_name","sender.login" as repository_name,user
 | if (isEmpty(service), "n/a",service) as service
 | "n/a" as team
