@@ -20,16 +20,8 @@ following operating systems and architectures are supported:
 
 Arm architectures for either Linux or Mac are not yet supported.
 
-The scripts require the following system commands be available:
-- curl
-- unzip
-- shasum 
-- sed
-- awk
-- find
-- grep
-
 **Outcomes**
+
 The scripts and Terraform code provided in this guide will have the following outcomes:
 
 - You will be able to track data on pull requests, issues, branch development,
@@ -93,10 +85,10 @@ The access token will need the following permissions:
 
 **Copy your access token to another location. You will need it later**
 
-## Step 4 - Prepare the automation
+## Step 4 - Run the automation
 
-In this step, you will use a script that will automatically configure Terraform
-to create all the necessary resources to ingest GitHub data into Sumo Logic.
+In this step, a script will run that will run Terraform to automatically
+create all the necessary resources to ingest GitHub data into Sumo Logic.
 
 Run this command `sh -c "$(curl -sSL https://raw.githubusercontent.com/ccaum/sumologic-solution-templates/github_getting_started_guide/software-development-optimization-terraform/scripts/getting-started)" -- github`
 
