@@ -85,7 +85,7 @@ curl -sSL $tf_download_url -o terraform.zip
 tf_binary_checksum=`shasum -a 256 terraform.zip | cut -d' ' -f1`
 
 if [ $tf_binary_checksum != $tf_checksum ]; then
-  echo "The downloaded Terraform zip file has checksum of ${tf_binary_checksum} - down not match expected checksum of ${tf_checksum}. It may have been modified at the source: ${tf_download_url}"
+  echo "The downloaded Terraform zip file has checksum of '${tf_binary_checksum}' - does not match expected checksum of ${tf_checksum}. It may have been modified at the source: ${tf_download_url}"
   exit 2
 fi
 
