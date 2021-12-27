@@ -83,7 +83,7 @@ Follow the instructions here: [Manage all users’ access keys on Access Keys pa
 In order to create a webhook that will send data to your Sumo Logic account,
 the automation in this guide will need an access token for your GitHub account.
 Go to this page in your GitHub account to create one:
-[https://github.com/settings/tokens](https://github.com/settings/tokens)
+[](https://github.com/settings/tokens)
 
 The access token will need the following permissions:
 
@@ -100,9 +100,27 @@ to create all the necessary resources to ingest GitHub data into Sumo Logic.
 
 Run this command `sh -c "$(curl -sSL https://raw.githubusercontent.com/ccaum/sumologic-solution-templates/github_getting_started_guide/software-development-optimization-terraform/scripts/getting-started)" -- github`
 
-Follow the instructions in the script.
+### Step 4a - Enter your GitHub info
 
-If the script was successful, you will now have a new folder called "Software
+![](/resources/github-access-token.png)
+
+1) Enter the GitHub personal access token you created in Step 3
+2) Enter the name of the GitHub organization you'd like to collect GitHub data on
+
+### Step 4b - Enter your Sumo Logic access token
+
+![](/resources/sumo-logic-access-token.png)
+
+1) Enter the Sumo Logic Personal Access Token you created in Step 2
+
+2) Enter the region you created your Sumo Logic account in. Use this guide to determine which region code to provide: [](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security#how-can-i-determine-which-endpoint-i-should-use)
+
+
+The script will now download a specific version of Terraform and dependent
+plugins and apply Terraform code. The Terraform installed **will not**
+interfere with any existing installations of Terraform.
+
+If the script c, you will now have a new folder called "Software
 Development Optimization" in your Sumo Logic Personal folder. There will be a
 collection of GitHub dashboards that will populate as you and your team use
 GitHub.
