@@ -45,7 +45,7 @@ If you already have a Sumo Logic account, you can skip this step and go straight
 1) Go to sumologic.com
 2) Click on "Start free trial"
 
-![](/resources/start-free-trial.png)
+![](resources/start-free-trial.png)
 
 3) Provide your business email address
 4) Select the deployment region closest to you. **Important: Remember your selection! You will need it later**
@@ -53,10 +53,11 @@ If you already have a Sumo Logic account, you can skip this step and go straight
 
 6) Check your inbox for your verification email. Click "Activate account" to be taken to the last account setup page.
 
-![](/resources/activate-sumo-trial-account.png)
+![](resources/activate-sumo-trial-account.png)
+
 7) Fill out the form and click "Activate"
 
-![](/resources/activate-trial.gif)
+![](resources/activate-trial.gif)
 8) Click the 'x' at the top right of the 'Welcome to Sumo Logic' web page. You will not need to follow the in-application guide for this gude.
 
 Congratulations! You now have a trial account
@@ -66,7 +67,7 @@ In this step, you will create an access key to programatically manage your Sumo 
 
 Follow the instructions here: [Manage all users’ access keys on Access Keys page](https://help.sumologic.com/Manage/Security/Access-Keys#manage-all-users%E2%80%99-access-keys-on-access-keys-page)
 
-![](/resources/create-access-key.gif)
+![](resources/create-access-key.gif)
 
 **Copy your access ID and key to another location. You will need them later**
 
@@ -94,14 +95,14 @@ Run this command `sh -c "$(curl -sSL https://raw.githubusercontent.com/ccaum/sum
 
 ### Step 4a - Enter your GitHub info
 
-![](/resources/github-access-token.png)
+![](resources/github-access-token.png)
 
 1) Enter the GitHub personal access token you created in Step 3
 2) Enter the name of the GitHub organization you'd like to collect GitHub data on
 
 ### Step 4b - Enter your Sumo Logic access token
 
-![](/resources/sumo-logic-access-token.png)
+![](resources/sumo-logic-access-token.png)
 
 1) Enter the Sumo Logic Personal Access Token you created in Step 2
 
@@ -121,6 +122,6 @@ GitHub.
 
 1) Create a new pull request in a repository in the GitHub organization you specified when you ran the script in Step 4.
 
-![](/resources/github-pull-requests-dashboard.gif)
+![](resources/github-pull-requests-dashboard.gif)
 
 2) Wait about 1 minute and then view the "GitHub - Pull Request Overview dashboard" in your Sumo Logic Account.
