@@ -106,7 +106,7 @@ Run this command `sh -c "$(curl -sSL https://raw.githubusercontent.com/ccaum/sum
 
 1) Enter the Sumo Logic Personal Access Token you created in Step 2
 
-2) Enter the region you created your Sumo Logic account in. Use this guide to determine which region code to provide: [](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security#how-can-i-determine-which-endpoint-i-should-use)
+2) Enter the region you created your Sumo Logic account in. [Use this guide to determine which region code to provide](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security#how-can-i-determine-which-endpoint-i-should-use)
 
 
 The script will now download a specific version of Terraform and dependent
