@@ -23,7 +23,7 @@ if [ $kernel != "linux" ] && [ $kernel != "Darwin" ]; then
 fi
 
 ## CHECK MACOS ARCHITECTURE
-if [ $kernel == "darwin" ]; then
+if [ $kernel == "Darwin" ]; then
   darwin_architecture=`uname -a | rev | cut -d" " -f1 | rev`
   if [ $darwin_architecture != "x86_64" ]; then 
     echo "Unsupported architecture: ${darwin_architecture}"
