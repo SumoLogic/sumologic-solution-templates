@@ -46,8 +46,7 @@ fi
 #TODO: check the curl version against a supported version regex
 
 ## DOWNLOAD TERRAFORM FOR PLATFORM
-tf_exists=`./terraform || false`
-if [ $kernel == "linux" ] && [ $tf_exists -ne 0 ]; then
+if [ $kernel == "linux" ]; then
   linux_architecture=`uname -i`
 
   if [ $linux_architecture == "x86_64" ]; then
@@ -79,7 +78,7 @@ if [ $kernel == "Darwin" ]; then
   fi
 fi
 
-echo "DOWNLOADING TERRAFORM..."
+echo "DOWNLOADING TERRAFORM TO LOCAL DIRECTORY..."
 curl -sSL $tf_download_url -o terraform.zip
 
 tf_binary_checksum=`shasum -a 256 terraform.zip | cut -d' ' -f1`
