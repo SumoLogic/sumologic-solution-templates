@@ -109,6 +109,10 @@ output "bitbucket_build_fer_id" {
   value = sumologic_field_extraction_rule.bitbucket_build_fer.*.id
 }
 
+output "bitbucket_push_fer_id" {
+  value = sumologic_field_extraction_rule.bitbucket_push_fer.*.id
+}
+
 output "bitbucket_deploy_fer_id" {
   value = sumologic_field_extraction_rule.bitbucket_deploy_fer.*.id
 }
@@ -123,6 +127,10 @@ output "pagerduty_alerts_fer_id" {
 
 output "github_pr_fer_id" {
   value = sumologic_field_extraction_rule.github_pr_fer.*.id
+}
+
+output "github_push_fer_id" {
+  value = sumologic_field_extraction_rule.github_push_fer.*.id
 }
 
 output "gitlab_pr_fer_id" {
@@ -140,6 +148,11 @@ output "gitlab_deploy_fer_id" {
 output "gitlab_issue_fer_id" {
   value = sumologic_field_extraction_rule.gitlab_issue_fer.*.id
 }
+
+output "gitlab_push_fer_id" {
+  value = sumologic_field_extraction_rule.gitlab_push_fer.*.id
+}
+
 output "jenkins_build_fer_id" {
   value = sumologic_field_extraction_rule.jenkins_build_fer.*.id
 }
