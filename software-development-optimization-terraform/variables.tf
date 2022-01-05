@@ -315,6 +315,9 @@ variable "gitlab_project_webhook_create" {
 variable "github_pull_request_fer_scope" {}
 variable "github_pull_request_fer_parse" {}
 
+variable "github_push_fer_scope" {}
+variable "github_push_fer_parse" {}
+
 variable "jenkins_build_fer_scope" {}
 variable "jenkins_build_fer_parse" {}
 
@@ -329,6 +332,9 @@ variable "bitbucket_pull_request_fer_parse" {}
 
 variable "bitbucket_build_fer_scope" {}
 variable "bitbucket_build_fer_parse" {}
+
+variable "bitbucket_push_fer_scope" {}
+variable "bitbucket_push_fer_parse" {}
 
 variable "bitbucket_deploy_fer_scope" {}
 variable "bitbucket_deploy_fer_parse" {}
@@ -351,6 +357,9 @@ variable "gitlab_build_request_fer_parse" {}
 
 variable "gitlab_deploy_request_fer_scope" {}
 variable "gitlab_deploy_request_fer_parse" {}
+
+variable "gitlab_push_fer_scope" {}
+variable "gitlab_push_fer_parse" {}
 
 variable "gitlab_issue_request_fer_scope" {}
 variable "gitlab_issue_request_fer_parse" {}
