@@ -16,7 +16,7 @@ sumologic_access_key=""
 read -r sumologic_access_key
 ./scripts/update_sdo_variable sumo_access_key $sumologic_access_key
 
-echo -n "Sumo Logic Deployment Region: "
+echo -n "Sumo Logic Deployment Region [US1, US2, JP, IN, FED, EU, DE CA, AU]: "
 sumologic_deployment_region=""
 read -r sumologic_deployment_region
 # Make sure we only have to deal with lowercase region values
