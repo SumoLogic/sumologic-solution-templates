@@ -1,0 +1,45 @@
+#!/bin/bash
+
+
+cleanup () {
+  echo -n "Cleaning up......"
+  cd ..
+  [ -d ./sumologic-getting-started ] && rm -rf ./sumologic-getting-started
+  echo "done"
+}
+
+tool=$1
+if [ "$tool" == "" ]; then
+  echo "The first argument must be the name of the tool to set up in Sumo Logic"
+  exit 1
+fi
+
+mkdir -p sumologic-getting-started
+cd sumologic-getting-started
+
+## Download the Terraform and script content
+curl -sSL "https://github.com/ccaum/sumologic-solution-templates/releases/download/v0.0.1/software-development-optimization.tar.gz" -O
+tar -xzf software-development-optimization.tar.gz
+if [ $? -ne 0 ]; then
+  echo "Error: Unable to untar the automation content"
+  cleanup
+  exit 1
+fi
+
+## Call the supporting tool's getting started script
+case $tool in
+  "github")
+    ./scripts/github-getting-started-build.sh
+    if [ $? -ne 0 ]; then
+      echo "Error: Unable to set up GitHub. Please try again"
+      cleanup
+      echo "done"
+    fi
+    ;;
+
+  *)
+    echo "Unknown tool $tool"
+    cleanup
+    exit 1
+    ;;
+esac
