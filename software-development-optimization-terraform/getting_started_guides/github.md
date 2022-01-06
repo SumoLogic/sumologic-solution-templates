@@ -17,15 +17,6 @@ This guide will use a helper script to automate much of the setup process. The f
 
 Arm architectures for either Linux or Mac are not yet supported.
 
-**Outcomes**
-
-The scripts and Terraform code provided in this guide will have the following outcomes:
-
-- You will be able to track data on pull requests, issues, branch development, and more across all GitHub repositories in your GitHub organization.
-- A collection of GitHub dashboards will be installed in the folder "Software Development Optimization" within your Sumo Logic account.
-- A single webhook will be added to your specified GitHub organization that will send events to Sumo Logic. You will provide a GitHub personal access token to be used to create the webhook.  The webhook can be removed at any time to stop sending data to Sumo Logic.
-- A specific version of Terraform for your OS and architecture will be downloaded and be installed in isolation to the local working directory. It **will not** affect any existing system installations of Terraform.
-
 
 # Steps
 
