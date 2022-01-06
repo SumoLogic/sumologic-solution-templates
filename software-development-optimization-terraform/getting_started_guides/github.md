@@ -32,31 +32,19 @@ The scripts and Terraform code provided in this guide will have the following ou
 ## Step 1 - Create a trial account
 If you already have a Sumo Logic account, you can skip this step and go straight to [Step 2](#step-2---create-a-sumo-logic-access-key).
 
-1. Visit [sumologic.com](https://sumologic.com) and click **Start free trial**.
+1. Visit [sumologic.com](https://sumologic.com) and create a trial account by clicking **Start free trial**.
+**Important:** Remember your deployment region selection. You will need it in a later step.
+1. Once your account is activated, click the 'x' at the top right of the *Welcome to Sumo Logic* web page. You will not need to follow the in-application guide.
 
-    ![Free Trial](resources/start-free-trial.png)
+![Activate Trial](resources/activate-trial.gif)
 
-1. Provide your business email address.
-1. Select the deployment region closest to you. **Important:** Remember your selection. You will need it in a later step.
-1. Agree to the Service License Agreement and click **Sign up**.
-1. Check your inbox for your verification email. Click **Activate account** to be taken to the last account setup page.
-
-    ![Activate Trial](resources/activate-sumo-trial-account.png)
-
-1. Fill out the form and click **Activate**.
-
-    ![Activate Trial](resources/activate-trial.gif)
-
-1. Click the 'x' at the top right of the *Welcome to Sumo Logic* web page. You will not need to follow the in-application guide.
-
-Congratulations! You now have a trial account.
 
 ## Step 2 - Create a Sumo Logic access key
 Create an access key to programatically manage your Sumo Logic account following these instructions: [Manage all users’ access keys on Access Keys page](https://help.sumologic.com/Manage/Security/Access-Keys#manage-all-users%E2%80%99-access-keys-on-access-keys-page).
+**Important:** Copy your access ID and key to another location. You will need them in a later step.
 
 ![Access Key](resources/create-access-key.gif)
 
-**Important:** Copy your access ID and key to another location. You will need them in a later step.
 
 ## Step 3 - Create a GitHub personal access token
 
