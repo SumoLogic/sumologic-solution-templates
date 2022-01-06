@@ -1,0 +1,124 @@
+---
+Global:
+  TemplatePath: "../elb_app.template.yaml"
+  TestProjectName: BasicTestProject
+  ParallelTestsRun: 6
+  GlobalParameters:
+    Section1aSumoDeployment: us1
+    Section1bSumoAccessID: 'suVJqqRLpQ6w2d'
+    Section1cSumoAccessKey: 'ypC5R6VJwGahwJmQ01mgjguBEVgR2GJF6NaPAdvWThty0cEkdNXiwRiR4AjJt8wT'
+    Section1dRemoveSumoResourcesOnDeleteStack: 'true'
+    Section2aAccountAlias: 'testenv'
+    Section3aInstallApp: 'No'
+    Section6aParentStackLambdaARN: '${lambda_arn}'  # ? 
+    Section6bTemplatesBucketName: '${template_bucket}'  # ? 
+    Section6cNestedTemplateVersion: '${template_version}' # ? 
+Tests:
+  - TestName: appferandmetricupdate
+    Regions:
+      - us-east-1  # ?
+    Parameters:
+      Values:
+        Section3aInstallApp: 'Yes'
+        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/187445783/sources/952768626' # ?
+        Section9bELBLogsSourceName: 'ElbTests'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - sumoApp
+            - ElbLogsFieldExtractionRule
+            - SumoELBMetricsUpdateSource
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - ExistingMetricSourceName
+  - TestName: installnothing
+    Regions:
+      - us-east-1  # ?
+    Parameters:
+      Values:
+        Section3aInstallApp: 'No'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+  - TestName: onlyappinstall
+    Regions:
+      - us-east-1  # ?
+    Parameters:
+      Values:
+        Section3aInstallApp: 'Yes'
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - sumoApp
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+  - TestName: updatecwmetrics
+    Regions:
+      - us-east-1   # ?
+    Parameters:
+      Values:
+        Section4aCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/187445783/sources/952768626' # ?
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoELBMetricsUpdateSource
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - ExistingMetricSourceName
+  - TestName: updatelogssource
+    Regions:
+      - us-east-1  # ?
+    Parameters:
+      Values:
+        Section9aELBLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/187445783/sources/951309199'  # ?
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoELBLogsUpdateSource
+            - ElbLogsFieldExtractionRule
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - ExistingLogSourceName
+  - TestName: updatebothsources
+    Regions:
+      - us-east-1  # ?
+    Parameters:
+      Values:
+        Section9aELBLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/187445783/sources/951309199'  # ? 
+        Section4aCloudWatchExistingSourceAPIUrl: "https://api.sumologic.com/api/v1/collectors/187445783/sources/952768626" # ?
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoELBLogsUpdateSource
+            - ElbLogsFieldExtractionRule
+            - SumoELBMetricsUpdateSource
+            - AddLoadBalancerField
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - ExistingLogSourceName
+            - ExistingMetricSourceName
