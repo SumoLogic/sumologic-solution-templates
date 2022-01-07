@@ -52,8 +52,6 @@ In order to create a webhook that will send data to your Sumo Logic account, the
 
 ## Step 4 - Run the automation
 
-Run a Terraform script to automatically create all the necessary resources to ingest GitHub data into Sumo Logic.
-
 Run the following command:
 
 ```
