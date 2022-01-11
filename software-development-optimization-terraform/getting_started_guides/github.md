@@ -55,7 +55,7 @@ In order to create a webhook that will send data to your Sumo Logic account, the
 Run the following command:
 
 ```
-sh -c "$(curl -sSL https://raw.githubusercontent.com/ccaum/sumologic-solution-templates/github_getting_started_guide/software-development-optimization-terraform/scripts/getting-started)" -- github
+sh -c "$(curl -sSL https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/github_getting_started_guide/software-development-optimization-terraform/scripts/getting-started)" -- github
 ```
 
 Enter your GitHub and Sumo Logic information at the prompts:
