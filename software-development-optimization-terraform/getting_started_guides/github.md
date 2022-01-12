@@ -15,7 +15,7 @@ This guide will use a helper script to automate much of the setup process. The f
 - MacOS 64-bit Intel
 - Linux 32-bit and 64-bit
 
-Arm architectures for either Linux or Mac are not yet supported.
+ARM architectures for either Linux or Mac are not yet supported.
 
 
 # Steps
