@@ -17,46 +17,25 @@ This guide will use a helper script to automate much of the setup process. The f
 
 Arm architectures for either Linux or Mac are not yet supported.
 
-**Outcomes**
-
-The scripts and Terraform code provided in this guide will have the following outcomes:
-
-- You will be able to track data on pull requests, issues, branch development, and more across all GitHub repositories in your GitHub organization.
-- A collection of GitHub dashboards will be installed in the folder "Software Development Optimization" within your Sumo Logic account.
-- A single webhook will be added to your specified GitHub organization that will send events to Sumo Logic. You will provide a GitHub personal access token to be used to create the webhook.  The webhook can be removed at any time to stop sending data to Sumo Logic.
-- A specific version of Terraform for your OS and architecture will be downloaded and be installed in isolation to the local working directory. It **will not** affect any existing system installations of Terraform.
-
 
 # Steps
 
 ## Step 1 - Create a trial account
 If you already have a Sumo Logic account, you can skip this step and go straight to [Step 2](#step-2---create-a-sumo-logic-access-key).
 
-1. Visit [sumologic.com](https://sumologic.com) and click **Start free trial**.
+1. Visit [sumologic.com](https://sumologic.com) and create a trial account by clicking **Start free trial**.
+**Important:** Remember your deployment region selection. You will need it in a later step.
+1. Once your account is activated, click the 'x' at the top right of the *Welcome to Sumo Logic* web page. You will not need to follow the in-application guide.
 
-    ![Free Trial](resources/start-free-trial.png)
+![Activate Trial](resources/activate-trial.gif)
 
-1. Provide your business email address.
-1. Select the deployment region closest to you. **Important:** Remember your selection. You will need it in a later step.
-1. Agree to the Service License Agreement and click **Sign up**.
-1. Check your inbox for your verification email. Click **Activate account** to be taken to the last account setup page.
-
-    ![Activate Trial](resources/activate-sumo-trial-account.png)
-
-1. Fill out the form and click **Activate**.
-
-    ![Activate Trial](resources/activate-trial.gif)
-
-1. Click the 'x' at the top right of the *Welcome to Sumo Logic* web page. You will not need to follow the in-application guide.
-
-Congratulations! You now have a trial account.
 
 ## Step 2 - Create a Sumo Logic access key
 Create an access key to programatically manage your Sumo Logic account following these instructions: [Manage all users’ access keys on Access Keys page](https://help.sumologic.com/Manage/Security/Access-Keys#manage-all-users%E2%80%99-access-keys-on-access-keys-page).
+**Important:** Copy your access ID and key to another location. You will need them in a later step.
 
 ![Access Key](resources/create-access-key.gif)
 
-**Important:** Copy your access ID and key to another location. You will need them in a later step.
 
 ## Step 3 - Create a GitHub personal access token
 
@@ -73,12 +52,10 @@ In order to create a webhook that will send data to your Sumo Logic account, the
 
 ## Step 4 - Run the automation
 
-Run a Terraform script to automatically create all the necessary resources to ingest GitHub data into Sumo Logic.
-
 Run the following command:
 
 ```
-sh -c "$(curl -sSL https://raw.githubusercontent.com/ccaum/sumologic-solution-templates/github_getting_started_guide/software-development-optimization-terraform/scripts/getting-started)" -- github
+sh -c "$(curl -sSL https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/github_getting_started_guide/software-development-optimization-terraform/scripts/getting-started)" -- github
 ```
 
 Enter your GitHub and Sumo Logic information at the prompts:
