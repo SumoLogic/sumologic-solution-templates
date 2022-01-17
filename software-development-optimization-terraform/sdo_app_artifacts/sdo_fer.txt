@@ -8,12 +8,9 @@ repository_name, link, status, commit_id, datetime, target_branch, user,
 title
 | commit_id as trace_id
 | "n/a" as team
-| concat("build number ", title, ". Commiit link ", link) as message 
-| parse regex field=datetime "(?<dateTime_epoch>[\S]+)
-(?<datetime>[\S]+)"
-| concat(datetime_epoch,"T",dateTime) as datetime_epoch
-| parseDate(datetime_epoch, "yyyy-MM-dd'T'HH:mm:ss") as datetime_epoch
-| if (status matches "0", "Success", "Failed") as status
+| "n/a" as service
+| concat("build number ", title, ". Commit link ", link) as message
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss","etc/utc") as datetime_epoch | if (status matches "0", "Success", "Failed") as status
 | "deploy" as event_type
 "
       },
@@ -33,7 +30,7 @@ target_branch, repository_name, commit_id
 |where toLowerCase(job_type) matches ("*deploy*")
 |json "custom_data.env","custom_data.team","custom_data.service","workflows.job_id","user.login","build_url","start_time","branch","outcome","reponame","vcs_revision","job_name","messages","build_num" as environment_name,team,service,trace_id,user,link,datetime,target_branch,job_status,repository_name,commit_id,job_name,message,job_num nodrop
 | if(job_status == "success", "Success", "Failed") as status
-| toLong(parseDate(datetime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")) as datetime_epoch
+| toLong(parseDate(datetime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'","etc/utc")) as datetime_epoch
 | concat(job_type, " # ",job_num) as title
 |"deploy" as event_type"
       },
@@ -46,7 +43,7 @@ target_branch, repository_name, commit_id
 | parse regex field=commit_link "\/commit\/(?<commit_id>[^\"]+)"
 | commit_id as trace_id
 | service as repository_name
-| parseDate(datetime, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss ZZZZ","etc/utc") as datetime_epoch
 | toLong(datetime_epoch) as datetime_epoch
 | if(status matches "success","Success",if(status matches "failed","Failed",status)) as status
 | "deploy" as event_type
@@ -58,38 +55,38 @@ target_branch, repository_name, commit_id
     "Pull Request": {
       "Github": {
         "Scope": "_sourceCategory = github/content %"x-github-event"=pull_request",
-        "Parse": "json "action", "pull_request.title", "pull_request.created_at", "pull_request.merged_at" ,"repository.name" ,"pull_request.merged", "pull_request.html_url", "pull_request.merge_commit_sha", "pull_request.base.ref" , "pull_request.user.login",
-"pull_request.labels[0].name", "pull_request.requested_reviewers[*].login" as action, title, dateTime, closeddate ,repository_name,  merge, link, commit_id, target_branch ,user, service, reviewers nodrop
- | where action in ("closed", "opened") 
- | parseDate(dateTime, "yyyy-MM-dd'T'HH:mm:ss") as dateTime_epoch
- | if(action matches "closed" and merge matches "true", "merged", if(action matches "closed" and merge matches "false", "declined", if (action matches "opened", "created", "other"  ))) as status
-   | if (status="merged", parseDate(closeddate, "yyyy-MM-dd'T'HH:mm:ss") , 000000000 ) as closeddate_epoch
- | toLong(closeddate_epoch)
- | "pull_request" as event_type
+        "Parse": "json "action", "pull_request.title", "pull_request.created_at", "pull_request.merged_at" ,"repository.name" ,"pull_request.merged", "pull_request.html_url", "pull_request.merge_commit_sha", "pull_request.base.ref" , "pull_request.user.login", "pull_request.labels[0].name", "pull_request.requested_reviewers[*].login","pull_request.head.sha" as action, title, dateTime, closeddate ,repository_name,  merge, link, commit_id, target_branch ,user, service, reviewers, head_commit_id nodrop
+| where action in ("closed", "opened") 
+| parseDate(dateTime, "yyyy-MM-dd'T'HH:mm:ss", "etc/utc") as dateTime_epoch
+| if(action matches "closed" and merge matches "true", "merged", if(action matches "closed" and merge matches "false", "declined", if (action matches "opened", "created", "other"  ))) as status
+| if (status="merged", parseDate(closeddate, "yyyy-MM-dd'T'HH:mm:ss", "etc/utc") , 000000000 ) as closeddate_epoch
+| toLong(closeddate_epoch)
+| "n/a" as team
+| "pull_request" as event_type
 "
       },
       "Bitbucket": {
         "Scope": "_sourceCategory=Labs/bitbucket %"x-event-key"=pullrequest:*",
         "Parse": "json "pullrequest.title", "pullrequest.destination.repository.full_name",  "pullrequest.destination.branch.name", "pullrequest.created_on", "pullrequest.author.display_name",  "pullrequest.state", 
-"pullrequest.links.html.href", "pullrequest.merge_commit.hash", "pullrequest.reviewers[*].display_name", "pullrequest.updated_on" as title, repository_name, target_branch, dateTime, user, action, link,
-commit_id, reviewers, closeddate nodrop
-| parse regex field= datetime "(?<datetime_epoch>\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d)"  nodrop   
-| parse regex field= closeddate
-"(?<closeddate_epoch>\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d)"  nodrop   
-            | parseDate(datetime_epoch, "yyyy-MM-dd'T'HH:mm:ss") as datetime_epoch
-            | parseDate(closeddate_epoch, "yyyy-MM-dd'T'HH:mm:ss") as closeddate_epoch
-            | parse regex field=%"x-event-key" ".+:(?<status>.+)"
-            | if (status matches "created", "created", if(status matches "fulfilled", "merged", if(status matches "rejected", "declined", "other"))) as status 
-            | "pull_request" as event_type
+"pullrequest.links.html.href", "pullrequest.merge_commit.hash", "pullrequest.reviewers[*].display_name", "pullrequest.updated_on", "pullrequest.source.commit.hash" as title, repository_name, target_branch, dateTime, user, action, link,
+commit_id, reviewers, updated_date, head_commit_id nodrop
+| parseDate(dateTime, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as datetime_epoch
+| parse regex field=%"x-event-key" ".+:(?<status>.+)"
+| if (status matches "created", "created", if(status matches "fulfilled", "merged", if(status matches "rejected", "declined", "other"))) as status 
+| if(status = "created", "n/a", updated_date) as closeddate
+| if(closeddate = "n/a", 0, parseDate(closeddate, "yyyy-MM-dd'T'HH:mm:ss","etc/utc")) as closeddate_epoch
+| "n/a" as service
+| "n/a" as team
+| "pull_request" as event_type
 "
       },
      "Gitlab": {
         "Scope": "_sourceCategory="sumo/gitlab" %"x-gitlab-event"="Merge Request Hook" ",
-        "Parse": "json "object_attributes.action","object_attributes.state" ,"object_attributes.title", "object_attributes.created_at","object_attributes.updated_at","user.name","project.name","object_attributes.target_branch" ,"object_attributes.url","assignees[*].name","object_attributes.merge_commit_sha","repository.name","project.path_with_namespace"  as action,status, title,createddatetime_epoch , updateddatetime_epoch,user,project_name,target_branch,link,reviewers,commit_id,repository_name,team nodrop
-|  parse regex field=team "(?<team>.+)\/.+" 
+        "Parse": " json "object_attributes.action","object_attributes.state" ,"object_attributes.title", "object_attributes.created_at","object_attributes.updated_at","user.name","project.name","object_attributes.target_branch" ,"object_attributes.url","assignees[*].name","object_attributes.merge_commit_sha","repository.name","project.path_with_namespace","object_attributes.last_commit.id"  as action,status, title,createddatetime, updateddatetime_epoch,user,project_name,target_branch,link,reviewers,commit_id,repository_name,team, head_commit_id nodrop
+| parse regex field=team "(?<team>.+)\/.+" 
 | if (status matches "opened", "created", if(status matches "merged", "merged", if(status matches "closed", "declined", "other"))) as status
-| parseDate(createddatetime_epoch, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
-| parseDate(updateddatetime_epoch, "yyyy-MM-dd HH:mm:ss") as updateddatetime_epoch
+| parseDate(createddatetime, "yyyy-MM-dd HH:mm:ss",”etc/utc”) as datetime_epoch
+| parseDate(updateddatetime_epoch, "yyyy-MM-dd HH:mm:ss",”etc/utc”) as updateddatetime_epoch
 |if(status in ("declined","merged") ,updateddatetime_epoch,000000000)as  closeddate_epoch
 | project_name as service
 | toLong(datetime_epoch)
@@ -120,8 +117,8 @@ commit_id, reviewers, closeddate nodrop
 | project_name as service
 | substring(issue_type,1,length(issue_type)-1) as issue_type
 |if (issue_type matches "*incident*","incident","issue") as issue_type
-| parseDate(datetime, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
-| if (isNull(closeddate) , 00000000000, parseDate(closedDate, "yyyy-MM-dd HH:mm:ss")) as closeddate_epoch
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss","etc/utc") as datetime_epoch
+| if (isNull(closeddate) , 00000000000, parseDate(closedDate, "yyyy-MM-dd HH:mm:ss","etc/utc")) as closeddate_epoch
 | if(issue_status matches "opened","To Do",if(issue_status matches "closed","Complete",issue_status)) as issue_status
 | toLong(datetime_epoch) as datetime_epoch
 | toLong(closeddate_epoch) as closeddate_epoch
@@ -157,7 +154,7 @@ commit_id, reviewers, closeddate nodrop
 | "n/a" as team
 | parse regex field= datetime
 "(?<datetime_epoch>\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d)"  nodrop   
-| parseDate(datetime_epoch, "yyyy-MM-dd'T'HH:mm:ss") as datetime_epoch
+| parseDate(datetime_epoch, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as datetime_epoch
 | where status in ("SUCCESSFUL", "FAILED")
 | "build" as event_type
 "
@@ -183,7 +180,7 @@ commit_id, reviewers, closeddate nodrop
 |concat("build ",build_name," ",status) as message
 |concat("pipeline # ",pipeline_id) as title
 | concat(homepage,"/-/jobs/",trace_id) as link
-| parseDate(datetime, "yyyy-MM-dd HH:mm:ss") as datetime_epoch
+| parseDate(datetime, "yyyy-MM-dd HH:mm:ss","etc/utc") as datetime_epoch
 | toLong(datetime_epoch) as datetime_epoch
 | if(status matches "success","Success",if(status matches "failed","Failed",status)) as status
 | if(isEmpty(environment_name),"n/a",environment_name) as environment_name
@@ -222,6 +219,55 @@ link
 "
       }
     }
+  },
+  {
+    "Push" : {
+      "Bitbucket" : {
+        "Scope": "_sourceCategory="Labs/bitbucket" %"x-event-key" = "repo:push"",
+        "Parse": "json "push.changes[0].commits[1].hash" as head_commit_id
+| json "push.changes[0].commits[1].date" as head_commit_datetime
+| json "push.changes[0].commits[1].message" as head_commit_message
+| parseDate(head_commit_datetime, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as head_commit_epoch
+| json "push.changes[0].commits[(@.length-1)].hash" as base_commit_id
+| json "push.changes[0].commits[(@.length-1)].date" as base_commit_datetime
+| json "push.changes[0].commits[(@.length-1)].message" as base_commit_message
+| parseDate(base_commit_datetime, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as base_commit_epoch
+| json "actor.display_name","repository.name" as user,repository_name
+| "n/a" as service
+| "n/a" as team
+| "push" as event_type
+"
+      },
+      "Github" : {
+        "Scope": "_sourceCategory = github/content %"x-github-event" = "push"",
+        "Parse": " json "commits[(@.length-2)].id" as head_commit_id
+| json "commits[(@.length-2)].timestamp" as head_commit_datetime
+| json "commits[(@.length-2)].message" as head_commit_message
+| parseDate(head_commit_datetime, "yyyy-MM-dd'T'HH:mm:ssXXX","etc/utc") as head_commit_epoch
+| json "commits[0].id" as base_commit_id
+| json "commits[0].timestamp" as base_commit_datetime
+| json "commits[0].message" as base_commit_message
+| parseDate(base_commit_datetime, "yyyy-MM-dd'T'HH:mm:ssXXX","etc/utc") as base_commit_epoch
+| json "repository.full_name","sender.login" as repository_name,user
+| if (isEmpty(service), "n/a",service) as service
+| "n/a" as team
+| "push" as event_type
+"
+      }
+      "Gitlab" : {
+        "Scope": "_sourceCategory="sumo/gitlab" %"x-gitlab-event" = "Push Hook"",
+        "Parse": " json "commits[(@.length-2)].id" as head_commit_id
+| json "commits[(@.length-2)].timestamp" as head_commit_datetime
+| json "commits[(@.length-2)].message" as head_commit_message
+| parseDate(head_commit_datetime, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as head_commit_epoch
+| json "commits[0].id" as base_commit_id
+| json "commits[0].timestamp" as base_commit_datetime
+| json "commits[0].message" as base_commit_message
+| parseDate(base_commit_datetime, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as base_commit_epoch
+| json "repository.name","user_name" as repository_name,user
+| "push" as event_type
+"
+      }
+    }
   }
-
 ]

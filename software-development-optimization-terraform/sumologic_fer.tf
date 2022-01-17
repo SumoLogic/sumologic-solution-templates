@@ -9,6 +9,15 @@ resource "sumologic_field_extraction_rule" "github_pr_fer" {
   enabled          = true
 }
 
+resource "sumologic_field_extraction_rule" "github_push_fer" {
+  count            = "${var.install_github}" == "fer" || "${var.install_github}" == "collection" || "${var.install_github}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.github,restapi_object.github_field]
+  name             = "SDO - Github Push"
+  scope            = "_sourceCategory=${var.github_sc} ${var.github_push_fer_scope}"
+  parse_expression = var.github_push_fer_parse
+  enabled          = true
+}
+
 resource "sumologic_field_extraction_rule" "jenkins_build_fer" {
   count            = "${var.install_jenkins}" == "fer" || "${var.install_jenkins}" == "collection" || "${var.install_jenkins}" == "all" ? 1 : 0
   depends_on       = [sumologic_http_source.jenkins]
@@ -71,6 +80,15 @@ resource "sumologic_field_extraction_rule" "bitbucket_deploy_fer" {
   enabled          = true
 }
 
+resource "sumologic_field_extraction_rule" "bitbucket_push_fer" {
+  count            = "${var.install_bitbucket_cloud}" == "fer" || "${var.install_bitbucket_cloud}" == "collection" || "${var.install_bitbucket_cloud}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.bitbucket_cloud,restapi_object.bitbucket_field]
+  name             = "SDO - Bitbucket Push"
+  scope            = "_sourceCategory=${var.bitbucket_sc} ${var.bitbucket_push_fer_scope}"
+  parse_expression = var.bitbucket_push_fer_parse
+  enabled          = true
+}
+
 resource "sumologic_field_extraction_rule" "jira_issues_fer" {
   count            = "${var.install_jira_cloud}" == "fer" || "${var.install_jira_cloud}" == "collection" || "${var.install_jira_cloud}" == "all" || "${var.install_jira_server}" == "fer" || "${var.install_jira_server}" == "collection" || "${var.install_jira_server}" == "all" ? 1 : 0
   name             = "SDO - Jira Issues"
@@ -122,6 +140,15 @@ resource "sumologic_field_extraction_rule" "gitlab_issue_fer" {
   name             = "SDO - Gitlab Issue"
   scope            = "_sourceCategory=${var.gitlab_sc} ${var.gitlab_issue_request_fer_scope}"
   parse_expression = var.gitlab_issue_request_fer_parse
+  enabled          = true
+}
+
+resource "sumologic_field_extraction_rule" "gitlab_push_fer" {
+  count            = "${var.install_gitlab}" == "fer" || "${var.install_gitlab}" == "collection" || "${var.install_gitlab}" == "all" ? 1 : 0
+  depends_on       = [sumologic_http_source.gitlab,restapi_object.gitlab_field]
+  name             = "SDO - Gitlab Push"
+  scope            = "_sourceCategory=${var.gitlab_sc} ${var.gitlab_push_fer_scope}"
+  parse_expression = var.gitlab_push_fer_parse
   enabled          = true
 }
 

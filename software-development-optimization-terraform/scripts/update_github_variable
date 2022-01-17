@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+###############################################################################
+# This function sets variable values in the github.auto.tfvars file.
+# It accepts exactly two arguments
+#  1st - the name of the variable to set
+#  2nd - the value of the variable
+setting=$1
+value=$2
+
+if [ "$setting" == "" ] || [ "$value" == "" ]; then
+  echo "Must provide two arguments. 1st: The variable to set; 2nd: The variable's value"
+  exit 1
+fi
+
+setting_string=`grep "^$setting\s.*" ./github.auto.tfvars`
+if [ "$setting_string" == "" ]; then
+  echo "Could not find setting $setting in sumologic.auto.tfvars"
+  exit 1
+fi
+
+new_string=`echo "$setting_string" | sed "s/\".*\"/\"$value\"/"`
+
+sed  -i "" "s/$setting_string/$new_string/" ./github.auto.tfvars
