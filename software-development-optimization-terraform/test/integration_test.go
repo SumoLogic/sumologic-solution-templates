@@ -153,6 +153,8 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicBitbucketBuildFER(t, terraformOptions)
 	// Validate if the Bitbucket Deploy FER is added successfully
 	validateSumoLogicBitbucketDeployFER(t, terraformOptions)
+	// Validate if the Bitbucket Push FER is added successfully
+	validateSumoLogicBitbucketPushFER(t, terraformOptions)
 	// Validate if the Jenkins Build FER is added successfully
 	validateSumoLogicJenkinsBuildFER(t, terraformOptions)
 	// Validate if the Jenkins Deploy FER is added successfully
@@ -161,6 +163,8 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicPagerdutyAlertsFER(t, terraformOptions)
 	// Validate if the Github PR FER is added successfully
 	validateSumoLogicGithubPrFER(t, terraformOptions)
+	// Validate if the Github Push FER is added successfully
+	validateSumoLogicGithubPushFER(t, terraformOptions)
 	// Validate if the Gitlab PR FER is added successfully
 	validateSumoLogicGitlabPrFER(t, terraformOptions)
 	// Validate if the Gitlab Build FER is added successfully
@@ -168,7 +172,9 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the Gitlab Deploy FER is added successfully
 	validateSumoLogicGitlabDeployFER(t, terraformOptions)	
 	// Validate if the Gitlab Issue FER is added successfully
-	validateSumoLogicGitlabIssueFER(t, terraformOptions)			
+	validateSumoLogicGitlabIssueFER(t, terraformOptions)
+	// Validate if the Gitlab Push FER is added successfully
+	validateSumoLogicGitlabPushFER(t, terraformOptions)			
 	// Validate if the Opsgenie Alerts FER is added successfully
 	validateSumoLogicOpsgenieAlertsFER(t, terraformOptions)
 	// Validate if the Jira Cloud FER is added successfully
@@ -461,6 +467,17 @@ func validateSumoLogicGithubPrFER(t *testing.T, terraformOptions *terraform.Opti
 	}
 }
 
+func validateSumoLogicGithubPushFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "github_push_fer_id")
+	if ferID != "[]" && getProperty("install_github") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
 func validateSumoLogicGitlabPrFER(t *testing.T, terraformOptions *terraform.Options) {
 
 	// Run `terraform output` to get the value of an output variable
@@ -498,6 +515,17 @@ func validateSumoLogicGitlabIssueFER(t *testing.T, terraformOptions *terraform.O
 
 	// Run `terraform output` to get the value of an output variable
 	ferID := terraform.Output(t, terraformOptions, "gitlab_issue_fer_id")
+	if ferID != "[]" && getProperty("install_gitlab") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicGitlabPushFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "gitlab_push_fer_id")
 	if ferID != "[]" && getProperty("install_gitlab") == "true" {
 		ferID = strings.Split(ferID, "\"")[1]
 		// Verify that we get back a 200 OK
@@ -586,6 +614,17 @@ func validateSumoLogicBitbucketBuildFER(t *testing.T, terraformOptions *terrafor
 
 	// Run `terraform output` to get the value of an output variable
 	ferID := terraform.Output(t, terraformOptions, "bitbucket_build_fer_id")
+	if ferID != "[]" && getProperty("install_bitbucket_cloud") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicBitbucketPushFER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "bitbucket_push_fer_id")
 	if ferID != "[]" && getProperty("install_bitbucket_cloud") == "true" {
 		ferID = strings.Split(ferID, "\"")[1]
 		// Verify that we get back a 200 OK
