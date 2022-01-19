@@ -5,12 +5,12 @@ output "sumologic_field_overview" {
 
 output "sumologic_content_overview" {
   value       = module.overview_app.sumologic_content
-  description = "This output contains alb App."
+  description = "This output contains overview App."
 }
 
 output "sumologic_field_alb" {
   value       = module.alb_app.sumologic_field
-  description = "This output contains fields required for overview app."
+  description = "This output contains fields required for alb app."
 }
 
 output "sumologic_field_extraction_rule_alb" {
@@ -25,17 +25,17 @@ output "sumologic_content_alb" {
 
 output "sumologic_field_elb" {
   value       = module.elb_app.sumologic_field
-  description = "This output contains fields required for overview app."
+  description = "This output contains fields required for classic elb app."
 }
 
 output "sumologic_field_extraction_rule_elb" {
   value       = module.elb_app.sumologic_field_extraction_rule
-  description = "This output contains Field Extraction rules required for alb app."
+  description = "This output contains Field Extraction rules required for classic elb app."
 }
 
 output "sumologic_content_elb" {
   value       = module.elb_app.sumologic_content
-  description = "This output contains alb App."
+  description = "This output contains classic elb App."
 }
 
 output "sumologic_field_dynamodb" {
