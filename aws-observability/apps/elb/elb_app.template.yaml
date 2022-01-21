@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.3.1: Template to setup the ALB app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.3.1: Template to setup the ELB classic app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -30,10 +30,10 @@ Metadata:
           - Section4aCloudWatchExistingSourceAPIUrl
 
       - Label:
-          default: "App Details - ALB Source Log Source Configuration"
+          default: "App Details - ELB classic Source Log Source Configuration"
         Parameters:
-          - Section5aALBLogsAPIUrl
-          - Section5bALBLogsSourceName
+          - Section5aELBLogsAPIUrl
+          - Section5bELBLogsSourceName
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
@@ -64,10 +64,10 @@ Metadata:
       Section4aCloudWatchExistingSourceAPIUrl:
         default: "Existing Sumo Logic CloudWatch Metrics Source API URL"
 
-      Section5aALBLogsAPIUrl:
-        default: "Existing Sumo Logic ALB Logs Source API URL"
-      Section5bALBLogsSourceName:
-        default: "Provide the ALB Logs Source Name for Field Extraction Rule"
+      Section5aELBLogsAPIUrl:
+        default: "Existing Sumo Logic ELB Logs Source API URL"
+      Section5bELBLogsSourceName:
+        default: "Provide the ELB Logs Source Name for Field Extraction Rule"
 
       Section6aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
@@ -115,7 +115,7 @@ Parameters:
 
   Section3aInstallApp:
     Type: String
-    Description: "Yes - Installs the ALB App for the Sumo Logic AWS Observability Solution.
+    Description: "Yes - Installs the ELB classic App for the Sumo Logic AWS Observability Solution.
                   No - Skips the installation of this app."
     Default: 'Yes'
     AllowedValues:
@@ -124,16 +124,16 @@ Parameters:
 
   Section4aCloudWatchExistingSourceAPIUrl:
     Type: String
-    Description: "Required when already collecting ALB Metrics. Provide the existing Sumo Logic ALB Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Description: "Required when already collecting ELB Metrics. Provide the existing Sumo Logic ALB Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
 
-  Section5aALBLogsAPIUrl:
+  Section5aELBLogsAPIUrl:
     Type: String
-    Description: "Required when already collecting ALB logs. Provide the existing Sumo Logic ALB Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Description: "Required when already collecting ELB logs. Provide the existing Sumo Logic ELB Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
-  Section5bALBLogsSourceName:
+  Section5bELBLogsSourceName:
     Type: String
-    Description: "Provide a ALB Logs Source Name for Field Extraction Rule."
+    Description: "Provide a ELB Logs Source Name for Field Extraction Rule."
     Default: ""
 
   Section6aParentStackLambdaARN:
@@ -152,13 +152,13 @@ Parameters:
 Conditions:
   install_app: !Equals [!Ref Section3aInstallApp, 'Yes']
 
-  update_alb_logs_source: !Not [!Equals [!Ref Section5aALBLogsAPIUrl, '']]
+  update_elb_logs_source: !Not [!Equals [!Ref Section5aELBLogsAPIUrl, '']]
 
-  update_alb_metrics_source: !Not [!Equals [!Ref Section4aCloudWatchExistingSourceAPIUrl, '']]
+  update_elb_metrics_source: !Not [!Equals [!Ref Section4aCloudWatchExistingSourceAPIUrl, '']]
 
   create_fer: !Or
-    - !Condition update_alb_logs_source
-    - !Not [!Equals [!Ref Section5bALBLogsSourceName, '']]
+    - !Condition update_elb_logs_source
+    - !Not [!Equals [!Ref Section5bELBLogsSourceName, '']]
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -273,84 +273,65 @@ Resources:
     Properties:
       ServiceToken: !Ref Section6aParentStackLambdaARN
       Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Alb App"
+      AppName: "AWS Observability Classic Load Balancer App"
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       FolderName: !Sub "AWS Observability ${Section6cNestedTemplateVersion} "
       RetainOldAppOnUpdate: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
-      AppJsonS3Url: !Sub "https://${Section6bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section6cNestedTemplateVersion}/appjson/Alb-App.json"
+      AppJsonS3Url: !Sub "https://${Section6bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section6cNestedTemplateVersion}/appjson/Classic-lb-App.json"
 
-  SumoALBLogsUpdateSource:
+  SumoELBLogsUpdateSource:
     Type: Custom::SumoLogicUpdateFields
-    Condition: update_alb_logs_source
+    Condition: update_elb_logs_source
     Properties:
       ServiceToken: !Ref Section6aParentStackLambdaARN
       Region: !Ref "AWS::Region"
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
-      SourceApiUrl: !Ref Section5aALBLogsAPIUrl
+      SourceApiUrl: !Ref Section5aELBLogsAPIUrl
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
         account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-        namespace: "AWS/ApplicationELB"
+        namespace: "AWS/ELB"
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
 
-  SumoALBMetricsUpdateSource:
-    Type: Custom::SumoLogicUpdateFields
-    Condition: update_alb_metrics_source
-    Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
-      Region: !Ref "AWS::Region"
-      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
-      SourceApiUrl: !Ref Section4aCloudWatchExistingSourceAPIUrl
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-      Fields:
-        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-        accountid: !Ref "AWS::AccountId"
-
-  AlbLogsFieldExtractionRule:
+  ElbLogsFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
-    DependsOn: AddLoadBalancerField
+    DependsOn: AddLoadBalancerNameField
     Properties:
       ServiceToken: !Ref Section6aParentStackLambdaARN
       RemoveOnDeleteStack: false
-      FieldExtractionRuleName: "AwsObservabilityAlbAccessLogsFER"
+      FieldExtractionRuleName: "AwsObservabilityElbAccessLogsFER"
       FieldExtractionRuleScope: !Join
         - ""
         - - "(_source="
-          - !If [update_alb_logs_source, !Sub "\"${SumoALBLogsUpdateSource.source_name}\"", !Ref Section5bALBLogsSourceName]
+          - !If [update_elb_logs_source, !Sub "\"${SumoELBLogsUpdateSource.source_name}\"", !Ref Section5bELBLogsSourceName]
           - ")"
-      FieldExtractionRuleParseExpression: '| parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
-                                            | tolowercase(loadbalancer) as loadbalancer
-                                            | fields loadbalancer'
+      FieldExtractionRuleParseExpression: '| parse "* * * * * * * * * * * \"*\" \"*\" * *" as datetime, loadbalancername, client, backend, request_processing_time, backend_processing_time, response_processing_time, elb_status_code, backend_status_code, received_bytes, sent_bytes, request,user_agent,ssl_cipher,ssl_protocol
+                                            | tolowercase(loadbalancername) as loadbalancername
+                                            | fields loadbalancername'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
-  AddLoadBalancerField:
+  AddLoadBalancerNameField:
     Type: Custom::SumoLogicFieldsSchema
     Properties:
       ServiceToken: !Ref Section6aParentStackLambdaARN
-      FieldName: "loadbalancer"
+      FieldName: "loadbalancername"
       RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
 Outputs:
-  ExistingMetricSourceName:
-    Description: "Existing CloudWatch Metrics Source Name"
-    Condition: update_alb_metrics_source
-    Value: !GetAtt SumoALBMetricsUpdateSource.source_name
   ExistingLogSourceName:
-    Description: "Existing ALB Logs Source Name"
-    Condition: update_alb_logs_source
-    Value: !GetAtt SumoALBLogsUpdateSource.source_name
+    Description: "Existing ELB Logs Source Name"
+    Condition: update_elb_logs_source
+    Value: !GetAtt SumoELBLogsUpdateSource.source_name

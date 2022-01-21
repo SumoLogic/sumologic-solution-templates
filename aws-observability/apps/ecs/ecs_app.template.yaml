@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.3.0: Template to setup the ECS app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.3.1: Template to setup the ECS app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -167,6 +167,7 @@ Resources:
                                            | json field=requestParameters "cluster" as clustername nodrop
                                            | where eventSource = "ecs.amazonaws.com"
                                            | "aws/ecs" as namespace
+                                           | tolowercase(clustername) as clustername
                                            | fields region, namespace, clustername, accountid'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
