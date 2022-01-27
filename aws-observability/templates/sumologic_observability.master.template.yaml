@@ -70,6 +70,12 @@ Metadata:
           - Section9dELBS3LogsBucketName
           - Section9eELBS3BucketPathExpression
 
+      - Label:
+          default: "10. App Installation and Sharing"
+        Parameters:
+          - Section10aAppInstallLocation
+          - Section10bShare
+
     ParameterLabels:
       Section1aSumoLogicDeployment:
         default: "Sumo Logic Deployment Name"
@@ -139,6 +145,11 @@ Metadata:
         default: "Amazon S3 Bucket Name"
       Section9eELBS3BucketPathExpression:
         default: "Path Expression for existing ELB logs"
+
+      Section10aAppInstallLocation:
+        default: "Location where you want the App to be Installed"
+      Section10bShare:
+        default: "Do you want to share App with whole organisation"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -347,6 +358,23 @@ Parameters:
     Description: "This is required in case the above existing bucket is already configured to receive ELB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/elasticloadbalancing/*"
     Default: "*AWSLogs/*/classicloadbalancing/*"
 
+  Section10aAppInstallLocation:
+    Type: String
+    Description: "Personal - Installs App in user's Personal folder.
+                  admin - Installs App in admin Recommended Folder"
+    Default: 'Personal'
+    AllowedValues:
+      - 'Personal'
+      - 'admin'
+  Section10bShare:
+    Type: String
+    Description: "True - Installed App will have view permission to all members of the organisation.
+                  False - Installed App will be visible to user installing the solution."
+    Default: 'True'
+    AllowedValues:
+      - 'True'
+      - 'False'
+
 Conditions:
   # Condition for Metrics Source
   install_inventory_source: !Or
@@ -538,6 +566,9 @@ Resources:
         Section3cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section4aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section4bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoAlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -560,6 +591,9 @@ Resources:
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section6bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section6cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section7aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section7bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
   
   sumoElbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -582,6 +616,9 @@ Resources:
         Section6aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section6bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section6cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section7aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section7bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoDynamoDBMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -602,6 +639,9 @@ Resources:
         Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section4bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoRdsMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -622,6 +662,9 @@ Resources:
         Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section4bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoApiGatewayMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -642,6 +685,9 @@ Resources:
         Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section4bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
@@ -672,6 +718,9 @@ Resources:
         Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section5bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section5cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section6aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section6bShare: !Ref Section10bShare
+        Section1fOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -695,6 +744,9 @@ Resources:
         Section7aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section7bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section7cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section8aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section8bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoECSMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -715,6 +767,9 @@ Resources:
         Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section4bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoElasticCacheMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -735,6 +790,9 @@ Resources:
         Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section4bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoNlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -755,3 +813,6 @@ Resources:
         Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section4bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
