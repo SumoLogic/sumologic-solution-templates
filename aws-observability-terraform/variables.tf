@@ -62,3 +62,16 @@ variable "aws_account_alias" {
     error_message = "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
   }
 }
+
+variable "sumologic_folder_installation_location" {
+  type        = string
+  description = "Indicates where to install the app folder. Enter Personal for installing in personal folder and Admin for installing in Admin folder."
+  validation {
+    condition = contains([
+      "Personal",
+      "Admin"], var.sumologic_folder_installation_location)
+    error_message = "The value must be one of Personal or Admin."
+  }
+  default     = "Personal"
+
+}
