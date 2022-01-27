@@ -12,6 +12,7 @@ Metadata:
           - Section1bSumoAccessID
           - Section1cSumoAccessKey
           - Section1dRemoveSumoResourcesOnDeleteStack
+          - Section1eOrgId
 
       - Label:
           default: "Sumo Logic AWS Resources Tagging Configuration (Required)"
@@ -48,6 +49,12 @@ Metadata:
           - Section7bTemplatesBucketName
           - Section7cNestedTemplateVersion
 
+      - Label:
+          default: "App Installation and sharing"
+        Parameters:
+          - Section8aAppInstallLocation
+          - Section8bShare
+
     ParameterLabels:
       Section1aSumoDeployment:
         default: "Sumo Logic Deployment Name"
@@ -57,6 +64,8 @@ Metadata:
         default: "Sumo Logic Access Key"
       Section1dRemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
+      Section1eOrgId:
+        default: "Sumo Logic Organization Id"
 
       Section2aAccountAlias:
         default: "Alias for AWS Account Identification. Please leave this blank if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
@@ -87,6 +96,11 @@ Metadata:
       Section7cNestedTemplateVersion:
         default: "Nested Templates Version"
 
+      Section8aAppInstallLocation:
+        default: "App Installation location"
+      Section8bShare:
+        default: "Share"
+
 Parameters:
   Section1aSumoDeployment:
     Type: String
@@ -111,6 +125,11 @@ Parameters:
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
+  Section1eOrgId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
   Section2aAccountAlias:
     Type: String
@@ -169,6 +188,23 @@ Parameters:
     Description: "Provide the version for the nested templates. Default is the latest version."
     AllowedPattern: ".+"
 
+  Section8aAppInstallLocation:
+    Type: String
+    Description: "Personal - Installs App in user's Personal folder.
+                  admin - Installs App in admin Recommended Folder"
+    Default: 'Personal'
+    AllowedValues:
+      - 'Personal'
+      - 'admin'
+  Section8bShare:
+    Type: String
+    Description: "True - Installed App will be visible to all members of the organisation.
+                  False - Installed App will be visible to you only."
+    Default: 'True'
+    AllowedValues:
+      - 'True'
+      - 'False'
+
 Conditions:
   install_app: !Equals [!Ref Section3aInstallApp, 'Yes']
 
@@ -214,6 +250,9 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       AppJsonS3Url: !Sub "https://${Section7bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section7cNestedTemplateVersion}/appjson/Lambda-App.json"
+      location: !Ref Section8aAppInstallLocation
+      share: !Ref Section8bShare
+      orgid: !Ref Section1eOrgId
 
   SumoCloudTrailLogsUpdateSource:
     Type: Custom::SumoLogicUpdateFields

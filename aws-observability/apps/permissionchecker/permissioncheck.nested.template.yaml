@@ -12,12 +12,19 @@ Metadata:
           - Section1bSumoLogicAccessID
           - Section1cSumoLogicAccessKey
           - Section1dSumoLogicOrganizationId
+          - Section1eOrgId
 
       - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
           - TemplatesBucketName
           - NestedTemplateVersion
+
+      - Label:
+          default: "App Installation and sharing"
+        Parameters:
+          - Section3aAppInstallLocation
+          - Section3bShare
 
     ParameterLabels:
       Section1aSumoLogicDeployment:
@@ -28,11 +35,18 @@ Metadata:
         default: "Sumo Logic Access Key"
       Section1dSumoLogicOrganizationId:
         default: "Sumo Logic Organization Id"
+      Section1eOrgId:
+        default: "Sumo Logic Organization Id"
 
       TemplatesBucketName:
         default: "Nested Templates Bucket Name"
       NestedTemplateVersion:
         default: "Nested Templates Version"
+
+      Section3aAppInstallLocation:
+        default: "App Installation location"
+      Section3bShare:
+        default: "Share"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -64,6 +78,11 @@ Parameters:
     Type: String
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+  Section1eOrgId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
   TemplatesBucketName:
     Type: String
@@ -73,6 +92,23 @@ Parameters:
     Type: String
     Description: "Provide the version for the nested templates. Default is the latest version."
     AllowedPattern: ".+"
+
+  Section3aAppInstallLocation:
+    Type: String
+    Description: "Personal - Installs App in user's Personal folder.
+                  admin - Installs App in admin Recommended Folder"
+    Default: 'Personal'
+    AllowedValues:
+      - 'Personal'
+      - 'admin'
+  Section3bShare:
+    Type: String
+    Description: "True - Installed App will be visible to all members of the organisation.
+                  False - Installed App will be visible to you only."
+    Default: 'True'
+    AllowedValues:
+      - 'True'
+      - 'False'
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -555,6 +591,9 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
       SumoDeployment: !Ref Section1aSumoLogicDeployment
       AppJsonS3Url: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/appjson/Overview-App.json"
+      location: !Ref Section3aAppInstallLocation
+      share: !Ref Section3bShare
+      orgid: !Ref Section1eOrgId
 
   sumoMonitorAlerts:
     Type: Custom::AlertsMonitor
