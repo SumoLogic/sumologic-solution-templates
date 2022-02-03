@@ -736,7 +736,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -750,7 +751,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -764,7 +766,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -778,7 +781,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -884,29 +888,39 @@
                 {
                     "id": null,
                     "key": "panelpane-3c5b34dda0bbb840",
-                    "title": "Invocations Trend",
-                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"markerSize\":\"0\",\"lineThickness\":\"3\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"Requests\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{functionname}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across All entities\"}}]}",
+                    "title": "Invocations Trend and Cold Starts Trends",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"markerSize\":\"0\",\"lineThickness\":\"3\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"Requests\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{functionname}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across All entities\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"type\":\"column\",\"axisYType\":\"secondary\",\"color\":\"#dfbe2e\",\"name\":\"Cold Starts\"}}],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} functionname={{functionname}} Resource=* | avg by functionname, namespace, region, account",
+                            "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} functionname={{functionname}}  application={{application}} Resource=* | avg by functionname, namespace, region, account,application",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message"
                         },
                         {
-                            "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}} functionname=* Resource=* | avg",
+                            "queryString": "Namespace={{namespace}} metric=Invocations statistic=Sum account={{account}} region={{region}}  application={{application}} functionname=* Resource=* | avg",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}} application={{application}}  \"init duration\"\n\n| _sourceName as logStream | _sourceHost as logGroup\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse  \"REPORT RequestId: *\\tDuration: * ms\\tBilled Duration: * ms\\tMemory Size: * MB\\tMax Memory Used: * MB\\tInit Duration: * ms\\t\\nXRAY TraceId: *\\tSegmentId: *: *\\t\" as reqId, duration, bill_duration, mem_total, mem_used, initDur, traceId, segmentId, isSampled\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 5m \n| count by functionname, _timeslice\n| fillmissing timeslice (5m) in _timeslice, values all in functionname\n| transpose row _timeslice column functionname",
+                            "queryType": "Logs",
+                            "queryKey": "C",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
                             "timeSource": "Message"
                         }
                     ],
@@ -924,7 +938,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as events by src_ip\n| top 10 src_ip by events, src_ip asc",
+                            "queryString": "\"lambda.amazonaws.com\" account={{account}} Namespace={{namespace}} region={{region}} application={{application}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as events by src_ip\n| top 10 src_ip by events, src_ip asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -948,7 +962,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"lambda.amazonaws.com\" \"\\\"eventName\\\":\\\"Invoke\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as invocations by function_version\n| top 10 function_version by invocations, function_version asc",
+                            "queryString": "\"lambda.amazonaws.com\" \"\\\"eventName\\\":\\\"Invoke\\\"\" account={{account}} Namespace={{namespace}} region={{region}} application={{application}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as invocations by function_version\n| top 10 function_version by invocations, function_version asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -972,7 +986,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"lambda.amazonaws.com\" (\"\\\"eventName\\\":\\\"Invoke\\\"\" OR \"\\\"eventName\\\":\\\"AssumedRole\\\"\") account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name in (\"Invoke\", \"AssumedRole\")\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| timeslice 15m\n| count as InvokeFrequency by function_version, _timeslice\n| transpose row _timeslice column function_version",
+                            "queryString": "\"lambda.amazonaws.com\" (\"\\\"eventName\\\":\\\"Invoke\\\"\" OR \"\\\"eventName\\\":\\\"AssumedRole\\\"\") account={{account}} Namespace={{namespace}} region={{region}} application={{application}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name in (\"Invoke\", \"AssumedRole\")\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| timeslice 15m\n| count as InvokeFrequency by function_version, _timeslice\n| transpose row _timeslice column function_version",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -996,7 +1010,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"lambda.amazonaws.com\" \"\\\"eventName\\\":\\\"Invoke\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as activities by caller_type, caller\n| top 10 caller_type, caller  by activities, caller_type asc, caller",
+                            "queryString": "\"lambda.amazonaws.com\" \"\\\"eventName\\\":\\\"Invoke\\\"\" account={{account}} Namespace={{namespace}} region={{region}} application={{application}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as activities by caller_type, caller\n| top 10 caller_type, caller  by activities, caller_type asc, caller",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1020,7 +1034,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId2>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId2>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| json \"requestID\", \"record.requestId\" as RequestId3, RequestId4 nodrop\n| if (isEmpty(RequestId), RequestId2, RequestId) as RequestId | if (isEmpty(RequestId), RequestId3, RequestId) as RequestId | if (isEmpty(RequestId), RequestId4, RequestId) as RequestId\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as frequency by functionname, version, eventStatus, requestId\n| sort by functionname asc\n| limit 100",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}} application={{application}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId2>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId2>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| json \"requestID\", \"record.requestId\" as RequestId3, RequestId4 nodrop\n| if (isEmpty(RequestId), RequestId2, RequestId) as RequestId | if (isEmpty(RequestId), RequestId3, RequestId) as RequestId | if (isEmpty(RequestId), RequestId4, RequestId) as RequestId\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as frequency by functionname, version, eventStatus, requestId\n| sort by functionname asc\n| limit 100",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1044,7 +1058,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"lambda.amazonaws.com\" \"\\\"eventName\\\":\\\"Invoke\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as frequency by functionname, function_version, caller, caller_type, src_ip, Region\n| sort by frequency, functionname, function_version, caller, caller_type, src_ip, Region\n| limit 30 | fields -frequency",
+                            "queryString": "\"lambda.amazonaws.com\" \"\\\"eventName\\\":\\\"Invoke\\\"\" account={{account}} Namespace={{namespace}} region={{region}} application={{application}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\"\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count as frequency by functionname, function_version, caller, caller_type, src_ip, Region\n| sort by frequency, functionname, function_version, caller, caller_type, src_ip, Region\n| limit 30 | fields -frequency",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1068,7 +1082,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count as events by version\n| sort by events, version asc",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}} application={{application}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count as events by version\n| sort by events, version asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1092,7 +1106,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"lambda.amazonaws.com\" \"\\\"eventName\\\":\\\"Invoke\\\"\" account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress \n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\" and !(src_ip matches \"*.amazonaws.com\")\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count by src_ip, event_name\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| where !isnull(latitude)",
+                            "queryString": "\"lambda.amazonaws.com\" \"\\\"eventName\\\":\\\"Invoke\\\"\" account={{account}} Namespace={{namespace}} region={{region}} application={{application}} sourceIPAddress \n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"sourceIPAddress\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"additionalEventData\" as event_name, event_source, Region, user_agent, src_ip, accountId, userIdentity, requestParameters, additionalEventData nodrop\n| json field=userIdentity \"type\", \"userName\", \"invokedBy\", \"arn\" as caller_type, user_name, invoked_by, arn nodrop | json field=requestParameters \"functionName\", \"resource\" as functionname, resource nodrop | json field=additionalEventData \"functionVersion\" as func_version nodrop \n| where event_name = \"Invoke\" and !(src_ip matches \"*.amazonaws.com\")\n| parse regex field=functionname \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<functionname>[\\S]+)$\" nodrop\n| parse field=resource \"arn:aws:lambda:*:function:*\" as f1, functionname2 nodrop\n| if (isEmpty(functionname), functionname2, functionname) as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=func_version \"\\w+:\\w+:\\S+:[\\w-]+:\\S+:\\S+:(?<function_version>[\\S]+:[\\S ]+)$\" nodrop\n| parse field=arn \"arn:aws:*::*:*\" as f1, f2, assumedroleuser nodrop\n| if (isNull(user_name), invoked_by, user_name) as caller\n| if (isNull(invoked_by), user_name, invoked_by) as caller\n| if (isNull(caller), assumedroleuser, caller) as caller\n| count by src_ip, event_name\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| where !isnull(latitude)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1134,7 +1148,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| timeslice 15m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}} application={{application}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| timeslice 15m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1158,7 +1172,7 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count by functionname, version\n| transpose row version column functionname",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}} application={{application}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| count by functionname, version\n| transpose row version column functionname",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1177,12 +1191,12 @@
                     "id": null,
                     "key": "panelPANE-5A94FACABB0B6947",
                     "title": "Requests Pass Vs Fail",
-                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"overrides\":[{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"pie\"}},{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"pie\"}}],\"series\":{}}",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"overrides\":[],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}} application={{application}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1200,15 +1214,25 @@
                 {
                     "id": null,
                     "key": "panelPANE-204391B58D3AD849",
-                    "title": "Function Duration (ms)",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "title": "Function Duration and Init Duration (ms)",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Function Duration\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"Init Duration\"}}]}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n| sum(Duration) as Duration by functionname, _timeslice\n| transpose row _timeslice column functionname",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}} application={{application}} Duration\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n| sum(Duration) as Duration by functionname, _timeslice\n| transpose row _timeslice column functionname",
                             "queryType": "Logs",
                             "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "\naccount={{account}} region={{region}} Namespace={{namespace}} application={{application}} \"init duration\"\n\n| _sourceName as logStream | _sourceHost as logGroup\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n//| where functionname matches \"tcb-se-prod-sweetsfunction*\"\n| parse  \"REPORT RequestId: *\\tDuration: * ms\\tBilled Duration: * ms\\tMemory Size: * MB\\tMax Memory Used: * MB\\tInit Duration: * ms\\t\\nXRAY TraceId: *\\tSegmentId: *: *\\t\" as reqId, duration, bill_duration, mem_total, mem_used, initDur, traceId, segmentId, isSampled\n//| describe(initDur) by functionname\n\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 5m\n| avg(initDur) as initDuration by functionname, _timeslice\n| transpose row _timeslice column functionname",
+                            "queryType": "Logs",
+                            "queryKey": "B",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
@@ -1235,7 +1259,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1249,7 +1274,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1263,7 +1289,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1277,7 +1304,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "application",
+                    "displayName": "application",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "application"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -1558,7 +1601,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1572,7 +1616,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1586,7 +1631,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1600,7 +1646,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -2059,7 +2106,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2073,7 +2121,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2087,7 +2136,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2101,7 +2151,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -2434,7 +2485,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2448,7 +2500,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2462,7 +2515,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2476,7 +2530,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -2808,7 +2863,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2822,7 +2878,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2836,7 +2893,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2850,7 +2908,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -3075,7 +3134,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -3089,7 +3149,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -3103,7 +3164,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -3117,7 +3179,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
