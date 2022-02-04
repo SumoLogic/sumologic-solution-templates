@@ -736,7 +736,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -750,7 +751,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -764,7 +766,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -778,7 +781,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -884,8 +888,8 @@
                 {
                     "id": null,
                     "key": "panelpane-3c5b34dda0bbb840",
-                    "title": "Invocations Trend",
-                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"markerSize\":\"0\",\"lineThickness\":\"3\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"Requests\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{functionname}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across All entities\"}}]}",
+                    "title": "Invocations Trend and Cold Starts Trends",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"markerSize\":\"0\",\"lineThickness\":\"3\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"Requests\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{functionname}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Average Across All entities\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"type\":\"column\",\"axisYType\":\"secondary\",\"color\":\"#dfbe2e\",\"name\":\"Cold Starts\"}}],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
@@ -896,7 +900,7 @@
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message"
                         },
                         {
@@ -906,7 +910,17 @@
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}   \"init duration\"\n\n| _sourceName as logStream | _sourceHost as logGroup\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse  \"REPORT RequestId: *\\tDuration: * ms\\tBilled Duration: * ms\\tMemory Size: * MB\\tMax Memory Used: * MB\\tInit Duration: * ms\\t\\nXRAY TraceId: *\\tSegmentId: *: *\\t\" as reqId, duration, bill_duration, mem_total, mem_used, initDur, traceId, segmentId, isSampled\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 5m \n| count by functionname, _timeslice\n| fillmissing timeslice (5m) in _timeslice, values all in functionname\n| transpose row _timeslice column functionname",
+                            "queryType": "Logs",
+                            "queryKey": "C",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
                             "timeSource": "Message"
                         }
                     ],
@@ -1201,7 +1215,7 @@
                     "id": null,
                     "key": "panelPANE-204391B58D3AD849",
                     "title": "Function Duration (ms)",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Function Duration\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"Init Duration\"}}]}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
@@ -1209,6 +1223,16 @@
                             "queryString": "account={{account}} region={{region}} Namespace={{namespace}} Duration\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 15m\n| sum(Duration) as Duration by functionname, _timeslice\n| transpose row _timeslice column functionname",
                             "queryType": "Logs",
                             "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}  \"init duration\"\n\n| _sourceName as logStream | _sourceHost as logGroup\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n//| where functionname matches \"tcb-se-prod-sweetsfunction*\"\n| parse  \"REPORT RequestId: *\\tDuration: * ms\\tBilled Duration: * ms\\tMemory Size: * MB\\tMax Memory Used: * MB\\tInit Duration: * ms\\t\\nXRAY TraceId: *\\tSegmentId: *: *\\t\" as reqId, duration, bill_duration, mem_total, mem_used, initDur, traceId, segmentId, isSampled\n//| describe(initDur) by functionname\n\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| timeslice 5m\n| avg(initDur) as initDuration by functionname, _timeslice\n| transpose row _timeslice column functionname",
+                            "queryType": "Logs",
+                            "queryKey": "B",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
@@ -1235,7 +1259,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1249,7 +1274,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1263,7 +1289,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1277,7 +1304,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -1558,7 +1586,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1572,7 +1601,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1586,7 +1616,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1600,7 +1631,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -2059,7 +2091,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2073,7 +2106,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2087,7 +2121,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2101,7 +2136,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -2434,7 +2470,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2448,7 +2485,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2462,7 +2500,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2476,7 +2515,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -2808,7 +2848,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2822,7 +2863,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2836,7 +2878,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2850,7 +2893,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -3075,7 +3119,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -3089,7 +3134,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -3103,7 +3149,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -3117,7 +3164,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
