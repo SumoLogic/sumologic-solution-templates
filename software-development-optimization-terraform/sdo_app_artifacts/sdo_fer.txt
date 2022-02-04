@@ -55,9 +55,10 @@ target_branch, repository_name, commit_id
     "Pull Request": {
       "Github": {
         "Scope": "_sourceCategory = github/content %"x-github-event"=pull_request",
-        "Parse": "json "action", "pull_request.title", "pull_request.created_at", "pull_request.merged_at" ,"repository.name" ,"pull_request.merged", "pull_request.html_url", "pull_request.merge_commit_sha", "pull_request.base.ref" , "pull_request.user.login", "pull_request.labels[0].name", "pull_request.requested_reviewers[*].login","pull_request.head.sha" as action, title, dateTime, closeddate ,repository_name,  merge, link, commit_id, target_branch ,user, service, reviewers, head_commit_id nodrop
+        "Parse": "json "action", "pull_request.title", "pull_request.created_at", "pull_request.merged_at" ,"repository.name" ,"pull_request.merged", "pull_request.html_url", "pull_request.merge_commit_sha", "pull_request.base.ref" , "pull_request.user.login", "pull_request.labels[0].name", "pull_request.requested_reviewers[*].login","pull_request.head.sha","pull_request.updated_at"  as action, title, dateTime, closeddate ,repository_name,  merge, link, commit_id, target_branch ,user, service, reviewers, head_commit_id, updated_dateTime nodrop
 | where action in ("closed", "opened") 
 | parseDate(dateTime, "yyyy-MM-dd'T'HH:mm:ss", "etc/utc") as dateTime_epoch
+| parseDate(updated_dateTime, "yyyy-MM-dd'T'HH:mm:ss", "etc/utc") as updateddatetime_epoch
 | if(action matches "closed" and merge matches "true", "merged", if(action matches "closed" and merge matches "false", "declined", if (action matches "opened", "created", "other"  ))) as status
 | if (status="merged", parseDate(closeddate, "yyyy-MM-dd'T'HH:mm:ss", "etc/utc") , 000000000 ) as closeddate_epoch
 | toLong(closeddate_epoch)
@@ -71,6 +72,7 @@ target_branch, repository_name, commit_id
 "pullrequest.links.html.href", "pullrequest.merge_commit.hash", "pullrequest.reviewers[*].display_name", "pullrequest.updated_on", "pullrequest.source.commit.hash" as title, repository_name, target_branch, dateTime, user, action, link,
 commit_id, reviewers, updated_date, head_commit_id nodrop
 | parseDate(dateTime, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as datetime_epoch
+| parseDate(updated_date, "yyyy-MM-dd'T'HH:mm:ss","etc/utc") as updateddatetime_epoch
 | parse regex field=%"x-event-key" ".+:(?<status>.+)"
 | if (status matches "created", "created", if(status matches "fulfilled", "merged", if(status matches "rejected", "declined", "other"))) as status 
 | if(status = "created", "n/a", updated_date) as closeddate
