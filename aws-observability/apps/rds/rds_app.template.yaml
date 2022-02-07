@@ -12,6 +12,7 @@ Metadata:
           - Section1bSumoAccessID
           - Section1cSumoAccessKey
           - Section1dRemoveSumoResourcesOnDeleteStack
+          - Section1eOrgId
 
       - Label:
           default: "App Details - Sumo Logic App Configuration"
@@ -31,6 +32,12 @@ Metadata:
           - Section4bTemplatesBucketName
           - Section4cNestedTemplateVersion
 
+      - Label:
+          default: "App Installation and sharing"
+        Parameters:
+          - Section5aAppInstallLocation
+          - Section5bShare
+
     ParameterLabels:
       Section1aSumoDeployment:
         default: "Sumo Logic Deployment Name"
@@ -40,6 +47,8 @@ Metadata:
         default: "Sumo Logic Access Key"
       Section1dRemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
+      Section1eOrgId:
+        default: "Sumo Logic Organization Id"
 
       Section2aInstallApp:
         default: "Install Sumo Logic App"
@@ -55,6 +64,11 @@ Metadata:
         default: "Nested Templates Bucket Name"
       Section4cNestedTemplateVersion:
         default: "Nested Templates Version"
+
+      Section5aAppInstallLocation:
+        default: "App Installation location"
+      Section5bShare:
+        default: "Share"
 
 Parameters:
   Section1aSumoDeployment:
@@ -80,6 +94,11 @@ Parameters:
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
+  Section1eOrgId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
   Section2aInstallApp:
     Type: String
@@ -115,6 +134,23 @@ Parameters:
     Type: String
     Description: "Provide the version for the nested templates. Default is the latest version."
     AllowedPattern: ".+"
+
+  Section5aAppInstallLocation:
+    Type: String
+    Description: "Personal - Installs App in user's Personal folder.
+                  admin - Installs App in admin Recommended Folder"
+    Default: 'Personal'
+    AllowedValues:
+      - 'Personal'
+      - 'admin'
+  Section5bShare:
+    Type: String
+    Description: "True - Installed App will be visible to all members of the organisation.
+                  False - Installed App will be visible to you only."
+    Default: 'True'
+    AllowedValues:
+      - 'True'
+      - 'False'
 
 Conditions:
   install_app: !Equals [!Ref Section2aInstallApp, 'Yes']
@@ -167,6 +203,9 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
       AppJsonS3Url: !Sub "https://${Section4bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section4cNestedTemplateVersion}/appjson/Rds-App.json"
+      location: !Ref Section5aAppInstallLocation
+      share: !Ref Section5bShare
+      orgid: !Ref Section1eOrgId
 
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
