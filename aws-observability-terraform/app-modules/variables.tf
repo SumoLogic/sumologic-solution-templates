@@ -167,5 +167,22 @@ variable "folder_installation_location" {
   default = "Personal Folder"
 }
 
+variable "sumologic_organization_id" {
+  type        = string
+  description = <<EOT
+            You can find your org on the Preferences page in the Sumo Logic UI. For more information, see the Preferences Page topic. Your org ID will be used to configure the IAM Role for Sumo Logic AWS Sources."
+            For more details, visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page
+        EOT
+  validation {
+    condition     = can(regex("\\w+", var.sumologic_organization_id))
+    error_message = "The organization ID must contain valid characters."
+  }
+}
 
+variable "folder_share_with_org" {
+  type        = bool
+  description = "Indicates if AWSO folder should be shared with entire organization. true to enable; false to disable."
+  default     = true
+
+}
 
