@@ -157,13 +157,15 @@ variable "rds_monitors_disabled" {
 
 variable "folder_installation_location" {
   type        = string
-  description = "Indicates where to install the app folder. Enter Personal for installing in personal folder and Admin for installing in Admin folder."
+  description = "Indicates where to install the app folder. Enter \"Personal Folder\" for installing in \"Personal\" folder and \"Admin Recommended Folder\" for installing in \"Admin Recommended\" folder."
   validation {
     condition = contains([
-      "Personal",
-      "Admin"], var.folder_installation_location)
-    error_message = "The value must be one of Personal or Admin."
+      "Personal Folder",
+      "Admin Recommended Folder"], var.folder_installation_location)
+    error_message = "The value must be one of \"Personal Folder\" or \"Admin Recommended Folder\"."
   }
-  default = "Personal"
+  default = "Personal Folder"
 }
+
+
 

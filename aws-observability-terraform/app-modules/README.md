@@ -37,6 +37,8 @@
 | [sumologic_monitor_folder.monitor_folder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/monitor_folder) | resource |
 | [time_sleep.wait_for_5_minutes](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [sumologic_personal_folder.personalFolder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/data-sources/personal_folder) | data source |
+| [sumologic_admin_recommended_folder.adminRecoFolder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/data-sources/admin_recommended_folder) | data source |
+
 
 ## Inputs
 
@@ -61,6 +63,7 @@
 | <a name="input_nlb_monitors_disabled"></a> [nlb\_monitors\_disabled](#input\_nlb\_monitors\_disabled) | Indicates if NLB Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_parent_folder_id"></a> [parent\_folder\_id](#input\_parent\_folder\_id) | Please provide a folder ID where you would like the apps to be installed. A folder with name provided in "apps\_folder\_name" will be created. If folder ID is empty, apps will be installed in Personal folder. | `string` | `""` | no |
 | <a name="input_rds_monitors_disabled"></a> [rds\_monitors\_disabled](#input\_rds\_monitors\_disabled) | Indicates if RDS Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
+| <a name="input_folder_installation_location"></a> [folder\_installation\_location](#input\_folder\_installation\_location) | Indicates where to install the app folder. Enter "Personal Folder" for installing in "Personal" folder and "Admin Recommended Folder" for installing in "Admin Recommended" folder. | `string` | `Personal Folder` | yes |
 
 ## Outputs
 
