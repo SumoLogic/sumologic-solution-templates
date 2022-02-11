@@ -9,6 +9,8 @@ module "sumo-module" {
   environment              = var.sumologic_environment
   json_file_directory_path = dirname(path.cwd)
   folder_installation_location = var.sumologic_folder_installation_location
+  folder_share_with_org    = var.sumologic_folder_share_with_org
+  sumologic_organization_id = var.sumologic_organization_id
 }
 
 #
