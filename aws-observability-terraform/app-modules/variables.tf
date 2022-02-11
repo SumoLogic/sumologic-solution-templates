@@ -155,3 +155,17 @@ variable "rds_monitors_disabled" {
   default     = true
 }
 
+variable "folder_installation_location" {
+  type        = string
+  description = "Indicates where to install the app folder. Enter \"Personal Folder\" for installing in \"Personal\" folder and \"Admin Recommended Folder\" for installing in \"Admin Recommended\" folder."
+  validation {
+    condition = contains([
+      "Personal Folder",
+      "Admin Recommended Folder"], var.folder_installation_location)
+    error_message = "The value must be one of \"Personal Folder\" or \"Admin Recommended Folder\"."
+  }
+  default = "Personal Folder"
+}
+
+
+

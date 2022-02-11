@@ -1,10 +1,11 @@
 data "sumologic_personal_folder" "personalFolder" {}
+data "sumologic_admin_recommended_folder" "adminRecoFolder" {}
 
 # Create a folder in the folder ID provided. If no folder ID is provided, create the folder in personal folder
 resource "sumologic_folder" "apps_folder" {
   description = "This folder contains all the apps for AWS Observability solution."
   name        = var.apps_folder_name
-  parent_id   = var.parent_folder_id != "" ? format("%x", var.parent_folder_id) : data.sumologic_personal_folder.personalFolder.id
+  parent_id   = var.parent_folder_id != "" ? format("%x", var.parent_folder_id) : (var.folder_installation_location == "Personal Folder" ? data.sumologic_personal_folder.personalFolder.id : data.sumologic_admin_recommended_folder.adminRecoFolder.id)
 }
 
 # Create a folder to install all monitors.
