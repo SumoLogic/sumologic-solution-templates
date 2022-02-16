@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.3.1. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
+Description: "Version - v2.4.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -360,12 +360,12 @@ Parameters:
 
   Section10aAppInstallLocation:
     Type: String
-    Description: "Personal - Installs App in user's Personal folder.
-                  admin - Installs App in admin Recommended Folder"
-    Default: 'Personal'
+    Description: "Personal Folder - Installs App in user's Personal folder.
+                  Admin Recommended Folder - Installs App in admin Recommended Folder"
+    Default: 'Personal Folder'
     AllowedValues:
-      - 'Personal'
-      - 'admin'
+      - 'Personal Folder'
+      - 'Admin Recommended Folder'
   Section10bShare:
     Type: String
     Description: "True - Installed App will have view permission to all members of the organisation.
@@ -459,7 +459,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.3.1"
+      Version: "v2.4.0"
     CollectorDetails:
       SumoLogicAccountID: 926226587429
       CollectorNamePrefix: "aws-observability"
@@ -597,6 +597,7 @@ Resources:
   
   sumoElbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: sumoAlbMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/elb/elb_app.template.yaml"
@@ -724,6 +725,7 @@ Resources:
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: sumoAlbMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/lambda/lambda_app.template.yaml"
