@@ -286,17 +286,18 @@ resource "null_resource" "install_github_app" {
 # Install CircleCI App
 resource "null_resource" "install_circleci_app" {
   count = "${var.install_circleci}" == "app" || "${var.install_circleci}" == "all" ? 1 : 0
+  depends_on = [sumologic_http_source.circleci]
   triggers = {
         version = var.circleci_version
   }
-
+  
   provisioner "local-exec" {
     command = <<EOT
         curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/f58985bd-40a8-4f87-aeeb-5a6a6ab4f703/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "CircleCI", "description": "The CircleCI app for Sumo Logic provides advanced views to track the performance and health of your continuous integration and deployment pipelines.", "destinationFolderId": "${data.external.folder_data_json.result.id}"},"dataSourceValues": {"circlecilogsrc": "_sourceCategory = ${var.circleci_app_sc}"}}'
+            --data-raw '{ "name": "CircleCI", "description": "The CircleCI app for Sumo Logic provides advanced views to track the performance and health of your continuous integration and deployment pipelines.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"logsrc": "_sourceCategory = ${var.circleci_app_sc}"}}'
     EOT
   }
 }
