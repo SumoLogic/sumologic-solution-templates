@@ -325,12 +325,12 @@ variable "auto_enable_access_logs" {
 variable "auto_enable_classic_lb_access_logs" {
   type        = string
   description = <<EOT
-            Enable Application Load Balancer (ALB) Access logging.
+            Enable Classic Load Balancer (CLB) Access logging.
             You have the following options:
-            New - Automatically enables access logging for newly created ALB resources to collect logs for ALB resources. This does not affect ALB resources already collecting logs.
-            Existing - Automatically enables access logging for existing ALB resources to collect logs for ALB resources.
-            Both - Automatically enables access logging for new and existing ALB resources.
-            None - Skips Automatic access Logging enable for ALB resources.
+            New - Automatically enables access logging for newly created CLB resources to collect logs for CLB resources. This does not affect CLB resources already collecting logs.
+            Existing - Automatically enables access logging for existing CLB resources to collect logs for CLB resources.
+            Both - Automatically enables access logging for new and existing CLB resources.
+            None - Skips Automatic access Logging enable for CLB resources.
         EOT
   validation {
     condition = contains([
