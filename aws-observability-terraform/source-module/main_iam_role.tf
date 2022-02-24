@@ -38,19 +38,36 @@ resource "aws_iam_role_policy_attachment" "cloudtrail_policy_attach" {
 
 # Sumo Logic ELB Source Policy Attachment
 resource "aws_iam_policy" "elb_policy" {
-  for_each = toset((local.create_elb_source || local.create_classic_lb_source) && local.create_iam_role ? ["elb_policy"] : [])
-  #for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy"] : [])
+  for_each = toset(local.create_elb_source && local.create_iam_role ? ["elb_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
-    BUCKET_NAME = (local.create_elb_bucket || local.create_classic_lb_source) ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
+    BUCKET_NAME = local.create_elb_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
   })
 }
 
+# Sumo Logic Classic LB Source Policy Attachment
+resource "aws_iam_policy" "classic_lb_policy" {
+  for_each = toset(local.create_classic_lb_source && local.create_iam_role ? ["classic_lb_policy"] : [])
+
+  policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
+    BUCKET_NAME = local.create_classic_lb_bucket ? local.common_bucket_name : var.classic_lb_source_details.bucket_details.bucket_name
+  })
+}
+
+# Attaching ALB policy to IAM role
 resource "aws_iam_role_policy_attachment" "elb_policy_attach" {
-  for_each = toset((local.create_elb_source || local.create_classic_lb_source) && local.create_iam_role ? ["elb_policy_attach"] : [])
+  for_each = toset(local.create_elb_source && local.create_iam_role ? ["elb_policy_attach"] : [])
   #for_each = toset(var.collect_elb_logs && local.create_iam_role ? ["elb_policy_attach"] : [])
 
   policy_arn = aws_iam_policy.elb_policy["elb_policy"].arn
+  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
+}
+
+# Attaching Classic LB policy to IAM role
+resource "aws_iam_role_policy_attachment" "classic_lb_policy_attach" {
+  for_each = toset(local.create_classic_lb_source && local.create_iam_role ? ["classic_lb_policy_attach"] : [])
+
+  policy_arn = aws_iam_policy.classic_lb_policy["classic_lb_policy"].arn
   role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
 }
 

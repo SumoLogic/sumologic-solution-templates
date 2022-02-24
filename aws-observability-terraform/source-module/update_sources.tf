@@ -71,7 +71,7 @@ resource "null_resource" "AddFieldsToCLBSource" {
        access_id         = var.access_id
        access_key        = var.access_key
        env               = var.environment
-       source_url        = var.elb_log_source_url
+       source_url        = var.classic_lb_log_source_url
    }
    provisioner "local-exec" {
        when    = create
