@@ -356,7 +356,7 @@ Parameters:
   Section9eELBS3BucketPathExpression:
     Type: String
     Description: "This is required in case the above existing bucket is already configured to receive ELB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/elasticloadbalancing/*"
-    Default: "*AWSLogs/*/classicloadbalancing/*"
+    Default: "classicloadbalancing/AWSLogs/*/elasticloadbalancing/*"
 
   Section10aAppInstallLocation:
     Type: String
@@ -452,6 +452,8 @@ Conditions:
     - !Condition auto_subscribe_lambda_log_groups
     - !Condition auto_enable_s3_logs_elb
 
+  elb_bucket_path_expression_provided: !Not [!Equals [ !Ref Section9eELBS3BucketPathExpression, 'classicloadbalancing/AWSLogs/*/elasticloadbalancing/*' ]]
+
   # Condition for Stacks creation. Calling Nested Stack EveryTime to create FER and Metric Rule. If already present, marked as duplicate in Resource.
   install_overview_dashboards: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
 
@@ -500,7 +502,7 @@ Resources:
         CreateALBLogSource: !Ref Section5bALBCreateLogSource
         CreateALBS3Bucket: !If [create_alb_bucket, "Yes", "No"]
         ALBS3LogsBucketName: !Ref Section5dALBS3LogsBucketName
-        ALBS3BucketPathExpression: !If [auto_enable_s3_logs, !Sub "*AWSLogs/${AWS::AccountId}/elasticloadbalancing/${AWS::Region}/*", !Ref Section5eALBS3BucketPathExpression]
+        ALBS3BucketPathExpression: !If [auto_enable_s3_logs, !Sub "*AWSLogs/${AWS::AccountId}/elasticloadbalancing/${AWS::Region}/*.log.gz", !Ref Section5eALBS3BucketPathExpression]
         ALBLogsSourceName: !Sub "alb-logs-${AWS::Region}"
         ALBLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, ALBLogsSourceCategory]
         CreateCloudTrailLogSource: !Ref Section6aCreateCloudTrailLogSource
@@ -520,7 +522,14 @@ Resources:
         CreateELBLogSource: !Ref Section9bELBCreateLogSource
         CreateELBS3Bucket: !If [create_elb_bucket, "Yes", "No"]
         ELBS3LogsBucketName: !Ref Section9dELBS3LogsBucketName
-        ELBS3BucketPathExpression: !If [auto_enable_s3_logs_elb, !Sub "*AWSLogs/${AWS::AccountId}/classicloadbalancing/${AWS::Region}/*", !Ref Section9eELBS3BucketPathExpression]
+        ELBS3BucketPathExpression: !Join
+          - ""
+          - - !If [elb_bucket_path_expression_provided,!Ref Section9eELBS3BucketPathExpression, "classicloadbalancing"]
+            - "/AWSLogs/"
+            - !Ref AWS::AccountId
+            - "/elasticloadbalancing/"
+            - !Ref AWS::Region
+            - "/*.log"
         ELBLogsSourceName: !Sub "elb-logs-${AWS::Region}"
         ELBLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, ELBLogsSourceCategory]
 
@@ -546,6 +555,7 @@ Resources:
         ELBAutoEnableS3Logs: !If [auto_enable_s3_logs_elb, "Yes", "No"]
         ELBAutoEnableS3LogsOptions: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
         ELBS3LogsBucketName: !If [create_elb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section9dELBS3LogsBucketName]
+        ELBS3LogsBucketPrefix: !If [elb_bucket_path_expression_provided, !Ref Section9eELBS3BucketPathExpression, !Sub "classicloadbalancing"]
 
   sumoEC2MetricsAppStack:
     Type: AWS::CloudFormation::Stack
