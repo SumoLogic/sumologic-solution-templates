@@ -58,24 +58,24 @@ output "elb_auto_enable_stack" {
   description = "AWS CloudFormation stack for ALB Auto Enable access logs."
 }
 
-output "clasic_lb_sns_topic" {
+output "classic_lb_sns_topic" {
   value       = local.create_classic_lb_source && !var.classic_lb_source_details.bucket_details.create_bucket ? module.classic_lb_module["classic_lb_module"].aws_sns_topic : {}
-  description = "SNS topic created to be attached to an existing elb logs bucket."
+  description = "SNS topic created to be attached to an existing classic lb logs bucket."
 }
 
-output "clasic_lb_source" {
+output "classic_lb_source" {
   value       = local.create_classic_lb_source ? module.classic_lb_module["classic_lb_module"].sumologic_source : null
-  description = "Sumo Logic AWS ELB source."
+  description = "Sumo Logic AWS Classic LB source."
 }
 
-output "clasic_lb_sns_subscription" {
+output "classic_lb_sns_subscription" {
   value       = local.create_classic_lb_source ? module.classic_lb_module["classic_lb_module"].aws_sns_subscription : {}
-  description = "AWS SNS subscription to Sumo Logic AWS ELB source."
+  description = "AWS SNS subscription to Sumo Logic AWS Classic LB source."
 }
 
-output "clasic_lb_auto_enable_stack" {
+output "classic_lb_auto_enable_stack" {
   value       = local.create_classic_lb_source && var.auto_enable_access_logs != "None" ? module.classic_lb_module["classic_lb_module"].aws_serverlessapplicationrepository_cloudformation_stack : {}
-  description = "AWS CloudFormation stack for ALB Auto Enable access logs."
+  description = "AWS CloudFormation stack for Classic LB Auto Enable access logs."
 }
 
 output "cloudwatch_metrics_source" {

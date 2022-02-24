@@ -16,15 +16,16 @@ locals {
   create_elb_source = var.collect_elb_logs && var.elb_log_source_url == ""
   update_elb_source = var.collect_elb_logs ? (var.elb_log_source_url == "" ? false : true) : false
   elb_source_name = var.elb_source_details.source_name == "Alb Logs (Region)" ? "Alb Logs ${local.aws_region}" : var.elb_source_details.source_name
-  elb_path_exp    = var.elb_source_details.bucket_details.create_bucket ? "*AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*" : var.elb_source_details.bucket_details.path_expression
-  elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/applicationelb", accountid = local.aws_account_id })
+  elb_path_exp    = var.elb_source_details.bucket_details.create_bucket ? "*elasticloadbalancing/AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log.gz" : "*AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log.gz"
+  elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, accountid = local.aws_account_id })
 
   # Classic ELB Source updated Details
   create_classic_lb_source = var.collect_classic_lb_logs && var.classic_lb_log_source_url == ""
   update_classic_lb_source = var.collect_classic_lb_logs ? (var.classic_lb_log_source_url == "" ? false : true) : false
   classic_lb_source_name = var.classic_lb_source_details.source_name == "Classic lb Logs (Region)" ? "Classic lb Logs ${local.aws_region}" : var.classic_lb_source_details.source_name
-  classic_lb_path_exp    = var.classic_lb_source_details.bucket_details.create_bucket ? "*AWSLogs/${local.aws_account_id}/classicloadbalancing/${local.aws_region}/*" : var.classic_lb_source_details.bucket_details.path_expression
-  classic_lb_fields      = merge(var.classic_lb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/elb", accountid = local.aws_account_id })
+  classic_lb_path_exp    = var.classic_lb_source_details.bucket_details.create_bucket ? "*classicloadbalancing/AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log" : "${var.classic_lb_source_details.bucket_details.path_expression}/AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log"
+  auto_classic_lb_path_exp = var.classic_lb_source_details.bucket_details.path_expression == "*classicloadbalancing/AWSLogs/<ACCOUNT-ID>/elasticloadbalancing/<REGION-NAME>/*" ? "classicloadbalancing" : var.classic_lb_source_details.bucket_details.path_expression
+  classic_lb_fields      = merge(var.classic_lb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, accountid = local.aws_account_id })
 
   # CloudWatch metrics source updated details
   create_cw_metrics_source = var.collect_cloudwatch_metrics == "CloudWatch Metrics Source" && var.cloudwatch_metrics_source_url == ""
