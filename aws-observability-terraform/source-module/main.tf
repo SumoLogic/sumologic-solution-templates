@@ -109,7 +109,7 @@ module "classic_lb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_classic_lb_source ? ["classic_lb_module"] : [])
 
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -140,12 +140,14 @@ module "classic_lb_module" {
       sns_topic_arn    = var.classic_lb_source_details.bucket_details.create_bucket ? aws_sns_topic.sns_topic["sns_topic"].arn : ""
     }
   }
-  #check with nitin to intro new var or not, I think no need
-  # auto_enable_access_logs = var.auto_enable_access_logs
-  # auto_enable_access_logs_options = {
-  #   filter                 = "'Type': 'application'|'type': 'application'"
-  #   remove_on_delete_stack = true
-  # }
+  auto_enable_access_logs = var.auto_enable_classic_lb_access_logs
+  app_semantic_version = "1.0.4"
+  auto_enable_access_logs_options = {
+    bucket_prefix          = local.auto_classic_lb_path_exp
+    auto_enable_logging    = "ELB"
+    filter                 = "'apiVersion': '2012-06-01'"
+    remove_on_delete_stack = true
+  }
 }
 
 module "cloudwatch_metrics_source_module" {

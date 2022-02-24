@@ -243,7 +243,7 @@ variable "elb_source_details" {
             To enable collection of application load balancer logs, set collect_elb_logs to true and provide configuration information for the bucket.
             If create_bucket is false, provide a name of an existing S3 bucket where you would like to store loadbalancer logs. If this is empty, a new bucket will be created in the region.
             If create_bucket is true, the script creates a bucket, the name of the bucket has to be unique; this is achieved internally by generating a random-id and then post-fixing it to the “aws-observability-” string.
-            path_expression - This is required in case the above existing bucket is already configured to receive ALB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/elasticloadbalancing/*/*
+            path_expression - This is required in case the above existing bucket is already configured to receive ALB access logs. If this is blank, Sumo Logic will store logs in the path expression: *elasticloadbalancing/AWSLogs/*/elasticloadbalancing/*/*
         EOT
   default = {
     source_name     = "Alb Logs (Region)"
@@ -252,7 +252,7 @@ variable "elb_source_details" {
     bucket_details = {
       create_bucket        = true
       bucket_name          = "aws-observability-random-id"
-      path_expression      = "*AWSLogs/<ACCOUNT-ID>/elasticloadbalancing/<REGION-NAME>/*"
+      path_expression      = "*elasticloadbalancing/AWSLogs/<ACCOUNT-ID>/elasticloadbalancing/<REGION-NAME>/*"
       force_destroy_bucket = true
     }
     fields = {}
@@ -281,7 +281,7 @@ variable "classic_lb_source_details" {
             To enable collection of classic load balancer logs, set collect_classic_lb_logs to true and provide configuration information for the bucket.
             If create_bucket is false, provide a name of an existing S3 bucket where you would like to store loadbalancer logs. If this is empty, a new bucket will be created in the region.
             If create_bucket is true, the script creates a bucket, the name of the bucket has to be unique; this is achieved internally by generating a random-id and then post-fixing it to the “aws-observability-” string.
-            path_expression - This is required in case the above existing bucket is already configured to receive ALB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/classicloadbalancing/*/*
+            path_expression - This is required in case the above existing bucket is already configured to receive Classic LB access logs. If this is blank, Sumo Logic will store logs in the path expression: *classicloadbalancing/AWSLogs/*/elasticloadbalancing/*/*
         EOT
   default = {
     source_name     = "Classic lb Logs (Region)"
@@ -290,7 +290,7 @@ variable "classic_lb_source_details" {
     bucket_details = {
       create_bucket        = true
       bucket_name          = "aws-observability-random-id"
-      path_expression      = "*AWSLogs/<ACCOUNT-ID>/classicloadbalancing/<REGION-NAME>/*"
+      path_expression      = "*classicloadbalancing/AWSLogs/<ACCOUNT-ID>/elasticloadbalancing/<REGION-NAME>/*"
       force_destroy_bucket = true
     }
     fields = {}
@@ -317,6 +317,27 @@ variable "auto_enable_access_logs" {
       "Existing",
       "Both",
     "None", ], var.auto_enable_access_logs)
+    error_message = "The value must be one of New, Existing, Both and None."
+  }
+  default = "Both"
+}
+
+variable "auto_enable_classic_lb_access_logs" {
+  type        = string
+  description = <<EOT
+            Enable Application Load Balancer (ALB) Access logging.
+            You have the following options:
+            New - Automatically enables access logging for newly created ALB resources to collect logs for ALB resources. This does not affect ALB resources already collecting logs.
+            Existing - Automatically enables access logging for existing ALB resources to collect logs for ALB resources.
+            Both - Automatically enables access logging for new and existing ALB resources.
+            None - Skips Automatic access Logging enable for ALB resources.
+        EOT
+  validation {
+    condition = contains([
+      "New",
+      "Existing",
+      "Both",
+    "None", ], var.auto_enable_classic_lb_access_logs)
     error_message = "The value must be one of New, Existing, Both and None."
   }
   default = "Both"
