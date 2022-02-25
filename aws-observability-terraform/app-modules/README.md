@@ -40,6 +40,7 @@
 | [time_sleep.wait_for_5_minutes](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [sumologic_personal_folder.personalFolder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/data-sources/personal_folder) | data source |
 | [sumologic_admin_recommended_folder.adminRecoFolder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/data-sources/admin_recommended_folder) | data source |
+| [sumologic_content_permission.share_with_org](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/content_permission_source) | resource |
 
 
 ## Inputs
@@ -66,7 +67,9 @@
 | <a name="input_nlb_monitors_disabled"></a> [nlb\_monitors\_disabled](#input\_nlb\_monitors\_disabled) | Indicates if NLB Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_parent_folder_id"></a> [parent\_folder\_id](#input\_parent\_folder\_id) | Please provide a folder ID where you would like the apps to be installed. A folder with name provided in "apps\_folder\_name" will be created. If folder ID is empty, apps will be installed in Personal folder. | `string` | `""` | no |
 | <a name="input_rds_monitors_disabled"></a> [rds\_monitors\_disabled](#input\_rds\_monitors\_disabled) | Indicates if RDS Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
-| <a name="input_folder_installation_location"></a> [folder\_installation\_location](#input\_folder\_installation\_location) | Indicates where to install the app folder. Enter "Personal Folder" for installing in "Personal" folder and "Admin Recommended Folder" for installing in "Admin Recommended" folder. | `string` | `Personal Folder` | yes |
+| <a name="input_folder_installation_location"></a> [folder\_installation\_location](#input\_folder\_installation\_location) | Indicates where to install the app folder. Enter "Personal Folder" for installing in "Personal" folder and "Admin Recommended Folder" for installing in "Admin Recommended" folder. | `string` | `Personal Folder` | no |
+| <a name="input_folder_share_with_org"></a> [folder\_share\_with\_org](#input\_folder\_share\_with\_org) | Indicates if AWS Observability folder should be shared with entire organization. true to enable; false to disable. | `bool` | `true` | no |
+
 
 ## Outputs
 
