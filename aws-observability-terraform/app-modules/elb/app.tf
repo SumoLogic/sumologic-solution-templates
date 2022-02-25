@@ -1,32 +1,21 @@
-module "alb_module" {
+module "classic_elb_module" {
   source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
   environment = var.environment
 
-  # ********************** No Metric Rules for ALB ********************** #
-
-  # ********************** Fields ********************** #
-  # managed_fields = {
-  #   "LoadBalancer" = {
-  #     field_name = "loadbalancer"
-  #     data_type  = "String"
-  #     state      = true
-  #   }
-  # }
-
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {
-    "AlbAccessLogsFieldExtractionRule" = {
-      name             = "AwsObservabilityAlbAccessLogsFER"
-      scope            = "account=* region=* (http or https or h2 or grpcs or ws or wss)"
+    "ElbAccessLogsFieldExtractionRule" = {
+      name             = "AwsObservabilityElbAccessLogsFER"
+      scope            = "account=* region=*"
       parse_expression = <<EOT
-              | parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
-              | where Type in ("http", "https", "h2", "grpcs", "ws", "wss")
-              | where !isBlank(loadbalancer)
-              | "aws/applicationelb" as namespace
-              | tolowercase(loadbalancer) as loadbalancer | fields loadbalancer, namespace
+        | parse "* * * * * * * * * * * \"*\" \"*\" * *" as datetime, loadbalancername, client, backend, request_processing_time, backend_processing_time, response_processing_time, elb_status_code, backend_status_code, received_bytes, sent_bytes, request, user_agent, ssl_cipher, ssl_protocol
+        | parse regex field=datetime "(?<datetimevalue>\d{0,4}-\d{0,2}-\d{0,2}T\d{0,2}:\d{0,2}:\d{0,2}\.\d+Z)" 
+        | where !isBlank(loadbalancername) and !isBlank(datetimevalue)
+        | "aws/elb" as namespace
+        | tolowercase(loadbalancername) as loadbalancername | fields loadbalancername, namespace
       EOT
       enabled          = true
     }
@@ -34,22 +23,22 @@ module "alb_module" {
 
   # ********************** Apps ********************** #
   managed_apps = {
-    "ALBApp" = {
-      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/Alb-App.json"])
+    "ClassicLBApp" = {
+      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/Classic-lb-App.json"])
       folder_id    = var.app_folder_id
     }
   }
 
   # ********************** Monitors ********************** #
   managed_monitors = {
-    "AWSApplicationLoadBalancerAccessfromHighlyMaliciousSources" = {
-      monitor_name         = "AWS Application Load Balancer - Access from Highly Malicious Sources"
-      monitor_description  = "This alert fires when an Application load balancer is accessed from highly malicious IP addresses within last 5 minutes"
+    "AWSClassicLoadBalancerAccessfromHighlyMaliciousSources" = {
+      monitor_name         = "AWS Classic Load Balancer - Access from Highly Malicious Sources"
+      monitor_description  = "This alert fires when the Classic load balancer is accessed from highly malicious IP addresses within last 5 minutes."
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-        A = "account=* region=* namespace=aws/applicationelb\n| parse \"* * * * * * * * * * * * \\\"*\\\" \\\"*\\\" * * * \\\"*\\\"\" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId\n| parse regex \"(?<ClientIp>\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\" multi\n| where ClientIp != \"0.0.0.0\" and ClientIp != \"127.0.0.1\"\n| count as ip_count by ClientIp, loadbalancer, account, region, namespace\n| lookup type, actor, raw, threatlevel as MaliciousConfidence from sumo://threat/cs on threat=ClientIp \n| json field=raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as ThreatCount by ClientIp, loadbalancer, account, region, namespace, MaliciousConfidence, Actor, LabelName"
+        A = "account=* region=* namespace=aws/elb\n| parse \"* * * * * * * * * * * \\\"*\\\" \\\"*\\\" * *\" as datetime, loadbalancername, client, backend, request_processing_time, backend_processing_time, response_processing_time, elb_status_code, backend_status_code, received_bytes, sent_bytes, request, user_agent, ssl_cipher, ssl_protocol\n| parse regex \"(?<ClientIp>\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\" multi\n| where ClientIp != \"0.0.0.0\" and ClientIp != \"127.0.0.1\"\n| count as ip_count by ClientIp, loadbalancername, account, region, namespace\n| lookup type, actor, raw, threatlevel as MaliciousConfidence from sumo://threat/cs on threat=ClientIp \n| json field=raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as ThreatCount by ClientIp, loadbalancername, account, region, namespace, MaliciousConfidence, Actor, LabelName"
       }
       triggers = [
         {
@@ -75,16 +64,16 @@ module "alb_module" {
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
     },
-    "AWSApplicationLoadBalancerHigh4XXErrors" = {
-      monitor_name         = "AWS Application Load Balancer - High 4XX Errors"
+    "AWSClassicLoadBalancerHigh4XXErrors" = {
+      monitor_name         = "AWS Classic Load Balancer - High 4XX Errors"
       monitor_description  = "This alert fires where there are too many HTTP requests (>5%) with a response status of 4xx within an interval of 5 minutes."
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-        A = "Namespace=aws/applicationelb metric=HTTPCode_ELB_4XX_Count Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
-        B = "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
-        C = "#A * 100 / #B along loadbalancer, account, region, namespace"
+        A = "Namespace=aws/elb metric=HTTPCode_ELB_4XX Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
+        B = "Namespace=aws/elb metric=RequestCount Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
+        C = "#A * 100 / #B along loadbalancername, account, region, namespace"
       }
       triggers = [
         {
@@ -110,14 +99,14 @@ module "alb_module" {
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
     },
-    "AWSApplicationLoadBalancerHighLatency" = {
-      monitor_name         = "AWS Application Load Balancer - High Latency"
-      monitor_description  = "This alert fires when we detect that the average latency for a given Application load balancer within a time interval of 5 minutes is greater than or equal to three seconds."
+    "AWSClassicLoadBalancerHighLatency" = {
+      monitor_name         = "AWS Classic Load Balancer - High Latency"
+      monitor_description  = "This alert fires when we detect that the average latency for a given Classic load balancer within a time interval of 5 minutes is greater than or equal to three seconds."
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-        A = "Namespace=aws/applicationelb metric=TargetResponseTime Statistic=Average account=* region=* loadbalancer=* | eval(_value*1000) | sum by account, region, namespace, loadbalancer"
+        A = "Namespace=aws/elb metric=Latency Statistic=Average account=* region=* loadbalancername=* | eval(_value*1000) | sum by account, region, namespace, loadbalancername"
       }
       triggers = [
         {
@@ -143,16 +132,16 @@ module "alb_module" {
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
     },
-    "AWSApplicationLoadBalancerHigh5XXErrors" = {
-      monitor_name         = "AWS Application Load Balancer - High 5XX Errors"
+    "AWSClassicLoadBalancerHigh5XXErrors" = {
+      monitor_name         = "AWS Classic Load Balancer - High 5XX Errors"
       monitor_description  = "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes."
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-        A = "Namespace=aws/applicationelb metric=HTTPCode_ELB_5XX_Count Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
-        B = "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
-        C = "#A * 100 / #B along loadbalancer, account, region, namespace"
+        A = "Namespace=aws/elb metric=HTTPCode_ELB_5XX Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
+        B = "Namespace=aws/elb metric=RequestCount Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
+        C = "#A * 100 / #B along loadbalancername, account, region, namespace"
       }
       triggers = [
         {

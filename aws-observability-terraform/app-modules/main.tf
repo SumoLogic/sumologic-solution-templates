@@ -194,3 +194,94 @@ module "nlb_app" {
   email_notifications      = var.email_notifications
   group_notifications      = var.group_notifications
 }
+
+# Install the classic lb app and resources.
+module "elb_app" {
+  depends_on = [module.elasticache_app]
+  source     = "./elb"
+
+  access_id                = var.access_id
+  access_key               = var.access_key
+  environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
+  app_folder_id            = sumologic_folder.apps_folder.id
+  monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
+  monitors_disabled        = var.elb_monitors_disabled
+  connection_notifications = var.connection_notifications
+  email_notifications      = var.email_notifications
+  group_notifications      = var.group_notifications
+}
+
+# ********************** Create Explore Hierarchy ********************** #
+resource "sumologic_hierarchy" "awso_hierarchy" {
+  name = "AWS Observability"
+  level {
+    entity_type = "account"
+    next_level {
+      entity_type = "region"
+      next_level {
+        entity_type = "namespace"
+        next_levels_with_conditions {
+          condition = "AWS/ApplicationElb"
+          level {
+              entity_type = "loadbalancer"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/ApiGateway"
+          level {
+              entity_type = "apiname"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/DynamoDB"
+          level {
+              entity_type = "tablename"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/EC2"
+          level {
+              entity_type = "instanceid"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/RDS"
+          level {
+              entity_type = "dbidentifier"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/Lambda"
+          level {
+              entity_type = "functionname"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/ECS"
+          level {
+              entity_type = "clustername"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/ElastiCache"
+          level {
+              entity_type = "cacheclusterid"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/ELB"
+          level {
+              entity_type = "loadbalancername"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/NetworkELB"
+          level {
+              entity_type = "networkloadbalancer"
+            }
+          }
+      }
+    }
+  }
+}

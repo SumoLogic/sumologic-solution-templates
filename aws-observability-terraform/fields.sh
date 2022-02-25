@@ -23,7 +23,7 @@ else
 fi
 
 # awso_list contains fields required for AWS Obervablity Solution. Update the list if new field is added to the solution.
-declare -ra awso_list=(loadbalancer apiname tablename instanceid clustername cacheclusterid functionname networkloadbalancer account region namespace accountid dbidentifier)
+declare -ra awso_list=(loadbalancer apiname tablename instanceid clustername cacheclusterid functionname networkloadbalancer account region namespace accountid dbidentifier loadbalancername)
 
 function get_remaining_fields() {
     local RESPONSE

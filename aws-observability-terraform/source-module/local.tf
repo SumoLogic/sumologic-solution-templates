@@ -12,12 +12,20 @@ locals {
   cloudtrail_path_exp    = var.cloudtrail_source_details.bucket_details.create_bucket ? "AWSLogs/${local.aws_account_id}/CloudTrail/${local.aws_region}/*" : var.cloudtrail_source_details.bucket_details.path_expression
   cloudtrail_fields      = merge(var.cloudtrail_source_details.fields, { account = var.aws_account_alias })
 
-  # ELB Source updated Details
+  # ALB Source updated Details
   create_elb_source = var.collect_elb_logs && var.elb_log_source_url == ""
   update_elb_source = var.collect_elb_logs ? (var.elb_log_source_url == "" ? false : true) : false
-  elb_source_name = var.elb_source_details.source_name == "Elb Logs (Region)" ? "Elb Logs ${local.aws_region}" : var.elb_source_details.source_name
-  elb_path_exp    = var.elb_source_details.bucket_details.create_bucket ? "*AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*" : var.elb_source_details.bucket_details.path_expression
-  elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/applicationelb", accountid = local.aws_account_id })
+  elb_source_name = var.elb_source_details.source_name == "Alb Logs (Region)" ? "Alb Logs ${local.aws_region}" : var.elb_source_details.source_name
+  elb_path_exp    = var.elb_source_details.bucket_details.create_bucket ? "*elasticloadbalancing/AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log.gz" : "*AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log.gz"
+  elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, accountid = local.aws_account_id })
+
+  # Classic ELB Source updated Details
+  create_classic_lb_source = var.collect_classic_lb_logs && var.classic_lb_log_source_url == ""
+  update_classic_lb_source = var.collect_classic_lb_logs ? (var.classic_lb_log_source_url == "" ? false : true) : false
+  classic_lb_source_name = var.classic_lb_source_details.source_name == "Classic lb Logs (Region)" ? "Classic lb Logs ${local.aws_region}" : var.classic_lb_source_details.source_name
+  classic_lb_path_exp    = var.classic_lb_source_details.bucket_details.create_bucket ? "*classicloadbalancing/AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log" : "${var.classic_lb_source_details.bucket_details.path_expression}/AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log"
+  auto_classic_lb_path_exp = var.classic_lb_source_details.bucket_details.path_expression == "*classicloadbalancing/AWSLogs/<ACCOUNT-ID>/elasticloadbalancing/<REGION-NAME>/*" ? "classicloadbalancing" : var.classic_lb_source_details.bucket_details.path_expression
+  classic_lb_fields      = merge(var.classic_lb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, accountid = local.aws_account_id })
 
   # CloudWatch metrics source updated details
   create_cw_metrics_source = var.collect_cloudwatch_metrics == "CloudWatch Metrics Source" && var.cloudwatch_metrics_source_url == ""
@@ -47,19 +55,20 @@ locals {
   # Common Bucket details
   create_cloudtrail_bucket      = local.create_cloudtrail_source && var.cloudtrail_source_details.bucket_details.create_bucket
   create_elb_bucket             = local.create_elb_source && var.elb_source_details.bucket_details.create_bucket
+  create_classic_lb_bucket      = local.create_classic_lb_source && var.classic_lb_source_details.bucket_details.create_bucket
   create_kf_metrics_fail_bucket = local.create_kf_metrics_source && var.cloudwatch_metrics_source_details.bucket_details.create_bucket
   create_kf_logs_fail_bucket    = local.create_kf_logs_source && var.cloudwatch_logs_source_details.bucket_details.create_bucket
-  create_common_bucket          = local.create_cloudtrail_bucket || local.create_elb_bucket || local.create_kf_metrics_fail_bucket || local.create_kf_logs_fail_bucket
+  create_common_bucket          = local.create_cloudtrail_bucket || local.create_elb_bucket || local.create_classic_lb_source || local.create_kf_metrics_fail_bucket || local.create_kf_logs_fail_bucket
   common_bucket_name            = local.create_common_bucket ? "aws-observability-${random_string.aws_random.id}" : ""
   common_force_destroy          = local.create_common_bucket && (var.cloudtrail_source_details.bucket_details.force_destroy_bucket || var.elb_source_details.bucket_details.force_destroy_bucket || var.cloudwatch_metrics_source_details.bucket_details.force_destroy_bucket || var.cloudwatch_logs_source_details.bucket_details.force_destroy_bucket)
 
-  create_common_sns_topic = local.create_common_bucket && (local.create_elb_source || local.create_cloudtrail_source)
+  create_common_sns_topic = local.create_common_bucket && (local.create_elb_source || local.create_classic_lb_source || local.create_cloudtrail_source)
 
   # Create an IAM role that provides trust relationship with AWS account
-  create_iam_role = var.existing_iam_details.create_iam_role && (local.create_elb_source || local.create_cloudtrail_source || local.create_kf_metrics_source || local.create_cw_metrics_source || local.create_root_cause_source)
+  create_iam_role = var.existing_iam_details.create_iam_role && (local.create_elb_source || local.create_classic_lb_source ||local.create_cloudtrail_source || local.create_kf_metrics_source || local.create_cw_metrics_source || local.create_root_cause_source)
 
   # Create any Sumo Logic source. Keep on adding to this if any new source is added.
-  create_any_source = local.create_cloudtrail_source || local.create_elb_source || local.create_metric_source || local.create_cw_logs_source || local.create_root_cause_source
+  create_any_source = local.create_cloudtrail_source || local.create_elb_source || local.create_metric_source || local.create_cw_logs_source || local.create_root_cause_source || local.create_classic_lb_source
   
 
   # Create a new Sumo Logic hosted collector

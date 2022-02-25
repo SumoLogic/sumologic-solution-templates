@@ -60,6 +60,7 @@ module "cloudtrail_module" {
   }
 }
 
+#ALB module
 module "elb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_elb_source ? ["elb_module"] : [])
@@ -99,6 +100,52 @@ module "elb_module" {
   auto_enable_access_logs = var.auto_enable_access_logs
   auto_enable_access_logs_options = {
     filter                 = "'Type': 'application'|'type': 'application'"
+    remove_on_delete_stack = true
+  }
+}
+
+#CLB module
+module "classic_lb_module" {
+  depends_on = [time_sleep.wait_for_minutes]
+  for_each   = toset(local.create_classic_lb_source ? ["classic_lb_module"] : [])
+
+  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing"
+
+  create_collector          = false
+  sumologic_organization_id = var.sumologic_organization_id
+  wait_for_seconds          = 1
+
+  source_details = {
+    source_name     = local.classic_lb_source_name
+    source_category = var.classic_lb_source_details.source_category
+    description     = var.classic_lb_source_details.description
+    collector_id    = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
+    bucket_details = {
+      create_bucket        = false
+      bucket_name          = var.classic_lb_source_details.bucket_details.create_bucket ? aws_s3_bucket.s3_bucket["s3_bucket"].bucket : var.classic_lb_source_details.bucket_details.bucket_name
+      path_expression      = local.classic_lb_path_exp
+      force_destroy_bucket = false
+    }
+    paused               = false
+    scan_interval        = 60000
+    sumo_account_id      = local.sumo_account_id
+    cutoff_relative_time = "-1d"
+    fields               = local.classic_lb_fields
+    iam_details = {
+      create_iam_role = false
+      iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
+    }
+    sns_topic_details = {
+      create_sns_topic = var.classic_lb_source_details.bucket_details.create_bucket ? false : true
+      sns_topic_arn    = var.classic_lb_source_details.bucket_details.create_bucket ? aws_sns_topic.sns_topic["sns_topic"].arn : ""
+    }
+  }
+  auto_enable_access_logs = var.auto_enable_classic_lb_access_logs
+  app_semantic_version = "1.0.4"
+  auto_enable_access_logs_options = {
+    bucket_prefix          = local.auto_classic_lb_path_exp
+    auto_enable_logging    = "ELB"
+    filter                 = "'apiVersion': '2012-06-01'"
     remove_on_delete_stack = true
   }
 }
