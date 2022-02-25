@@ -10,7 +10,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.6.3 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.6.2 |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
@@ -23,6 +23,7 @@
 | <a name="module_ec2metrics_app"></a> [ec2metrics\_app](#module\_ec2metrics\_app) | ./ec2metrics | n/a |
 | <a name="module_ecs_app"></a> [ecs\_app](#module\_ecs\_app) | ./ecs | n/a |
 | <a name="module_elasticache_app"></a> [elasticache\_app](#module\_elasticache\_app) | ./elasticache | n/a |
+| <a name="module_elb_app"></a> [elb\_app](#module\_elb\_app) | ./elb | n/a |
 | <a name="module_lambda_app"></a> [lambda\_app](#module\_lambda\_app) | ./lambda | n/a |
 | <a name="module_nlb_app"></a> [nlb\_app](#module\_nlb\_app) | ./nlb | n/a |
 | <a name="module_overview_app"></a> [overview\_app](#module\_overview\_app) | ./overview | n/a |
@@ -34,6 +35,7 @@
 | Name | Type |
 |------|------|
 | [sumologic_folder.apps_folder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/folder) | resource |
+| [sumologic_hierarchy.awso_hierarchy](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/hierarchy) | resource |
 | [sumologic_monitor_folder.monitor_folder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/monitor_folder) | resource |
 | [time_sleep.wait_for_5_minutes](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [sumologic_personal_folder.personalFolder](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/data-sources/personal_folder) | data source |
@@ -54,6 +56,7 @@
 | <a name="input_ec2metrics_monitors_disabled"></a> [ec2metrics\_monitors\_disabled](#input\_ec2metrics\_monitors\_disabled) | Indicates if EC2 Metrics Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_ecs_monitors_disabled"></a> [ecs\_monitors\_disabled](#input\_ecs\_monitors\_disabled) | Indicates if ECS Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_elasticache_monitors_disabled"></a> [elasticache\_monitors\_disabled](#input\_elasticache\_monitors\_disabled) | Indicates if Elasticache Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
+| <a name="input_elb_monitors_disabled"></a> [elb\_monitors\_disabled](#input\_elb\_monitors\_disabled) | Indicates if the ALB Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_email_notifications"></a> [email\_notifications](#input\_email\_notifications) | Email Notifications to be sent by the alert. | <pre>list(object(<br>    {<br>      connection_type       = string,<br>      recipients            = list(string),<br>      subject               = string,<br>      time_zone             = string,<br>      message_body          = string,<br>      run_for_trigger_types = list(string)<br>    }<br>  ))</pre> | `[]` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Enter au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security | `string` | n/a | yes |
 | <a name="input_group_notifications"></a> [group\_notifications](#input\_group\_notifications) | Whether or not to group notifications for individual items that meet the trigger condition. Defaults to true. | `bool` | `true` | no |
@@ -75,22 +78,25 @@
 | <a name="output_sumologic_content_ec2metrics"></a> [sumologic\_content\_ec2metrics](#output\_sumologic\_content\_ec2metrics) | This output contains EC2 Metrics App. |
 | <a name="output_sumologic_content_ecs"></a> [sumologic\_content\_ecs](#output\_sumologic\_content\_ecs) | This output contains ecs App. |
 | <a name="output_sumologic_content_elasticache"></a> [sumologic\_content\_elasticache](#output\_sumologic\_content\_elasticache) | This output contains elasticache App. |
+| <a name="output_sumologic_content_elb"></a> [sumologic\_content\_elb](#output\_sumologic\_content\_elb) | This output contains classic elb App. |
 | <a name="output_sumologic_content_lambda"></a> [sumologic\_content\_lambda](#output\_sumologic\_content\_lambda) | This output contains lambda App. |
 | <a name="output_sumologic_content_nlb"></a> [sumologic\_content\_nlb](#output\_sumologic\_content\_nlb) | This output contains nlb App. |
-| <a name="output_sumologic_content_overview"></a> [sumologic\_content\_overview](#output\_sumologic\_content\_overview) | This output contains alb App. |
+| <a name="output_sumologic_content_overview"></a> [sumologic\_content\_overview](#output\_sumologic\_content\_overview) | This output contains overview App. |
 | <a name="output_sumologic_content_rce"></a> [sumologic\_content\_rce](#output\_sumologic\_content\_rce) | This output contains rce Apps. |
 | <a name="output_sumologic_content_rds"></a> [sumologic\_content\_rds](#output\_sumologic\_content\_rds) | This output contains rds App. |
-| <a name="output_sumologic_field_alb"></a> [sumologic\_field\_alb](#output\_sumologic\_field\_alb) | This output contains fields required for overview app. |
+| <a name="output_sumologic_field_alb"></a> [sumologic\_field\_alb](#output\_sumologic\_field\_alb) | This output contains fields required for alb app. |
 | <a name="output_sumologic_field_apigateway"></a> [sumologic\_field\_apigateway](#output\_sumologic\_field\_apigateway) | This output contains fields required for apigateway app. |
 | <a name="output_sumologic_field_dynamodb"></a> [sumologic\_field\_dynamodb](#output\_sumologic\_field\_dynamodb) | This output contains fields required for dynamodb app. |
 | <a name="output_sumologic_field_ec2metrics"></a> [sumologic\_field\_ec2metrics](#output\_sumologic\_field\_ec2metrics) | This output contains fields required for EC2 Metrics app. |
 | <a name="output_sumologic_field_ecs"></a> [sumologic\_field\_ecs](#output\_sumologic\_field\_ecs) | This output contains fields required for ecs app. |
 | <a name="output_sumologic_field_elasticache"></a> [sumologic\_field\_elasticache](#output\_sumologic\_field\_elasticache) | This output contains fields required for elasticache app. |
+| <a name="output_sumologic_field_elb"></a> [sumologic\_field\_elb](#output\_sumologic\_field\_elb) | This output contains fields required for classic elb app. |
 | <a name="output_sumologic_field_extraction_rule_alb"></a> [sumologic\_field\_extraction\_rule\_alb](#output\_sumologic\_field\_extraction\_rule\_alb) | This output contains Field Extraction rules required for alb app. |
 | <a name="output_sumologic_field_extraction_rule_apigateway"></a> [sumologic\_field\_extraction\_rule\_apigateway](#output\_sumologic\_field\_extraction\_rule\_apigateway) | This output contains Field Extraction rules required for apigateway app. |
 | <a name="output_sumologic_field_extraction_rule_dynamodb"></a> [sumologic\_field\_extraction\_rule\_dynamodb](#output\_sumologic\_field\_extraction\_rule\_dynamodb) | This output contains Field Extraction rules required for dynamodb app. |
 | <a name="output_sumologic_field_extraction_rule_ecs"></a> [sumologic\_field\_extraction\_rule\_ecs](#output\_sumologic\_field\_extraction\_rule\_ecs) | This output contains Field Extraction rules required for ecs app. |
 | <a name="output_sumologic_field_extraction_rule_elasticache"></a> [sumologic\_field\_extraction\_rule\_elasticache](#output\_sumologic\_field\_extraction\_rule\_elasticache) | This output contains Field Extraction rules required for elasticache app. |
+| <a name="output_sumologic_field_extraction_rule_elb"></a> [sumologic\_field\_extraction\_rule\_elb](#output\_sumologic\_field\_extraction\_rule\_elb) | This output contains Field Extraction rules required for classic elb app. |
 | <a name="output_sumologic_field_extraction_rule_lambda"></a> [sumologic\_field\_extraction\_rule\_lambda](#output\_sumologic\_field\_extraction\_rule\_lambda) | This output contains Field Extraction rules required for lambda app. |
 | <a name="output_sumologic_field_extraction_rule_rds"></a> [sumologic\_field\_extraction\_rule\_rds](#output\_sumologic\_field\_extraction\_rule\_rds) | This output contains Field Extraction rules required for rds app. |
 | <a name="output_sumologic_field_lambda"></a> [sumologic\_field\_lambda](#output\_sumologic\_field\_lambda) | This output contains fields required for lambda app. |
