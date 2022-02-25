@@ -14,7 +14,7 @@ resource "sumologic_monitor_folder" "monitor_folder" {
   description = "This folder contains all the monitors for AWS Observability solution."
 }
 
-resource "sumologic_content_permission" "content_permission_test" {
+resource "sumologic_content_permission" "share_with_org" {
 	count = var.folder_share_with_org ? 1 : 0
 	content_id = sumologic_folder.apps_folder.id
 	notify_recipient = true
