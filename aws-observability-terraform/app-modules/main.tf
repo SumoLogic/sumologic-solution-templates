@@ -14,6 +14,19 @@ resource "sumologic_monitor_folder" "monitor_folder" {
   description = "This folder contains all the monitors for AWS Observability solution."
 }
 
+#Provides a way to configure permissions on a content to share it with a user, a role, or the entire org
+resource "sumologic_content_permission" "share_with_org" {
+	count = var.folder_share_with_org ? 1 : 0
+	content_id = sumologic_folder.apps_folder.id
+	notify_recipient = true
+	notification_message = "You now have the permission to access this content"
+	permission {
+		permission_name = "View"
+		source_type = "org"
+		source_id = var.sumologic_organization_id
+	}
+ }
+
 # Install the overview app and resources.
 module "overview_app" {
   source = "./overview"
