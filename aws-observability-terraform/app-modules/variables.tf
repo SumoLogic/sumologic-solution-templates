@@ -167,6 +167,7 @@ variable "folder_installation_location" {
   default = "Personal Folder"
 }
 
+#Org ID is required in App module for sharing App Folder with Sumo Organisation
 variable "sumologic_organization_id" {
   type        = string
   description = <<EOT
