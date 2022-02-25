@@ -78,7 +78,7 @@ variable "sumologic_folder_installation_location" {
 
 variable "sumologic_folder_share_with_org" {
   type        = bool
-  description = "Indicates if AWSO folder should be shared (view access) with entire organization. true to enable; false to disable."
+  description = "Indicates if AWS Observability folder should be shared (view access) with entire organization. true to enable; false to disable."
   default     = true
 
 }
