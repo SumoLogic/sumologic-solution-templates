@@ -23,7 +23,7 @@ module "alb_module" {
       scope            = "account=* region=* (http or https or h2 or grpcs or ws or wss)"
       parse_expression = <<EOT
               | parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
-              | where Type in ("http","https","h2","grpcs","ws","wss")
+              | where Type in ("http", "https", "h2", "grpcs", "ws", "wss")
               | where !isBlank(loadbalancer)
               | "aws/applicationelb" as namespace
               | tolowercase(loadbalancer) as loadbalancer | fields loadbalancer, namespace
