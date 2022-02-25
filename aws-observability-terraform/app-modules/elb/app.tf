@@ -13,7 +13,7 @@ module "classic_elb_module" {
       parse_expression = <<EOT
         | parse "* * * * * * * * * * * \"*\" \"*\" * *" as datetime, loadbalancername, client, backend, request_processing_time, backend_processing_time, response_processing_time, elb_status_code, backend_status_code, received_bytes, sent_bytes, request, user_agent, ssl_cipher, ssl_protocol
         | parse regex field=datetime "(?<datetimevalue>\d{0,4}-\d{0,2}-\d{0,2}T\d{0,2}:\d{0,2}:\d{0,2}\.\d+Z)" 
-        | where !isBlank(loadbalancername)and !isBlank(datetimevalue)
+        | where !isBlank(loadbalancername) and !isBlank(datetimevalue)
         | "aws/elb" as namespace
         | tolowercase(loadbalancername) as loadbalancername | fields loadbalancername, namespace
       EOT
