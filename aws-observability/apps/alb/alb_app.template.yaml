@@ -334,7 +334,6 @@ Resources:
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
         account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-        namespace: "AWS/ApplicationELB"
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
 
@@ -365,10 +364,12 @@ Resources:
         - ""
         - - "(_source="
           - !If [update_alb_logs_source, !Sub "\"${SumoALBLogsUpdateSource.source_name}\"", !Ref Section5bALBLogsSourceName]
-          - ")"
+          - " (http or https or h2 or grpcs or ws or wss))"
       FieldExtractionRuleParseExpression: '| parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
-                                            | tolowercase(loadbalancer) as loadbalancer
-                                            | fields loadbalancer'
+                                            | where Type in ("http", "https", "h2", "grpcs", "ws", "wss")
+                                            | where !isBlank(loadbalancer)
+                                            | "aws/applicationelb" as namespace
+                                            | tolowercase(loadbalancer) as loadbalancer | fields loadbalancer, namespace'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
