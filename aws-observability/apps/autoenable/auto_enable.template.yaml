@@ -100,6 +100,11 @@ Parameters:
     Type: String
     Description: "Provide a name of existing S3 bucket name where you would like to store ELB logs. If this is empty, a new bucket will be created in the region."
     Default: ""
+  
+  ELBS3LogsBucketPrefix:
+    Type: String
+    Description : "Path inside bucket for dumping of Access Logs for classic load balancer"
+    Default: "" 
 
 Conditions:
   auto_enable_s3_logs: !Equals [ !Ref ALBAutoEnableS3Logs, 'Yes' ]
@@ -119,7 +124,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
-        SemanticVersion: 1.0.3
+        SemanticVersion: 1.0.4
       Parameters:
         BucketName: !Ref ALBS3LogsBucketName
         BucketPrefix: "elasticloadbalancing"
@@ -134,10 +139,10 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
-        SemanticVersion: 1.0.3
+        SemanticVersion: 1.0.4
       Parameters:
         BucketName: !Ref ELBS3LogsBucketName
-        BucketPrefix: "classicloadbalancing"
+        BucketPrefix: !Ref ELBS3LogsBucketPrefix
         AutoEnableLogging: "ELB"
         AutoEnableResourceOptions: !Ref ELBAutoEnableS3LogsOptions
         FilterExpression: "'apiVersion': '2012-06-01'"
