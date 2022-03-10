@@ -54,7 +54,7 @@ variable "aws_account_alias" {
   type        = string
   description = <<EOT
             Provide the Name/Alias for the AWS environment from which you are collecting data. This name will appear in the Sumo Logic Explorer View, metrics, and logs.
-            Please leave this blank if you are going to deploy the solution in multiple AWS accounts.
+            If you are going to deploy the solution in multiple AWS accounts then this value has to be overidden at main.tf file.
             Do not include special characters in the alias.
         EOT
   validation {
