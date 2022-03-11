@@ -15,7 +15,7 @@ locals {
   # ALB Source updated Details
   create_elb_source = var.collect_elb_logs && var.elb_log_source_url == ""
   update_elb_source = var.collect_elb_logs ? (var.elb_log_source_url == "" ? false : true) : false
-  elb_source_name = var.elb_source_details.source_name == "Alb Logs (Region)" ? "Alb Logs ${local.aws_region}" : var.elb_source_details.source_name
+  elb_source_name = var.elb_source_details.source_name == "Elb Logs (Region)" ? "Elb Logs ${local.aws_region}" : var.elb_source_details.source_name
   elb_path_exp    = var.elb_source_details.bucket_details.create_bucket ? "*elasticloadbalancing/AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log.gz" : "*AWSLogs/${local.aws_account_id}/elasticloadbalancing/${local.aws_region}/*.log.gz"
   elb_fields      = merge(var.elb_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, accountid = local.aws_account_id })
 
