@@ -246,7 +246,7 @@ variable "elb_source_details" {
             path_expression - This is required in case the above existing bucket is already configured to receive ALB access logs. If this is blank, Sumo Logic will store logs in the path expression: *elasticloadbalancing/AWSLogs/*/elasticloadbalancing/*/*
         EOT
   default = {
-    source_name     = "Alb Logs (Region)"
+    source_name     = "Elb Logs (Region)"
     source_category = "aws/observability/alb/logs"
     description     = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Application LoadBalancer logs."
     bucket_details = {
