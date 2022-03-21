@@ -278,7 +278,7 @@ resource "null_resource" "install_pagerduty_v3_app" {
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
-            --data-raw '{ "name": "Pagerduty V3", "description": "The Sumo Logic App for PagerDuty V3 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"logsrcpd": "_sourceCategory = ${var.pagerduty_sc}"}}'
+            --data-raw '{ "name": "Pagerduty V3", "description": "The Sumo Logic App for PagerDuty V3 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"logsrc": "_sourceCategory = ${var.pagerduty_sc}"}}'
     EOT
   }
 }
