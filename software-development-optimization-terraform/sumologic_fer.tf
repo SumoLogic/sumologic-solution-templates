@@ -97,12 +97,21 @@ resource "sumologic_field_extraction_rule" "jira_issues_fer" {
   enabled          = true
 }
 
-resource "sumologic_field_extraction_rule" "pagerduty_alerts_fer" {
-  count            = "${var.install_pagerduty}" == "fer" || "${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all" ? 1 : 0
+resource "sumologic_field_extraction_rule" "pagerduty_alerts_v2_fer" {
+  count            = ("${var.install_pagerduty}" == "fer" || "${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v2" ? 1 : 0 
   depends_on       = [sumologic_http_source.pagerduty]
-  name             = "SDO - Pagerduty Alerts"
-  scope            = "_sourceCategory=${var.pagerduty_sc} ${var.pagerduty_alerts_fer_scope}"
-  parse_expression = var.pagerduty_alerts_fer_parse
+  name             = "SDO - Pagerduty V2 Alerts"
+  scope            = "_sourceCategory=${var.pagerduty_sc} ${var.pagerduty_alerts_v2_fer_scope}"
+  parse_expression = var.pagerduty_alerts_v2_fer_parse
+  enabled          = true
+}
+
+resource "sumologic_field_extraction_rule" "pagerduty_alerts_v3_fer" {
+  count            = ("${var.install_pagerduty}" == "fer" || "${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3" ? 1 : 0 
+  depends_on       = [sumologic_http_source.pagerduty]
+  name             = "SDO - Pagerduty V3 Alerts"
+  scope            = "_sourceCategory=${var.pagerduty_sc} ${var.pagerduty_alerts_v3_fer_scope}"
+  parse_expression = var.pagerduty_alerts_v3_fer_parse
   enabled          = true
 }
 

@@ -245,12 +245,12 @@ resource "null_resource" "install_Opsgenie_app" {
   }
 }
 
-# Install Pagerduty App
-resource "null_resource" "install_pagerduty_app" {
-  count      = "${var.install_pagerduty}" == "app" || "${var.install_pagerduty}" == "all" ? 1 : 0
+# Install PagerdutyV2 App
+resource "null_resource" "install_pagerduty_v2_app" {
+  count      = ("${var.install_pagerduty}" == "app" && "${var.install_pagerduty_version}" == "v2") || ("${var.install_pagerduty}" == "all"  && "${var.install_pagerduty_version}" == "v2") ? 1 : 0
   depends_on = [sumologic_http_source.pagerduty]
   triggers = {
-        version = var.pagerduty_version
+        version = var.pagerduty_v2_version
   }
 
   provisioner "local-exec" {
@@ -260,6 +260,25 @@ resource "null_resource" "install_pagerduty_app" {
             --header 'Content-Type: application/json' \
             -u ${var.sumo_access_id}:${var.sumo_access_key} \
             --data-raw '{ "name": "Pagerduty V2", "description": "The Sumo Logic App for PagerDuty V2 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"logsrcpd": "_sourceCategory = ${var.pagerduty_sc}"}}'
+    EOT
+  }
+}
+
+# Install PagerdutyV3 App
+resource "null_resource" "install_pagerduty_v3_app" {
+  count      = ("${var.install_pagerduty}" == "app" && "${var.install_pagerduty_version}" == "v3") || ("${var.install_pagerduty}" == "all"  && "${var.install_pagerduty_version}" == "v3") ? 1 : 0
+  depends_on = [sumologic_http_source.pagerduty]
+  triggers = {
+        version = var.pagerduty_v3_version
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+        curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/3726d111-3026-44bc-b36f-744b313e806d/install' \
+            --header 'Accept: application/json' \
+            --header 'Content-Type: application/json' \
+            -u ${var.sumo_access_id}:${var.sumo_access_key} \
+            --data-raw '{ "name": "Pagerduty V3", "description": "The Sumo Logic App for PagerDuty V3 collects incident messages from your PagerDuty account via a webhook, and displays that incident data in pre-configured Dashboards, so you can monitor and analyze the activity of your PagerDuty account and Services.", "destinationFolderId": "${data.external.folder_data_json.result.id}","dataSourceValues": {"logsrcpd": "_sourceCategory = ${var.pagerduty_sc}"}}'
     EOT
   }
 }

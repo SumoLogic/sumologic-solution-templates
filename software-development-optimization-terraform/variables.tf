@@ -145,6 +145,16 @@ variable "install_pagerduty" {
     error_message = "Argument \"install_pagerduty\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
+
+variable "install_pagerduty_version"{
+ type        = string
+  validation {
+    condition = contains([
+      "v2","v3"], var.install_pagerduty_version)
+    error_message = "Argument \"install_pagerduty_version\" must be one of \"v2\" or \"v3\"."
+  }
+}
+
 variable "install_sdo" {
   type        = string
   validation {
@@ -257,6 +267,10 @@ variable "install_sumo_to_pagerduty_webhook" {
   }
 }
 
+variable "create_services_webhooks" {}
+variable "create_account_webhook" {}
+variable "create_teams_webhooks" {}
+
 #Github
 variable "github_token" {}
 variable "github_organization" {}
@@ -342,8 +356,11 @@ variable "bitbucket_deploy_fer_parse" {}
 variable "jira_issues_fer_scope" {}
 variable "jira_issues_fer_parse" {}
 
-variable "pagerduty_alerts_fer_scope" {}
-variable "pagerduty_alerts_fer_parse" {}
+variable "pagerduty_alerts_v2_fer_scope" {}
+variable "pagerduty_alerts_v2_fer_parse" {}
+
+variable "pagerduty_alerts_v3_fer_scope" {}
+variable "pagerduty_alerts_v3_fer_parse" {}
 
 variable "jenkins_build_status_fer_scope" {}
 variable "jenkins_build_status_fer_parse" {}
