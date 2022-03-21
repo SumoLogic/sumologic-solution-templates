@@ -2,7 +2,7 @@
 # Configure the Sumo Logic credentials in the sumologic.auto.tvars and other system credentials in respective files.
 
 # Create/Delete Sumo Logic to Pagerduty Webhook
-resource "sumologic_connection" "pagerduty_connection" {
+resource "sumologic_connection" "pagerduty_v2_connection" {
   count       = length(data.pagerduty_vendor.sumologic) > 0 && "${var.install_sumo_to_pagerduty_webhook}" ? length(var.pagerduty_services_sumo_webhooks) : 0
   type        = "WebhookConnection"
   name        = "Pagerduty Connection for Service - ${var.pagerduty_services_sumo_webhooks[count.index]}"
@@ -14,7 +14,29 @@ resource "sumologic_connection" "pagerduty_connection" {
 
   default_payload = <<JSON
 {
-	"service_key": "${pagerduty_service_integration.sumologic_service[count.index].integration_key}",
+	"service_key": "${pagerduty_service_integration.sumologic_v2_service[count.index].integration_key}",
+	"event_type": "trigger",
+	"description": "Event from Sumo Logic.",
+	"client": "Sumo Logic",
+	"client_url": "{{SearchQueryUrl}}"
+}
+JSON
+  webhook_type    = "PagerDuty"
+}
+
+resource "sumologic_connection" "pagerduty_v3_connection" {
+  count       = length(data.pagerduty_vendor.v3_service_sumologic) > 0 && "${var.install_sumo_to_pagerduty_webhook}" ? length(var.pagerduty_services_sumo_webhooks) : 0
+  type        = "WebhookConnection"
+  name        = "Pagerduty Connection for Service - ${var.pagerduty_services_sumo_webhooks[count.index]}"
+  description = "Created via Sumo Logic SDO Terraform Script."
+  url         = "https://events.pagerduty.com/generic/2010-04-15/create_event.json"
+  headers = {
+    "X-Header" : "Token token=${var.pagerduty_api_key}"
+  }
+
+  default_payload = <<JSON
+{
+	"service_key": "${pagerduty_service_integration.sumologic_v3_service[count.index].integration_key}",
 	"event_type": "trigger",
 	"description": "Event from Sumo Logic.",
 	"client": "Sumo Logic",

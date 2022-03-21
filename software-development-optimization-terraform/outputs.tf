@@ -53,8 +53,20 @@ output "circleci_orb_workflow_source_id" {
 #   value = sumologic_folder.folder.path
 # }
 
-output "sumo_pagerduty_webhook_id" {
-  value = sumologic_connection.pagerduty_connection.*.id
+output "sumo_pagerduty_v2_webhook_id" {
+  value = sumologic_connection.pagerduty_v2_connection.*.id
+}
+
+output "sumo_pagerduty_v3_webhook_id" {
+  value = sumologic_connection.pagerduty_v3_connection.*.id
+}
+
+output "sumo_pagerduty_v2_webhook_integration_key" {
+  value = pagerduty_service_integration.sumologic_v2_service.*.integration_key
+}
+
+output "sumo_pagerduty_v3_webhook_integration_key" {
+  value = pagerduty_service_integration.sumologic_v3_service.*.integration_key
 }
 
 output "sumo_opsgenie_webhook_id" {
@@ -81,8 +93,20 @@ output "opsgenie_webhook_id" {
   value = restapi_object.ops_to_sumo_webhook.*.id
 }
 
-output "pagerduty_webhook_id" {
+output "pagerduty_v2_webhook_id" {
   value = pagerduty_extension.sumologic_extension.*.id
+}
+
+output "pagerduty_v3_service_webhook_id" {
+  value = pagerduty_webhook_subscription.service_webhook.*.id
+}
+
+output "pagerduty_v3_account_webhook_id" {
+  value = pagerduty_webhook_subscription.account_webhook.*.id
+}
+
+output "pagerduty_v3_team_webhook_id" {
+  value = pagerduty_webhook_subscription.team_webhook.*.id
 }
 
 # output "github_repo_webhook_id" {
@@ -121,8 +145,12 @@ output "jira_issues_fer_id" {
   value = sumologic_field_extraction_rule.jira_issues_fer.*.id
 }
 
-output "pagerduty_alerts_fer_id" {
-  value = sumologic_field_extraction_rule.pagerduty_alerts_fer.*.id
+output "pagerduty_alerts_v2_fer_id" {
+  value = sumologic_field_extraction_rule.pagerduty_alerts_v2_fer.*.id
+}
+
+output "pagerduty_alerts_v3_fer_id" {
+  value = sumologic_field_extraction_rule.pagerduty_alerts_v3_fer.*.id
 }
 
 output "github_pr_fer_id" {

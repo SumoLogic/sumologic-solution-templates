@@ -17,7 +17,10 @@ variable "bitbucket_version" {
 variable "opsgenie_version" {
     default = "1"
 }
-variable "pagerduty_version" {
+variable "pagerduty_v2_version" {
+    default = "2"
+}
+variable "pagerduty_v3_version" {
     default = "1"
 }
 variable "github_version" {

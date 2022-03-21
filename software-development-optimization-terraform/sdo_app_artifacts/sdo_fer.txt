@@ -205,7 +205,7 @@ commit_id, reviewers, updated_date, head_commit_id nodrop
 | if (alert_type matches "*Create", "alert_created", if(alert_type  matches "*Close", "alert_closed", "other") ) as event_type
 "
       },
-      "PagerDuty": {
+      "PagerDutyV2": {
         "Scope": "_sourcecategory=Labs/pagerduty_v2 ("incident.trigger" or "incident.resolve" )",
         "Parse": "parse regex "(?<event>\{\"event\":\"incident\..+?\}(?=,\{\"event\":\"incident\..+|\]\}$))" 
 |json  field=event "event", "created_on", "incident" as alert_type,
@@ -219,6 +219,18 @@ link
 | parseDate(closeddate, "yyyy-MM-dd'T'HH:mm:ss'Z'") as closeddate_epoch
 | if (alert_type matches "*trigger", "alert_created", if(alert_type matches "*resolve", "alert_closed", "other") ) as event_type
 "
+      }
+      "PagerDutyV3":{
+        "Scope": "_sourceCategory=Labs/pagerduty_v3 ("incident.triggered" or "incident.resolved")",
+        "Parse": "json "event.event_type","event.data","event.occurred_at" as alert_type,incident,closeddate nodrop
+| json field=incident "id",  "service.summary" , "urgency",
+"teams[*].summary", "html_url","created_at"  as alert_id, service, priority, team,
+link,dateTime nodrop
+| where alert_type in ("incident.triggered", "incident.resolved")
+| parseDate(closeddate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'","etc/utc") as closeddate_epoch
+| parse regex field=dateTime "(?<dateTime>.{19})"
+| parseDate(dateTime,"yyyy-MM-dd'T'HH:mm:ss","etc/utc") as dateTime_epoch
+| if (alert_type matches "*triggered", "alert_created", if(alert_type matches "*resolved", "alert_closed", "other") ) as event_type"
       }
     }
   },
