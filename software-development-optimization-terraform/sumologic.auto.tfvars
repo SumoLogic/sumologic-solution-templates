@@ -32,7 +32,7 @@ install_pagerduty_version = "v3"
 install_github          = "all"
 install_gitlab          = "all"
 install_jenkins         = "all"
-install_sdo             = "all"
+install_sdo             = "app"
 install_circleci_SDO_plugin = "all"
 install_circleci        = "all"
 
