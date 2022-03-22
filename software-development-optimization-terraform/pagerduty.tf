@@ -2,5 +2,5 @@
 
 provider "pagerduty" {
   skip_credentials_validation = "true"
-  token = var.pagerduty_api_key
+  token                       = var.pagerduty_api_key
 }

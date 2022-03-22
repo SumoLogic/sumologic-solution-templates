@@ -132,7 +132,7 @@ locals {
 resource "null_resource" "create_folder" {
   depends_on = [sumologic_collector.sdo_collector]
   triggers = {
-        version = var.folder_version
+    version = var.folder_version
   }
   provisioner "local-exec" {
     command = <<EOT
@@ -150,7 +150,7 @@ resource "null_resource" "create_folder" {
 resource "null_resource" "process_folder_result" {
   depends_on = [null_resource.create_folder]
   triggers = {
-        version = var.folder_version
+    version = var.folder_version
   }
   provisioner "local-exec" {
     command = "python extract_id.py"
@@ -160,7 +160,7 @@ resource "null_resource" "process_folder_result" {
 # Load processed json
 data "local_file" "folder_json" {
   depends_on = [null_resource.process_folder_result]
-  filename = "${path.module}/sumo_folder_id.json"
+  filename   = "${path.module}/sumo_folder_id.json"
 }
 
 # Make the json data available
@@ -172,7 +172,7 @@ data "external" "folder_data_json" {
 # Install Jira Cloud
 resource "null_resource" "install_jira_cloud_app" {
   triggers = {
-        version = var.jira_cloud_version
+    version = var.jira_cloud_version
   }
   count      = "${var.install_jira_cloud}" == "app" || "${var.install_jira_cloud}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jira_cloud]
@@ -193,7 +193,7 @@ resource "null_resource" "install_jira_server_app" {
   count      = "${var.install_jira_server}" == "app" || "${var.install_jira_server}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jira_server]
   triggers = {
-        version = var.jira_server_version
+    version = var.jira_server_version
   }
 
   provisioner "local-exec" {
@@ -209,10 +209,10 @@ resource "null_resource" "install_jira_server_app" {
 
 # Install Bitbucket
 resource "null_resource" "install_bitbucket_cloud_app" {
-  count      = "${var.install_bitbucket_cloud}" == "app" || "${var.install_bitbucket_cloud}" == "all"? 1 : 0
+  count      = "${var.install_bitbucket_cloud}" == "app" || "${var.install_bitbucket_cloud}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.bitbucket_cloud]
   triggers = {
-        version = var.bitbucket_version
+    version = var.bitbucket_version
   }
 
   provisioner "local-exec" {
@@ -231,7 +231,7 @@ resource "null_resource" "install_Opsgenie_app" {
   count      = "${var.install_opsgenie}" == "app" || "${var.install_opsgenie}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.opsgenie]
   triggers = {
-        version = var.opsgenie_version
+    version = var.opsgenie_version
   }
 
   provisioner "local-exec" {
@@ -247,10 +247,10 @@ resource "null_resource" "install_Opsgenie_app" {
 
 # Install PagerdutyV2 App
 resource "null_resource" "install_pagerduty_v2_app" {
-  count      = ("${var.install_pagerduty}" == "app" && "${var.install_pagerduty_version}" == "v2") || ("${var.install_pagerduty}" == "all"  && "${var.install_pagerduty_version}" == "v2") ? 1 : 0
+  count      = ("${var.install_pagerduty}" == "app" && "${var.install_pagerduty_version}" == "v2") || ("${var.install_pagerduty}" == "all" && "${var.install_pagerduty_version}" == "v2") ? 1 : 0
   depends_on = [sumologic_http_source.pagerduty]
   triggers = {
-        version = var.pagerduty_v2_version
+    version = var.pagerduty_v2_version
   }
 
   provisioner "local-exec" {
@@ -266,10 +266,10 @@ resource "null_resource" "install_pagerduty_v2_app" {
 
 # Install PagerdutyV3 App
 resource "null_resource" "install_pagerduty_v3_app" {
-  count      = ("${var.install_pagerduty}" == "app" && "${var.install_pagerduty_version}" == "v3") || ("${var.install_pagerduty}" == "all"  && "${var.install_pagerduty_version}" == "v3") ? 1 : 0
+  count      = ("${var.install_pagerduty}" == "app" && "${var.install_pagerduty_version}" == "v3") || ("${var.install_pagerduty}" == "all" && "${var.install_pagerduty_version}" == "v3") ? 1 : 0
   depends_on = [sumologic_http_source.pagerduty]
   triggers = {
-        version = var.pagerduty_v3_version
+    version = var.pagerduty_v3_version
   }
 
   provisioner "local-exec" {
@@ -288,7 +288,7 @@ resource "null_resource" "install_github_app" {
   count      = "${var.install_github}" == "app" || "${var.install_github}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.github]
   triggers = {
-        version = var.github_version
+    version = var.github_version
   }
 
   provisioner "local-exec" {
@@ -304,12 +304,12 @@ resource "null_resource" "install_github_app" {
 
 # Install CircleCI App
 resource "null_resource" "install_circleci_app" {
-  count = "${var.install_circleci}" == "app" || "${var.install_circleci}" == "all" ? 1 : 0
+  count      = "${var.install_circleci}" == "app" || "${var.install_circleci}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.circleci]
   triggers = {
-        version = var.circleci_version
+    version = var.circleci_version
   }
-  
+
   provisioner "local-exec" {
     command = <<EOT
         curl -s --request POST '${local.sumo_api_endpoint_fixed}/v1/apps/f58985bd-40a8-4f87-aeeb-5a6a6ab4f703/install' \
@@ -327,7 +327,7 @@ resource "null_resource" "install_gitlab_app" {
   count      = "${var.install_gitlab}" == "app" || "${var.install_gitlab}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.gitlab]
   triggers = {
-        version = var.gitlab_version
+    version = var.gitlab_version
   }
 
   provisioner "local-exec" {
@@ -346,7 +346,7 @@ resource "null_resource" "install_jenkins_app" {
   count      = "${var.install_jenkins}" == "app" || "${var.install_jenkins}" == "all" ? 1 : 0
   depends_on = [sumologic_http_source.jenkins]
   triggers = {
-        version = var.jenkins_version
+    version = var.jenkins_version
   }
 
   provisioner "local-exec" {
@@ -364,7 +364,7 @@ resource "null_resource" "install_jenkins_app" {
 resource "null_resource" "install_sdo_app" {
   count = "${var.install_sdo}" == "app" ? 1 : 0
   triggers = {
-        version = var.sdo_version
+    version = var.sdo_version
   }
 
   provisioner "local-exec" {

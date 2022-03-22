@@ -8,7 +8,7 @@ resource "pagerduty_webhook_subscription" "service_webhook" {
   count = (("${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3") ? length(var.create_services_webhooks) : 0
   delivery_method {
     type = "http_delivery_method"
-    url = sumologic_http_source.pagerduty[0].url
+    url  = sumologic_http_source.pagerduty[0].url
   }
   description = "Sends PagerDuty v3 webhook events to Sumo"
   events = [
@@ -31,7 +31,7 @@ resource "pagerduty_webhook_subscription" "service_webhook" {
   ]
   active = true
   filter {
-    id = "${var.create_services_webhooks[count.index]}"
+    id   = var.create_services_webhooks[count.index]
     type = "service_reference"
   }
   type = "webhook_subscription"
@@ -40,7 +40,7 @@ resource "pagerduty_webhook_subscription" "service_webhook" {
 # Send service level alerts to PagerDuty
 data "pagerduty_vendor" "v3_service_sumologic" {
   count = (("${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3") ? length(var.create_services_webhooks) : 0
-  name = "Sumo Logic"
+  name  = "Sumo Logic"
 }
 
 # We need to create Service Key for each service for Sumo Logic to Pagerduty Webhook
@@ -56,7 +56,7 @@ resource "pagerduty_webhook_subscription" "account_webhook" {
   count = (("${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3") ? ("${var.create_account_webhook}" == true ? 1 : 0) : 0
   delivery_method {
     type = "http_delivery_method"
-    url = sumologic_http_source.pagerduty[0].url
+    url  = sumologic_http_source.pagerduty[0].url
   }
   description = "Sends PagerDuty v3 webhook events to Sumo"
   events = [
@@ -85,17 +85,17 @@ resource "pagerduty_webhook_subscription" "account_webhook" {
 }
 
 # TODO for account level alerts
-data "pagerduty_vendor" "v3_account_sumologic" {
-  count = (("${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3" && "${var.create_account_webhook}") == "yes" ? 1 : 0
-  name = "Sumo Logic"
-}
+# data "pagerduty_vendor" "v3_account_sumologic" {
+#   count = (("${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3" && "${var.create_account_webhook}") == "yes" ? 1 : 0
+#   name  = "Sumo Logic"
+# }
 
 # Create v3 webhook for team/teams in PagerDuty
 resource "pagerduty_webhook_subscription" "team_webhook" {
   count = (("${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3") ? length(var.create_teams_webhooks) : 0
   delivery_method {
     type = "http_delivery_method"
-    url = sumologic_http_source.pagerduty[0].url
+    url  = sumologic_http_source.pagerduty[0].url
   }
   description = "Sends PagerDuty v3 webhook events to Sumo"
   events = [
@@ -118,14 +118,14 @@ resource "pagerduty_webhook_subscription" "team_webhook" {
   ]
   active = true
   filter {
-    id = "${var.create_teams_webhooks[count.index]}"
+    id   = var.create_teams_webhooks[count.index]
     type = "team_reference"
   }
   type = "webhook_subscription"
 }
 
 # TODO for team level alerts
-data "pagerduty_vendor" "v3_team_sumologic" {
-  count = (("${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3") ? length(var.create_teams_webhooks) : 0
-  name = "Sumo Logic"
-}
+# data "pagerduty_vendor" "v3_team_sumologic" {
+#   count = (("${var.install_pagerduty}" == "collection" || "${var.install_pagerduty}" == "all") && "${var.install_pagerduty_version}" == "v3") ? length(var.create_teams_webhooks) : 0
+#   name  = "Sumo Logic"
+# }
