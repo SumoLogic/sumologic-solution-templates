@@ -148,7 +148,8 @@ variable "install_pagerduty" {
 
 variable "install_pagerduty_version"{
  type        = string
-  validation {
+ default = "v3"
+ validation {
     condition = contains([
       "v2","v3"], var.install_pagerduty_version)
     error_message = "Argument \"install_pagerduty_version\" must be one of \"v2\" or \"v3\"."
