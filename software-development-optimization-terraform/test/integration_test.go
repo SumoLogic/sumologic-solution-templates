@@ -54,7 +54,8 @@ func TestTerraformSumoLogic(t *testing.T) {
 
 	// Validate Pagerduty Resources
 	test_structure.RunTestStage(t, "validatePagerduty", func() {
-		validatePagerdutyToSumologicWebhook(t, workingDir)
+		validatePagerdutyV2ToSumologicWebhook(t, workingDir)
+		validatePagerdutyV3ToSumologicWebhook(t, workingDir)
 	})
 
 	// // Validate Github Resources
@@ -110,7 +111,9 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the Pagerduty Source is created successfully
 	validateSumoLogicPagerdutySource(t, terraformOptions, collectorID)
 	// Validate if the Sumologic Pagerduty Webhook is created successfully
-	validateSumoLogicPagerdutyWebhook(t, terraformOptions)
+	validateSumoLogicPagerdutyV2Webhook(t, terraformOptions)
+	// Validate if the Sumologic Pagerduty Webhook is created successfully
+	validateSumoLogicPagerdutyV3Webhook(t, terraformOptions)
 	// Validate if the CircleCI Source is created successfully
 	validateSumoLogicCircleCISource(t, terraformOptions, collectorID)
 	// Validate if the CircleCI Orb Job Source is created successfully
@@ -133,14 +136,18 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicBitbucketAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Opsgenie App is installed
 	validateSumoLogicOpsgenieAppInstallation(t, terraformOptions, folderName)
-	// Validate if the Pagerduty App is installed
-	validateSumoLogicPagerdutyAppInstallation(t, terraformOptions, folderName)
+	// Validate if the Pagerduty V2 App is installed
+	validateSumoLogicPagerdutyV2AppInstallation(t, terraformOptions, folderName)
+	// Validate if the Pagerduty V3 App is installed
+	validateSumoLogicPagerdutyV3AppInstallation(t, terraformOptions, folderName)
 	// Validate if the Github App is installed
 	validateSumoLogicGithubAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Gitlab App is installed
 	validateSumoLogicGitlabAppInstallation(t, terraformOptions, folderName)
-	// Validate if the jenkins App is installed
+	// Validate if the Jenkins App is installed
 	validateSumoLogicJenkinsAppInstallation(t, terraformOptions, folderName)
+	// Validate if the CircleCI App is installed
+	validateSumoLogicCircleCIAppInstallation(t, terraformOptions, folderName)
 	// Validate if the Github Field is added successfully
 	validateSumoLogicGithubField(t, terraformOptions)
 	// Validate if the Gitlab Field is added successfully
@@ -159,8 +166,10 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	validateSumoLogicJenkinsBuildFER(t, terraformOptions)
 	// Validate if the Jenkins Deploy FER is added successfully
 	validateSumoLogicJenkinsDeployFER(t, terraformOptions)
-	// Validate if the Pagerduty alerts FER is added successfully
-	validateSumoLogicPagerdutyAlertsFER(t, terraformOptions)
+	// Validate if the Pagerduty alerts V2 FER is added successfully
+	validateSumoLogicPagerdutyAlertsV2FER(t, terraformOptions)
+	// Validate if the Pagerduty alerts V3 FER is added successfully
+	validateSumoLogicPagerdutyAlertsV3FER(t, terraformOptions)
 	// Validate if the Github PR FER is added successfully
 	validateSumoLogicGithubPrFER(t, terraformOptions)
 	// Validate if the Github Push FER is added successfully
@@ -170,15 +179,19 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the Gitlab Build FER is added successfully
 	validateSumoLogicGitlabBrFER(t, terraformOptions)
 	// Validate if the Gitlab Deploy FER is added successfully
-	validateSumoLogicGitlabDeployFER(t, terraformOptions)	
+	validateSumoLogicGitlabDeployFER(t, terraformOptions)
 	// Validate if the Gitlab Issue FER is added successfully
 	validateSumoLogicGitlabIssueFER(t, terraformOptions)
 	// Validate if the Gitlab Push FER is added successfully
-	validateSumoLogicGitlabPushFER(t, terraformOptions)			
+	validateSumoLogicGitlabPushFER(t, terraformOptions)
 	// Validate if the Opsgenie Alerts FER is added successfully
 	validateSumoLogicOpsgenieAlertsFER(t, terraformOptions)
 	// Validate if the Jira Cloud FER is added successfully
 	validateSumoLogicJiraFER(t, terraformOptions)
+	// Validate if the CircleCI Build FER is added successfully
+	validateSumoLogicCircleCIBuildFER(t, terraformOptions)
+	// Validate if the CircleCI Deploy FER is added successfully
+	validateSumoLogicCircleCIDeployFER(t, terraformOptions)
 }
 
 func validateSumoLogicCollector(t *testing.T, terraformOptions *terraform.Options, collectorID string) {
@@ -304,9 +317,19 @@ func validateSumoLogicCircleCIOrbWorkflowSource(t *testing.T, terraformOptions *
 	}
 }
 
-func validateSumoLogicPagerdutyWebhook(t *testing.T, terraformOptions *terraform.Options) {
+func validateSumoLogicPagerdutyV2Webhook(t *testing.T, terraformOptions *terraform.Options) {
 	// Run `terraform output` to get the value of an output variable
-	webhookID := terraform.Output(t, terraformOptions, "sumo_pagerduty_webhook_id")
+	webhookID := terraform.Output(t, terraformOptions, "sumo_pagerduty_v2_webhook_id")
+	if webhookID != "[]" && getProperty("install_sumo_to_pagerduty_webhook") == "true" {
+		webhookID = strings.Split(webhookID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/connections/%s", sumologicURL, webhookID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicPagerdutyV3Webhook(t *testing.T, terraformOptions *terraform.Options) {
+	// Run `terraform output` to get the value of an output variable
+	webhookID := terraform.Output(t, terraformOptions, "sumo_pagerduty_v3_webhook_id")
 	if webhookID != "[]" && getProperty("install_sumo_to_pagerduty_webhook") == "true" {
 		webhookID = strings.Split(webhookID, "\"")[1]
 		// Verify that we get back a 200 OK
@@ -390,10 +413,19 @@ func validateSumoLogicOpsgenieAppInstallation(t *testing.T, terraformOptions *te
 	}
 }
 
-func validateSumoLogicPagerdutyAppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+func validateSumoLogicPagerdutyV2AppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
 
 	if getProperty("install_pagerduty") == "true" {
 		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Pagerduty%%20V2", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicPagerdutyV3AppInstallation(t *testing.T, terraformOptions *terraform.Options, folderName string) {
+
+	if getProperty("install_pagerduty") == "true" {
+		appFolderPath := fmt.Sprintf("/Library/Users/%s/%s/Pagerduty%%20V3", strings.Replace(os.Getenv("SUMOLOGIC_USERNAME"), "+", "%2B", -1), folderName)
 		// Verify that we get back a 200 OK
 		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v2/content/path?path=%s", sumologicURL, appFolderPath), nil, headers, customValidation, nil)
 	}
@@ -577,10 +609,21 @@ func validateSumoLogicBitbucketPrFER(t *testing.T, terraformOptions *terraform.O
 	}
 }
 
-func validateSumoLogicPagerdutyAlertsFER(t *testing.T, terraformOptions *terraform.Options) {
+func validateSumoLogicPagerdutyAlertsV2FER(t *testing.T, terraformOptions *terraform.Options) {
 
 	// Run `terraform output` to get the value of an output variable
-	ferID := terraform.Output(t, terraformOptions, "pagerduty_alerts_fer_id")
+	ferID := terraform.Output(t, terraformOptions, "pagerduty_alerts_v2_fer_id")
+	if ferID != "[]" && getProperty("install_pagerduty") == "true" {
+		ferID = strings.Split(ferID, "\"")[1]
+		// Verify that we get back a 200 OK
+		http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("%s/api/v1/extractionRules/%s", sumologicURL, ferID), nil, headers, customValidation, nil)
+	}
+}
+
+func validateSumoLogicPagerdutyAlertsV3FER(t *testing.T, terraformOptions *terraform.Options) {
+
+	// Run `terraform output` to get the value of an output variable
+	ferID := terraform.Output(t, terraformOptions, "pagerduty_alerts_v3_fer_id")
 	if ferID != "[]" && getProperty("install_pagerduty") == "true" {
 		ferID = strings.Split(ferID, "\"")[1]
 		// Verify that we get back a 200 OK
@@ -707,12 +750,28 @@ func validateAtlassianOpsgenieWebhook(t *testing.T, terraformOptions *terraform.
 	}
 }
 
-func validatePagerdutyToSumologicWebhook(t *testing.T, workingDir string) {
+func validatePagerdutyV2ToSumologicWebhook(t *testing.T, workingDir string) {
 	terraformOptions := test_structure.LoadTerraformOptions(t, workingDir)
-	var pdProps = loadPropertiesFile("../pagerduty.auto.tfvars")
+	var pdProps = loadPropertiesFile("../pagerdutyv2.auto.tfvars")
 	var pdheaders = map[string]string{"Authorization": "Token token=" + pdProps["pagerduty_api_key"], "Accept": "application/vnd.pagerduty+json;version=2"}
 	// Run `terraform output` to get the value of an output variable
-	webhookID := terraform.Output(t, terraformOptions, "pagerduty_webhook_id")
+	webhookID := terraform.Output(t, terraformOptions, "pagerduty_v2_webhook_id")
+	if webhookID != "[]" && getProperty("install_pagerduty") == "true" {
+		webhookID = strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(webhookID, "{", "", -1), "}", "", -1), "[", "", -1), "]", "", -1), "\"", "", -1)
+		webhookIDs := strings.Split(webhookID, ",")
+		for i := 0; i < len(webhookIDs); i++ {
+			// Verify that we get back a 200 OK
+			http_helper.HTTPDoWithCustomValidation(t, "GET", fmt.Sprintf("https://api.pagerduty.com/extensions/%s", strings.TrimSpace(webhookIDs[i])), nil, pdheaders, customValidation, nil)
+		}
+	}
+}
+
+func validatePagerdutyV3ToSumologicWebhook(t *testing.T, workingDir string) {
+	terraformOptions := test_structure.LoadTerraformOptions(t, workingDir)
+	var pdProps = loadPropertiesFile("../pagerdutyv3.auto.tfvars")
+	var pdheaders = map[string]string{"Authorization": "Token token=" + pdProps["pagerduty_api_key"], "Accept": "application/vnd.pagerduty+json;version=2"}
+	// Run `terraform output` to get the value of an output variable
+	webhookID := terraform.Output(t, terraformOptions, "pagerduty_v3_service_webhook_id")
 	if webhookID != "[]" && getProperty("install_pagerduty") == "true" {
 		webhookID = strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(webhookID, "{", "", -1), "}", "", -1), "[", "", -1), "]", "", -1), "\"", "", -1)
 		webhookIDs := strings.Split(webhookID, ",")
