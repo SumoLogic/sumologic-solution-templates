@@ -146,9 +146,14 @@ variable "install_pagerduty" {
   }
 }
 
+<<<<<<< HEAD
 variable "install_pagerduty_version" {
   type    = string
-  default = "v3"
+
+=======
+variable "install_pagerduty_version"{
+ type     = string
+>>>>>>> parent of c8c1889 (final update)
   validation {
     condition = contains([
     "v2", "v3"], var.install_pagerduty_version)
