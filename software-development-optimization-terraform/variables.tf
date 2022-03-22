@@ -40,10 +40,10 @@ variable "sumo_api_endpoint" {
   }
 }
 variable "app_installation_folder" {
-  default = "SDO PagerDuty Test"
+  default = "Software Development Optimization"
 }
 variable "collector_name" {
-  default = "SDO PagerDuty Test"
+  default = "Software Development Optimization"
 }
 
 #Apps
@@ -146,14 +146,9 @@ variable "install_pagerduty" {
   }
 }
 
-<<<<<<< HEAD
 variable "install_pagerduty_version" {
   type    = string
-
-=======
-variable "install_pagerduty_version"{
- type     = string
->>>>>>> parent of c8c1889 (final update)
+  default = "v3"
   validation {
     condition = contains([
     "v2", "v3"], var.install_pagerduty_version)
