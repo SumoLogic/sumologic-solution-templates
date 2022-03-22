@@ -8,6 +8,6 @@ terraform {
     github    = "~> 2.8"
     pagerduty = "~> 2.3"
     sumologic = "~> 2.1.0"
-    gitlab ="3.6.0"
+    gitlab    = "3.6.0"
   }
 }

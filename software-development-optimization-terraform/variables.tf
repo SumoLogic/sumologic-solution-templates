@@ -26,159 +26,159 @@ variable "deployment" {
   validation {
     condition = contains([
       "US1",
-    "us1","US2","us2","AU","au","CA","ca","DE","de","EU","eu","FED","fed","JP","jp","IN","in"], var.deployment)
+    "us1", "US2", "us2", "AU", "au", "CA", "ca", "DE", "de", "EU", "eu", "FED", "fed", "JP", "jp", "IN", "in"], var.deployment)
     error_message = "Argument \"deployment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"de\",\"eu\",\"fed\",\"jp\",\"in\"."
   }
 }
 variable "sumo_api_endpoint" {
-  type        = string
+  type = string
   validation {
-  condition = contains([
-  "https://api.au.sumologic.com/api/",
-  "https://api.ca.sumologic.com/api/","https://api.de.sumologic.com/api/","https://api.eu.sumologic.com/api/","https://api.fed.sumologic.com/api/","https://api.in.sumologic.com/api/","https://api.jp.sumologic.com/api/","https://api.sumologic.com/api/","https://api.us2.sumologic.com/api/"], var.sumo_api_endpoint)
-  error_message = "Argument \"sumo_api_endpoint\" must be one of the values specified at https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security."
-}
+    condition = contains([
+      "https://api.au.sumologic.com/api/",
+    "https://api.ca.sumologic.com/api/", "https://api.de.sumologic.com/api/", "https://api.eu.sumologic.com/api/", "https://api.fed.sumologic.com/api/", "https://api.in.sumologic.com/api/", "https://api.jp.sumologic.com/api/", "https://api.sumologic.com/api/", "https://api.us2.sumologic.com/api/"], var.sumo_api_endpoint)
+    error_message = "Argument \"sumo_api_endpoint\" must be one of the values specified at https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security."
+  }
 }
 variable "app_installation_folder" {
-  default = "Software Development Optimization"
+  default = "SDO PagerDuty Test"
 }
 variable "collector_name" {
-  default = "Software Development Optimization"
+  default = "SDO PagerDuty Test"
 }
 
 #Apps
 variable "install_jira_cloud" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","app","collection"], var.install_jira_cloud)
+    "all", "none", "fer", "app", "collection"], var.install_jira_cloud)
     error_message = "Argument \"install_jira_cloud\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
 variable "install_bitbucket_cloud" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","app","collection"], var.install_bitbucket_cloud)
+    "all", "none", "fer", "app", "collection"], var.install_bitbucket_cloud)
     error_message = "Argument \"install_bitbucket_cloud\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
 variable "install_opsgenie" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","app","collection"], var.install_opsgenie)
+    "all", "none", "fer", "app", "collection"], var.install_opsgenie)
     error_message = "Argument \"install_opsgenie\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
 variable "install_sumo_to_opsgenie_webhook" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "true","false"], var.install_sumo_to_opsgenie_webhook)
+    "true", "false"], var.install_sumo_to_opsgenie_webhook)
     error_message = "Argument \"install_sumo_to_opsgenie_webhook\" must be one of \"true\",\"false\"."
   }
 }
 variable "install_jira_server" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","app","collection"], var.install_jira_server)
+    "all", "none", "fer", "app", "collection"], var.install_jira_server)
     error_message = "Argument \"install_jira_server\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
 variable "install_sumo_to_jiracloud_webhook" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "true","false"], var.install_sumo_to_jiracloud_webhook)
+    "true", "false"], var.install_sumo_to_jiracloud_webhook)
     error_message = "Argument \"install_sumo_to_jiracloud_webhook\" must be one of \"true\",\"false\"."
   }
 }
 variable "install_sumo_to_jiraserver_webhook" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "true","false"], var.install_sumo_to_jiraserver_webhook)
+    "true", "false"], var.install_sumo_to_jiraserver_webhook)
     error_message = "Argument \"install_sumo_to_jiraserver_webhook\" must be one of \"true\",\"false\"."
   }
 }
 variable "install_sumo_to_jiraservicedesk_webhook" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "true","false"], var.install_sumo_to_jiraservicedesk_webhook)
+    "true", "false"], var.install_sumo_to_jiraservicedesk_webhook)
     error_message = "Argument \"install_sumo_to_jiraservicedesk_webhook\" must be one of \"true\",\"false\"."
   }
 }
 variable "install_jenkins" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","app","collection"], var.install_jenkins)
+    "all", "none", "fer", "app", "collection"], var.install_jenkins)
     error_message = "Argument \"install_jenkins\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
 variable "install_github" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","app","collection"], var.install_github)
+    "all", "none", "fer", "app", "collection"], var.install_github)
     error_message = "Argument \"install_github\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
 
 variable "install_gitlab" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","app","collection"], var.install_gitlab)
+    "all", "none", "fer", "app", "collection"], var.install_gitlab)
     error_message = "Argument \"install_gitlab\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
 
 variable "install_pagerduty" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","app","collection"], var.install_pagerduty)
+    "all", "none", "fer", "app", "collection"], var.install_pagerduty)
     error_message = "Argument \"install_pagerduty\" must be one of \"all\",\"none\",\"fer\",\"app\",\"collection\"."
   }
 }
 
-variable "install_pagerduty_version"{
- type        = string
- default = "v3"
- validation {
+variable "install_pagerduty_version" {
+  type    = string
+  default = "v3"
+  validation {
     condition = contains([
-      "v2","v3"], var.install_pagerduty_version)
+    "v2", "v3"], var.install_pagerduty_version)
     error_message = "Argument \"install_pagerduty_version\" must be one of \"v2\" or \"v3\"."
   }
 }
 
 variable "install_sdo" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "none","app"], var.install_sdo)
+    "none", "app"], var.install_sdo)
     error_message = "Argument \"install_sdo\" must be one of \"none\",\"app\"."
   }
 }
 
 variable "install_circleci" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","app","collection"], var.install_circleci)
+    "all", "none", "app", "collection"], var.install_circleci)
     error_message = "Argument \"install_circleci\" must be one of \"none\",\"app\",\"all\" and \"collection\"."
   }
 }
 
 variable "install_circleci_SDO_plugin" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "all","none","fer","collection"], var.install_circleci_SDO_plugin)
+    "all", "none", "fer", "collection"], var.install_circleci_SDO_plugin)
     error_message = "Argument \"install_circleci_SDO_plugin\" must be one of \"all\",\"none\",\"fer\",\"collection\"."
   }
 }
@@ -260,10 +260,10 @@ variable "pagerduty_api_key" {}
 variable "pagerduty_services_pagerduty_webhooks" {}
 variable "pagerduty_services_sumo_webhooks" {}
 variable "install_sumo_to_pagerduty_webhook" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "true","false"], var.install_sumo_to_pagerduty_webhook)
+    "true", "false"], var.install_sumo_to_pagerduty_webhook)
     error_message = "Argument \"install_sumo_to_pagerduty_webhook\" must be one of \"true\",\"false\"."
   }
 }
@@ -279,18 +279,18 @@ variable "github_repository_names" {}
 variable "github_repo_events" {}
 variable "github_org_events" {}
 variable "github_org_webhook_create" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "true","false"], var.github_org_webhook_create)
+    "true", "false"], var.github_org_webhook_create)
     error_message = "Argument \"github_org_webhook_create\" must be one of \"true\",\"false\"."
   }
 }
 variable "github_repo_webhook_create" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "true","false"], var.github_repo_webhook_create)
+    "true", "false"], var.github_repo_webhook_create)
     error_message = "Argument \"github_repo_webhook_create\" must be one of \"true\",\"false\"."
   }
 }
@@ -319,10 +319,10 @@ variable "circleci_deploy_jobname" {
 variable "gitlab_token" {}
 variable "gitlab_project_names" {}
 variable "gitlab_project_webhook_create" {
-  type        = string
+  type = string
   validation {
     condition = contains([
-      "true","false"], var.gitlab_project_webhook_create)
+    "true", "false"], var.gitlab_project_webhook_create)
     error_message = "Argument \"gitlab_project_webhook_create\" must be one of \"true\",\"false\"."
   }
 }
