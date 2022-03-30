@@ -10,7 +10,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_alb_module"></a> [alb\_module](#module\_alb\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | n/a |
+| <a name="module_classic_elb_module"></a> [classic\_elb\_module](#module\_classic\_elb\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | n/a |
 
 ## Resources
 
@@ -35,6 +35,6 @@ No resources.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_sumologic_content"></a> [sumologic\_content](#output\_sumologic\_content) | This output contains alb App. |
-| <a name="output_sumologic_field"></a> [sumologic\_field](#output\_sumologic\_field) | This output contains fields required for alb app. |
-| <a name="output_sumologic_field_extraction_rule"></a> [sumologic\_field\_extraction\_rule](#output\_sumologic\_field\_extraction\_rule) | This output contains Field Extraction rules required for alb app. |
+| <a name="output_sumologic_content"></a> [sumologic\_content](#output\_sumologic\_content) | This output contains classic elb App. |
+| <a name="output_sumologic_field"></a> [sumologic\_field](#output\_sumologic\_field) | This output contains fields required for classic elb app. |
+| <a name="output_sumologic_field_extraction_rule"></a> [sumologic\_field\_extraction\_rule](#output\_sumologic\_field\_extraction\_rule) | This output contains Field Extraction rules required for classic elb app. |

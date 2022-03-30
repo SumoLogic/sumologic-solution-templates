@@ -26,6 +26,7 @@ module "ecs_module" {
               | json field=requestParameters "cluster" as clustername nodrop
               | where eventSource = "ecs.amazonaws.com"
               | "aws/ecs" as namespace
+              | tolowercase(clustername) as clustername
               | fields region, namespace, clustername, accountid
       EOT
       enabled          = true
