@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.3.0: Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
+Description: "Version - v2.4.0: Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
 
 Parameters:
   SumoLogicResourceRemoveOnDeleteStack:
@@ -75,8 +75,40 @@ Parameters:
     Default: ""
     Description: "Enter AWS IAM Role arn in case the destination is Kinesis Firehose stream."
 
+  ELBAutoEnableS3Logs:
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+    Default: 'Yes'
+    Description: "Enable ELB S3 Access Logging"
+    Type: String
+
+  ELBAutoEnableS3LogsOptions:
+    Type: String
+    Description: "New - Automatically enables S3 logging for newly created ELB resources to collect logs for ELB resources. This does not affect ELB resources already collecting logs.
+                  Existing - Automatically enables S3 logging for existing ELB resources to collect logs for ELB resources.
+                  Both - Automatically enables S3 logging for new and existing ELB resources.
+                  None - Skips Automatic S3 Logging enable for ELB resources."
+    Default: 'Both'
+    AllowedValues:
+      - 'New'
+      - 'Existing'
+      - 'Both'
+      - 'None'
+
+  ELBS3LogsBucketName:
+    Type: String
+    Description: "Provide a name of existing S3 bucket name where you would like to store ELB logs. If this is empty, a new bucket will be created in the region."
+    Default: ""
+  
+  ELBS3LogsBucketPrefix:
+    Type: String
+    Description : "Path inside bucket for dumping of Access Logs for classic load balancer"
+    Default: "" 
+
 Conditions:
   auto_enable_s3_logs: !Equals [ !Ref ALBAutoEnableS3Logs, 'Yes' ]
+  auto_enable_s3_logs_elb: !Equals [ !Ref ELBAutoEnableS3Logs, 'Yes' ]
   auto_subscribe_new_lambda_log_groups: !Equals [ !Ref AutoSubscribeLogGroups, 'Yes' ]
 
   # Condition for Auto Subscribe Lambda
@@ -92,13 +124,28 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
-        SemanticVersion: 1.0.2
+        SemanticVersion: 1.0.4
       Parameters:
         BucketName: !Ref ALBS3LogsBucketName
         BucketPrefix: "elasticloadbalancing"
         AutoEnableLogging: "ALB"
         AutoEnableResourceOptions: !Ref ALBAutoEnableS3LogsOptions
         FilterExpression: "'Type': 'application'|'type': 'application'"
+        RemoveOnDeleteStack: !Ref SumoLogicResourceRemoveOnDeleteStack
+  
+  AutoEnableS3LogsElbAWSResources:
+    Type: AWS::Serverless::Application
+    Condition: auto_enable_s3_logs_elb
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
+        SemanticVersion: 1.0.4
+      Parameters:
+        BucketName: !Ref ELBS3LogsBucketName
+        BucketPrefix: !Ref ELBS3LogsBucketPrefix
+        AutoEnableLogging: "ELB"
+        AutoEnableResourceOptions: !Ref ELBAutoEnableS3LogsOptions
+        FilterExpression: "'apiVersion': '2012-06-01'"
         RemoveOnDeleteStack: !Ref SumoLogicResourceRemoveOnDeleteStack
 
   AutoSubscribeLambdaLogGroupsAWSResources:

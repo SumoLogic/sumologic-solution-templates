@@ -159,6 +159,30 @@
                     {
                         "key": "panelPANE-829C893895A9EA4F",
                         "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":1}"
+                    },
+                    {
+                        "key": "panelPANE-9BF16BAEA2C13A49",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":12,\"y\":10}"
+                    },
+                    {
+                        "key": "panelPANE-9CD9CA05B552CA44",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":6,\"y\":39}"
+                    },
+                    {
+                        "key": "panelPANE-9D6E7556A262C846",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":18,\"y\":11}"
+                    },
+                    {
+                        "key": "panel9A752B10B7A38B4A",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":12,\"y\":11}"
+                    },
+                    {
+                        "key": "panelF8611200A33CD847",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":0,\"y\":38}"
+                    },
+                    {
+                        "key": "panel510C3885ADF8E840",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":39}"
                     }
                 ]
             },
@@ -491,7 +515,7 @@
                     "id": null,
                     "key": "panelPANE-2489C9AEA5489B4A",
                     "title": "Requests Served by ALB",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}],\"series\":{}}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.25,\"mode\":\"timeSeries\",\"aggregationType\":\"avg\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
@@ -502,7 +526,7 @@
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message"
                         }
                     ],
@@ -810,6 +834,120 @@
                     "timeRange": null,
                     "coloringRules": null,
                     "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-9BF16BAEA2C13A49",
+                    "title": "Classic Load Balancer (ELB)",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":20},\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-9CD9CA05B552CA44",
+                    "title": "Classic Load Balancer (ELB) Latency (ms)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":1001,\"color\":\"#75bf00\"},{\"from\":1001,\"to\":3001,\"color\":\"#f6c851\"},{\"from\":3001,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "account={{account}} Namespace=AWS/ELB metric=Latency Statistic=Average region=* loadbalancername=* | eval(_value*1000) | avg by account, region, namespace, loadbalancername",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-9D6E7556A262C846",
+                    "title": "ELB Errors",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":5,\"color\":\"#75bf00\"},{\"from\":6,\"to\":50,\"color\":\"#f6c851\"},{\"from\":51,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "account={{account}} Namespace=AWS/ELB (metric=HTTPCode_ELB_4XX or metric=HTTPCode_ELB_5XX) Statistic=Sum region=* loadbalancername=* | sum by account, region, namespace, loadbalancername",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9A752B10B7A38B4A",
+                    "title": "Requests Served by ELB",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.25,\"mode\":\"timeSeries\",\"aggregationType\":\"avg\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancername}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace=AWS/ELB metric=RequestCount Statistic=Sum account={{account}} region=* loadbalancername=* | sum by loadbalancername, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelF8611200A33CD847",
+                    "title": "Application and Classic Load Balancer",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":20},\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panel510C3885ADF8E840",
+                    "title": "Active Connections (ALB)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "account={{account}} Namespace=AWS/ApplicationELB metric=ActiveConnectionCount Statistic=Sum region=* loadbalancer=* | sum by account, region, namespace, loadbalancer",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
                 }
             ],
             "variables": [
@@ -825,7 +963,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -989,6 +1128,30 @@
                     {
                         "key": "panelPANE-2AEC3E7192D9D942",
                         "structure": "{\"height\":6,\"width\":6,\"x\":6,\"y\":32}"
+                    },
+                    {
+                        "key": "panelPANE-4162DCB5A32D094C",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":12,\"y\":10}"
+                    },
+                    {
+                        "key": "panelPANE-A67B2E20BC271A43",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":12,\"y\":11}"
+                    },
+                    {
+                        "key": "panelPANE-6DFA637C8E2A6B4F",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":18,\"y\":11}"
+                    },
+                    {
+                        "key": "panelPANE-8302BACC9D69C946",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":0,\"y\":38}"
+                    },
+                    {
+                        "key": "panelPANE-1BE7F7D5A20C7949",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":39}"
+                    },
+                    {
+                        "key": "panelPANE-FF1759E1A405494E",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":6,\"y\":39}"
                     }
                 ]
             },
@@ -1640,6 +1803,120 @@
                     "timeRange": null,
                     "coloringRules": null,
                     "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-4162DCB5A32D094C",
+                    "title": "Classic Load Balancer (ELB)",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":20},\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-A67B2E20BC271A43",
+                    "title": "Requests Served by ELB",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.25,\"mode\":\"timeSeries\",\"aggregationType\":\"avg\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancername}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace=AWS/ELB metric=RequestCount Statistic=Sum account={{account}} region={{region}} loadbalancername=* | sum by loadbalancername, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-6DFA637C8E2A6B4F",
+                    "title": "ELB Errors",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":5,\"color\":\"#75bf00\"},{\"from\":6,\"to\":50,\"color\":\"#f6c851\"},{\"from\":51,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "account={{account}} Namespace=AWS/ELB (metric=HTTPCode_ELB_4XX or metric=HTTPCode_ELB_5XX) Statistic=Sum region={{region}} loadbalancername=* | sum by account, region, namespace, loadbalancername",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-8302BACC9D69C946",
+                    "title": "Application and Classic Load Balancer",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":20},\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-1BE7F7D5A20C7949",
+                    "title": "Active Connections (ALB)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{loadbalancer}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "account={{account}} Namespace=AWS/ApplicationELB metric=ActiveConnectionCount Statistic=Sum region={{region}} loadbalancer=* | sum by account, region, namespace, loadbalancer",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-FF1759E1A405494E",
+                    "title": "Classic Load Balancer (ELB) Latency (ms)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":1001,\"color\":\"#75bf00\"},{\"from\":1001,\"to\":3001,\"color\":\"#f6c851\"},{\"from\":3001,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "account={{account}} Namespace=AWS/ELB metric=Latency Statistic=Average region={{region}} loadbalancername=* | eval(_value*1000) | avg by account, region, namespace, loadbalancername",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
                 }
             ],
             "variables": [
@@ -1655,7 +1932,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1669,7 +1947,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []

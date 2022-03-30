@@ -16,7 +16,31 @@ module "ec2metrics_module" {
   #   }
   # }
 
-  # ********************** No FERs for EC2 Metrics ********************** #
+  # ********************** FERs (for EC2 CloudTrail Logs) ********************** #
+  managed_field_extraction_rules = {
+    "CloudTrailFieldExtractionRule" = {
+      name             = "AwsObservabilityEC2CloudTrailLogsFER"
+      scope            = "account=* eventname eventsource \"ec2.amazonaws.com\""
+      parse_expression = <<EOT
+              | json "eventSource", "awsRegion", "requestParameters", "responseElements", "recipientAccountId" as eventSource, region, requestParameters, responseElements, accountid nodrop
+              | where eventSource = "ec2.amazonaws.com"
+              | "aws/ec2" as namespace
+              | json field=requestParameters "instanceType", "instancesSet", "instanceId", "DescribeInstanceCreditSpecificationsRequest.InstanceId.content" as req_instancetype, req_instancesSet, req_instanceid_1, req_instanceid_2 nodrop
+              | json field=req_instancesSet "item", "items" as req_instancesSet_item, req_instancesSet_items nodrop
+              | parse regex field=req_instancesSet_item "\"instanceId\":\s*\"(?<req_instanceid_3>.*?)\"" nodrop
+              | parse regex field=req_instancesSet_items "\"instanceId\":\s*\"(?<req_instanceid_4>.*?)\"" nodrop
+              | json field=responseElements "instancesSet.items" as res_responseElements_items nodrop
+              | parse regex field=res_responseElements_items "\"instanceType\":\s*\"(?<res_instanceType>.*?)\"" nodrop
+              | parse regex field=res_responseElements_items "\"instanceId\":\s*\"(?<res_instanceid>.*?)\"" nodrop
+              | if (!isBlank(req_instanceid_1), req_instanceid_1,  if (!isBlank(req_instanceid_2), req_instanceid_2, if (!isBlank(req_instanceid_3), req_instanceid_3, if (!isBlank(req_instanceid_4), req_instanceid_4, "")))) as req_instanceid
+              | if (!isBlank(req_instanceid), req_instanceid, res_instanceid) as instanceid
+              | if (!isBlank(req_instancetype), req_instancetype, res_instancetype) as instanceType 
+              | tolowercase(instanceid) as instanceid
+              | fields region, namespace, accountid, instanceid
+      EOT
+      enabled          = true
+    }
+  }
 
   # ********************** Apps ********************** #
   managed_apps = {
