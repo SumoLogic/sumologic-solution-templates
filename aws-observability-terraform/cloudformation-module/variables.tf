@@ -98,8 +98,8 @@ variable "Section4aCreateMetricsSourceOptions" {
 }
 variable "Section4bMetricsNameSpaces" {
   type        = string
-  default     = "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
-  description = "Provide Comma delimited list of the namespaces which will be used for both AWS CLoudWatch Metrics and Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
+  default     = "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2"
+  description = "Provide Comma delimited list of the namespaces which will be used for both AWS CloudWatch Metrics and Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2. AWS/AutoScaling will be appended to Namespaces for Inventory Sources."
 }
 variable "Section4cCloudWatchExistingSourceAPIUrl" {
   type        = string

@@ -26,7 +26,7 @@ Section3aInstallObservabilityApps = "Yes"
 ## Sumo Logic AWS CloudWatch Metrics Sources ##
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-aws-cloudwatch-metrics-and-inventory-source
 Section4aCreateMetricsSourceOptions     = "Kinesis Firehose Metrics Source"
-Section4bMetricsNameSpaces              = "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
+Section4bMetricsNameSpaces              = "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2"
 Section4cCloudWatchExistingSourceAPIUrl = ""
 
 ## Sumo Logic AWS ALB Log Source ##
