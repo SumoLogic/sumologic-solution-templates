@@ -39,7 +39,7 @@ variable "access_key" {
 
 variable "cloudwatch_metrics_source_url" {
   type        = string
-  description = "Required if you are already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. If the URL is of “CloudWatch Metric source” - account and accountID fields will be added to the Source.  If the URL is of “Kinesis Firehose Metrics source” - account field will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
+  description = "Required if you are already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. If the URL is of “CloudWatch Metric source” - account and accountID fields will be added to the Source. If the URL is of “Kinesis Firehose Metrics source” - account field will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
   default = ""
 }
 
@@ -51,13 +51,13 @@ variable "cloudtrail_source_url" {
 
 variable "elb_log_source_url" {
   type        = string
-  description = "Required if you are already collecting ALB logs. Provide the existing Sumo Logic ALB Source API URL. The account, accountid, region and namespace fields will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
+  description = "Required if you are already collecting ALB logs. Provide the existing Sumo Logic ALB Source API URL. The account, accountid, and region fields will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
   default = ""
 }
 
 variable "classic_lb_log_source_url" {
   type        = string
-  description = "Required if you are already collecting Classic LB logs. Provide the existing Sumo Logic Classic LB Source API URL. The account, accountid, region and namespace fields will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
+  description = "Required if you are already collecting Classic LB logs. Provide the existing Sumo Logic Classic LB Source API URL. The account, accountid, and region fields will be added to the Source. For information on how to determine the URL, see [View or Download Source JSON Configuration](https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration)."
   default = ""
 }
 
@@ -384,7 +384,7 @@ variable "cloudwatch_metrics_source_details" {
     source_name         = "CloudWatch Metrics (Region)"
     source_category     = "aws/observability/cloudwatch/metrics"
     description         = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch metrics."
-    limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS"]
+    limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/EC2"]
     fields              = {}
     bucket_details = {
       create_bucket        = true
@@ -541,13 +541,13 @@ variable "inventory_source_details" {
     source_name         = "AWS Inventory (Region)"
     source_category     = "aws/observability/inventory"
     description         = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS inventory metadata."
-    limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/AutoScaling"]
+    limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/AutoScaling", "AWS/EC2"]
     fields              = {}
   }
   validation {
     # regex check that each element of the input namespaces is one of the accepted values, contains check if any of the can function returns was false, return false from logical if any of the returns were false
-    condition     = contains([for namespace in var.inventory_source_details.limit_to_namespaces : can(regex("AWS/(?:ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS|AutoScaling)", namespace))], false) != true
-    error_message = "Namespaces should be from provided default list \"AWS/ApplicationELB\", \"AWS/ApiGateway\", \"AWS/DynamoDB\", \"AWS/Lambda\", \"AWS/RDS\", \"AWS/ECS\", \"AWS/ElastiCache\", \"AWS/ELB\", \"AWS/NetworkELB\", \"AWS/SQS\", \"AWS/SNS\", \"AWS/AutoScaling\"."
+    condition     = contains([for namespace in var.inventory_source_details.limit_to_namespaces : can(regex("AWS/(?:ApplicationELB|ApiGateway|DynamoDB|Lambda|RDS|ECS|ElastiCache|ELB|NetworkELB|SQS|SNS|AutoScaling|EC2)", namespace))], false) != true
+    error_message = "Namespaces should be from provided default list \"AWS/ApplicationELB\", \"AWS/ApiGateway\", \"AWS/DynamoDB\", \"AWS/Lambda\", \"AWS/RDS\", \"AWS/ECS\", \"AWS/ElastiCache\", \"AWS/ELB\", \"AWS/NetworkELB\", \"AWS/SQS\", \"AWS/SNS\", \"AWS/AutoScaling\", \"AWS/EC2\"."
   }
 }
 
