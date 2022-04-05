@@ -470,7 +470,7 @@ variable "cloudwatch_logs_source_details" {
   }
   validation {
     condition     = contains(["VPC-RAW", "VPC-JSON", "Others"], var.cloudwatch_logs_source_details.lambda_log_forwarder_config.log_format)
-    error_message = "Log format service must be be one of VPC-RAW, VPC-JSON, or Others."
+    error_message = "Log format service must be one of VPC-RAW, VPC-JSON, or Others."
   }
 }
 
