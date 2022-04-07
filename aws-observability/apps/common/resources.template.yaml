@@ -79,8 +79,8 @@ Parameters:
     Description: "Provide a Cloud Watch Metrics Source Name"
     Default: ""
   CloudWatchMetricsNameSpaces:
-    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS"
-    Description: "Provide Comma delimited list of the namespaces. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS. See the list of AWS services that publish CloudWatch metrics: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
+    Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2"
+    Description: "Provide Comma delimited list of the namespaces. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2. See the list of AWS services that publish CloudWatch metrics: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
     Type: String
   ScanInterval:
     Default: 300000
@@ -904,7 +904,7 @@ Resources:
           LOGGER.setLevel(logging.INFO)
           # Update the Default value whenever CF starts supporting More Namespaces
           default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS",
-                     "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS"]
+                     "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/EC2"]
           cw_metrics_specific = ["SQS", "SNS"]
 
           def lambda_handler(event, context):
@@ -999,7 +999,8 @@ Resources:
         ThirdMetricsSourceNamespace: "ELB"
         CreateFourthMetricsSource: !GetAtt Primerinvoke.NetworkELB
         FourthMetricsSourceNamespace: "NetworkELB"
-        CreateFifthMetricsSource: "No"
+        CreateFifthMetricsSource: !GetAtt Primerinvoke.EC2
+        FifthMetricsSourceNamespace: "EC2"
 
   CloudWatchMetricsThirdStack:
     Type: AWS::CloudFormation::Stack
