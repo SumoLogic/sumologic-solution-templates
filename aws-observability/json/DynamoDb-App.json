@@ -449,11 +449,11 @@
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
@@ -1052,11 +1052,11 @@
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
@@ -1274,11 +1274,11 @@
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
@@ -1307,7 +1307,7 @@
         {
             "type": "DashboardV2SyncDefinition",
             "name": "3. AWS DynamoDB - Events",
-            "description": "See the details on events in your DynamoDB including the location, users, errors, updates, creations, and deletions to tables.",
+            "description": "See the details on cloudtrail audit events in your DynamoDB including the location, users, errors, updates, creations, and deletions to tables.",
             "title": "3. AWS DynamoDB - Events",
             "theme": "Light",
             "topologyLabelMap": {
@@ -1379,7 +1379,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| count by EventName\n| sort by _count, EventName asc\n| limit 5",
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| count by EventName\n| sort by _count, EventName asc\n| limit 5",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1399,13 +1399,13 @@
                     "id": null,
                     "key": "panelpane-da8bb2b4afbc5948",
                     "title": "Events Over Time",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{}}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as EventName, Region, tablename, SourceIp, UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| timeslice 5m\n| count by EventName, _timeslice\n| transpose row _timeslice column EventName \n| fillmissing timeslice (5m)",
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as EventName, Region, tablename, SourceIp, UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| timeslice 5m\n| count by EventName, _timeslice\n| transpose row _timeslice column EventName \n| fillmissing timeslice (5m)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1431,7 +1431,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\") and !isEmpty(ErrorCode)\n| count",
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where !isBlank(errorCode)\n| count",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1451,13 +1451,13 @@
                     "id": null,
                     "key": "panelpane-b8faa804b5a87b46",
                     "title": "Top 10 IAM Users",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{}}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| count as count by UserName\n| sort count \n| limit 10",
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| count as count by UserName\n| sort count \n| limit 10",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1483,7 +1483,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\") and !isEmpty(ErrorCode)\n| count as Count by ErrorCode, ErrorMessage, EventName, UserName, SourceIp\n| sort by Count\n| limit 20",
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where !isBlank(errorCode)\n| count as Count by ErrorCode, ErrorMessage, EventName, UserName, SourceIp\n| sort by Count, ErrorCode, ErrorMessage\n| limit 20",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1509,7 +1509,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"requestParameters.keySchema\", \"requestParameters.attributeDefinitions\", \"userAgent\", \"responseElements.tableDescription.provisionedThroughput\", \"userIdentity.sessionContext.attributes.mfaAuthenticated\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, TableSchema, AttributeDefinition, UserAgent, ProvisionedThroughput, MFAAuthenticated nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS\") as MessageDate\n| count as Count by MessageDate, EventName, tablename, UserName, SourceIp, MFAAuthenticated\n| sort by MessageDate\n| fields MessageDate, EventName, tablename, UserName, SourceIp, MFAAuthenticated",
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"requestParameters.keySchema\", \"requestParameters.attributeDefinitions\", \"userAgent\", \"responseElements.tableDescription.provisionedThroughput\", \"userIdentity.sessionContext.attributes.mfaAuthenticated\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, TableSchema, AttributeDefinition, UserAgent, ProvisionedThroughput, MFAAuthenticated nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS\") as MessageDate\n| count as Count by MessageDate, EventName, tablename, UserName, SourceIp, MFAAuthenticated\n| sort by MessageDate\n| fields MessageDate, EventName, tablename, UserName, SourceIp, MFAAuthenticated",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1535,7 +1535,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| count by SourceIp\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = SourceIp\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| count by SourceIp\n| lookup latitude, longitude from geo://location on ip = SourceIp\n| count by latitude, longitude\n| where !isnull(latitude)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1586,11 +1586,11 @@
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
@@ -1838,11 +1838,11 @@
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
