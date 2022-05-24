@@ -36,11 +36,25 @@ module "lambda_module" {
     },
     "CloudWatchFieldExtractionRule" = {
       name             = "AwsObservabilityLambdaCloudWatchLogsFER"
-      scope            = "account=* region=* namespace=aws/lambda _sourceHost=/aws/lambda/*"
+      scope            = "account=* region=* _sourceHost=/aws/lambda/*"
       parse_expression = <<EOT
               | parse field=_sourceHost "/aws/lambda/*" as functionname
               | tolowercase(functionname) as functionname
-              | fields functionname
+              | "aws/lambda" as namespace
+              | fields functionname, namespace
+      EOT
+      enabled          = true
+    },
+    "GenericCloudWatchLogsFieldExtractionRule" = {
+      name             = "AwsObservabilityGenericCloudWatchLogsFER"
+      scope            = "account=* region=* _sourceHost=/aws/*"
+      parse_expression = <<EOT
+              | "unknown" as namespace
+              | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
+              | if (_sourceHost matches "/aws/rds/*", "aws/rds", namespace) as namespace
+              | if (_sourceHost matches "/aws/ecs/containerinsights/*", "ecs/containerinsights", namespace) as namespace
+              | if (_sourceHost matches "/aws/kinesisfirehose/*", "aws/firehose", namespace) as namespace
+              | fields namespace
       EOT
       enabled          = true
     }
