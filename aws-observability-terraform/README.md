@@ -12,7 +12,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.13.0 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.14.0 |
 
 ## Modules
 
