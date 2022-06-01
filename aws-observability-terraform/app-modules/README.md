@@ -4,13 +4,13 @@
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | >= 2.1 |
-| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.13.0 |
+| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.14.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.13.0 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.14.0 |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
@@ -74,6 +74,7 @@
 
 | Name | Description |
 |------|-------------|
+| <a name="output_sumologic_apps_folder"></a> [sumologic\_apps\_folder](#output\_sumologic\_apps\_folder) | This output contains rce Apps. |
 | <a name="output_sumologic_content_alb"></a> [sumologic\_content\_alb](#output\_sumologic\_content\_alb) | This output contains alb App. |
 | <a name="output_sumologic_content_apigateway"></a> [sumologic\_content\_apigateway](#output\_sumologic\_content\_apigateway) | This output contains apigateway App. |
 | <a name="output_sumologic_content_dynamodb"></a> [sumologic\_content\_dynamodb](#output\_sumologic\_content\_dynamodb) | This output contains dynamodb App. |
@@ -105,5 +106,7 @@
 | <a name="output_sumologic_field_nlb"></a> [sumologic\_field\_nlb](#output\_sumologic\_field\_nlb) | This output contains fields required for nlb app. |
 | <a name="output_sumologic_field_overview"></a> [sumologic\_field\_overview](#output\_sumologic\_field\_overview) | This output contains fields required for overview app. |
 | <a name="output_sumologic_field_rds"></a> [sumologic\_field\_rds](#output\_sumologic\_field\_rds) | This output contains fields required for rds app. |
+| <a name="output_sumologic_hierarchy"></a> [sumologic\_hierarchy](#output\_sumologic\_hierarchy) | This output contains rce Apps. |
 | <a name="output_sumologic_metric_rules_nlb"></a> [sumologic\_metric\_rules\_nlb](#output\_sumologic\_metric\_rules\_nlb) | This output contains metric rules required for nlb app. |
 | <a name="output_sumologic_metric_rules_rds"></a> [sumologic\_metric\_rules\_rds](#output\_sumologic\_metric\_rules\_rds) | This output contains metric rules required for rds app. |
+| <a name="output_sumologic_monitors_folder"></a> [sumologic\_monitors\_folder](#output\_sumologic\_monitors\_folder) | This output contains rce Apps. |

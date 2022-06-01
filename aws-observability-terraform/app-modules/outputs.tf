@@ -162,3 +162,18 @@ output "sumologic_content_rce" {
   value       = module.rce_app.sumologic_content
   description = "This output contains rce Apps."
 }
+
+output "sumologic_hierarchy" {
+  value       = sumologic_hierarchy.awso_hierarchy
+  description = "This output contains rce Apps."
+}
+
+output "sumologic_apps_folder" {
+  value       = sumologic_folder.apps_folder
+  description = "This output contains rce Apps."
+}
+
+output "sumologic_monitors_folder" {
+  value       = sumologic_monitor_folder.monitor_folder
+  description = "This output contains rce Apps."
+}
