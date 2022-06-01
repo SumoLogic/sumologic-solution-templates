@@ -58,7 +58,7 @@ locals {
   create_classic_lb_bucket      = local.create_classic_lb_source && var.classic_lb_source_details.bucket_details.create_bucket
   create_kf_metrics_fail_bucket = local.create_kf_metrics_source && var.cloudwatch_metrics_source_details.bucket_details.create_bucket
   create_kf_logs_fail_bucket    = local.create_kf_logs_source && var.cloudwatch_logs_source_details.bucket_details.create_bucket
-  create_common_bucket          = local.create_cloudtrail_bucket || local.create_elb_bucket || local.create_classic_lb_source || local.create_kf_metrics_fail_bucket || local.create_kf_logs_fail_bucket
+  create_common_bucket          = local.create_cloudtrail_bucket || local.create_elb_bucket || local.create_classic_lb_bucket || local.create_kf_metrics_fail_bucket || local.create_kf_logs_fail_bucket
   common_bucket_name            = local.create_common_bucket ? "aws-observability-${random_string.aws_random.id}" : ""
   common_force_destroy          = local.create_common_bucket && (var.cloudtrail_source_details.bucket_details.force_destroy_bucket || var.elb_source_details.bucket_details.force_destroy_bucket || var.cloudwatch_metrics_source_details.bucket_details.force_destroy_bucket || var.cloudwatch_logs_source_details.bucket_details.force_destroy_bucket)
 
