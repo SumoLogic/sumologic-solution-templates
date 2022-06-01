@@ -12,7 +12,7 @@ import (
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 )
 
-var props = loadPropertiesFile("../examples/default/main.auto.tfvars")
+var props = loadPropertiesFile("../../examples/appmodule/main.auto.tfvars")
 
 func loadPropertiesFile(file string) map[string]string {
 	props, err := ReadPropertiesFile(file)
