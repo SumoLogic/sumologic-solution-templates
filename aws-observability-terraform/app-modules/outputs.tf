@@ -165,15 +165,15 @@ output "sumologic_content_rce" {
 
 output "sumologic_hierarchy" {
   value       = sumologic_hierarchy.awso_hierarchy
-  description = "This output contains rce Apps."
+  description = "This output contains Sumologic Hierarchy."
 }
 
 output "sumologic_apps_folder" {
   value       = sumologic_folder.apps_folder
-  description = "This output contains rce Apps."
+  description = "This output contains AWS Observability Parent App folder."
 }
 
 output "sumologic_monitors_folder" {
   value       = sumologic_monitor_folder.monitor_folder
-  description = "This output contains rce Apps."
+  description = "This output contains AWS Observability Monitors folder."
 }
