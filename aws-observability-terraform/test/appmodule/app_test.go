@@ -14,12 +14,8 @@ func TestAppModule1(t *testing.T) {
 	// t.Parallel()
 
 	// The values to pass into the terraform CLI
-	// rootFolder := "../"
-	// terraformFolderRelativeToRoot := "examples/appmodule"
-	// // Copy the terraform folder to a temp folder
-	// TerraformDir := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
-	TerraformDir := "../examples/appmodule"
-	props = loadPropertiesFile("../examples/appmodule/main.auto.tfvars")
+	TerraformDir := "../../examples/appmodule"
+	props = loadPropertiesFile("../../examples/appmodule/main.auto.tfvars")
 	Vars := map[string]interface{}{}
 
 	// Deploy the solution using Terraform
@@ -56,8 +52,8 @@ func TestAppModule2(t *testing.T) {
 	// terraformFolderRelativeToRoot := "examples/appmodule"
 	// // Copy the terraform folder to a temp folder
 	// TerraformDir := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
-	TerraformDir := "../examples/appmodule"
-	props = loadPropertiesFile("../examples/appmodule/main.auto.tfvars")
+	TerraformDir := "../../examples/appmodule"
+	props = loadPropertiesFile("../../examples/appmodule/main.auto.tfvars")
 
 	// Deploy the solution using Terraform
 	test_structure.RunTestStage(t, "deploy", func() {
@@ -86,12 +82,8 @@ func TestAppModule3(t *testing.T) {
 	}
 
 	// The values to pass into the terraform CLI
-	// rootFolder := ".."
-	// terraformFolderRelativeToRoot := "examples/appmodule"
-	// // Copy the terraform folder to a temp folder
-	// TerraformDir := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
-	TerraformDir := "../examples/appmodule"
-	props = loadPropertiesFile("../examples/appmodule/main.auto.tfvars")
+	TerraformDir := "../../examples/appmodule"
+	props = loadPropertiesFile("../../examples/appmodule/main.auto.tfvars")
 
 	// Deploy the solution using Terraform
 	test_structure.RunTestStage(t, "deploy", func() {
@@ -121,13 +113,9 @@ func TestAppModule4(t *testing.T) {
 		"ecs_monitors":                           "false",
 	}
 
-	// // The values to pass into the terraform CLI
-	// // rootFolder := ".."
-	// // terraformFolderRelativeToRoot := "examples/appmodule"
-	// // // Copy the terraform folder to a temp folder
-	// // TerraformDir := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
-	TerraformDir := "../examples/appmodule"
-	// props = loadPropertiesFile("../examples/appmodule/main.auto.tfvars")
+	// The values to pass into the terraform CLI
+	TerraformDir := "../../examples/appmodule"
+	props = loadPropertiesFile("../../examples/appmodule/main.auto.tfvars")
 
 	// Deploy the solution using Terraform
 	test_structure.RunTestStage(t, "deploy", func() {
