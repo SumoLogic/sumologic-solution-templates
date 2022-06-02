@@ -78,9 +78,6 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the NLB App folder is created successfully
 	nlbFolderID := terraform.Output(t, terraformOptions, "nlb_apps_folder_id")
 	validateSumoLogicAppsFolder(t, terraformOptions, nlbFolderID)
-	// Validate if the RCE App folder is created successfully
-	// rceFolderID := terraform.Output(t, terraformOptions, "rce_apps_folder_id")
-	// validateSumoLogicAppsFolder(t, terraformOptions, rceFolderID)
 	// Validate if the RDS App folder is created successfully
 	rdsFolderID := terraform.Output(t, terraformOptions, "rds_apps_folder_id")
 	validateSumoLogicAppsFolder(t, terraformOptions, rdsFolderID)

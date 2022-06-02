@@ -58,11 +58,6 @@ output "rds_apps_folder_id" {
   description = "This output contains sumologic RDS apps folder."
 }
 
-# output "rce_apps_folder_id" {
-#   value       = module.sumo-module.sumologic_content_rce.RceApp.id
-#   description = "This output contains sumologic Rce apps folder."
-# }
-
 output "monitors_folder_id" {
   value       = module.sumo-module.sumologic_monitors_folder.id
   description = "This output contains sumologic monitors folder."
