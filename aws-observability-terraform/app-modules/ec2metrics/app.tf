@@ -47,7 +47,11 @@ module "ec2metrics_module" {
     "EC2MetricsApp" = {
       content_json = join("", [var.json_file_directory_path, "/aws-observability/json/EC2-Metrics-App.json"])
       folder_id    = var.app_folder_id
-    }
+    },
+    "EC2CWMetricsApp" = {
+      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/EC2-CW-Metrics-App.json"])
+      folder_id    = var.app_folder_id
+    },
   }
 
   # ********************** Monitors ********************** #
