@@ -178,6 +178,25 @@ Resources:
       location: !Ref Section5aAppInstallLocation
       share: !Ref Section5bShare
       orgid: !Ref Section1eOrgId
+  
+  sumoAppCW:
+    Type: Custom::App
+    Condition: install_app
+    DependsOn: sumoApp
+    Properties:
+      ServiceToken: !Ref Section3aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "AWS Observability EC2 CloudWatch Metrics App"
+      FolderName: !Sub "AWS Observability ${Section3cNestedTemplateVersion} "
+      RetainOldAppOnUpdate: true
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      AppJsonS3Url: !Sub "https://${Section3bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section3cNestedTemplateVersion}/appjson/EC2-CW-Metrics-App.json"
+      location: !Ref Section5aAppInstallLocation
+      share: !Ref Section5bShare
+      orgid: !Ref Section1eOrgId
 
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
@@ -215,7 +234,7 @@ Resources:
   sumoOverview:
     Type: Custom::App
     Condition: install_app
-    DependsOn: sumoApp
+    DependsOn: sumoAppCW
     Properties:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"
