@@ -19,10 +19,9 @@ Metadata:
           default: "App Details - Sumo Logic Collector Configuration"
         Parameters:
           - Section2aInstallApp
-          - Section2bCollectorName
-          - Section2cSumoLogicAccountID
-          - Section2dAccountAlias
-          - Section2eAccountAliasMappingS3URL
+          - Section2bSumoLogicAccountID
+          - Section2cAccountAlias
+          - Section2dAccountAliasMappingS3URL
 
       - Label:
           default: "AWS Inventory Source Details"
@@ -43,8 +42,7 @@ Metadata:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
           - Section5aParentStackLambdaARN
-          - Section5bTemplatesBucketName
-          - Section5cNestedTemplateVersion
+          - Section5bNestedTemplateVersion
 
       - Label:
           default: "App Installation and sharing"
@@ -68,13 +66,11 @@ Metadata:
 
       Section2aInstallApp:
         default: "Create AWS Root Cause Explorer App"
-      Section2bCollectorName:
-        default: "Collector Name"
-      Section2cSumoLogicAccountID:
+      Section2bSumoLogicAccountID:
         default: "Sumo Logic Account ID"
-      Section2dAccountAlias:
+      Section2cAccountAlias:
         default: "Alias for AWS Account Identification. Please leave this blank if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
-      Section2eAccountAliasMappingS3URL:
+      Section2dAccountAliasMappingS3URL:
         default: "S3 URL of a CSV file that maps AWS Account IDs to an Account Alias"
 
       Section3aCreateAwsInventorySource:
@@ -95,9 +91,7 @@ Metadata:
 
       Section5aParentStackLambdaARN:
         default: "If Any, Lambda ARN from parent Stack"
-      Section5bTemplatesBucketName:
-        default: "Nested Templates Bucket Name"
-      Section5cNestedTemplateVersion:
+      Section5bNestedTemplateVersion:
         default: "Nested Templates Version"
 
       Section6aAppInstallLocation:
@@ -148,24 +142,19 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-
-  Section2bCollectorName:
-    Type: String
-    Description: "Change the collector name to be created else default name will be used."
-    Default: ""
-  Section2cSumoLogicAccountID:
+  Section2bSumoLogicAccountID:
     Type: String
     Description: "Provide the Sumo Logic Account ID for trust relationship."
     Default: ""
 
-  Section2dAccountAlias:
+  Section2cAccountAlias:
     Type: String
     Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
     AllowedPattern: "[a-z0-9]*"
     ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
     MaxLength: 30
 
-  Section2eAccountAliasMappingS3URL:
+  Section2dAccountAliasMappingS3URL:
     Type: String
     Description: "Required only if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
     Default: ""
@@ -210,11 +199,7 @@ Parameters:
     Type: String
     Default: "ParentStackLambdaARN"
     Description: Parent Stack Lambda ARN. Do Not Edit the value.
-  Section5bTemplatesBucketName:
-    Type: String
-    AllowedPattern: ".+"
-    Description: Bucket Name for all the nested templates.
-  Section5cNestedTemplateVersion:
+  Section5bNestedTemplateVersion:
     Type: String
     Description: "Provide the version for the nested templates. Default is the latest version."
     AllowedPattern: ".+"
@@ -248,8 +233,6 @@ Conditions:
     - !Condition install_inventory_source
     - !Condition install_xray_source
 
-  # Collector Name Check
-  # collector_name_available: !Not [!Equals [ !Ref Section2bCollectorName, ''] ]
 
 Mappings:
   # Bucket names where the Lambda Zip and Nested Templates are kept. Buckets are present in region, with region as suffix.
@@ -352,29 +335,11 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
       AccountID: !Ref "AWS::AccountId"
-      AccountAlias: !Ref Section2dAccountAlias
-      AccountAliasMappingS3Url: !Ref Section2eAccountAliasMappingS3URL
+      AccountAlias: !Ref Section2cAccountAlias
+      AccountAliasMappingS3Url: !Ref Section2dAccountAliasMappingS3URL
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
-
-  sumoOverview:
-    Type: Custom::App
-    Condition: install_app
-    Properties:
-      ServiceToken: !Ref Section5aParentStackLambdaARN
-      Region: !Ref "AWS::Region"
-      AppName: "AWS Observability Overview App Tsat"
-      FolderName: !Sub "AWS Observability ${Section5cNestedTemplateVersion} "
-      RetainOldAppOnUpdate: true
-      RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-      AppJsonS3Url: !Sub "https://${Section5bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section5cNestedTemplateVersion}/appjson/Rce-App.json"
-      location: !Ref Section6aAppInstallLocation
-      share: !Ref Section6bShare
-      orgid: !Ref Section1fOrgId
 
   CloudTrailDevOps:
     Type: Custom::App
@@ -386,7 +351,7 @@ Resources:
       AppId: "c7e195de-f169-460a-8e8b-7bb23af0ee5e"
       AppSources:
         CloudTrailLogSrc: "account=* eventSource"
-      FolderName: !Sub "AWS Observability ${Section5cNestedTemplateVersion} "
+      FolderName: !Sub "AWS Observability ${Section5bNestedTemplateVersion} "
       RetainOldAppOnUpdate: true
       RemoveOnDeleteStack: !Ref Section1eRemoveSumoResourcesOnDeleteStack
       SumoAccessID: !Ref Section1bSumoAccessID
@@ -426,7 +391,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${Section2cSumoLogicAccountID}:root"
+              AWS: !Sub "arn:aws:iam::${Section2bSumoLogicAccountID}:root"
             Action: sts:AssumeRole
             Condition:
               StringEquals:
