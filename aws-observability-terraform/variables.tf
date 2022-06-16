@@ -54,11 +54,31 @@ variable "aws_account_alias" {
   type        = string
   description = <<EOT
             Provide the Name/Alias for the AWS environment from which you are collecting data. This name will appear in the Sumo Logic Explorer View, metrics, and logs.
-            Please leave this blank if you are going to deploy the solution in multiple AWS accounts.
+            If you are going to deploy the solution in multiple AWS accounts then this value has to be overidden at main.tf file.
             Do not include special characters in the alias.
         EOT
   validation {
     condition     = can(regex("[a-z0-9]*", var.aws_account_alias))
     error_message = "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
   }
+}
+
+variable "sumologic_folder_installation_location" {
+  type        = string
+  description = "Indicates where to install the app folder. Enter \"Personal Folder\" for installing in \"Personal\" folder and \"Admin Recommended Folder\" for installing in \"Admin Recommended\" folder."
+  validation {
+    condition = contains([
+      "Personal Folder",
+      "Admin Recommended Folder"], var.sumologic_folder_installation_location)
+    error_message = "The value must be one of \"Personal Folder\" or \"Admin Recommended Folder\"."
+  }
+  default     = "Personal Folder"
+
+}
+
+variable "sumologic_folder_share_with_org" {
+  type        = bool
+  description = "Indicates if AWS Observability folder should be shared (view access) with entire organization. true to enable; false to disable."
+  default     = true
+
 }
