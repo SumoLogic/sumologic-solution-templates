@@ -33,6 +33,13 @@ resource "sumologic_field" "loadbalancer" {
     state      = "Enabled"
 }
 
+# Used in Classic LB
+resource "sumologic_field" "loadbalancername" {
+    data_type  = "String"
+    field_name = "loadbalancername"
+    state      = "Enabled"
+}
+
 # Used in API gateway
 resource "sumologic_field" "apiname" {
     data_type  = "String"

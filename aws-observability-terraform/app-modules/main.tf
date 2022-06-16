@@ -1,10 +1,11 @@
 data "sumologic_personal_folder" "personalFolder" {}
+data "sumologic_admin_recommended_folder" "adminRecoFolder" {}
 
 # Create a folder in the folder ID provided. If no folder ID is provided, create the folder in personal folder
 resource "sumologic_folder" "apps_folder" {
   description = "This folder contains all the apps for AWS Observability solution."
   name        = var.apps_folder_name
-  parent_id   = var.parent_folder_id != "" ? format("%x", var.parent_folder_id) : data.sumologic_personal_folder.personalFolder.id
+  parent_id   = var.parent_folder_id != "" ? format("%x", var.parent_folder_id) : (var.folder_installation_location == "Personal Folder" ? data.sumologic_personal_folder.personalFolder.id : data.sumologic_admin_recommended_folder.adminRecoFolder.id)
 }
 
 # Create a folder to install all monitors.
@@ -12,6 +13,19 @@ resource "sumologic_monitor_folder" "monitor_folder" {
   name        = var.monitors_folder_name
   description = "This folder contains all the monitors for AWS Observability solution."
 }
+
+#Provides a way to configure permissions on a content to share it with a user, a role, or the entire org
+resource "sumologic_content_permission" "share_with_org" {
+	count = var.folder_share_with_org ? 1 : 0
+	content_id = sumologic_folder.apps_folder.id
+	notify_recipient = true
+	notification_message = "You now have the permission to access this content"
+	permission {
+		permission_name = "View"
+		source_type = "org"
+		source_id = var.sumologic_organization_id
+	}
+ }
 
 # Install the overview app and resources.
 module "overview_app" {
@@ -192,4 +206,95 @@ module "nlb_app" {
   connection_notifications = var.connection_notifications
   email_notifications      = var.email_notifications
   group_notifications      = var.group_notifications
+}
+
+# Install the classic lb app and resources.
+module "elb_app" {
+  depends_on = [module.elasticache_app]
+  source     = "./elb"
+
+  access_id                = var.access_id
+  access_key               = var.access_key
+  environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
+  app_folder_id            = sumologic_folder.apps_folder.id
+  monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
+  monitors_disabled        = var.elb_monitors_disabled
+  connection_notifications = var.connection_notifications
+  email_notifications      = var.email_notifications
+  group_notifications      = var.group_notifications
+}
+
+# ********************** Create Explore Hierarchy ********************** #
+resource "sumologic_hierarchy" "awso_hierarchy" {
+  name = "AWS Observability"
+  level {
+    entity_type = "account"
+    next_level {
+      entity_type = "region"
+      next_level {
+        entity_type = "namespace"
+        next_levels_with_conditions {
+          condition = "AWS/ApplicationElb"
+          level {
+              entity_type = "loadbalancer"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/ApiGateway"
+          level {
+              entity_type = "apiname"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/DynamoDB"
+          level {
+              entity_type = "tablename"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/EC2"
+          level {
+              entity_type = "instanceid"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/RDS"
+          level {
+              entity_type = "dbidentifier"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/Lambda"
+          level {
+              entity_type = "functionname"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/ECS"
+          level {
+              entity_type = "clustername"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/ElastiCache"
+          level {
+              entity_type = "cacheclusterid"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/ELB"
+          level {
+              entity_type = "loadbalancername"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/NetworkELB"
+          level {
+              entity_type = "networkloadbalancer"
+            }
+          }
+      }
+    }
+  }
 }

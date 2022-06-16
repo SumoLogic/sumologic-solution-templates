@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.3.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.4.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
@@ -212,12 +212,45 @@ Parameters:
     Type: String
     Description: "Provide the version for the nested templates. Default is the latest version."
     AllowedPattern: ".+"
+  
+  CreateELBLogSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic ELB Log Source with provided bucket Name."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CreateELBS3Bucket:
+    Type: String
+    Description: "Yes - Create a new S3 bucket in AWS S3.
+                  No - Use an existing S3 bucket from AWS S3 which has ELB Logs."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  ELBS3LogsBucketName:
+    Type: String
+    Description: "Required when Bucket creation Flag = No. Provide an existing bucket name that has ELB logs."
+    Default: ""
+  ELBS3BucketPathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  ELBLogsSourceName:
+    Type: String
+    Description: "Provide a ELB Logs Source Name"
+    Default: ""
+  ELBLogsSourceCategory:
+    Type: String
+    Description: "Provide a source Category for the ELB Logs Source."
+    Default: ""
 
 Conditions:
   # Sources Conditions
   install_metadata_source: !Equals [ !Ref CreateMetaDataSource, 'Yes' ]
   install_cloud_watch_metric_source: !Equals [ !Ref CreateCloudWatchMetricsSource, 'Yes' ]
   install_alb_logs_source: !Equals [ !Ref CreateALBLogSource, 'Yes' ]
+  install_elb_logs_source: !Equals [ !Ref CreateELBLogSource, 'Yes']
   install_cloudtrail_logs_source: !Equals [ !Ref CreateCloudTrailLogSource, 'Yes' ]
   install_cloudwatch_logs_source: !Equals [ !Ref CreateCloudWatchLogSource, 'Yes' ]
   install_kf_metric_source: !Equals [ !Ref CreateKinesisFirehoseMetricsSource, 'Yes' ]
@@ -227,6 +260,7 @@ Conditions:
     - !Condition install_metadata_source
     - !Condition install_cloud_watch_metric_source
     - !Condition install_alb_logs_source
+    - !Condition install_elb_logs_source
     - !Condition install_cloudtrail_logs_source
     - !Condition install_cloudwatch_logs_source
     - !Condition install_kf_metric_source
@@ -234,10 +268,12 @@ Conditions:
 
   # Bucket Condition and Trail
   create_alb_bucket: !Equals [ !Ref CreateALBS3Bucket, 'Yes' ]
+  create_elb_bucket: !Equals [ !Ref CreateELBS3Bucket, 'Yes' ]
   create_cloudtrail_bucket: !Equals [ !Ref CreateCloudTrailBucket, 'Yes' ]
   create_target_s3_bucket: !Or
     - !Condition create_alb_bucket
     - !Condition create_cloudtrail_bucket
+    - !Condition create_elb_bucket
 
   # SNS
   create_cloudtrail_sns_topic: !And
@@ -246,12 +282,16 @@ Conditions:
   create_alb_sns_topic: !And
     - !Not [ !Condition create_alb_bucket ]
     - !Condition install_alb_logs_source
+  create_elb_sns_topic: !And
+    - !Not [ !Condition create_elb_bucket ]
+    - !Condition install_elb_logs_source
 
   # Sumo Logic Role
   install_sumo_logic_role: !Or
     - !Condition install_metadata_source
     - !Condition install_cloud_watch_metric_source
     - !Condition install_alb_logs_source
+    - !Condition install_elb_logs_source
     - !Condition install_cloudtrail_logs_source
     - !Condition install_kf_metric_source
 
@@ -412,6 +452,12 @@ Resources:
                   - !Sub
                     - "arn:aws:s3:::${S3Bucket}/*"
                     - S3Bucket: !If [install_cloudtrail_logs_source, !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ], ""]
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}"
+                    - S3Bucket: !If [install_elb_logs_source, !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ], ""] 
+                  - !Sub
+                    - "arn:aws:s3:::${S3Bucket}/*"
+                    - S3Bucket: !If [install_elb_logs_source, !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ], ""]  
 
   LambdaHelper:
     Type: 'AWS::Serverless::Function'
@@ -420,7 +466,7 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.13.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.14.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -463,7 +509,7 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.13.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.14.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -654,7 +700,7 @@ Resources:
       ServiceToken: !GetAtt LambdaHelper.Arn
       RemoveOnDeleteStack: false
       HierarchyName: "AWS Observability"
-      HierarchyLevel: { "entityType": "account","nextLevelsWithConditions": [ ],"nextLevel": { "entityType": "region","nextLevelsWithConditions": [ ],"nextLevel": { "entityType": "namespace","nextLevelsWithConditions": [ { "condition": "AWS/ApplicationElb","level": { "entityType": "loadbalancer","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ApiGateway","level": { "entityType": "apiname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/DynamoDB","level": { "entityType": "tablename","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/EC2","level": { "entityType": "instanceid","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/RDS","level": { "entityType": "dbidentifier","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/Lambda","level": { "entityType": "functionname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ECS","level": { "entityType": "clustername","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ElastiCache","level": { "entityType": "cacheclusterid","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/NetworkELB","level": { "entityType": "networkloadbalancer","nextLevelsWithConditions": [ ] } } ] } } }
+      HierarchyLevel: {"entityType":"account","nextLevelsWithConditions":[],"nextLevel":{"entityType":"region","nextLevelsWithConditions":[],"nextLevel":{"entityType":"namespace","nextLevelsWithConditions":[{"condition":"AWS/ApplicationElb","level":{"entityType":"loadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ApiGateway","level":{"entityType":"apiname","nextLevelsWithConditions":[]}},{"condition":"AWS/DynamoDB","level":{"entityType":"tablename","nextLevelsWithConditions":[]}},{"condition":"AWS/EC2","level":{"entityType":"instanceid","nextLevelsWithConditions":[]}},{"condition":"AWS/RDS","level":{"entityType":"dbidentifier","nextLevelsWithConditions":[]}},{"condition":"AWS/Lambda","level":{"entityType":"functionname","nextLevelsWithConditions":[]}},{"condition":"AWS/ECS","level":{"entityType":"clustername","nextLevelsWithConditions":[]}},{"condition":"AWS/ElastiCache","level":{"entityType":"cacheclusterid","nextLevelsWithConditions":[]}},{"condition":"AWS/NetworkELB","level":{"entityType":"networkloadbalancer","nextLevelsWithConditions":[]}},{"condition":"AWS/ELB","level":{"entityType":"loadbalancername","nextLevelsWithConditions":[]}}]}}}
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
@@ -682,6 +728,30 @@ Resources:
               - !Sub
                 - "arn:aws:s3:::${S3Bucket}/*"
                 - S3Bucket: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ]
+
+  SumoLogicELBS3Policy:
+    Type: AWS::IAM::Policy
+    Condition: install_elb_logs_source
+    Properties:
+      PolicyName: SumoLogicAwsSourcesPoliciesS3ELB
+      Roles:
+        - !Ref SumoLogicSourceRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}"
+                - S3Bucket: !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ] 
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}/*"
+                - S3Bucket: !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ]            
             
   SumoLogicCloudTrailS3Policy:
     Type: AWS::IAM::Policy
@@ -1015,7 +1085,6 @@ Resources:
       PathExpression: !Ref ALBS3BucketPathExpression
       Fields:
         account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-        namespace: "aws/applicationelb"
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
@@ -1079,6 +1148,91 @@ Resources:
               - !Ref ALBSNSTopic
       Topics:
         - Ref: ALBSNSTopic
+
+   ############# START - RESOURCES FOR ELB SOURCE #################
+
+  ELBSource:
+    Condition: install_elb_logs_source
+    Type: Custom::AWSSource
+    DependsOn: SumoLogicELBS3Policy
+    Properties:
+      SourceType: AwsElbBucket  # ??
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref ELBLogsSourceName
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceCategory: !Ref ELBLogsSourceCategory
+      CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      TargetBucketName: !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ]
+      PathExpression: !Ref ELBS3BucketPathExpression
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS 
+        region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
+      RoleArn: !GetAtt SumoLogicSourceRole.Arn
+
+  ELBSNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Condition: create_elb_sns_topic
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W47
+            reason: "KmsMasterKeyId not required for SNS topic."
+    Properties:
+      TopicName: !Join
+        - ""
+        - - "elb-sumo-sns-"
+          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split [ "/", !Ref "AWS::StackId" ]
+
+  ELBSNSSubscription:
+    Condition: install_elb_logs_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !If [ create_elb_bucket, !Ref CommonBucketSNSTopic, !Ref ELBSNSTopic ]
+      Endpoint: !GetAtt ELBSource.SUMO_ENDPOINT # ??
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  ELBSNSpolicy:
+    Condition: create_elb_sns_topic
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: ELBSNSpolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${ELBS3LogsBucketName}"
+            Effect: Allow
+            Principal:
+              "Service": "s3.amazonaws.com"
+            Resource:
+              - !Ref ELBSNSTopic
+      Topics:
+        - Ref: ELBSNSTopic
 
   ############# START - RESOURCES FOR CLOUD TRAIL SOURCE #################
 
