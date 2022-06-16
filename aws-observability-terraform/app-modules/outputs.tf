@@ -163,6 +163,21 @@ output "sumologic_content_rce" {
   description = "This output contains rce Apps."
 }
 
+output "sumologic_field_sns" {
+  value       = module.sns_app.sumologic_field
+  description = "This output contains fields required for apigateway app."
+}
+
+output "sumologic_field_extraction_rule_sns" {
+  value       = module.sns_app.sumologic_field_extraction_rule
+  description = "This output contains Field Extraction rules required for apigateway app."
+}
+
+output "sumologic_content_sns" {
+  value       = module.sns_app.sumologic_content
+  description = "This output contains apigateway App."
+}
+
 output "sumologic_hierarchy" {
   value       = sumologic_hierarchy.awso_hierarchy
   description = "This output contains Sumologic Hierarchy."
