@@ -95,3 +95,10 @@ resource "sumologic_field" "dbidentifier" {
     field_name = "dbidentifier"
     state      = "Enabled"
 }
+
+# Used in SNS
+resource "sumologic_field" "topicname" {
+    data_type  = "String"
+    field_name = "topicname"
+    state      = "Enabled"
+}

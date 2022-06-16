@@ -12,13 +12,12 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.14.0 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.16.2 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_collection-module"></a> [collection-module](#module\_collection-module) | ./source-module | n/a |
 | <a name="module_sumo-module"></a> [sumo-module](#module\_sumo-module) | ./app-modules | n/a |
 
 ## Resources
@@ -39,6 +38,7 @@
 | [sumologic_field.networkloadbalancer](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.region](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.tablename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field.topicname](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 
 ## Inputs
 
@@ -57,4 +57,3 @@
 | Name | Description |
 |------|-------------|
 | <a name="output_Apps"></a> [Apps](#output\_Apps) | All outputs related to apps. |
-| <a name="output_Collection"></a> [Collection](#output\_Collection) | All outputs related to collection and sources. |
