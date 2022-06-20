@@ -165,17 +165,17 @@ output "sumologic_content_rce" {
 
 output "sumologic_field_sns" {
   value       = module.sns_app.sumologic_field
-  description = "This output contains fields required for apigateway app."
+  description = "This output contains fields required for sns app."
 }
 
 output "sumologic_field_extraction_rule_sns" {
   value       = module.sns_app.sumologic_field_extraction_rule
-  description = "This output contains Field Extraction rules required for apigateway app."
+  description = "This output contains Field Extraction rules required for sns app."
 }
 
 output "sumologic_content_sns" {
   value       = module.sns_app.sumologic_content
-  description = "This output contains apigateway App."
+  description = "This output contains sns App."
 }
 
 output "sumologic_hierarchy" {
