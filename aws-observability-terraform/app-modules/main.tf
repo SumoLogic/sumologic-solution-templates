@@ -227,7 +227,7 @@ module "elb_app" {
 
 # Install the sns app and resources.
 module "sns_app" {
-  depends_on = [module.elb_app]
+  depends_on = [module.nlb_app]
   source     = "./sns"
 
   access_id                = var.access_id

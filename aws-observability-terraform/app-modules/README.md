@@ -88,7 +88,7 @@
 | <a name="output_sumologic_content_overview"></a> [sumologic\_content\_overview](#output\_sumologic\_content\_overview) | This output contains overview App. |
 | <a name="output_sumologic_content_rce"></a> [sumologic\_content\_rce](#output\_sumologic\_content\_rce) | This output contains rce Apps. |
 | <a name="output_sumologic_content_rds"></a> [sumologic\_content\_rds](#output\_sumologic\_content\_rds) | This output contains rds App. |
-| <a name="output_sumologic_content_sns"></a> [sumologic\_content\_sns](#output\_sumologic\_content\_sns) | This output contains apigateway App. |
+| <a name="output_sumologic_content_sns"></a> [sumologic\_content\_sns](#output\_sumologic\_content\_sns) | This output contains sns App. |
 | <a name="output_sumologic_field_alb"></a> [sumologic\_field\_alb](#output\_sumologic\_field\_alb) | This output contains fields required for alb app. |
 | <a name="output_sumologic_field_apigateway"></a> [sumologic\_field\_apigateway](#output\_sumologic\_field\_apigateway) | This output contains fields required for apigateway app. |
 | <a name="output_sumologic_field_dynamodb"></a> [sumologic\_field\_dynamodb](#output\_sumologic\_field\_dynamodb) | This output contains fields required for dynamodb app. |
@@ -104,12 +104,12 @@
 | <a name="output_sumologic_field_extraction_rule_elb"></a> [sumologic\_field\_extraction\_rule\_elb](#output\_sumologic\_field\_extraction\_rule\_elb) | This output contains Field Extraction rules required for classic elb app. |
 | <a name="output_sumologic_field_extraction_rule_lambda"></a> [sumologic\_field\_extraction\_rule\_lambda](#output\_sumologic\_field\_extraction\_rule\_lambda) | This output contains Field Extraction rules required for lambda app. |
 | <a name="output_sumologic_field_extraction_rule_rds"></a> [sumologic\_field\_extraction\_rule\_rds](#output\_sumologic\_field\_extraction\_rule\_rds) | This output contains Field Extraction rules required for rds app. |
-| <a name="output_sumologic_field_extraction_rule_sns"></a> [sumologic\_field\_extraction\_rule\_sns](#output\_sumologic\_field\_extraction\_rule\_sns) | This output contains Field Extraction rules required for apigateway app. |
+| <a name="output_sumologic_field_extraction_rule_sns"></a> [sumologic\_field\_extraction\_rule\_sns](#output\_sumologic\_field\_extraction\_rule\_sns) | This output contains Field Extraction rules required for sns app. |
 | <a name="output_sumologic_field_lambda"></a> [sumologic\_field\_lambda](#output\_sumologic\_field\_lambda) | This output contains fields required for lambda app. |
 | <a name="output_sumologic_field_nlb"></a> [sumologic\_field\_nlb](#output\_sumologic\_field\_nlb) | This output contains fields required for nlb app. |
 | <a name="output_sumologic_field_overview"></a> [sumologic\_field\_overview](#output\_sumologic\_field\_overview) | This output contains fields required for overview app. |
 | <a name="output_sumologic_field_rds"></a> [sumologic\_field\_rds](#output\_sumologic\_field\_rds) | This output contains fields required for rds app. |
-| <a name="output_sumologic_field_sns"></a> [sumologic\_field\_sns](#output\_sumologic\_field\_sns) | This output contains fields required for apigateway app. |
+| <a name="output_sumologic_field_sns"></a> [sumologic\_field\_sns](#output\_sumologic\_field\_sns) | This output contains fields required for sns app. |
 | <a name="output_sumologic_hierarchy"></a> [sumologic\_hierarchy](#output\_sumologic\_hierarchy) | This output contains Sumologic Hierarchy. |
 | <a name="output_sumologic_metric_rules_nlb"></a> [sumologic\_metric\_rules\_nlb](#output\_sumologic\_metric\_rules\_nlb) | This output contains metric rules required for nlb app. |
 | <a name="output_sumologic_metric_rules_rds"></a> [sumologic\_metric\_rules\_rds](#output\_sumologic\_metric\_rules\_rds) | This output contains metric rules required for rds app. |

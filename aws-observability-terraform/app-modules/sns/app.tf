@@ -5,7 +5,7 @@ module "sns_module" {
   access_key  = var.access_key
   environment = var.environment
 
-  # ********************** No Metric Rules for API Gateway ********************** #
+  # ********************** No Metric Rules for SNS ********************** #
 
   # ********************** Fields ********************** #
   /***
@@ -19,8 +19,8 @@ module "sns_module" {
 ***/
   # ********************** FERs ********************** #
   managed_field_extraction_rules = {
-    "SnsFieldExtractionRule" = {
-      name             = "AwsObservabilitySNSLogsFER"
+    "SnsCloudTrailLogsFieldExtractionRule" = {
+      name             = "AwsObservabilitySNSCloudTrailLogsFER"
       scope            = "_sourcecategory=*cloudtrail* \"sns.amazonaws.com\""
       parse_expression = <<EOT
               | json "eventSource", "awsRegion", "requestParameters", "responseElements", "recipientAccountId" as eventSource, region, requestParameters, responseElements, accountid nodrop
