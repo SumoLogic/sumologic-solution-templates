@@ -15,7 +15,7 @@
 3. Provide Existing collectorID and S3 bucket at function TestSourceModule4 at
 3.1 aws-observability-terraform/test/sourcemodule/source_test.go
 4. Go to folder aws-observability-terraform and run following command to execute all Test functions, with function name pattern as Test* 
-4.1 go test -v -timeout 50m ./test/sourcemodule
+```go test -v -timeout 50m ./test/sourcemodule```
 5. Go test command runs all functions starting with name Test*. So if you want to run a particular test case according to your use case, comment the rest of the Testing functions. It’ll take less time to run than running all test cases.
 6. For example if you only run testcase 3 you can expect successful test execution as follows:
 
