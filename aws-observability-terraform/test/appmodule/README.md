@@ -1,72 +1,43 @@
-# Unit/Integration Tests for Sumo Logic SDO Terraform
+## Pre-requisites
 
-#### Unit Tests
+- AWS cli configured
+- Git
+- Golang
+- Terraform
+- Sumo account (Preferably new) to run this test suite or any account which does not have conflicting resources with AWSO
 
-The unit tests verify/run following:
-1. `terraform` installation.
-2. `tflint` installation.
-3. Run `tflint`.
-4. Run `terraform init`. Make sure third party plugins are installed otherwise this will fail.
-5. Run `terraform validate`.
-6. Run `terraform fmt`.
+## App Module
+### How to run Test automation 
+1. Clone git repository
+2. Set variables at following file
+2.1 aws-observability-terraform/examples/appmodule/main.auto.tfvars
+3. Now Go back to folder aws-observability-terraform and run following command to execute all Test functions, with function name pattern as Test* 
+  go test -v -timeout 50m ./test/appmodule
+4. Go test command runs all functions starting with name Test*. So if you want to run a particular test case according to your use case, comment the rest of the Testing functions. It’ll take less time to run than running all test cases.
+5. In case of failure - you can determine the cause of failure, fix the issue and re-run the failed test case.
+6. For example if you only run testcase 3 you can expect successful test execution as follows:
 
-#### Running unit tests
+### Success Criteria
+If all the test cases are passed successfully, then you can expect the below output. 
 
-```shell
-cd test
-sh unit_tests.sh
-```
+### Failure Criteria
+If any of the test cases failed, then you can expect the below output. 
+### Limitations
+While running multiple test cases if any of the test cases failed then you need to do manual cleanup of the resources created. Alternatively you can go to folder aws-observability-terraform/examples/appmodule and run terraform destroy here manually to cleanup resources created.
+### How to Update Test Suite
+Codebase for App Module test cases is present at : aws-observability-terraform/test/appmodule
+1. If any resource is added / removed from the solution
+1.1 Modify the function validateSumoLogicResources at validateSumo.go
+1.2 Add / Remove the respective validation
+2. If New Sumo entity is added to AWSO Solution
+Currently we have validations for following entities, If apart from them any new entity is added please add its validation on similar lines at validateSumo.go.
+2.1 validateSumoLogicAppsFolder
+2.2 validateSumoLogicFER
+2.3 validateSumoLogicField
+2.4 validateSumoLogicMetricRule
+2.5 validateSumoLogicMonitorsFolder
+2.6 validateSumoLogicHierarchy
 
-#### Integration Tests
-
-[Terratest](https://terratest.gruntwork.io/) is being used for Integration testing of the Sumo Logic SDO Terraform scripts.
-
-Following objects are verified:
-
-1. Sumo Logic:
-
-    * Collector.
-    * Sources for each app i.e. Jira Server, Jira Cloud, Opsgenie, Bitbucket, Github and Pagerduty.
-    * App installation for Jira Cloud, Jira Server, Opsgenie, Bitbucket, Github and Pagerduty.
-    * Webhooks for Jira Cloud, Jira Server, Jira Service Desk, Opsgenie and Pagerduty.
-
-2. Atlassian
-
-    * Opsgenie Integration.
-
-3. Pagerduty
-
-    * Pagerduty Integration.
-
-
-#### Running integration tests
-
-
-1. Configure the execution options in `sumologic.auto.tfvars`, `atlassian.auto.tfvars`, `github.auto.tfvars`, `pagerduty.auto.tfvars` and `webhooks.auto-tfvars`.
-2. Configure your Sumo Logic Username by setting the environment variable:
-
-    * `SUMOLOGIC_USERNAME`, it should be the same user with which the access id is created.
-
-3. Install Terraform and make sure it's on your PATH.
-4. Install Golang and make sure it's on your PATH.
-5. Execute Tests
-
-    ```shell
-    cd test
-    dep ensure
-    go test -v -timeout 30m
-    ```
-6. The tests are divided into multiple stages:
-
-    * deploy
-    * validateSumoLogic
-    * validateAtlassian
-    * validatePagerduty
-    * cleanup
-
-    All the stages are executed by default. If you would like to skip a stage set the environment variables like `SKIP_deploy=true`.
-    This is very helpful for example if you are modifying the code and do not want to create/destroy resources with each test run.
-    To achieve this, for the first run you would set `SKIP_cleanup=true` and all other variables should be unset.
-    For the second run it would be `SKIP_cleanup=true` and `SKIP_deploy=true`.
-
-    Now, you can run tests without creating/destroying resources with each run. Once you are finished, unset `SKIP_cleanup` and run the tests to clean up the resources.
+### Miscellaneous Links
+https://docs.google.com/spreadsheets/d/1tPC4lZPfQTXxfNLqr3oVXFCQH0PjZouNQAnbt4LSU8k/edit#gid=1162903618
+https://docs.google.com/document/d/1PsNXkmL6Jo_2Q5f4mO0MvK1Dojl6KfY8SyybpE-g1gg/edit?usp=sharing
