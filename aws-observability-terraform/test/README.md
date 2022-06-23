@@ -12,8 +12,8 @@
 ### How to run Test automation 
 1. Clone git repository
 2. Set variables at following file
-2.1 aws-observability-terraform/examples/appmodule/main.auto.tfvars
-3. Now Go back to folder aws-observability-terraform and run following command to execute all Test functions, with function name pattern as Test* 
+   - aws-observability-terraform/examples/appmodule/main.auto.tfvars
+3. Now Go back to folder aws-observability-terraform and run following command to execute all Test functions, with function name pattern as Test*
 ```go test -v -timeout 50m ./test/appmodule```
 4. Go test command runs all functions starting with name Test*. So if you want to run a particular test case according to your use case, comment the rest of the Testing functions. It’ll take less time to run than running all test cases.
 5. In case of failure - you can determine the cause of failure, fix the issue and re-run the failed test case.
@@ -27,28 +27,28 @@ If any of the test cases failed, then you can expect the below output.
 ### Limitations
 While running multiple test cases if any of the test cases failed then you need to do manual cleanup of the resources created. Alternatively you can go to folder aws-observability-terraform/examples/appmodule and run terraform destroy here manually to cleanup resources created.
 ### How to Update Test Suite
-Codebase for App Module test cases is present at : aws-observability-terraform/test/appmodule
+Codebase for App Module test cases is present at : ```aws-observability-terraform/test/appmodule```
 1. If any resource is added / removed from the solution
-1.1 Modify the function validateSumoLogicResources at validateSumo.go
-1.2 Add / Remove the respective validation
+   - Modify the function validateSumoLogicResources at ```validateSumo.go```
+   - Add / Remove the respective validation
 2. If New Sumo entity is added to AWSO Solution
-Currently we have validations for following entities, If apart from them any new entity is added please add its validation on similar lines at validateSumo.go.
-2.1 validateSumoLogicAppsFolder
-2.2 validateSumoLogicFER
-2.3 validateSumoLogicField
-2.4 validateSumoLogicMetricRule
-2.5 validateSumoLogicMonitorsFolder
-2.6 validateSumoLogicHierarchy
+Currently we have validations for following entities, If apart from them any new entity is added please add its validation on similar lines at ```validateSumo.go.```
+   - validateSumoLogicAppsFolder
+   - validateSumoLogicFER
+   - validateSumoLogicField
+   - validateSumoLogicMetricRule
+   - validateSumoLogicMonitorsFolder
+   - validateSumoLogicHierarchy
 
 
 ## Source Module
 ### How to run Test automation 
 1. Clone git repository
 2. Set variables at following 2 files
-2.1 aws-observability-terraform/examples/sourcemodule/testSource/main.auto.tfvars
-2.2 aws-observability-terraform/examples/sourcemodule/overrideSources/main.auto.tfvars
+   - aws-observability-terraform/examples/sourcemodule/testSource/main.auto.tfvars
+   - aws-observability-terraform/examples/sourcemodule/overrideSources/main.auto.tfvars
 3. Provide Existing collectorID and S3 bucket at function TestSourceModule4 at
-3.1 aws-observability-terraform/test/sourcemodule/source_test.go
+   - aws-observability-terraform/test/sourcemodule/source_test.go
 4. Go to folder aws-observability-terraform and run following command to execute all Test functions, with function name pattern as Test* 
 ```go test -v -timeout 50m ./test/sourcemodule```
 5. Go test command runs all functions starting with name Test*. So if you want to run a particular test case according to your use case, comment the rest of the Testing functions. It’ll take less time to run than running all test cases.
@@ -66,24 +66,24 @@ While running multiple test cases if any of the test cases failed then you need 
  - aws-observability-terraform/examples/sourcemodule/overrideSources
 
 ### How to Update Test Suite
-Codebase for App Module test cases is present at : aws-observability-terraform/test/sourcemodule
+Codebase for App Module test cases is present at : ```aws-observability-terraform/test/sourcemodule```
 1. If any resource is added / removed from the solution
-1.1 Modify all the Test case functions at source_test.go . 
-1.2 Add / Remove the respective validation. E.g. If Classic LB gets deprecated from AWSO then followings things will have to be performed (wrt test framework only)
-   - Remove its sumo source validation.
-   - Remove validations for all the AWS resources created as a part of it such as SNS topic, SNS subscription, CF stack, etc.
-   - Similarly If any new service is added, write validations
+   - Modify all the Test case functions at ```source_test.go``` . 
+   - Add / Remove the respective validation. E.g. If Classic LB gets deprecated from AWSO then followings things will have to be performed (wrt test framework only)
+     - Remove its sumo source validation.
+     - Remove validations for all the AWS resources created as a part of it such as SNS topic, SNS subscription, CF stack, etc.
+     - Similarly If any new service is added, write validations
 2. If New AWS entity is added to AWSO Solution
-Currently we have validations for following entities, If apart from them any new entity is added please add its validation on similar lines at validateAWS.go.
-2.1 validateS3Bucket
-2.2 validateSNSTopic
-2.3 validateSNSsub
-2.4 validateIAMRole
-2.5 validateCloudTrail
-2.6 validateLambda
-2.7 validateCFStack
-2.8 validateKFstream
-2.9 validateCWmetricstream
+Currently we have validations for following entities, If apart from them any new entity is added please add its validation on similar lines at ```validateAWS.go```.
+   - validateS3Bucket
+   - validateSNSTopic
+   - validateSNSsub
+   - validateIAMRole
+   - validateCloudTrail
+   - validateLambda
+   - validateCFStack
+   - validateKFstream
+   - validateCWmetricstream
 
 
 ### Miscellaneous Links
