@@ -13,9 +13,9 @@
 2.1 aws-observability-terraform/examples/appmodule/main.auto.tfvars
 3. Now Go back to folder aws-observability-terraform and run following command to execute all Test functions, with function name pattern as Test* 
 ```go test -v -timeout 50m ./test/appmodule```
-4. Go test command runs all functions starting with name Test*. So if you want to run a particular test case according to your use case, comment the rest of the Testing functions. It’ll take less time to run than running all test cases.
-5. In case of failure - you can determine the cause of failure, fix the issue and re-run the failed test case.
-6. For example if you only run testcase 3 you can expect successful test execution as follows:
+5. Go test command runs all functions starting with name Test*. So if you want to run a particular test case according to your use case, comment the rest of the Testing functions. It’ll take less time to run than running all test cases.
+6. In case of failure - you can determine the cause of failure, fix the issue and re-run the failed test case.
+7. For example if you only run testcase 3 you can expect successful test execution as follows:
 
 ### Success Criteria
 If all the test cases are passed successfully, then you can expect the below output. 
