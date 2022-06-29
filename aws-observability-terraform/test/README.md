@@ -84,8 +84,3 @@ Currently we have validations for following entities, If apart from them any new
    - validateCFStack
    - validateKFstream
    - validateCWmetricstream
-
-
-### Miscellaneous Links
-https://docs.google.com/spreadsheets/d/1tPC4lZPfQTXxfNLqr3oVXFCQH0PjZouNQAnbt4LSU8k/edit#gid=1162903618
-https://docs.google.com/document/d/1PsNXkmL6Jo_2Q5f4mO0MvK1Dojl6KfY8SyybpE-g1gg/edit?usp=sharing
