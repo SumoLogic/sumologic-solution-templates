@@ -8,7 +8,7 @@ module "sns_module" {
   # ********************** No Metric Rules for SNS ********************** #
 
   # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
-  
+
   # ********************** Apps ********************** #
   managed_apps = {
     "SNSApp" = {
