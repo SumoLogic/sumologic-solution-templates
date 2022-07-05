@@ -4,8 +4,8 @@
   "type": "MonitorsLibraryFolderExport",
   "children": [
     {
-      "name": "AWS API Gateway - High Latency",
-      "description": "This alert fires when we detect that the average latency for a given API Gateway is greater than or equal to one second for 5 minutes.",
+      "name": "AWS EC2 - High System CPU Utilization",
+      "description": "This alert fires when the average system CPU utilization within a 5 minute interval for an EC2 instance is high (>=85%).",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
       "evaluationDelay": "0m",
@@ -15,97 +15,14 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "Namespace=aws/apigateway metric=Latency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
+          "query": "Namespace=aws/ec2 metric=CPU_Sys account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
         }
       ],
       "triggers": [
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 1000,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 1000,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon Elasticache - High Engine CPU Utilization",
-      "description": "This alert fires when the average CPU utilization for the Redis engine process within a 5 minute interval is  high (>=90%). For larger node types with four vCPUs or more, use the EngineCPUUtilization metric to monitor and set thresholds for scaling.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/elasticache metric=EngineCPUUtilization statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by CacheClusterId, CacheNodeId, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 90,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 90,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS EC2 - High Memory Utilization",
-      "description": "This alert fires when the average memory utilization within a 5 minute interval for an EC2 instance is high (>=85%).",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/ec2 metric=Mem_UsedPercent account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 85,
           "thresholdType": "GreaterThanOrEqual",
@@ -116,6 +33,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 85,
           "thresholdType": "LessThan",
@@ -127,7 +45,8 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
       "name": "Amazon Elasticache - Low Redis Cache Hit Rate",
@@ -148,6 +67,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 80,
           "thresholdType": "LessThanOrEqual",
@@ -158,6 +78,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 80,
           "thresholdType": "GreaterThan",
@@ -169,279 +90,12 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
-      "name": "AWS API Gateway - High 5XX Errors",
-      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/apigateway metric=5xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "#A * 100 / #B along account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Application Load Balancer - High Latency",
-      "description": "This alert fires when we detect that the average latency for a given Application load balancer within a time interval of 5 minutes is greater than or equal to three seconds.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/applicationelb metric=TargetResponseTime Statistic=Average account=* region=* loadbalancer=* | eval(_value*1000) | sum by account, region, namespace, loadbalancer"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 3000,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 3000,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon ECS - High Memory Utilization",
-      "description": "This alert fires when the average memory utilization within a 5 minute interval for a service within a cluster is high (>=85%).",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/ecs metric=MemoryUtilization statistic=Average  account=* region=* ClusterName=* ServiceName=* | avg by ClusterName, ServiceName, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 85,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 85,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon RDS - High Write Latency",
-      "description": "This alert fires when the average write latency of a database within a 5 minute interval is high (>=5 seconds) . High write latencies will affect the performance of your application.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/rds metric=WriteLatency statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Application Load Balancer - High 4XX Errors",
-      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 4xx within an interval of 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/applicationelb metric=HTTPCode_ELB_4XX_Count Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "#A * 100 / #B along loadbalancer, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon RDS - Low Burst Balance",
-      "description": "This alert fires when we observe a low burst balance (<= 50%) for a given database. A low burst balance indicates you won't be able to scale up as fast for burstable database workloads on gp2 volumes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/rds metric=BurstBalance statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 50,
-          "thresholdType": "LessThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 50,
-          "thresholdType": "GreaterThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Classic Load Balancer - Access from Highly Malicious Sources",
-      "description": "This alert fires when the Classic load balancer is accessed from highly malicious IP addresses within last 5 minutes.",
+      "name": "AWS Application Load Balancer - Access from Highly Malicious Sources",
+      "description": "This alert fires when an Application load balancer is accessed from highly malicious IP addresses within last 5 minutes",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Logs",
       "evaluationDelay": "0m",
@@ -451,395 +105,38 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "account=* region=* namespace=aws/elb\n| parse \"* * * * * * * * * * * \\\"*\\\" \\\"*\\\" * *\" as datetime, loadbalancername, client, backend, request_processing_time, backend_processing_time, response_processing_time, elb_status_code, backend_status_code, received_bytes, sent_bytes, request, user_agent, ssl_cipher, ssl_protocol\n| parse regex \"(?<ClientIp>\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\" multi\n| where ClientIp != \"0.0.0.0\" and ClientIp != \"127.0.0.1\"\n| count as ip_count by ClientIp, loadbalancername, account, region, namespace\n| lookup type, actor, raw, threatlevel as MaliciousConfidence from sumo://threat/cs on threat=ClientIp \n| json field=raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as ThreatCount by ClientIp, loadbalancername, account, region, namespace, MaliciousConfidence, Actor, LabelName"
+          "query": "account=* region=* namespace=aws/applicationelb\n| parse \"* * * * * * * * * * * * \\\"*\\\" \\\"*\\\" * * * \\\"*\\\"\" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId\n| parse regex \"(?<ClientIp>\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\" multi\n| where ClientIp != \"0.0.0.0\" and ClientIp != \"127.0.0.1\"\n| count as ip_count by ClientIp, loadbalancer, account, region, namespace\n| lookup type, actor, raw, threatlevel as MaliciousConfidence from sumo://threat/cs on threat=ClientIp \n| json field=raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as ThreatCount by ClientIp, loadbalancer, account, region, namespace, MaliciousConfidence, Actor, LabelName"
         }
       ],
       "triggers": [
         {
-          "detectionMethod": "LogsStaticCondition",
+          "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 0,
           "thresholdType": "GreaterThan",
-          "field": ""
+          "field": null,
+          "occurrenceType": "ResultCount",
+          "triggerSource": "AllResults"
         },
         {
-          "detectionMethod": "LogsStaticCondition",
+          "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 0,
           "thresholdType": "LessThanOrEqual",
-          "field": ""
+          "field": null,
+          "occurrenceType": "ResultCount",
+          "triggerSource": "AllResults"
         }
       ],
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": true,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Classic Load Balancer - High 5XX Errors",
-      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/elb metric=HTTPCode_ELB_5XX Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/elb metric=RequestCount Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "#A * 100 / #B along loadbalancername, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "MetricsStaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "occurrenceType": "Always"
-        },
-        {
-          "detectionMethod": "MetricsStaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "occurrenceType": "Always"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Network Load Balancer - High Unhealthy Hosts",
-      "description": "This alert fires when we detect that are there are too many unhealthy hosts (>=10%) within an interval of 5 minutes for a given network load balancer",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account=* region=* LoadBalancer=* AvailabilityZone=* | sum by LoadBalancer, AvailabilityZone, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account=* region=* LoadBalancer=* AvailabilityZone=* | sum by LoadBalancer, AvailabilityZone, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "#A * 100 / (#A + #B) along LoadBalancer, AvailabilityZone, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 10,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 10,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS API Gateway - High Integration Latency",
-      "description": "This alert fires when we detect that the average integration latency for a given API Gateway is greater than or equal to one second for 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/apigateway metric=IntegrationLatency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 1000,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 1000,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Lambda - High Percentage of Failed Requests",
-      "description": "This alert fires when we detect a large number of failed Lambda requests (>5%) within an interval of 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/lambda metric=Errors Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/lambda metric=Invocations Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "#A * 100 / #B along functionname, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Application Load Balancer - High 5XX Errors",
-      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/applicationelb metric=HTTPCode_ELB_5XX_Count Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "#A * 100 / #B along loadbalancer, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon Elasticache - High Redis Memory Fragmentation Ratio",
-      "description": "This alert fires when the average Redis memory fragmentation ratio for within a 5 minute interval is high (>=1.5). Value equal to or greater than 1.5 Indicate significant memory fragmentation.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/elasticache metric=MemoryFragmentationRatio statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by account, region, namespace, CacheClusterId, CacheNodeId"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 1.5,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 1.5,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon Elasticache - High CPU Utilization",
-      "description": "This alert fires when the average CPU utilization within a 5 minute interval for a host is  high (>=90%). The CPUUtilization metric includes total CPU utilization across application, operating system and management processes. We highly recommend monitoring  CPU utilization for hosts with two vCPUs or less.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/elasticache metric=CPUUtilization statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by CacheClusterId, CacheNodeId, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 90,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 90,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon RDS - Low Aurora Buffer Cache Hit Ratio",
-      "description": "This alert fires when the average RDS Aurora buffer cache hit ratio within a 5 minute interval is low (<= 50%). This indicates that a lower percentage of requests were are served by the buffer cache, which could further indicate a degradation in application performance.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/rds metric=BufferCacheHitRatio statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 50,
-          "thresholdType": "LessThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 50,
-          "thresholdType": "GreaterThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
       "name": "AWS API Gateway - High 4XX Errors",
@@ -868,6 +165,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 5,
           "thresholdType": "GreaterThanOrEqual",
@@ -878,6 +176,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 5,
           "thresholdType": "LessThan",
@@ -889,11 +188,12 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
-      "name": "AWS EC2 - High Total CPU Utilization",
-      "description": "This alert fires when the average total CPU utilization within a 5 minute interval for an EC2 instance is high (>=85%).",
+      "name": "Amazon RDS - High Write Latency",
+      "description": "This alert fires when the average write latency of a database within a 5 minute interval is high (>=5 seconds) . High write latencies will affect the performance of your application.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
       "evaluationDelay": "0m",
@@ -903,15 +203,16 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "Namespace=aws/ec2 metric=CPU_Total account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
+          "query": "Namespace=aws/rds metric=WriteLatency statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
         }
       ],
       "triggers": [
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 85,
+          "threshold": 5,
           "thresholdType": "GreaterThanOrEqual",
           "field": null,
           "occurrenceType": "Always",
@@ -920,8 +221,9 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 85,
+          "threshold": 5,
           "thresholdType": "LessThan",
           "field": null,
           "occurrenceType": "Always",
@@ -931,45 +233,8 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Classic Load Balancer - High Latency",
-      "description": "This alert fires when we detect that the average latency for a given Classic load balancer within a time interval of 5 minutes is greater than or equal to three seconds.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/elb metric=Latency Statistic=Average account=* region=* loadbalancername=* | eval(_value*1000) | sum by account, region, namespace, loadbalancername"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "MetricsStaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 3000,
-          "thresholdType": "GreaterThanOrEqual",
-          "occurrenceType": "Always"
-        },
-        {
-          "detectionMethod": "MetricsStaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 3000,
-          "thresholdType": "LessThan",
-          "occurrenceType": "Always"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
       "name": "AWS EC2 - High Disk Utilization",
@@ -990,6 +255,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 85,
           "thresholdType": "GreaterThanOrEqual",
@@ -1000,6 +266,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 85,
           "thresholdType": "LessThan",
@@ -1011,7 +278,106 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Lambda - High Percentage of Failed Requests",
+      "description": "This alert fires when we detect a large number of failed Lambda requests (>5%) within an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/lambda metric=Errors Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
+        },
+        {
+          "rowId": "B",
+          "query": "Namespace=aws/lambda metric=Invocations Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
+        },
+        {
+          "rowId": "C",
+          "query": "#A * 100 / #B along functionname, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Application Load Balancer - High Latency",
+      "description": "This alert fires when we detect that the average latency for a given Application load balancer within a time interval of 5 minutes is greater than or equal to three seconds.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/applicationelb metric=TargetResponseTime Statistic=Average account=* region=* loadbalancer=* | eval(_value*1000) | sum by account, region, namespace, loadbalancer"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 3000,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 3000,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
     },
     {
       "name": "Amazon ECS - High CPU Utilization",
@@ -1032,6 +398,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 85,
           "thresholdType": "GreaterThanOrEqual",
@@ -1042,182 +409,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 85,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Network Load Balancer - High TLS Negotiation Errors",
-      "description": "This alert fires when we detect that there are too many TLS Negotiation Errors (>=10%) within an interval of 5 minutes for a given network load balancer",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account=* region=* LoadBalancer=* | sum by LoadBalancer, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account=* region=* LoadBalancer=* | sum by LoadBalancer, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "(#A + #B) along LoadBalancer, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 10,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 10,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon Elasticache - Multiple Failed Operations",
-      "description": "This alert fires when we detect multiple failed operations within a 15 minute interval for an ElastiCache service.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Logs",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "account=* region=* namespace=aws/elasticache \"\\\"eventSource\\\":\\\"elasticache.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventSource\", \"errorCode\", \"errorMessage\", \"userIdentity\", \"requestParameters\", \"responseElements\"  as event_source, error_code, error_message, user_identity, requestParameters, responseElements nodrop\n| json field=requestParameters \"cacheClusterId\" as req_cacheClusterId nodrop\n| json field=responseElements \"cacheClusterId\" as res_cacheClusterId nodrop\n| json field=user_identity \"arn\", \"userName\" nodrop \n| parse field=arn \":assumed-role/*\" as user nodrop  \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(req_cacheClusterId), res_cacheClusterId, req_cacheClusterId) as cacheclusterid\n| where event_source matches \"elasticache.amazonaws.com\" and !isEmpty(error_code) and !isEmpty(error_message) and !isEmpty(user)\n| count as event_count by _messageTime, account, region, event_source, error_code, error_message, user, cacheclusterid\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS Z\") as message_date\n| fields message_date, account, region, event_source, error_code, error_message, user, cacheclusterid\n| fields -_messageTime"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-15m",
-          "threshold": 10,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "ResultCount",
-          "triggerSource": "AllResults"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-15m",
-          "threshold": 10,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "ResultCount",
-          "triggerSource": "AllResults"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": true,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon Elasticache - High Redis Database Memory Usage",
-      "description": "This alert fires when the average database memory usage within a 5 minute interval for the Redis engine is high (>=95%). When the value reaches 100%, eviction may happen or write operations may fail based on ElastiCache policies thereby impacting application performance.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/elasticache metric=DatabaseMemoryUsagePercentage statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by account, region, namespace, CacheClusterId, CacheNodeId"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 95,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 95,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS EC2 - High System CPU Utilization",
-      "description": "This alert fires when the average system CPU utilization within a 5 minute interval for an EC2 instance is high (>=85%).",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/ec2 metric=CPU_Sys account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 85,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 85,
           "thresholdType": "LessThan",
@@ -1229,11 +421,12 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
-      "name": "AWS Lambda - Low Provisioned Concurrency Utilization",
-      "description": "This alert fires when the average provisioned concurrency utilization for 5 minutes is low (<= 50%). This indicates low provisioned concurrency utilization efficiency.",
+      "name": "AWS EC2 - High Memory Utilization",
+      "description": "This alert fires when the average memory utilization within a 5 minute interval for an EC2 instance is high (>=85%).",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
       "evaluationDelay": "0m",
@@ -1243,57 +436,16 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "Namespace=aws/lambda metric=ProvisionedConcurrencyUtilization statistic=Average account=* region=* functionname=* | avg by functionname, namespace, region, account"
+          "query": "Namespace=aws/ec2 metric=Mem_UsedPercent account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
         }
       ],
       "triggers": [
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 50,
-          "thresholdType": "LessThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 50,
-          "thresholdType": "GreaterThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS DynamoDB - High Max Provisioned Table Write Capacity",
-      "description": "This alert fires when we detect that the average percentage of write provisioned capacity used by the highest write provisioned table of an account for a time interval of 5 minutes is great than or equal to 80%. High values indicate requests to the database are being throttled, which could further indicate that your application may not be working as intended.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/dynamodb metric=MaxProvisionedTableWriteCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 80,
+          "threshold": 85,
           "thresholdType": "GreaterThanOrEqual",
           "field": null,
           "occurrenceType": "Always",
@@ -1302,8 +454,9 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 80,
+          "threshold": 85,
           "thresholdType": "LessThan",
           "field": null,
           "occurrenceType": "Always",
@@ -1313,11 +466,12 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
-      "name": "AWS DynamoDB - High Max Provisioned Table Read Capacity",
-      "description": "This alert fires when we detect that the average percentage of read provisioned capacity used by the highest read provisioned table of an account for a time interval of 5 minutes is great than or equal to 80%. High values indicate requests to the database are being throttled, which could further indicate that your application may not be working as intended.",
+      "name": "AWS API Gateway - High Latency",
+      "description": "This alert fires when we detect that the average latency for a given API Gateway is greater than or equal to one second for 5 minutes.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
       "evaluationDelay": "0m",
@@ -1327,15 +481,16 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "Namespace=aws/dynamodb metric=MaxProvisionedTableReadCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
+          "query": "Namespace=aws/apigateway metric=Latency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
         }
       ],
       "triggers": [
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 80,
+          "threshold": 1000,
           "thresholdType": "GreaterThanOrEqual",
           "field": null,
           "occurrenceType": "Always",
@@ -1344,8 +499,9 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 80,
+          "threshold": 1000,
           "thresholdType": "LessThan",
           "field": null,
           "occurrenceType": "Always",
@@ -1355,7 +511,8 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
       "name": "AWS DynamoDB - Multiple Tables deleted",
@@ -1376,6 +533,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-15m",
           "threshold": 5,
           "thresholdType": "GreaterThanOrEqual",
@@ -1386,6 +544,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-15m",
           "threshold": 5,
           "thresholdType": "LessThan",
@@ -1397,11 +556,12 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": true,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
-      "name": "AWS DynamoDB - High Account Provisioned Write Capacity",
-      "description": "This alert fires when we detect that the average write capacity provisioned for an account for a time interval of 5 minutes is greater than or equal to 80%. High values indicate requests to the database are being throttled, which could further indicate that your application may not be working as intended.",
+      "name": "Amazon RDS - Low Aurora Buffer Cache Hit Ratio",
+      "description": "This alert fires when the average RDS Aurora buffer cache hit ratio within a 5 minute interval is low (<= 50%). This indicates that a lower percentage of requests were are served by the buffer cache, which could further indicate a degradation in application performance.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
       "evaluationDelay": "0m",
@@ -1411,119 +571,38 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "Namespace=aws/dynamodb metric=AccountProvisionedWriteCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
+          "query": "Namespace=aws/rds metric=BufferCacheHitRatio statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
         }
       ],
       "triggers": [
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 80,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 80,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "Amazon RDS - High Read Latency",
-      "description": "This alert fires when the average read latency of a database within a 5 minutes time inerval is high (>=5 seconds). High read latency will affect the performance of your application.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/rds metric=ReadLatency statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
-      "playbook": ""
-    },
-    {
-      "name": "AWS Application Load Balancer - Access from Highly Malicious Sources",
-      "description": "This alert fires when an Application load balancer is accessed from highly malicious IP addresses within last 5 minutes",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Logs",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "account=* region=* namespace=aws/applicationelb\n| parse \"* * * * * * * * * * * * \\\"*\\\" \\\"*\\\" * * * \\\"*\\\"\" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId\n| parse regex \"(?<ClientIp>\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\" multi\n| where ClientIp != \"0.0.0.0\" and ClientIp != \"127.0.0.1\"\n| count as ip_count by ClientIp, loadbalancer, account, region, namespace\n| lookup type, actor, raw, threatlevel as MaliciousConfidence from sumo://threat/cs on threat=ClientIp \n| json field=raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as ThreatCount by ClientIp, loadbalancer, account, region, namespace, MaliciousConfidence, Actor, LabelName"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "timeRange": "-5m",
-          "threshold": 0,
-          "thresholdType": "GreaterThan",
-          "field": null,
-          "occurrenceType": "ResultCount",
-          "triggerSource": "AllResults"
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "timeRange": "-5m",
-          "threshold": 0,
+          "threshold": 50,
           "thresholdType": "LessThanOrEqual",
           "field": null,
-          "occurrenceType": "ResultCount",
-          "triggerSource": "AllResults"
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 50,
+          "thresholdType": "GreaterThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
         }
       ],
       "notifications": [],
       "isDisabled": true,
-      "groupNotifications": true,
-      "playbook": ""
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
     },
     {
       "name": "AWS Classic Load Balancer - High 4XX Errors",
@@ -1552,6 +631,7 @@
         {
           "detectionMethod": "MetricsStaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 5,
           "thresholdType": "GreaterThanOrEqual",
@@ -1560,6 +640,7 @@
         {
           "detectionMethod": "MetricsStaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 5,
           "thresholdType": "LessThan",
@@ -1569,11 +650,12 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
     },
     {
-      "name": "Amazon RDS - High CPU Utilization",
-      "description": "This alert fires when we detect that the average CPU utilization for a database is high (>=85%) for an interval of 5 minutes.",
+      "name": "AWS DynamoDB - High Max Provisioned Table Read Capacity",
+      "description": "This alert fires when we detect that the average percentage of read provisioned capacity used by the highest read provisioned table of an account for a time interval of 5 minutes is great than or equal to 80%. High values indicate requests to the database are being throttled, which could further indicate that your application may not be working as intended.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
       "evaluationDelay": "0m",
@@ -1583,13 +665,59 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "Namespace=aws/rds metric=CPUUtilization statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
+          "query": "Namespace=aws/dynamodb metric=MaxProvisionedTableReadCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
         }
       ],
       "triggers": [
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 80,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 80,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS EC2 - High Total CPU Utilization",
+      "description": "This alert fires when the average total CPU utilization within a 5 minute interval for an EC2 instance is high (>=85%).",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/ec2 metric=CPU_Total account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 85,
           "thresholdType": "GreaterThanOrEqual",
@@ -1600,6 +728,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 85,
           "thresholdType": "LessThan",
@@ -1611,7 +740,155 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Classic Load Balancer - High 5XX Errors",
+      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/elb metric=HTTPCode_ELB_5XX Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
+        },
+        {
+          "rowId": "B",
+          "query": "Namespace=aws/elb metric=RequestCount Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
+        },
+        {
+          "rowId": "C",
+          "query": "#A * 100 / #B along loadbalancername, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always"
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Application Load Balancer - High 4XX Errors",
+      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 4xx within an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/applicationelb metric=HTTPCode_ELB_4XX_Count Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
+        },
+        {
+          "rowId": "B",
+          "query": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
+        },
+        {
+          "rowId": "C",
+          "query": "#A * 100 / #B along loadbalancer, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon Elasticache - High Redis Memory Fragmentation Ratio",
+      "description": "This alert fires when the average Redis memory fragmentation ratio for within a 5 minute interval is high (>=1.5). Value equal to or greater than 1.5 Indicate significant memory fragmentation.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/elasticache metric=MemoryFragmentationRatio statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by account, region, namespace, CacheClusterId, CacheNodeId"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 1.5,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 1.5,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
     },
     {
       "name": "Amazon RDS - High Disk Queue Depth",
@@ -1632,6 +909,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 5,
           "thresholdType": "GreaterThanOrEqual",
@@ -1642,6 +920,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 5,
           "thresholdType": "LessThan",
@@ -1653,7 +932,871 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS DynamoDB - High Account Provisioned Write Capacity",
+      "description": "This alert fires when we detect that the average write capacity provisioned for an account for a time interval of 5 minutes is greater than or equal to 80%. High values indicate requests to the database are being throttled, which could further indicate that your application may not be working as intended.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/dynamodb metric=AccountProvisionedWriteCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 80,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 80,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS SNS -  Access from Highly Malicious Sources",
+      "description": "This alert fires when an Application AWS - SNS is accessed from highly malicious IP addresses within last 5 minutes",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/sns \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" sourceIPAddress\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, user_type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user_type, username) as user_type\n| count as ip_count by src_ip, event_name, region, accountid,user_type\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| where type=\"ip_address\" and malicious_confidence = \"high\"\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as actor\n| sum(ip_count) as threat_count by src_ip, event_name, region, accountid, malicious_confidence, actor, label_name\n"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS API Gateway - High 5XX Errors",
+      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/apigateway metric=5xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
+        },
+        {
+          "rowId": "B",
+          "query": "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
+        },
+        {
+          "rowId": "C",
+          "query": "#A * 100 / #B along account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS SNS - Failed Events",
+      "description": "This alert fires when an SNS app has high number of  failed events (>5) within last 5 minutes",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/sns \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !isblank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as event_count by event_name, error_code, error_message, region, src_ip, accountid, user, type, request_id, topicname, topic_arn, user_agent\n"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon Elasticache - Multiple Failed Operations",
+      "description": "This alert fires when we detect multiple failed operations within a 15 minute interval for an ElastiCache service.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/elasticache \"\\\"eventSource\\\":\\\"elasticache.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventSource\", \"errorCode\", \"errorMessage\", \"userIdentity\", \"requestParameters\", \"responseElements\"  as event_source, error_code, error_message, user_identity, requestParameters, responseElements nodrop\n| json field=requestParameters \"cacheClusterId\" as req_cacheClusterId nodrop\n| json field=responseElements \"cacheClusterId\" as res_cacheClusterId nodrop\n| json field=user_identity \"arn\", \"userName\" nodrop \n| parse field=arn \":assumed-role/*\" as user nodrop  \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(req_cacheClusterId), res_cacheClusterId, req_cacheClusterId) as cacheclusterid\n| where event_source matches \"elasticache.amazonaws.com\" and !isEmpty(error_code) and !isEmpty(error_message) and !isEmpty(user)\n| count as event_count by _messageTime, account, region, event_source, error_code, error_message, user, cacheclusterid\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS Z\") as message_date\n| fields message_date, account, region, event_source, error_code, error_message, user, cacheclusterid\n| fields -_messageTime"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-15m",
+          "threshold": 10,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "ResultCount",
+          "triggerSource": "AllResults"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-15m",
+          "threshold": 10,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "ResultCount",
+          "triggerSource": "AllResults"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Network Load Balancer - High Unhealthy Hosts",
+      "description": "This alert fires when we detect that are there are too many unhealthy hosts (>=10%) within an interval of 5 minutes for a given network load balancer",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account=* region=* LoadBalancer=* AvailabilityZone=* | sum by LoadBalancer, AvailabilityZone, account, region, namespace"
+        },
+        {
+          "rowId": "B",
+          "query": "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account=* region=* LoadBalancer=* AvailabilityZone=* | sum by LoadBalancer, AvailabilityZone, account, region, namespace"
+        },
+        {
+          "rowId": "C",
+          "query": "#A * 100 / (#A + #B) along LoadBalancer, AvailabilityZone, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon Elasticache - High CPU Utilization",
+      "description": "This alert fires when the average CPU utilization within a 5 minute interval for a host is  high (>=90%). The CPUUtilization metric includes total CPU utilization across application, operating system and management processes. We highly recommend monitoring  CPU utilization for hosts with two vCPUs or less.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/elasticache metric=CPUUtilization statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by CacheClusterId, CacheNodeId, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 90,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 90,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Network Load Balancer - High TLS Negotiation Errors",
+      "description": "This alert fires when we detect that there are too many TLS Negotiation Errors (>=10%) within an interval of 5 minutes for a given network load balancer",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account=* region=* LoadBalancer=* | sum by LoadBalancer, account, region, namespace"
+        },
+        {
+          "rowId": "B",
+          "query": "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account=* region=* LoadBalancer=* | sum by LoadBalancer, account, region, namespace"
+        },
+        {
+          "rowId": "C",
+          "query": "(#A + #B) along LoadBalancer, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS DynamoDB - High Max Provisioned Table Write Capacity",
+      "description": "This alert fires when we detect that the average percentage of write provisioned capacity used by the highest write provisioned table of an account for a time interval of 5 minutes is great than or equal to 80%. High values indicate requests to the database are being throttled, which could further indicate that your application may not be working as intended.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/dynamodb metric=MaxProvisionedTableWriteCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 80,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 80,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Classic Load Balancer - Access from Highly Malicious Sources",
+      "description": "This alert fires when the Classic load balancer is accessed from highly malicious IP addresses within last 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/elb\n| parse \"* * * * * * * * * * * \\\"*\\\" \\\"*\\\" * *\" as datetime, loadbalancername, client, backend, request_processing_time, backend_processing_time, response_processing_time, elb_status_code, backend_status_code, received_bytes, sent_bytes, request, user_agent, ssl_cipher, ssl_protocol\n| parse regex \"(?<ClientIp>\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\" multi\n| where ClientIp != \"0.0.0.0\" and ClientIp != \"127.0.0.1\"\n| count as ip_count by ClientIp, loadbalancername, account, region, namespace\n| lookup type, actor, raw, threatlevel as MaliciousConfidence from sumo://threat/cs on threat=ClientIp \n| json field=raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as ThreatCount by ClientIp, loadbalancername, account, region, namespace, MaliciousConfidence, Actor, LabelName"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon RDS - High CPU Utilization",
+      "description": "This alert fires when we detect that the average CPU utilization for a database is high (>=85%) for an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/rds metric=CPUUtilization statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 85,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 85,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon Elasticache - High Redis Database Memory Usage",
+      "description": "This alert fires when the average database memory usage within a 5 minute interval for the Redis engine is high (>=95%). When the value reaches 100%, eviction may happen or write operations may fail based on ElastiCache policies thereby impacting application performance.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/elasticache metric=DatabaseMemoryUsagePercentage statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by account, region, namespace, CacheClusterId, CacheNodeId"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 95,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 95,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon ECS - High Memory Utilization",
+      "description": "This alert fires when the average memory utilization within a 5 minute interval for a service within a cluster is high (>=85%).",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/ecs metric=MemoryUtilization statistic=Average  account=* region=* ClusterName=* ServiceName=* | avg by ClusterName, ServiceName, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 85,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 85,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon Elasticache - High Engine CPU Utilization",
+      "description": "This alert fires when the average CPU utilization for the Redis engine process within a 5 minute interval is  high (>=90%). For larger node types with four vCPUs or more, use the EngineCPUUtilization metric to monitor and set thresholds for scaling.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/elasticache metric=EngineCPUUtilization statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by CacheClusterId, CacheNodeId, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 90,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 90,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS API Gateway - High Integration Latency",
+      "description": "This alert fires when we detect that the average integration latency for a given API Gateway is greater than or equal to one second for 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/apigateway metric=IntegrationLatency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 1000,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 1000,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Lambda - Low Provisioned Concurrency Utilization",
+      "description": "This alert fires when the average provisioned concurrency utilization for 5 minutes is low (<= 50%). This indicates low provisioned concurrency utilization efficiency.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/lambda metric=ProvisionedConcurrencyUtilization statistic=Average account=* region=* functionname=* | avg by functionname, namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 50,
+          "thresholdType": "LessThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 50,
+          "thresholdType": "GreaterThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Classic Load Balancer - High Latency",
+      "description": "This alert fires when we detect that the average latency for a given Classic load balancer within a time interval of 5 minutes is greater than or equal to three seconds.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/elb metric=Latency Statistic=Average account=* region=* loadbalancername=* | eval(_value*1000) | sum by account, region, namespace, loadbalancername"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 3000,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always"
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 3000,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon RDS - Low Burst Balance",
+      "description": "This alert fires when we observe a low burst balance (<= 50%) for a given database. A low burst balance indicates you won't be able to scale up as fast for burstable database workloads on gp2 volumes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/rds metric=BurstBalance statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 50,
+          "thresholdType": "LessThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 50,
+          "thresholdType": "GreaterThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "Amazon RDS - High Read Latency",
+      "description": "This alert fires when the average read latency of a database within a 5 minutes time inerval is high (>=5 seconds). High read latency will affect the performance of your application.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/rds metric=ReadLatency statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
     },
     {
       "name": "AWS DynamoDB - High Account Provisioned Read Capacity",
@@ -1674,6 +1817,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "Critical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 80,
           "thresholdType": "GreaterThanOrEqual",
@@ -1684,6 +1828,7 @@
         {
           "detectionMethod": "StaticCondition",
           "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
           "timeRange": "-5m",
           "threshold": 80,
           "thresholdType": "LessThan",
@@ -1695,7 +1840,102 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": ""
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS SNS - Failed Notifications",
+      "description": "This alert fires where there are many failed notifications (>=5) within an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/sns TopicName=* metric=NumberOfNotificationsFailed Statistic=Sum | sum by account, region, TopicName"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always"
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS Application Load Balancer - High 5XX Errors",
+      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/applicationelb metric=HTTPCode_ELB_5XX_Count Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
+        },
+        {
+          "rowId": "B",
+          "query": "Namespace=aws/applicationelb metric=RequestCount Statistic=Sum account=* region=* loadbalancer=* | sum by loadbalancer, account, region, namespace"
+        },
+        {
+          "rowId": "C",
+          "query": "#A * 100 / #B along loadbalancer, account, region, namespace"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "Always",
+          "triggerSource": "AnyTimeSeries"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null
     }
   ]
 }

@@ -12,6 +12,7 @@ group_notifications           = true
 rds_monitors_disabled         = true
 alb_monitors_disabled         = true
 apigateway_monitors_disabled  = true
+sns_monitors_disabled         = true
 dynamodb_monitors_disabled    = true
 ec2metrics_monitors_disabled  = true
 ecs_monitors_disabled         = true
@@ -19,3 +20,4 @@ elasticache_monitors_disabled = true
 lambda_monitors_disabled      = true
 nlb_monitors_disabled         = true
 folder_share_with_org         = true
+
