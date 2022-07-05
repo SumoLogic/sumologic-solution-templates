@@ -7,34 +7,8 @@ module "sns_module" {
 
   # ********************** No Metric Rules for SNS ********************** #
 
-  # ********************** Fields ********************** #
-  /***
-   managed_fields = {
-     "TopicName" = {
-       field_name = "topicname"
-       data_type  = "String"
-       state      = true
-     }
-   }
-***/
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "SnsCloudTrailLogsFieldExtractionRule" = {
-      name             = "AwsObservabilitySNSCloudTrailLogsFER"
-      scope            = "_sourcecategory=*cloudtrail* \"sns.amazonaws.com\""
-      parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters", "responseElements", "recipientAccountId" as eventSource, region, requestParameters, responseElements, accountid nodrop
-              | json field=requestParameters "topicArn" as req_topicarn nodrop
-              | json field=responseElements "topicArn" as res_topicarn nodrop
-              | if (isBlank(req_topicarn), res_topicarn, req_topicarn) as topicarn
-              | parse field=topicarn "arn:aws:sns:*:*:*" as r, acctid, topicname nodrop
-              | where eventSource = "sns.amazonaws.com"
-              | "aws/sns" as namespace
-              | fields region, namespace, topicname, accountid
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
+  
   # ********************** Apps ********************** #
   managed_apps = {
     "SNSApp" = {

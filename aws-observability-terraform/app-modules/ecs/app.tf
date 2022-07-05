@@ -7,31 +7,7 @@ module "ecs_module" {
 
   # ********************** No Metric Rules for ECS ********************** #
 
-  # ********************** Fields ********************** #
-  # managed_fields = {
-  #   "ClusterName" = {
-  #     field_name = "clustername"
-  #     data_type  = "String"
-  #     state      = true
-  #   }
-  # }
-
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "CloudTrailFieldExtractionRule" = {
-      name             = "AwsObservabilityECSCloudTrailLogsFER"
-      scope            = "account=* eventname eventsource \"ecs.amazonaws.com\""
-      parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters", "recipientAccountId" as eventSource, region, requestParameters, accountid nodrop
-              | json field=requestParameters "cluster" as clustername nodrop
-              | where eventSource = "ecs.amazonaws.com"
-              | "aws/ecs" as namespace
-              | tolowercase(clustername) as clustername
-              | fields region, namespace, clustername, accountid
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
 
   # ********************** Apps ********************** #
   managed_apps = {
