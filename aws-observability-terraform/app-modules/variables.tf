@@ -49,7 +49,7 @@ variable "apps_folder_name" {
             Provide a folder name where all the apps will be installed under the Personal folder of the user whose access keys you have entered.
             Default value will be: AWS Observability Apps
         EOT
-  default     = "AWS Observability Apps- Somya Testing Monitors SNS"
+  default     = "AWS Observability Apps"
 }
 
 variable "parent_folder_id" {
