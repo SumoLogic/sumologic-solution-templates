@@ -700,6 +700,29 @@ Resources:
         Section5bShare: !Ref Section10bShare
         Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
+  sumoSNSAppStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: sumoEC2MetricsAppStack
+    Properties:
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/sns/sns_app.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
+      Parameters:
+        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
+        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
+        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
+        Section3aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
+        Section3bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
+        Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section4bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+        Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
+        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
+        
   RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: sumoLambdaMetricsAppStack
