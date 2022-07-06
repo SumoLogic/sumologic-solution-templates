@@ -49,7 +49,7 @@ variable "apps_folder_name" {
             Provide a folder name where all the apps will be installed under the Personal folder of the user whose access keys you have entered.
             Default value will be: AWS Observability Apps
         EOT
-  default     = "AWS Observability Apps"
+  default     = "AWS Observability Apps- Somya Testing Monitors SNS"
 }
 
 variable "parent_folder_id" {
@@ -116,6 +116,12 @@ variable "elb_monitors_disabled" {
 variable "apigateway_monitors_disabled" {
   type        = bool
   description = "Indicates if the API Gateway Apps monitors should be enabled. true to disable; false to enable."
+  default     = true
+}
+
+variable "sns_monitors_disabled" {
+  type        = bool
+  description = "Indicates if the SNS App monitors should be enabled. true to disable; false to enable."
   default     = true
 }
 
