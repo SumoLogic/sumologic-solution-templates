@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------
-# This script imports the existing fields (required by aws observability solution) if field(s) already present in the user's Sumo Logic account.
+# This script imports the existing fields and FERs (required by aws observability solution) if field(s) and FER(s) are already present in the user's Sumo Logic account.
 # For SUMOLOGIC_ENV, provide one from the list : au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
 # Before using this script, set following environment variables using below commands:
 # export SUMOLOGIC_ENV=""
@@ -23,7 +23,9 @@ else
 fi
 
 # awso_list contains fields required for AWS Obervablity Solution. Update the list if new field is added to the solution.
-declare -ra awso_list=(loadbalancer apiname tablename instanceid clustername cacheclusterid functionname networkloadbalancer account region namespace accountid dbidentifier loadbalancername)
+declare -ra awso_list=(account accountid apiname cacheclusterid clustername dbclusteridentifier dbidentifier dbinstanceidentifier functionname instanceid loadbalancer loadbalancername namespace networkloadbalancer region tablename topicname)
+# awso_fer_list contains FERs required for AWS Obervablity Solution. Update the list if new FER is added to the solution.
+declare -ra awso_fer_list=(AwsObservabilityAlbAccessLogsFER AwsObservabilityApiGatewayCloudTrailLogsFER AwsObservabilityDynamoDBCloudTrailLogsFER AwsObservabilityEC2CloudTrailLogsFER AwsObservabilityECSCloudTrailLogsFER AwsObservabilityElastiCacheCloudTrailLogsFER AwsObservabilityElbAccessLogsFER AwsObservabilityFieldExtractionRule AwsObservabilityGenericCloudWatchLogsFER AwsObservabilityLambdaCloudWatchLogsFER AwsObservabilityRdsCloudTrailLogsFER AwsObservabilitySNSCloudTrailLogsFER)
 
 function get_remaining_fields() {
     local RESPONSE
@@ -66,7 +68,7 @@ function should_create_fields() {
 
 should_create_fields
 outputVal=$?
-# Sumo Logic fields in field schema - Decide to import
+# Sumo Logic fields in field schema, FERs in FER schema - Decide to import
 if [ $outputVal == 0 ] ; then
     # Get list of all fields present in field schema of user's Sumo Logic org.
     readonly FIELDS_RESPONSE="$(curl -XGET -s \
@@ -83,19 +85,34 @@ if [ $outputVal == 0 ] ; then
         terraform import \
             sumologic_field."${FIELD}" "${FIELD_ID}"
     done
+    # Get list of all FER present in FER schema of user's Sumo Logic org.
+    readonly FER_RESPONSE="$(curl -XGET -s \
+        -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
+        "${SUMOLOGIC_BASE_URL}"v1/extractionRules | jq '.data[] | del(.parseExpression)' )"
+
+    for FER in "${awso_fer_list[@]}" ; do
+        FER_ID=$( echo "${FER_RESPONSE}" | jq -r "select(.name == \"${FER}\") | .id" )
+        if [[ -z "${FER_ID}" ]]; then
+            # If FER is not present in Sumo org, skip importing
+            continue
+        fi
+        # FER exist in Sumo org, hence import
+        terraform import \
+            sumologic_field_extraction_rule."${FER}" "${FER_ID}"           
+    done
 elif [ $outputVal == 1 ] ; then
-    echo "Couldn't automatically create fields"
-    echo "You do not have enough field capacity to create the required fields automatically."
-    echo "Please refer to https://help.sumologic.com/Manage/Fields to manually create the fields after you have removed unused fields to free up capacity."
+    echo "Couldn't automatically create fields and FERS"
+    echo "You do not have enough field capacity to create the required fields and FERS automatically."
+    echo "Please refer to https://help.sumologic.com/Manage/Fields to manually create the fields after you have removed unused fields and FERs to free up capacity."
 elif [ $outputVal == 2 ] ; then
-    echo "Error in calling Sumo Logic Fields API."
+    echo "Error in calling Sumo Logic Fields or FER API."
     echo "User's credentials (SUMOLOGIC_ACCESSID and SUMOLOGIC_ACCESSKEY) are not valid."
 elif [ $outputVal == 3 ] ; then
-    echo "Error in calling Sumo Logic Fields API. The reasons can be:"
+    echo "Error in calling Sumo Logic Fields or FERs API. The reasons can be:"
     echo "1. Credentials could not be verified. Cross check SUMOLOGIC_ACCESSID and SUMOLOGIC_ACCESSKEY."
-    echo "2. You do not have the role capabilities to create Sumo Logic fields. Please see the Sumo Logic docs on role capabilities https://help.sumologic.com/Manage/Users-and-Roles/Manage-Roles/05-Role-Capabilities"
+    echo "2. You do not have the role capabilities to create Sumo Logic fields or FERs. Please see the Sumo Logic docs on role capabilities https://help.sumologic.com/Manage/Users-and-Roles/Manage-Roles/05-Role-Capabilities"
 else
-    echo "Error in calling Sumo Logic Fields API. The reasons can be:"
+    echo "Error in calling Sumo Logic Fields or FERs API. The reasons can be:"
     echo "1. User's credentials (SUMOLOGIC_ACCESSID and SUMOLOGIC_ACCESSKEY) are not associated with SUMOLOGIC_ENV"
-    echo "2. You do not have the role capabilities to create Sumo Logic fields. Please see the Sumo Logic docs on role capabilities https://help.sumologic.com/Manage/Users-and-Roles/Manage-Roles/05-Role-Capabilities"
+    echo "2. You do not have the role capabilities to create Sumo Logic fields or FERs. Please see the Sumo Logic docs on role capabilities https://help.sumologic.com/Manage/Users-and-Roles/Manage-Roles/05-Role-Capabilities"
 fi
