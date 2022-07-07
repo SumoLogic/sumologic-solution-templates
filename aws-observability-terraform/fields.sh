@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------
-# This script imports the existing fields and FERs (required by aws observability solution) if field(s) already present in the user's Sumo Logic account.
+# This script imports the existing fields and FERs (required by aws observability solution) if field(s) and FER(s) are already present in the user's Sumo Logic account.
 # For SUMOLOGIC_ENV, provide one from the list : au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
 # Before using this script, set following environment variables using below commands:
 # export SUMOLOGIC_ENV=""
@@ -22,9 +22,10 @@ else
     SUMOLOGIC_BASE_URL="https://api.${SUMOLOGIC_ENV}.sumologic.com/api/"
 fi
 
-# awso_list contains fields required for AWS Obervablity Solution. Update the list if new field,FER is added to the solution.
-declare -ra awso_list=(loadbalancer apiname tablename instanceid clustername cacheclusterid functionname networkloadbalancer account region namespace accountid dbidentifier loadbalancername topicname dbclusteridentifier dbinstanceidentifier)
-declare -ra awso_fer_list=(AwsObservabilityAlbAccessLogsFER AwsObservabilityApiGatewayCloudTrailLogsFER AwsObservabilityDynamoDBCloudTrailLogsFER AwsObservabilityEC2CloudTrailLogsFER AwsObservabilityECSCloudTrailLogsFER AwsObservabilityElastiCacheCloudTrailLogsFER AwsObservabilityElbAccessLogsFER AwsObservabilityFieldExtractionRule AwsObservabilityLambdaCloudWatchLogsFER AwsObservabilityGenericCloudWatchLogsFER AwsObservabilityRdsCloudTrailLogsFER AwsObservabilitySNSCloudTrailLogsFER)
+# awso_list contains fields required for AWS Obervablity Solution. Update the list if new field is added to the solution.
+declare -ra awso_list=(account accountid apiname cacheclusterid clustername dbclusteridentifier dbidentifier dbinstanceidentifier functionname instanceid loadbalancer loadbalancername namespace networkloadbalancer region tablename topicname)
+# awso_fer_list contains FERs required for AWS Obervablity Solution. Update the list if new FER is added to the solution.
+declare -ra awso_fer_list=(AwsObservabilityAlbAccessLogsFER AwsObservabilityApiGatewayCloudTrailLogsFER AwsObservabilityDynamoDBCloudTrailLogsFER AwsObservabilityEC2CloudTrailLogsFER AwsObservabilityECSCloudTrailLogsFER AwsObservabilityElastiCacheCloudTrailLogsFER AwsObservabilityElbAccessLogsFER AwsObservabilityFieldExtractionRule AwsObservabilityGenericCloudWatchLogsFER AwsObservabilityLambdaCloudWatchLogsFER AwsObservabilityRdsCloudTrailLogsFER AwsObservabilitySNSCloudTrailLogsFER)
 
 function get_remaining_fields() {
     local RESPONSE
@@ -67,7 +68,7 @@ function should_create_fields() {
 
 should_create_fields
 outputVal=$?
-# Sumo Logic fields in field schema - Decide to import
+# Sumo Logic fields in field schema, FERs in FER schema - Decide to import
 if [ $outputVal == 0 ] ; then
     # Get list of all fields present in field schema of user's Sumo Logic org.
     readonly FIELDS_RESPONSE="$(curl -XGET -s \
@@ -84,7 +85,7 @@ if [ $outputVal == 0 ] ; then
         terraform import \
             sumologic_field."${FIELD}" "${FIELD_ID}"
     done
-    # Get list of all FER present in field schema of user's Sumo Logic org.
+    # Get list of all FER present in FER schema of user's Sumo Logic org.
     readonly FER_RESPONSE="$(curl -XGET -s \
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
         "${SUMOLOGIC_BASE_URL}"v1/extractionRules | jq '.data[] | del(.parseExpression)' )"
