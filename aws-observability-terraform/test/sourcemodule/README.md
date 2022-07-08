@@ -23,6 +23,8 @@
 
 ### Success Criteria
 If all the test cases are passed successfully, then you can expect the below output. 
+<img width="1024" alt="image" src="https://user-images.githubusercontent.com/87634042/177769695-79631f57-ea51-4fd7-b9cc-ab75251c052b.png">
+
 
 ### Failure Criteria
 If any of the test cases failed, then you can expect the below output. 
