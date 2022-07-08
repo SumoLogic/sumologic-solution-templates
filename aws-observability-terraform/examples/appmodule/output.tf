@@ -20,7 +20,12 @@ output "dynamodb_apps_folder_id" {
 
 output "ec2metrics_apps_folder_id" {
   value       = module.sumo-module.sumologic_content_ec2metrics.EC2MetricsApp.id
-  description = "This output contains sumologic EC2 metrics apps folder."
+  description = "This output contains sumologic EC2 host metrics apps folder."
+}
+
+output "ec2CWmetrics_apps_folder_id" {
+  value       = module.sumo-module.sumologic_content_ec2metrics.EC2CWMetricsApp.id
+  description = "This output contains sumologic EC2 CW metrics apps folder."
 }
 
 output "ecs_apps_folder_id" {
@@ -58,6 +63,11 @@ output "rds_apps_folder_id" {
   description = "This output contains sumologic RDS apps folder."
 }
 
+output "sns_apps_folder_id" {
+  value       = module.sumo-module.sumologic_content_sns.SNSApp.id
+  description = "This output contains sumologic SNS apps folder."
+}
+
 output "monitors_folder_id" {
   value       = module.sumo-module.sumologic_monitors_folder.id
   description = "This output contains sumologic monitors folder."
@@ -70,62 +80,74 @@ output "hierarchy_id" {
 
 # API gateway FER id
 output "sumologic_field_extraction_rule_apigateway" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_apigateway.CloudTrailFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityApiGatewayCloudTrailLogsFER.id
   description = "This output contains sumologic API gateway field extraction rule id."
 }
 
 # ALB FER id
 output "sumologic_field_extraction_rule_alb" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_alb.AlbAccessLogsFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityAlbAccessLogsFER.id
   description = "This output contains sumologic ALB field extraction rule id."
 }
 
 # CLB FER id
 output "sumologic_field_extraction_rule_elb" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_elb.ElbAccessLogsFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityElbAccessLogsFER.id
   description = "This output contains sumologic CLB field extraction rule id."
 }
 
 # DynamoDB FER id
 output "sumologic_field_extraction_rule_dynamodb" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_dynamodb.CloudTrailFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityDynamoDBCloudTrailLogsFER.id
   description = "This output contains sumologic dynamoDB field extraction rule id."
 }
 
 # Elasticache FER id
 output "sumologic_field_extraction_rule_elasticache" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_elasticache.CloudTrailFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityElastiCacheCloudTrailLogsFER.id
   description = "This output contains sumologic Elasticache field extraction rule id."
 }
 
 # ECS FER id
 output "sumologic_field_extraction_rule_ecs" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_ecs.CloudTrailFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityECSCloudTrailLogsFER.id
   description = "This output contains sumologic ECS field extraction rule id."
 }
 
 # EC2 FER id
-# output "sumologic_field_extraction_rule_ec2metrics" {
-#   value       = module.sumo-module.sumologic_field_extraction_rule_ec2metrics.CloudTrailFieldExtractionRule.id
-#   description = "This output contains sumologic EC2 field extraction rule id."
-# }
+output "sumologic_field_extraction_rule_ec2metrics" {
+  value       = sumologic_field_extraction_rule.AwsObservabilityEC2CloudTrailLogsFER.id
+  description = "This output contains sumologic EC2 field extraction rule id."
+}
 
 # Lambda CloudTrail FER id
 output "sumologic_field_extraction_rule_lambda" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_lambda.CloudTrailFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityFieldExtractionRule.id
   description = "This output contains sumologic Lambda cloudtrail field extraction rule id."
 }
 
 # Lambda CloudWatch FER id
 output "sumologic_field_extraction_rule_lambda_cw" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_lambda.CloudWatchFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityLambdaCloudWatchLogsFER.id
   description = "This output contains sumologic Lambda cloudwatch field extraction rule id."
 }
 
 # RDS FER id
 output "sumologic_field_extraction_rule_rds" {
-  value       = module.sumo-module.sumologic_field_extraction_rule_rds.CloudTrailFieldExtractionRule.id
+  value       = sumologic_field_extraction_rule.AwsObservabilityRdsCloudTrailLogsFER.id
   description = "This output contains sumologic RDS field extraction rule id."
+}
+
+# CloudWatch generic FER id
+output "sumologic_field_extraction_rule_cw" {
+  value       = sumologic_field_extraction_rule.AwsObservabilityGenericCloudWatchLogsFER.id
+  description = "This output contains sumologic CloudWatch logs generic field extraction rule id."
+}
+
+# SNS FER id
+output "sumologic_field_extraction_rule_sns" {
+  value       = sumologic_field_extraction_rule.AwsObservabilitySNSCloudTrailLogsFER.id
+  description = "This output contains sumologic SNS field extraction rule id."
 }
 
 # NLB Metric rule
@@ -214,4 +236,19 @@ output "sumologic_field_networkloadbalancer" {
 output "sumologic_field_dbidentifier" {
   value       = sumologic_field.dbidentifier.id
   description = "This output contains sumologic dbidentifier field id."
+}
+
+output "sumologic_field_topicname" {
+  value       = sumologic_field.topicname.id
+  description = "This output contains sumologic topicname field id."
+}
+
+output "sumologic_field_dbclusteridentifier" {
+  value       = sumologic_field.dbclusteridentifier.id
+  description = "This output contains sumologic dbclusteridentifier field id."
+}
+
+output "sumologic_field_dbinstanceidentifier" {
+  value       = sumologic_field.dbinstanceidentifier.id
+  description = "This output contains sumologic dbinstanceidentifier field id."
 }
