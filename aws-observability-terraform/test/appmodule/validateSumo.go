@@ -81,7 +81,13 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the RDS App folder is created successfully
 	rdsFolderID := terraform.Output(t, terraformOptions, "rds_apps_folder_id")
 	validateSumoLogicAppsFolder(t, terraformOptions, rdsFolderID)
+	// Validate if the EC2 CloudWatch metrics App folder is created successfully
+	ec2cwmetricsFolderID := terraform.Output(t, terraformOptions, "ec2CWmetrics_apps_folder_id")
+	validateSumoLogicAppsFolder(t, terraformOptions, ec2cwmetricsFolderID)
 	time.Sleep(2 * time.Second)
+	// Validate if the SNS App folder is created successfully
+	snsFolderID := terraform.Output(t, terraformOptions, "sns_apps_folder_id")
+	validateSumoLogicAppsFolder(t, terraformOptions, snsFolderID)
 
 	// Monitor Folder
 	// Validate if the Monitors folder is created successfully
@@ -94,10 +100,10 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the ALB FER is created successfully
 	albFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_alb")
 	validateSumoLogicFER(t, terraformOptions, albFerID)
+	time.Sleep(2 * time.Second)
 	// Validate if the API Gateway FER is created successfully
 	apigatewayFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_apigateway")
 	validateSumoLogicFER(t, terraformOptions, apigatewayFerID)
-	time.Sleep(2 * time.Second)
 	// Validate if the DynamoDB FER is created successfully
 	dynamodbFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_dynamodb")
 	validateSumoLogicFER(t, terraformOptions, dynamodbFerID)
@@ -107,10 +113,10 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the Elasticache FER is created successfully
 	elasticacheFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_elasticache")
 	validateSumoLogicFER(t, terraformOptions, elasticacheFerID)
+	time.Sleep(2 * time.Second)
 	// Validate if the ELB FER is created successfully
 	elbFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_elb")
 	validateSumoLogicFER(t, terraformOptions, elbFerID)
-	time.Sleep(2 * time.Second)
 	// Validate if the Lambda FER is created successfully
 	lambdaFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_lambda")
 	validateSumoLogicFER(t, terraformOptions, lambdaFerID)
@@ -120,6 +126,16 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the RDS FER is created successfully
 	rdsFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_rds")
 	validateSumoLogicFER(t, terraformOptions, rdsFerID)
+	time.Sleep(2 * time.Second)
+	// Validate if the CloudWatch generic FER is created successfully
+	cwFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_cw")
+	validateSumoLogicFER(t, terraformOptions, cwFerID)
+	// Validate if the SNS FER is created successfully
+	snsFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_sns")
+	validateSumoLogicFER(t, terraformOptions, snsFerID)
+	// Validate if the EC2 FER is created successfully
+	ec2FerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_ec2metrics")
+	validateSumoLogicFER(t, terraformOptions, ec2FerID)
 
 	// Fields
 	// Validate if the account Field is created successfully
@@ -168,6 +184,16 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the dbidentifier Field is created successfully
 	dbidentifierField := terraform.Output(t, terraformOptions, "sumologic_field_dbidentifier")
 	validateSumoLogicField(t, terraformOptions, dbidentifierField)
+	// Validate if the topicname Field is created successfully
+	topicnameField := terraform.Output(t, terraformOptions, "sumologic_field_topicname")
+	validateSumoLogicField(t, terraformOptions, topicnameField)
+	// Validate if the dbclusteridentifier Field is created successfully
+	dbclusteridentifierField := terraform.Output(t, terraformOptions, "sumologic_field_dbclusteridentifier")
+	validateSumoLogicField(t, terraformOptions, dbclusteridentifierField)
+	// Validate if the dbinstanceidentifier Field is created successfully
+	dbinstanceidentifierField := terraform.Output(t, terraformOptions, "sumologic_field_dbinstanceidentifier")
+	validateSumoLogicField(t, terraformOptions, dbinstanceidentifierField)
+	time.Sleep(2 * time.Second)
 
 	// Metric Rules
 	// NLB
