@@ -21,6 +21,8 @@
 
 ### Success Criteria
 If all the test cases are passed successfully, then you can expect the below output. 
+<img width="1024" alt="image" src="https://user-images.githubusercontent.com/87634042/177769474-4ba63eac-cea2-4ba0-8256-17a47e3be7a5.png">
+
 
 ### Failure Criteria
 If any of the test cases failed, then you can expect the below output. 
@@ -56,6 +58,8 @@ Currently we have validations for following entities, If apart from them any new
 
 ### Success Criteria
 If all the test cases are passed successfully, then you can expect the below output. 
+<img width="1024" alt="image" src="https://user-images.githubusercontent.com/87634042/177769443-1a194b56-7b9d-4d5b-a3ba-3c44434cef2f.png">
+
 
 ### Failure Criteria
 If any of the test cases failed, then you can expect the below output. 

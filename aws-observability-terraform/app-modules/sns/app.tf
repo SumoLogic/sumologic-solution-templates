@@ -7,41 +7,7 @@ module "sns_module" {
 
   # ********************** No Metric Rules for SNS ********************** #
 
-  # ********************** Fields ********************** #
-  /***
-   managed_fields = {
-     "TopicName" = {
-       field_name = "topicname"
-       data_type  = "String"
-       state      = true
-     }
-   }
-***/
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "SnsCloudTrailLogsFieldExtractionRule" = {
-      name             = "AwsObservabilitySNSCloudTrailLogsFER"
-      scope            = "account=* eventname eventsource \"sns.amazonaws.com\""
-      parse_expression = <<EOT
-              | json "userIdentity", "eventSource", "eventName", "awsRegion", "recipientAccountId", "requestParameters", "responseElements" as userIdentity, event_source, event_name, region, recipient_account_id, requestParameters, responseElements nodrop
-              | where event_source = "sns.amazonaws.com"
-              | json field=userIdentity "accountId", "type", "arn", "userName"  as accountid, type, arn, username nodrop
-              | parse field=arn ":assumed-role/*" as user nodrop 
-              | parse field=arn "arn:aws:iam::*:*" as accountid, user nodrop
-              | json field=requestParameters "topicArn", "name", "resourceArn", "subscriptionArn" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop 
-              | json field=responseElements "topicArn" as res_topic_arn nodrop
-              | if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn
-              | if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn
-              | parse field=topic_arn "arn:aws:sns:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp nodrop
-              | parse field=subscription_arn "arn:aws:sns:*:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
-              | if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname
-              | if (isBlank(accountid), recipient_account_id, accountid) as accountid
-              | "aws/sns" as namespace
-              | fields region, namespace, topicname, accountid
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
 
   # ********************** Apps ********************** #
   managed_apps = {
