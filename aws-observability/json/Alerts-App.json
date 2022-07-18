@@ -1075,6 +1075,47 @@
       "sloId": null
     },
     {
+      "name": "AWS SNS - Failed Notifications",
+      "description": "This alert fires where there are many failed notifications (>2) within an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/sns TopicName=* metric=NumberOfNotificationsFailed Statistic=Sum | sum by account, region, TopicName"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 2,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always"
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 2,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always"
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
       "name": "AWS SNS - Failed Events",
       "description": "This alert fires when an SNS app has high number of  failed events (>5) within last 5 minutes",
       "type": "MonitorsLibraryMonitorExport",
@@ -1840,47 +1881,6 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
-      "playbook": "",
-      "sloId": null
-    },
-    {
-      "name": "AWS SNS - Failed Notifications",
-      "description": "This alert fires where there are many failed notifications (>=5) within an interval of 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "account=* region=* namespace=aws/sns TopicName=* metric=NumberOfNotificationsFailed Statistic=Sum | sum by account, region, TopicName"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "MetricsStaticCondition",
-          "triggerType": "Critical",
-          "resolutionWindow": null,
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "occurrenceType": "Always"
-        },
-        {
-          "detectionMethod": "MetricsStaticCondition",
-          "triggerType": "ResolvedCritical",
-          "resolutionWindow": null,
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "occurrenceType": "Always"
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": true,
       "playbook": "",
       "sloId": null
     },
