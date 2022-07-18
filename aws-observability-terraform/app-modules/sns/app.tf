@@ -69,8 +69,8 @@ module "sns_module" {
           detection_method = "StaticCondition",
           time_range       = "-5m",
           trigger_type     = "Critical",
-          threshold        = 5,
-          threshold_type   = "GreaterThanOrEqual",
+          threshold        = 2,
+          threshold_type   = "GreaterThan",
           occurrence_type  = "Always",
           trigger_source   = "AnyTimeSeries"
         },
@@ -78,8 +78,8 @@ module "sns_module" {
           detection_method = "StaticCondition",
           time_range       = "-5m",
           trigger_type     = "ResolvedCritical",
-          threshold        = 5,
-          threshold_type   = "LessThan",
+          threshold        = 2,
+          threshold_type   = "LessThanOrEqual",
           occurrence_type  = "Always",
           trigger_source   = "AnyTimeSeries"
         }
@@ -103,7 +103,7 @@ module "sns_module" {
           time_range       = "-5m",
           trigger_type     = "Critical",
           threshold        = 5,
-          threshold_type   = "GreaterThanOrEqual",
+          threshold_type   = "GreaterThan",
           occurrence_type  = "ResultCount",
           trigger_source   = "AllResults"
         },
@@ -112,7 +112,7 @@ module "sns_module" {
           time_range       = "-5m",
           trigger_type     = "ResolvedCritical",
           threshold        = 5,
-          threshold_type   = "LessThan",
+          threshold_type   = "LessThanOrEqual",
           occurrence_type  = "ResultCount",
           trigger_source   = "AllResults"
         }
