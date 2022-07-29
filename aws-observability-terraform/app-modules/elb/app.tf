@@ -5,21 +5,7 @@ module "classic_elb_module" {
   access_key  = var.access_key
   environment = var.environment
 
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "ElbAccessLogsFieldExtractionRule" = {
-      name             = "AwsObservabilityElbAccessLogsFER"
-      scope            = "account=* region=*"
-      parse_expression = <<EOT
-        | parse "* * * * * * * * * * * \"*\" \"*\" * *" as datetime, loadbalancername, client, backend, request_processing_time, backend_processing_time, response_processing_time, elb_status_code, backend_status_code, received_bytes, sent_bytes, request, user_agent, ssl_cipher, ssl_protocol
-        | parse regex field=datetime "(?<datetimevalue>\d{0,4}-\d{0,2}-\d{0,2}T\d{0,2}:\d{0,2}:\d{0,2}\.\d+Z)" 
-        | where !isBlank(loadbalancername) and !isBlank(datetimevalue)
-        | "aws/elb" as namespace
-        | tolowercase(loadbalancername) as loadbalancername | fields loadbalancername, namespace
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
 
   # ********************** Apps ********************** #
   managed_apps = {

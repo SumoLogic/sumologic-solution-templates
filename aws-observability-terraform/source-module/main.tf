@@ -168,7 +168,7 @@ module "cloudwatch_metrics_source_module" {
     limit_to_namespaces = [each.value]
     limit_to_regions    = [local.aws_region]
     paused              = false
-    scan_interval       = local.namespace_scan_interval[regex("^AWS/(\\w+)$", each.value)[0]]
+    scan_interval       = lookup(local.namespace_scan_interval,regex("^AWS/(\\w+)$", each.value)[0],"300000")
     sumo_account_id     = local.sumo_account_id
     fields              = local.metrics_fields
     iam_details = {

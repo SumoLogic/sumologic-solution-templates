@@ -1,14 +1,13 @@
 {
     "type": "FolderSyncDefinition",
     "name": "AWS DynamoDB",
-    "description": "The Sumo Logic App for Amazon DynamoDB is a unified logs and metrics (ULM) App which provides operational insights into your DynamoDB solution. The App includes Dashboards that allow you to monitor key metrics and view the throttle events, errors, latency, and help you plan the capacity of your DynamoDB solution.",
+    "description": "The Sumo Logic App for Amazon DynamoDB is using both logs and metrics to provide operational insights into your DynamoDB. The App includes Dashboards that allow you to monitor key metrics, view the throttle events, errors, latency, and help you plan the capacity of your DynamoDB instances.",
     "children": [
         {
             "type": "DashboardV2SyncDefinition",
             "name": "1. AWS DynamoDB - Capacity Planning",
             "description": "See the details of your DynamoDB capacity including the provisioned read/write consumed, read/write throttle events, and throttled requests.",
             "title": "1. AWS DynamoDB - Capacity Planning",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -98,24 +97,30 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ProvisionedReadCapacityUnits Statistic=Maximum | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         },
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ConsumedReadCapacityUnits Statistic=Maximum | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -132,24 +137,30 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ProvisionedWriteCapacityUnits Statistic=Maximum  | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         },
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ConsumedWriteCapacityUnits Statistic=Maximum  | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -166,14 +177,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ThrottledRequests Statistic=sum (operation=*get* or operation=*scan* or operation=*query*) | sum by account, region, namespace, tablename, operation",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -190,14 +204,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ThrottledRequests Statistic=sum (operation=*get* or operation=*scan* or operation=*query*) | sum by account, region, namespace, tablename, operation",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -214,14 +231,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ThrottledRequests Statistic=sum (operation=*update* or operation=*put* or operation=*delete* or operation=*write*) | sum by account, region, namespace, tablename, operation",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -238,14 +258,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ThrottledRequests Statistic=sum (operation=*update* or operation=*put* or operation=*delete* or operation=*write*) | sum by account, region, namespace, tablename, operation",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -262,14 +285,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ReadThrottleEvents Statistic=sum | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -286,14 +312,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=WriteThrottleEvents Statistic=sum | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -310,24 +339,30 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": " region={{region}} namespace={{namespace}} account={{account}} metric=AccountMaxReads Statistic=Average | avg by account, region, namespace",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         },
                         {
+                            "transient": false,
                             "queryString": " region={{region}} namespace={{namespace}} account={{account}} metric=AccountMaxTableLevelReads Statistic=Average | avg by account, region, namespace",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -344,24 +379,30 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": " region={{region}} namespace={{namespace}} account={{account}} metric=AccountMaxWrites Statistic=Average | avg by account, region, namespace",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         },
                         {
+                            "transient": false,
                             "queryString": " region={{region}} namespace={{namespace}} account={{account}} metric=AccountMaxTableLevelWrites Statistic=Average | avg by account, region, namespace",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -401,7 +442,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -415,21 +457,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -443,7 +487,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -453,7 +498,6 @@
             "name": "1. AWS DynamoDB - Overview",
             "description": "See the overview of your DynamoDB environment including the events, errors, requests, users, and latency.",
             "title": "1. AWS DynamoDB - Overview",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -567,14 +611,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} metric=AccountProvisionedWriteCapacityUtilization Statistic=Average | avg",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -591,14 +638,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} metric=UserErrors Statistic=SampleCount | sum",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -615,14 +665,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} metric=SystemErrors Statistic=SampleCount | sum",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -639,14 +692,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} tablename={{tablename}} metric=ConditionalCheckFailedRequests Statistic=SampleCount | sum",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -663,14 +719,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} tablename={{tablename}} metric=TransactionConflict Statistic=SampleCount | sum",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -687,14 +746,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} tablename={{tablename}} metric=SuccessfulRequestLatency Statistic=Average  | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -711,14 +773,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} tablename={{tablename}} metric=SuccessfulRequestLatency Statistic=SampleCount  | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -735,24 +800,30 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} metric=UserErrors Statistic=SampleCount | sum by account, region, namespace",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         },
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} metric=SystemErrors Statistic=SampleCount  | sum by account, region, namespace",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -769,14 +840,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| timeslice 5m\n| count by EventName, _timeslice\n| transpose row _timeslice column EventName ",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -788,19 +862,22 @@
                     "id": null,
                     "key": "panelpane-064f62b0b148db44",
                     "title": "Top 10 Errors",
-                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "Region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| count as Count by ErrorCode, ErrorMessage\n| sort by Count\n| limit 10",
+                            "transient": false,
+                            "queryString": "account={{account}} Region={{region}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isblank(tablename)\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| count as Count by ErrorCode, ErrorMessage\n| sort by Count\n| limit 10",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -812,19 +889,22 @@
                     "id": null,
                     "key": "panelpane-c0cb88ffbad6eb42",
                     "title": "Top 5 IAM Users",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false},\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} Region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| count as Count by UserName\n| sort Count \n| limit 5",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} Region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isblank(tablename)\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| count as Count by UserName\n| sort Count, UserName asc\n| limit 5",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -841,14 +921,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} metric=AccountProvisionedReadCapacityUtilization Statistic=Average | avg",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -860,19 +943,22 @@
                     "id": null,
                     "key": "panelPANE-4AD569BB8E29FA47",
                     "title": "Top 5 Events",
-                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false}}",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} Region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| count as count by EventName\n| sort count \n| limit 5",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} Region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isblank(tablename)\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| count as count by EventName\n| sort count, EventName asc\n| limit 5",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -916,14 +1002,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} account={{account}} region={{region}} tablename={{tablename}} metric=ThrottledRequests Statistic=sum  | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -940,14 +1029,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "account={{account}} namespace={{namespace}} region={{region}} tablename={{tablename}} metric=ConditionalCheckFailedRequests Statistic=SampleCount  | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -969,7 +1061,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -983,21 +1076,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1011,7 +1106,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -1021,7 +1117,6 @@
             "name": "2. AWS DynamoDB  - Latency and Errors",
             "description": "See the details of errors and latency of your DynamoDB including the user error, system error, failed request, and latency.",
             "title": "2. AWS DynamoDB  - Latency and Errors",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -1079,14 +1174,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} tablename={{tablename}} metric=SuccessfulRequestLatency Statistic=Average (operation=*get* or operation=*scan* or operation=*query*) | sum by account, region, namespace, tablename, operation",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1103,14 +1201,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "namespace={{namespace}} region={{region}} account={{account}} tablename={{tablename}} metric=SuccessfulRequestLatency Statistic=Average (operation=*update* or operation=*put* or operation=*delete* or operation=*write*) | sum by account, region, namespace, tablename, operation",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1127,14 +1228,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "account={{account}} namespace={{namespace}} region={{region}} tablename={{tablename}} metric=ConditionalCheckFailedRequests Statistic=SampleCount | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1151,14 +1255,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "account={{account}} namespace={{namespace}} region={{region}} tablename={{tablename}} metric=TransactionConflict Statistic=SampleCount | sum by account, region, namespace, tablename",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1180,7 +1287,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1194,21 +1302,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1222,7 +1332,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -1230,9 +1341,8 @@
         {
             "type": "DashboardV2SyncDefinition",
             "name": "3. AWS DynamoDB - Events",
-            "description": "See the details on events in your DynamoDB including the location, users, errors, updates, creations, and deletions to tables.",
+            "description": "See the details on cloudtrail audit events in your DynamoDB including the location, users, errors, updates, creations, and deletions to tables.",
             "title": "3. AWS DynamoDB - Events",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -1302,14 +1412,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| count by EventName\n| sort by _count, EventName asc\n| limit 5",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| count by EventName\n| sort by _count, EventName asc\n| limit 5",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1321,19 +1434,22 @@
                     "id": null,
                     "key": "panelpane-da8bb2b4afbc5948",
                     "title": "Events Over Time",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{}}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as EventName, Region, tablename, SourceIp, UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| timeslice 5m\n| count by EventName, _timeslice\n| transpose row _timeslice column EventName \n| fillmissing timeslice (5m)",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\" as EventName, Region, tablename, SourceIp, UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| timeslice 5m\n| count by EventName, _timeslice\n| transpose row _timeslice column EventName \n| fillmissing timeslice (5m)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1350,14 +1466,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\") and !isEmpty(ErrorCode)\n| count",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where !isBlank(errorCode)\n| count",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1369,19 +1488,22 @@
                     "id": null,
                     "key": "panelpane-b8faa804b5a87b46",
                     "title": "Top 10 IAM Users",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{}}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| count as count by UserName\n| sort count \n| limit 10",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| count as count by UserName\n| sort by count \n| limit 10",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1398,14 +1520,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\") and !isEmpty(ErrorCode)\n| count as Count by ErrorCode, ErrorMessage, EventName, UserName, SourceIp\n| sort by Count\n| limit 20",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"errorCode\", \"errorMessage\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, ErrorCode, ErrorMessage nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where !isBlank(errorCode)\n| count as Count by ErrorCode, ErrorMessage, EventName, UserName, SourceIp\n| sort by Count, ErrorCode, ErrorMessage\n| limit 20",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1422,14 +1547,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"requestParameters.keySchema\", \"requestParameters.attributeDefinitions\", \"userAgent\", \"responseElements.tableDescription.provisionedThroughput\", \"userIdentity.sessionContext.attributes.mfaAuthenticated\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, TableSchema, AttributeDefinition, UserAgent, ProvisionedThroughput, MFAAuthenticated nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS\") as MessageDate\n| count as Count by MessageDate, EventName, tablename, UserName, SourceIp, MFAAuthenticated\n| sort by MessageDate\n| fields MessageDate, EventName, tablename, UserName, SourceIp, MFAAuthenticated",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\", \"requestParameters.keySchema\", \"requestParameters.attributeDefinitions\", \"userAgent\", \"responseElements.tableDescription.provisionedThroughput\", \"userIdentity.sessionContext.attributes.mfaAuthenticated\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName, TableSchema, AttributeDefinition, UserAgent, ProvisionedThroughput, MFAAuthenticated nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS\") as MessageDate\n| count as Count by MessageDate, EventName, tablename, UserName, SourceIp, MFAAuthenticated\n| sort by MessageDate\n| fields MessageDate, EventName, tablename, UserName, SourceIp, MFAAuthenticated",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1446,14 +1574,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| count by SourceIp\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = SourceIp\n| count by latitude, longitude, country_code, country_name, region, city, postal_code",
+                            "transient": false,
+                            "queryString": "account={{account}} namespace={{namespace}} region={{region}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where !(SourceIp matches \"*.amazonaws.com\")\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| count by SourceIp\n| lookup latitude, longitude from geo://location on ip = SourceIp\n| where !isnull(latitude)\n| sum(_count) as count by latitude, longitude",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1475,7 +1606,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1489,21 +1621,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1517,7 +1651,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -1527,7 +1662,6 @@
             "name": "4. AWS DynamoDB - Threat Intel",
             "description": "See the details of IP threats including the count, location, and highly malicious IP threats.",
             "title": "4. AWS DynamoDB - Threat Intel",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -1589,14 +1723,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\"\n| count as ip_count by SourceIp\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=SourceIp \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count",
+                            "transient": false,
+                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\" and !(SourceIp matches \"*.amazonaws.com\")\n| count as ip_count by SourceIp\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=SourceIp \n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as threat_count",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1613,14 +1750,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\"\n| timeslice 5m\n| count as ip_count by SourceIp, tablename\n| lookup Type, Actor, Raw, ThreatLevel as MaliciousConfidence from sumo://threat/cs on threat=SourceIp \n| json field=Raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| if (isEmpty(Actor), \"Unassigned\", Actor) as Actor\n| sum (ip_count) as ThreatCount by SourceIp, MaliciousConfidence, tablename, Actor, LabelName\n| sort by ThreatCount",
+                            "transient": false,
+                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\" and !(SourceIp matches \"*.amazonaws.com\")\n| count as ip_count by SourceIp, tablename\n| lookup Type, Actor, Raw, ThreatLevel as MaliciousConfidence from sumo://threat/cs on threat=SourceIp \n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| json field=Raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| if (isEmpty(Actor), \"Unassigned\", Actor) as Actor\n| sum (ip_count) as ThreatCount by SourceIp, MaliciousConfidence, tablename, Actor, LabelName\n| sort by ThreatCount",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1637,14 +1777,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\"\n| count as ip_count by SourceIp\n| lookup Type, Actor, Raw, ThreatLevel as MaliciousConfidence from sumo://threat/cs on threat=SourceIp \n| json field=Raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where  type=\"ip_address\" and !isNull(MaliciousConfidence)\n| if (isEmpty(Actor), \"Unassigned\", Actor) as Actor\n| sum (ip_count) as ThreatCount by SourceIp, MaliciousConfidence, Actor, LabelName\n| sort by ThreatCount",
+                            "transient": false,
+                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\" and !(SourceIp matches \"*.amazonaws.com\")\n| count as ip_count by SourceIp\n| lookup Type, Actor, Raw, ThreatLevel as MaliciousConfidence from sumo://threat/cs on threat=SourceIp \n| where  type=\"ip_address\" and !isNull(MaliciousConfidence)\n| json field=Raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| if (isEmpty(Actor), \"Unassigned\", Actor) as Actor\n| sum (ip_count) as ThreatCount by SourceIp, MaliciousConfidence, Actor, LabelName\n| sort by ThreatCount, MaliciousConfidence asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1656,19 +1799,22 @@
                     "id": null,
                     "key": "panelpane-c605d948852ffb48",
                     "title": "Malicious Confidence",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{}}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\"\n| count as ip_count by SourceIp\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=SourceIp \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where type=\"ip_address\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count by malicious_confidence\n| sort by _count",
+                            "transient": false,
+                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\" and !(SourceIp matches \"*.amazonaws.com\")\n| count as ip_count by SourceIp\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=SourceIp\n| where type=\"ip_address\"\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum(ip_count) as ThreatCount by malicious_confidence\n| sort by ThreatCount, malicious_confidence asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1685,14 +1831,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| where tolowercase(tablename) matches tolowercase(\"{{tablename}}\")\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\"\n| count as ip_count by SourceIp\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=SourceIp \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count by SourceIp\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = SourceIp\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| where !isnull(latitude)",
+                            "transient": false,
+                            "queryString": "region={{region}} account={{account}} namespace={{namespace}} \"\\\"eventSource\\\":\\\"dynamodb.amazonaws.com\\\"\"\n| json \"eventName\", \"awsRegion\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as EventName, Region, tablename, SourceIp, UserName, ContextUserName nodrop\n| where (tolowercase(tablename) matches tolowercase(\"{{tablename}}\")) or isBlank(tablename)\n| where SourceIp != \"0.0.0.0\" and SourceIp != \"127.0.0.1\" and !(SourceIp matches \"*.amazonaws.com\")\n| if (isEmpty(UserName), ContextUserName, UserName) as UserName\n| count as ip_count by SourceIp\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=SourceIp\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| lookup latitude, longitude from geo://location on ip = SourceIp\n| where !isnull(latitude)\n| sum(ip_count) as count by latitude, longitude",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1714,7 +1863,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1728,21 +1878,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/dynamodb",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/dynamodb",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1756,7 +1908,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
