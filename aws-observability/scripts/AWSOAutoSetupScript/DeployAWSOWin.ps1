@@ -53,7 +53,8 @@ $awscmd
 $x = $json | ConvertFrom-Json
 $awsAccountId = $x.Account
 Add-Content $fileName "`"Section2aAccountAlias=${awsAccountId}`"]"
-aws s3 cp s3://sumologic-appdev-aws-sam-apps/aws-observability-versions/v2.3.0/sumologic_observability.master.template.yaml sumologic_observability_template.yaml
+aws s3 cp s3://sumologic-appdev-aws-sam-apps/aws-observability-versions/v2.5.0/sumologic_observability.master.template.yaml sumologic_observability_template.yaml
+
 
 
 $stackName="sumoawsoquicksetup"
@@ -68,7 +69,3 @@ Remove-Item param.json
 
 $now=Get-Date
 echo "Script completed at : $now"
-
-
-
- 

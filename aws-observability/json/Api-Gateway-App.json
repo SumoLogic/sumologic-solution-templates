@@ -1,14 +1,13 @@
 {
     "type": "FolderSyncDefinition",
     "name": "AWS API Gateway",
-    "description": "The Sumo Logic App for AWS API Gateway provides visibility into your Amazon APIGateway Service Metrics collected via a CloudWatch Metrics Source. The App’s Dashboards provide preconfigured searches and filters that allow you to monitor your API Gateway Infrastructure.",
+    "description": "The Sumo Logic App for AWS API Gateway provides visibility into your Amazon APIGateway Service. The App’s Dashboards provide preconfigured searches and filters that allow you to monitor your API Gateway Infrastructure.",
     "children": [
         {
             "type": "DashboardV2SyncDefinition",
             "name": "1. AWS API Gateway - Latency, Cache",
             "description": "AWS API Gateway - Latency, Cache dashboard provides insights into API Gateway performance including API requests, latency, API cache hits, and back-end cache misses.",
             "title": "1. AWS API Gateway - Latency, Cache",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -93,40 +92,49 @@
                 {
                     "id": null,
                     "key": "panelpane-07fe4834864daa40",
-                    "title": " API Requests (Today, Yesterday, Last Week)",
-                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Requests\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today, {{apiname}}\"}},{\"series\":[],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday, {{apiname}}\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week, {{apiname}}\"}}]}",
+                    "title": "API Requests (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Requests\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today, {{apiname}}\"}},{\"series\":[],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday, {{apiname}}\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week, {{apiname}}\"}}],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         },
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | timeshift 1d",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         },
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | timeshift 7d",
                             "queryType": "Metrics",
                             "queryKey": "C",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -161,14 +169,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=Latency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -185,14 +196,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=IntegrationLatency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -209,14 +223,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=CacheHitCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account | eval _value * 100 ",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -233,14 +250,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=CacheMissCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account | eval _value * 100",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -271,8 +291,8 @@
                 {
                     "id": null,
                     "name": "account",
-                    "displayName": null,
-                    "defaultValue": null,
+                    "displayName": "account",
+                    "defaultValue": "",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
                         "filter": "",
@@ -280,7 +300,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -294,21 +315,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/apigateway",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/apigateway",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -322,7 +345,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -332,7 +356,6 @@
             "name": "1. AWS API Gateway - Overview",
             "description": "AWS API Gateway - Overview dashboard provides insights into API Gateway performance throughout your infrastructure, including API calls, latency, client and server-side errors, API cache hits, and back-end cache misses.",
             "title": "1. AWS API Gateway - Overview",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -477,14 +500,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=Latency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -501,14 +527,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=5XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -525,14 +554,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=IntegrationLatency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -549,14 +581,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=CacheHitCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account | eval _value * 100",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -573,14 +608,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=CacheMissCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account | eval _value * 100",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -597,14 +635,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=4XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -657,14 +698,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -681,14 +725,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | count",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -705,14 +752,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname | eval round(_value)",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -729,14 +779,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=Latency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -753,14 +806,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=IntegrationLatency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -771,40 +827,49 @@
                 {
                     "id": null,
                     "key": "panelPANE-F43AE7E8952D5A40",
-                    "title": " API Requests (Today, Yesterday, Last Week)",
-                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week\"}}]}",
+                    "title": "API Requests (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week\"}}],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by account, region, namespace",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         },
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by account, region, namespace | timeshift 1d",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         },
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by account, region, namespace | timeshift 7d",
                             "queryType": "Metrics",
                             "queryKey": "C",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -826,7 +891,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -840,21 +906,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/apigateway",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/apigateway",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -868,7 +936,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -878,7 +947,6 @@
             "name": "2. AWS API Gateway - 4XX and 5XX Errors",
             "description": "AWS API Gateway - 4xx and 5xx Errors dashboard provides insights into API Gateway HTTP 4xx and 5xx code errors throughout your infrastructure, including API requests, client-side errors, and server-side errors.",
             "title": "2. AWS API Gateway - 4XX and 5XX Errors",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -944,14 +1012,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=4XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -968,14 +1039,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=5XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -992,34 +1066,43 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         },
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | timeshift 1d",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         },
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | timeshift 7d",
                             "queryType": "Metrics",
                             "queryKey": "C",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1068,7 +1151,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1082,21 +1166,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/apigateway",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/apigateway",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1110,7 +1196,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -1120,7 +1207,6 @@
             "name": "2. AWS API Gateway - Audit Events",
             "description": "AWS API Gateway - Audit Events dashboard provides detailed audit insights into API Gateway events by various dimensions including event names, trends, regions, user agents, and recipient account IDs.",
             "title": "2. AWS API Gateway - Audit Events",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -1211,14 +1297,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" eventName account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| timeslice 15m\n| count as eventCount by _timeslice, event_name\n| transpose row _timeslice column event_name",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" eventName account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| timeslice 15m\n| count as event_count by _timeslice, event_name\n| transpose row _timeslice column event_name",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1235,14 +1324,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" userAgent account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by user_agent\n| sort by eventCount, user_agent asc",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" userAgent account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as event_count by user_agent\n| sort by event_count, user_agent asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1259,14 +1351,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")  and !isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| where !isnull(latitude)",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")  and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isnull(latitude)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1283,14 +1378,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\") and isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| where !isnull(latitude)",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\") and isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isnull(latitude)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1302,19 +1400,22 @@
                     "id": null,
                     "key": "panelPANE-D3C4BB28A83C9947",
                     "title": "Event Status",
-                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"overrides\":[{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"pie\"}},{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"pie\"}},{\"series\":[],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"type\":\"pie\"}}],\"series\":{}}",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"overrides\":[{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"pie\"}},{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"pie\"}}],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as event_count by event_status\n| sort by event_count, event_status asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1331,14 +1432,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(userName), user, userName) as user\n| timeslice 15m\n| count by _timeslice, eventStatus\n| fillmissing timeslice(15m), values (\"Success\", \"Failure\") in eventStatus\n| transpose row _timeslice column eventStatus",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(userName), user, userName) as user\n| timeslice 15m\n| count by _timeslice, event_status\n| fillmissing timeslice(15m), values (\"Success\", \"Failure\") in event_status\n| transpose row _timeslice column event_status",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1355,14 +1459,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by errorCode \n| top 10 errorCode by eventCount, errorCode asc",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(userName), user, userName) as user\n| count as event_count by error_code \n| top 10 error_code by event_count, error_code asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1379,14 +1486,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by event_name\n| sort by eventCount, event_name asc",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as event_count by event_name\n| sort by event_count, event_name asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1403,14 +1513,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop \n| json field=responseElements \"name\", \"Message\" as ApiName, responseMessage nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(errorMessage), responseMessage, errorMessage) as errorMessage\n| timeslice 1s\n| count as eventCount by _timeslice, event_name, errorCode, errorMessage, Region, src_ip, accountId, user, type, requestID, user_agent\n| sort by _timeslice\n| limit 100",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop \n| json field=responseElements \"name\", \"Message\" as ApiName, responseMessage nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(error_message), responseMessage, error_message) as error_message\n| timeslice 1s\n| count as event_count by _timeslice, event_name, error_code, error_message, region, src_ip, accountId, user, type, requestID, user_agent, apiname\n| sort by _timeslice\n| limit 100",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1427,14 +1540,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where eventStatus = \"Success\"\n| count as eventCount by event_name\n| sort by eventCount, event_name asc",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and isBlank(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as event_count by event_name\n| sort by event_count, event_name asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1451,14 +1567,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where eventStatus = \"Success\"\n| timeslice 1s\n| count as eventCount by _timeslice, event_name, Region, src_ip, accountId, user, type, requestID, user_agent, ApiName\n| sort by _timeslice\n| limit 100",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and isBlank(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| timeslice 1s\n| count as event_count by _timeslice, event_name, region, src_ip, accountId, user, type, requestID, user_agent, ApiName\n| sort by _timeslice\n| limit 100",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1475,14 +1594,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by type, user\n| topk(10, eventCount) by type | fields -_rank",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as event_count by type, user\n| topk(10, event_count) by type | fields -_rank",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1499,14 +1621,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
-                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip, event_name, user, user_agent\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and malicious_confidence = \"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sort by _count\n| fields src_ip, event_name, user, user_agent, type, actor, malicious_confidence",
+                            "transient": false,
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, error_code, error_message, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| where (tolowercase(ApiName) matches tolowercase(\"{{apiname}}\")) or isBlank(apiname)\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip, event_name // , user, user_agent, apiname\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| where  type=\"ip_address\" and malicious_confidence = \"high\"\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sort by _count\n| fields src_ip, event_name, type, actor, malicious_confidence // , user, user_agent, apiname",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1528,7 +1653,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1542,21 +1668,38 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/apigateway",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/apigateway",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "apiname",
+                    "displayName": "apiname",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/apigateway",
+                        "key": "apiname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []
@@ -1566,7 +1709,6 @@
             "name": "3. AWS API Gateway - Enhanced Monitoring",
             "description": "AWS API Gateway - Enhanced Monitoring dashboard provides detailed insights into API Gateway performance throughout your infrastructure, including the number and types of API calls, API resources, cache hits and misses, latency averages, and errors by HTTP method.",
             "title": "3. AWS API Gateway - Enhanced Monitoring",
-            "rootPanel": null,
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
@@ -1652,14 +1794,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=Count Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by method",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1676,14 +1821,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=4XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by method",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1700,14 +1848,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=5XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}}  method={{method}} resource={{resource}} | sum by method",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1724,14 +1875,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1748,14 +1902,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by apiname, namespace, region, account, method | count",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1772,14 +1929,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by apiname, namespace, region, account, resource | count",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1796,14 +1956,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by apiname, method, resource | eval round(_value)",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1815,29 +1978,35 @@
                     "id": null,
                     "key": "panelpane-6052fefb99524948",
                     "title": "Cache Hits and Misses",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Rate\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Cache Hits, apiname={{apiname}} \"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Cache Miss, apiname={{apiname}}\"}}]}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Rate\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Cache Hits, {{apiname}} \"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Cache Miss, {{apiname}}\"}}],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=CacheHitCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | avg by apiname, namespace, region, account | eval _value * 100",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         },
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=CacheMissCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | avg by apiname, namespace, region, account | eval _value * 100",
                             "queryType": "Metrics",
                             "queryKey": "B",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1854,14 +2023,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=Latency statistic=Average account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | avg by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1878,14 +2050,17 @@
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
+                            "transient": false,
                             "queryString": "Namespace={{namespace}} metric=IntegrationLatency statistic=Average account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | avg by apiname, namespace, region, account",
                             "queryType": "Metrics",
                             "queryKey": "A",
                             "metricsQueryMode": "Advanced",
                             "metricsQueryData": null,
                             "tracesQueryData": null,
+                            "spansQueryData": null,
                             "parseMode": "Manual",
-                            "timeSource": "Message"
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
                         }
                     ],
                     "description": "",
@@ -1897,10 +2072,10 @@
                     "id": null,
                     "key": "panelpane-4f8a91c58c9d3b4e",
                     "title": "Note",
-                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"alignment\":\"left\",\"fontSize\":16,\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"alignment\":\"left\",\"fontSize\":16,\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"},\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "TextPanel",
-                    "text": "This dashboard works on detailed CloudWatch metrics which needs to be explicitly enabled. You can do this in the console by selecting \"Enable CloudWatch Metrics\" under a stage Settings tab. Alternatively, you can call the update-stage AWS CLI command to update the metricsEnabled property to true."
+                    "text": "This dashboard works on detailed CloudWatch metrics which needs to be explicitly enabled. You can do this in the AWS console by selecting \"Enable CloudWatch Metrics\" under a stage Settings tab. Alternatively, you can call the update-stage AWS CLI command to update the metricsEnabled property to true."
                 }
             ],
             "variables": [
@@ -1916,7 +2091,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1930,21 +2106,23 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
                     "name": "namespace",
-                    "displayName": null,
+                    "displayName": "namespace",
                     "defaultValue": "aws/apigateway",
                     "sourceDefinition": {
                         "variableSourceType": "MetadataVariableSourceDefinition",
-                        "filter": "account={{account}} region={{region}}",
+                        "filter": "account={{account}} region={{region}} namespace=aws/apigateway",
                         "key": "namespace"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1958,7 +2136,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1972,7 +2151,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -1986,7 +2166,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 },
                 {
                     "id": null,
@@ -2000,7 +2181,8 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
-                    "hideFromUI": false
+                    "hideFromUI": false,
+                    "valueType": "Any"
                 }
             ],
             "coloringRules": []

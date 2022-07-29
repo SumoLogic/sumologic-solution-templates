@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.4.0: Template to setup the Lambda app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.5.0: Template to setup the Lambda app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -342,7 +342,28 @@ Resources:
           - " _sourceHost=/aws/lambda/*)"
       FieldExtractionRuleParseExpression: '| parse field=_sourceHost "/aws/lambda/*" as functionname
                                            | tolowercase(functionname) as functionname
-                                           | fields functionname'
+                                           | "aws/lambda" as namespace
+                                           | fields functionname, namespace'
+      FieldExtractionRuleParseEnabled: true
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+  
+  GenericCloudWatchLogsFieldExtractionRule:
+    Type: Custom::SumoLogicFieldExtractionRule
+    Condition: create_cloudwatch_fer
+    DependsOn: AddFunctionNameField
+    Properties:
+      ServiceToken: !Ref Section7aParentStackLambdaARN
+      RemoveOnDeleteStack: false
+      FieldExtractionRuleName: "AwsObservabilityGenericCloudWatchLogsFER"
+      FieldExtractionRuleScope: "account=* region=* _sourceHost=/aws/*"
+      FieldExtractionRuleParseExpression: '| "unknown" as namespace
+              | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
+              | if (_sourceHost matches "/aws/rds/*", "aws/rds", namespace) as namespace
+              | if (_sourceHost matches "/aws/ecs/containerinsights/*", "ecs/containerinsights", namespace) as namespace
+              | if (_sourceHost matches "/aws/kinesisfirehose/*", "aws/firehose", namespace) as namespace
+              | fields namespace'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey

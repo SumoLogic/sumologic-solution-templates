@@ -4,14 +4,14 @@
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | >= 2.1 |
-| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.13.0 |
+| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.14.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.13.0 |
-| <a name="provider_time"></a> [time](#provider\_time) | n/a |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.16.2 |
+| <a name="provider_time"></a> [time](#provider\_time) | 0.7.2 |
 
 ## Modules
 
@@ -29,6 +29,7 @@
 | <a name="module_overview_app"></a> [overview\_app](#module\_overview\_app) | ./overview | n/a |
 | <a name="module_rce_app"></a> [rce\_app](#module\_rce\_app) | ./rce | n/a |
 | <a name="module_rds_app"></a> [rds\_app](#module\_rds\_app) | ./rds | n/a |
+| <a name="module_sns_app"></a> [sns\_app](#module\_sns\_app) | ./sns | n/a |
 
 ## Resources
 
@@ -74,6 +75,7 @@
 
 | Name | Description |
 |------|-------------|
+| <a name="output_sumologic_apps_folder"></a> [sumologic\_apps\_folder](#output\_sumologic\_apps\_folder) | This output contains AWS Observability Parent App folder. |
 | <a name="output_sumologic_content_alb"></a> [sumologic\_content\_alb](#output\_sumologic\_content\_alb) | This output contains alb App. |
 | <a name="output_sumologic_content_apigateway"></a> [sumologic\_content\_apigateway](#output\_sumologic\_content\_apigateway) | This output contains apigateway App. |
 | <a name="output_sumologic_content_dynamodb"></a> [sumologic\_content\_dynamodb](#output\_sumologic\_content\_dynamodb) | This output contains dynamodb App. |
@@ -86,6 +88,7 @@
 | <a name="output_sumologic_content_overview"></a> [sumologic\_content\_overview](#output\_sumologic\_content\_overview) | This output contains overview App. |
 | <a name="output_sumologic_content_rce"></a> [sumologic\_content\_rce](#output\_sumologic\_content\_rce) | This output contains rce Apps. |
 | <a name="output_sumologic_content_rds"></a> [sumologic\_content\_rds](#output\_sumologic\_content\_rds) | This output contains rds App. |
+| <a name="output_sumologic_content_sns"></a> [sumologic\_content\_sns](#output\_sumologic\_content\_sns) | This output contains sns App. |
 | <a name="output_sumologic_field_alb"></a> [sumologic\_field\_alb](#output\_sumologic\_field\_alb) | This output contains fields required for alb app. |
 | <a name="output_sumologic_field_apigateway"></a> [sumologic\_field\_apigateway](#output\_sumologic\_field\_apigateway) | This output contains fields required for apigateway app. |
 | <a name="output_sumologic_field_dynamodb"></a> [sumologic\_field\_dynamodb](#output\_sumologic\_field\_dynamodb) | This output contains fields required for dynamodb app. |
@@ -101,9 +104,13 @@
 | <a name="output_sumologic_field_extraction_rule_elb"></a> [sumologic\_field\_extraction\_rule\_elb](#output\_sumologic\_field\_extraction\_rule\_elb) | This output contains Field Extraction rules required for classic elb app. |
 | <a name="output_sumologic_field_extraction_rule_lambda"></a> [sumologic\_field\_extraction\_rule\_lambda](#output\_sumologic\_field\_extraction\_rule\_lambda) | This output contains Field Extraction rules required for lambda app. |
 | <a name="output_sumologic_field_extraction_rule_rds"></a> [sumologic\_field\_extraction\_rule\_rds](#output\_sumologic\_field\_extraction\_rule\_rds) | This output contains Field Extraction rules required for rds app. |
+| <a name="output_sumologic_field_extraction_rule_sns"></a> [sumologic\_field\_extraction\_rule\_sns](#output\_sumologic\_field\_extraction\_rule\_sns) | This output contains Field Extraction rules required for sns app. |
 | <a name="output_sumologic_field_lambda"></a> [sumologic\_field\_lambda](#output\_sumologic\_field\_lambda) | This output contains fields required for lambda app. |
 | <a name="output_sumologic_field_nlb"></a> [sumologic\_field\_nlb](#output\_sumologic\_field\_nlb) | This output contains fields required for nlb app. |
 | <a name="output_sumologic_field_overview"></a> [sumologic\_field\_overview](#output\_sumologic\_field\_overview) | This output contains fields required for overview app. |
 | <a name="output_sumologic_field_rds"></a> [sumologic\_field\_rds](#output\_sumologic\_field\_rds) | This output contains fields required for rds app. |
+| <a name="output_sumologic_field_sns"></a> [sumologic\_field\_sns](#output\_sumologic\_field\_sns) | This output contains fields required for sns app. |
+| <a name="output_sumologic_hierarchy"></a> [sumologic\_hierarchy](#output\_sumologic\_hierarchy) | This output contains Sumologic Hierarchy. |
 | <a name="output_sumologic_metric_rules_nlb"></a> [sumologic\_metric\_rules\_nlb](#output\_sumologic\_metric\_rules\_nlb) | This output contains metric rules required for nlb app. |
 | <a name="output_sumologic_metric_rules_rds"></a> [sumologic\_metric\_rules\_rds](#output\_sumologic\_metric\_rules\_rds) | This output contains metric rules required for rds app. |
+| <a name="output_sumologic_monitors_folder"></a> [sumologic\_monitors\_folder](#output\_sumologic\_monitors\_folder) | This output contains AWS Observability Monitors folder. |
