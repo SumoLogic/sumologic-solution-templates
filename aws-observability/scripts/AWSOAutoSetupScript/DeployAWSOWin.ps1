@@ -56,6 +56,7 @@ Add-Content $fileName "`"Section2aAccountAlias=${awsAccountId}`"]"
 aws s3 cp s3://sumologic-appdev-aws-sam-apps/aws-observability-versions/v2.5.0/sumologic_observability.master.template.yaml sumologic_observability_template.yaml
 
 
+
 $stackName="sumoawsoquicksetup"
 $now=Get-Date
 echo "Script Configuration completed. Triggering CloudFormation Template at : $now"
@@ -68,7 +69,3 @@ Remove-Item param.json
 
 $now=Get-Date
 echo "Script completed at : $now"
-
-
-
- 
