@@ -7,31 +7,7 @@ module "apigateway_module" {
 
   # ********************** No Metric Rules for API Gateway ********************** #
 
-  # ********************** Fields ********************** #
-  # managed_fields = {
-  #   "APIName" = {
-  #     field_name = "apiname"
-  #     data_type  = "String"
-  #     state      = true
-  #   }
-  # }
-
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "CloudTrailFieldExtractionRule" = {
-      name             = "AwsObservabilityApiGatewayCloudTrailLogsFER"
-      scope            = "account=* eventname eventsource \"apigateway.amazonaws.com\""
-      parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "responseElements", "recipientAccountId" as eventSource, region, responseElements, accountid nodrop
-              | where eventSource = "apigateway.amazonaws.com"
-              | "aws/apigateway" as namespace
-              | json field=responseElements "name" as ApiName nodrop
-              | tolowercase(ApiName) as apiname
-              | fields region, namespace, apiname, accountid
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
 
   # ********************** Apps ********************** #
   managed_apps = {

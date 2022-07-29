@@ -12,12 +12,12 @@ module "rce_module" {
   # ********************** No FERs for RCE ********************** #
 
   # ********************** Apps - RCE dashboards only ********************** #
-  managed_apps = {
-    "RceApp" = {
-      content_json = join("", [var.json_file_directory_path, "/aws-observability/json/Rce-App.json"])
-      folder_id    = var.app_folder_id
-    }
-  }
+  # managed_apps = {
+  #   "RceApp" = {
+  #     content_json = join("", [var.json_file_directory_path, "/aws-observability/json/Rce-App.json"])
+  #     folder_id    = var.app_folder_id
+  #   }
+  # }
 
   # ********************** Monitors ********************** #
 }

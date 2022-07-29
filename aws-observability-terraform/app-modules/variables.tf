@@ -119,6 +119,12 @@ variable "apigateway_monitors_disabled" {
   default     = true
 }
 
+variable "sns_monitors_disabled" {
+  type        = bool
+  description = "Indicates if the SNS App monitors should be enabled. true to disable; false to enable."
+  default     = true
+}
+
 variable "dynamodb_monitors_disabled" {
   type        = bool
   description = "Indicates if DynamoDB Apps monitors should be enabled. true to disable; false to enable."
