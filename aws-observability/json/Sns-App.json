@@ -1,0 +1,2312 @@
+{
+    "type": "FolderSyncDefinition",
+    "name": "Amazon SNS",
+    "description": "The Sumo Logic App for Amazon SNS is a unified logs and metrics App that provides insights into the operations and utilization of your SNS service. The preconfigured dashboards help you monitor the key metrics by application, platform, and topic name, view the SNS events for activities, and help you plan the capacity of your SNS service.",
+    "children": [
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "1. Amazon SNS - Messages, Notifications ",
+            "description": "",
+            "title": "1. Amazon SNS - Messages, Notifications ",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "namespace": [
+                        "aws/sns"
+                    ],
+                    "topicname": [
+                        "*"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel82FC587B9BACF941",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":21}"
+                    },
+                    {
+                        "key": "panelPANE-A3ADC6ED8EDF2B4C",
+                        "structure": "{\"height\":4,\"width\":5,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel1FA1906D834C9B46",
+                        "structure": "{\"height\":4,\"width\":5,\"x\":10,\"y\":0}"
+                    },
+                    {
+                        "key": "panel815D399A933C5940",
+                        "structure": "{\"height\":4,\"width\":5,\"x\":15,\"y\":0}"
+                    },
+                    {
+                        "key": "panel81AC01C88E6C8B46",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":21}"
+                    },
+                    {
+                        "key": "panel5DD1E582BAA4A84F",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":27}"
+                    },
+                    {
+                        "key": "panel71CB92F989A1D84E",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":27}"
+                    },
+                    {
+                        "key": "panel27A5906DA65FE84B",
+                        "structure": "{\"height\":4,\"width\":5,\"x\":5,\"y\":0}"
+                    },
+                    {
+                        "key": "panel99D65C5790DDC84F",
+                        "structure": "{\"height\":4,\"width\":4,\"x\":20,\"y\":0}"
+                    },
+                    {
+                        "key": "panel53EF06C4A2B08A4A",
+                        "structure": "{\"height\":5,\"width\":4,\"x\":0,\"y\":4}"
+                    },
+                    {
+                        "key": "panel9B5290EA9C1C1849",
+                        "structure": "{\"height\":5,\"width\":4,\"x\":0,\"y\":9}"
+                    },
+                    {
+                        "key": "panel8197657DAE4A394C",
+                        "structure": "{\"height\":10,\"width\":20,\"x\":4,\"y\":4}"
+                    },
+                    {
+                        "key": "panelEC8A062C923DBA4E",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":0,\"y\":14}"
+                    },
+                    {
+                        "key": "panel8DF75C14B6BC3A49",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":16,\"y\":14}"
+                    },
+                    {
+                        "key": "panel0344AFB8A76FF84C",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":14}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel82FC587B9BACF941",
+                    "title": "Message Publish Size (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\"},\"series\":{},\"hiddenQueryKeys\":[],\"overrides\":[{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"type\":\"line\",\"color\":\"#50caf2\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"type\":\"line\",\"color\":\"#f0731f\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"type\":\"line\",\"color\":\"#4f3aab\",\"name\":\"Last Week\"}}],\"axes\":{\"axisY\":{\"title\":\"Message Size\",\"unit\":{\"value\":\"B\",\"isCustom\":false}},\"axisX\":{\"title\":\"\"}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=PublishSize Statistic=Average | avg ",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#C | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "D",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#C | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "E",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-A3ADC6ED8EDF2B4C",
+                    "title": "Messages Published",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"Messages\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#6cae01\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfMessagesPublished Statistic=Sum | sum",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel1FA1906D834C9B46",
+                    "title": "Notifications Delivered",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"Notifications\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#6cae01\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsDelivered Statistic=Sum | sum \n\n",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel815D399A933C5940",
+                    "title": "Notifications Failed",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"label\":\"Notifications\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#6cae01\"},{\"from\":1,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFailed Statistic=Sum | sum ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel81AC01C88E6C8B46",
+                    "title": "Messages Published (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"avg\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Messages\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"type\":\"line\",\"color\":\"#50caf2\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"type\":\"line\",\"color\":\"#f0731f\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"type\":\"line\",\"color\":\"#4f3aab\",\"name\":\"Last Week\"}}],\"hiddenQueryKeys\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfMessagesPublished Statistic=Sum | sum ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel5DD1E582BAA4A84F",
+                    "title": "Notifications Delivered (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"avg\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Notifications\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"type\":\"line\",\"color\":\"#50caf2\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"type\":\"line\",\"color\":\"#f0731f\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"type\":\"line\",\"color\":\"#4f3aab\",\"name\":\"Last Week\"}}],\"hiddenQueryKeys\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsDelivered Statistic=Sum | sum ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel71CB92F989A1D84E",
+                    "title": "Notifications Failed (Today, Yesterday, Last Week) ",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"avg\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Notifications\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"type\":\"line\",\"color\":\"#50caf2\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"type\":\"line\",\"color\":\"#f0731f\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"type\":\"line\",\"color\":\"#4f3aab\",\"name\":\"Last Week\"}}],\"hiddenQueryKeys\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFailed Statistic=Sum | sum ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel27A5906DA65FE84B",
+                    "title": "Avg Message Size",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Bytes\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#6cae01\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=PublishSize Statistic=Average | avg ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel99D65C5790DDC84F",
+                    "title": "Failure Rate",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#6cae01\"},{\"from\":1,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false},\"hiddenQueryKeys\":[\"A\",\"B\"]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsDelivered Statistic=Sum | sum \n\n",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFailed Statistic=Sum | sum \n",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#B/(#A+#B)*100",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel53EF06C4A2B08A4A",
+                    "title": "SMS Success Rate",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"SMS\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":1,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} metric=SMSSuccessRate Statistic=Sum | sum",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9B5290EA9C1C1849",
+                    "title": "SMS Month To Date Spent USD",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"USD\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":1,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} metric=SMSMonthToDateSpentUSD Statistic=Sum | sum",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel8197657DAE4A394C",
+                    "title": "Notifications Detail",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Notifications\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"NumberOfNotifications\"},\"axisY2\":{\"title\":\"\",\"unit\":{\"value\":\"\",\"isCustom\":false}}},\"series\":{},\"hiddenQueryKeys\":[],\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"NotificationsFilteredOut\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"NotificationsFilteredOut-InvalidAttributes\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"NotificationsFilteredOut-NoMessageAttributes \"}},{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"NotificationsRedrivenToDlq\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"NotificationsFailedToRedriveToDlq\"}}],\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"distribution\",\"aggregationType\":\"sum\"},\"color\":{\"family\":\"Categorical Default\"},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFilteredOut Statistic=Sum | sum by metric",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFilteredOut-InvalidAttributes Statistic=Sum | sum by metric",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFilteredOut-NoMessageAttributes   Statistic=Sum | sum by metric",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsRedrivenToDlq Statistic=Sum | sum by metric",
+                            "queryType": "Metrics",
+                            "queryKey": "D",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFailedToRedriveToDlq Statistic=Sum | sum by metric",
+                            "queryType": "Metrics",
+                            "queryKey": "E",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelEC8A062C923DBA4E",
+                    "title": "Top 10 Active Topics by Messages Published",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"TopicName\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"NumberOfMessagesPublished\"}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\",\"aggregationType\":\"sum\"},\"color\":{\"family\":\"Categorical Light\"},\"legend\":{\"enabled\":false},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfMessagesPublished Statistic=Sum | sum by metric , TopicName | topk (10, sum)",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel8DF75C14B6BC3A49",
+                    "title": "Top 10 Active Topics by Notifications Failed",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"TopicName\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"NumberOfNotificationsFailed\"}},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}],\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\",\"aggregationType\":\"sum\"},\"color\":{\"family\":\"Categorical Light\"},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFailed Statistic=Sum | sum by metric , TopicName | topk (10, sum)",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel0344AFB8A76FF84C",
+                    "title": "Top 10 Active Topics by Notifications Delivered",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"TopicName\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"NumberOfNotificationsDelivered\"}},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}],\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\",\"aggregationType\":\"sum\"},\"color\":{\"family\":\"Categorical Light\"},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsDelivered Statistic=Sum | sum by metric , TopicName | topk (10, sum)",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sns",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/sns",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "topicname",
+                    "displayName": "topicname",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "topicname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "1. Amazon SNS - Overview",
+            "description": "",
+            "title": "1. Amazon SNS - Overview",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "namespace": [
+                        "aws/sns"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel40B571E3A8CF694E",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":13}"
+                    },
+                    {
+                        "key": "panel93252B51B57EDB4D",
+                        "structure": "{\"height\":5,\"width\":5,\"x\":0,\"y\":1}"
+                    },
+                    {
+                        "key": "panel246853BDA98F894A",
+                        "structure": "{\"height\":5,\"width\":5,\"x\":5,\"y\":1}"
+                    },
+                    {
+                        "key": "panel8E6DF23A8D775A4B",
+                        "structure": "{\"height\":5,\"width\":7,\"x\":10,\"y\":1}"
+                    },
+                    {
+                        "key": "panelDA2DFDF2A4D19A44",
+                        "structure": "{\"height\":5,\"width\":7,\"x\":17,\"y\":1}"
+                    },
+                    {
+                        "key": "panel9CBE3510857A6845",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panel6BF3727D86A0E949",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":22}"
+                    },
+                    {
+                        "key": "panelCB717EB5B480A948",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":22}"
+                    },
+                    {
+                        "key": "panel5C761868A14A7B40",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":13}"
+                    },
+                    {
+                        "key": "panel2C1AFF3CADD60947",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-88E3C816ADF55B44",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel46CCAA8DAA25C848",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":12}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel40B571E3A8CF694E",
+                    "title": "Messages Published (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#50caf2\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#f0731f\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"color\":\"#4f3aab\",\"name\":\"Last Week\"}}],\"axes\":{\"axisY\":{\"title\":\"Messages\"},\"axisX\":{\"title\":\"\"}},\"hiddenQueryKeys\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}}  metric=NumberOfMessagesPublished Statistic=Sum | sum ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 1d ",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel93252B51B57EDB4D",
+                    "title": "Successful Events",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"Events\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" !errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and isBlank(error_code) \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as event_count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel246853BDA98F894A",
+                    "title": "Error Events",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"Events\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":1,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !isblank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as event_count \n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel8E6DF23A8D775A4B",
+                    "title": "Events by Status",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\"\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count by event_status\n| sort by _count,event_status asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelDA2DFDF2A4D19A44",
+                    "title": "Events by Event Name",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\"\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count by event_name\n| sort by _count,event_name asc\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9CBE3510857A6845",
+                    "title": "Events by Users and Types",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"title\":\"User\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Event Types\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Light\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\"\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1h\n| count as eventCount by user, event_name\n| transpose row user column event_name",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel6BF3727D86A0E949",
+                    "title": "Notifications Delivered (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"aggregationType\":\"avg\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#50caf2\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#f0731f\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"color\":\"#4f3aab\",\"name\":\"Last Week\"}}],\"axes\":{\"axisY\":{\"title\":\"Notifications\"},\"axisX\":{\"title\":\"\"}},\"hiddenQueryKeys\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsDelivered Statistic=Sum | sum ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelCB717EB5B480A948",
+                    "title": "Notifications Failed (Today, Yesterday, Last Week) ",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#50caf2\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#f0731f\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"color\":\"#4f3aab\",\"name\":\"Last Week\"}}],\"axes\":{\"axisY\":{\"title\":\"Notifications\"},\"axisX\":{\"title\":\"\"}},\"hiddenQueryKeys\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=NumberOfNotificationsFailed Statistic=Sum | sum ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel5C761868A14A7B40",
+                    "title": "Message Publish Size (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#6fb9d1\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#f0731f\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"color\":\"#4f3aab\",\"name\":\"Last Week\"}}],\"axes\":{\"axisY\":{\"title\":\"Message Size\",\"unit\":{\"value\":\"B\",\"isCustom\":false}},\"axisX\":{\"title\":\"\"}},\"hiddenQueryKeys\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} TopicName={{topicname}} metric=PublishSize Statistic=Average | avg ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel2C1AFF3CADD60947",
+                    "title": "Topic Names by Event Count",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"Topic Name\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Event Count\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{\"A_11-solutions-awslogs\":{\"visible\":true},\"A_12-solutions-awslogs\":{\"visible\":true},\"A_13-solutions-awslogs\":{\"visible\":true},\"A_BI-LogsCollector-BICWEmailSNSTopic-1MQUDFLZF0NOS\":{\"visible\":true},\"A_CPU_usage\":{\"visible\":true},\"A_NitinAuroraCWLogAudit-SumoCWEmailSNSTopic-12RYDWUON6XVT\":{\"visible\":true},\"A_NitinAuroraCWLogError-SumoCWEmailSNSTopic-LQKJDO1CY9S8\":{\"visible\":true},\"A_NitinAuroraCWLogGeneral-SumoCWEmailSNSTopic-C4YC53ZVBBOE\":{\"visible\":true},\"A_NitinAuroraCWLogSlowQuery-SumoCWEmailSNSTopic-AHZLA5G60USS\":{\"visible\":true},\"A_NotifyMe\":{\"visible\":true},\"A_SESNotificationTestByNitin\":{\"visible\":true},\"A_SESbyNitin\":{\"visible\":true},\"A_SNSAppSomya01\":{\"visible\":true},\"A_SNSAppSomya02\":{\"visible\":true},\"A_SNSAppSomya03\":{\"visible\":true},\"A_SNSAppTest-Somya01\":{\"visible\":true},\"A_SNSAppTest-Somya02\":{\"visible\":true},\"A_SNSTopic4\":{\"visible\":true},\"A_SourabhCloudWatch-SumoCWEmailSNSTopic-XRUAPIF2HPWL\":{\"visible\":true},\"A_SumoContent_Billing\":{\"visible\":true},\"A_SumoInspectorTrigger\":{\"visible\":true},\"A_SumoLogic-Aws-Observability-Module-8apyj2ekn2\":{\"visible\":true},\"A_SumoLogic-Aws-Observability-Module-zn3s2z6i0t\":{\"visible\":true},\"A_SumoLogic-Terraform-CloudTrail-Module-7ze3ita3x9\":{\"visible\":true},\"A_SumoSNSTopic-anema-elb-classic-log-s3-sns\":{\"visible\":true},\"A_SumoSNSTopic-event-based-field-enablement\":{\"visible\":true},\"A_SumoSNSTopic-test-event-based-cf\":{\"visible\":true},\"A_TestLambdaLogFmt-SumoCWEmailSNSTopic-16AT76WQUY8IH\":{\"visible\":true},\"A_auroraCWCollection-SumoCWEmailSNSTopic-9L52U6PPO88T\":{\"visible\":true},\"A_awso-testautomation-do-not-delete\":{\"visible\":true},\"A_config-topic\":{\"visible\":true},\"A_dynamodb\":{\"visible\":true},\"A_redis01\":{\"visible\":true},\"A_securityHub-sns\":{\"visible\":true},\"A_sumo-bi-test\":{\"visible\":true},\"A_sumo-sns-topic-956882708938-45f7b250\":{\"visible\":true},\"A_sumo-sns-topic-956882708938-465d1a50\":{\"visible\":true},\"A_sumo-sns-topic-content-ed5aadf0\":{\"visible\":true},\"A_testnull-SumoCWEmailSNSTopic-1NV3GQ8XZ4DFY\":{\"visible\":true},\"A_topic-name\":{\"visible\":true}},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Light\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" topicArn\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| where !isEmpty(topic_arn)\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as topic_region, topic_accountid, topicname\n| timeslice 1h\n| count as event_count by _timeslice, topicname\n| transpose row _timeslice column topicname\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-88E3C816ADF55B44",
+                    "title": "CloudTrail Audit Events",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"backgroundColor\":\"#b6b3b3\",\"textColor\":\"black\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panel46CCAA8DAA25C848",
+                    "title": "SNS Metrics",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"backgroundColor\":\"#b6b3b3\",\"textColor\":\"black\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sns",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/sns",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "topicname",
+                    "displayName": "topicname",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "topicname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "2. Amazon SNS - Audit Events",
+            "description": "",
+            "title": "2. Amazon SNS - Audit Events",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "namespace": [
+                        "aws/sns"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel9724CE95BF93284E",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel13A28BCF9195784A",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":0}"
+                    },
+                    {
+                        "key": "panel8295225DA9487941",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":9}"
+                    },
+                    {
+                        "key": "panel63133FE7966C3B44",
+                        "structure": "{\"height\":7,\"width\":6,\"x\":5,\"y\":21}"
+                    },
+                    {
+                        "key": "panelA3841CC48DC37A4E",
+                        "structure": "{\"height\":6,\"width\":9,\"x\":15,\"y\":9}"
+                    },
+                    {
+                        "key": "panel08DA60FCB6CBA94F",
+                        "structure": "{\"height\":7,\"width\":5,\"x\":0,\"y\":21}"
+                    },
+                    {
+                        "key": "panel554DCC97A661E840",
+                        "structure": "{\"height\":7,\"width\":13,\"x\":11,\"y\":21}"
+                    },
+                    {
+                        "key": "panel8BD78A42A42E2941",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":15}"
+                    },
+                    {
+                        "key": "panel04C58849BF85EA40",
+                        "structure": "{\"height\":6,\"width\":19,\"x\":5,\"y\":15}"
+                    },
+                    {
+                        "key": "panelEB163726B40EDB42",
+                        "structure": "{\"height\":7,\"width\":13,\"x\":0,\"y\":35}"
+                    },
+                    {
+                        "key": "panelFA76DDA1858D6941",
+                        "structure": "{\"height\":6,\"width\":10,\"x\":5,\"y\":9}"
+                    },
+                    {
+                        "key": "panelEA26769CA251884A",
+                        "structure": "{\"height\":7,\"width\":11,\"x\":13,\"y\":28}"
+                    },
+                    {
+                        "key": "panelDCAE9CBE8FF65945",
+                        "structure": "{\"height\":7,\"width\":13,\"x\":0,\"y\":28}"
+                    },
+                    {
+                        "key": "panel81CB1F119E659A4D",
+                        "structure": "{\"height\":7,\"width\":11,\"x\":13,\"y\":35}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel9724CE95BF93284E",
+                    "title": "Successful Events Location",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" !errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and isBlank(error_code) and !(src_ip matches \"*.amazonaws.com\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count by src_ip\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isNull(latitude)",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel13A28BCF9195784A",
+                    "title": "Error Events Location",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !isBlank(error_code) and !(src_ip matches \"*.amazonaws.com\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count by src_ip\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isNull(latitude)",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel8295225DA9487941",
+                    "title": "Event by Status",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"innerRadius\":\"30%\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\"\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop | json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count by event_status\n| sort by _count, event_status asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel63133FE7966C3B44",
+                    "title": "Top 10 Error Codes",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Light\"},\"overrides\":[],\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"title\":\"Error Code\",\"hideLabels\":false},\"axisY\":{\"title\":\"Event Count\"}},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !isblank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as event_count by error_code \n| top 10 error_code by event_count\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA3841CC48DC37A4E",
+                    "title": "Event Status Trend",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\"\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1h\n| count by _timeslice, event_status\n| fillmissing timeslice(1d), values (\"Success\", \"Failure\") in event_status\n| transpose row _timeslice column event_status",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel08DA60FCB6CBA94F",
+                    "title": "Error Events by Event Name",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"innerRadius\":\"30%\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !isblank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as event_count by event_name\n| sort by event_count, event_name asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-4w2d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel554DCC97A661E840",
+                    "title": "Error Events Detail",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !isblank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1s\n| count as event_count by _timeslice, event_name, error_code, error_message, region, src_ip, accountid, user, type, request_id, topicname, topic_arn, user_agent\n| sort by _timeslice\n| limit 100",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel8BD78A42A42E2941",
+                    "title": "Successful Events by Event Name",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"innerRadius\":\"30%\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" !errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and isBlank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as event_count by event_name\n| sort by event_count, event_name asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel04C58849BF85EA40",
+                    "title": "Successful Events Detail",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" !errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and isBlank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1s\n| count as event_count by _timeslice, event_name, region, src_ip, accountid, user, type, request_id, topicname, topic_arn, user_agent\n| sort by _timeslice\n| limit 100",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelEB163726B40EDB42",
+                    "title": "Top 10 Users by Events",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Light\"},\"legend\":{\"enabled\":false},\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"title\":\"User\",\"hideLabels\":false},\"axisY\":{\"title\":\"Event Count\"}},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\"\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as event_count by user\n| top 10 user by event_count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelFA76DDA1858D6941",
+                    "title": "Events Trend ",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\"\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1h\n| count as event_count by _timeslice, event_name\n| transpose row _timeslice column event_name\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelEA26769CA251884A",
+                    "title": "Top 10 TopicNames by Error Events",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Light\"},\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"title\":\"Topic Name\",\"hideLabels\":false},\"axisY\":{\"title\":\"Event Count\"}},\"legend\":{\"enabled\":false},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" topicArn errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !isblank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| where !isEmpty(topic_arn)\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as topic_region, topic_accountid, topicname\n| count as event_count by topicname\n| top 10 topicname by event_count, topicname asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelDCAE9CBE8FF65945",
+                    "title": "Top 10 Active TopicNames by Events",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Light\"},\"legend\":{\"enabled\":false},\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"title\":\"Topic Name\",\"hideLabels\":false},\"axisY\":{\"title\":\"Event Count\"},\"axisY2\":{\"title\":\"\"}},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" topicArn\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| where !isEmpty(topic_arn)\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as topic_region, topic_accountid, topicname\n| count as event_count by topicname\n| top 10 topicname by event_count, topicname asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel81CB1F119E659A4D",
+                    "title": "Top 10 Users by Error Events",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Light\"},\"legend\":{\"enabled\":false},\"overrides\":[],\"axes\":{\"axisX\":{\"labelPlacement\":\"inside\",\"labelWrap\":true,\"labelMaxWidth\":500,\"labelFontColor\":\"black\",\"title\":\"User\",\"hideLabels\":false},\"axisY\":{\"title\":\"Event Count\"}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" errorCode\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !isblank(error_code)\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as event_count by user\n| top 10 user by event_count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sns",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/sns",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "topicname",
+                    "displayName": "topicname",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "topicname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "3. Amazon SNS - Threat Intel",
+            "description": "",
+            "title": "3. Amazon SNS - Threat Intel",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "namespace": [
+                        "aws/sns"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel9724CE95BF93284E",
+                        "structure": "{\"height\":12,\"width\":9,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-EF5A8C1DA61C1940",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":9,\"y\":0}"
+                    },
+                    {
+                        "key": "panel55B0B116B41A8B41",
+                        "structure": "{\"height\":6,\"width\":9,\"x\":15,\"y\":0}"
+                    },
+                    {
+                        "key": "panel93F3942D894F494E",
+                        "structure": "{\"height\":6,\"width\":15,\"x\":9,\"y\":6}"
+                    },
+                    {
+                        "key": "panel587D1A2C81DA4947",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":12}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel9724CE95BF93284E",
+                    "title": "Threat Locations",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" sourceIPAddress\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as ip_count by src_ip\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| where type=\"ip_address\" and !isNull(malicious_confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as actor\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isnull(latitude)",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-EF5A8C1DA61C1940",
+                    "title": "All IP Threat Count",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Threats\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" sourceIPAddress\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as ip_count by src_ip\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| where type=\"ip_address\" and !isNull(malicious_confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as actor\n| sum(ip_count) as threat_count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel55B0B116B41A8B41",
+                    "title": "Malicious Confidence",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" sourceIPAddress\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| count as ip_count by src_ip\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| where type=\"ip_address\" and !isNull(malicious_confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as actor\n| count as Threats by malicious_confidence\n| sort by Threats, malicious_confidence",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel93F3942D894F494E",
+                    "title": "Highly Malicious IP Threats Table",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" sourceIPAddress\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, user_type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user_type, username) as user_type\n| count as ip_count by src_ip, event_name, region, accountid,user_type\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| where type=\"ip_address\" and malicious_confidence = \"high\"\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as actor\n| sort by ip_count\n| fields src_ip, event_name, region, accountid, user_type, actor, malicious_confidence",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel587D1A2C81DA4947",
+                    "title": "All IP Threats Table",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" sourceIPAddress\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" \n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, user_type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user_type, username) as user_type\n| count as ip_count by src_ip, event_name, region, accountid,user_type\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| where type=\"ip_address\" and !isNull(malicious_confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as actor\n| sort by ip_count\n| sum(ip_count) as threat_count by src_ip, event_name, region, accountid, user_type, malicious_confidence, actor, label_name\n| sort by malicious_confidence",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sns",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/sns",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "topicname",
+                    "displayName": "topicname",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "topicname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "4. Amazon SNS - Audit Events Details",
+            "description": "",
+            "title": "4. Amazon SNS - Audit Events Details",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "namespace": [
+                        "aws/sns"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel04C58849BF85EA40",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelC8C6B83597FE3847",
+                        "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":7,\"minHeight\":3,\"minWidth\":3}"
+                    },
+                    {
+                        "key": "panel0DFBD478BF18BA43",
+                        "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":7,\"minHeight\":3,\"minWidth\":3}"
+                    },
+                    {
+                        "key": "panel9D704C229408EB46",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":0,\"minHeight\":3,\"minWidth\":3}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel04C58849BF85EA40",
+                    "title": "Create/Delete Topic Event Details",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" (CreateTopic or DeleteTopic)\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and (event_name= \"CreateTopic\" or event_name= \"DeleteTopic\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1s\n| count as event_count by _timeslice, event_name, region, src_ip, accountid, user, type, request_id, topicname, topic_arn, user_agent\n| sort by _timeslice\n| limit 100\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelC8C6B83597FE3847",
+                    "title": "Read Only Event Details",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" (Get* or List* or Verify*)\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and (event_name matches \"List*\" or event_name matches \"Get*\" or event_name matches \"Verify*\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1s\n| count as event_count by _timeslice, event_name, region, src_ip, accountid, user, type, request_id, topicname, topic_arn, user_agent\n| sort by _timeslice\n| limit 100",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel0DFBD478BF18BA43",
+                    "title": "Non Read Only Event Details",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" \n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and !(event_name matches \"List*\") and !(event_name matches \"Get*\") and !(event_name matches \"Verify*\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1s\n| count as event_count by _timeslice, event_name, region, src_ip, accountid, user, type, request_id, topicname, topic_arn, user_agent\n| sort by _timeslice\n| limit 100",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9D704C229408EB46",
+                    "title": "Subscription Event Details",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} \"\\\"eventsource\\\":\\\"sns.amazonaws.com\\\"\" (ConfirmSubscription or Subscribe or Unsubscribe)\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"sourceIPAddress\", \"userAgent\", \"eventType\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"requestID\", \"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, src_ip, user_agent, event_type, recipient_account_id, requestParameters, responseElements, request_id, error_code, error_message nodrop\n| where event_source = \"sns.amazonaws.com\" and (event_name= \"ConfirmSubscription\" or event_name= \"Subscribe\" or event_name= \"Unsubscribe\")\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\"  as accountid, type, arn, username nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop \n| parse field=arn \"arn:aws:iam::*:*\" as accountid, user nodrop\n| json field=requestParameters \"topicArn\", \"name\", \"resourceArn\", \"subscriptionArn\" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop \n| json field=responseElements \"topicArn\" as res_topic_arn nodrop\n| if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn\n| if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn\n| parse field=topic_arn \"arn:aws:sns:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp nodrop\n| parse field=subscription_arn \"arn:aws:sns:*:*:*:*\" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop\n| if (isBlank(accountid), recipient_account_id, accountid) as accountid\n| if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname\n| where (tolowercase(topicname) matches tolowercase(\"{{topicname}}\")) or isBlank(topicname)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(username), user, username) as user\n| timeslice 1s\n| count as event_count by _timeslice, event_name, region, src_ip, accountid, user, type, request_id, topicname, topic_arn, user_agent\n| sort by _timeslice\n| limit 100",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sns",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/sns",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "topicname",
+                    "displayName": "topicname",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "topicname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        }
+    ]
+}

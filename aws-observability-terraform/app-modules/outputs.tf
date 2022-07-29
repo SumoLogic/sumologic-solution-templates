@@ -162,3 +162,33 @@ output "sumologic_content_rce" {
   value       = module.rce_app.sumologic_content
   description = "This output contains rce Apps."
 }
+
+output "sumologic_field_sns" {
+  value       = module.sns_app.sumologic_field
+  description = "This output contains fields required for sns app."
+}
+
+output "sumologic_field_extraction_rule_sns" {
+  value       = module.sns_app.sumologic_field_extraction_rule
+  description = "This output contains Field Extraction rules required for sns app."
+}
+
+output "sumologic_content_sns" {
+  value       = module.sns_app.sumologic_content
+  description = "This output contains sns App."
+}
+
+output "sumologic_hierarchy" {
+  value       = sumologic_hierarchy.awso_hierarchy
+  description = "This output contains Sumologic Hierarchy."
+}
+
+output "sumologic_apps_folder" {
+  value       = sumologic_folder.apps_folder
+  description = "This output contains AWS Observability Parent App folder."
+}
+
+output "sumologic_monitors_folder" {
+  value       = sumologic_monitor_folder.monitor_folder
+  description = "This output contains AWS Observability Monitors folder."
+}

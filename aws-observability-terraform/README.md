@@ -5,14 +5,15 @@
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.42.0, < 4.0.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1.0 |
-| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.13.0 |
+| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.14.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.7.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.13.0 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.16.2 |
+| <a name="provider_time"></a> [time](#provider\_time) | 0.7.2 |
 
 ## Modules
 
@@ -30,7 +31,9 @@
 | [sumologic_field.apiname](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.cacheclusterid](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.clustername](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field.dbclusteridentifier](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.dbidentifier](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field.dbinstanceidentifier](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.functionname](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.instanceid](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.loadbalancer](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
@@ -39,6 +42,20 @@
 | [sumologic_field.networkloadbalancer](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.region](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.tablename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field.topicname](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityAlbAccessLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityApiGatewayCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityDynamoDBCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityEC2CloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityECSCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityElastiCacheCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityElbAccessLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityFieldExtractionRule](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityGenericCloudWatchLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityLambdaCloudWatchLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityRdsCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilitySNSCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [time_sleep.wait_for_10_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 
 ## Inputs
 

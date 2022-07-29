@@ -7,31 +7,7 @@ module "elasticache_module" {
 
   # ********************** No Metric Rules for Elasticache ********************** #
 
-  # ********************** Fields ********************** #
-  # managed_fields = {
-  #   "CacheClusterId" = {
-  #     field_name = "cacheclusterid"
-  #     data_type  = "String"
-  #     state      = true
-  #   }
-  # }
-
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "CloudTrailFieldExtractionRule" = {
-      name             = "AwsObservabilityElastiCacheCloudTrailLogsFER"
-      scope            = "account=* eventname eventsource \"elasticache.amazonaws.com\""
-      parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters.cacheClusterId", "responseElements.cacheClusterId", "recipientAccountId" as eventSource, region, req_cacheClusterId, res_cacheClusterId, accountid nodrop
-              | where eventSource = "elasticache.amazonaws.com"
-              | if (!isEmpty(req_cacheClusterId), req_cacheClusterId, res_cacheClusterId) as cacheclusterid
-              | "aws/elasticache" as namespace
-              | tolowercase(cacheclusterid) as cacheclusterid
-              | fields region, namespace, cacheclusterid, accountid
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
 
   # ********************** Apps ********************** #
   managed_apps = {

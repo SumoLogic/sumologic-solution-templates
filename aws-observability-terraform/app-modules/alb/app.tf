@@ -7,30 +7,7 @@ module "alb_module" {
 
   # ********************** No Metric Rules for ALB ********************** #
 
-  # ********************** Fields ********************** #
-  # managed_fields = {
-  #   "LoadBalancer" = {
-  #     field_name = "loadbalancer"
-  #     data_type  = "String"
-  #     state      = true
-  #   }
-  # }
-
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "AlbAccessLogsFieldExtractionRule" = {
-      name             = "AwsObservabilityAlbAccessLogsFER"
-      scope            = "account=* region=* (http or https or h2 or grpcs or ws or wss)"
-      parse_expression = <<EOT
-              | parse "* * * * * * * * * * * * \"*\" \"*\" * * * \"*\"" as Type, DateTime, loadbalancer, Client, Target, RequestProcessingTime, TargetProcessingTime, ResponseProcessingTime, ElbStatusCode, TargetStatusCode, ReceivedBytes, SentBytes, Request, UserAgent, SslCipher, SslProtocol, TargetGroupArn, TraceId
-              | where Type in ("http", "https", "h2", "grpcs", "ws", "wss")
-              | where !isBlank(loadbalancer)
-              | "aws/applicationelb" as namespace
-              | tolowercase(loadbalancer) as loadbalancer | fields loadbalancer, namespace
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
 
   # ********************** Apps ********************** #
   managed_apps = {

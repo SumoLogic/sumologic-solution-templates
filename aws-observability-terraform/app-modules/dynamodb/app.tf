@@ -7,30 +7,7 @@ module "dynamodb_module" {
 
   # ********************** No Metric Rules for DynamoDB ********************** #
 
-  # ********************** Fields ********************** #
-  # managed_fields = {
-  #   "TableName" = {
-  #     field_name = "tablename"
-  #     data_type  = "String"
-  #     state      = true
-  #   }
-  # }
-
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "CloudTrailFieldExtractionRule" = {
-      name             = "AwsObservabilityDynamoDBCloudTrailLogsFER"
-      scope            = "account=* eventname eventsource \"dynamodb.amazonaws.com\""
-      parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters.tableName", "recipientAccountId" as eventSource, region, tablename, accountid nodrop
-              | where eventSource = "dynamodb.amazonaws.com"
-              | "aws/dynamodb" as namespace
-              | tolowercase(tablename) as tablename
-              | fields region, namespace, tablename, accountid
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
 
   # ********************** Apps ********************** #
   managed_apps = {

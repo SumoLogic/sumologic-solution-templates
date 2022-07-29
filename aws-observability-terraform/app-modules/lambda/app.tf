@@ -7,44 +7,7 @@ module "lambda_module" {
 
   # ********************** No Metric Rules for Lambda ********************** #
 
-  # ********************** Fields ********************** #
-  # managed_fields = {
-  #   "FunctionName" = {
-  #     field_name = "functionname"
-  #     data_type  = "String"
-  #     state      = true
-  #   }
-  # }
-
-  # ********************** FERs ********************** #
-  managed_field_extraction_rules = {
-    "CloudTrailFieldExtractionRule" = {
-      name             = "AwsObservabilityFieldExtractionRule"
-      scope            = "account=* eventname eventsource \"lambda.amazonaws.com\""
-      parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "requestParameters", "recipientAccountId" as eventSource, region, requestParameters, accountid nodrop
-              | where eventSource = "lambda.amazonaws.com"
-              | json field=requestParameters "functionName", "resource" as functionname, resource nodrop
-              | parse regex field=functionname "\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$" nodrop
-              | parse field=resource "arn:aws:lambda:*:function:*" as f1, functionname2 nodrop
-              | if (isEmpty(functionname), functionname2, functionname) as functionname
-              | "aws/lambda" as namespace
-              | tolowercase(functionname) as functionname
-              | fields region, namespace, functionname, accountid
-      EOT
-      enabled          = true
-    },
-    "CloudWatchFieldExtractionRule" = {
-      name             = "AwsObservabilityLambdaCloudWatchLogsFER"
-      scope            = "account=* region=* namespace=aws/lambda _sourceHost=/aws/lambda/*"
-      parse_expression = <<EOT
-              | parse field=_sourceHost "/aws/lambda/*" as functionname
-              | tolowercase(functionname) as functionname
-              | fields functionname
-      EOT
-      enabled          = true
-    }
-  }
+  # ********************** Required Fields and FERs are created at aws-observability-terraform/field.tf ********************** #
 
   # ********************** Apps ********************** #
   managed_apps = {
