@@ -56,6 +56,7 @@ echo ']'>>param.json
 #download the sumo logic AWS Observability solution's master template
 aws s3 cp s3://sumologic-appdev-aws-sam-apps/aws-observability-versions/v2.5.0/sumologic_observability.master.template.yaml sumologic_observability_template.yaml
 
+
 #extract stack name into a variable with unique identifier appended
 stackName="sumoawsoquicksetup"
 now="$(date)"
