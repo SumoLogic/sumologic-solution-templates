@@ -10,21 +10,35 @@ apps_folder_installation_location = "Personal Folder" # Please specify the locat
 share_apps_folder_with_org = true # Set this to true to share with view permissions with the entire sumologic org.
 
 # Specify the database engine types comma separated from the following list of supported db engines - memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle.
-database_engines = "memcached"
+database_engines = "memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle"
+
+####### MONITOR CONFIGURATION #######
 
 # Specify the data source for which you want to enable the monitors. By default it's enabled for all.
 # Example to enable for clusters starting with prod prefix set below parameter to db_system=memcached AND db_cluster=prod*
 # memcached_data_source = "db_system=memcached"
+# redis_data_source = "db_system=redis"
+# sqlserver_data_source = "db_system=sqlserver"
+# mysql_data_source = "db_system=mysql"
+# postgresql_data_source = "db_system=postgresql"
+# cassandra_data_source = "db_system=cassandra"
+# couchbase_data_source = "db_system=couchbase"
+# elasticsearch_data_source = "db_system=elasticsearch"
+# mariadb_data_source = "db_system=mariadb"
+# mongodb_data_source = "db_system=mongodb"
+# oracle_data_source = "db_system=oracle"
 
 # Set it to false to enable the monitors. By default they are disabled
+# There are limits to how many alerts can be enabled - see the Alerts FAQ(https://help.sumologic.com/Visualizations-and-Alerts/Alerts/Monitors/Monitor_FAQ).
 # monitors_disabled=false
 
-
-connection_notifications = []
+connection_notifications_critical = []
+connection_notifications_warning = []
+connection_notifications_missingdata = []
 # To configure notification via pagerduty or webhook, uncomment below lines and
 # replace <CONNECTION_ID> with the connection id of the webhook connection.
 # The webhook connection id can be retrieved by calling the Monitors API(https://api.sumologic.com/docs/#operation/listConnections)
-# connection_notifications = [
+# connection_notifications_critical = [
 #     {
 #       connection_type       = "PagerDuty",
 #       connection_id         = "<CONNECTION_ID>",
@@ -39,9 +53,11 @@ connection_notifications = []
 #     }
 #   ]
 
-email_notifications = []
+email_notifications_critical = []
+email_notifications_warning = []
+email_notifications_missingdata = []
 # Uncomment below lines and update the recipients list to send notification from the monitors as email
-# email_notifications = [
+# email_notifications_critical = [
 #    {
 #      connection_type       = "Email",
 #      recipients            = ["abc@example.com"],

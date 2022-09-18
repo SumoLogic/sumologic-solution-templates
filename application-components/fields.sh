@@ -28,10 +28,11 @@ else
     SUMOLOGIC_BASE_URL="https://api.${SUMOLOGIC_ENV}.sumologic.com/api/"
 fi
 
-# awso_list contains fields required for AWS Obervablity Solution. Update the list if new field is added to the solution.
+# awso_list contains fields required for Application Component Solution. Update the list if new field is added to the solution.
 declare -ra awso_list=(db_cluster db_cluster_address db_cluster_port db_system component environment pod_labels_db_cluster pod_labels_db_cluster_address pod_labels_db_cluster_port pod_labels_db_system)
-# awso_fer_list contains FERs required for AWS Obervablity Solution. Update the list if new FER is added to the solution.
+# awso_fer_list contains FERs required for Application Component Solution. Update the list if new FER is added to the solution.
 declare -ra awso_fer_list=(ApplicationComponentDatabaseLogsFER)
+declare -ra awso_hierarchy_list=("Application Components View")
 
 function get_remaining_fields() {
     local RESPONSE
@@ -105,7 +106,22 @@ if [ $outputVal == 0 ] ; then
             continue
         fi
         terraform import \
-            sumologic_field_extraction_rule."${FER}" "${FER_ID}"
+            sumologic_field_extraction_rule."SumoLogicFieldExtractionRulesForDatabase" "${FER_ID}"
+    done
+
+    echo "Get list of all hierarchies present in user's Sumo Logic org."
+    readonly HIERARCHY_RESPONSE="$(curl -XGET -s \
+        -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
+        "${SUMOLOGIC_BASE_URL}"v1/entities/hierarchies | jq '.data[] | del(.parseExpression)' )"
+
+    for hierarchy_name in "${awso_hierarchy_list[@]}" ; do
+        HIERARCHY_ID=$( echo "${HIERARCHY_RESPONSE}" | jq -r "select(.name == \"${hierarchy_name}\") | .id" )
+        if [[ -z "${HIERARCHY_ID}" ]]; then
+            # If FER is not present in Sumo org, skip importing
+            continue
+        fi
+        terraform import \
+            sumologic_hierarchy."application_component_view" "${HIERARCHY_ID}"
     done
 
     echo "Finished Importing FERs and Fields"

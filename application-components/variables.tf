@@ -1,3 +1,5 @@
+# sumologic organization variables
+
 variable "sumologic_environment" {
   type        = string
   description = "Enter au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
@@ -52,6 +54,8 @@ variable "sumologic_organization_id" {
   }
 }
 
+# Component variables
+
 variable "database_deployment_type" {
   type        = string
   description = "Provide the deployment type where your databases are running.Allowed values are Kubernetes,Non-Kubernetes,Both. "
@@ -79,7 +83,7 @@ variable "database_engines" {
   default=""
 }
 
-# App related variables
+# App variables
 
 variable "apps_folder_installation_location" {
   type        = string
@@ -102,7 +106,6 @@ variable "share_apps_folder_with_org" {
 
 }
 
-# Todo add suffix
 variable "apps_folder_name" {
   type        = string
   description = <<EOT
@@ -113,7 +116,7 @@ variable "apps_folder_name" {
 }
 
 
-# Common Monitor related variables
+# Common Monitor variables
 variable "monitors_folder_name" {
   type        = string
   description = <<EOT
@@ -130,31 +133,86 @@ variable "monitors_disabled" {
   default     = true
 }
 
-variable "connection_notifications" {
-  type = list(object(
-    {
-      connection_type       = string,
-      connection_id         = string,
-      payload_override      = string,
-      run_for_trigger_types = list(string)
-    }
-  ))
-  description = "Connection Notifications to be sent by the alert."
+
+
+variable "connection_notifications_critical" {
+  type        = list(object(
+                {
+                  connection_type = string,
+                  connection_id = string,
+                  payload_override = string,
+                  run_for_trigger_types = list(string)
+                }
+    ))
+  description = "Connection Notifications to be sent by the critical alert."
 }
 
-variable "email_notifications" {
-  type = list(object(
-    {
-      connection_type       = string,
-      recipients            = list(string),
-      subject               = string,
-      time_zone             = string,
-      message_body          = string,
-      run_for_trigger_types = list(string)
-    }
-  ))
-  description = "Email Notifications to be sent by the alert."
+variable "connection_notifications_warning" {
+  type        = list(object(
+                {
+                  connection_type = string,
+                  connection_id = string,
+                  payload_override = string,
+                  run_for_trigger_types = list(string)
+                }
+    ))
+  description = "Connection Notifications to be sent by the warning alert."
 }
+
+variable "connection_notifications_missingdata" {
+  type        = list(object(
+                {
+                  connection_type = string,
+                  connection_id = string,
+                  payload_override = string,
+                  run_for_trigger_types = list(string)
+                }
+    ))
+  description = "Connection Notifications to be sent by the missing data alert."
+}
+
+variable "email_notifications_critical" {
+  type        = list(object(
+                {
+                  connection_type = string,
+                  recipients = list(string),
+                  subject = string,
+                  time_zone = string,
+                  message_body = string,
+                  run_for_trigger_types = list(string)
+                }
+    ))
+  description = "Email Notifications to be sent by the critical alert."
+}
+
+variable "email_notifications_warning" {
+  type        = list(object(
+                {
+                  connection_type = string,
+                  recipients = list(string),
+                  subject = string,
+                  time_zone = string,
+                  message_body = string,
+                  run_for_trigger_types = list(string)
+                }
+    ))
+  description = "Email Notifications to be sent by the warning alert."
+}
+
+variable "email_notifications_missingdata" {
+  type        = list(object(
+                {
+                  connection_type = string,
+                  recipients = list(string),
+                  subject = string,
+                  time_zone = string,
+                  message_body = string,
+                  run_for_trigger_types = list(string)
+                }
+    ))
+  description = "Email Notifications to be sent by the missing data alert."
+}
+
 
 variable "group_notifications" {
   type        = bool
@@ -162,7 +220,7 @@ variable "group_notifications" {
   default     = true
 }
 
-# individual monitors
+# individual monitor variables
 
 variable "memcached_monitor_folder" {
   type = string
@@ -176,5 +234,116 @@ variable "memcached_data_source" {
   default = "db_system=memcached"
 }
 
+variable "redis_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "Redis"
+}
 
+variable "redis_data_source" {
+  type = string
+  description = "Sumo Logic Redis cluster Filter. For eg: db_cluster=redis.prod.01"
+  default = "db_system=redis"
+}
+
+variable "mongodb_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "MongoDB"
+}
+
+variable "mongodb_data_source" {
+  type = string
+  description = "Sumo Logic MongoDB cluster Filter. For eg: db_cluster=mongodb.prod.01"
+  default = "db_system=mongodb"
+}
+
+variable "sqlserver_data_source" {
+  type = string
+  description = "Sumo Logic sqlserver cluster Filter. For eg: db_cluster=sqlserver.prod.01"
+  default = "db_system=sqlserver"
+}
+variable "sqlserver_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "SQL Server"
+}
+
+variable "cassandra_data_source" {
+  type = string
+  description = "Sumo Logic cassandra cluster Filter. For eg: db_cluster=cassandra.prod.01"
+  default = "db_system=cassandra"
+}
+variable "cassandra_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "Cassandra"
+}
+
+variable "mysql_data_source" {
+  type = string
+  description = "Sumo Logic mysql cluster Filter. For eg: db_cluster=mysql.prod.01"
+  default = "db_system=mysql"
+}
+variable "mysql_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "MySQL"
+}
+
+variable "postgresql_data_source" {
+  type = string
+  description = "Sumo Logic postgresql cluster Filter. For eg: db_cluster=postgresql.prod.01"
+  default = "db_system=postgresql"
+}
+variable "postgresql_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "PostgreSQL"
+}
+
+variable "oracle_data_source" {
+  type = string
+  description = "Sumo Logic oracle cluster Filter. For eg: db_cluster=oracle.prod.01"
+  default = "db_system=oracle"
+}
+variable "oracle_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "Oracle"
+}
+
+variable "elasticsearch_data_source" {
+  type = string
+  description = "Sumo Logic elasticsearch cluster Filter. For eg: db_cluster=elasticsearch.prod.01"
+  default = "db_system=elasticsearch"
+}
+variable "elasticsearch_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "Elasticsearch"
+}
+
+variable "couchbase_data_source" {
+  type = string
+  description = "Sumo Logic couchbase cluster Filter. For eg: db_cluster=couchbase.prod.01"
+  default = "db_system=couchbase"
+}
+variable "couchbase_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "Couchbase"
+}
+
+variable "mariadb_data_source" {
+  type = string
+  description = "Sumo Logic mariadb cluster Filter. For eg: db_cluster=mariadb.prod.01"
+  default = "db_system=mariadb"
+}
+
+variable "mariadb_monitor_folder" {
+  type = string
+  description = "Folder where monitors will be created."
+  default = "MariaDB"
+}
 

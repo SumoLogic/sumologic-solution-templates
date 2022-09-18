@@ -4,7 +4,7 @@ data "sumologic_admin_recommended_folder" "adminFolder" {}
 # Create a folder in the folder ID provided. If no folder ID is provided, create the folder in personal folder
 resource "sumologic_folder" "root_apps_folder" {
   description = "This folder contains all the apps for Application Component Solution."
-  name        = "${var.apps_folder_name} - ${local.solution_version} ${local.folder_creation_date}"
+  name        = "${var.apps_folder_name} - ${local.solution_version}"
   parent_id   = var.apps_folder_installation_location == "Personal Folder" ? data.sumologic_personal_folder.personalFolder.id : data.sumologic_admin_recommended_folder.adminFolder.id
 }
 
@@ -23,6 +23,6 @@ resource "sumologic_content_permission" "share_with_org" {
 
 # Create a folder to install all monitors.
 resource "sumologic_monitor_folder" "root_monitor_folder" {
-  name        = "${var.monitors_folder_name} - ${local.solution_version} ${local.folder_creation_date}"
+  name        = "${var.monitors_folder_name} - ${local.solution_version}"
   description = "This folder contains all the monitors for Application Component Solution."
 }
