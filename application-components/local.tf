@@ -7,5 +7,4 @@ locals {
     has_any_kubernetes_deployments = lower(var.database_deployment_type) == "kubernetes" || lower(var.database_deployment_type) == "both" ? true: false
     has_any_nonkubernetes_deployments = lower(var.database_deployment_type) == "non-kubernetes" || lower(var.database_deployment_type) == "both" ? true: false
     solution_version = "v1.0.0"
-    folder_creation_date = formatdate("DD-MMM-YYYY hh:mm:ss", timestamp())
 }

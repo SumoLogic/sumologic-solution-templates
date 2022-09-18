@@ -16,8 +16,8 @@ module "Memcached-AuthenticationError" {
   monitor_parent_id           = sumologic_monitor_folder.memcached_monitor_folder[count.index].id
   monitor_is_disabled         = var.monitors_disabled
   group_notifications       = var.group_notifications
-  connection_notifications  = var.connection_notifications
-  email_notifications       = var.email_notifications
+  connection_notifications  = var.connection_notifications_warning
+  email_notifications       = var.email_notifications_warning
   queries = {
     A = "${var.memcached_data_source} metric=memcached_auth_errors db_cluster=* host=*| sum by db_cluster,host | rate"
   }
@@ -70,8 +70,8 @@ module "Memcached-Uptime" {
   monitor_parent_id           = sumologic_monitor_folder.memcached_monitor_folder[count.index].id
   monitor_is_disabled         = var.monitors_disabled
   group_notifications       = var.group_notifications
-  connection_notifications  = var.connection_notifications
-  email_notifications       = var.email_notifications
+  connection_notifications  = var.connection_notifications_critical
+  email_notifications       = var.email_notifications_critical
   queries = {
     A = "${var.memcached_data_source} metric=memcached_uptime db_cluster=* host=*  | avg by db_cluster, host"
   }
@@ -106,8 +106,8 @@ module "Memcached-ConnectionYields" {
   monitor_parent_id           = sumologic_monitor_folder.memcached_monitor_folder[count.index].id
   monitor_is_disabled         = var.monitors_disabled
   group_notifications       = var.group_notifications
-  connection_notifications  = var.connection_notifications
-  email_notifications       = var.email_notifications
+  connection_notifications  = var.connection_notifications_warning
+  email_notifications       = var.email_notifications_warning
   queries = {
     A = "${var.memcached_data_source} metric=memcached_conn_yields db_cluster=* host=*| sum by db_cluster,host | rate"
   }
@@ -160,8 +160,8 @@ module "Memcached-CacheHitRatio" {
   monitor_parent_id           = sumologic_monitor_folder.memcached_monitor_folder[count.index].id
   monitor_is_disabled         = var.monitors_disabled
   group_notifications       = var.group_notifications
-  connection_notifications  = var.connection_notifications
-  email_notifications       = var.email_notifications
+  connection_notifications  = var.connection_notifications_critical
+  email_notifications       = var.email_notifications_critical
   queries = {
     A = "${var.memcached_data_source} metric=memcached_get_hits db_cluster=* host=* | avg by db_cluster, host  "
     B = "${var.memcached_data_source} metric=memcached_get_misses db_cluster=* host=* | avg by db_cluster, host  "
@@ -198,8 +198,8 @@ module "Memcached-CommandsError" {
   monitor_parent_id           = sumologic_monitor_folder.memcached_monitor_folder[count.index].id
   monitor_is_disabled         = var.monitors_disabled
   group_notifications       = var.group_notifications
-  connection_notifications  = var.connection_notifications
-  email_notifications       = var.email_notifications
+  connection_notifications  = var.connection_notifications_critical
+  email_notifications       = var.email_notifications_critical
   queries = {
     A = "${var.memcached_data_source} db_cluster=* db_system=memcached memcached \">\" ERROR | json \"log\" as _rawlog nodrop  | if (isEmpty(_rawlog), _raw, _rawlog) as memcached_log_message | parse regex field=memcached_log_message \">(?<pid>\\d+) (?<msg>\\w+)\" | fields pid, msg"
   }
@@ -234,8 +234,8 @@ module "Memcached-CurrentConnections" {
   monitor_parent_id           = sumologic_monitor_folder.memcached_monitor_folder[count.index].id
   monitor_is_disabled         = var.monitors_disabled
   group_notifications       = var.group_notifications
-  connection_notifications  = var.connection_notifications
-  email_notifications       = var.email_notifications
+  connection_notifications  = var.connection_notifications_critical
+  email_notifications       = var.email_notifications_critical
   queries = {
     A = "${var.memcached_data_source} metric=memcached_curr_connections db_cluster=* host=* | sum by db_cluster, host "
   }
@@ -270,8 +270,8 @@ module "Memcached-ListenDisabled" {
   monitor_parent_id           = sumologic_monitor_folder.memcached_monitor_folder[count.index].id
   monitor_is_disabled         = var.monitors_disabled
   group_notifications       = var.group_notifications
-  connection_notifications  = var.connection_notifications
-  email_notifications       = var.email_notifications
+  connection_notifications  = var.connection_notifications_warning
+  email_notifications       = var.email_notifications_warning
   queries = {
     A = "${var.memcached_data_source} metric=memcached_listen_disabled_num db_cluster=* host=*| sum by db_cluster,host | rate"
   }
@@ -324,8 +324,8 @@ module "Memcached-HighMemoryUsage" {
   monitor_parent_id           = sumologic_monitor_folder.memcached_monitor_folder[count.index].id
   monitor_is_disabled         = var.monitors_disabled
   group_notifications       = var.group_notifications
-  connection_notifications  = var.connection_notifications
-  email_notifications       = var.email_notifications
+  connection_notifications  = var.connection_notifications_warning
+  email_notifications       = var.email_notifications_warning
   queries = {
     A = "${var.memcached_data_source} metric=memcached_bytes db_cluster=* host=* | sum by db_cluster, host"
     B = "${var.memcached_data_source} metric=memcached_limit_maxbytes db_cluster=* host=* | sum by db_cluster, host"
