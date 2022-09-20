@@ -4,7 +4,7 @@ terraform {
   required_providers {
 
     sumologic = {
-      version = ">= 2.18.0"
+      version = ">= 2.19.0"
       source  = "SumoLogic/sumologic"
     }
     time = {
