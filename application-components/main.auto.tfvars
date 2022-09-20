@@ -1,18 +1,23 @@
 ####### BELOW ARE REQUIRED PARAMETERS FOR TERRAFORM SCRIPT #######
 # Visit - https://help.sumologic.com/Observability_Solution/Application_Component_Solution/
 
+####### SUMOLOGIC CONFIGURATION #######
+
 sumologic_environment     = ""   # Please replace <YOUR SUMO DEPLOYMENT> (including brackets) with au, ca, de, eu, jp, us2, in, fed or us1.
 sumologic_access_id       = ""   # Please replace <YOUR SUMO ACCESS ID> (including brackets) with your Sumo Logic Access ID.
 sumologic_access_key      = ""   # Please replace <YOUR SUMO ACCESS KEY> (including brackets) with your Sumo Logic Access KEY.
 sumologic_organization_id = ""   # Please replace <YOUR SUMO ORG ID> (including brackets) with your Sumo Logic Organization ID.
 
-apps_folder_installation_location = "Personal Folder" # Please specify the location where the sumologic apps/dashboards will be installed.
+####### APP CONFIGURATION #######
+
+# Please specify the location where the sumologic apps/dashboards will be installed. Allowed values are "Admin Recommended Folder" and "Personal Folder"
+apps_folder_installation_location = "Personal Folder"
 share_apps_folder_with_org = true # Set this to true to share with view permissions with the entire sumologic org.
 
 ####### COMPONENT CONFIGURATION #######
 
 # Specify the components comma separated from the following list of supported components - memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle.
-components_on_kubernetes_deployment = "memcached, cassandra"
+components_on_kubernetes_deployment = "mysql,memcached"
 # components_on_non_kubernetes_deployment = "memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle"
 
 ####### MONITOR CONFIGURATION #######
