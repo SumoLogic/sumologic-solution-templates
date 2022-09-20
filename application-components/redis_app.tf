@@ -1,14 +1,14 @@
 # ********************** App ********************** #
 locals {
-  redis_app_id = "a5803cb5-8e23-4f30-a03e-d1c9dfd7fd5e"
-  redis_app_name = "Redis"
+  redis_app_id          = "a5803cb5-8e23-4f30-a03e-d1c9dfd7fd5e"
+  redis_app_name        = "Redis"
   redis_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_redis_app" {
-  count      = contains(local.database_engines_values, "redis") ? 1 : 0
+  count = contains(local.all_components_values, "redis") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [

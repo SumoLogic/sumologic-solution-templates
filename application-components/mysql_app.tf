@@ -1,14 +1,14 @@
 # ********************** App ********************** #
 locals {
-  mysql_app_id = "7a19a7f8-810c-4084-81be-7cd5c2db69e7"
-  mysql_app_name = "MySQL"
+  mysql_app_id          = "7a19a7f8-810c-4084-81be-7cd5c2db69e7"
+  mysql_app_name        = "MySQL"
   mysql_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_mysql_app" {
-  count      = contains(local.database_engines_values, "mysql") ? 1 : 0
+  count = contains(local.all_components_values, "mysql") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [

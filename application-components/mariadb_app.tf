@@ -1,14 +1,14 @@
 # ********************** App ********************** #
 locals {
-  mariadb_app_id = "6a41c72f-fc02-47c6-a5fe-bc58bd4af50f"
-  mariadb_app_name = "MariaDB"
+  mariadb_app_id          = "6a41c72f-fc02-47c6-a5fe-bc58bd4af50f"
+  mariadb_app_name        = "MariaDB"
   mariadb_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_mariadb_app" {
-  count      = contains(local.database_engines_values, "mariadb") ? 1 : 0
+  count = contains(local.all_components_values, "mariadb") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [

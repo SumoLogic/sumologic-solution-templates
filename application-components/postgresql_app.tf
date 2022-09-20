@@ -1,14 +1,14 @@
 # ********************** App ********************** #
 locals {
-  postgresql_app_id = "5722da9c-83b3-4c59-bc80-43dc7c50125b"
-  postgresql_app_name = "PostgreSQL"
+  postgresql_app_id          = "5722da9c-83b3-4c59-bc80-43dc7c50125b"
+  postgresql_app_name        = "PostgreSQL"
   postgresql_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_postgresql_app" {
-  count      = contains(local.database_engines_values, "postgresql") ? 1 : 0
+  count = contains(local.all_components_values, "postgresql") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [

@@ -28,11 +28,11 @@ else
     SUMOLOGIC_BASE_URL="https://api.${SUMOLOGIC_ENV}.sumologic.com/api/"
 fi
 
-# awso_list contains fields required for Application Component Solution. Update the list if new field is added to the solution.
-declare -ra awso_list=(db_cluster db_cluster_address db_cluster_port db_system component environment pod_labels_db_cluster pod_labels_db_cluster_address pod_labels_db_cluster_port pod_labels_db_system)
-# awso_fer_list contains FERs required for Application Component Solution. Update the list if new FER is added to the solution.
-declare -ra awso_fer_list=(ApplicationComponentDatabaseLogsFER)
-declare -ra awso_hierarchy_list=("Application Components View")
+# aco_fields_list contains fields required for Application Component Solution. Update the list if new field is added to the solution.
+declare -ra aco_fields_list=(db_cluster db_cluster_address db_cluster_port db_system component environment pod_labels_db_cluster pod_labels_db_cluster_address pod_labels_db_cluster_port pod_labels_db_system)
+# aco_fer_list contains FERs required for Application Component Solution. Update the list if new FER is added to the solution.
+declare -ra aco_fer_list=(ApplicationComponentDatabaseLogsFER)
+declare -ra aco_hierarchy_list=("Application Components View")
 
 function get_remaining_fields() {
     local RESPONSE
@@ -64,7 +64,7 @@ function should_create_fields() {
     local REMAINING
     readonly REMAINING=$(jq -e '.remaining' <<< "${RESPONSE}")
 
-    if [ $REMAINING -ge ${#awso_list[*]} ] ; then
+    if [ $REMAINING -ge ${#aco_fields_list[*]} ] ; then
         # Function returning with success
         return 0
     else
@@ -78,28 +78,31 @@ outputVal=$?
 # Sumo Logic fields in field schema, FERs in FER schema - Decide to import
 if [ $outputVal == 0 ] ; then
     echo "Get list of all fields present in field schema of user's Sumo Logic org."
-    readonly FIELDS_RESPONSE="$(curl -XGET -s \
+    FIELDS_RESPONSE="$(curl -XGET -s \
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
         "${SUMOLOGIC_BASE_URL}"v1/fields | jq '.data[]' )"
-
-    for FIELD in "${awso_list[@]}" ; do
+    echo $FIELDS_RESPONSE
+    for FIELD in "${aco_fields_list[@]}" ; do
         FIELD_ID=$( echo "${FIELDS_RESPONSE}" | jq -r "select(.fieldName == \"${FIELD}\") | .fieldId" )
         if [[ -z "${FIELD_ID}" ]]; then
             # If field is not present in Sumo org, skip importing
             continue
         fi
         # Field exist in Sumo org, hence import
-        terraform import \
-            sumologic_field."${FIELD}" "${FIELD_ID}"
+        if [ "$FIELD" == "component" ] || [ "$FIELD" == "environment" ] ; then
+            terraform import sumologic_field."${FIELD}" "${FIELD_ID}"
+        else
+            terraform import sumologic_field."${FIELD}"[0] "${FIELD_ID}"
+        fi
     done
 
     echo "Get list of all FER present in FER schema of user's Sumo Logic org."
-    readonly FER_RESPONSE="$(curl -XGET -s \
+    FER_RESPONSE="$(curl  -XGET -s \
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
         "${SUMOLOGIC_BASE_URL}"v1/extractionRules | jq '.data[] | del(.parseExpression)' )"
-
+    echo  $FER_RESPONSE
     #Todo FER is throwing error "Full authentication is required"
-    for FER in "${awso_fer_list[@]}" ; do
+    for FER in "${aco_fer_list[@]}" ; do
         FER_ID=$( echo "${FER_RESPONSE}" | jq -r "select(.name == \"${FER}\") | .id" )
         if [[ -z "${FER_ID}" ]]; then
             # If FER is not present in Sumo org, skip importing
@@ -109,12 +112,12 @@ if [ $outputVal == 0 ] ; then
             sumologic_field_extraction_rule."SumoLogicFieldExtractionRulesForDatabase" "${FER_ID}"
     done
 
-    echo "Get list of all hierarchies present in user's Sumo Logic org."
-    readonly HIERARCHY_RESPONSE="$(curl -XGET -s \
+    # echo "Get list of all hierarchies present in user's Sumo Logic org."
+    HIERARCHY_RESPONSE="$(curl -XGET -s \
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
         "${SUMOLOGIC_BASE_URL}"v1/entities/hierarchies | jq '.data[] | del(.parseExpression)' )"
-
-    for hierarchy_name in "${awso_hierarchy_list[@]}" ; do
+    echo  $HIERARCHY_RESPONSE
+    for hierarchy_name in "${aco_hierarchy_list[@]}" ; do
         HIERARCHY_ID=$( echo "${HIERARCHY_RESPONSE}" | jq -r "select(.name == \"${hierarchy_name}\") | .id" )
         if [[ -z "${HIERARCHY_ID}" ]]; then
             # If FER is not present in Sumo org, skip importing
@@ -124,7 +127,7 @@ if [ $outputVal == 0 ] ; then
             sumologic_hierarchy."application_component_view" "${HIERARCHY_ID}"
     done
 
-    echo "Finished Importing FERs and Fields"
+    echo "Finished Importing FERs, Hierarchy and Fields"
 elif [ $outputVal == 1 ] ; then
     echo "Couldn't automatically create fields and FERS"
     echo "You do not have enough field capacity to create the required fields and FERS automatically."

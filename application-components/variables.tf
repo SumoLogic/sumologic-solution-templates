@@ -34,7 +34,7 @@ variable "sumologic_access_id" {
 variable "sumologic_access_key" {
   type        = string
   description = "Sumo Logic Access Key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
-  sensitive = true
+  sensitive   = true
 
   validation {
     condition     = can(regex("\\w+", var.sumologic_access_key))
@@ -55,32 +55,28 @@ variable "sumologic_organization_id" {
 }
 
 # Component variables
-
-variable "database_deployment_type" {
+variable "components_on_kubernetes_deployment" {
   type        = string
-  description = "Provide the deployment type where your databases are running.Allowed values are Kubernetes,Non-Kubernetes,Both. "
-  validation {
-    condition = contains([
-      "Kubernetes",
-      "Non-Kubernetes",
-      "Both"], var.database_deployment_type)
-    error_message = "The value must be one of \"Kubernetes\", \"Both\" or \"Non-Kubernetes\"."
-  }
-  default     = "Both"
-
-}
-
-
-variable "database_engines" {
-  type= string
   description = <<EOT
-            Provide comma separated list of database components for which sumologic resources needs to be created. Allowed values are "memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle.
+            Provide comma separated list of application components for which sumologic resources needs to be created. Allowed values are "memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle".
         EOT
   validation {
-      condition = anytrue([for engine in split(",", var.database_engines): contains(["memcached","cassandra","elasticsearch","sqlserver","mongodb","mysql","postgresql","redis","mariadb","couchbase","oracle"], engine)])
-    error_message = "The value must be one of memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle"
+    condition     = anytrue([for engine in split(",", var.components_on_kubernetes_deployment) : contains(["", "memcached", "cassandra", "elasticsearch", "sqlserver", "mongodb", "mysql", "postgresql", "redis", "mariadb", "couchbase", "oracle"], engine)])
+    error_message = "The value must be one of \"memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle\""
   }
-  default=""
+  default = ""
+}
+
+variable "components_on_non_kubernetes_deployment" {
+  type        = string
+  description = <<EOT
+            Provide comma separated list of application components for which sumologic resources needs to be created. Allowed values are "memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle".
+        EOT
+  validation {
+    condition     = anytrue([for engine in split(",", var.components_on_non_kubernetes_deployment) : contains(["", "memcached", "cassandra", "elasticsearch", "sqlserver", "mongodb", "mysql", "postgresql", "redis", "mariadb", "couchbase", "oracle"], engine)])
+    error_message = "The value must be one of \"memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle\""
+  }
+  default = ""
 }
 
 # App variables
@@ -91,10 +87,10 @@ variable "apps_folder_installation_location" {
   validation {
     condition = contains([
       "Personal Folder",
-      "Admin Recommended Folder"], var.apps_folder_installation_location)
+    "Admin Recommended Folder"], var.apps_folder_installation_location)
     error_message = "The value must be one of \"Personal Folder\" or \"Admin Recommended Folder\"."
   }
-  default     = "Personal Folder"
+  default = "Personal Folder"
 
 }
 
@@ -136,80 +132,80 @@ variable "monitors_disabled" {
 
 
 variable "connection_notifications_critical" {
-  type        = list(object(
-                {
-                  connection_type = string,
-                  connection_id = string,
-                  payload_override = string,
-                  run_for_trigger_types = list(string)
-                }
-    ))
+  type = list(object(
+    {
+      connection_type       = string,
+      connection_id         = string,
+      payload_override      = string,
+      run_for_trigger_types = list(string)
+    }
+  ))
   description = "Connection Notifications to be sent by the critical alert."
 }
 
 variable "connection_notifications_warning" {
-  type        = list(object(
-                {
-                  connection_type = string,
-                  connection_id = string,
-                  payload_override = string,
-                  run_for_trigger_types = list(string)
-                }
-    ))
+  type = list(object(
+    {
+      connection_type       = string,
+      connection_id         = string,
+      payload_override      = string,
+      run_for_trigger_types = list(string)
+    }
+  ))
   description = "Connection Notifications to be sent by the warning alert."
 }
 
 variable "connection_notifications_missingdata" {
-  type        = list(object(
-                {
-                  connection_type = string,
-                  connection_id = string,
-                  payload_override = string,
-                  run_for_trigger_types = list(string)
-                }
-    ))
+  type = list(object(
+    {
+      connection_type       = string,
+      connection_id         = string,
+      payload_override      = string,
+      run_for_trigger_types = list(string)
+    }
+  ))
   description = "Connection Notifications to be sent by the missing data alert."
 }
 
 variable "email_notifications_critical" {
-  type        = list(object(
-                {
-                  connection_type = string,
-                  recipients = list(string),
-                  subject = string,
-                  time_zone = string,
-                  message_body = string,
-                  run_for_trigger_types = list(string)
-                }
-    ))
+  type = list(object(
+    {
+      connection_type       = string,
+      recipients            = list(string),
+      subject               = string,
+      time_zone             = string,
+      message_body          = string,
+      run_for_trigger_types = list(string)
+    }
+  ))
   description = "Email Notifications to be sent by the critical alert."
 }
 
 variable "email_notifications_warning" {
-  type        = list(object(
-                {
-                  connection_type = string,
-                  recipients = list(string),
-                  subject = string,
-                  time_zone = string,
-                  message_body = string,
-                  run_for_trigger_types = list(string)
-                }
-    ))
+  type = list(object(
+    {
+      connection_type       = string,
+      recipients            = list(string),
+      subject               = string,
+      time_zone             = string,
+      message_body          = string,
+      run_for_trigger_types = list(string)
+    }
+  ))
   description = "Email Notifications to be sent by the warning alert."
 }
 
 variable "email_notifications_missingdata" {
-  type        = list(object(
-                {
-                  connection_type = string,
-                  recipients = list(string),
-                  subject = string,
-                  time_zone = string,
-                  message_body = string,
-                  run_for_trigger_types = list(string)
-                }
-    ))
+  type = list(object(
+    {
+      connection_type       = string,
+      recipients            = list(string),
+      subject               = string,
+      time_zone             = string,
+      message_body          = string,
+      run_for_trigger_types = list(string)
+    }
+  ))
   description = "Email Notifications to be sent by the missing data alert."
 }
 
@@ -223,127 +219,127 @@ variable "group_notifications" {
 # individual monitor variables
 
 variable "memcached_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "Memcached"
+  default     = "Memcached"
 }
 
 variable "memcached_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic Memcached cluster Filter. For eg: db_cluster=memcached.prod.01"
-  default = "db_system=memcached"
+  default     = "db_system=memcached"
 }
 
 variable "redis_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "Redis"
+  default     = "Redis"
 }
 
 variable "redis_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic Redis cluster Filter. For eg: db_cluster=redis.prod.01"
-  default = "db_system=redis"
+  default     = "db_system=redis"
 }
 
 variable "mongodb_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "MongoDB"
+  default     = "MongoDB"
 }
 
 variable "mongodb_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic MongoDB cluster Filter. For eg: db_cluster=mongodb.prod.01"
-  default = "db_system=mongodb"
+  default     = "db_system=mongodb"
 }
 
 variable "sqlserver_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic sqlserver cluster Filter. For eg: db_cluster=sqlserver.prod.01"
-  default = "db_system=sqlserver"
+  default     = "db_system=sqlserver"
 }
 variable "sqlserver_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "SQL Server"
+  default     = "SQL Server"
 }
 
 variable "cassandra_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic cassandra cluster Filter. For eg: db_cluster=cassandra.prod.01"
-  default = "db_system=cassandra"
+  default     = "db_system=cassandra"
 }
 variable "cassandra_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "Cassandra"
+  default     = "Cassandra"
 }
 
 variable "mysql_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic mysql cluster Filter. For eg: db_cluster=mysql.prod.01"
-  default = "db_system=mysql"
+  default     = "db_system=mysql"
 }
 variable "mysql_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "MySQL"
+  default     = "MySQL"
 }
 
 variable "postgresql_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic postgresql cluster Filter. For eg: db_cluster=postgresql.prod.01"
-  default = "db_system=postgresql"
+  default     = "db_system=postgresql"
 }
 variable "postgresql_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "PostgreSQL"
+  default     = "PostgreSQL"
 }
 
 variable "oracle_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic oracle cluster Filter. For eg: db_cluster=oracle.prod.01"
-  default = "db_system=oracle"
+  default     = "db_system=oracle"
 }
 variable "oracle_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "Oracle"
+  default     = "Oracle"
 }
 
 variable "elasticsearch_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic elasticsearch cluster Filter. For eg: db_cluster=elasticsearch.prod.01"
-  default = "db_system=elasticsearch"
+  default     = "db_system=elasticsearch"
 }
 variable "elasticsearch_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "Elasticsearch"
+  default     = "Elasticsearch"
 }
 
 variable "couchbase_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic couchbase cluster Filter. For eg: db_cluster=couchbase.prod.01"
-  default = "db_system=couchbase"
+  default     = "db_system=couchbase"
 }
 variable "couchbase_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "Couchbase"
+  default     = "Couchbase"
 }
 
 variable "mariadb_data_source" {
-  type = string
+  type        = string
   description = "Sumo Logic mariadb cluster Filter. For eg: db_cluster=mariadb.prod.01"
-  default = "db_system=mariadb"
+  default     = "db_system=mariadb"
 }
 
 variable "mariadb_monitor_folder" {
-  type = string
+  type        = string
   description = "Folder where monitors will be created."
-  default = "MariaDB"
+  default     = "MariaDB"
 }
 

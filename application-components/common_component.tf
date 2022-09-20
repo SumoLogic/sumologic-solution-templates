@@ -1,27 +1,27 @@
 # ********************** Fields ********************** #
 resource "sumologic_field" "component" {
-    data_type  = "String"
-    field_name = "component"
-    state      = "Enabled"
+  data_type  = "String"
+  field_name = "component"
+  state      = "Enabled"
 }
 
 resource "sumologic_field" "environment" {
-    data_type  = "String"
-    field_name = "environment"
-    state      = "Enabled"
+  data_type  = "String"
+  field_name = "environment"
+  state      = "Enabled"
 }
 
 
 # ********************** Application Components App ********************** #
 locals {
-  application_component_app_id = "22aa033e-5a36-4a20-b07d-810096e18050"
-  application_component_app_name = "Application Components"
+  application_component_app_id          = "22aa033e-5a36-4a20-b07d-810096e18050"
+  application_component_app_name        = "Application Components"
   application_component_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_app_component_app" {
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [
@@ -47,44 +47,44 @@ resource "sumologic_hierarchy" "application_component_view" {
   }
   level {
     entity_type = "environment"
-    next_level  {
+    next_level {
       entity_type = "component"
       next_levels_with_conditions {
         condition = "database"
         level {
           entity_type = "db_system"
-          next_levels_with_conditions  {
+          next_levels_with_conditions {
             condition = "mysql"
             level {
               entity_type = "db_cluster"
-              next_level  {
+              next_level {
                 entity_type = "schema"
-                next_level  {
+                next_level {
                   entity_type = "table"
                 }
               }
             }
           }
-          next_levels_with_conditions  {
+          next_levels_with_conditions {
             condition = "postgresql"
             level {
               entity_type = "db_cluster"
-              next_level  {
+              next_level {
                 entity_type = "db"
-                next_level  {
+                next_level {
                   entity_type = "schemaname"
-                  next_level  {
+                  next_level {
                     entity_type = "relname"
                   }
                 }
               }
             }
           }
-          next_levels_with_conditions  {
+          next_levels_with_conditions {
             condition = "cassandra"
             level {
               entity_type = "db_cluster"
-              next_level  {
+              next_level {
                 entity_type = "keyspace"
               }
             }
@@ -93,43 +93,43 @@ resource "sumologic_hierarchy" "application_component_view" {
             condition = "mariadb"
             level {
               entity_type = "db_cluster"
-              next_level  {
+              next_level {
                 entity_type = "schema"
-                next_level  {
+                next_level {
                   entity_type = "table"
 
                 }
               }
             }
           }
-          next_levels_with_conditions  {
+          next_levels_with_conditions {
             condition = "couchbase"
             level {
               entity_type = "db_cluster"
-              next_level  {
+              next_level {
                 entity_type = "bucket"
               }
             }
           }
-          next_levels_with_conditions  {
-              condition = "oracle"
-              level {
-                entity_type = "db_cluster"
-                next_level  {
-                  entity_type = "instance"
-                }
+          next_levels_with_conditions {
+            condition = "oracle"
+            level {
+              entity_type = "db_cluster"
+              next_level {
+                entity_type = "instance"
               }
+            }
           }
-          next_levels_with_conditions  {
+          next_levels_with_conditions {
             condition = "sqlserver"
             level {
               entity_type = "db_cluster"
-              next_level  {
+              next_level {
                 entity_type = "database_name"
               }
             }
           }
-          next_level  {
+          next_level {
             entity_type = "db_cluster"
           }
         }

@@ -1,14 +1,14 @@
 # ********************** App ********************** #
 locals {
-  mongodb_app_id = "2e785ce9-026a-4385-90fb-8640287c2c11"
-  mongodb_app_name = "MongoDB"
+  mongodb_app_id          = "2e785ce9-026a-4385-90fb-8640287c2c11"
+  mongodb_app_name        = "MongoDB"
   mongodb_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_mongodb_app" {
-  count      = contains(local.database_engines_values, "mongodb") ? 1 : 0
+  count = contains(local.all_components_values, "mongodb") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [
