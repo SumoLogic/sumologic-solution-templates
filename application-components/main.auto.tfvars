@@ -9,8 +9,11 @@ sumologic_organization_id = ""   # Please replace <YOUR SUMO ORG ID> (including 
 apps_folder_installation_location = "Personal Folder" # Please specify the location where the sumologic apps/dashboards will be installed.
 share_apps_folder_with_org = true # Set this to true to share with view permissions with the entire sumologic org.
 
-# Specify the database engine types comma separated from the following list of supported db engines - memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle.
-database_engines = "memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle"
+####### COMPONENT CONFIGURATION #######
+
+# Specify the components comma separated from the following list of supported components - memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle.
+components_on_kubernetes_deployment = "memcached, cassandra"
+# components_on_non_kubernetes_deployment = "memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle"
 
 ####### MONITOR CONFIGURATION #######
 

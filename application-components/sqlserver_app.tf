@@ -1,14 +1,14 @@
 # ********************** App ********************** #
 locals {
-  sqlserver_app_id = "208123e2-6546-49c6-9b99-829d9b2f8c88"
-  sqlserver_app_name = "SQL Server"
+  sqlserver_app_id          = "208123e2-6546-49c6-9b99-829d9b2f8c88"
+  sqlserver_app_name        = "SQL Server"
   sqlserver_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_sqlserver_app" {
-  count      = contains(local.database_engines_values, "sqlserver") ? 1 : 0
+  count = contains(local.all_components_values, "sqlserver") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [

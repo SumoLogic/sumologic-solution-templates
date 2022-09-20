@@ -1,14 +1,14 @@
 # ********************** App ********************** #
 locals {
-  oracle_app_id = "83e571b4-08e9-4b21-a06c-800bb2ef0b4c"
-  oracle_app_name = "Oracle"
+  oracle_app_id          = "83e571b4-08e9-4b21-a06c-800bb2ef0b4c"
+  oracle_app_name        = "Oracle"
   oracle_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_oracle_app" {
-  count      = contains(local.database_engines_values, "oracle") ? 1 : 0
+  count = contains(local.all_components_values, "oracle") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [

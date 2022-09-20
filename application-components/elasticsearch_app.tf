@@ -1,14 +1,14 @@
 # ********************** App ********************** #
 locals {
-  elasticsearch_app_id = "c1d6cc61-6b12-4404-beb0-928ed6935d88"
-  elasticsearch_app_name = "Elasticsearch"
+  elasticsearch_app_id          = "c1d6cc61-6b12-4404-beb0-928ed6935d88"
+  elasticsearch_app_name        = "Elasticsearch"
   elasticsearch_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
 resource "null_resource" "install_elasticsearch_app" {
-  count      = contains(local.database_engines_values, "elasticsearch") ? 1 : 0
+  count = contains(local.all_components_values, "elasticsearch") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [

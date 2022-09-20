@@ -1,14 +1,15 @@
 # ********************** App ********************** #
 locals {
-  cassandra_app_id = "e98f457e-ec29-4b26-8477-f371424d37a5"
-  cassandra_app_name = "Cassandra"
+  cassandra_app_id          = "e98f457e-ec29-4b26-8477-f371424d37a5"
+  cassandra_app_name        = "Cassandra"
   cassandra_app_description = "This folder is created by Terraform.DO NOT DELETE."
 }
+
 resource "null_resource" "install_cassandra_app" {
-  count      = contains(local.database_engines_values, "cassandra") ? 1 : 0
+  count = contains(local.all_components_values, "cassandra") ? 1 : 0
   triggers = {
-    api_endpoint      = local.sumologic_api_endpoint
-    organization      = var.sumologic_organization_id
+    api_endpoint     = local.sumologic_api_endpoint
+    organization     = var.sumologic_organization_id
     solution_version = local.solution_version
   }
   depends_on = [
