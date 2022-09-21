@@ -81,7 +81,7 @@ if [ $outputVal == 0 ] ; then
     FIELDS_RESPONSE="$(curl -XGET -s \
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
         "${SUMOLOGIC_BASE_URL}"v1/fields | jq '.data[]' )"
-    echo $FIELDS_RESPONSE
+
     for FIELD in "${aco_fields_list[@]}" ; do
         FIELD_ID=$( echo "${FIELDS_RESPONSE}" | jq -r "select(.fieldName == \"${FIELD}\") | .fieldId" )
         if [[ -z "${FIELD_ID}" ]]; then
@@ -100,7 +100,7 @@ if [ $outputVal == 0 ] ; then
     FER_RESPONSE="$(curl  -XGET -s \
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
         "${SUMOLOGIC_BASE_URL}"v1/extractionRules | jq '.data[] | del(.parseExpression)' )"
-    echo  $FER_RESPONSE
+
     #Todo FER is throwing error "Full authentication is required"
     for FER in "${aco_fer_list[@]}" ; do
         FER_ID=$( echo "${FER_RESPONSE}" | jq -r "select(.name == \"${FER}\") | .id" )
@@ -109,14 +109,14 @@ if [ $outputVal == 0 ] ; then
             continue
         fi
         terraform import \
-            sumologic_field_extraction_rule."SumoLogicFieldExtractionRulesForDatabase" "${FER_ID}"
+            sumologic_field_extraction_rule."SumoLogicFieldExtractionRulesForDatabase"[0] "${FER_ID}"
     done
 
     # echo "Get list of all hierarchies present in user's Sumo Logic org."
     HIERARCHY_RESPONSE="$(curl -XGET -s \
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
         "${SUMOLOGIC_BASE_URL}"v1/entities/hierarchies | jq '.data[] | del(.parseExpression)' )"
-    echo  $HIERARCHY_RESPONSE
+
     for hierarchy_name in "${aco_hierarchy_list[@]}" ; do
         HIERARCHY_ID=$( echo "${HIERARCHY_RESPONSE}" | jq -r "select(.name == \"${hierarchy_name}\") | .id" )
         if [[ -z "${HIERARCHY_ID}" ]]; then
