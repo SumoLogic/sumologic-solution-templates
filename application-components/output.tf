@@ -1,5 +1,5 @@
 locals {
-  apps_folder_id_decimal = parseint(sumologic_folder.root_apps_folder.id, 16)
+  apps_folder_id_decimal = parseint(local.parent_folder_id, 16)
 }
 output "ApplicationComponentAppsFolder" {
 

@@ -10,17 +10,20 @@ resource "null_resource" "install_elasticsearch_app" {
     api_endpoint     = local.sumologic_api_endpoint
     organization     = var.sumologic_organization_id
     solution_version = local.solution_version
+    root_folder_id   = local.parent_folder_id
   }
   depends_on = [
-    sumologic_folder.root_apps_folder
+    sumologic_folder.admin_root_apps_folder,
+    sumologic_folder.personal_root_apps_folder
   ]
   provisioner "local-exec" {
     command = <<EOT
       curl -s --request POST '${local.sumologic_api_endpoint}/v1/apps/${local.elasticsearch_app_id}/install' \
             --header 'Accept: application/json' \
             --header 'Content-Type: application/json' \
+            --header 'isAdminMode: ${local.is_adminMode}' \
             -u ${var.sumologic_access_id}:${var.sumologic_access_key} \
-          --data-raw '{ "name": "${local.elasticsearch_app_name}", "description": "${local.elasticsearch_app_description}", "destinationFolderId": "${sumologic_folder.root_apps_folder.id}"}}'
+          --data-raw '{ "name": "${local.elasticsearch_app_name}", "description": "${local.elasticsearch_app_description}", "destinationFolderId": "${local.parent_folder_id}"}}'
     EOT
   }
 }
