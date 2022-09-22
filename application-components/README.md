@@ -15,6 +15,6 @@ Follow the instruction in [Deploy and Configure Application Components Solution]
 
 # Important Links
 
-  - [RESOURCES](./RESOURCE.md)
-  - [CHANGELOG](./CHANGELOG.md)
+  - [RESOURCES](RESOURCE.md)
+  - [CHANGELOG](CHANGELOG.md)
   - [DASHBOARDS](https://help.sumologic.com/Observability_Solution/Application_Component_Solution/View_Application_Components_Dashboards_and_Alerts)
