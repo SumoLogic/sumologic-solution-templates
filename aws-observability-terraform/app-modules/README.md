@@ -30,6 +30,7 @@
 | <a name="module_rce_app"></a> [rce\_app](#module\_rce\_app) | ./rce | n/a |
 | <a name="module_rds_app"></a> [rds\_app](#module\_rds\_app) | ./rds | n/a |
 | <a name="module_sns_app"></a> [sns\_app](#module\_sns\_app) | ./sns | n/a |
+| <a name="module_sqs_app"></a> [sqs\_app](#module\_sqs\_app) | ./sqs | n/a |
 
 ## Resources
 
@@ -89,6 +90,7 @@
 | <a name="output_sumologic_content_rce"></a> [sumologic\_content\_rce](#output\_sumologic\_content\_rce) | This output contains rce Apps. |
 | <a name="output_sumologic_content_rds"></a> [sumologic\_content\_rds](#output\_sumologic\_content\_rds) | This output contains rds App. |
 | <a name="output_sumologic_content_sns"></a> [sumologic\_content\_sns](#output\_sumologic\_content\_sns) | This output contains sns App. |
+| <a name="output_sumologic_content_sqs"></a> [sumologic\_content\_sns](#output\_sumologic\_content\_sqs) | This output contains sqs App. |
 | <a name="output_sumologic_field_alb"></a> [sumologic\_field\_alb](#output\_sumologic\_field\_alb) | This output contains fields required for alb app. |
 | <a name="output_sumologic_field_apigateway"></a> [sumologic\_field\_apigateway](#output\_sumologic\_field\_apigateway) | This output contains fields required for apigateway app. |
 | <a name="output_sumologic_field_dynamodb"></a> [sumologic\_field\_dynamodb](#output\_sumologic\_field\_dynamodb) | This output contains fields required for dynamodb app. |

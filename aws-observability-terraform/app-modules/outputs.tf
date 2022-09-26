@@ -178,6 +178,16 @@ output "sumologic_content_sns" {
   description = "This output contains sns App."
 }
 
+output "sumologic_field_extraction_rule_sqs" {
+  value       = module.sqs_app.sumologic_field_extraction_rule
+  description = "This output contains Field Extraction rules required for sqs app."
+}
+
+output "sumologic_content_sqs" {
+  value       = module.sqs_app.sumologic_content
+  description = "This output contains sqs App."
+}
+
 output "sumologic_hierarchy" {
   value       = sumologic_hierarchy.awso_hierarchy
   description = "This output contains Sumologic Hierarchy."
