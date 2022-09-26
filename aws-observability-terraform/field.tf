@@ -278,7 +278,7 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityGenericCloudWatchLog
               | "unknown" as namespace
               | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
               | if (_sourceHost matches "/aws/rds/*", "aws/rds", namespace) as namespace
-              | if (_sourceHost matches "/aws/ecs/containerinsights/*", "ecs/containerinsights", namespace) as namespace
+              | if (_sourceHost matches "/aws/ecs/containerinsights/*", "aws/ecs", namespace) as namespace
               | if (_sourceHost matches "/aws/kinesisfirehose/*", "aws/firehose", namespace) as namespace
               | fields namespace
       EOT
