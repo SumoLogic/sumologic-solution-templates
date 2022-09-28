@@ -1,0 +1,1636 @@
+{
+    "type": "FolderSyncDefinition",
+    "name": "Amazon SQS",
+    "description": "The Sumo Logic App for Amazon SQS is a unified logs and metrics (ULM) App that provides operational insights into your Amazon SQS utilization. The preconfigured dashboards help you monitor the key metrics, view the SQS events for queue activities, and help you plan the capacity of your SQS service utilization.",
+    "children": [
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Amazon SQS - CloudTrail Events ",
+            "description": "",
+            "title": "Amazon SQS - CloudTrail Events ",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel2bd5a92ea1b1494d",
+                        "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel5e1bae3e804eb944",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":8}"
+                    },
+                    {
+                        "key": "panelcb2650b59cff8845",
+                        "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":0}"
+                    },
+                    {
+                        "key": "panel83660c3188dcca4c",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":15}"
+                    },
+                    {
+                        "key": "panel8fd6624fbc46aa4e",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":15}"
+                    },
+                    {
+                        "key": "panel5329e666af79da4c",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":8}"
+                    },
+                    {
+                        "key": "panelc2921040ab435b49",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":21}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel5e1bae3e804eb944",
+                    "title": "Events Trend",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| timeslice 1d\n|where eventSource=\"sqs.amazonaws.com\" AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n|count as eventCount by _timeslice, eventName\n| transpose row _timeslice column eventName",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel5329e666af79da4c",
+                    "title": "Events by User",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| where eventSource=\"sqs.amazonaws.com\" AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n| timeslice 1d\n| count as eventCount by userName, eventName\n| transpose row userName column eventName",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel2bd5a92ea1b1494d",
+                    "title": "Events",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| where eventSource=\"sqs.amazonaws.com\" AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n|count as eventCount by eventName\n| sort by eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelcb2650b59cff8845",
+                    "title": "Events Location",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"series\":{},\"map\":{\"mainMetric\":{\"metricName\":\"_count\"}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| where eventSource=\"sqs.amazonaws.com\"AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n|count by src_ip, eventName\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| sort _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-2w"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelc2921040ab435b49",
+                    "title": "Events Details",
+                    "visualSettings": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| where eventSource=\"sqs.amazonaws.com\"\n| timeslice 1s\n| where queuename matches \"{{queuename}}\"AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n| count as eventCount by _timeslice, eventName, queueName, queueUrl, type, userName, accountId, region, src_ip\n| sort by _timeslice",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel8fd6624fbc46aa4e",
+                    "title": "Top Users",
+                    "visualSettings": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| where eventSource=\"sqs.amazonaws.com\"AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n| count as eventCount by userName\n| top 10 userName by eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel83660c3188dcca4c",
+                    "title": "Top Queues",
+                    "visualSettings": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| where eventSource=\"sqs.amazonaws.com\"AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n|count as eventCount by queueName\n| top 10 queueName by eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "queuename",
+                    "displayName": "queuename",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "queuename"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sqs",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "namespace=aws/sqs account={{account}} region={{region}}",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Amazon SQS - Overview",
+            "description": "",
+            "title": "Amazon SQS - Overview",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel3a05a6f680f4794d",
+                        "structure": "{\"height\":12,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel7b6dda6cb14ef84f",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":6}"
+                    },
+                    {
+                        "key": "panel87da72469d855a41",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":18}"
+                    },
+                    {
+                        "key": "panelb8ce812189b4e940",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":24}"
+                    },
+                    {
+                        "key": "panel3c3b949ea56f7a4b",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":18}"
+                    },
+                    {
+                        "key": "panelbd068cb8a4f43949",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":30}"
+                    },
+                    {
+                        "key": "panel805217ffa7396b4b",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":24}"
+                    },
+                    {
+                        "key": "panel1755772bb5ba9a45",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":36}"
+                    },
+                    {
+                        "key": "panel9fd39173b6475b4e",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":30}"
+                    },
+                    {
+                        "key": "panel72e935348857ab4d",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":36}"
+                    },
+                    {
+                        "key": "panelFBD0640FB60E5840",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panelA576AA7E91D3AA4A",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel9fd39173b6475b4e",
+                    "title": "Sent Message Size",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"{{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=SentMessageSize Statistic=Average region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel1755772bb5ba9a45",
+                    "title": "Number Of Messages Received",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesReceived Statistic=Sum region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | Sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel72e935348857ab4d",
+                    "title": "Number Of Messages Sent and Deleted",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#ff5d5d\",\"name\":\"Deleted Messages in {{region}}\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#6cae01\",\"name\":\"Sent Messages in {{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesDeleted Statistic=Sum region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | Sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesSent Statistic=Sum region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel3a05a6f680f4794d",
+                    "title": "Events Location",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\naccount=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| where eventSource=\"sqs.amazonaws.com\"AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n|count by src_ip, eventName\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| sort _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-2w"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel7b6dda6cb14ef84f",
+                    "title": "Approximate Age Of Oldest Message (Seconds)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateAgeOfOldestMessage Statistic=Average region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel805217ffa7396b4b",
+                    "title": "Lag (Sent - Deleted)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"Lag in {{region}}\"}}],\"series\":{},\"hiddenQueryKeys\":[\"A\",\"B\"]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesSent Statistic=Sum region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | Sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesDeleted Statistic=Sum  region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | Sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A - #B",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelb8ce812189b4e940",
+                    "title": "Approximate Number Of Messages Visible and Not Visible",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null},\"axisY2\":{\"title\":\"\",\"minimum\":null,\"maximum\":null,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"color\":\"#6cae01\",\"name\":\"Visible in {{region}}\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"axisYType\":\"primary\",\"color\":\"#ff5d5d\",\"lineDashType\":\"solid\",\"name\":\"Not Visible in {{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesNotVisible Statistic=Sum region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesVisible Statistic=Sum region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelbd068cb8a4f43949",
+                    "title": "Number Of Empty Receives",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"{{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfEmptyReceives Statistic=Sum region = {{region}}  account={{account}} queuename={{queuename}} namespace={{namespace}} | sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel87da72469d855a41",
+                    "title": "Approximate Number Of Messages Delayed",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null},\"axisY2\":{\"title\":\"\",\"minimum\":null,\"maximum\":null,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"secondary\",\"lineDashType\":\"solid\",\"name\":\"{{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesDelayed Statistic=Average region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel3c3b949ea56f7a4b",
+                    "title": "Top Users",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| where eventSource=\"sqs.amazonaws.com\"AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n| count as eventCount by userName\n| top 10 userName by eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelFBD0640FB60E5840",
+                    "title": "Events Trend",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account=* \"\\\"eventsource\\\":\\\"sqs.amazonaws.com\\\"\" | json \"eventSource\",\"eventName\" nodrop \n| json \"userIdentity.type\", \"userIdentity.arn\", \"userIdentity.userName\", \"userIdentity.accountId\", \"awsRegion\", \"responseElements.queueUrl\", \"requestParameters.queueUrl\", \"sourceIPAddress\" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop \n| if(eventName=\"CreateQueue\",queueUrlRes,queueUrlReq) as queueUrl\n| parse regex field= queueUrl \"(?<queueName>[^\\/]*$)\"\n| fields - queueUrlRes,queueUrlReq\n| timeslice 1d\n|where eventSource=\"sqs.amazonaws.com\" AND queuename matches \"{{queuename}}\" AND account matches \"{{account}}\" AND region matches \"{{region}}\" AND namespace matches \"{{namespace}}\"\n| timeslice 1h\n|count as eventCount by _timeslice, eventName\n| transpose row _timeslice column eventName",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1w"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA576AA7E91D3AA4A",
+                    "title": "Number Of Messages Sent, Received and Deleted ",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#ff5d5d\",\"name\":\"Deleted Messages in {{region}}\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#6cae01\",\"name\":\"Sent Messages in {{region}}\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"color\":\"#00a0d6\",\"name\":\"Received Messages in {{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesDeleted Statistic=Sum region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}}   | Sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesSent Statistic=Sum region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesReceived Statistic=Sum region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | sum by region ",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "queuename",
+                    "displayName": "queuename",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "queuename"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sqs",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/sqs",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Amazon SQS - Queue",
+            "description": "",
+            "title": "Amazon SQS - Queue",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel6a9c966b811ea94a",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel0594465caab31940",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":0}"
+                    },
+                    {
+                        "key": "panel72fec3a8a31e7b4e",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panel540eb927bcc9ca49",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":6}"
+                    },
+                    {
+                        "key": "panel7802a100b94c2948",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panel6a4804968b19c844",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":12}"
+                    },
+                    {
+                        "key": "panelb05cdd8bba57ea41",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":18}"
+                    },
+                    {
+                        "key": "panel95de75fc850a3a45",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":18}"
+                    },
+                    {
+                        "key": "panel4ce77b0fa1c07a49",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":24}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel6a4804968b19c844",
+                    "title": "Number Of Messages Deleted",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{queuename}} in {{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesDeleted Statistic=Sum region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel540eb927bcc9ca49",
+                    "title": "Approximate Number Of Messages Visible",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{queuename}} in {{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesVisible Statistic=Sum  region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel7802a100b94c2948",
+                    "title": "Number Of Empty Receives",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"{{queuename}} in {{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfEmptyReceives Statistic=Sum region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel6a9c966b811ea94a",
+                    "title": "Approximate Age Of Oldest Message (Seconds)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{queuename}} in {{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateAgeOfOldestMessage Statistic=Average  region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelb05cdd8bba57ea41",
+                    "title": "Number Of Messages Received",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{queuename}} in {{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesReceived Statistic=Sum  region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel4ce77b0fa1c07a49",
+                    "title": "Sent Message Size",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"{{queuename}} in {{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=SentMessageSize Statistic=Average region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel0594465caab31940",
+                    "title": "Approximate Number Of Messages Delayed",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null},\"axisY2\":{\"title\":\"\",\"minimum\":null,\"maximum\":null,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"secondary\",\"lineDashType\":\"solid\",\"name\":\"{{queuename}} in {{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesDelayed Statistic=Average region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel95de75fc850a3a45",
+                    "title": "Number Of Messages Sent",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{queuename}} in {{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesSent Statistic=Sum  region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel72fec3a8a31e7b4e",
+                    "title": "Approximate Number Of Messages Not Visible",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{queuename}} in {{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesNotVisible Statistic=Sum region = {{region}} account={{account}} queuename={{queuename}} namespace={{namespace}} | avg by queuename, region ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "queuename",
+                    "displayName": "queuename",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "queuename"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sqs",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "namespace=aws/sqs account={{account}} region={{region}}",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Amazon SQS - Region",
+            "description": "",
+            "title": "Amazon SQS - Region",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel8d6c6c79b4d90b4e",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel1b8c81dc9fed7b47",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":0}"
+                    },
+                    {
+                        "key": "panel9fb15ce1a26b4842",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":7}"
+                    },
+                    {
+                        "key": "panel37741fd198d5ba48",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":7}"
+                    },
+                    {
+                        "key": "panelbbfced8f96308944",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":14}"
+                    },
+                    {
+                        "key": "panelf6180f5abc464b42",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":14}"
+                    },
+                    {
+                        "key": "panel24f7dca4b972fb42",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":20}"
+                    },
+                    {
+                        "key": "panelf64ebccf86eca845",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":20}"
+                    },
+                    {
+                        "key": "panelca52ccd986a0c940",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":26}"
+                    },
+                    {
+                        "key": "panel0780d3e2bf392b42",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":26}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel9fb15ce1a26b4842",
+                    "title": "Approximate Number Of Messages Not Visible",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesNotVisible Statistic=Sum region={{region}} namespace={{namespace}} | sum by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel24f7dca4b972fb42",
+                    "title": "Number Of Messages Received",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesReceived Statistic=Sum region={{region}} namespace={{namespace}} | sum by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel0780d3e2bf392b42",
+                    "title": "Lag (Sent - Deleted)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"Sent Messages in {{region}}\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"Deleted Messages in {{region}}\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"Lag in {{region}}\"}}],\"series\":{},\"hiddenQueryKeys\":[\"A\",\"B\"]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesSent Statistic=Sum region={{region}} namespace={{namespace}} | sum by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesDeleted Statistic=Sum region={{region}} namespace={{namespace}} | sum by region",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "#A - #B",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelbbfced8f96308944",
+                    "title": "Number Of Empty Receives",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"{{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfEmptyReceives Statistic=Sum region={{region}} namespace={{namespace}} | sum by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel37741fd198d5ba48",
+                    "title": "Approximate Number Of Messages Visible",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesVisible Statistic=Sum region={{region}} namespace={{namespace}} | sum by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelf6180f5abc464b42",
+                    "title": "Number Of Messages Deleted",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesDeleted Statistic=Sum region={{region}} namespace={{namespace}} | sum by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel1b8c81dc9fed7b47",
+                    "title": "Approximate Number Of Messages Delayed",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"{{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateNumberOfMessagesDelayed Statistic=Average region={{region}} namespace={{namespace}} | avg by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel8d6c6c79b4d90b4e",
+                    "title": "Approximate Age Of Oldest Message (Seconds)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=ApproximateAgeOfOldestMessage Statistic=Average region={{region}} namespace={{namespace}} | avg by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelf64ebccf86eca845",
+                    "title": "Number Of Messages Sent",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{region}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=NumberOfMessagesSent Statistic=Sum region={{region}} namespace={{namespace}} | sum by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelca52ccd986a0c940",
+                    "title": "Sent Message Size",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"lineDashType\":\"solid\",\"name\":\"{{region}}\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "Namespace=AWS/SQS metric=SentMessageSize Statistic=Average region={{region}} namespace={{namespace}} | avg by region",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": null,
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/sqs",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "namespace=aws/sqs region={{region}}",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        }
+    ]
+  }
