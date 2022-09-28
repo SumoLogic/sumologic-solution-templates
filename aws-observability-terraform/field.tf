@@ -330,3 +330,20 @@ resource "sumologic_field_extraction_rule" "AwsObservabilitySNSCloudTrailLogsFER
       EOT
       enabled = true
 }
+
+# SQS CloudTrail FER
+resource "sumologic_field_extraction_rule" "AwsObservabilitySQSCloudTrailLogsFER" {
+      depends_on = [time_sleep.wait_for_10_seconds]
+      name = "AwsObservabilitySQSCloudTrailLogsFER"
+      scope = "account=* eventsource sqs.amazonaws.com"
+      parse_expression = <<EOT
+              | json "eventSource","eventName" nodrop
+              | json "userIdentity.type", "userIdentity.arn", "userIdentity.userName", "userIdentity.accountId", "awsRegion", "responseElements.queueUrl", "requestParameters.queueUrl", "sourceIPAddress" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop
+              | if(eventName="CreateQueue",queueUrlRes,queueUrlReq) as queueUrl
+              | parse regex field= queueUrl "(?<queueName>[^\/]*$)"
+              | fields - queueUrlRes,queueUrlReq
+              | "aws/sqs" as namespace
+              | where eventSource="sqs.amazonaws.com"
+      EOT
+      enabled = true
+}
