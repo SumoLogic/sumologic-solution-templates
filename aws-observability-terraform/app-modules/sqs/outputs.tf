@@ -7,3 +7,8 @@ output "sumologic_content" {
   value       = module.sqs_module.sumologic_content
   description = "This output contains amazon sqs App."
 }
+
+output "sumologic_field" {
+  value       = module.sqs_module.sumologic_field
+  description = "This output contains fields required for sqs app."
+}

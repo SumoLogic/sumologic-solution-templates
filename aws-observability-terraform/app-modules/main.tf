@@ -338,7 +338,7 @@ resource "sumologic_hierarchy" "awso_hierarchy" {
         next_levels_with_conditions {
           condition = "AWS/SQS"
           level {
-              entity_type = "topicname"
+              entity_type = "queuename"
             }
           }
       }
