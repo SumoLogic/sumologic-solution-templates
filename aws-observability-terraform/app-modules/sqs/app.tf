@@ -21,28 +21,16 @@ module "sqs_module" {
   # ********************** Monitors ********************** #
   
   managed_monitors = {
-    "AWSSNSAccessfromHighlyMaliciousSources" = {
-      monitor_name         = "AWS SQS -  Messages not deleted but visible"
-      monitor_description  = "This alert fires when an Application AWS - SQS has messages deleted but not visible"
+    "AWSSQSMessageProcessingNotFastEnough" = {
+      monitor_name         = "AWS SQS -  Message processing not fast enough"
+      monitor_description  = "This alert fires when we detect message processing is not fast enough. That is, the average approximate age of the oldest non-deleted message in the queue is more than 5 seconds for an interval of 5 minutes"
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       "queries": [
       {
         "rowId": "A",
-        "query": "metric=NumberOfMessagesDeleted Statistic=sum region = * account=* queuename=* namespace=aws/sqs | avg by queuename "
-      },
-      {
-        "rowId": "B",
-        "query": "metric=ApproximateNumberOfMessagesVisible Statistic=sum region = * account=* queuename=* namespace=aws/sqs | avg by queuename"
-      },
-      {
-        "rowId": "C",
-        "query": "metric=NumberOfMessagesReceived Statistic=sum region = * account=* queuename=* namespace=aws/sqs | avg by queuename"
-      },
-      {
-        "rowId": "D",
-        "query": "(#C-#A)/#B"
+        "query": "metric=ApproximateAgeOfOldestMessage Statistic=avg region=* account=* queuename=* namespace=aws/sqs | avg by account,region,namespace,queuename "
       }
     ],
       triggers = [
@@ -69,31 +57,32 @@ module "sqs_module" {
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
     },
-    "AWSSNSAccessfromHighlyMaliciousSources" = {
-      monitor_name         = "AWS SQS -  Queue has stopped receiving messages"
-      monitor_description  = "This alert fires when an Application AWS - SQS queue has stopped receiving messages for the last 24 hours"
+    "AWSSQSMessagesNotProcessed" = {
+      monitor_name         = "AWS SQS -  Messages not processed"
+      monitor_description  = "This alert fires when we detect messages that have been received by a consumer, but have not been processed (deleted/failed). That is, the average number of messages that are in flight are >=20 for an interval of 5 minutes"
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-        A = "metric=NumberOfMessagesReceived Statistic=Sum region=* account=* queuename=* namespace=aws/sqs | sum by queuename"
+        "rowId": "A",
+        "query": "metric=ApproximateNumberOfMessagesNotVisible Statistic=avg region = * account=* queuename=* namespace=aws/sqs | avg by account, region, namespace, queuename "
       }
       triggers = [
         {
           detection_method = "MetricsStaticCondition",
-          time_range       = "-1d",
+          time_range       = "-5m",
           trigger_type     = "Critical",
-          threshold        = 0,
-          threshold_type   = "LessThan",
+          threshold        = 20,
+          threshold_type   = "GreaterThanOrEqual",
           occurrence_type  = "Always",
           trigger_source   = "AnyTimeSeries"
         },
         {
           detection_method = "MetricsStaticCondition",
-          time_range       = "-1d",
+          time_range       = "-5m",
           trigger_type     = "ResolvedCritical",
-          threshold        = 0,
-          threshold_type   = "GreaterThanOrEqual",
+          threshold        = 20,
+          threshold_type   = "LessThan",
           occurrence_type  = "Always",
           trigger_source   = "AnyTimeSeries"
         }
@@ -129,6 +118,42 @@ module "sqs_module" {
           threshold_type   = "LessThanOrEqual",
           occurrence_type  = "ResultCount",
           trigger_source   = "AllResults"
+        }
+      ]
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+     "AWSSQSQueueHasStoppedReceivingMessages" = {
+      monitor_name         = "AWS SQS - Queue has stopped receiving messages"
+      monitor_description  = "This alert fires when we detect that the queue has stopped receiving messages. That is, the average number of messages received in the queue <1 for an interval of 30 minutes."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      "queries": [
+      {
+        "rowId": "A",
+        "query": "metric=NumberOfMessagesReceived Statistic=avg region=* account=* queuename=* namespace=aws/sqs | avg by account, region, namespace, queuename "
+      }
+    ],
+      triggers = [
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-30m",
+          trigger_type     = "Critical",
+          threshold        = 1,
+          threshold_type   = "LessThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-30m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 1,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
         }
       ]
       group_notifications      = var.group_notifications
