@@ -9,6 +9,7 @@ echo "Script initiated at : $now"
 #input to the script is sumo accessId and accessKey
 export SUMO_ACCESS_ID=$1
 export SUMO_ACCESS_KEY=$2
+export AWS_PROFILE=$3
 if [ -z "$AWS_PROFILE" ]
 then
     AWS_PROFILE=default
@@ -48,7 +49,7 @@ echo '"Section1cSumoLogicAccessKey='${SUMO_ACCESS_KEY}'",' >> param.json
 
 echo '"Section1dSumoLogicOrganizationId='${orgId}'",' >> param.json
 
-awsAccountId=`aws sts get-caller-identity | jq -r '.Account'` 
+awsAccountId=`aws sts get-caller-identity --output json | jq -r '.Account'` 
 echo '"Section2aAccountAlias='${awsAccountId}'"' >> param.json
 
 echo ']'>>param.json
