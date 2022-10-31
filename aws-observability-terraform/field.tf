@@ -344,13 +344,17 @@ resource "sumologic_field_extraction_rule" "AwsObservabilitySQSCloudTrailLogsFER
       name = "AwsObservabilitySQSCloudTrailLogsFER"
       scope = "account=* eventsource sqs.amazonaws.com"
       parse_expression = <<EOT
-              | json "eventSource","eventName" nodrop
-              | json "userIdentity.type", "userIdentity.arn", "userIdentity.userName", "userIdentity.accountId", "awsRegion", "responseElements.queueUrl", "requestParameters.queueUrl", "sourceIPAddress" as type, arn, userName, accountId, region, queueUrlRes, queueUrlReq, src_ip nodrop
-              | if(eventName="CreateQueue",queueUrlRes,queueUrlReq) as queueUrl
-              | parse regex field= queueUrl "(?<queueName>[^\/]*$)"
-              | fields - queueUrlRes,queueUrlReq
+              | json "userIdentity", "eventSource", "eventName", "awsRegion", "recipientAccountId", "requestParameters", "responseElements", "sourceIPAddress" as userIdentity, event_source, event_name, region, recipient_account_id, requestParameters, responseElements, src_ip  nodrop
+              | json field=userIdentity "accountId", "type", "arn", "userName" as accountid, type, arn, username nodrop
+              | json field=requestParameters "queueUrl" as queueUrlReq nodrop
+              | json field=responseElements "queueUrl" as queueUrlRes nodrop
+              | where event_source="sqs.amazonaws.com"
+              | if(event_name="CreateQueue", queueUrlRes, queueUrlReq) as queueUrl
+              | parse regex field=queueUrl "(?<queueName>[^\/]*$)"
+              | if (isBlank(recipient_account_id), accountid, recipient_account_id) as accountid
+              | toLowerCase(queuename) as queuename
               | "aws/sqs" as namespace
-              | where eventSource="sqs.amazonaws.com"
+              | fields region, namespace, queuename, accountid
       EOT
       enabled = true
 }
