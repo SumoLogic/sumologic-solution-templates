@@ -68,6 +68,11 @@ output "sns_apps_folder_id" {
   description = "This output contains sumologic SNS apps folder."
 }
 
+output "sqs_apps_folder_id" {
+  value       = module.sumo-module.sumologic_content_sqs.SQSApp.id
+  description = "This output contains sumologic SQS apps folder."
+}
+
 output "monitors_folder_id" {
   value       = module.sumo-module.sumologic_monitors_folder.id
   description = "This output contains sumologic monitors folder."
@@ -148,6 +153,12 @@ output "sumologic_field_extraction_rule_cw" {
 output "sumologic_field_extraction_rule_sns" {
   value       = sumologic_field_extraction_rule.AwsObservabilitySNSCloudTrailLogsFER.id
   description = "This output contains sumologic SNS field extraction rule id."
+}
+
+# SQS FER id
+output "sumologic_field_extraction_rule_sqs" {
+  value       = sumologic_field_extraction_rule.AwsObservabilitySQSCloudTrailLogsFER.id
+  description = "This output contains sumologic SQS field extraction rule id."
 }
 
 # NLB Metric rule
