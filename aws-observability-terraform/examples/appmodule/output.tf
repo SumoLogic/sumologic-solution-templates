@@ -254,6 +254,11 @@ output "sumologic_field_topicname" {
   description = "This output contains sumologic topicname field id."
 }
 
+output "sumologic_field_queuename" {
+  value       = sumologic_field.queuename.id
+  description = "This output contains sumologic queuename field id."
+}
+
 output "sumologic_field_dbclusteridentifier" {
   value       = sumologic_field.dbclusteridentifier.id
   description = "This output contains sumologic dbclusteridentifier field id."

@@ -118,6 +118,12 @@ resource "sumologic_field" "topicname" {
     state      = "Enabled"
 }
 
+resource "sumologic_field" "queuename" {
+    data_type  = "String"
+    field_name = "queuename"
+    state      = "Enabled"
+}
+
 # ALB access log FER
 resource "sumologic_field_extraction_rule" "AwsObservabilityAlbAccessLogsFER" {
       depends_on = [time_sleep.wait_for_10_seconds]

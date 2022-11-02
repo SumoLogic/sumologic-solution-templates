@@ -127,6 +127,7 @@
 | <a name="output_sumologic_field_region"></a> [sumologic\_field\_region](#output\_sumologic\_field\_region) | This output contains sumologic Region field id. |
 | <a name="output_sumologic_field_tablename"></a> [sumologic\_field\_tablename](#output\_sumologic\_field\_tablename) | This output contains sumologic tablename field id. |
 | <a name="output_sumologic_field_topicname"></a> [sumologic\_field\_topicname](#output\_sumologic\_field\_topicname) | This output contains sumologic topicname field id. |
+| <a name="output_sumologic_field_queuename"></a> [sumologic\_field\_queuename](#output\_sumologic\_field\_queuename) | This output contains sumologic queuename field id. |
 | <a name="output_sumologic_metric_rule_nlb"></a> [sumologic\_metric\_rule\_nlb](#output\_sumologic\_metric\_rule\_nlb) | This output contains sumologic NLB metric rule name. |
 | <a name="output_sumologic_metric_rule_rds_cluster"></a> [sumologic\_metric\_rule\_rds\_cluster](#output\_sumologic\_metric\_rule\_rds\_cluster) | This output contains sumologic RDS cluster metric rule name. |
 | <a name="output_sumologic_metric_rule_rds_instance"></a> [sumologic\_metric\_rule\_rds\_instance](#output\_sumologic\_metric\_rule\_rds\_instance) | This output contains sumologic RDS instance metric rule name. |
