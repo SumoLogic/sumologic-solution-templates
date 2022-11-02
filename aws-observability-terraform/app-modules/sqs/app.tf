@@ -27,12 +27,9 @@ module "sqs_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
-      "queries": [
-      {
-        "rowId": "A",
-        "query": "metric=ApproximateAgeOfOldestMessage Statistic=avg region=* account=* queuename=* namespace=aws/sqs | avg by account,region,namespace,queuename "
-      }
-    ],
+      queries =  {
+        A =  "metric=ApproximateAgeOfOldestMessage Statistic=avg region=* account=* queuename=* namespace=aws/sqs | avg by account,region,namespace,queuename "
+      },
       triggers = [
         {
           detection_method = "MetricsStaticCondition",
@@ -64,8 +61,7 @@ module "sqs_module" {
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
       queries = {
-        "rowId": "A",
-        "query": "metric=ApproximateNumberOfMessagesNotVisible Statistic=avg region = * account=* queuename=* namespace=aws/sqs | avg by account, region, namespace, queuename "
+        A =  "metric=ApproximateNumberOfMessagesNotVisible Statistic=avg region = * account=* queuename=* namespace=aws/sqs | avg by account, region, namespace, queuename "
       }
       triggers = [
         {
@@ -130,12 +126,9 @@ module "sqs_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
-      "queries": [
-      {
-        "rowId": "A",
-        "query": "metric=NumberOfMessagesReceived Statistic=avg region=* account=* queuename=* namespace=aws/sqs | avg by account, region, namespace, queuename "
-      }
-    ],
+      queries = {
+        A = "metric=NumberOfMessagesReceived Statistic=avg region=* account=* queuename=* namespace=aws/sqs | avg by account, region, namespace, queuename "
+      },
       triggers = [
         {
           detection_method = "MetricsStaticCondition",
