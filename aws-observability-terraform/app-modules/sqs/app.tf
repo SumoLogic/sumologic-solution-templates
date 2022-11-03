@@ -44,7 +44,7 @@ module "sqs_module" {
           detection_method = "MetricsStaticCondition",
           time_range       = "-5m",
           trigger_type     = "ResolvedCritical",
-          threshold        = 0,
+          threshold        = 5,
           threshold_type   = "LessThanOrEqual",
           occurrence_type  = "Always",
           trigger_source   = "AnyTimeSeries"
@@ -122,7 +122,7 @@ module "sqs_module" {
     },
      "AWSSQSQueueHasStoppedReceivingMessages" = {
       monitor_name         = "AWS SQS - Queue has stopped receiving messages"
-      monitor_description  = "This alert fires when we detect that the queue has stopped receiving messages. That is, the average number of messages received in the queue <1 for an interval of 30 minutes."
+      monitor_description  = "This alert fires when we detect that the queue has stopped receiving messages. That is, the average number of messages received in the queue <1 for an interval of 30 minutes"
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
