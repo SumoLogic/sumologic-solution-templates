@@ -1936,6 +1936,176 @@
       "groupNotifications": false,
       "playbook": "",
       "sloId": null
+    },
+    {
+      "name": "AWS SQS -  Access from highly malicious sources",
+      "description": "This alert fires when an Application AWS - SQS is accessed from highly malicious IP addresses within last 5 minutes",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=\"aws/sqs\" eventname eventsource \"sqs.amazonaws.com\" sourceIPAddress\n| json \"userIdentity\", \"eventSource\", \"eventName\", \"awsRegion\", \"recipientAccountId\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\",\"errorCode\", \"errorMessage\" as userIdentity, event_source, event_name, region, recipient_account_id, requestParameters, responseElements, src_ip, error_code, error_message nodrop\n| json field=userIdentity \"accountId\", \"type\", \"arn\", \"userName\" as accountid, type, arn, username nodrop\n| json field=requestParameters \"queueUrl\" as queueUrlReq nodrop \n| json field=responseElements \"queueUrl\" as queueUrlRes nodrop\n| where event_source=\"sqs.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")\n| if(event_name=\"CreateQueue\", queueUrlRes, queueUrlReq) as queueUrl \n| parse regex field=queueUrl \"(?<queueName>[^\\/]*$)\"\n| if (isBlank(recipient_account_id), accountid, recipient_account_id) as accountid\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status \n| count as ip_count by src_ip\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as actor\n| where type=\"ip_address\" and malicious_confidence = \"high\"\n| sort by ip_count, src_ip\n| fields src_ip, malicious_confidence, actor, label_name"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS SQS -  Message processing not fast enough",
+      "description": "This alert fires when we detect message processing is not fast enough. That is, the average approximate age of the oldest non-deleted message in the queue is more than 5 seconds for an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=ApproximateAgeOfOldestMessage Statistic=avg region=* account=* queuename=* namespace=aws/sqs | avg by account,region,namespace,queuename "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 3
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 3
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS SQS -  Messages not processed",
+      "description": "This alert fires when we detect messages that have been received by a consumer, but have not been processed (deleted/failed). That is, the average number of messages that are in flight are >=20 for an interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=ApproximateNumberOfMessagesNotVisible Statistic=avg region = * account=* queuename=* namespace=aws/sqs | avg by account, region, namespace, queuename "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 20,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 3
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 20,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 3
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
+    },
+    {
+      "name": "AWS SQS -  Queue has stopped receiving messages",
+      "description": "This alert fires when we detect that the queue has stopped receiving messages. That is, the average number of messages received in the queue <1 for an interval of 30 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "metric=NumberOfMessagesReceived Statistic=avg region=* account=* queuename=* namespace=aws/sqs | avg by account, region, namespace, queuename "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-30m",
+          "threshold": 1,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 3
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-30m",
+          "threshold": 1,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 3
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null
     }
   ]
 }

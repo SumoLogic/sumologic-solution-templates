@@ -245,7 +245,7 @@ module "sns_app" {
 
 # Install the sqs app and resources.
 module "sqs_app" {
-  depends_on = [module.nlb_app]
+  depends_on = [module.elb_app]
   source     = "./sqs"
 
   access_id                = var.access_id
