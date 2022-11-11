@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.5.1: Template to setup the SNS app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.6.0: Template to setup the SNS app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -205,6 +205,7 @@ Resources:
                                            | parse field=subscription_arn "arn:aws:sns:*:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
                                            | if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname
                                            | if (isBlank(accountid), recipient_account_id, accountid) as accountid
+                                           | toLowerCase(topicname) as topicname
                                            | "aws/sns" as namespace
                                            | fields region, namespace, topicname, accountid'
       FieldExtractionRuleParseEnabled: true
