@@ -2,7 +2,7 @@ module "aws_elb_server_errors_limit_breached_monitor" {
   depends_on = [
     sumologic_slo.aws_elb_server_errors_limit_breached
   ]
-  source                    = "../../../terraform-sumologic-sumo-logic-monitor"
+  source                    = "SumoLogic/sumo-logic-monitor/sumologic"
   #source                    = "SumoLogic/sumo-logic-monitor/sumologic"
   #version                  = "{revision}"
   monitor_name                = "AWS - Server Errors Limit Breached."
@@ -34,7 +34,7 @@ module "aws_elb_latency_limit_breached_monitor" {
   depends_on = [
     sumologic_slo.aws_elb_latency_limit_breached
   ]
-  source                    = "../../../terraform-sumologic-sumo-logic-monitor"
+  source                    = "SumoLogic/sumo-logic-monitor/sumologic"
   #source                    = "SumoLogic/sumo-logic-monitor/sumologic"
   #version                  = "{revision}"
   monitor_name                = "AWS - Error budget for latency has depleted by 2% in 1 hour."
