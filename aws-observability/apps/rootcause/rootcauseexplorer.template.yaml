@@ -13,7 +13,6 @@ Metadata:
           - Section1cSumoAccessKey
           - Section1dSumoOrganizationId
           - Section1eRemoveSumoResourcesOnDeleteStack
-          - Section1fOrgId
 
       - Label:
           default: "App Details - Sumo Logic Collector Configuration"
@@ -61,8 +60,6 @@ Metadata:
         default: "Sumo Logic Organization Id"
       Section1eRemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
-      Section1fOrgId:
-        default: "Sumo Logic Organization Id"
 
       Section2aInstallApp:
         default: "Create AWS Root Cause Explorer App"
@@ -128,11 +125,6 @@ Parameters:
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-  Section1fOrgId:
-    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
-    Type: String
-    AllowedPattern: ".+"
-    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
   Section2aInstallApp:
     Type: String
@@ -283,6 +275,14 @@ Mappings:
       bucketname: appdevzipfiles-eu-south-1
     me-south-1:
       bucketname: appdevzipfiles-me-south-1s
+    me-central-1:
+      bucketname: appdevzipfiles-me-central-1
+    eu-central-2:
+        bucketname: appdevzipfiles-eu-central-2ss
+    ap-northeast-3:
+        bucketname: ppdevzipfiles-ap-northeast-3s
+    ap-southeast-3:
+        bucketname: appdevzipfiles-ap-southeast-3
 
 Resources:
 
@@ -359,7 +359,7 @@ Resources:
       SumoDeployment: !Ref Section1aSumoDeployment
       location: !Ref Section6aAppInstallLocation
       share: !Ref Section6bShare
-      orgid: !Ref Section1fOrgId
+      orgid: !Ref Section1dSumoOrganizationId
 
   SumoLogicHostedCollector:
     Type: Custom::Collector
