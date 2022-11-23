@@ -3,7 +3,6 @@ module "aws_elb_server_errors_limit_breached_monitor" {
     sumologic_slo.aws_elb_server_errors_limit_breached
   ]
   source                    = "SumoLogic/sumo-logic-monitor/sumologic"
-  #source                    = "SumoLogic/sumo-logic-monitor/sumologic"
   #version                  = "{revision}"
   monitor_name                = "AWS - Server Errors Limit Breached."
   monitor_description         = "This alert is fired when the AWS Server Errors Limit Breached."
@@ -35,7 +34,6 @@ module "aws_elb_latency_limit_breached_monitor" {
     sumologic_slo.aws_elb_latency_limit_breached
   ]
   source                    = "SumoLogic/sumo-logic-monitor/sumologic"
-  #source                    = "SumoLogic/sumo-logic-monitor/sumologic"
   #version                  = "{revision}"
   monitor_name                = "AWS - Error budget for latency has depleted by 2% in 1 hour."
   monitor_description         = "This alert is fired when Error budget for latency has depleted by 2% in 1 hour."

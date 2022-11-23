@@ -8,5 +8,5 @@ provider "sumologic" {
 #Sumo Logic SLO Folder
 resource "sumologic_slo_folder" "AWS" {
   name        = var.folder
-  description = "Folder for SLOs created for AWS"
+  description = "Folder for SLOs for AWS"
 }
