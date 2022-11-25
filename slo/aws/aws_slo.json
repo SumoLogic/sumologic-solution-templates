@@ -1,0 +1,88 @@
+{
+    "name": "AWS",
+    "description": "Folder for SLOs for AWS",
+    "type": "SlosLibraryFolderExport",
+    "children": [
+      {
+        "name": "Server Errors Limit Breached",
+        "description": "Server error rate every 5 minutes rolling over 24 hrs.",
+        "type": "SlosLibrarySloExport",
+        "signalType": "Error",
+        "compliance": {
+          "complianceType": "Rolling",
+          "target": 99,
+          "timezone": "Asia/Kolkata",
+          "size": "1d"
+        },
+        "indicator": {
+          "evaluationType": "Window",
+          "queryType": "Metrics",
+          "queries": [
+            {
+              "queryGroupType": "Unsuccessful",
+              "queryGroup": [
+                {
+                  "rowId": "A",
+                  "query": "metric=HTTPCode_Backend_5XX _sourcecategory=labs/aws/elb/metric account=prod",
+                  "useRowCount": false,
+                  "field": null
+                }
+              ]
+            },
+            {
+              "queryGroupType": "Total",
+              "queryGroup": [
+                {
+                  "rowId": "A",
+                  "query": "metric=RequestCount _sourcecategory=labs/aws/elb/metric account=prod",
+                  "useRowCount": false,
+                  "field": null
+                }
+              ]
+            }
+          ],
+          "threshold": 99,
+          "op": "GreaterThanOrEqual",
+          "aggregation": null,
+          "size": "5m"
+        },
+        "service": "",
+        "application": ""
+      },
+      {
+        "name": "Latency Limit Breached.",
+        "description": "Round-trip request-processing time between load balancer and backend every 5 minutes rolling over 24 hrs.",
+        "type": "SlosLibrarySloExport",
+        "signalType": "Latency",
+        "compliance": {
+          "complianceType": "Rolling",
+          "target": 99,
+          "timezone": "Asia/Kolkata",
+          "size": "1d"
+        },
+        "indicator": {
+          "evaluationType": "Window",
+          "queryType": "Metrics",
+          "queries": [
+            {
+              "queryGroupType": "Threshold",
+              "queryGroup": [
+                {
+                  "rowId": "A",
+                  "query": "metric=Latency",
+                  "useRowCount": false,
+                  "field": null
+                }
+              ]
+            }
+          ],
+          "threshold": 3,
+          "op": "LessThanOrEqual",
+          "aggregation": "Avg",
+          "size": "5m"
+        },
+        "service": "",
+        "application": ""
+      }
+    ]
+  }
