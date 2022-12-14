@@ -7,6 +7,7 @@ Metadata:
       - Label:
           default: "1. Sumo Logic Access Configuration (Required)"
         Parameters:
+          - SecretName
           - Section1aSumoLogicDeployment
           - Section1bSumoLogicAccessID
           - Section1cSumoLogicAccessKey
@@ -77,6 +78,8 @@ Metadata:
           - Section10bShare
 
     ParameterLabels:
+      SecretName:
+        default: "Secret ARN"
       Section1aSumoLogicDeployment:
         default: "Sumo Logic Deployment Name"
       Section1bSumoLogicAccessID:
@@ -152,35 +155,42 @@ Metadata:
         default: "Do you want to share App with whole organisation"
 
 Parameters:
+  SecretName:
+    Description: >-
+      The secret containing your Sumo Logic credentials if you just created a new Sumo Logic account from AWS Marketplace.
+    Type: String
+    Default: ""
   Section1aSumoLogicDeployment:
     Type: String
     AllowedValues:
+      - ""
       - au
       - ca
       - de
       - eu
-      - jp
-      - us2
-      - us1
-      - in
       - fed
-    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+      - in
+      - jp
+      - us1
+      - us2
+    Description: "Provide value only if Secret ARN is EMPTY, enter au, ca, de, eu, fed, in, jp, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+    Default: ""
   Section1bSumoLogicAccessID:
     Type: String
-    Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
-    AllowedPattern: ".+"
-    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+    Description: "Provide value only if Secret ARN is EMPTY, enter Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    # AllowedPattern: ".+"
+    # ConstraintDescription: "Sumo Logic Access ID can not be empty."
   Section1cSumoLogicAccessKey:
     Type: String
-    Description: "Sumo Logic Access Key."
-    AllowedPattern: ".+"
-    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    Description: "Provide value only if Secret ARN is EMPTY, enter Sumo Logic Access Key."
+    # AllowedPattern: ".+"
+    # ConstraintDescription: "Sumo Logic Access Key can not be empty."
     NoEcho: true
   Section1dSumoLogicOrganizationId:
-    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Description: "Provide value only if Secret ARN is EMPTY, enter Organisation ID. Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
     Type: String
-    AllowedPattern: ".+"
-    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+    # AllowedPattern: ".+"
+    # ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   Section1eSumoLogicResourceRemoveOnDeleteStack:
     AllowedValues:
       - true
@@ -457,13 +467,40 @@ Conditions:
   # Condition for Stacks creation. Calling Nested Stack EveryTime to create FER and Metric Rule. If already present, marked as duplicate in Resource.
   install_overview_dashboards: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
 
+  # Condition to determine if Secret ARN is provided or Access Keys
+  SecretNameProvided:
+    !Not
+      - !Equals
+        - !Ref SecretName
+        - ""
+
+Rules:
+  MustSetKeysOrSecretArn:
+    Assertions:
+      - Assert:
+          Fn::Or:
+            - Fn::And:
+              - Fn::Not:
+                - Fn::Equals:
+                  - Ref: Section1bSumoLogicAccessID
+                  - ""
+              - Fn::Not:
+                - Fn::Equals:
+                  - Ref: Section1cSumoLogicAccessKey
+                  - ""
+            - Fn::Not:
+                - Fn::Equals:
+                    - Ref: SecretName
+                    - ""
+        AssertDescription: Either of "Secret Arn" or "Sumo Logic Deployment Name", "Access ID", "Access Key" and "Organisation Id" must be set.
+
 Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
       Version: "v2.5.2"
     CollectorDetails:
-      SumoLogicAccountID: 926226587429
+      SumoLogicAccountID: 246946804217
       CollectorNamePrefix: "aws-observability"
       CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
       ALBLogsSourceCategory: "aws/observability/alb/logs"
@@ -474,6 +511,156 @@ Mappings:
       ELBLogsSourceCategory: "aws/observability/clb/logs"
 
 Resources:
+  # Retrieve secrets in provided secret ARN
+  LambdaExecutionRoleSecretsRetrieval:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn-lint:
+        config:
+          # This policy needs permission to decrypt kms keys - the name of the key is unknown at stack execution
+          ignore_checks:
+            - EIAMPolicyWildcardResource
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: LambdaSecretsRetrieval
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "secretsmanager:GetSecretValue"
+                Resource: !Ref SecretName
+              - Effect: "Allow"
+                Action:
+                  - "kms:Decrypt"
+                Resource: "*"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  # Retrieving secrets passed in via SecretsManager Arn
+  SecretsRetrieval:
+    Type: "Custom::SecretsRetrieval"
+    Properties:
+      ServiceToken: !GetAtt SecretsRetrievalFunction.Arn
+      SecretArn: !Ref SecretName
+      AccessID: !Ref Section1bSumoLogicAccessID
+      AccessKey: !Ref Section1cSumoLogicAccessKey
+      OrgID: !Ref Section1dSumoLogicOrganizationId
+      Deployment: !Ref Section1aSumoLogicDeployment
+      
+  SecretsRetrievalFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Description: "A function to retrieve secrets from a provided secrets arn."
+      Role: !GetAtt LambdaExecutionRoleSecretsRetrieval.Arn
+      Handler: "index.handler"
+      Runtime: "python3.8"
+      Timeout: 30
+      Code:
+        ZipFile: |
+          import boto3
+
+          import json
+          import logging
+          import signal
+          from urllib.request import build_opener, HTTPHandler, Request
+
+          LOGGER = logging.getLogger()
+          LOGGER.setLevel(logging.INFO)
+
+
+          def handler(event, context):
+              '''Handle Lambda event from AWS'''
+              try:
+                  #LOGGER.info('REQUEST RECEIVED:\n %s', event)
+                  #LOGGER.info('REQUEST RECEIVED:\n %s', context)
+                  if event['RequestType'] == 'Create':
+                      LOGGER.info('Received Create request.')
+                      secret_arn = event['ResourceProperties']['SecretArn']
+                      access_id = event['ResourceProperties']['AccessID']
+                      access_key = event['ResourceProperties']['AccessKey']
+                      org_id = event['ResourceProperties']['OrgID']
+                      deployment = event['ResourceProperties']['Deployment']
+                      #region = context.invoked_function_arn.split(":")[3]
+                      region = "us-east-1"
+
+                      if secret_arn:
+                          client = boto3.client("secretsmanager", region_name=region)
+                          secret_json = client.get_secret_value(SecretId=secret_arn)
+                          secret_content = json.loads(secret_json["SecretString"])
+                          access_id = secret_content["accessId"]
+                          access_key = secret_content["accessKey"]
+                          org_id = secret_content["externalId"]
+                          deployment = secret_content["deployment"]
+
+                      send_response(event, context, "SUCCESS",
+                                    {
+                                        "Message": "Type Configuration set correctly.",
+                                        "accessID": access_id,
+                                        "accessKey": access_key,
+                                        "orgID": org_id,
+                                        "deployment": deployment,
+                                    })
+                  elif event['RequestType'] == 'Update':
+                      LOGGER.info('Received Update request.')
+                      send_response(event, context, "SUCCESS",
+                                    {"Message": "Update not supported, no operation performed."})
+                  elif event['RequestType'] == 'Delete':
+                      LOGGER.info('Received Delete request.')
+                      send_response(event, context, "SUCCESS",
+                                    {"Message": "Delete not supported, no operation performed."})
+                  else:
+                      LOGGER.info('Failed - received unexpected request.')
+                      send_response(event, context, "FAILED",
+                                    {"Message": "Unexpected event received from CloudFormation"})
+              except Exception as e:  # pylint: disable=W0702
+                  LOGGER.info('Failed - exception thrown during processing.')
+                  send_response(event, context, "FAILED", {
+                      "Message": "Exception during processing: {}".format(e)})
+
+
+          def send_response(event, context, response_status, response_data):
+              '''Send a resource manipulation status response to CloudFormation'''
+              response_body = json.dumps({
+                  "Status": response_status,
+                  "Reason": "See the details in CloudWatch Log Stream: " + context.log_stream_name,
+                  "PhysicalResourceId": context.log_stream_name,
+                  "StackId": event['StackId'],
+                  "RequestId": event['RequestId'],
+                  "LogicalResourceId": event['LogicalResourceId'],
+                  "Data": response_data
+              })
+              formatted_response = response_body.encode("utf-8")
+
+              #LOGGER.info('ResponseURL: %s', event['ResponseURL'])
+              #LOGGER.info('ResponseBody: %s', response_body)
+
+              opener = build_opener(HTTPHandler)
+              request = Request(event['ResponseURL'], data=formatted_response)
+              request.add_header('Content-Type', 'application/json; charset=utf-8')
+              request.add_header('Content-Length', len(formatted_response))
+              request.get_method = lambda: 'PUT'
+              response = opener.open(request)
+              LOGGER.info("Status code: %s", response.getcode())
+              LOGGER.info("Status message: %s", response.msg)
+
+
+          def timeout_handler(_signal, _frame):
+              '''Handle SIGALRM'''
+              raise Exception('Time exceeded')
+
+          signal.signal(signal.SIGALRM, timeout_handler)
+
+
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -482,10 +669,10 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        SumoLogicDeployment: !Ref Section1aSumoLogicDeployment
-        SumoLogicAccessID: !Ref Section1bSumoLogicAccessID
-        SumoLogicAccessKey: !Ref Section1cSumoLogicAccessKey
-        SumoLogicOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        SumoLogicDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        SumoLogicAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        SumoLogicAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
+        SumoLogicOrganizationId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         RemoveSumoLogicResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         AccountAlias: !Ref Section2aAccountAlias
         AccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
@@ -566,10 +753,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
         Section3bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
@@ -578,7 +766,6 @@ Resources:
         Section4bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoAlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -588,10 +775,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aAccountAlias: !Ref Section2aAccountAlias
         Section2bAccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
@@ -603,7 +791,6 @@ Resources:
         Section6cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section7aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section7bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
   
   sumoElbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -614,10 +801,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aAccountAlias: !Ref Section2aAccountAlias
         Section2bAccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
@@ -629,7 +817,6 @@ Resources:
         Section6cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section7aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section7bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoDynamoDBMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -640,10 +827,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section3bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
@@ -652,7 +840,6 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoRdsMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -663,10 +850,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section3bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
@@ -675,7 +863,6 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoApiGatewayMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -686,10 +873,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section3bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
@@ -698,7 +886,6 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoSNSAppStack:
     Type: AWS::CloudFormation::Stack
@@ -709,10 +896,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section3bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
@@ -721,7 +909,6 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
         
   RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
@@ -732,10 +919,10 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
+        Section1dSumoOrganizationId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
         Section2bSumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
@@ -752,7 +939,7 @@ Resources:
         Section5bNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section6aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section6bShare: !Ref Section10bShare
-        Section1fOrgId: !Ref Section1dSumoLogicOrganizationId
+        Section1fOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -763,10 +950,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aAccountAlias: !Ref Section2aAccountAlias
         Section2bAccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
         Section3aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
@@ -779,7 +967,6 @@ Resources:
         Section7cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section8aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section8bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoECSMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -790,10 +977,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section3bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
@@ -802,7 +990,6 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoElasticCacheMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -813,10 +1000,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
         Section3bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
@@ -825,7 +1013,6 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
 
   sumoNlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -836,10 +1023,11 @@ Resources:
         - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
           Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
         Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
         Section3aNLBLogsSourceName: ""
         Section3bNLBSourceUpdated: "No"
@@ -848,4 +1036,3 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
