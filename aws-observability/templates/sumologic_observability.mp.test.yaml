@@ -514,6 +514,7 @@ Resources:
   # Retrieve secrets in provided secret ARN
   LambdaExecutionRoleSecretsRetrieval:
     Type: AWS::IAM::Role
+    Condition: SecretNameProvided
     Metadata:
       cfn-lint:
         config:
@@ -549,6 +550,7 @@ Resources:
   # Retrieving secrets passed in via SecretsManager Arn
   SecretsRetrieval:
     Type: "Custom::SecretsRetrieval"
+    Condition: SecretNameProvided
     Properties:
       ServiceToken: !GetAtt SecretsRetrievalFunction.Arn
       SecretArn: !Ref SecretName
@@ -559,6 +561,7 @@ Resources:
       
   SecretsRetrievalFunction:
     Type: "AWS::Lambda::Function"
+    Condition: SecretNameProvided
     Properties:
       Description: "A function to retrieve secrets from a provided secrets arn."
       Role: !GetAtt LambdaExecutionRoleSecretsRetrieval.Arn
