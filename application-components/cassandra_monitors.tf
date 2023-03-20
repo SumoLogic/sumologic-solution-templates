@@ -4,6 +4,11 @@ resource "sumologic_monitor_folder" "cassandra_monitor_folder" {
   name        = var.cassandra_monitor_folder
   description = "Folder for Cassandra Monitors"
   parent_id   = sumologic_monitor_folder.root_monitor_folder.id
+  obj_permission {
+    subject_type = "org"
+    subject_id = var.sumologic_organization_id
+    permissions = ["Create", "Read", "Update", "Delete", "Manage"]
+  }
 }
 
 module "Cassandra-CompactionTaskPending" {

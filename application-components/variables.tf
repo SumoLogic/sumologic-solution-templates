@@ -62,7 +62,7 @@ variable "components_on_kubernetes_deployment" {
         EOT
   validation {
     condition     = anytrue([for engine in split(",", var.components_on_kubernetes_deployment) : contains(["", "memcached", "cassandra", "elasticsearch", "sqlserver", "mongodb", "mysql", "postgresql", "redis", "mariadb", "couchbase", "oracle"], engine)])
-    error_message = "The value must be one of \"memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle\""
+    error_message = "The value must be one of \"memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle\"."
   }
   default = ""
 }
@@ -74,7 +74,7 @@ variable "components_on_non_kubernetes_deployment" {
         EOT
   validation {
     condition     = anytrue([for engine in split(",", var.components_on_non_kubernetes_deployment) : contains(["", "memcached", "cassandra", "elasticsearch", "sqlserver", "mongodb", "mysql", "postgresql", "redis", "mariadb", "couchbase", "oracle"], engine)])
-    error_message = "The value must be one of \"memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle\""
+    error_message = "The value must be one of \"memcached,cassandra,elasticsearch,sqlserver,mongodb,mysql,postgresql,redis,mariadb,couchbase,oracle\"."
   }
   default = ""
 }
