@@ -44,20 +44,18 @@ Required in the aws_slo_notifications.auto.tfvars file.
 | <a name="email_notifications_warning"></a> [email\_notifications\_warning](#email\_notifications\_warning) | If you want the alerts to send email or connection notifications, edit the aws_slo_notifications.auto.tfvars file to populate the connection_notifications and email_notifications sections. Examples are provided below. | `object` | n/a | yes |
 | <a name="email_notifications_missingdata"></a> [email\_notifications\_missingdata](#email\_notifications\_missingdata) | If you want the alerts to send email or connection notifications, edit the aws_slo_notifications.auto.tfvars file to populate the connection_notifications and email_notifications sections. Examples are provided below. | `object` | n/a | yes |
 
-Examples:
-
 
 ## Installation
 
 ### Terraform Installation
 
-1. Generate an access key and access ID for a user that has the Manage Monitors role capability. For instructions see [Access Keys](https://help.sumologic.com/docs/manage/Security/Access-Keys/#Create_an_access_key_on_Preferences_page).
+1. Generate an access key and access ID for a user that has the Manage SLOs and Manage Monitors role capability. For instructions see [Access Keys](https://help.sumologic.com/docs/manage/Security/Access-Keys/#Create_an_access_key_on_Preferences_page).
 
 2. Download [Terraform 0.13](https://www.terraform.io/downloads.html) or later, and install it.
 
 3. Clone the Sumo Logic Terraform package for [AWS ELB Slos](https://github.com/SumoLogic/sumologic-solution-templates/slo-packages/aws) using the git clone command.
 
-4. Configuration: After extracting the package, navigate to the `sumologic-solution-templates/slo-packages/aws directory`.
+4. Configuration: Navigate to the `sumologic-solution-templates/slo-packages/aws` directory.
 
 > Edit the `aws_slo.auto.tfvars` file and add the Sumo Logic Access Key and Access ID from Step 1 and your Sumo Logic deployment. If you're not sure of your deployment, see [Sumo Logic Endpoints and Firewall Security](https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security).
 
@@ -115,7 +113,7 @@ email_notifications = [
 
 **Install slos.**
 
-1. Navigate to the `sumologic-solution-templates/slo-packages/aws directory` and run `terraform init`. This will initialize Terraform and download the required components.
+1. Navigate to the `sumologic-solution-templates/slo-packages/aws` directory and run `terraform init`. This will initialize Terraform and download the required components.
 2. Run `terraform plan` to view the slos that Terraform will create or modify.
 3. Run `terraform apply`.
 
