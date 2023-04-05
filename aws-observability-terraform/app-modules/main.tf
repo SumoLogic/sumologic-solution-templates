@@ -12,11 +12,13 @@ resource "sumologic_folder" "apps_folder" {
 resource "sumologic_monitor_folder" "monitor_folder" {
   name        = var.monitors_folder_name
   description = "This folder contains all the monitors for AWS Observability solution."
-  obj_permission {
-    subject_type = "org"
-    subject_id = var.sumologic_organization_id
-    permissions = ["Create", "Read", "Update", "Delete", "Manage"]
-  }
+  # Turn on this code block when FGP feature is GA'ed
+  # obj_permission {
+  #   subject_type = "org"
+  #   subject_id = var.sumologic_organization_id
+  #   permissions = ["Create", "Read", "Update", "Delete", "Manage"]
+  # }
+  # Turn on this code block when FGP feature is GA'ed
 }
 
 #Provides a way to configure permissions on a content to share it with a user, a role, or the entire org
