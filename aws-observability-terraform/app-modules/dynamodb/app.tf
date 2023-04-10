@@ -21,7 +21,7 @@ module "dynamodb_module" {
   managed_monitors = {
     "AWSDynamoDBMultipleTablesdeleted" = {
       monitor_name         = "AWS DynamoDB - Multiple Tables deleted"
-      monitor_description  = "This alert fires when we detect multiple failed operations for Elasticache service within 15 minutes"
+      monitor_description  = "This alert fires when five or more tables are deleted within 10 minutes."
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
