@@ -7,7 +7,7 @@ access_key          = "<YOUR SUMO ACCESS KEY>"
 environment         = "<DEPLOYMENT>"
 # This flag determines whether to enable all monitors or not.
 monitors_disabled   = true
-# The Sumo Logic SLOA will be installed in a folder specified by this value.
+# The Sumo Logic SLOs will be installed in a folder specified by this value.
 folder              = "AWS"
 # AWS ELB Data Filter. For eg: account=prod
 aws_elb_data_filter = ""

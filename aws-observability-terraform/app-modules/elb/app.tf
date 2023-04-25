@@ -23,6 +23,7 @@ module "classic_elb_module" {
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
       queries = {
         A = "account=* region=* namespace=aws/elb\n| parse \"* * * * * * * * * * * \\\"*\\\" \\\"*\\\" * *\" as datetime, loadbalancername, client, backend, request_processing_time, backend_processing_time, response_processing_time, elb_status_code, backend_status_code, received_bytes, sent_bytes, request, user_agent, ssl_cipher, ssl_protocol\n| parse regex \"(?<ClientIp>\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\" multi\n| where ClientIp != \"0.0.0.0\" and ClientIp != \"127.0.0.1\"\n| count as ip_count by ClientIp, loadbalancername, account, region, namespace\n| lookup type, actor, raw, threatlevel as MaliciousConfidence from sumo://threat/cs on threat=ClientIp \n| json field=raw \"labels[*].name\" as LabelName \n| replace(LabelName, \"\\\\/\",\"->\") as LabelName\n| replace(LabelName, \"\\\"\",\" \") as LabelName\n| where type=\"ip_address\" and MaliciousConfidence=\"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sum (ip_count) as ThreatCount by ClientIp, loadbalancername, account, region, namespace, MaliciousConfidence, Actor, LabelName"
       }
@@ -56,6 +57,7 @@ module "classic_elb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/elb metric=HTTPCode_ELB_4XX Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
         B = "Namespace=aws/elb metric=RequestCount Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
@@ -91,6 +93,7 @@ module "classic_elb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/elb metric=Latency Statistic=Average account=* region=* loadbalancername=* | eval(_value*1000) | sum by account, region, namespace, loadbalancername"
       }
@@ -124,6 +127,7 @@ module "classic_elb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/elb metric=HTTPCode_ELB_5XX Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"
         B = "Namespace=aws/elb metric=RequestCount Statistic=Sum account=* region=* loadbalancername=* | sum by loadbalancername, account, region, namespace"

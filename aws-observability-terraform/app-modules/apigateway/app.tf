@@ -25,6 +25,7 @@ module "apigateway_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/apigateway metric=5xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
         B = "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
@@ -60,6 +61,7 @@ module "apigateway_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/apigateway metric=4xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
         B = "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
@@ -95,6 +97,7 @@ module "apigateway_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/apigateway metric=IntegrationLatency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
       }
@@ -128,6 +131,7 @@ module "apigateway_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/apigateway metric=Latency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
       }

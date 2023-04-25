@@ -12,6 +12,13 @@ resource "sumologic_folder" "apps_folder" {
 resource "sumologic_monitor_folder" "monitor_folder" {
   name        = var.monitors_folder_name
   description = "This folder contains all the monitors for AWS Observability solution."
+  # Turn on this code block when FGP feature is GA'ed
+  # obj_permission {
+  #   subject_type = "org"
+  #   subject_id = var.sumologic_organization_id
+  #   permissions = ["Create", "Read", "Update", "Delete", "Manage"]
+  # }
+  # Turn on this code block when FGP feature is GA'ed
 }
 
 #Provides a way to configure permissions on a content to share it with a user, a role, or the entire org
@@ -243,6 +250,23 @@ module "sns_app" {
   
 }
 
+# Install the sqs app and resources.
+module "sqs_app" {
+  depends_on = [module.elb_app]
+  source     = "./sqs"
+
+  access_id                = var.access_id
+  access_key               = var.access_key
+  environment              = var.environment
+  json_file_directory_path = var.json_file_directory_path
+  app_folder_id            = sumologic_folder.apps_folder.id
+  monitor_folder_id        = sumologic_monitor_folder.monitor_folder.id
+  monitors_disabled        = var.sqs_monitors_disabled
+  connection_notifications = var.connection_notifications
+  email_notifications      = var.email_notifications
+  group_notifications      = var.group_notifications
+}
+
 # ********************** Create Explore Hierarchy ********************** #
 resource "sumologic_hierarchy" "awso_hierarchy" {
   name = "AWS Observability"
@@ -316,6 +340,12 @@ resource "sumologic_hierarchy" "awso_hierarchy" {
           condition = "AWS/SNS"
           level {
               entity_type = "topicname"
+            }
+          }
+        next_levels_with_conditions {
+          condition = "AWS/SQS"
+          level {
+              entity_type = "queuename"
             }
           }
       }
