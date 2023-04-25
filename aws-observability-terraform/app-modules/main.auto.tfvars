@@ -13,6 +13,7 @@ rds_monitors_disabled         = true
 alb_monitors_disabled         = true
 apigateway_monitors_disabled  = true
 sns_monitors_disabled         = true
+sqs_monitors_disabled         = true
 dynamodb_monitors_disabled    = true
 ec2metrics_monitors_disabled  = true
 ecs_monitors_disabled         = true

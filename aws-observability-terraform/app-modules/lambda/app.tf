@@ -25,6 +25,7 @@ module "lambda_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/lambda metric=ProvisionedConcurrencyUtilization statistic=Average account=* region=* functionname=* | avg by functionname, namespace, region, account"
       }
@@ -58,6 +59,7 @@ module "lambda_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/lambda metric=Errors Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"
         B = "Namespace=aws/lambda metric=Invocations Statistic=Sum account=* region=* functionname=* | sum by functionname, account, region, namespace"

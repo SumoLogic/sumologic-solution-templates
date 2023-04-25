@@ -29,6 +29,7 @@ module "ec2metrics_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
       queries = {
         A = "Namespace=aws/ec2 metric=CPU_Sys account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
       }
@@ -62,6 +63,7 @@ module "ec2metrics_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
       queries = {
         A = "Namespace=aws/ec2 metric=CPU_Total account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
       }
@@ -95,6 +97,7 @@ module "ec2metrics_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
       queries = {
         A = "Namespace=aws/ec2 metric=Mem_UsedPercent account=* region=* instanceid=* | avg by account, region, namespace, instanceid"
       }
@@ -128,6 +131,7 @@ module "ec2metrics_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
       queries = {
         A = "Namespace=aws/ec2 metric=Disk_UsedPercent account=* region=* instanceid=* | avg by account, region, namespace, instanceid, devname"
       }
