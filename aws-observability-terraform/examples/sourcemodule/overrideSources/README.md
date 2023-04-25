@@ -42,6 +42,7 @@
 | [sumologic_field.region](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.tablename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.topicname](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field.queuename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityAlbAccessLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityApiGatewayCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityDynamoDBCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
@@ -54,6 +55,7 @@
 | [sumologic_field_extraction_rule.AwsObservabilityLambdaCloudWatchLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityRdsCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilitySNSCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilitySQSCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [time_sleep.wait_for_10_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 
 ## Inputs
@@ -132,6 +134,7 @@
 | <a name="output_sumologic_field_networkloadbalancer"></a> [sumologic\_field\_networkloadbalancer](#output\_sumologic\_field\_networkloadbalancer) | This output contains sumologic networkloadbalancer field id. |
 | <a name="output_sumologic_field_region"></a> [sumologic\_field\_region](#output\_sumologic\_field\_region) | This output contains sumologic Region field id. |
 | <a name="output_sumologic_field_tablename"></a> [sumologic\_field\_tablename](#output\_sumologic\_field\_tablename) | This output contains sumologic tablename field id. |
+| <a name="output_sumologic_field_queuename"></a> [sumologic\_field\_queuename](#output\_sumologic\_field\_queuename) | This output contains sumologic queuename field id. |
 | <a name="output_sumologic_inventory_source"></a> [sumologic\_inventory\_source](#output\_sumologic\_inventory\_source) | This output contains sumologic aws inventory source id. |
 | <a name="output_sumologic_kinesis_firehose_for_logs_source"></a> [sumologic\_kinesis\_firehose\_for\_logs\_source](#output\_sumologic\_kinesis\_firehose\_for\_logs\_source) | This output contains sumologic kinesis firehose for logs source id. |
 | <a name="output_sumologic_kinesis_firehose_for_metrics_source"></a> [sumologic\_kinesis\_firehose\_for\_metrics\_source](#output\_sumologic\_kinesis\_firehose\_for\_metrics\_source) | This output contains sumologic kinesis firehose for metrics source id. |
