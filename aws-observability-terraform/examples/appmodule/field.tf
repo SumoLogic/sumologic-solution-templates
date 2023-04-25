@@ -118,6 +118,12 @@ resource "sumologic_field" "topicname" {
     state      = "Enabled"
 }
 
+resource "sumologic_field" "queuename" {
+    data_type  = "String"
+    field_name = "queuename"
+    state      = "Enabled"
+}
+
 # ALB access log FER
 resource "sumologic_field_extraction_rule" "AwsObservabilityAlbAccessLogsFER" {
       depends_on = [time_sleep.wait_for_10_seconds]
@@ -327,6 +333,27 @@ resource "sumologic_field_extraction_rule" "AwsObservabilitySNSCloudTrailLogsFER
               | if (isBlank(accountid), recipient_account_id, accountid) as accountid
               | "aws/sns" as namespace
               | fields region, namespace, topicname, accountid
+      EOT
+      enabled = true
+}
+
+# SQS CloudTrail FER
+resource "sumologic_field_extraction_rule" "AwsObservabilitySQSCloudTrailLogsFER" {
+      depends_on = [time_sleep.wait_for_10_seconds]
+      name = "AwsObservabilitySQSCloudTrailLogsFER"
+      scope = "account=* eventsource sqs.amazonaws.com"
+      parse_expression = <<EOT
+              | json "userIdentity", "eventSource", "eventName", "awsRegion", "recipientAccountId", "requestParameters", "responseElements", "sourceIPAddress" as userIdentity, event_source, event_name, region, recipient_account_id, requestParameters, responseElements, src_ip  nodrop
+              | json field=userIdentity "accountId", "type", "arn", "userName" as accountid, type, arn, username nodrop
+              | json field=requestParameters "queueUrl" as queueUrlReq nodrop
+              | json field=responseElements "queueUrl" as queueUrlRes nodrop
+              | where event_source="sqs.amazonaws.com"
+              | if(event_name="CreateQueue", queueUrlRes, queueUrlReq) as queueUrl
+              | parse regex field=queueUrl "(?<queueName>[^\/]*$)"
+              | if (isBlank(recipient_account_id), accountid, recipient_account_id) as accountid
+              | toLowerCase(queuename) as queuename
+              | "aws/sqs" as namespace
+              | fields region, namespace, queuename, accountid
       EOT
       enabled = true
 }
