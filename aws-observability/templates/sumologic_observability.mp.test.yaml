@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.5.2. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
+Description: "Version - v2.6.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -164,6 +164,7 @@ Parameters:
     Type: String
     AllowedValues:
       - ""
+      - "stag"
       - au
       - ca
       - de
@@ -498,7 +499,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.5.2"
+      Version: "v2.6.0"
     CollectorDetails:
       SumoLogicAccountID: 246946804217
       CollectorNamePrefix: "aws-observability"
@@ -912,6 +913,29 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
+
+  sumoSQSAppStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: sumoEC2MetricsAppStack
+    Properties:
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/sqs/sqs_app.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
+      Parameters:
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
+        Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section1eOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
+        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.PaidAccountCheck, "No"]
+        Section3aCloudTrailLogsSourceName: !If [create_cloudtrail_source, "*cloudtrail-logs*", !If [update_cloudtrail_logs_source, !GetAtt sumoLambdaMetricsAppStack.Outputs.ExistingCloudTrailLogSourceName, "" ] ]
+        Section3bCloudTrailSourceUpdated: !If [update_cloudtrail_logs_source, "Yes", "No"]
+        Section4aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section4bTemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+        Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section5bShare: !Ref Section10bShare
         
   RootCauseAppStack:
     Type: AWS::CloudFormation::Stack
@@ -942,7 +966,6 @@ Resources:
         Section5bNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section6aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section6bShare: !Ref Section10bShare
-        Section1fOrgId: !If [SecretNameProvided, !GetAtt SecretsRetrieval.orgID, !Ref Section1dSumoLogicOrganizationId]
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
