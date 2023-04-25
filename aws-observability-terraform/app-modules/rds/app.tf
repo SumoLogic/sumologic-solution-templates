@@ -50,6 +50,7 @@ module "rds_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/rds metric=BufferCacheHitRatio statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
       }
@@ -83,6 +84,7 @@ module "rds_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/rds metric=DiskQueueDepth statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
       }
@@ -116,6 +118,7 @@ module "rds_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/rds metric=WriteLatency statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
       }
@@ -149,6 +152,7 @@ module "rds_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/rds metric=BurstBalance statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
       }
@@ -182,6 +186,7 @@ module "rds_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/rds metric=ReadLatency statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
       }
@@ -215,6 +220,7 @@ module "rds_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/rds metric=CPUUtilization statistic=Average account=* region=* dbidentifier=* | avg by dbidentifier, namespace, region, account"
       }

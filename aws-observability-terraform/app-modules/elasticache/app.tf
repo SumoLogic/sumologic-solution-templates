@@ -25,6 +25,7 @@ module "elasticache_module" {
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
       queries = {
         A = "account=* region=* namespace=aws/elasticache \"\\\"eventSource\\\":\\\"elasticache.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventSource\", \"errorCode\", \"errorMessage\", \"userIdentity\", \"requestParameters\", \"responseElements\"  as event_source, error_code, error_message, user_identity, requestParameters, responseElements nodrop\n| json field=requestParameters \"cacheClusterId\" as req_cacheClusterId nodrop\n| json field=responseElements \"cacheClusterId\" as res_cacheClusterId nodrop\n| json field=user_identity \"arn\", \"userName\" nodrop \n| parse field=arn \":assumed-role/*\" as user nodrop  \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(req_cacheClusterId), res_cacheClusterId, req_cacheClusterId) as cacheclusterid\n| where event_source matches \"elasticache.amazonaws.com\" and !isEmpty(error_code) and !isEmpty(error_message) and !isEmpty(user)\n| count as event_count by _messageTime, account, region, event_source, error_code, error_message, user, cacheclusterid\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS Z\") as message_date\n| fields message_date, account, region, event_source, error_code, error_message, user, cacheclusterid\n| fields -_messageTime"
       }
@@ -58,6 +59,7 @@ module "elasticache_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/elasticache metric=DatabaseMemoryUsagePercentage statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by account, region, namespace, CacheClusterId, CacheNodeId"
       }
@@ -91,6 +93,7 @@ module "elasticache_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/elasticache metric=CPUUtilization statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by CacheClusterId, CacheNodeId, account, region, namespace"
       }
@@ -124,6 +127,7 @@ module "elasticache_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/elasticache metric=MemoryFragmentationRatio statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by account, region, namespace, CacheClusterId, CacheNodeId"
       }
@@ -157,6 +161,7 @@ module "elasticache_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/elasticache metric=CacheHitRate statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by account, region, namespace, CacheClusterId, CacheNodeId"
       }
@@ -190,6 +195,7 @@ module "elasticache_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/elasticache metric=EngineCPUUtilization statistic=Average account=* region=* CacheClusterId=* CacheNodeId=* | avg by CacheClusterId, CacheNodeId, account, region, namespace"
       }

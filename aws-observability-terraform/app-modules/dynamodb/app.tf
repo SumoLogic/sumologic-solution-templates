@@ -21,10 +21,11 @@ module "dynamodb_module" {
   managed_monitors = {
     "AWSDynamoDBMultipleTablesdeleted" = {
       monitor_name         = "AWS DynamoDB - Multiple Tables deleted"
-      monitor_description  = "This alert fires when we detect multiple failed operations for Elasticache service within 15 minutes"
+      monitor_description  = "This alert fires when five or more tables are deleted within 15 minutes."
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
       queries = {
         A = "account=* region=* namespace=aws/dynamodb eventSource \"dynamodb.amazonaws.com\"\n| json \"eventSource\", \"eventName\", \"requestParameters.tableName\", \"sourceIPAddress\", \"userIdentity.userName\", \"userIdentity.sessionContext.sessionIssuer.userName\" as event_source, event_name, tablename, SourceIp, UserName, ContextUserName nodrop\n| where event_source = \"dynamodb.amazonaws.com\" and event_name = \"DeleteTable\"\n| if (isEmpty(UserName), ContextUserName, UserName) as user\n| count by _messageTime, account, region, namespace, event_name, user, tablename\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS Z\") as message_date\n| fields message_date, account, region, namespace, event_name, user, tablename\n| fields -_messageTime"
       }
@@ -58,6 +59,7 @@ module "dynamodb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/dynamodb metric=AccountProvisionedReadCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
       }
@@ -91,6 +93,7 @@ module "dynamodb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/dynamodb metric=MaxProvisionedTableWriteCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
       }
@@ -124,6 +127,7 @@ module "dynamodb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/dynamodb metric=MaxProvisionedTableReadCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
       }
@@ -157,6 +161,7 @@ module "dynamodb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/dynamodb metric=AccountProvisionedWriteCapacityUtilization statistic=Average account=* region=* | avg by namespace, region, account"
       }
