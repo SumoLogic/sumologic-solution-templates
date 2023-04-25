@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.6.0: Template to setup the ElastiCache app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.6.0: Template to setup the SQS app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -102,7 +102,7 @@ Parameters:
 
   Section2aInstallApp:
     Type: String
-    Description: "Yes - Installs the Amazon ElastiCache App for the Sumo Logic AWS Observability Solution.
+    Description: "Yes - Installs the SQS App for the Sumo Logic AWS Observability Solution.
                   No - Skips the installation of this app."
     Default: 'Yes'
     AllowedValues:
@@ -167,14 +167,14 @@ Resources:
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       Region: !Ref "AWS::Region"
-      AppName: "AWS Observability ElastiCache App"
+      AppName: "AWS Observability SQS App"
       RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
       FolderName: !Sub "AWS Observability ${Section4cNestedTemplateVersion} "
       RetainOldAppOnUpdate: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
-      AppJsonS3Url: !Sub "https://${Section4bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section4cNestedTemplateVersion}/appjson/ElastiCache-App.json"
+      AppJsonS3Url: !Sub "https://${Section4bTemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${Section4cNestedTemplateVersion}/appjson/Sqs-App.json"
       location: !Ref Section5aAppInstallLocation
       share: !Ref Section5bShare
       orgid: !Ref Section1eOrgId
@@ -182,33 +182,40 @@ Resources:
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
-    DependsOn: AddCacheClusterIdField
+    DependsOn: AddQueueNameField
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
-      FieldExtractionRuleName: "AwsObservabilityElastiCacheCloudTrailLogsFER"
+      FieldExtractionRuleName: "AwsObservabilitySQSCloudTrailLogsFER"
       FieldExtractionRuleScope: !Join
         - ""
         - - "(_source="
           - !If [source_updated, !Sub "\"${Section3aCloudTrailLogsSourceName}\"", !Ref Section3aCloudTrailLogsSourceName]
-          - " (\"elasticache.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: 'json "eventSource", "awsRegion", "requestParameters.cacheClusterId", "responseElements.cacheClusterId", "recipientAccountId" as eventSource, region, req_cacheClusterId, res_cacheClusterId, accountid nodrop
-                                           | where eventSource = "elasticache.amazonaws.com"
-                                           | if (!isEmpty(req_cacheClusterId), req_cacheClusterId, res_cacheClusterId) as cacheclusterid
-                                           | "aws/elasticache" as namespace
-                                           | tolowercase(cacheclusterid) as cacheclusterid
-                                           | fields region, namespace, cacheclusterid, accountid'
+          - " (\"sqs.amazonaws.com\"))"
+      FieldExtractionRuleParseExpression: '| json "userIdentity", "eventSource", "eventName", "awsRegion", "recipientAccountId", "requestParameters", "responseElements", "sourceIPAddress" as userIdentity, event_source, event_name, region, recipient_account_id, requestParameters, responseElements, src_ip  nodrop
+                                           | json field=userIdentity "accountId", "type", "arn", "userName" as accountid, type, arn, username nodrop
+                                           | json field=requestParameters "queueUrl" as queueUrlReq nodrop
+                                           | json field=responseElements "queueUrl" as queueUrlRes nodrop
+                                           | where event_source="sqs.amazonaws.com"
+                                           | if(event_name="CreateQueue", queueUrlRes, queueUrlReq) as queueUrl
+                                           | parse regex field=queueUrl "(?<queueName>[^\/]*$)"
+                                           | if (isBlank(recipient_account_id), accountid, recipient_account_id) as accountid
+                                           | toLowerCase(queuename) as queuename
+                                           | "aws/sqs" as namespace
+                                           | fields region, namespace, queuename, accountid'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
-
-  AddCacheClusterIdField:
+  
+  AddQueueNameField:
     Type: Custom::SumoLogicFieldsSchema
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
-      FieldName: "cacheclusterid"
+      FieldName: "queuename"
       RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
+  
+ 

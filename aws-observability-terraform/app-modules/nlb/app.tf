@@ -60,6 +60,7 @@ module "nlb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/NetworkELB metric=ClientTLSNegotiationErrorCount Statistic=sum account=* region=* LoadBalancer=* | sum by LoadBalancer, account, region, namespace"
         B = "Namespace=aws/NetworkELB metric=TargetTLSNegotiationErrorCount Statistic=sum account=* region=* LoadBalancer=* | sum by LoadBalancer, account, region, namespace"
@@ -95,6 +96,7 @@ module "nlb_module" {
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
       queries = {
         A = "Namespace=aws/NetworkELB metric=UnHealthyHostCount Statistic=sum account=* region=* LoadBalancer=* AvailabilityZone=* | sum by LoadBalancer, AvailabilityZone, account, region, namespace"
         B = "Namespace=aws/NetworkELB metric=HealthyHostCount Statistic=sum account=* region=* LoadBalancer=* AvailabilityZone=* | sum by LoadBalancer, AvailabilityZone, account, region, namespace"

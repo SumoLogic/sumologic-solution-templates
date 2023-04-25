@@ -89,6 +89,10 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	snsFolderID := terraform.Output(t, terraformOptions, "sns_apps_folder_id")
 	validateSumoLogicAppsFolder(t, terraformOptions, snsFolderID)
 
+	// Validate if the SQS App folder is created successfully
+	sqsFolderID := terraform.Output(t, terraformOptions, "sqs_apps_folder_id")
+	validateSumoLogicAppsFolder(t, terraformOptions, sqsFolderID)
+
 	// Monitor Folder
 	// Validate if the Monitors folder is created successfully
 	validateSumoLogicMonitorsFolder(t, terraformOptions)
@@ -133,6 +137,9 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the SNS FER is created successfully
 	snsFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_sns")
 	validateSumoLogicFER(t, terraformOptions, snsFerID)
+	// Validate if the SQS FER is created successfully
+	sqsFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_sqs")
+	validateSumoLogicFER(t, terraformOptions, sqsFerID)
 	// Validate if the EC2 FER is created successfully
 	ec2FerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_ec2metrics")
 	validateSumoLogicFER(t, terraformOptions, ec2FerID)
@@ -187,6 +194,9 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the topicname Field is created successfully
 	topicnameField := terraform.Output(t, terraformOptions, "sumologic_field_topicname")
 	validateSumoLogicField(t, terraformOptions, topicnameField)
+	// Validate if the queuename Field is created successfully
+	queuenameField := terraform.Output(t, terraformOptions, "sumologic_field_queuename")
+	validateSumoLogicField(t, terraformOptions, queuenameField)
 	// Validate if the dbclusteridentifier Field is created successfully
 	dbclusteridentifierField := terraform.Output(t, terraformOptions, "sumologic_field_dbclusteridentifier")
 	validateSumoLogicField(t, terraformOptions, dbclusteridentifierField)
