@@ -41,10 +41,10 @@ $response=$response.Content | ConvertFrom-Json
 $orgId=$response.orgId
 $fileName="param.json"
 New-Item -Path $fileName -ItemType File -Force
-Add-Content $fileName "[`"Section1aSumoLogicDeployment=${deployment}`","
-Add-Content $fileName "`"Section1bSumoLogicAccessID=${SUMO_ACCESS_ID}`","
-Add-Content $fileName "`"Section1cSumoLogicAccessKey=${SUMO_ACCESS_KEY}`","
-Add-Content $fileName "`"Section1dSumoLogicOrganizationId=${orgId}`","
+Add-Content $fileName "[{`"ParameterKey`":`"Section1aSumoLogicDeployment`",`"ParameterValue`":`"${deployment}`"},"
+Add-Content $fileName "{`"ParameterKey`":`"Section1bSumoLogicAccessID`",`"ParameterValue`":`"${SUMO_ACCESS_ID}`"},"
+Add-Content $fileName "{`"ParameterKey`":`"Section1cSumoLogicAccessKey`",`"ParameterValue`":`"${SUMO_ACCESS_KEY}`"},"
+Add-Content $fileName "{`"ParameterKey`":`"Section1dSumoLogicOrganizationId`",`"ParameterValue`":`"${orgId}`"},"
 
 $awscmd=aws sts get-caller-identity
 $json = @"
@@ -52,15 +52,14 @@ $awscmd
 "@
 $x = $json | ConvertFrom-Json
 $awsAccountId = $x.Account
-Add-Content $fileName "`"Section2aAccountAlias=${awsAccountId}`"]"
-aws s3 cp s3://sumologic-appdev-aws-sam-apps/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml sumologic_observability_template.yaml
+Add-Content $fileName "{`"ParameterKey`":`"Section2aAccountAlias`",`"ParameterValue`":`"${awsAccountId}`"}]"
 
 
 
 $stackName="sumoawsoquicksetup"
 $now=Get-Date
 echo "Script Configuration completed. Triggering CloudFormation Template at : $now"
-aws cloudformation deploy --profile ${AWS_PROFILE} --template-file sumologic_observability_template.yaml --stack-name $stackName --parameter-overrides file://param.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation create-stack --profile ${AWS_PROFILE} --template-url "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml" --stack-name $stackName --parameter file://param.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 if($LASTEXITCODE -ne 0){
 	echo "Error Occured in aws cloudformation command"
 	Exit
