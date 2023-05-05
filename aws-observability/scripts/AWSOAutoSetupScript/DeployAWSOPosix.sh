@@ -40,31 +40,27 @@ then
     exit
 fi
 
-echo '["Section1aSumoLogicDeployment='${deployment}'",' >param.json  
+echo '[{"ParameterKey": "Section1aSumoLogicDeployment","ParameterValue": "'${deployment}'"},' >param.json  
 
-echo '"Section1bSumoLogicAccessID='${SUMO_ACCESS_ID}'",' >> param.json
+echo '{"ParameterKey": "Section1bSumoLogicAccessID","ParameterValue": "'${SUMO_ACCESS_ID}'"},' >> param.json
 
-echo '"Section1cSumoLogicAccessKey='${SUMO_ACCESS_KEY}'",' >> param.json
+echo '{"ParameterKey": "Section1cSumoLogicAccessKey","ParameterValue": "'${SUMO_ACCESS_KEY}'"},' >> param.json
 
-echo '"Section1dSumoLogicOrganizationId='${orgId}'",' >> param.json
+echo '{"ParameterKey": "Section1dSumoLogicOrganizationId","ParameterValue": "'${orgId}'"},' >> param.json
 
-awsAccountId=`aws sts get-caller-identity | jq -r '.Account'` 
-echo '"Section2aAccountAlias='${awsAccountId}'"' >> param.json
+awsAccountId=`aws sts get-caller-identity --output json | jq -r '.Account'` 
+echo '{"ParameterKey": "Section2aAccountAlias","ParameterValue": "'${awsAccountId}'"}' >> param.json
 
 echo ']'>>param.json
-
-#download the sumo logic AWS Observability solution's master template
-aws s3 cp s3://sumologic-appdev-aws-sam-apps/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml sumologic_observability_template.yaml
-
 
 #extract stack name into a variable with unique identifier appended
 stackName="sumoawsoquicksetup"
 now="$(date)"
 echo "Script Configuration completed. Triggering CloudFormation Template at : $now"
-aws cloudformation deploy --profile ${AWS_PROFILE} \
-  --template-file sumologic_observability_template.yaml \
+aws cloudformation create-stack --profile ${AWS_PROFILE} \
+  --template-url "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml" \
   --stack-name ${stackName} \
-  --parameter-overrides file://param.json \
+  --parameter file://param.json \
   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 if [ "$?" != 0 ]
 then
