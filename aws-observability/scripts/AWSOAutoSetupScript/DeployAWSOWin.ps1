@@ -14,14 +14,27 @@ if(-not $AWS_PROFILE){
 	$AWS_PROFILE="default"
 }
 #identify sumo deployment associated with sumo accessId and accessKey
+$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml"
 $apiUrl="https://api.sumologic.com"
 $deployment="us1"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f "$SUMO_ACCESS_ID","$SUMO_ACCESS_KEY")))
 
+# Uncomment following for Stag
+#$apiUrl="https://stag-api.sumologic.net"
+#$deployment="stag" 
+#$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
+# Uncomment following for Stag
+
+# # Uncomment following for Long
+#$apiUrl="https://long-api.sumologic.net"
+#$deployment="long"
+#$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
+# # Uncomment following for Long
+
 try{
-$result = Invoke-WebRequest -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}  -Uri "https://api.sumologic.com/api/v1/collectors/"
+$result = Invoke-WebRequest -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}  -Uri "$apiUrl/api/v1/collectors/"
 }
 catch {
 	$hostvar = $_.Exception.Response.ResponseUri.Host
@@ -54,12 +67,10 @@ $x = $json | ConvertFrom-Json
 $awsAccountId = $x.Account
 Add-Content $fileName "{`"ParameterKey`":`"Section2aAccountAlias`",`"ParameterValue`":`"${awsAccountId}`"}]"
 
-
-
 $stackName="sumoawsoquicksetup"
 $now=Get-Date
 echo "Script Configuration completed. Triggering CloudFormation Template at : $now"
-aws cloudformation create-stack --profile ${AWS_PROFILE} --template-url "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml" --stack-name $stackName --parameter file://param.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation create-stack --profile ${AWS_PROFILE} --template-url ${masterTemplateURL} --stack-name $stackName --parameter file://param.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 if($LASTEXITCODE -ne 0){
 	echo "Error Occured in aws cloudformation command"
 	Exit
