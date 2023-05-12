@@ -13,11 +13,27 @@ if [ -z "$AWS_PROFILE" ]
 then
     AWS_PROFILE=default
 fi
+masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml"
+
 #identify sumo deployment associated with sumo accessId and accessKey
 export apiUrl="https://api.sumologic.com"
 response=$(curl -s -i -u "${SUMO_ACCESS_ID}:${SUMO_ACCESS_KEY}" -X GET "${apiUrl}"/api/v1/collectors/)
 location=`echo "$response" | grep "location:"`
 deployment="us1"
+
+
+# # Uncomment following for Stag
+# apiUrl="https://stag-api.sumologic.net"
+# deployment="stag" 
+# masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
+# # Uncomment following for Stag
+
+# # Uncomment following for Long
+# apiUrl="https://long-api.sumologic.net"
+# deployment="long"
+# masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
+# # Uncomment following for Long
+
 if [ ! -z "$location" ]
 then
     IFS='.' read -ra ADDR <<< "$location"
@@ -58,7 +74,7 @@ stackName="sumoawsoquicksetup"
 now="$(date)"
 echo "Script Configuration completed. Triggering CloudFormation Template at : $now"
 aws cloudformation create-stack --profile ${AWS_PROFILE} \
-  --template-url "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml" \
+  --template-url ${masterTemplateURL} \
   --stack-name ${stackName} \
   --parameter file://param.json \
   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
