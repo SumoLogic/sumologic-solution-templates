@@ -17,7 +17,7 @@ AWS_PROFILE can be set as environment variable from the Command Line before exec
 ## Command
 Below is an example to run the sh file with respective parameters
  
-`sh DeployAWSOPosix.sh <SUMO_ACCESS_ID> <SUMO_ACCESS_KEY>`
+`./DeployAWSOPosix.sh <SUMO_ACCESS_ID> <SUMO_ACCESS_KEY>`
 
 
 
