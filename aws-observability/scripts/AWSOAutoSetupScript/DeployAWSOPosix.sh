@@ -29,9 +29,9 @@ deployment="us1"
 # # Uncomment following for Stag
 
 # # Uncomment following for Long
-# apiUrl="https://long-api.sumologic.net"
-# deployment="long"
-# masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
+apiUrl="https://long-api.sumologic.net"
+deployment="long"
+masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
 # # Uncomment following for Long
 
 if [ ! -z "$location" ]
