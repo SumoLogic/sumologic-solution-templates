@@ -21,18 +21,6 @@ $deployment="us1"
 
 $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f "$SUMO_ACCESS_ID","$SUMO_ACCESS_KEY")))
 
-# Uncomment following for Stag
-#$apiUrl="https://stag-api.sumologic.net"
-#$deployment="stag" 
-#$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
-# Uncomment following for Stag
-
-# # Uncomment following for Long
-#$apiUrl="https://long-api.sumologic.net"
-#$deployment="long"
-#$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
-# # Uncomment following for Long
-
 try{
 $result = Invoke-WebRequest -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}  -Uri "$apiUrl/api/v1/collectors/"
 }
