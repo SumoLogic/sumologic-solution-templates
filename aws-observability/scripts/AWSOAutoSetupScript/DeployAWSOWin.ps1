@@ -14,7 +14,7 @@ if(-not $AWS_PROFILE){
 	$AWS_PROFILE="default"
 }
 #identify sumo deployment associated with sumo accessId and accessKey
-$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml"
+$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.1/sumologic_observability.master.template.yaml"
 $apiUrl="https://api.sumologic.com"
 $deployment="us1"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
