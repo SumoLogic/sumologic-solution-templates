@@ -13,7 +13,7 @@ if [ -z "$AWS_PROFILE" ]
 then
     AWS_PROFILE=default
 fi
-masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml"
+masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.1/sumologic_observability.master.template.yaml"
 
 #identify sumo deployment associated with sumo accessId and accessKey
 export apiUrl="https://api.sumologic.com"
