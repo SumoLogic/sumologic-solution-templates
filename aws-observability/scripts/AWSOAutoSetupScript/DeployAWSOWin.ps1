@@ -1,18 +1,45 @@
+# Inputs to the script- Mandatory - SUMO_ACCESS_ID and SUMO_ACCESSKEY, Optional - AWS_PROFILE and AWS_REGION
+param(
+     [Parameter(Mandatory,HelpMessage="Enter Sumo Logic Access ID.")]
+	 [Alias('i')]
+     [string]$SUMO_ACCESS_ID,
+
+     [Parameter(Mandatory,HelpMessage="Enter Sumo Logic Access Key.")]
+	 [Alias('k')]
+     [string]$SUMO_ACCESS_KEY,
+
+     [Parameter(HelpMessage="Enter AWS Profile.")]
+	 [Alias('p')]
+     [string]$AWS_PROFILE,
+
+	 [Parameter(HelpMessage="Enter AWS Region.")]
+	 [Alias('r')]
+     [string]$AWS_REGION
+ )
+
+# If profile(-p) is empty set default profile
+if(-not $AWS_PROFILE){
+	echo "Setting AWS_PROFILE as default"
+	$AWS_PROFILE="default"
+}
+
+# If region(-r) is empty set us-east-1 region
+if(-not $AWS_REGION){
+	echo "Setting AWS_REGION as us-east-1"
+	$AWS_REGION="us-east-1"
+}
+
+
 try{
 $awsCheck=aws --version
 }
 catch{
-	echo "aws cli not installed. Please install aws cli and rerun the script"
+	echo "aws cli not installed. Please install aws cli and rerun the AWS Observability script"
 	Exit
 }
 $now=Get-Date
-echo "Script initiated at : $now"
-#input to the script is sumo accessId and accessKey
-$SUMO_ACCESS_ID = $args[0]
-$SUMO_ACCESS_KEY = $args[1]
-if(-not $AWS_PROFILE){
-	$AWS_PROFILE="default"
-}
+echo "AWS Observability Script initiated at : $now"
+
 #identify sumo deployment associated with sumo accessId and accessKey
 $masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.6.0/sumologic_observability.master.template.yaml"
 $apiUrl="https://api.sumologic.com"
@@ -47,7 +74,7 @@ Add-Content $fileName "{`"ParameterKey`":`"Section1bSumoLogicAccessID`",`"Parame
 Add-Content $fileName "{`"ParameterKey`":`"Section1cSumoLogicAccessKey`",`"ParameterValue`":`"${SUMO_ACCESS_KEY}`"},"
 Add-Content $fileName "{`"ParameterKey`":`"Section1dSumoLogicOrganizationId`",`"ParameterValue`":`"${orgId}`"},"
 
-$awscmd=aws sts get-caller-identity
+$awscmd=aws sts get-caller-identity --profile ${AWS_PROFILE}
 $json = @"
 $awscmd
 "@
@@ -57,8 +84,8 @@ Add-Content $fileName "{`"ParameterKey`":`"Section2aAccountAlias`",`"ParameterVa
 
 $stackName="sumoawsoquicksetup"
 $now=Get-Date
-echo "Script Configuration completed. Triggering CloudFormation Template at : $now"
-aws cloudformation create-stack --profile ${AWS_PROFILE} --template-url ${masterTemplateURL} --stack-name $stackName --parameter file://param.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+echo "AWS Observability Script Configuration completed. Triggering CloudFormation Template at : $now"
+aws cloudformation create-stack --profile ${AWS_PROFILE} --region ${AWS_REGION} --template-url ${masterTemplateURL} --stack-name $stackName --parameter file://param.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 if($LASTEXITCODE -ne 0){
 	echo "Error Occured in aws cloudformation command"
 	Exit
@@ -66,4 +93,4 @@ if($LASTEXITCODE -ne 0){
 Remove-Item param.json
 
 $now=Get-Date
-echo "Script completed at : $now"
+echo "AWS Observability Script completed at : $now"
