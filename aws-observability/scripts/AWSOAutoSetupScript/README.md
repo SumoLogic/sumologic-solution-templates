@@ -31,6 +31,7 @@ The `DeployAWSOWin.ps1` enables you to deploy the AWS Observability CloudFromati
  
 ```
 $uri="https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/master/aws-observability/scripts/AWSOAutoSetupScript/DeployAWSOWin.ps1";$path=".\DeployAWSOWin.ps1";(New-Object System.Net.WebClient).DownloadFile($uri, $path);
+
 .\DeployAWSOWin.ps1 -i <SUMO_ACCESS_ID> -k <SUMO_ACCESS_KEY> -p <AWS_PROFILE> -r <AWS_REGION>
 ```
 
