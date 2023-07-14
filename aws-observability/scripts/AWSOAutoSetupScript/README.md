@@ -26,9 +26,9 @@ Provide the following details where you want to install AWS Observability Soluti
 
 <details>
 <summary>Above command performs following actions</summary>
-    <br>Downloading master template using wget command.</br>
-    <br>Using chmod command to grant execute permission to shell script.</br>
-    <br>Execute shell script for deploying the solution.</br>
+    <br>1. Downloading master template using wget command.</br>
+    <br>2. Using chmod command to grant execute permission to shell script.</br>
+    <br>3. Execute shell script for deploying the solution.</br>
 </details>
 
 ## For installing on Windows through powershell
@@ -53,6 +53,6 @@ Provide the following details where you want to install AWS Observability Soluti
 
 <details>
 <summary>Above command performs following actions</summary>
-    <br>Downloading master template using DownloadFile function.</br>
-    <br>Execute powershell script for deploying the solution.</br>
+    <br>1. Downloading master template using DownloadFile function.</br>
+    <br>2. Execute powershell script for deploying the solution.</br>
 </details>
