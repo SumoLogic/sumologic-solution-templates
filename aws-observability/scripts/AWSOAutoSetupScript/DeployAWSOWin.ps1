@@ -88,6 +88,7 @@ echo "AWS Observability Script Configuration completed. Triggering CloudFormatio
 aws cloudformation create-stack --profile ${AWS_PROFILE} --region ${AWS_REGION} --template-url ${masterTemplateURL} --stack-name $stackName --parameter file://param.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 if($LASTEXITCODE -ne 0){
 	echo "Error Occured in aws cloudformation command"
+	Remove-Item param.json
 	Exit
 }
 Remove-Item param.json
