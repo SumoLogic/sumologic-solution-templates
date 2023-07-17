@@ -48,7 +48,7 @@ Provide the following details where you want to install AWS Observability Soluti
 |-----------------|-------|-----------|-----------|---------------------------------------------------------|
 | SUMO_ACCESS_ID  | -i    | Yes       | <>        | Sumo Access Id from your respective Sumo Logic Account  |
 | SUMO_ACCESS_KEY | -k    | Yes       | <>        | Sumo Access Key from your respective Sumo Logic Account |
-| AWS_PROFILE     | -p    | No        | default   | AWS account which you want to observe                   |
+| AWS_PROFILE     | -p    | No        | default   | User profile from AWS account which you want to observe |
 | AWS_REGION      | -r    | No        | us-east-1 | AWS region which you want to observe                    |
 
 <details>
