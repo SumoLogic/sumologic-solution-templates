@@ -59,16 +59,16 @@ response=$(curl -s -i -u "${SUMO_ACCESS_ID}:${SUMO_ACCESS_KEY}" -X GET "${apiUrl
 location=$(echo "$response" | grep "location:")
 deployment="us1"
 
-# # Uncomment following for Stag
-# apiUrl="https://stag-api.sumologic.net"
-# deployment="stag" 
-# masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
-# # Uncomment following for Stag
+# Uncomment following for Stag
+apiUrl="https://stag-api.sumologic.net"
+deployment="stag" 
+masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
+# Uncomment following for Stag
 
 # # Uncomment following for Long
-apiUrl="https://long-api.sumologic.net"
-deployment="long"
-masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
+# apiUrl="https://long-api.sumologic.net"
+# deployment="long"
+# masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
 # # Uncomment following for Long
 
 if [ ! -z "$location" ]
