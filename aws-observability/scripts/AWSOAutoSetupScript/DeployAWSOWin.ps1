@@ -95,3 +95,4 @@ Remove-Item param.json
 
 $now=Get-Date
 echo "AWS Observability Script completed at : $now"
+echo "Please return to Sumo Logic UI to continue."
