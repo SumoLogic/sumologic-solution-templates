@@ -125,3 +125,4 @@ fi
 rm param.json
 now="$(date)"
 echo "AWS Observability Script completed at : $now"
+echo "Please return to Sumo Logic UI to continue."
