@@ -473,7 +473,8 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.7
+      Runtime: python3.11
+      Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
         Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.16.zip"
@@ -516,7 +517,8 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.7
+      Runtime: python3.11
+      Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
         Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.16.zip"
@@ -940,7 +942,7 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 128
       Role: !GetAtt "LambdaRole.Arn"
-      Runtime: python3.7
+      Runtime: python3.11
       Timeout: 60
       Environment:
         Variables:
@@ -1041,7 +1043,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_kf_metric_source
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
+      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/cloudwatchmetrics/KinesisFirehoseCWMetrics.template.yaml"
       Parameters:
         Section1aSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
         Section1bNamespaceFilter: !Ref CloudWatchMetricsNameSpaces
@@ -1334,7 +1336,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_cloudwatch_logs_source
     Properties:
-      TemplateURL: "https://s3.amazonaws.com/appdev-cloudformation-templates/DLQLambdaCloudFormation.json"
+      TemplateURL: "https://appdev-cloudformation-templates.s3.amazonaws.com/DLQLambdaCloudFormationTest.json"
       Parameters:
         SumoEndPointURL: !GetAtt CloudWatchHTTPSource.SUMO_ENDPOINT
         IncludeLogGroupInfo: true
