@@ -49,6 +49,8 @@ Parameters:
   Section1aSumoLogicDeployment:
     Type: String
     AllowedValues:
+      - stag
+      - long
       - au
       - ca
       - de
@@ -265,7 +267,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::926226587429:root
+              AWS: arn:aws:iam::246946804217:root
             Action: sts:AssumeRole
             Condition:
               StringEquals:
@@ -301,7 +303,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::926226587429:root
+              AWS: arn:aws:iam::246946804217:root
             Action: sts:AssumeRole
             Condition:
               StringEquals:
@@ -365,7 +367,7 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.7
+      Runtime: python3.11
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
         Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.12.zip"
@@ -670,7 +672,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.8
+        SemanticVersion: 1.0.7
       Parameters:
         DestinationArnType: "Lambda"
         DestinationArnValue: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
