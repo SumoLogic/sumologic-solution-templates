@@ -1,0 +1,228 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Version - v2.6.1. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
+Transform: 'AWS::Serverless-2016-10-31'
+
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: "1. Sumo Logic Access Configuration (Required)"
+        Parameters:
+          - Section1aSumoLogicDeployment
+          - Section1bSumoLogicAccessID
+          - Section1cSumoLogicAccessKey
+          - Section1dSumoLogicOrganizationId
+
+    ParameterLabels:
+      Section1aSumoLogicDeployment:
+        default: "Sumo Logic Deployment Name"
+      Section1bSumoLogicAccessID:
+        default: "Sumo Logic Access ID"
+      Section1cSumoLogicAccessKey:
+        default: "Sumo Logic Access Key"
+      Section1dSumoLogicOrganizationId:
+        default: "Sumo Logic Organization Id"
+
+Parameters:
+  Section1aSumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - stag
+      - long
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  Section1bSumoLogicAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  Section1cSumoLogicAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  Section1dSumoLogicOrganizationId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/docs/get-started/account-settings-preferences/"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+
+Mappings:
+  CommonData:
+    NestedTemplate:
+      BucketName: "sumologic-appdev-aws-sam-apps"
+      Version: "v2.6.1"
+
+Resources:
+
+  PermissionStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/permissionchecker/permissioncheck.nested.template.test.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
+      Parameters:
+        Section1aSumoLogicDeployment: !Ref Section1aSumoLogicDeployment
+        Section1bSumoLogicAccessID: !Ref Section1bSumoLogicAccessID
+        Section1cSumoLogicAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1dSumoLogicOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        TemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+        NestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: AwsObservabilityLambdaExecutePolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "cloudformation:DeleteChangeSet"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:ListStackResources"
+                  - "cloudtrail:DeleteTrail"
+                  - "cloudwatch:DeleteAlarms"
+                  - "events:DeleteRule"
+                  - "events:RemoveTargets"
+                  - "iam:DeletePolicy"
+                  - "iam:DeleteRole"
+                  - "iam:DeleteRolePolicy"
+                  - "iam:DetachRolePolicy"
+                  - "iam:UntagRole"
+                  - "lambda:DeleteFunction"
+                  - "lambda:RemovePermission"
+                  - "lambda:InvokeFunction"
+                  - "logs:DeleteDestination"
+                  - "logs:DeleteLogDelivery"
+                  - "logs:DeleteLogGroup"
+                  - "logs:DeleteLogStream"
+                  - "logs:DeleteResourcePolicy"
+                  - "logs:DeleteRetentionPolicy"
+                  - "logs:DeleteSubscriptionFilter"
+                  - "logs:UntagLogGroup"
+                  - "s3:DeleteBucket"
+                  - "s3:DeleteObject"
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                  - "s3:DeleteBucketPolicy"
+                  - "sns:DeleteEndpoint"
+                  - "sns:SetTopicAttributes"
+                  - "sns:GetTopicAttributes"
+                  - "sns:DeleteTopic"
+                  - "sqs:DeleteQueue"
+                  - "firehose:DescribeDeliveryStream"
+                  - "firehose:DeleteDeliveryStream"
+                  - "cloudwatch:GetMetricStream"
+                  - "cloudwatch:DeleteMetricStream"
+                Resource: "*"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  DeleteCFNLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: !Sub "DeleteCFNLambda-${AWS::StackName}"
+      Code:
+        ZipFile: |
+          import subprocess
+          import time
+          import boto3
+          import os
+          import cfnresponse
+
+          IN_PROGRESS = ["DELETE_IN_PROGRESS", "ROLLBACK_IN_PROGRESS"]
+
+
+          def lambda_handler(event, context):
+              try:
+                  stack_arn = os.environ['stackArn']
+                  region = os.environ['AwsRegion']
+                  cfn = boto3.client('cloudformation', region)
+                  delete_stack(cfn, stack_arn)
+                  print("Completed the Stacks Deletion.")
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, "NamespaceSplitting")
+              except Exception as e:
+                  print("Failed the Stacks Deletion.")
+                  print(e)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {}, "NamespaceSplitting")
+
+
+          def get_status(cf_client, stack_identifier):
+              try:
+                  return cf_client.describe_stacks(StackName=stack_identifier)["Stacks"][0]["StackStatus"]
+              except Exception as e:
+                  return "DELETE_COMPLETE"
+
+
+          def list_stack_resources(cf_client, stack_identifier):
+              response = []
+              for page in cf_client.get_paginator("list_stack_resources").paginate(StackName=stack_identifier):
+                  for resource in page["StackResourceSummaries"]:
+                      if resource["ResourceStatus"] == "DELETE_FAILED":
+                          response.append(resource["LogicalResourceId"])
+                          if resource["ResourceType"] == "AWS::S3::Bucket":
+                              s3 = boto3.resource('s3')
+                              bucket = s3.Bucket(resource["PhysicalResourceId"])
+                              bucket.objects.delete()
+                              bucket.delete()
+              return response
+
+
+          def delete_stack(cf_client, stack_identifier):
+              stack_status = get_status(cf_client, stack_identifier)
+              for i in range(0, 10):
+                  if stack_status == "DELETE_FAILED":
+                      failed_resources = list_stack_resources(cf_client, stack_identifier)
+                      cf_client.delete_stack(StackName=stack_identifier, RetainResources=failed_resources)
+                  elif stack_status not in IN_PROGRESS:
+                      cf_client.delete_stack(StackName=stack_identifier)
+                  stack_status = get_status(cf_client, stack_identifier)
+                  if stack_status != "DELETE_COMPLETE":
+                      print("Stack Status is %s, sleep for 60 Seconds." % stack_status)
+                      time.sleep(60)
+                      continue
+                  else:
+                      print("Complete Stack %s deletion with current status as DELETE_COMPLETE" % stack_identifier)
+                      break
+              return stack_status
+      Environment:
+        Variables:
+          stackArn: !Ref PermissionStack
+          AwsRegion: !Ref AWS::Region
+      Handler: "index.lambda_handler"
+      Runtime: "python3.11"
+      Timeout: 900
+      MemorySize: 128
+      Role: !GetAtt "LambdaRole.Arn"
+
+  Primerinvoke:
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt DeleteCFNLambda.Arn
