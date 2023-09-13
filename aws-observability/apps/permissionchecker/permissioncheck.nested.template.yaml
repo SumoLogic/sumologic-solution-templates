@@ -365,10 +365,10 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.7
+      Runtime: python3.11
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.12.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.16.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -535,7 +535,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
-        SemanticVersion: 1.0.5
+        SemanticVersion: 1.0.6
       Parameters:
         BucketName: !Ref CommonS3Bucket
         BucketPrefix: "elasticloadbalancing"
@@ -660,7 +660,7 @@ Resources:
   CloudWatchEventFunction:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: "https://s3.amazonaws.com/appdev-cloudformation-templates/DLQLambdaCloudFormation.json"
+      TemplateURL: "https://appdev-cloudformation-templates.s3.amazonaws.com/DLQLambdaCloudFormationTest.json"
       Parameters:
         SumoEndPointURL: "test-url"
         IncludeLogGroupInfo: true
@@ -670,7 +670,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.7
+        SemanticVersion: 1.0.9
       Parameters:
         DestinationArnType: "Lambda"
         DestinationArnValue: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
