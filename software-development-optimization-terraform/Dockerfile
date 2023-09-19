@@ -32,10 +32,7 @@ RUN curl -LO https://github.com/Mastercard/terraform-provider-restapi/releases/d
     && mv terraform-provider-restapi_v1.8.0-linux-amd64 /usr/local/bin/terraform-provider-restapi
 
 # Set the working directory
-WORKDIR /app
-
-# Clone the specified GitHub repository
-RUN git clone https://github.com/SumoLogic/sumologic-solution-templates.git
+WORKDIR /sdo
 
 # Set an entry point for convenience (you can customize this)
 ENTRYPOINT ["bash"]
