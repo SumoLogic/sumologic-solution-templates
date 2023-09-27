@@ -263,11 +263,7 @@ module "kinesis_firehose_for_logs_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-<<<<<<< HEAD
   app_semantic_version = "1.0.9"
-=======
-  app_semantic_version = "1.0.8"
->>>>>>> refs/remotes/origin/master
   auto_enable_logs_subscription_options = {
     filter = var.auto_enable_logs_subscription_options.filter
   }
