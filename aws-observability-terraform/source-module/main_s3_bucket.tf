@@ -8,13 +8,23 @@ resource "aws_s3_bucket" "s3_bucket" {
 
   bucket        = local.common_bucket_name
   force_destroy = local.common_force_destroy
-  acl           = "private"
+}
 
+resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
+  bucket = aws_s3_bucket.s3_bucket["s3_bucket"].id
   policy = templatefile("${path.module}/templates/s3_bucket_policy.tmpl", {
     BUCKET_NAME     = local.common_bucket_name
     ELB_ACCCOUNT_ID = local.region_to_elb_account_id[local.aws_region]
   })
 }
+
+# Default s3 bucket acl is private, if you want to update uncomment the following block
+# For more details refer https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl
+# resource "aws_s3_bucket_acl" "s3_bucket_acl" {
+#   for_each = toset(local.create_common_bucket ? ["s3_bucket_acl"] : [])
+#   bucket = aws_s3_bucket.s3_bucket["s3_bucket"].id
+#   acl    = "private"
+# }
 
 resource "aws_sns_topic" "sns_topic" {
   for_each = toset(local.create_common_sns_topic ? ["sns_topic"] : [])
