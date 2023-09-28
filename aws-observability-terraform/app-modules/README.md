@@ -10,8 +10,8 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.16.2 |
-| <a name="provider_time"></a> [time](#provider\_time) | 0.7.2 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.14.0 |
+| <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
 
@@ -70,6 +70,8 @@
 | <a name="input_nlb_monitors_disabled"></a> [nlb\_monitors\_disabled](#input\_nlb\_monitors\_disabled) | Indicates if NLB Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_parent_folder_id"></a> [parent\_folder\_id](#input\_parent\_folder\_id) | Please provide a folder ID where you would like the apps to be installed. A folder with name provided in "apps\_folder\_name" will be created. If folder ID is empty, apps will be installed in Personal folder. | `string` | `""` | no |
 | <a name="input_rds_monitors_disabled"></a> [rds\_monitors\_disabled](#input\_rds\_monitors\_disabled) | Indicates if RDS Apps monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
+| <a name="input_sns_monitors_disabled"></a> [sns\_monitors\_disabled](#input\_sns\_monitors\_disabled) | Indicates if the SNS App monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
+| <a name="input_sqs_monitors_disabled"></a> [sqs\_monitors\_disabled](#input\_sqs\_monitors\_disabled) | Indicates if the SQS App monitors should be enabled. true to disable; false to enable. | `bool` | `true` | no |
 | <a name="input_sumologic_organization_id"></a> [sumologic\_organization\_id](#input\_sumologic\_organization\_id) | You can find your org on the Preferences page in the Sumo Logic UI. For more information, see the Preferences Page topic. Your org ID will be used to configure the IAM Role for Sumo Logic AWS Sources."<br>            For more details, visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page | `string` | n/a | yes |
 
 ## Outputs
