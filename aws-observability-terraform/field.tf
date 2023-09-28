@@ -291,7 +291,7 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityGenericCloudWatchLog
                 | tolowercase(functionname) as functionname
                 | parse field=_sourceHost "/aws/rds/*/*/" as f1, dbidentifier nodrop
                 | tolowercase(dbidentifier) as dbidentifier
-                | fields namespace, functionname,dbidentifier
+                | fields namespace, functionname, dbidentifier
       EOT
       enabled = true
 }
