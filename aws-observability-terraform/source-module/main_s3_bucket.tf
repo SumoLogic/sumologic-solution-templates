@@ -10,7 +10,7 @@ resource "aws_s3_bucket" "s3_bucket" {
   force_destroy = local.common_force_destroy
 }
 
-resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
+resource "aws_s3_bucket_policy" "dump_access_logs_to_s3" {
   bucket = aws_s3_bucket.s3_bucket["s3_bucket"].id
   policy = templatefile("${path.module}/templates/s3_bucket_policy.tmpl", {
     BUCKET_NAME     = local.common_bucket_name
