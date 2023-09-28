@@ -359,7 +359,6 @@ Resources:
       FieldExtractionRuleName: "AwsObservabilityGenericCloudWatchLogsFER"
       FieldExtractionRuleScope: "account=* region=* _sourceHost=/aws/*"
       FieldExtractionRuleParseExpression: '| "unknown" as namespace
-              | "unknown" as namespace
               | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
               | if (_sourceHost matches "/aws/rds/*", "aws/rds", namespace) as namespace
               | if (_sourceHost matches "/aws/ecs/containerinsights/*", "aws/ecs", namespace) as namespace
@@ -368,7 +367,7 @@ Resources:
               | tolowercase(functionname) as functionname
               | parse field=_sourceHost "/aws/rds/*/*/" as f1, dbidentifier nodrop
               | tolowercase(dbidentifier) as dbidentifier
-              | fields namespace, functionname,dbidentifier'
+              | fields namespace, functionname, dbidentifier'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
