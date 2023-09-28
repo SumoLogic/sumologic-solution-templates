@@ -11,6 +11,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "9bfbcb9b1f28dcbf2412921022a5649c": [
+                        "*"
+                    ],
                     "namespace": [
                         "aws/lambda"
                     ],
@@ -902,6 +905,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -1282,13 +1288,13 @@
                     "id": null,
                     "key": "panelPANE-493D84E79DACFB44",
                     "title": "Pass Vs Fail Requests",
-                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"column\"}},{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"column\"}}],\"series\":{}}",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| timeslice 15m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| timeslice 15m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1297,7 +1303,7 @@
                             "spansQueryData": null,
                             "parseMode": "Manual",
                             "timeSource": "Message",
-                            "outputCardinalityLimit": null
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1336,13 +1342,13 @@
                     "id": null,
                     "key": "panelPANE-5A94FACABB0B6947",
                     "title": "Requests Pass Vs Fail",
-                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"overrides\":[{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"pie\"}},{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"pie\"}}],\"series\":{}}",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"overrides\":[],\"series\":{}}",
                     "keepVisualSettingsConsistentWithParent": true,
                     "panelType": "SumoSearchPanel",
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1351,7 +1357,7 @@
                             "spansQueryData": null,
                             "parseMode": "Manual",
                             "timeSource": "Message",
-                            "outputCardinalityLimit": null
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1472,6 +1478,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -1822,6 +1831,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -2374,6 +2386,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -2776,6 +2791,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -3186,6 +3204,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
