@@ -503,7 +503,7 @@ variable "auto_enable_logs_subscription_options" {
 		    filter - Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters
 	    EOT
   default = {
-    filter = "lambda | rds"
+    filter = "lambda|rds"
   }
 }
 
