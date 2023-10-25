@@ -11,6 +11,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "9bfbcb9b1f28dcbf2412921022a5649c": [
+                        "*"
+                    ],
                     "namespace": [
                         "aws/lambda"
                     ],
@@ -180,7 +183,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -193,7 +196,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -206,7 +209,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -233,7 +236,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -246,7 +249,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -259,7 +262,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -286,7 +289,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -299,7 +302,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -312,7 +315,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -339,7 +342,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -352,7 +355,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -365,7 +368,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -392,7 +395,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -419,7 +422,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -439,14 +442,14 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isBlank(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isBlank(errorMessage)\n| count as eventCount",
+                            "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isBlank(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isBlank(errorMessage)\n| count as eventCount",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -473,7 +476,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -538,14 +541,14 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "(errorMessage or ERROR or CRITICAL) account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as num_errors by errorMessage, functionname\n| top 30 errorMessage, functionname by num_errors desc, errorMessage asc, functionname asc",
+                            "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as num_errors by errorMessage, functionname\n| top 30 errorMessage, functionname by num_errors desc, errorMessage asc, functionname asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -572,7 +575,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -585,7 +588,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -713,16 +716,16 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (!isEmpty(errorMessage), 1, 0) as haserror\n| if (!isEmpty(errorMessage), 0, 1) as noerror\n| sum(haserror) as failures, sum(noerror) as successes by functionname\n| top 10 functionname by failures, successes",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (!isEmpty(errorMessage), 1, 0) as haserror\n| if (!isEmpty(errorMessage), 0, 1) as noerror\n| sum(haserror) as failures, sum(noerror) as successes by functionname\n| top 10 functionname by failures, successes",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
-                            "outputCardinalityLimit": null
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -747,7 +750,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -902,6 +905,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -1008,7 +1014,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -1021,7 +1027,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -1034,7 +1040,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -1169,7 +1175,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -1223,7 +1229,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -1288,16 +1294,16 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| timeslice 15m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| timeslice 15m\n| count as eventCount by _timeslice, eventStatus\n| transpose row _timeslice column eventStatus",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
-                            "outputCardinalityLimit": null
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1322,7 +1328,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -1342,16 +1348,16 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
+                            "queryString": "account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" nodrop\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| if (isEmpty(errorMessage), \"Success\", \"Failure\") as eventStatus\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
-                            "outputCardinalityLimit": null
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1376,7 +1382,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -1389,7 +1395,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -1472,6 +1478,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -1822,6 +1831,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -1917,16 +1929,16 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as eventCount",
+                            "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname \n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as eventCount",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
-                            "outputCardinalityLimit": null
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -1951,7 +1963,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -1964,7 +1976,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -2031,7 +2043,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -2044,7 +2056,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -2071,7 +2083,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -2084,7 +2096,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -2104,16 +2116,16 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count by version\n| sort by _count, version asc",
+                            "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count by version\n| sort by _count, version asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
-                            "outputCardinalityLimit": null
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -2156,7 +2168,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2183,7 +2195,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2210,7 +2222,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2237,7 +2249,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2264,7 +2276,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2284,16 +2296,16 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"^(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as Frequency by errorMessage, functionname, version\n| top 30 errorMessage, functionname, version by Frequency desc, errorMessage asc, functionname asc, version asc",
+                            "queryString": "(errorMessage or ERROR or CRITICAL or \"Task timed out\") account={{account}} region={{region}} Namespace={{namespace}}\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n// | json \"logStream\", \"logGroup\" nodrop\n| _sourceName as logStream | _sourceHost as logGroup\n| parse field=logstream \"*/[*]*\" as logstreamDate,version,logstreamID\n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| where tolowercase(functionname) matches tolowercase(\"{{functionname}}\")\n| parse regex field=message \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex field=message \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex field=message \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| parse regex field=message \"(?<errorMsg>Task timed out after .*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage)\n| count as Frequency by errorMessage, functionname, version\n| top 30 errorMessage, functionname, version by Frequency desc, errorMessage asc, functionname asc, version asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
-                            "outputCardinalityLimit": null
+                            "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
@@ -2374,6 +2386,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -2468,7 +2483,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2495,7 +2510,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2522,7 +2537,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2549,7 +2564,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2576,7 +2591,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2603,7 +2618,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2630,7 +2645,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2657,7 +2672,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -2776,6 +2791,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
@@ -2920,7 +2938,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -2933,7 +2951,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         },
@@ -2946,7 +2964,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -3022,7 +3040,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -3049,7 +3067,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -3076,7 +3094,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -3103,7 +3121,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Manual",
+                            "parseMode": "Auto",
                             "timeSource": "Message",
                             "outputCardinalityLimit": null
                         }
@@ -3186,6 +3204,9 @@
             "theme": "Light",
             "topologyLabelMap": {
                 "data": {
+                    "178087e53241bd9cf9886850dd9b895c": [
+                        "*"
+                    ],
                     "functionname": [
                         "*"
                     ],
