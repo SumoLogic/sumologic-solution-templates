@@ -282,12 +282,16 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityGenericCloudWatchLog
       name = "AwsObservabilityGenericCloudWatchLogsFER"
       scope = "account=* region=* _sourceHost=/aws/*"
       parse_expression = <<EOT
-              | "unknown" as namespace
-              | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
-              | if (_sourceHost matches "/aws/rds/*", "aws/rds", namespace) as namespace
-              | if (_sourceHost matches "/aws/ecs/containerinsights/*", "aws/ecs", namespace) as namespace
-              | if (_sourceHost matches "/aws/kinesisfirehose/*", "aws/firehose", namespace) as namespace
-              | fields namespace
+                | "unknown" as namespace
+                | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
+                | if (_sourceHost matches "/aws/rds/*", "aws/rds", namespace) as namespace
+                | if (_sourceHost matches "/aws/ecs/containerinsights/*", "aws/ecs", namespace) as namespace
+                | if (_sourceHost matches "/aws/kinesisfirehose/*", "aws/firehose", namespace) as namespace
+                | parse field=_sourceHost "/aws/lambda/*" as functionname nodrop
+                | tolowercase(functionname) as functionname
+                | parse field=_sourceHost "/aws/rds/*/*/" as f1, dbidentifier nodrop
+                | tolowercase(dbidentifier) as dbidentifier
+                | fields namespace, functionname, dbidentifier
       EOT
       enabled = true
 }

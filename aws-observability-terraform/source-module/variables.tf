@@ -500,10 +500,10 @@ variable "auto_enable_logs_subscription_options" {
     filter = string
   })
   description = <<EOT
-		    filter - Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters
+		    filter - Enter regex for matching CloudWatch Log groups name. Regex will check for the Log groups name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters
 	    EOT
   default = {
-    filter = "lambda"
+    filter = "lambda|rds"
   }
 }
 
