@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.7.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.8.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
@@ -477,7 +477,7 @@ Resources:
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.18.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -521,7 +521,7 @@ Resources:
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.18.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -551,6 +551,29 @@ Resources:
       SumoDeployment: !Ref SumoLogicDeployment
 
   ############# START - RESOURCES FOR COMMON BUCKET #################
+
+  SumoTelemetry:
+    Type: Custom::Telemetry
+    Condition: install_collector # Add send telemetry condition
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      Region: !Ref "AWS::Region"
+      AwsAccountId: !Ref AWS::AccountId
+      AwsAlias: !Ref AccountAlias
+      parentStack: !Ref "AWS::StackName"
+      childStack: !Ref "AWS::StackName"
+      SumoOrgID: !Ref SumoLogicOrganizationId
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      CloudWatchMetricsSource: !Ref CreateCloudWatchMetricsSource
+      KinesisMetricsSource: !Ref CreateKinesisFirehoseMetricsSource
+      CreateAlbSoure: !Ref CreateALBLogSource
+      CreateElbSoure: !Ref CreateELBLogSource
+      CreateCloudTrailSource: !Ref CreateCloudTrailLogSource
+      CloudWatchLogsSource: !Ref CreateCloudWatchLogSource
+      KinesisLogsSource: !Ref CreateKinesisFirehoseLogSource
 
   CommonBucketSNSTopic:
     Type: 'AWS::SNS::Topic'
