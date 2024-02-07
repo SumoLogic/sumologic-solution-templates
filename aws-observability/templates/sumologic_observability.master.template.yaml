@@ -461,7 +461,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.7.0"
+      Version: "v2.8.0"
     CollectorDetails:
       SumoLogicAccountID: 926226587429
       CollectorNamePrefix: "aws-observability"
@@ -559,7 +559,7 @@ Resources:
 
   sumoEC2MetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoElasticCacheMetricsAppStack
+    DependsOn: sumoAlbMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/ec2metrics/ec2_metrics_app.template.yaml"
@@ -656,7 +656,7 @@ Resources:
 
   sumoRdsMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: RootCauseAppStack
+    DependsOn: sumoLambdaMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/rds/rds_app.template.yaml"
@@ -702,7 +702,7 @@ Resources:
 
   sumoSNSAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoEC2MetricsAppStack
+    DependsOn: sumoDynamoDBMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/sns/sns_app.template.yaml"
@@ -725,7 +725,7 @@ Resources:
 
   sumoSQSAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoEC2MetricsAppStack
+    DependsOn: sumoDynamoDBMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/sqs/sqs_app.template.yaml"
@@ -805,7 +805,7 @@ Resources:
 
   sumoECSMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoRdsMetricsAppStack
+    DependsOn: sumoElbMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/ecs/ecs_app.template.yaml"
@@ -828,7 +828,7 @@ Resources:
 
   sumoElasticCacheMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoApiGatewayMetricsAppStack
+    DependsOn: sumoDynamoDBMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/elasticache/elasticache_app.template.yaml"
@@ -851,7 +851,7 @@ Resources:
 
   sumoNlbMetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoECSMetricsAppStack
+    DependsOn: sumoElbMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/nlb/nlb_app.template.yaml"
