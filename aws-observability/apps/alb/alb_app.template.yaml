@@ -294,7 +294,7 @@ Resources:
       Runtime: python3.11
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.18.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -361,12 +361,10 @@ Resources:
       SumoDeployment: !Ref Section1aSumoDeployment
       Fields:
         account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-        accountid: !Ref "AWS::AccountId"
 
   AlbLogsFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
-    DependsOn: AddLoadBalancerField
     Properties:
       ServiceToken: !Ref Section6aParentStackLambdaARN
       RemoveOnDeleteStack: false
