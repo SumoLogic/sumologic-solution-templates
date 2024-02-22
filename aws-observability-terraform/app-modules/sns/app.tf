@@ -123,6 +123,74 @@ module "sns_module" {
       group_notifications      = var.group_notifications
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
+    },
+    "AWSSNSNotificationToDLQ" = {
+      monitor_name         = "AWS SNS - Notification to DLQ"
+      monitor_description  = "This alert fires when an SNS topic messages are moved to a dead-letter queue."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
+      queries = {
+        A = "account=* region=* namespace=aws/sns topicname=* metric=NumberOfNotificationsRedrivenToDlq statistic=sum | sum by account, region, namespace, topicname"
+      }
+      triggers = [
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 0,
+          threshold_type   = "GreaterThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 0,
+          threshold_type   = "LessThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        }
+      ]
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "AWSSNSNotificationToDLQFailure" = {
+      monitor_name         = "AWS SNS - Notification to DLQ Failure"
+      monitor_description  = "This alert fires when an SNS topic messages that couldn't be moved to a dead-letter queue."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
+      queries = {
+        A = "account=* region=* namespace=aws/sns topicname=* metric=NumberOfNotificationsFailedToRedriveToDlq  statistic=sum | sum by account, region, namespace, topicname "
+      }
+      triggers = [
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 0,
+          threshold_type   = "GreaterThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 0,
+          threshold_type   = "LessThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        }
+      ]
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
     }
   }
   
