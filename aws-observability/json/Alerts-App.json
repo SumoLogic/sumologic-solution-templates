@@ -4,8 +4,8 @@
   "type": "MonitorsLibraryFolderExport",
   "children": [
     {
-      "name": "AWS API Gateway - High 5XX Errors",
-      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes.",
+      "name": "AWS API Gateway - High Client-Side Errors",
+      "description": "This alert fires where there are too many API requests (>5%) with client-side errors within 5 minutes. \nThis can indicate an issue in the authorisation or client request parameters. It could also mean that a resource was removed or a client is requesting one that doesn't exist.Errors could also be caused by exceeding the configured throttling limit.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
       "evaluationDelay": "4m",
@@ -15,49 +15,228 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "Namespace=aws/apigateway metric=5xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "#A * 100 / #B along account, region, namespace"
+          "query": "Namespace=aws/apigateway (metric=4XX or metric=4xxError or metric=ClientError) Statistic=Average account=* region=* apiname=* stage=* !(route=*) !(resource=*) | avg by apiname, namespace, region, account, stage"
         }
       ],
       "triggers": [
         {
-          "detectionMethod": "StaticCondition",
+          "detectionMethod": "MetricsStaticCondition",
           "triggerType": "Critical",
           "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 5,
+          "threshold": 0.05,
           "thresholdType": "GreaterThanOrEqual",
-          "field": null,
           "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries",
-          "minDataPoints": 2
+          "minDataPoints": 5
         },
         {
-          "detectionMethod": "StaticCondition",
+          "detectionMethod": "MetricsStaticCondition",
           "triggerType": "ResolvedCritical",
           "resolutionWindow": null,
           "timeRange": "-5m",
-          "threshold": 5,
+          "threshold": 0.05,
           "thresholdType": "LessThan",
-          "field": null,
           "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries",
-          "minDataPoints": 2
+          "minDataPoints": 5
         }
       ],
+      "timeZone": "Asia/Kolkata",
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
       "playbook": "",
       "sloId": null,
-      "monitorTemplateId": null
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS API Gateway - High Integration Latency",
+      "description": "This alert fires when we detect the high integration latency for the API requests in a stage within 5 minutes. This alarm is recommended for WebSocket APIs by AWS, and optional for other APIs because they already have separate alarm recommendations for the Latency metric.\nYou can correlate the IntegrationLatency metric value with the corresponding latency metric of your backend such as the Duration metric for Lambda integrations. This helps you determine whether the API backend is taking more time to process requests from clients due to performance issues or if there is some other overhead from initialization or cold start.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "5m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* Namespace=aws/apigateway metric=IntegrationLatency statistic=p90  apiname=* stage=* !(route=*) !(resource=*) | avg by apiname, namespace, region, account, stage"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 2000,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 5
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 2000,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 5
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS API Gateway - High Latency",
+      "description": "This alert fires when we detect the high Latency in a stage within 5 minutes for REST and HTTP API.\nFind the IntegrationLatency metric value to check the API backend latency. If the two metrics are mostly aligned, the API backend is the source of higher latency and you should investigate there for issues. View this metric per resource and method and narrow down the source of the latency.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "5m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* Namespace=aws/apigateway metric=Latency  statistic=p90 apiname=* stage=* !(route=*) !(resource=*) | avg by apiname, namespace, region, account, stage"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 2500,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 5
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 2500,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 5
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS API Gateway - High Server-Side Errors",
+      "description": "This alert fires where there are too many API requests (>5%) with server-side errors within 5 minutes.\nThis can be caused by 5xx errors from your integration, permission issues, or other factors preventing successful invocation of the integration, such as the integration being throttled or deleted.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/apigateway (metric=5XX or metric=5xxError or metric=ExecutionError) Statistic=Average account=* region=* apiname=* stage=* !(route=*) !(resource=*) | avg by apiname, namespace, region, account, stage"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0.05,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 5
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0.05,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 5
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS API Gateway - Low Traffic API",
+      "description": "This alert fires where there is low message traffic volume for the API within 5 minutes. \nThis can indicate an issue with the application calling the API such as using incorrect endpoints. It could also indicate an issue with the configuration or permissions of the API making it unreachable for clients. This alarm is not recommended for APIs that don't expect constant and consistent traffic.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "5m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/apigateway (metric=ConnectCount OR metric=Count) statistic=SampleCount account=* region=* apiname=* stage=* !(route=*) !(resource=*) | quantize using sum | sum by apiname, namespace, region, account, stage"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-10m",
+          "threshold": 1,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 10
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-10m",
+          "threshold": 1,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 10
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
     },
     {
       "name": "AWS EC2 - High System CPU Utilization",
@@ -235,54 +414,6 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": true,
-      "playbook": "",
-      "sloId": null,
-      "monitorTemplateId": null
-    },
-    {
-      "name": "AWS API Gateway - High Integration Latency",
-      "description": "This alert fires when we detect that the average integration latency for a given API Gateway is greater than or equal to one second for 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "4m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/apigateway metric=IntegrationLatency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "resolutionWindow": null,
-          "timeRange": "-5m",
-          "threshold": 1000,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries",
-          "minDataPoints": 2
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "resolutionWindow": null,
-          "timeRange": "-5m",
-          "threshold": 1000,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries",
-          "minDataPoints": 2
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
       "playbook": "",
       "sloId": null,
       "monitorTemplateId": null
@@ -711,62 +842,6 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": true,
-      "playbook": "",
-      "sloId": null,
-      "monitorTemplateId": null
-    },
-    {
-      "name": "AWS API Gateway - High 4XX Errors",
-      "description": "This alert fires where there are too many HTTP requests (>5%) with a response status of 4xx within an interval of 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "4m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/apigateway metric=4xxError Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-        },
-        {
-          "rowId": "B",
-          "query": "Namespace=aws/apigateway metric=count Statistic=Sum account=* region=* apiname=* | sum by apiname, account, region, namespace"
-        },
-        {
-          "rowId": "C",
-          "query": "#A * 100 / #B along apiname, account, region, namespace"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "resolutionWindow": null,
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries",
-          "minDataPoints": 2
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "resolutionWindow": null,
-          "timeRange": "-5m",
-          "threshold": 5,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries",
-          "minDataPoints": 2
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
       "playbook": "",
       "sloId": null,
       "monitorTemplateId": null
@@ -1401,54 +1476,6 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": true,
-      "playbook": "",
-      "sloId": null,
-      "monitorTemplateId": null
-    },
-    {
-      "name": "AWS API Gateway - High Latency",
-      "description": "This alert fires when we detect that the average latency for a given API Gateway is greater than or equal to one second for 5 minutes.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Metrics",
-      "evaluationDelay": "4m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "Namespace=aws/apigateway metric=Latency statistic=Average account=* region=* apiname=* | avg by apiname, namespace, region, account"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "Critical",
-          "resolutionWindow": null,
-          "timeRange": "-5m",
-          "threshold": 1000,
-          "thresholdType": "GreaterThanOrEqual",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries",
-          "minDataPoints": 2
-        },
-        {
-          "detectionMethod": "StaticCondition",
-          "triggerType": "ResolvedCritical",
-          "resolutionWindow": null,
-          "timeRange": "-5m",
-          "threshold": 1000,
-          "thresholdType": "LessThan",
-          "field": null,
-          "occurrenceType": "Always",
-          "triggerSource": "AnyTimeSeries",
-          "minDataPoints": 2
-        }
-      ],
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": false,
       "playbook": "",
       "sloId": null,
       "monitorTemplateId": null
