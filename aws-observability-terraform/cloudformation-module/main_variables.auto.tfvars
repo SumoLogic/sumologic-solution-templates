@@ -48,8 +48,8 @@ Section6dCloudTrailBucketPathExpression = "AWSLogs/*/CloudTrail/*"
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-aws-lambda-cloudwatch-logs
 Section7aLambdaCreateCloudWatchLogsSourceOptions = "Kinesis Firehose Log Source"
 Section7bLambdaCloudWatchLogsSourceUrl           = ""
-Section7cAutoSubscribeLogGroupsOptions     = "Both"
-Section7dAutoSubscribeLogGroupPattern      = "lambda"
+Section7cAutoSubscribeLogGroupsLambdaOptions     = "Both"
+Section7dAutoSubscribeLambdaLogGroupPattern      = "lambda"
 
 ## Sumo Logic Root Cause Explorer Sources ##
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-aws-x-ray-source
