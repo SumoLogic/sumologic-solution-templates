@@ -50,8 +50,8 @@ resource "aws_cloudformation_stack" "aws-observability" {
     # Sumo Logic AWS Lambda CloudWatch HTTP Source
     Section7aLambdaCreateCloudWatchLogsSourceOptions = var.Section7aLambdaCreateCloudWatchLogsSourceOptions
     Section7bLambdaCloudWatchLogsSourceUrl           = var.Section7bLambdaCloudWatchLogsSourceUrl
-    Section7cAutoSubscribeLogGroupsOptions     = var.Section7cAutoSubscribeLogGroupsOptions
-    Section7dAutoSubscribeLogGroupPattern      = var.Section7dAutoSubscribeLogGroupPattern
+    Section7cAutoSubscribeLogGroupsLambdaOptions     = var.Section7cAutoSubscribeLogGroupsLambdaOptions
+    Section7dAutoSubscribeLambdaLogGroupPattern      = var.Section7dAutoSubscribeLambdaLogGroupPattern
     # Sumo Logic AWS X-Ray Source
     Section8aRootCauseExplorerOptions = var.Section8aRootCauseExplorerOptions
   }

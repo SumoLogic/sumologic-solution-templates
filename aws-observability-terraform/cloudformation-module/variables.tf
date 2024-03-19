@@ -192,7 +192,7 @@ variable "Section7bLambdaCloudWatchLogsSourceUrl" {
   default     = ""
   description = "Required when already collecting Lambda CloudWatch logs in Sumo Logic. Provide the existing Sumo Logic Lambda CloudWatch Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
 }
-variable "Section7cAutoSubscribeLogGroupsOptions" {
+variable "Section7cAutoSubscribeLogGroupsLambdaOptions" {
   type        = string
   default     = "Both"
   description = "New - Automatically subscribes new log groups to lambda to send logs to Sumo Logic. Existing - Automatically subscribes existing log groups to lambda to send logs to Sumo Logic. Both - Automatically subscribes new and existing log groups. None - Skips Automatic subscription."
@@ -201,11 +201,11 @@ variable "Section7cAutoSubscribeLogGroupsOptions" {
       "New",
       "Existing",
       "Both",
-    "None"], var.Section7cAutoSubscribeLogGroupsOptions)
-    error_message = "Argument \"Section7cAutoSubscribeLogGroupsOptions\" must be either \"New\", \"Existing\", \"Both\" or \"None\"."
+    "None"], var.Section7cAutoSubscribeLogGroupsLambdaOptions)
+    error_message = "Argument \"Section7cAutoSubscribeLogGroupsLambdaOptions\" must be either \"New\", \"Existing\", \"Both\" or \"None\"."
   }
 }
-variable "Section7dAutoSubscribeLogGroupPattern" {
+variable "Section7dAutoSubscribeLambdaLogGroupPattern" {
   type        = string
   default     = "lambda"
   description = "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"

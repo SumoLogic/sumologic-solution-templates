@@ -49,7 +49,7 @@ Metadata:
           - Section6dCloudTrailBucketPathExpression
 
       - Label:
-          default: "7. Sumo Logic AWS Lambda CloudWatch Logs Source"
+          default: "7. Sumo Logic CloudWatch Logs Source"
         Parameters:
           - Section7aLambdaCreateCloudWatchLogsSourceOptions
           - Section7bLambdaCloudWatchLogsSourceUrl
@@ -128,7 +128,7 @@ Metadata:
       Section7bLambdaCloudWatchLogsSourceUrl:
         default: "Existing Sumo Logic Lambda CloudWatch Logs Source API URL"
       Section7cAutoSubscribeLogGroupsOptions:
-        default: "Subscribe log groups to Sumo Logic CloudWatch Logs Forwarder"
+        default: "Subscribe log groups to Destination (Lambda or kinesis firehose delivery stream)"
       Section7dAutoSubscribeLogGroupPattern:
         default: "Regex for AWS Lambda Log and API Gateway Groups"
 
@@ -440,16 +440,16 @@ Conditions:
     - !Condition is_elb_bucket_available
 
   # Condition for Auto Subscribe Lambda
-  auto_subscribe_new_lambda_log_groups: !Or
+  auto_subscribe_new_log_groups: !Or
     - !Equals [ !Ref Section7cAutoSubscribeLogGroupsOptions, 'New' ]
     - !Equals [ !Ref Section7cAutoSubscribeLogGroupsOptions, 'Both' ]
-  auto_subscribe_lambda_log_groups: !And
+  auto_subscribe_log_groups: !And
     - !Condition create_cloudwatch_logs_source
-    - !Condition auto_subscribe_new_lambda_log_groups
+    - !Condition auto_subscribe_new_log_groups
 
   call_auto_enable: !Or
     - !Condition auto_enable_s3_logs
-    - !Condition auto_subscribe_lambda_log_groups
+    - !Condition auto_subscribe_log_groups
     - !Condition auto_enable_s3_logs_elb
 
   elb_bucket_path_expression_provided: !Not [!Equals [ !Ref Section9eELBS3BucketPathExpression, 'classicloadbalancing/AWSLogs/*/elasticloadbalancing/*' ]]
