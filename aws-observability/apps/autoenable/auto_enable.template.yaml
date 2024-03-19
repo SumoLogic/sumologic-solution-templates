@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.7.0: Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
+Description: "Version - v2.8.0: Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
 
 Parameters:
   SumoLogicResourceRemoveOnDeleteStack:
@@ -41,12 +41,12 @@ Parameters:
       - 'Yes'
       - 'No'
     Default: 'Yes'
-    Description: "Auto Subscribe Lambda Log Groups"
+    Description: "Auto Subscribe Lambda and API Gateway Log Groups"
     Type: String
-  AutoSubscribeLogGroupsLambdaOptions:
+  AutoSubscribeLogGroupsOptions:
     Type: String
-    Description: "New - Automatically subscribes new log groups to lambda to send logs to Sumo Logic.
-                  Existing - Automatically subscribes existing log groups to lambda to send logs to Sumo Logic.
+    Description: "New - Automatically subscribes new log groups to destination to send logs to Sumo Logic.
+                  Existing - Automatically subscribes existing log groups to destination to send logs to Sumo Logic.
                   Both - Automatically subscribes new and existing log groups.
                   None - Skips Automatic subscription."
     Default: 'Both'
@@ -57,19 +57,19 @@ Parameters:
       - 'None'
   AutoSubscribeDestinationARNType:
     Type: String
-    Description: "Destination ARN Type for Cloudwatch Log Sender."
+    Description: "Destination ARN Type (Lambda or Kinesis) for Cloudwatch Log Sender."
     Default: 'Lambda'
     AllowedValues:
       - 'Lambda'
       - 'Kinesis'
-  AutoSubscribeDestinationARN:
+  AutoSubscribeDestinationARNValue:
     Type: String
-    Description: "Destination ARN for Cloudwatch Log Sender."
+    Description: "Enter the Destination ARN (Lambda ARN or Delivery Stream ARN) based on the destination ARN type"
     Default: ""
-  AutoSubscribeLambdaLogGroupPattern:
+  AutoSubscribeLogGroupPattern:
     Type: String
-    Default: "lambda"
-    Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
+    Default: "\/aws\/(lambda|apigateway)"
+    Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters"
   AutoSubscribeRoleArn:
     Type: String
     Default: ""
@@ -113,8 +113,8 @@ Conditions:
 
   # Condition for Auto Subscribe Lambda
   auto_subscribe_exisitng_lambda_log_groups: !Or
-    - !Equals [ !Ref AutoSubscribeLogGroupsLambdaOptions, 'Existing' ]
-    - !Equals [ !Ref AutoSubscribeLogGroupsLambdaOptions, 'Both' ]
+    - !Equals [ !Ref AutoSubscribeLogGroupsOptions, 'Existing' ]
+    - !Equals [ !Ref AutoSubscribeLogGroupsOptions, 'Both' ]
 
 Resources:
 
@@ -157,7 +157,7 @@ Resources:
         SemanticVersion: 1.0.9
       Parameters:
         DestinationArnType: !Ref AutoSubscribeDestinationARNType
-        DestinationArnValue: !Ref AutoSubscribeDestinationARN
-        LogGroupPattern: !Ref AutoSubscribeLambdaLogGroupPattern
+        DestinationArnValue: !Ref AutoSubscribeDestinationARNValue
+        LogGroupPattern: !Ref AutoSubscribeLogGroupPattern
         UseExistingLogs: !If [auto_subscribe_exisitng_lambda_log_groups, "true", "false"]
         RoleArn: !Ref AutoSubscribeRoleArn
