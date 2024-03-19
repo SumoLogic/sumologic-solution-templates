@@ -216,7 +216,7 @@ Resources:
       FieldExtractionRuleScope: "account=* region=* apiId domainName stage requestId status"
       FieldExtractionRuleParseExpression: '| json "apiId", "domainName", "stage" as apiId, domainName, stage
                                            | "aws/apigateway" as namespace
-                                           | apiId as apiNames
+                                           | apiId as apiName
                                            | fields apiName, namespace, apiId'
       FieldExtractionRuleParseEnabled: true
       SumoAccessID: !Ref Section1bSumoAccessID
@@ -225,14 +225,13 @@ Resources:
 
   MetricRule:
     Type: Custom::SumoLogicMetricRules
-    DependsOn: AddLoadBalancerField
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
-      MetricRuleName: "AwsObservabilityApiGatewayApiNameEntityRule"
+      MetricRuleName: "AwsObservabilityApiGatewayApiNameMetricsEntityRule"
       MatchExpression: "Namespace=AWS/ApiGateway apiid=*"
       ExtractVariables:
-        networkloadbalancer: "$apiid._1"
+        apiname: "$apiid._1"
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
