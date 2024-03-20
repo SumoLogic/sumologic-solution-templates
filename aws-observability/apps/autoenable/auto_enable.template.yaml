@@ -43,7 +43,7 @@ Parameters:
     Default: 'Yes'
     Description: "Auto Subscribe Lambda and API Gateway Log Groups"
     Type: String
-  AutoSubscribeLogGroupsOptions:
+  AutoSubscribeLogGroupsLambdaOptions:
     Type: String
     Description: "New - Automatically subscribes new log groups to destination to send logs to Sumo Logic.
                   Existing - Automatically subscribes existing log groups to destination to send logs to Sumo Logic.
@@ -62,11 +62,11 @@ Parameters:
     AllowedValues:
       - 'Lambda'
       - 'Kinesis'
-  AutoSubscribeDestinationARNValue:
+  AutoSubscribeDestinationARN:
     Type: String
     Description: "Enter the Destination ARN (Lambda ARN or Delivery Stream ARN) based on the destination ARN type"
     Default: ""
-  AutoSubscribeLogGroupPattern:
+  AutoSubscribeLambdaLogGroupPattern:
     Type: String
     Default: "\/aws\/(lambda|apigateway)"
     Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters"
@@ -113,8 +113,8 @@ Conditions:
 
   # Condition for Auto Subscribe Lambda
   auto_subscribe_exisitng_log_groups: !Or
-    - !Equals [ !Ref AutoSubscribeLogGroupsOptions, 'Existing' ]
-    - !Equals [ !Ref AutoSubscribeLogGroupsOptions, 'Both' ]
+    - !Equals [ !Ref AutoSubscribeLogGroupsLambdaOptions, 'Existing' ]
+    - !Equals [ !Ref AutoSubscribeLogGroupsLambdaOptions, 'Both' ]
 
 Resources:
 
@@ -157,7 +157,7 @@ Resources:
         SemanticVersion: 1.0.9
       Parameters:
         DestinationArnType: !Ref AutoSubscribeDestinationARNType
-        DestinationArnValue: !Ref AutoSubscribeDestinationARNValue
-        LogGroupPattern: !Ref AutoSubscribeLogGroupPattern
+        DestinationArnValue: !Ref AutoSubscribeDestinationARN
+        LogGroupPattern: !Ref AutoSubscribeLambdaLogGroupPattern
         UseExistingLogs: !If [auto_subscribe_exisitng_log_groups, "true", "false"]
         RoleArn: !Ref AutoSubscribeRoleArn
