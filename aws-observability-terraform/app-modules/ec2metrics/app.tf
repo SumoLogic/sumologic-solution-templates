@@ -158,6 +158,74 @@ module "ec2metrics_module" {
       group_notifications      = var.group_notifications
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
+    },
+    "AWSEC2CWStatusCheckFailed" = {
+      monitor_name         = "AWS EC2 CW - Status Check Failed"
+      monitor_description  = "This alert fires when there is a status check failures within a 5 minute interval for an EC2 instance."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
+      queries = {
+        A = "account=* region=* namespace=aws/ec2 instanceid=* metric=StatusCheckFailed statistic=maximum | filter latest=1 | count by account, region, namespace,instanceid "
+      }
+      triggers = [
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 0,
+          threshold_type   = "GreaterThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 0,
+          threshold_type   = "LessThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        }
+      ]
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "AWSEC2CWHighCPUUtilization" = {
+      monitor_name         = "AWS EC2 CW - High CPU Utilization"
+      monitor_description  = "This alert fires when the average CPU Utilization based on cloud watch metrics, within a 5 minute interval for an EC2 instance is high (>=85%)."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
+      queries = {
+        A = "account=* region=* namespace=aws/ec2 instanceid=* statistic=average | avg by account, region, namespace, instanceid"
+      }
+      triggers = [
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 85,
+          threshold_type   = "GreaterThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 85,
+          threshold_type   = "LessThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        }
+      ]
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
     }
   }
 }
