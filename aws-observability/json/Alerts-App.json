@@ -2257,6 +2257,786 @@
       "playbook": "",
       "sloId": null,
       "monitorTemplateId": null
+    },
+    {
+      "name": "AWS EC2 CW - Status Check Failed",
+      "description": "This alert fires when there is a status check failures within a 5 minute interval for an EC2 instance.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/ec2 instanceid=* metric=StatusCheckFailed statistic=maximum | filter latest=1 | count by account, region, namespace,instanceid "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS SNS - Notification to DLQ",
+      "description": "This alert fires when an SNS topic messages are moved to a dead-letter queue.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/sns topicname=* metric=NumberOfNotificationsRedrivenToDlq statistic=sum | sum by account, region, namespace, topicname "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS SNS - Notification to DLQ Failure",
+      "description": "This alert fires when an SNS topic messages that couldn't be moved to a dead-letter queue.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/sns topicname=* metric=NumberOfNotificationsFailedToRedriveToDlq  statistic=sum | sum by account, region, namespace, topicname "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS DynamoDB - High Read Throttle",
+      "description": "This alert fires when we detect that the total read throttle events for a dynamodb table is high (>5) for a time interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/dynamodb tablename=* metric=ReadThrottleEvents statistic=sum   | sum by account, region, namespace, tablename"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS DynamoDB - High Write Throttle",
+      "description": "This alert fires when we detect that the total write throttle events for a dynamodb table is high (>5) for a time interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/dynamodb tablename=* metric=WriteThrottleEvents statistic=sum   | sum by account, region, namespace, tablename"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS DynamoDB - System Errors",
+      "description": "This alert fires when we detect system errors for a dynamodb table is high (>10) for a time interval of 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/dynamodb metric=SystemErrors statistic=samplecount  | sum "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS Lambda - High Memory Utilization",
+      "description": "This alert fires when we detect a Lambda execution with memory usage of more than 85% within an interval of 10 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* Namespace=aws/lambda Memory Size Used\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| _sourceName as logStream | _sourceHost as logGroup\n| parse regex field=message \"REPORT\\s+RequestId:\\s+(?<RequestId>[^\\s]+)\\s+Duration:\\s+(?<Duration>[^\\s]+)\\s+ms\\s+Billed Duration:\\s+(?<BilledDuration>[^\\s]+)\\s+ms\\s+Memory\\s+Size:\\s+(?<MemorySize>[^\\s]+)\\s+MB\\s+Max\\s+Memory\\s+Used:\\s+(?<MaxMemoryUsed>[^\\s]+)\\s+MB\" \n| parse field=loggroup \"/aws/lambda/*\" as functionname\n| avg(MemorySize) as MemorySizeAvg, avg(MaxMemoryUsed) as MaxMemoryUsedAvg by functionname\n| (MaxMemoryUsedAvg/MemorySizeAvg)*100 as memoryUtilization\n| where memoryUtilization>85"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-10m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": "-10m",
+          "timeRange": "-10m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS Lambda - Throttling",
+      "description": "This alert fires when we detect a Lambda running into throttling within an interval of 10 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "Namespace=aws/lambda metric=Throttles statistic=average account=* region=* functionname=* Resource=* | avg by account, region,namespace, functionname "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-10m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-10m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS MySQL - Excessive Slow Query Detected",
+      "description": "This alert fires when we detect the average time to execute a query is more than 5 seconds over last 10 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*SlowQuery \"User@Host\" \"Query_time\"\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"(?<query_block># User@Host:[\\S\\s]+?SET timestamp=\\d+;[\\S\\s]+?;)\" multi\n| parse regex field=query_block \"# User@Host:\\s*\\S+?\\[(?<user>\\S*?)\\]\\s*@\\s*\\[(?<ip_addr>\\S*?)\\]\\s*Id:\\s*(?<Id>\\d*)\" nodrop\n| parse regex field=query_block \"# User@Host:\\s*\\S+?\\[(?<user>\\S*?)\\]\\s*@\\s*(?<host_name>\\S+)\\s\\[(?<ip_addr>\\S*?)\\]\\s+Id:\\s*(?<Id>\\d+)\"\n| parse regex field=query_block \"# Query_time:\\s+(?<query_time>[\\d.]*)\\s+Lock_time:\\s+(?<lock_time>[\\d.]*)\\s+Rows_sent:\\s+(?<rows_sent>[\\d]*)\\s+Rows_examined:\\s+(?<rows_examined>[\\d]*)\" nodrop\n| parse regex field=query_block \"SET timestamp=(?<set_timestamp>\\d*);\\n(?<sql_cmd>[\\s\\S]*);\" nodrop\n| parse regex field=sql_cmd \"[^a-zA-Z]*(?<sql_cmd_type>[a-zA-Z]+)\\s*\"\n| fields -query_block\n| num (query_time)\n| count as frequency, sum(query_time) as total_time, min(query_time) as min_time, max(query_time) as max_time, avg(query_time) as avg_time, avg(rows_examined) as avg_rows_examined, avg(rows_sent) as avg_rows_sent, avg(Lock_Time) as avg_lock_time group by sql_cmd, dbidentifier\n| 5 as threshold // customize if need different value. As an example, query taking more than 5 Seconds is considered as Excessive Slow.\n| where avg_time > threshold\n| sort by avg_time, frequency asc"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-10m",
+          "threshold": 1,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null,
+          "occurrenceType": "ResultCount",
+          "triggerSource": "AllResults",
+          "minDataPoints": null
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-10m",
+          "threshold": 1,
+          "thresholdType": "LessThan",
+          "field": null,
+          "occurrenceType": "ResultCount",
+          "triggerSource": "AllResults",
+          "minDataPoints": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS MySQL - High Authentication Failure",
+      "description": "This alert fires when we detect more then 10 authentication failure over a 5 minute time-period",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*Error \"Access denied for user\"\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \" [*] \" as LogLevel\n| parse field=message \" * [Note] Access denied for user '*'@'*' (using *: *)\" as requestid, user, host, authenticationType, flag nodrop\n| parse field=message \"[Warning] Access denied for user '*'@'*' (using *: *)\" as user, host, authenticationType, flag nodrop"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS PostgreSQL - Excessive Slow Query Detected",
+      "description": "This alert fires when we detect the average time to execute a query is more than 5 seconds over a 10 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*postgresql\n| json \"message\" nodrop \n| if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* * *:*(*):*@*:[*]:*:*\" as date,time,time_zone,host,thread_id,user,database,processid,severity,msg \n| parse regex field=msg \"duration: (?<execution_time_ms>[\\S]+) ms (?<query>.+)\"\n| 5000 as threshold // customize if need different value. As an example, query taking more than 5 Seconds is considered as Excessive Slow.\n| where execution_time_ms > threshold  \n| count by dbidentifier, database"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "field": null,
+          "occurrenceType": "ResultCount",
+          "triggerSource": "AllResults",
+          "minDataPoints": null
+        },
+        {
+          "detectionMethod": "StaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "field": null,
+          "occurrenceType": "ResultCount",
+          "triggerSource": "AllResults",
+          "minDataPoints": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS PostgreSQL - High Authentication Failure",
+      "description": "This alert fires when we detect Postgres logs show high rate of authentication failures",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds _sourceHost=/aws/rds/*postgresql dbidentifier=* \"authentication failed\"\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* * *:*(*):*@*:[*]:*:*\" as date,time,time_zone,host,thread_id,user,database,processid,severity,msg \n| where msg matches \"*authentication failed*\""
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS PostgreSQL - High Errors",
+      "description": "This alert fires when we detect Postgres logs show high rate of error/fatal logs",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds _sourceHost=/aws/rds/*postgresql dbidentifier=* (\"ERROR\" OR \"FATAL\")\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* * *:*(*):*@*:[*]:*:*\" as date,time,time_zone,host,threadid,user,database,processid,severity,msg \n| where severity IN (\"ERROR\", \"FATAL\") "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 10,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS PostgreSQL - Statement Timeouts",
+      "description": "This alert fires when we detect Postgres logs show statement timeouts",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*postgresql \"statement timeout\" | json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message | parse field=message \"* * *:*(*):*@*:[*]:*:*\" as date,time,time_zone,host,thread_id,user,database,processid,severity,msg | count by  dbidentifier, database"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "GreaterThan",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 0,
+          "thresholdType": "LessThanOrEqual",
+          "field": null
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS - Low Free Storage",
+      "description": "This alert fires when the average free storage space of a RDS instance is low (< 512MB) for an interval of 15 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds metric=FreeStorageSpace statistic=average |  eval _value/(1024*1024) | avg by dbidentifier, namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-15m",
+          "threshold": 512,
+          "thresholdType": "LessThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-15m",
+          "threshold": 512,
+          "thresholdType": "GreaterThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS - Low Freeable Memory",
+      "description": "This alert fires when the average Freeable memory of an RDS instance is < 128 MB for an interval of 15 minutes. If this value is lower you may need to scale up to a larger instance class.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds metric=FreeableMemory statistic=average |  eval _value/(1024*1024) | avg by dbidentifier, namespace, region, account"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-15m",
+          "threshold": 128,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-15m",
+          "threshold": 128,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS EC2 CW - High CPU Utilization",
+      "description": "This alert fires when the average CPU Utilization based on cloud watch metrics, within a 5 minute interval for an EC2 instance is high (>=85%).",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Metrics",
+      "evaluationDelay": "4m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/ec2 instanceid=* statistic=average | avg by account, region, namespace, instanceid "
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 85,
+          "thresholdType": "GreaterThan",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        },
+        {
+          "detectionMethod": "MetricsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 85,
+          "thresholdType": "LessThanOrEqual",
+          "occurrenceType": "Always",
+          "minDataPoints": 2
+        }
+      ],
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
     }
   ]
 }
