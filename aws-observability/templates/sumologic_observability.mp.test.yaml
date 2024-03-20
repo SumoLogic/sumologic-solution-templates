@@ -452,12 +452,12 @@ Conditions:
     - !Condition is_elb_bucket_available
 
   # Condition for Auto Subscribe Lambda
-  auto_subscribe_new_log_groups: !Or
+  auto_subscribe_exisitng_log_groups: !Or
     - !Equals [ !Ref Section7cAutoSubscribeLogGroupsOptions, 'New' ]
     - !Equals [ !Ref Section7cAutoSubscribeLogGroupsOptions, 'Both' ]
   auto_subscribe_log_groups: !And
     - !Condition create_cloudwatch_logs_source
-    - !Condition auto_subscribe_new_log_groups
+    - !Condition auto_subscribe_exisitng_log_groups
 
   call_auto_enable: !Or
     - !Condition auto_enable_s3_logs
