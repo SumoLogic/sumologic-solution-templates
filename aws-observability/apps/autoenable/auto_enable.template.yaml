@@ -112,7 +112,7 @@ Conditions:
   auto_subscribe_new_log_groups: !Equals [ !Ref AutoSubscribeLogGroups, 'Yes' ]
 
   # Condition for Auto Subscribe Lambda
-  auto_subscribe_new_log_groups: !Or
+  auto_subscribe_exisitng_log_groups: !Or
     - !Equals [ !Ref AutoSubscribeLogGroupsOptions, 'Existing' ]
     - !Equals [ !Ref AutoSubscribeLogGroupsOptions, 'Both' ]
 
@@ -159,5 +159,5 @@ Resources:
         DestinationArnType: !Ref AutoSubscribeDestinationARNType
         DestinationArnValue: !Ref AutoSubscribeDestinationARNValue
         LogGroupPattern: !Ref AutoSubscribeLogGroupPattern
-        UseExistingLogs: !If [auto_subscribe_new_log_groups, "true", "false"]
+        UseExistingLogs: !If [auto_subscribe_exisitng_log_groups, "true", "false"]
         RoleArn: !Ref AutoSubscribeRoleArn
