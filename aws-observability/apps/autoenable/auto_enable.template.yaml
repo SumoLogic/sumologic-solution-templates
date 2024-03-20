@@ -109,10 +109,10 @@ Parameters:
 Conditions:
   auto_enable_s3_logs: !Equals [ !Ref ALBAutoEnableS3Logs, 'Yes' ]
   auto_enable_s3_logs_elb: !Equals [ !Ref ELBAutoEnableS3Logs, 'Yes' ]
-  auto_subscribe_new_log_groups: !Equals [ !Ref AutoSubscribeLogGroups, 'Yes' ]
+  auto_subscribe_exisitng_log_groups: !Equals [ !Ref AutoSubscribeLogGroups, 'Yes' ]
 
   # Condition for Auto Subscribe Lambda
-  auto_subscribe_new_log_groups: !Or
+  auto_subscribe_exisitng_log_groups: !Or
     - !Equals [ !Ref AutoSubscribeLogGroupsOptions, 'Existing' ]
     - !Equals [ !Ref AutoSubscribeLogGroupsOptions, 'Both' ]
 
@@ -150,7 +150,7 @@ Resources:
 
   AutoSubscribeLambdaLogGroupsAWSResources:
     Type: AWS::Serverless::Application
-    Condition: auto_subscribe_new_log_groups
+    Condition: auto_subscribe_exisitng_log_groups
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
@@ -159,5 +159,5 @@ Resources:
         DestinationArnType: !Ref AutoSubscribeDestinationARNType
         DestinationArnValue: !Ref AutoSubscribeDestinationARNValue
         LogGroupPattern: !Ref AutoSubscribeLogGroupPattern
-        UseExistingLogs: !If [auto_subscribe_new_log_groups, "true", "false"]
+        UseExistingLogs: !If [auto_subscribe_exisitng_log_groups, "true", "false"]
         RoleArn: !Ref AutoSubscribeRoleArn
