@@ -4,6 +4,51 @@
   "type": "MonitorsLibraryFolderExport",
   "children": [
     {
+      "name": "AWS API Gateway - High Authorizer Errors",
+      "description": "This alert fires where there are too many API requests (>5%)  with authorizer errors within 5 minutes",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "1m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/apigateway apiname=* apiid stage domainname requestId authorizerError\n| json \"status\", \"authorizerError\", \"apiid\", \"stage\" as status, authorizerError, apiid, stage \n| if (!(authorizerError matches \"-\") and !(status matches \"2*\"), 1, 0) as is_authorizerError\n| sum(is_authorizerError) as is_authorizerError_count, count as totalRequests by apiid, stage\n| (is_authorizerError_count*100/totalRequests) as authorizerError_percent\n| fields authorizerError_percent, apiid, stage\n"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThan",
+          "field": "authorizerError_percent"
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": "-5m",
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThanOrEqual",
+          "field": "authorizerError_percent"
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
       "name": "AWS API Gateway - High Client-Side Errors",
       "description": "This alert fires where there are too many API requests (>5%) with client-side errors within 5 minutes. \nThis can indicate an issue in the authorisation or client request parameters. It could also mean that a resource was removed or a client is requesting one that doesn't exist.Errors could also be caused by exceeding the configured throttling limit.",
       "type": "MonitorsLibraryMonitorExport",
@@ -44,6 +89,51 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS API Gateway - High Integration Errors",
+      "description": "This alert fires where there are too many API requests (>5%)  with integration errors within 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "1m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/apigateway apiname=* apiid stage domainname requestId integrationError\n| json \"status\", \"integrationError\", \"apiid\", \"stage\" as status, integrationError, apiid, stage \n| if (!(integrationError matches \"-\") and !(status matches \"2*\"), 1, 0) as is_integrationError\n| sum(is_integrationError) as integrationError_count, count as totalRequests by apiid, stage\n| (integrationError_count*100/totalRequests) as integrationError_percent\n| fields integrationError_percent, apiid, stage"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThan",
+          "field": "integrationError_percent"
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": "-5m",
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThanOrEqual",
+          "field": "integrationError_percent"
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
       "playbook": "",
       "sloId": null,
       "monitorTemplateId": null,
@@ -185,6 +275,96 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS API Gateway - High WAF Errors",
+      "description": "This alert fires where there are too many API requests (>5%) with WAF errors within 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "1m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/apigateway apiname=* apiid stage domainname requestId \n| json  \"status\", \"apiid\", \"stage\", \"wafResponseCode\" as  status, apiid, stage, wafResponseCode\n| if (wafResponseCode==\"WAF_BLOCK\" and !(status matches \"2*\"), 1, 0) as is_wafError\n| sum(is_wafError) as is_wafError_count, count as totalRequests by apiid, stage\n| (is_wafError_count*100/totalRequests) as wafError_percent\n| fields wafError_percent, apiid, stage"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "GreaterThan",
+          "field": "wafError_percent"
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": "-5m",
+          "timeRange": "-5m",
+          "threshold": 5,
+          "thresholdType": "LessThanOrEqual",
+          "field": "wafError_percent"
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "AWS API Gateway - High WAF Latency",
+      "description": "This alert fires when we detect the high WAF latency for the REST and WebSocket API requests in a stage within 5 minutes.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "1m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=* apiname=* apiid stage domainname requestId wafLatency\n| json \"wafLatency\", \"apiId\", \"stage\" as wafLatency, apiid, stage \n| pct(wafLatency, 90) as wafLatency90th by apiid,stage"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-5m",
+          "threshold": 1000,
+          "thresholdType": "GreaterThan",
+          "field": "wafLatency90th"
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": "-5m",
+          "timeRange": "-5m",
+          "threshold": 1000,
+          "thresholdType": "LessThanOrEqual",
+          "field": "wafLatency90th"
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
       "playbook": "",
       "sloId": null,
       "monitorTemplateId": null,
