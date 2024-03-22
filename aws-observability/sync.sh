@@ -24,9 +24,10 @@ else
     isdryrun=""
 fi
 
+# sync should be first and then cp. DO NOT CHANGE ORDER
 echo "Copying child templates from ${APPS_TEMPLATES_DIR} to Bucket ${S3_TEMPLATES} in ${BUCKET_REGION}"
 aws s3 sync ${APPS_TEMPLATES_DIR}/ ${S3_TEMPLATES} --delete --include '*.yaml' --exclude '*.DS_Store'  --exclude '*/test/*' --exclude 'SumoLogicAWSObservabilityHelper/*' --acl public-read ${isdryrun} --profile ${AWS_PROFILE} --region ${BUCKET_REGION}
 echo "Copying json folder ${APPS_JSON_DIR} to Bucket ${S3_JSON_DIR} in ${BUCKET_REGION}"
-aws s3 cp --recursive ${APPS_JSON_DIR} ${S3_JSON_DIR} ${isdryrun} --profile ${AWS_PROFILE} --region ${BUCKET_REGION}
+aws s3 cp --recursive ${APPS_JSON_DIR} ${S3_JSON_DIR} --acl public-read ${isdryrun} --profile ${AWS_PROFILE} --region ${BUCKET_REGION}
 echo "Copying master template ${MASTER_TEMPLATE} to Bucket ${S3_TEMPLATES} in ${BUCKET_REGION}"
-aws s3 cp ${MASTER_TEMPLATE} ${S3_TEMPLATES} ${isdryrun} --profile ${AWS_PROFILE} --region ${BUCKET_REGION}
+aws s3 cp ${MASTER_TEMPLATE} ${S3_TEMPLATES} --acl public-read ${isdryrun} --profile ${AWS_PROFILE} --region ${BUCKET_REGION}
