@@ -17,7 +17,7 @@ Tests:
         Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
         Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
         Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
-        Section2aAccountAlias: ''
+        Section2aAccountAlias: 'testenv'
         Section2bAccountAliasMappingS3URL: ''
         Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SQS, AWS/SNS, AWS/EC2'
     Assertions:
@@ -46,6 +46,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -141,7 +142,9 @@ Tests:
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
             - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -254,10 +257,10 @@ Tests:
             ELBAutoEnableS3LogsOptions: "Both"
             ELBS3LogsBucketName: 'aws-observability-logs'
             AutoSubscribeLogGroups: 'Yes'
-            AutoSubscribeLogGroupsLambdaOptions: 'Both'
+            AutoSubscribeLogGroupsOptions: 'Both'
             AutoSubscribeDestinationARNType: 'Kinesis'
-            AutoSubscribeDestinationARN: 'arn:aws:firehose:'
-            AutoSubscribeLambdaLogGroupPattern: 'lambda'
+            AutoSubscribeDestinationARNValue: 'arn:aws:firehose:'
+            AutoSubscribeLogGroupPattern: 'lambda'
             AutoSubscribeRoleArn: "arn:aws:iam::"
           AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
             BucketName: 'aws-observability-logs'
@@ -305,7 +308,7 @@ Tests:
             Section4bAwsXRaySourceName: "xray-ap-south-1"
             Section4cXraySourceCategory: "aws/observability/xray"
           sumoLambdaMetricsAppStack:
-            Section2aAccountAlias: ''
+            Section2aAccountAlias: 'testenv'
             Section3aInstallApp: 'Yes'
             Section4aCloudWatchExistingSourceAPIUrl: ''
             Section5aCloudTrailLogsAPIUrl: ''
@@ -335,7 +338,7 @@ Tests:
         Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
         Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
         Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
-        Section2aAccountAlias: ''
+        Section2aAccountAlias: 'testenv'
         Section2bAccountAliasMappingS3URL: 'https://mappingbucketawso.s3.amazonaws.com/mapping.csv'
         Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SQS, AWS/SNS'
     Assertions:
@@ -364,6 +367,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -459,7 +463,9 @@ Tests:
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
             - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -572,10 +578,10 @@ Tests:
             ELBAutoEnableS3LogsOptions: "Both"
             ELBS3LogsBucketName: 'aws-observability-logs'
             AutoSubscribeLogGroups: 'Yes'
-            AutoSubscribeLogGroupsLambdaOptions: 'Both'
+            AutoSubscribeLogGroupsOptions: 'Both'
             AutoSubscribeDestinationARNType: 'Kinesis'
-            AutoSubscribeDestinationARN: 'arn:aws:firehose:'
-            AutoSubscribeLambdaLogGroupPattern: 'lambda'
+            AutoSubscribeDestinationARNValue: 'arn:aws:firehose:'
+            AutoSubscribeLogGroupPattern: 'lambda'
             AutoSubscribeRoleArn: "arn:aws:iam::"
           AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
             BucketName: 'aws-observability-logs'
@@ -631,7 +637,7 @@ Tests:
             Section4bAwsXRaySourceName: "xray-ap-south-1"
             Section4cXraySourceCategory: "aws/observability/xray"
           sumoLambdaMetricsAppStack:
-            Section2aAccountAlias: ''
+            Section2aAccountAlias: 'testenv'
             Section3aInstallApp: 'Yes'
             Section4aCloudWatchExistingSourceAPIUrl: ''
             Section5aCloudTrailLogsAPIUrl: ''
@@ -661,7 +667,7 @@ Tests:
         Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
         Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
         Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
-        Section2aAccountAlias: ''
+        Section2aAccountAlias: 'testenv'
         Section2bAccountAliasMappingS3URL: 'https://mappingbucketawso.s3.amazonaws.com/mapping_invalid.csv'
         Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SQS, AWS/SNS'
     Assertions:
@@ -691,6 +697,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -789,7 +796,9 @@ Tests:
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
             - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -898,10 +907,10 @@ Tests:
             ELBAutoEnableS3LogsOptions: "Both"
             ELBS3LogsBucketName: 'aws-observability-logs'
             AutoSubscribeLogGroups: 'Yes'
-            AutoSubscribeLogGroupsLambdaOptions: 'Both'
+            AutoSubscribeLogGroupsOptions: 'Both'
             AutoSubscribeDestinationARNType: 'Kinesis'
-            AutoSubscribeDestinationARN: 'arn:aws:firehose:'
-            AutoSubscribeLambdaLogGroupPattern: 'lambda'
+            AutoSubscribeDestinationARNValue: 'arn:aws:firehose:'
+            AutoSubscribeLogGroupPattern: 'lambda'
             AutoSubscribeRoleArn: "arn:aws:iam::"
           AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
             BucketName: 'aws-observability-logs'
@@ -957,7 +966,7 @@ Tests:
             Section4bAwsXRaySourceName: "xray-ap-south-1"
             Section4cXraySourceCategory: "aws/observability/xray"
           sumoLambdaMetricsAppStack:
-            Section2aAccountAlias: ''
+            Section2aAccountAlias: 'testenv'
             Section3aInstallApp: 'Yes'
             Section4aCloudWatchExistingSourceAPIUrl: ''
             Section5aCloudTrailLogsAPIUrl: ''
@@ -982,10 +991,10 @@ Tests:
     Skip: false
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us2'
-        Section1bSumoLogicAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
-        Section1cSumoLogicAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${US2_PROFESSIONAL_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us1'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test2env'
         Section2bAccountAliasMappingS3URL: ''
         Section3aInstallObservabilityApps: 'No'
@@ -1023,6 +1032,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -1164,10 +1174,10 @@ Tests:
     Skip: false
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us2'
-        Section1bSumoLogicAccessID: '${FREE_ACCOUNT_ACCESS_ID}'
-        Section1cSumoLogicAccessKey: '${FREE_ACCOUNT_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${US2_FREE_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us1'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test3env'
         Section2bAccountAliasMappingS3URL: ''
         Section3aInstallObservabilityApps: 'Yes'
@@ -1176,7 +1186,7 @@ Tests:
         Section5bALBCreateLogSource: 'Yes'
         Section6aCreateCloudTrailLogSource: 'No'
         Section7aLambdaCreateCloudWatchLogsSourceOptions: 'Lambda Log Forwarder'
-        Section7cAutoSubscribeLogGroupsLambdaOptions: 'New'
+        Section7cAutoSubscribeLogGroupsOptions: 'New'
         Section8aRootCauseExplorerOptions: 'Xray Source'
         Section4bMetricsNameSpaces: 'AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/ApplicationELB, AWS/RDS, AWS/SQS, AWS/EC2, AWS/SNS'
         Section9aAutoEnableS3LogsELBResourcesOptions: 'New'
@@ -1208,6 +1218,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -1355,10 +1366,10 @@ Tests:
             ELBAutoEnableS3Logs: 'Yes'
             ELBS3LogsBucketName: 'aws-observability-logs'
             AutoSubscribeLogGroups: 'Yes'
-            AutoSubscribeLogGroupsLambdaOptions: 'New'
+            AutoSubscribeLogGroupsOptions: 'New'
             AutoSubscribeDestinationARNType: 'Lambda'
-            AutoSubscribeDestinationARN: 'arn:aws:lambda:'
-            AutoSubscribeLambdaLogGroupPattern: 'lambda'
+            AutoSubscribeDestinationARNValue: 'arn:aws:lambda:'
+            AutoSubscribeLogGroupPattern: 'lambda'
             AutoSubscribeRoleArn: ""
           AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
             BucketName: 'aws-observability-logs'
@@ -1442,8 +1453,8 @@ Tests:
     Parameters:
       Values:
         Section1aSumoLogicDeployment: 'us1'
-        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID_1}'
-        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY_1}'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
         Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test4env'
         Section2bAccountAliasMappingS3URL: ''
@@ -1453,7 +1464,7 @@ Tests:
         Section5bALBCreateLogSource: 'No'
         Section6aCreateCloudTrailLogSource: 'Yes'
         Section7aLambdaCreateCloudWatchLogsSourceOptions: 'Lambda Log Forwarder'
-        Section7cAutoSubscribeLogGroupsLambdaOptions: 'Existing'
+        Section7cAutoSubscribeLogGroupsOptions: 'Existing'
         Section8aRootCauseExplorerOptions: 'Inventory Source'
         Section9aAutoEnableS3LogsELBResourcesOptions: 'New'
         Section9bELBCreateLogSource: 'No'
@@ -1484,6 +1495,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -1538,7 +1550,9 @@ Tests:
             - sumoRdsMetricsAppStack.ClusterMetricRule
             - sumoRdsMetricsAppStack.InstanceMetricRule
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -1686,10 +1700,10 @@ Tests:
     Skip: false
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us2'
-        Section1bSumoLogicAccessID: '${FREE_ACCOUNT_ACCESS_ID}'
-        Section1cSumoLogicAccessKey: '${FREE_ACCOUNT_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${US2_FREE_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us1'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test5env'
         Section2bAccountAliasMappingS3URL: ''
         Section3aInstallObservabilityApps: 'No'
@@ -1702,7 +1716,7 @@ Tests:
         Section6aCreateCloudTrailLogSource: 'Yes'
         Section7aLambdaCreateCloudWatchLogsSourceOptions: 'None'
         Section7bLambdaCloudWatchLogsSourceUrl: 'https://api.us2.sumologic.com/api/v1/collectors/167776029/sources/1169994000'
-        Section7cAutoSubscribeLogGroupsLambdaOptions: 'New'
+        Section7cAutoSubscribeLogGroupsOptions: 'New'
         Section8aRootCauseExplorerOptions: 'Xray Source'
     Assertions:
       - AssertType: ResourceExistence
@@ -1731,6 +1745,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -1768,7 +1783,9 @@ Tests:
             - sumoLambdaMetricsAppStack.SumoHTTPUpdateSource
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -1904,10 +1921,10 @@ Tests:
     Skip: true
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us2'
-        Section1bSumoLogicAccessID: '${FREE_ACCOUNT_ACCESS_ID}'
-        Section1cSumoLogicAccessKey: '${FREE_ACCOUNT_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${US2_FREE_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us1'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test9env'
         Section2bAccountAliasMappingS3URL: ''
         Section3aInstallObservabilityApps: 'No'
@@ -1918,7 +1935,7 @@ Tests:
         Section6aCreateCloudTrailLogSource: 'Yes'
         Section7aLambdaCreateCloudWatchLogsSourceOptions: 'None'
         Section7bLambdaCloudWatchLogsSourceUrl: 'https://api.de.sumologic.com/api/v1/collectors/2081523/sources/12791746'
-        Section7cAutoSubscribeLogGroupsLambdaOptions: 'New'
+        Section7cAutoSubscribeLogGroupsOptions: 'New'
         Section8aRootCauseExplorerOptions: 'Xray Source'
         Section9aAutoEnableS3LogsELBResourcesOptions: 'Existing'
         Section9bELBCreateLogSource: 'Yes'
@@ -1952,6 +1969,7 @@ Tests:
             - sumoAlbMetricsAppStack.AddLoadBalancerField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -1988,7 +2006,9 @@ Tests:
             - sumoLambdaMetricsAppStack.SumoHTTPUpdateSource
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -2125,8 +2145,8 @@ Tests:
     Parameters:
       Values:
         Section1aSumoLogicDeployment: 'us1'
-        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID_2}'
-        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY_2}'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
         Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test6env'
         Section2bAccountAliasMappingS3URL: ''
@@ -2168,6 +2188,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -2211,7 +2232,9 @@ Tests:
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
             - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -2347,10 +2370,10 @@ Tests:
     Skip: false
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us2'
-        Section1bSumoLogicAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
-        Section1cSumoLogicAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${US2_PROFESSIONAL_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us1'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test7env'
         Section2bAccountAliasMappingS3URL: ''
         Section3aInstallObservabilityApps: 'Yes'
@@ -2359,7 +2382,7 @@ Tests:
         Section5aAutoEnableS3LogsALBResourcesOptions: 'Both'
         Section5bALBCreateLogSource: 'No'
         Section5cALBLogsSourceUrl: 'https://api.us2.sumologic.com/api/v1/collectors/238450591/sources/1563363030'
-        Section5dALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1-arun'
+        Section5dALBS3LogsBucketName: 'newapigateway'
         Section6aCreateCloudTrailLogSource: 'No'
         Section6bCloudTrailLogsSourceUrl: 'https://api.us2.sumologic.com/api/v1/collectors/238450591/sources/1563363030'
         Section7aLambdaCreateCloudWatchLogsSourceOptions: 'None'
@@ -2393,6 +2416,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -2430,7 +2454,9 @@ Tests:
             - sumoLambdaMetricsAppStack.SumoCloudTrailLogsUpdateSource
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -2594,10 +2620,10 @@ Tests:
     Skip: true
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us2'
-        Section1bSumoLogicAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
-        Section1cSumoLogicAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${US2_PROFESSIONAL_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us1'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: 'test7env'
         Section2bAccountAliasMappingS3URL: ''
         Section3aInstallObservabilityApps: 'Yes'
@@ -2640,6 +2666,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -2677,7 +2704,9 @@ Tests:
             - sumoLambdaMetricsAppStack.SumoCloudTrailLogsUpdateSource
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -2854,15 +2883,15 @@ Tests:
         Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
         Section5bALBCreateLogSource: 'Yes'
         Section5cALBLogsSourceUrl: 'https://api.us2.sumologic.com/api/v1/collectors/185140717/sources/908777855'
-        Section5dALBS3LogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1-arun'
+        Section5dALBS3LogsBucketName: 'newapigateway'
         Section5eALBS3BucketPathExpression: '*abc*'
         Section6aCreateCloudTrailLogSource: 'Yes'
         Section6bCloudTrailLogsSourceUrl: 'https://api.us2.sumologic.com/api/v1/collectors/185140717/sources/908777855'
-        Section6cCloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-south-1-arun'
+        Section6cCloudTrailLogsBucketName: 'newapigateway'
         Section6dCloudTrailBucketPathExpression: '*abc*'
         Section7aLambdaCreateCloudWatchLogsSourceOptions: 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)'
         Section7bLambdaCloudWatchLogsSourceUrl: "https://api.us2.sumologic.com/api/v1/collectors/185140717/sources/908777855"
-        Section7cAutoSubscribeLogGroupsLambdaOptions: "Both"
+        Section7cAutoSubscribeLogGroupsOptions: "Both"
         Section8aRootCauseExplorerOptions: 'Inventory Source'
         Section9aAutoEnableS3LogsELBResourcesOptions: 'None'
         Section9bELBCreateLogSource: 'Yes'
@@ -2895,6 +2924,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -2939,7 +2969,9 @@ Tests:
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
             - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -3066,10 +3098,10 @@ Tests:
             ALBAutoEnableS3Logs: 'No'
             ELBAutoEnableS3Logs: 'No'
             AutoSubscribeLogGroups: 'Yes'
-            AutoSubscribeLogGroupsLambdaOptions: 'Both'
+            AutoSubscribeLogGroupsOptions: 'Both'
             AutoSubscribeDestinationARNType: 'Kinesis'
-            AutoSubscribeDestinationARN: 'arn:aws:firehose:'
-            AutoSubscribeLambdaLogGroupPattern: 'lambda'
+            AutoSubscribeDestinationARNValue: 'arn:aws:firehose:'
+            AutoSubscribeLogGroupPattern: 'lambda'
             AutoSubscribeRoleArn: "arn:aws:iam::"
           AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources:
             UseExistingLogs: 'true'
@@ -3139,10 +3171,10 @@ Tests:
     Skip: false
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: 'us2'
-        Section1bSumoLogicAccessID: '${PROFESSIONAL_US2_ACCESS_ID}'
-        Section1cSumoLogicAccessKey: '${PROFESSIONAL_US2_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${US2_PROFESSIONAL_ORG_ID}'
+        Section1aSumoLogicDeployment: 'us1'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
         Section2aAccountAlias: ''
         Section2bAccountAliasMappingS3URL: ''
         Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SQS, AWS/SNS, AWS/SQS'
@@ -3176,6 +3208,7 @@ Tests:
             - sumoElbMetricsAppStack.AddLoadBalancerNameField
             - sumoLambdaMetricsAppStack.AddFunctionNameField
             - sumoApiGatewayMetricsAppStack.AddApiNameField
+            - sumoApiGatewayMetricsAppStack.AddApiIdField
             - sumoSNSAppStack.AddTopicNameField
             - sumoSQSAppStack.AddQueueNameField
             - sumoRdsMetricsAppStack.AddDBIdentifierField
@@ -3266,7 +3299,9 @@ Tests:
             - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
             - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
             - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-            - sumoApiGatewayMetricsAppStack.FieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+            - sumoApiGatewayMetricsAppStack.MetricRule
             - sumoSNSAppStack.FieldExtractionRule
             - sumoSQSAppStack.FieldExtractionRule
             - sumoDynamoDBMetricsAppStack.FieldExtractionRule
@@ -3379,10 +3414,10 @@ Tests:
             ELBAutoEnableS3LogsOptions: "Both"
             ELBS3LogsBucketName: 'aws-observability-logs'
             AutoSubscribeLogGroups: 'Yes'
-            AutoSubscribeLogGroupsLambdaOptions: 'Both'
+            AutoSubscribeLogGroupsOptions: 'Both'
             AutoSubscribeDestinationARNType: 'Kinesis'
-            AutoSubscribeDestinationARN: 'arn:aws:firehose:'
-            AutoSubscribeLambdaLogGroupPattern: 'lambda'
+            AutoSubscribeDestinationARNValue: 'arn:aws:firehose:'
+            AutoSubscribeLogGroupPattern: 'lambda'
             AutoSubscribeRoleArn: "arn:aws:iam::"
           AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
             BucketName: 'aws-observability-logs'
