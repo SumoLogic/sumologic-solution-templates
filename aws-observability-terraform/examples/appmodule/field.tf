@@ -52,6 +52,13 @@ resource "sumologic_field" "apiname" {
     state      = "Enabled"
 }
 
+# Used in API gateway
+resource "sumologic_field" "apiid" {
+    data_type  = "String"
+    field_name = "apiid"
+    state      = "Enabled"
+}
+
 # Used in DynamoDB
 resource "sumologic_field" "tablename" {
     data_type  = "String"
@@ -118,6 +125,7 @@ resource "sumologic_field" "topicname" {
     state      = "Enabled"
 }
 
+# Used in SQS
 resource "sumologic_field" "queuename" {
     data_type  = "String"
     field_name = "queuename"
@@ -151,6 +159,20 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityApiGatewayCloudTrail
               | json field=responseElements "name" as ApiName nodrop
               | tolowercase(ApiName) as apiname
               | fields region, namespace, apiname, accountid
+      EOT
+      enabled = true
+}
+
+# API Gateway Access Logs FER
+resource "sumologic_field_extraction_rule" "AwsObservabilityApiGatewayAccessLogsFER" {
+      depends_on = [time_sleep.wait_for_10_seconds]
+      name = "AwsObservabilityApiGatewayAccessLogsFER"
+      scope = "account=* region=* apiId domainName stage requestId status"
+      parse_expression = <<EOT
+              | json "apiId", "domainName", "stage" as apiId, domainName, stage
+              | "aws/apigateway" as namespace
+              | apiId as apiName
+              | fields apiName, namespace, apiId
       EOT
       enabled = true
 }
@@ -279,14 +301,23 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityLambdaCloudWatchLogs
 resource "sumologic_field_extraction_rule" "AwsObservabilityGenericCloudWatchLogsFER" {
       depends_on = [time_sleep.wait_for_10_seconds]
       name = "AwsObservabilityGenericCloudWatchLogsFER"
-      scope = "account=* region=* _sourceHost=/aws/*"
+      scope = "account=* region=* (_sourceHost=/aws/* or _sourceHost=API*Gateway*Execution*Logs*)"
       parse_expression = <<EOT
-              | "unknown" as namespace
-              | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
-              | if (_sourceHost matches "/aws/rds/*", "aws/rds", namespace) as namespace
-              | if (_sourceHost matches "/aws/ecs/containerinsights/*", "ecs/containerinsights", namespace) as namespace
-              | if (_sourceHost matches "/aws/kinesisfirehose/*", "aws/firehose", namespace) as namespace
-              | fields namespace
+                | if (isEmpty(namespace),"unknown",namespace) as namespace
+                | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
+                | if (_sourceHost matches "/aws/rds/*", "aws/rds", namespace) as namespace
+                | if (_sourceHost matches "/aws/ecs/containerinsights/*", "aws/ecs", namespace) as namespace
+                | if (_sourceHost matches "/aws/kinesisfirehose/*", "aws/firehose", namespace) as namespace
+                | if (_sourceHost matches "/aws/apigateway/*", "aws/apigateway", namespace) as namespace 
+                | if (_sourceHost matches "API-Gateway-Execution-Logs*", "aws/apigateway", namespace) as namespace 
+                | parse field=_sourceHost "/aws/lambda/*" as functionname nodrop
+                | tolowercase(functionname) as functionname
+                | parse field=_sourceHost "/aws/rds/*/*/" as f1, dbidentifier nodrop
+                | parse field=_sourceHost "/aws/apigateway/*/*" as apiid, stage nodrop
+                | parse field=_sourceHost "API-Gateway-Execution-Logs_*/*" as apiid, stage nodrop
+                | apiid as apiName
+                | tolowercase(dbidentifier) as dbidentifier
+                | fields namespace, functionname, dbidentifier, apiid, apiName
       EOT
       enabled = true
 }
@@ -331,6 +362,7 @@ resource "sumologic_field_extraction_rule" "AwsObservabilitySNSCloudTrailLogsFER
               | parse field=subscription_arn "arn:aws:sns:*:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
               | if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname
               | if (isBlank(accountid), recipient_account_id, accountid) as accountid
+              | toLowerCase(topicname) as topicname
               | "aws/sns" as namespace
               | fields region, namespace, topicname, accountid
       EOT
@@ -341,7 +373,7 @@ resource "sumologic_field_extraction_rule" "AwsObservabilitySNSCloudTrailLogsFER
 resource "sumologic_field_extraction_rule" "AwsObservabilitySQSCloudTrailLogsFER" {
       depends_on = [time_sleep.wait_for_10_seconds]
       name = "AwsObservabilitySQSCloudTrailLogsFER"
-      scope = "account=* eventsource sqs.amazonaws.com"
+      scope = "account=* eventsource \"sqs.amazonaws.com\""
       parse_expression = <<EOT
               | json "userIdentity", "eventSource", "eventName", "awsRegion", "recipientAccountId", "requestParameters", "responseElements", "sourceIPAddress" as userIdentity, event_source, event_name, region, recipient_account_id, requestParameters, responseElements, src_ip  nodrop
               | json field=userIdentity "accountId", "type", "arn", "userName" as accountid, type, arn, username nodrop
