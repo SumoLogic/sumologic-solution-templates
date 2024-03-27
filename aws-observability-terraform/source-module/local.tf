@@ -43,7 +43,7 @@ locals {
   update_logs_source          = var.collect_cloudwatch_logs == "None" ? false : (var.cloudwatch_logs_source_url == "" ? false : true)
   create_cw_logs_source       = var.collect_cloudwatch_logs == "None" ? false : (local.update_logs_source ? false : true)
   cloudwatch_logs_source_name = var.cloudwatch_logs_source_details.source_name == "CloudWatch Logs (Region)" ? "CloudWatch Logs ${local.aws_region}" : var.cloudwatch_logs_source_details.source_name
-  cloudwatch_logs_fields      = merge(var.cloudwatch_logs_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, namespace = "aws/lambda", accountid = local.aws_account_id })
+  cloudwatch_logs_fields      = merge(var.cloudwatch_logs_source_details.fields, { account = var.aws_account_alias, region = local.aws_region, accountid = local.aws_account_id })
 
   # Root Cause sources updated details
   create_inventory_source  = var.collect_root_cause_data == "Inventory Source" || var.collect_root_cause_data == "Both"
