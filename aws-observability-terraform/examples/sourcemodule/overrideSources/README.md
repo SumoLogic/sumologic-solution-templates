@@ -5,14 +5,14 @@
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.42.0, < 4.0.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1.0 |
-| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.13.0 |
+| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.28.3, < 3.0.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.7.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.13.0 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.28.3, < 3.0.0 |
 | <a name="provider_time"></a> [time](#provider\_time) | >= 0.7.1 |
 
 ## Modules
@@ -39,10 +39,10 @@
 | [sumologic_field.loadbalancername](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.namespace](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.networkloadbalancer](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field.queuename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.region](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.tablename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.topicname](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
-| [sumologic_field.queuename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityAlbAccessLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityApiGatewayCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityDynamoDBCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
@@ -134,7 +134,6 @@
 | <a name="output_sumologic_field_networkloadbalancer"></a> [sumologic\_field\_networkloadbalancer](#output\_sumologic\_field\_networkloadbalancer) | This output contains sumologic networkloadbalancer field id. |
 | <a name="output_sumologic_field_region"></a> [sumologic\_field\_region](#output\_sumologic\_field\_region) | This output contains sumologic Region field id. |
 | <a name="output_sumologic_field_tablename"></a> [sumologic\_field\_tablename](#output\_sumologic\_field\_tablename) | This output contains sumologic tablename field id. |
-| <a name="output_sumologic_field_queuename"></a> [sumologic\_field\_queuename](#output\_sumologic\_field\_queuename) | This output contains sumologic queuename field id. |
 | <a name="output_sumologic_inventory_source"></a> [sumologic\_inventory\_source](#output\_sumologic\_inventory\_source) | This output contains sumologic aws inventory source id. |
 | <a name="output_sumologic_kinesis_firehose_for_logs_source"></a> [sumologic\_kinesis\_firehose\_for\_logs\_source](#output\_sumologic\_kinesis\_firehose\_for\_logs\_source) | This output contains sumologic kinesis firehose for logs source id. |
 | <a name="output_sumologic_kinesis_firehose_for_metrics_source"></a> [sumologic\_kinesis\_firehose\_for\_metrics\_source](#output\_sumologic\_kinesis\_firehose\_for\_metrics\_source) | This output contains sumologic kinesis firehose for metrics source id. |
