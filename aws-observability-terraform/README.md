@@ -6,7 +6,7 @@
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.16.2, < 6.0.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1.0 |
 | <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.28.3, < 3.0.0 |
-| <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.7.1 |
+| <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11.1 |
 
 ## Providers
 
