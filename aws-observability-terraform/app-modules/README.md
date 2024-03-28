@@ -117,6 +117,7 @@
 | <a name="output_sumologic_field_sns"></a> [sumologic\_field\_sns](#output\_sumologic\_field\_sns) | This output contains fields required for sns app. |
 | <a name="output_sumologic_field_sqs"></a> [sumologic\_field\_sqs](#output\_sumologic\_field\_sqs) | This output contains fields required for sqs app. |
 | <a name="output_sumologic_hierarchy"></a> [sumologic\_hierarchy](#output\_sumologic\_hierarchy) | This output contains Sumologic Hierarchy. |
+| <a name="output_sumologic_metric_rules_api_gw"></a> [sumologic\_metric\_rules\_api\_gw](#output\_sumologic\_metric\_rules\_api\_gw) | This output contains metric rules required for api gateway app. |
 | <a name="output_sumologic_metric_rules_nlb"></a> [sumologic\_metric\_rules\_nlb](#output\_sumologic\_metric\_rules\_nlb) | This output contains metric rules required for nlb app. |
 | <a name="output_sumologic_metric_rules_rds"></a> [sumologic\_metric\_rules\_rds](#output\_sumologic\_metric\_rules\_rds) | This output contains metric rules required for rds app. |
 | <a name="output_sumologic_monitors_folder"></a> [sumologic\_monitors\_folder](#output\_sumologic\_monitors\_folder) | This output contains AWS Observability Monitors folder. |
