@@ -35,10 +35,13 @@ jobs:
     name: "cfn-nag for Cloud Formation template"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: stelligent/cfn_nag@master
-        with:
-          input_path: 'aws-observability'
+      - name: Install cfn_nag
+        run: |
+          brew install ruby brew-gem && brew gem install cfn-nag
 
+      - uses: Validate with cfn_nag
+        run: |
+          cfn_nag_scan -i aws-observability/**/*.yaml
 
   ValidatePython:
     name: "Validate Python test"
