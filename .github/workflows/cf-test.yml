@@ -1,0 +1,58 @@
+name: "CF template tests"
+on: [workflow_dispatch, pull_request]
+
+jobs:
+  ValidateLinting:
+    name: "Cloud Formation template linting verification"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Cloud Formation Linter with Latest Version
+        uses: scottbrenner/cfn-lint-action@v2
+
+      - name: Print the Cloud Formation Linter Version & run Linter.
+        run: |
+          cfn-lint aws-observability/**/*.yaml --ignore-templates aws-observability/**/*TestTemplate.yaml
+
+  CFSecurityChecksCheckovt:
+    name: "Cloud Formation template tests using checkov"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: aws-observability/
+          quiet: false
+          framework: cloudformation
+          output_format: cli
+          output_bc_ids: true
+
+  CFSecurityChecksCFNNAG:
+    name: "cfn-nag for Cloud Formation template"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: stelligent/cfn_nag@master
+        with:
+          input_path: aws-observability/**/*.yaml
+
+
+  ValidatePython:
+    name: "Validate Python test"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - run: |
+        unzip aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17.zip -d SumoLogicAWSObservabilityHelperv2.0.17
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17/
+          quiet: false
+          framework: python
+          output_format: cli
+          output_bc_ids: true
