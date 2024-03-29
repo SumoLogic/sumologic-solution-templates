@@ -4,6 +4,8 @@ on:
   push:
     paths:
     - aws-observability
+  workflow_dispatch:
+    - aws-observability
 
 jobs:
   ValidateLinting:
@@ -18,8 +20,7 @@ jobs:
 
       - name: Print the Cloud Formation Linter Version & run Linter.
         run: |
-          cfn-lint --version
-          cfn-lint -t $GITHUB_WORKSPACE/aws-observability/templates/sumologic_observability.master.template.yaml
+          cfn-lint aws-observability/**/*.yaml --ignore-templates aws-observability/**/*TestTemplate.yaml
 
   CFSecurityChecksCheckovt:
     name: "Cloud Formation template tests using checkov"
@@ -30,7 +31,7 @@ jobs:
 
       - uses: bridgecrewio/checkov-action@master
         with:
-          file: $GITHUB_WORKSPACE/aws-observability/templates/sumologic_observability.master.template.yaml
+          directory: aws-observability/
           quiet: false
           framework: cloudformation
           output_format: cli
@@ -42,7 +43,7 @@ jobs:
     steps:
       - uses: stelligent/cfn_nag@master
         with:
-          input_path: templates
+          input_path: aws-observability/**/*.yaml
 
 
   ValidatePython:
@@ -52,9 +53,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - run: |
+        unzip aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17.zip -d SumoLogicAWSObservabilityHelperv2.0.17
       - uses: bridgecrewio/checkov-action@master
         with:
-          file: $GITHUB_WORKSPACE/aws-observability/templates/sumologic_observability.master.template.yaml
+          directory: aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17/
           quiet: false
           framework: python
           output_format: cli
