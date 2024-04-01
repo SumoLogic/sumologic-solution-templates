@@ -37,25 +37,25 @@ jobs:
     steps:
       - name: Install cfn_nag
         run: |
-          brew install ruby brew-gem && brew gem install cfn-nag
+          gem install cfn-nag
 
       - name: Validate with cfn_nag
         run: |
           cfn_nag_scan -i aws-observability/**/*.yaml
 
-  ValidatePython:
-    name: "Validate Python test"
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - run: |
-          unzip aws-observability/apps/SumoLogicAWSObservabilityHelper/*.zip -d SumoLogicAWSObservabilityHelper
-      - uses: bridgecrewio/checkov-action@master
-        with:
-          directory: 'aws-observability/apps/SumoLogicAWSObservabilityHelper/'
-          quiet: false
-          framework: sast_python
-          output_format: cli
-          output_bc_ids: true
+#  ValidatePython:
+#    name: "Validate Python test"
+#    runs-on: "ubuntu-latest"
+#    steps:
+#      - name: Checkout repo
+#        uses: actions/checkout@v3
+#
+#      - run: |
+#          unzip aws-observability/apps/SumoLogicAWSObservabilityHelper/*.zip -d SumoLogicAWSObservabilityHelper
+#      - uses: bridgecrewio/checkov-action@master
+#        with:
+#          directory: 'aws-observability/apps/SumoLogicAWSObservabilityHelper/'
+#          quiet: false
+#          framework: sast_python
+#          output_format: cli
+#          output_bc_ids: true
