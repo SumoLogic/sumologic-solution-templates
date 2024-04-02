@@ -449,6 +449,7 @@ Resources:
                 Action:
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
+                Resource: 'LambdaHelper'
               - Effect: "Allow"
                 Action:
                   - "s3:*"
@@ -605,7 +606,9 @@ Resources:
                 - !Split [ "/", !Ref "AWS::StackId" ]
       PublicAccessBlockConfiguration:
         RestrictPublicBuckets: true
-        BlockPublicPolicy: false
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        BlockPublicAcls: true
       NotificationConfiguration:
         TopicConfigurations:
           - Event: s3:ObjectCreated:Put
