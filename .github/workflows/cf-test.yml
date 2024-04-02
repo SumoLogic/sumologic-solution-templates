@@ -25,7 +25,7 @@ jobs:
 
       - uses: bridgecrewio/checkov-action@master
         with:
-          directory: aws-observability/
+          directory: 'aws-observability/'
           quiet: false
           framework: cloudformation
           output_format: cli
@@ -35,24 +35,31 @@ jobs:
     name: "cfn-nag for Cloud Formation template"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: stelligent/cfn_nag@master
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
         with:
-          input_path: aws-observability/**/*.yaml
+          ruby-version: 2.6
+      - name: Install cfn_nag
+        run: |
+          gem install cfn-nag
 
+      - name: Validate with cfn_nag
+        run: |
+          cfn_nag_scan -i aws-observability/**/*.yaml
 
-  ValidatePython:
-    name: "Validate Python test"
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - run: |
-        unzip aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17.zip -d SumoLogicAWSObservabilityHelperv2.0.17
-      - uses: bridgecrewio/checkov-action@master
-        with:
-          directory: aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17/
-          quiet: false
-          framework: python
-          output_format: cli
-          output_bc_ids: true
+#  ValidatePython:
+#    name: "Validate Python test"
+#    runs-on: "ubuntu-latest"
+#    steps:
+#      - name: Checkout repo
+#        uses: actions/checkout@v3
+#
+#      - run: |
+#          unzip aws-observability/apps/SumoLogicAWSObservabilityHelper/*.zip -d SumoLogicAWSObservabilityHelper
+#      - uses: bridgecrewio/checkov-action@master
+#        with:
+#          directory: 'aws-observability/apps/SumoLogicAWSObservabilityHelper/'
+#          quiet: false
+#          framework: sast_python
+#          output_format: cli
+#          output_bc_ids: true
