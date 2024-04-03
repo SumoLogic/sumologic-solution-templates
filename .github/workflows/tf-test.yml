@@ -1,0 +1,64 @@
+name: "TF template tests"
+on: [workflow_dispatch, pull_request]
+
+jobs:
+  ValidateTF:
+    runs-on: ubuntu-latest
+    name: "Validate Terraform module"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: terraform validate
+        uses: dflook/terraform-validate@v1
+        with:
+          path: my-terraform-config
+
+  ValidateLinting:
+    runs-on: ${{ matrix.os }}
+    name: "Terraform template linting verification"
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout source code
+
+    - uses: actions/cache@v4
+      name: Cache plugin dir
+      with:
+        path: ~/.tflint.d/plugins
+        key: ${{ matrix.os }}-tflint-${{ hashFiles('.tflint.hcl') }}
+
+    - uses: terraform-linters/setup-tflint@v4
+      name: Setup TFLint
+      with:
+        tflint_version: v0.50.3
+
+    - name: Show version
+      run: tflint --version
+
+    - name: Init TFLint
+      run: tflint --init
+      env:
+        GITHUB_TOKEN: ''
+
+    - name: Run TFLint
+      run: tflint -f compact
+
+  TFSecurityChecks:
+    name: "terraform template tests using checkov"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: 'aws-observability-terraform/'
+          quiet: true
+          framework: terraform
+          output_format: cli
+          output_bc_ids: false
