@@ -15,12 +15,9 @@ jobs:
           directory: aws-observability-terraform/
 
   ValidateLinting:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     name: "Terraform template linting verification"
 
-    strategy:
-      matrix:
-        os: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -30,7 +27,7 @@ jobs:
       name: Cache plugin dir
       with:
         path: ~/.tflint.d/plugins
-        key: ${{ matrix.os }}-tflint-${{ hashFiles('.tflint.hcl') }}
+        key: ubuntu-latest-tflint-${{ hashFiles('.tflint.hcl') }}
 
     - uses: terraform-linters/setup-tflint@v4
       name: Setup TFLint
