@@ -9,6 +9,6 @@ output "sumologic_field_extraction_rule" {
 }
 
 output "sumologic_content" {
-  value       : module.classic_elb_module.sumologic_content
+  value       = module.classic_elb_module.sumologic_content
   description = "This output contains classic elb App."
 }
