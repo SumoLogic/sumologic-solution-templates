@@ -68,6 +68,11 @@ output "sumologic_content_apigateway" {
   description = "This output contains apigateway App."
 }
 
+output "sumologic_metric_rules_api_gw" {
+  value       = module.apigateway_app.sumologic_metric_rules
+  description = "This output contains metric rules required for api gateway app."
+}
+
 output "sumologic_field_ec2metrics" {
   value       = module.ec2metrics_app.sumologic_field
   description = "This output contains fields required for EC2 Metrics app."
