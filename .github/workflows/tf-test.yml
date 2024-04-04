@@ -4,7 +4,7 @@ on: [workflow_dispatch, pull_request]
 jobs:
   ValidateTF:
     runs-on: ubuntu-latest
-    name: "Validate Terraform module"
+    name: "Validate Terraform module for AWSO"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -16,12 +16,14 @@ jobs:
 
   ValidateLinting:
     runs-on: ubuntu-latest
-    name: "Terraform template linting verification"
-
+    name: "Terraform template linting verification for AWSO"
 
     steps:
     - uses: actions/checkout@v4
       name: Checkout source code
+
+    - name: Change directory
+      run: cd aws-observability-terraform/
 
     - uses: actions/cache@v4
       name: Cache plugin dir
@@ -43,10 +45,10 @@ jobs:
         GITHUB_TOKEN: ''
 
     - name: Run TFLint
-      run: tflint -f compact
+      run: tflint --recursive -f checkstyle
 
   TFSecurityChecks:
-    name: "terraform template tests using checkov"
+    name: "terraform template tests using checkov for AWSO"
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout repo
