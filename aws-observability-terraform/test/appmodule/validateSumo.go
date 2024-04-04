@@ -207,7 +207,7 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	dbinstanceidentifierField := terraform.Output(t, terraformOptions, "sumologic_field_dbinstanceidentifier")
 	validateSumoLogicField(t, terraformOptions, dbinstanceidentifierField)
 	time.Sleep(2 * time.Second)
-	// Validate if the dbinstanceidentifier Field is created successfully
+	// Validate if the apiid Field is created successfully
 	apiidField := terraform.Output(t, terraformOptions, "sumologic_field_apiid")
 	validateSumoLogicField(t, terraformOptions, apiidField)
 
