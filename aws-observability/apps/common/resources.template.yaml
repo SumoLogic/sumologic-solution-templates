@@ -440,7 +440,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: '*'
+                Resource: "LambdaHelper"
         - PolicyName: AwsObservabilityLambdaExecutePoliciesS3
           PolicyDocument:
             Version: '2012-10-17'
@@ -449,7 +449,12 @@ Resources:
                 Action:
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
+                Resource: "LambdaHelper"
+              - Effect: "Allow"
+                Action:
+                  - "s3:*"
                 Resource:
+                  - "LambdaHelper"
                   - !Sub
                     - "arn:aws:s3:::${S3Bucket}"
                     - S3Bucket: !If [install_alb_logs_source, !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ], ""] 
@@ -511,7 +516,10 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: '*'
+              - Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource: 'LambdaHelperAlias'
 
   LambdaHelperAlias:
     Type: 'AWS::Serverless::Function'
@@ -596,6 +604,11 @@ Resources:
               - !Select
                 - 2
                 - !Split [ "/", !Ref "AWS::StackId" ]
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        BlockPublicAcls: true
       NotificationConfiguration:
         TopicConfigurations:
           - Event: s3:ObjectCreated:Put

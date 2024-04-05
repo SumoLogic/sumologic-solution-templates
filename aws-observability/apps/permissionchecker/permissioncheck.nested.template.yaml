@@ -250,7 +250,10 @@ Resources:
                   - logs:PutLogEvents
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
-                Resource: '*'
+              - Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource: 'LambdaHelper'
 
   SumoLogicSourceRole:
     Type: AWS::IAM::Role
@@ -427,6 +430,11 @@ Resources:
               - !Select
                 - 2
                 - !Split ["/", !Ref "AWS::StackId"]
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        BlockPublicAcls: true
       NotificationConfiguration:
         TopicConfigurations:
           - Event: s3:ObjectCreated:Put
