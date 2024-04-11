@@ -201,7 +201,7 @@ module "ec2metrics_module" {
       monitor_is_disabled  = var.monitors_disabled
       monitor_evaluation_delay = "4m"
       queries = {
-        A = "account=* region=* namespace=aws/ec2 instanceid=* statistic=average | avg by account, region, namespace, instanceid"
+        A = "account=* region=* namespace=aws/ec2 metric=CPUUtilization instanceid=* statistic=average | avg by account, region, namespace, instanceid"
       }
       triggers = [
         {

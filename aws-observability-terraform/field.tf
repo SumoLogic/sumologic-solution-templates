@@ -301,7 +301,7 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityLambdaCloudWatchLogs
 resource "sumologic_field_extraction_rule" "AwsObservabilityGenericCloudWatchLogsFER" {
       depends_on = [time_sleep.wait_for_10_seconds]
       name = "AwsObservabilityGenericCloudWatchLogsFER"
-      scope = "account=* region=* (_sourceHost=/aws/* or _sourceHost=API*Gateway*Execution*Logs*)"
+      scope = "(account=* region=* (_sourceHost=/aws/* or _sourceHost=API*Gateway*Execution*Logs*))"
       parse_expression = <<EOT
                 | if (isEmpty(namespace),"unknown",namespace) as namespace
                 | if (_sourceHost matches "/aws/lambda/*", "aws/lambda", namespace) as namespace
