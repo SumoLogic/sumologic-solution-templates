@@ -386,7 +386,7 @@ module "rds_module" {
     },
     "RdsPostgreSQLHighErrors" = {
       monitor_name         = "Amazon RDS PostgreSQL - High Errors"
-      monitor_description  = "This alert fires when we detect high rate (>10) of error/fatal logs in Postgres logs over a 5 minutes time period"
+      monitor_description  = "This alert fires when we detect high number (>10) of error/fatal logs in Postgres logs over a 5 minutes time period"
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
