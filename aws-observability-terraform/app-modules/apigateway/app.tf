@@ -70,7 +70,7 @@ module "apigateway_module" {
     },
     "AWSAPIGatewayHighClientSideErrors" = {
       monitor_name         = "AWS API Gateway - High Client-Side Errors"
-      monitor_description  = "This alert fires where there are too many API requests (>5%) with client-side errors within 5 minutes. This can indicate an issue in the authorisation or client request parameters. It could also mean that a resource was removed or a client is requesting one that doesn't exist.Errors could also be caused by exceeding the configured throttling limit."
+      monitor_description  = "This alert fires where there are too many API requests (>5%) with client-side errors within 5 minutes. This can indicate an issue in the authorisation or client request parameters. It could also mean that a resource was removed or a client is requesting one that doesn't exist. Errors could also be caused by exceeding the configured throttling limit."
       monitor_monitor_type = "Metrics"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
@@ -176,7 +176,7 @@ module "apigateway_module" {
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
-      monitor_evaluation_delay = "0m"
+      monitor_evaluation_delay = "1m"
       queries = {
         A = "account=* region=* namespace=aws/apigateway apiname=* apiid stage domainname requestId authorizerError\n| json \"status\", \"authorizerError\", \"apiid\", \"stage\" as status, authorizerError, apiid, stage \n| if (!(authorizerError matches \"-\") and !(status matches \"2*\"), 1, 0) as is_authorizerError \n| sum(is_authorizerError) as is_authorizerError_count, count as totalRequests by apiid, stage \n| (is_authorizerError_count*100/totalRequests) as authorizerError_percent \n| fields authorizerError_percent, apiid, stage"
       }
@@ -210,7 +210,7 @@ module "apigateway_module" {
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
-      monitor_evaluation_delay = "0m"
+      monitor_evaluation_delay = "1m"
       queries = {
         A = "account=* region=* namespace=aws/apigateway apiname=* apiid stage domainname requestId integrationError\n| json \"status\", \"integrationError\", \"apiid\", \"stage\" as status, integrationError, apiid, stage \n| if (!(integrationError matches \"-\") and !(status matches \"2*\"), 1, 0) as is_integrationError \n| sum(is_integrationError) as integrationError_count, count as totalRequests by apiid, stage \n| (integrationError_count*100/totalRequests) as integrationError_percent \n| fields integrationError_percent, apiid, stage"
       }
@@ -244,7 +244,7 @@ module "apigateway_module" {
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
-      monitor_evaluation_delay = "0m"
+      monitor_evaluation_delay = "1m"
       queries = {
         A = "account=* region=* namespace=aws/apigateway apiname=* apiid stage domainname requestId \n| json  \"status\", \"apiid\", \"stage\", \"wafResponseCode\" as  status, apiid, stage, wafResponseCode \n| if (wafResponseCode==\"WAF_BLOCK\" and !(status matches \"2*\"), 1, 0) as is_wafError \n| sum(is_wafError) as is_wafError_count, count as totalRequests by apiid, stage \n| (is_wafError_count*100/totalRequests) as wafError_percent \n| fields wafError_percent, apiid, stage"
       }
@@ -278,7 +278,7 @@ module "apigateway_module" {
       monitor_monitor_type = "Logs"
       monitor_parent_id    = var.monitor_folder_id
       monitor_is_disabled  = var.monitors_disabled
-      monitor_evaluation_delay = "0m"
+      monitor_evaluation_delay = "1m"
       queries = {
         A = "account=* region=* namespace=* apiname=* apiid stage domainname requestId wafLatency \n| json \"wafLatency\", \"apiId\", \"stage\" as wafLatency, apiid, stage \n| pct(wafLatency, 90) as wafLatency90th by apiid,stage"
       }

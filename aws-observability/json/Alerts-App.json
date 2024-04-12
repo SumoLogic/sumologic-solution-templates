@@ -50,7 +50,7 @@
     },
     {
       "name": "AWS API Gateway - High Client-Side Errors",
-      "description": "This alert fires where there are too many API requests (>5%) with client-side errors within 5 minutes. \nThis can indicate an issue in the authorisation or client request parameters. It could also mean that a resource was removed or a client is requesting one that doesn't exist.Errors could also be caused by exceeding the configured throttling limit.",
+      "description": "This alert fires where there are too many API requests (>5%) with client-side errors within 5 minutes. \nThis can indicate an issue in the authorisation or client request parameters. It could also mean that a resource was removed or a client is requesting one that doesn't exist. Errors could also be caused by exceeding the configured throttling limit.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
       "evaluationDelay": "4m",
@@ -145,7 +145,7 @@
       "description": "This alert fires when we detect the high integration latency for the API requests in a stage within 5 minutes. This alarm is recommended for WebSocket APIs by AWS, and optional for other APIs because they already have separate alarm recommendations for the Latency metric.\nYou can correlate the IntegrationLatency metric value with the corresponding latency metric of your backend such as the Duration metric for Lambda integrations. This helps you determine whether the API backend is taking more time to process requests from clients due to performance issues or if there is some other overhead from initialization or cold start.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
-      "evaluationDelay": "5m",
+      "evaluationDelay": "4m",
       "alertName": null,
       "runAs": null,
       "notificationGroupFields": [],
@@ -192,7 +192,7 @@
       "description": "This alert fires when we detect the high Latency in a stage within 5 minutes for REST and HTTP API.\nFind the IntegrationLatency metric value to check the API backend latency. If the two metrics are mostly aligned, the API backend is the source of higher latency and you should investigate there for issues. View this metric per resource and method and narrow down the source of the latency.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
-      "evaluationDelay": "5m",
+      "evaluationDelay": "4m",
       "alertName": null,
       "runAs": null,
       "notificationGroupFields": [],
@@ -376,7 +376,7 @@
       "description": "This alert fires where there is low message traffic volume for the API within 5 minutes. \nThis can indicate an issue with the application calling the API such as using incorrect endpoints. It could also indicate an issue with the configuration or permissions of the API making it unreachable for clients. This alarm is not recommended for APIs that don't expect constant and consistent traffic.",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Metrics",
-      "evaluationDelay": "5m",
+      "evaluationDelay": "4m",
       "alertName": null,
       "runAs": null,
       "notificationGroupFields": [],
@@ -2950,7 +2950,7 @@
     },
     {
       "name": "Amazon RDS PostgreSQL - High Authentication Failure",
-      "description": "This alert fires when we detect Postgres logs show high rate of authentication failures",
+      "description": "This alert fires when we detect more than 10 authentication failure in Postgres logs over a 5 minute time-period",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Logs",
       "evaluationDelay": "0m",
@@ -2994,7 +2994,7 @@
     },
     {
       "name": "Amazon RDS PostgreSQL - High Errors",
-      "description": "This alert fires when we detect Postgres logs show high rate of error/fatal logs",
+      "description": "This alert fires when we detect high number (>10) of error/fatal logs in Postgres logs over a 5 minutes time period",
       "type": "MonitorsLibraryMonitorExport",
       "monitorType": "Logs",
       "evaluationDelay": "0m",
@@ -3184,7 +3184,7 @@
       "queries": [
         {
           "rowId": "A",
-          "query": "account=* region=* namespace=aws/ec2 instanceid=* statistic=average | avg by account, region, namespace, instanceid "
+          "query": "account=* region=* namespace=aws/ec2 metric=CPUUtilization instanceid=* statistic=average | avg by account, region, namespace, instanceid"
         }
       ],
       "triggers": [
