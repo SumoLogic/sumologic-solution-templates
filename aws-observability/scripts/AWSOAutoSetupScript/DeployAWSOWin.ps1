@@ -41,7 +41,7 @@ $now=Get-Date
 echo "AWS Observability Script initiated at : $now"
 
 #identify sumo deployment associated with sumo accessId and accessKey
-$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v.2.8.0/sumologic_observability.master.template.yaml"
+$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.8.0/sumologic_observability.master.template.yaml"
 $apiUrl="https://api.sumologic.com"
 $deployment="us1"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
