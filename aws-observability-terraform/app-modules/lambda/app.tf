@@ -114,7 +114,7 @@ module "lambda_module" {
           time_range       = "-10m",
           trigger_type     = "ResolvedCritical",
           threshold        = 0,
-          threshold_type   = "LessThan",
+          threshold_type   = "LessThanOrEqual",
           occurrence_type  = "ResultCount",
           trigger_source   = "AllResults"
         }
