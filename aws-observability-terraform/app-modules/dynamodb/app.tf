@@ -188,6 +188,108 @@ module "dynamodb_module" {
       group_notifications      = var.group_notifications
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
+    },
+    "AWSDynamoDBHighHighReadThrottle" = {
+      monitor_name         = "AWS DynamoDB - High Read Throttle"
+      monitor_description  = "This alert fires when we detect that the total read throttle events for a dynamodb table is high (>5) for a time interval of 5 minutes."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
+      queries = {
+        A = "account=* region=* namespace=aws/dynamodb tablename=* metric=ReadThrottleEvents statistic=sum   | sum by account, region, namespace, tablename"
+      }
+      triggers = [
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 5,
+          threshold_type   = "GreaterThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 5,
+          threshold_type   = "LessThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "AWSDynamoDBHighHighWriteThrottle" = {
+      monitor_name         = "AWS DynamoDB - High Write Throttle"
+      monitor_description  = "This alert fires when we detect that the total write throttle events for a dynamodb table is high (>5) for a time interval of 5 minutes."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
+      queries = {
+        A = "account=* region=* namespace=aws/dynamodb tablename=* metric=WriteThrottleEvents statistic=sum   | sum by account, region, namespace, tablename"
+      }
+      triggers = [
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 5,
+          threshold_type   = "GreaterThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 5,
+          threshold_type   = "LessThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "AWSDynamoDBSystemErrors" = {
+      monitor_name         = "AWS DynamoDB - System Errors"
+      monitor_description  = "This alert fires when we detect system errors for a dynamodb table is high (>10) for a time interval of 5 minutes."
+      monitor_monitor_type = "Metrics"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "4m"
+      queries = {
+        A = "account=* region=* namespace=aws/dynamodb metric=SystemErrors statistic=samplecount  | sum"
+      }
+      triggers = [
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 10,
+          threshold_type   = "GreaterThan",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        },
+        {
+          detection_method = "MetricsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 10,
+          threshold_type   = "LessThanOrEqual",
+          occurrence_type  = "Always",
+          trigger_source   = "AnyTimeSeries"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
     }
   }
 }

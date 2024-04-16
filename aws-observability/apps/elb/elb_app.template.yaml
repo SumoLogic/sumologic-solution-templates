@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.7.0: Template to setup the ELB classic app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.8.0: Template to setup the ELB classic app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -291,7 +291,7 @@ Resources:
       Runtime: python3.11
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.17.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.18.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -345,10 +345,23 @@ Resources:
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
 
+  SumoELBMetricsUpdateSource:
+    Type: Custom::SumoLogicUpdateFields
+    Condition: update_elb_metrics_source
+    Properties:
+      ServiceToken: !Ref Section6aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SourceApiUrl: !Ref Section4aCloudWatchExistingSourceAPIUrl
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+
   ElbLogsFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
-    DependsOn: AddLoadBalancerNameField
     Properties:
       ServiceToken: !Ref Section6aParentStackLambdaARN
       RemoveOnDeleteStack: false
