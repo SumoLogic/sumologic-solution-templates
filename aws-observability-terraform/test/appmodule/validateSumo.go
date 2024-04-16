@@ -108,6 +108,9 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the API Gateway FER is created successfully
 	apigatewayFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_apigateway")
 	validateSumoLogicFER(t, terraformOptions, apigatewayFerID)
+	// Validate if the API Gateway Access Logs FER is created successfully
+	apigatewayALFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_apigateway_access_logs")
+	validateSumoLogicFER(t, terraformOptions, apigatewayALFerID)
 	// Validate if the DynamoDB FER is created successfully
 	dynamodbFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_dynamodb")
 	validateSumoLogicFER(t, terraformOptions, dynamodbFerID)
@@ -204,8 +207,14 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	dbinstanceidentifierField := terraform.Output(t, terraformOptions, "sumologic_field_dbinstanceidentifier")
 	validateSumoLogicField(t, terraformOptions, dbinstanceidentifierField)
 	time.Sleep(2 * time.Second)
+	// Validate if the apiid Field is created successfully
+	apiidField := terraform.Output(t, terraformOptions, "sumologic_field_apiid")
+	validateSumoLogicField(t, terraformOptions, apiidField)
 
 	// Metric Rules
+	// API Gateway Metric rule
+	apiMetricRule := terraform.Output(t, terraformOptions, "sumologic_metric_rule_api_gw")
+	validateSumoLogicMetricRule(t, terraformOptions, apiMetricRule)
 	// NLB
 	nlbMetricRule := terraform.Output(t, terraformOptions, "sumologic_metric_rule_nlb")
 	validateSumoLogicMetricRule(t, terraformOptions, nlbMetricRule)

@@ -89,6 +89,12 @@ output "sumologic_field_extraction_rule_apigateway" {
   description = "This output contains sumologic API gateway field extraction rule id."
 }
 
+# API gateway FER id
+output "sumologic_field_extraction_rule_apigateway_access_logs" {
+  value       = sumologic_field_extraction_rule.AwsObservabilityApiGatewayAccessLogsFER.id
+  description = "This output contains sumologic API gateway Access Logs field extraction rule id."
+}
+
 # ALB FER id
 output "sumologic_field_extraction_rule_alb" {
   value       = sumologic_field_extraction_rule.AwsObservabilityAlbAccessLogsFER.id
@@ -165,6 +171,13 @@ output "sumologic_field_extraction_rule_sqs" {
 output "sumologic_metric_rule_nlb" {
   value       = module.sumo-module.sumologic_metric_rules_nlb.NLBMetricRule.triggers.name
   description = "This output contains sumologic NLB metric rule name."
+}
+
+# API Gateway Metric rule
+output "sumologic_metric_rule_api_gw" {
+  # value       = module.sumo-module.sumologic_metric_rules_api_gw.ApiNameMetricRule.triggers.name
+  value       = module.sumo-module.sumologic_metric_rules_api_gw.ApiNameMetricRule.triggers.name
+  description = "This output contains sumologic API Gateway metric rule name."
 }
 
 # RDS Cluster Metric rule
@@ -267,4 +280,9 @@ output "sumologic_field_dbclusteridentifier" {
 output "sumologic_field_dbinstanceidentifier" {
   value       = sumologic_field.dbinstanceidentifier.id
   description = "This output contains sumologic dbinstanceidentifier field id."
+}
+
+output "sumologic_field_apiid" {
+  value       = sumologic_field.apiid.id
+  description = "This output contains sumologic apiid field id."
 }
