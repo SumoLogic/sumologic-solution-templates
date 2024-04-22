@@ -1,0 +1,50 @@
+name: "CF template tests"
+on: [workflow_dispatch, pull_request]
+
+jobs:
+  ValidateLinting:
+    name: "Validatation (cfn-lint)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Cloud Formation Linter with Latest Version
+        uses: scottbrenner/cfn-lint-action@v2
+
+      - name: Print the Cloud Formation Linter Version & run Linter.
+        run: |
+          cfn-lint aws-observability/**/*.yaml --ignore-templates aws-observability/**/*TestTemplate.yaml
+
+  CFSecurityChecksCheckovt:
+    name: "Security Checks (checkov)"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: 'aws-observability/'
+          quiet: true
+          framework: cloudformation
+          output_format: cli
+          output_bc_ids: false
+          skip_check: CKV_AWS_26,CKV_AWS_116,CKV_AWS_117,CKV_AWS_115,CKV_AWS_108,CKV_AWS_173,CKV_AWS_18,CKV_AWS_21,CKV_AWS_109,CKV_AWS_67,CKV_AWS_36,CKV_AWS_35,CKV_AWS_111,CKV_AWS_54,CKV_AWS_56,CKV_AWS_55,CKV_AWS_53
+
+  CFSecurityChecksCFNNAG:
+    name: "Security Checks (cfn-nag)"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+      - name: Install cfn_nag
+        run: |
+          gem install cfn-nag
+
+      - name: Validate with cfn_nag
+        run: |
+          cfn_nag_scan -i aws-observability --ignore-fatal aws-observability/**/TestTemplate.yaml
+        continue-on-error: true

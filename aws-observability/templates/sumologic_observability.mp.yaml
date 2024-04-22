@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.7.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
+Description: "Version - v2.8.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -50,12 +50,12 @@ Metadata:
           - Section6dCloudTrailBucketPathExpression
 
       - Label:
-          default: "7. Sumo Logic AWS Lambda CloudWatch Logs Source"
+          default: "7. Sumo Logic CloudWatch Logs Source"
         Parameters:
           - Section7aLambdaCreateCloudWatchLogsSourceOptions
           - Section7bLambdaCloudWatchLogsSourceUrl
-          - Section7cAutoSubscribeLogGroupsLambdaOptions
-          - Section7dAutoSubscribeLambdaLogGroupPattern
+          - Section7cAutoSubscribeLogGroupsOptions
+          - Section7dAutoSubscribeLogGroupPattern
 
       - Label:
           default: "8. Sumo Logic Root Cause Explorer Sources"
@@ -130,10 +130,10 @@ Metadata:
         default: "Select the Sumo Logic CloudWatch Logs Sources"
       Section7bLambdaCloudWatchLogsSourceUrl:
         default: "Existing Sumo Logic Lambda CloudWatch Logs Source API URL"
-      Section7cAutoSubscribeLogGroupsLambdaOptions:
-        default: "Subscribe log groups to Sumo Logic CloudWatch Logs Forwarder"
-      Section7dAutoSubscribeLambdaLogGroupPattern:
-        default: "Regex for AWS Lambda Log Groups"
+      Section7cAutoSubscribeLogGroupsOptions:
+        default: "Subscribe log groups to Destination (Lambda or kinesis firehose delivery stream)"
+      Section7dAutoSubscribeLogGroupPattern:
+        default: "Regex for filtering CloudWatch Log Groups. If you want to collect from all CloudWatch Log Groups use .*"
 
       Section8aRootCauseExplorerOptions:
         default: "Select the Sumo Logic Root Cause Explorer Sources"
@@ -307,7 +307,7 @@ Parameters:
     Type: String
     Description: "Required when already collecting Lambda CloudWatch logs in Sumo Logic. Provide the existing Sumo Logic Lambda CloudWatch Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
-  Section7cAutoSubscribeLogGroupsLambdaOptions:
+  Section7cAutoSubscribeLogGroupsOptions:
     Type: String
     Description: "New - Automatically subscribes new log groups to send logs to Sumo Logic.
                   Existing - Automatically subscribes existing log groups to send logs to Sumo Logic.
@@ -319,10 +319,10 @@ Parameters:
       - 'Existing'
       - 'Both'
       - 'None'
-  Section7dAutoSubscribeLambdaLogGroupPattern:
+  Section7dAutoSubscribeLogGroupPattern:
     Type: String
-    Default: "lambda"
-    Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
+    Default: "/aws/(lambda|apigateway|rds)"
+    Description: "Enter regex for matching CloudWatch Log groups name. Regex will check for the Log group name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
 
   Section8aRootCauseExplorerOptions:
     Type: String
@@ -450,16 +450,16 @@ Conditions:
     - !Condition is_elb_bucket_available
 
   # Condition for Auto Subscribe Lambda
-  auto_subscribe_new_lambda_log_groups: !Or
-    - !Equals [ !Ref Section7cAutoSubscribeLogGroupsLambdaOptions, 'New' ]
-    - !Equals [ !Ref Section7cAutoSubscribeLogGroupsLambdaOptions, 'Both' ]
-  auto_subscribe_lambda_log_groups: !And
+  auto_subscribe_exisitng_log_groups: !Or
+    - !Equals [ !Ref Section7cAutoSubscribeLogGroupsOptions, 'New' ]
+    - !Equals [ !Ref Section7cAutoSubscribeLogGroupsOptions, 'Both' ]
+  auto_subscribe_log_groups: !And
     - !Condition create_cloudwatch_logs_source
-    - !Condition auto_subscribe_new_lambda_log_groups
+    - !Condition auto_subscribe_exisitng_log_groups
 
   call_auto_enable: !Or
     - !Condition auto_enable_s3_logs
-    - !Condition auto_subscribe_lambda_log_groups
+    - !Condition auto_subscribe_log_groups
     - !Condition auto_enable_s3_logs_elb
 
   elb_bucket_path_expression_provided: !Not [!Equals [ !Ref Section9eELBS3BucketPathExpression, 'classicloadbalancing/AWSLogs/*/elasticloadbalancing/*' ]]
@@ -498,7 +498,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.7.0"
+      Version: "v2.8.0"
     CollectorDetails:
       SumoLogicAccountID: 926226587429
       CollectorNamePrefix: "aws-observability"
@@ -737,10 +737,10 @@ Resources:
         ALBAutoEnableS3LogsOptions: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
         ALBS3LogsBucketName: !If [create_alb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section5dALBS3LogsBucketName]
         AutoSubscribeLogGroups: !If [create_kf_logs_source, "Yes", !If [ create_cw_logs_source, "Yes", "No" ] ]
-        AutoSubscribeLogGroupsLambdaOptions: !Ref Section7cAutoSubscribeLogGroupsLambdaOptions
+        AutoSubscribeLogGroupsOptions: !Ref Section7cAutoSubscribeLogGroupsOptions
         AutoSubscribeDestinationARNType: !If [create_kf_logs_source, "Kinesis",  "Lambda" ]
-        AutoSubscribeDestinationARN: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, !If [ create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, "" ] ]
-        AutoSubscribeLambdaLogGroupPattern: !Ref Section7dAutoSubscribeLambdaLogGroupPattern
+        AutoSubscribeDestinationARNValue: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, !If [ create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, "" ] ]
+        AutoSubscribeLogGroupPattern: !Ref Section7dAutoSubscribeLogGroupPattern
         AutoSubscribeRoleArn: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsRoleARN,  "" ]
         ELBAutoEnableS3Logs: !If [auto_enable_s3_logs_elb, "Yes", "No"]
         ELBAutoEnableS3LogsOptions: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
