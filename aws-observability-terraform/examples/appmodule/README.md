@@ -5,15 +5,15 @@
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.42.0, < 4.0.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1.0 |
-| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.13.0 |
-| <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.7.1 |
+| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.28.3, < 3.0.0 |
+| <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.16.2 |
-| <a name="provider_time"></a> [time](#provider\_time) | 0.7.2 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.28.3, < 3.0.0 |
+| <a name="provider_time"></a> [time](#provider\_time) | >= 0.11.1 |
 
 ## Modules
 
@@ -27,6 +27,7 @@
 |------|------|
 | [sumologic_field.account](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.accountid](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field.apiid](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.apiname](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.cacheclusterid](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.clustername](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
@@ -39,10 +40,12 @@
 | [sumologic_field.loadbalancername](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.namespace](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.networkloadbalancer](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
+| [sumologic_field.queuename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.region](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.tablename](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field.topicname](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityAlbAccessLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
+| [sumologic_field_extraction_rule.AwsObservabilityApiGatewayAccessLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityApiGatewayCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityDynamoDBCloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
 | [sumologic_field_extraction_rule.AwsObservabilityEC2CloudTrailLogsFER](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/field_extraction_rule) | resource |
@@ -99,6 +102,7 @@
 | <a name="output_sqs_apps_folder_id"></a> [sqs\_apps\_folder\_id](#output\_sqs\_apps\_folder\_id) | This output contains sumologic SQS apps folder. |
 | <a name="output_sumologic_field_account"></a> [sumologic\_field\_account](#output\_sumologic\_field\_account) | This output contains sumologic Account field id. |
 | <a name="output_sumologic_field_accountid"></a> [sumologic\_field\_accountid](#output\_sumologic\_field\_accountid) | This output contains sumologic accountid field id. |
+| <a name="output_sumologic_field_apiid"></a> [sumologic\_field\_apiid](#output\_sumologic\_field\_apiid) | This output contains sumologic apiid field id. |
 | <a name="output_sumologic_field_apiname"></a> [sumologic\_field\_apiname](#output\_sumologic\_field\_apiname) | This output contains sumologic apiname field id. |
 | <a name="output_sumologic_field_cacheclusterid"></a> [sumologic\_field\_cacheclusterid](#output\_sumologic\_field\_cacheclusterid) | This output contains sumologic cacheclusterid field id. |
 | <a name="output_sumologic_field_clustername"></a> [sumologic\_field\_clustername](#output\_sumologic\_field\_clustername) | This output contains sumologic clustername field id. |
@@ -107,6 +111,7 @@
 | <a name="output_sumologic_field_dbinstanceidentifier"></a> [sumologic\_field\_dbinstanceidentifier](#output\_sumologic\_field\_dbinstanceidentifier) | This output contains sumologic dbinstanceidentifier field id. |
 | <a name="output_sumologic_field_extraction_rule_alb"></a> [sumologic\_field\_extraction\_rule\_alb](#output\_sumologic\_field\_extraction\_rule\_alb) | This output contains sumologic ALB field extraction rule id. |
 | <a name="output_sumologic_field_extraction_rule_apigateway"></a> [sumologic\_field\_extraction\_rule\_apigateway](#output\_sumologic\_field\_extraction\_rule\_apigateway) | This output contains sumologic API gateway field extraction rule id. |
+| <a name="output_sumologic_field_extraction_rule_apigateway_access_logs"></a> [sumologic\_field\_extraction\_rule\_apigateway\_access\_logs](#output\_sumologic\_field\_extraction\_rule\_apigateway\_access\_logs) | This output contains sumologic API gateway Access Logs field extraction rule id. |
 | <a name="output_sumologic_field_extraction_rule_cw"></a> [sumologic\_field\_extraction\_rule\_cw](#output\_sumologic\_field\_extraction\_rule\_cw) | This output contains sumologic CloudWatch logs generic field extraction rule id. |
 | <a name="output_sumologic_field_extraction_rule_dynamodb"></a> [sumologic\_field\_extraction\_rule\_dynamodb](#output\_sumologic\_field\_extraction\_rule\_dynamodb) | This output contains sumologic dynamoDB field extraction rule id. |
 | <a name="output_sumologic_field_extraction_rule_ec2metrics"></a> [sumologic\_field\_extraction\_rule\_ec2metrics](#output\_sumologic\_field\_extraction\_rule\_ec2metrics) | This output contains sumologic EC2 field extraction rule id. |
@@ -124,10 +129,11 @@
 | <a name="output_sumologic_field_loadbalancername"></a> [sumologic\_field\_loadbalancername](#output\_sumologic\_field\_loadbalancername) | This output contains sumologic loadbalancername field id. |
 | <a name="output_sumologic_field_namespace"></a> [sumologic\_field\_namespace](#output\_sumologic\_field\_namespace) | This output contains sumologic namespace field id. |
 | <a name="output_sumologic_field_networkloadbalancer"></a> [sumologic\_field\_networkloadbalancer](#output\_sumologic\_field\_networkloadbalancer) | This output contains sumologic networkloadbalancer field id. |
+| <a name="output_sumologic_field_queuename"></a> [sumologic\_field\_queuename](#output\_sumologic\_field\_queuename) | This output contains sumologic queuename field id. |
 | <a name="output_sumologic_field_region"></a> [sumologic\_field\_region](#output\_sumologic\_field\_region) | This output contains sumologic Region field id. |
 | <a name="output_sumologic_field_tablename"></a> [sumologic\_field\_tablename](#output\_sumologic\_field\_tablename) | This output contains sumologic tablename field id. |
 | <a name="output_sumologic_field_topicname"></a> [sumologic\_field\_topicname](#output\_sumologic\_field\_topicname) | This output contains sumologic topicname field id. |
-| <a name="output_sumologic_field_queuename"></a> [sumologic\_field\_queuename](#output\_sumologic\_field\_queuename) | This output contains sumologic queuename field id. |
+| <a name="output_sumologic_metric_rule_api_gw"></a> [sumologic\_metric\_rule\_api\_gw](#output\_sumologic\_metric\_rule\_api\_gw) | This output contains sumologic API Gateway metric rule name. |
 | <a name="output_sumologic_metric_rule_nlb"></a> [sumologic\_metric\_rule\_nlb](#output\_sumologic\_metric\_rule\_nlb) | This output contains sumologic NLB metric rule name. |
 | <a name="output_sumologic_metric_rule_rds_cluster"></a> [sumologic\_metric\_rule\_rds\_cluster](#output\_sumologic\_metric\_rule\_rds\_cluster) | This output contains sumologic RDS cluster metric rule name. |
 | <a name="output_sumologic_metric_rule_rds_instance"></a> [sumologic\_metric\_rule\_rds\_instance](#output\_sumologic\_metric\_rule\_rds\_instance) | This output contains sumologic RDS instance metric rule name. |
