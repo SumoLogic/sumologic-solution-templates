@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.7.0: Template to setup the EC2 Metrics app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.8.0: Template to setup the EC2 Metrics app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -201,7 +201,6 @@ Resources:
   FieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
-    DependsOn: AddInstanceIdField
     Properties:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       RemoveOnDeleteStack: false
@@ -253,6 +252,7 @@ Resources:
   sumoMonitorAlerts:
     Type: Custom::AlertsMonitor
     Condition: install_app
+    DependsOn: sumoOverview
     Properties:
       ServiceToken: !Ref Section3aParentStackLambdaARN
       Region: !Ref "AWS::Region"

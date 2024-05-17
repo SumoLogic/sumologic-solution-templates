@@ -12,3 +12,8 @@ output "sumologic_content" {
   value       = module.apigateway_module.sumologic_content
   description = "This output contains apigateway App."
 }
+
+output "sumologic_metric_rules" {
+  value       = module.apigateway_module.sumologic_metric_rules
+  description = "This output contains metric rules required for nlb app."
+}

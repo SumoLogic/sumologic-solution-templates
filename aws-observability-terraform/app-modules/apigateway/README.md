@@ -38,3 +38,4 @@ No resources.
 | <a name="output_sumologic_content"></a> [sumologic\_content](#output\_sumologic\_content) | This output contains apigateway App. |
 | <a name="output_sumologic_field"></a> [sumologic\_field](#output\_sumologic\_field) | This output contains fields required for apigateway app. |
 | <a name="output_sumologic_field_extraction_rule"></a> [sumologic\_field\_extraction\_rule](#output\_sumologic\_field\_extraction\_rule) | This output contains Field Extraction rules required for apigateway app. |
+| <a name="output_sumologic_metric_rules"></a> [sumologic\_metric\_rules](#output\_sumologic\_metric\_rules) | This output contains metric rules required for nlb app. |
