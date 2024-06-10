@@ -49,6 +49,15 @@ Parameters:
     Description: "Provide the Sumo Logic Account ID for trust relationship."
     Default: ""
 
+  InstallObservabilityApps:
+    Type: String
+    Default: 'Yes'
+    Description: "Yes - Installs Apps (EC2, Application Load Balancer, RDS, API Gateway, Lambda, Dynamo DB, ECS, ElastiCache and NLB) and Alerts for the Sumo Logic AWS Observability Solution. All the Apps are installed in the folder 'AWS Observability'.
+                  No - Skips the installation of Apps and Alerts."
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+
   CreateMetaDataSource:
     Type: String
     Description: "Yes - Creates Sumo Logic MetaData Source. A common metadata source will be created with the region selected.
@@ -247,6 +256,7 @@ Parameters:
 
 Conditions:
   # Sources Conditions
+  install_observability_apps: !Equals [ !Ref InstallObservabilityApps, 'Yes' ]
   install_metadata_source: !Equals [ !Ref CreateMetaDataSource, 'Yes' ]
   install_cloud_watch_metric_source: !Equals [ !Ref CreateCloudWatchMetricsSource, 'Yes' ]
   install_alb_logs_source: !Equals [ !Ref CreateALBLogSource, 'Yes' ]
@@ -883,6 +893,161 @@ Resources:
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
 
+  # ALB App
+  AddLoadBalancerField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "loadbalancer"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # Dynamodb App
+  AddTableNameField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "tablename"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # ELb App
+  AddLoadBalancerNameField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "loadbalancername"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # Lambda App
+  AddFunctionNameField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "functionname"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # EC2 App
+  AddInstanceIdField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "instanceid"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # RDS App
+  AddDBIdentifierField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "dbidentifier"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # Elastic App
+  AddCacheClusterIdField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "cacheclusterid"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # API gateway App
+  AddApiNameField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "apiname"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # API gateway App
+  AddApiIdField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "apiid"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # SNS App
+  AddTopicNameField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "topicname"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # SQS App
+  AddQueueNameField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "queuename"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # ECS App
+  AddClusterNameField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "clustername"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+
+  # NLB App
+  AddNETLoadBalancerField:
+    Condition: install_observability_apps
+    Type: Custom::SumoLogicFieldsSchema
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      FieldName: "networkloadbalancer"
+      RemoveOnDeleteStack: false
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
   ############# START - RESOURCES FOR METADATA SOURCE #################
 
   SumoLogicMetaDataSource:

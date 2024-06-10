@@ -461,7 +461,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.8.0"
+      Version: "v2.10.0"
     CollectorDetails:
       SumoLogicAccountID: 926226587429
       CollectorNamePrefix: "aws-observability"
@@ -490,6 +490,7 @@ Resources:
         AccountAlias: !Ref Section2aAccountAlias
         AccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
         SumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
+        InstallObservabilityApps: !Ref Section3aInstallObservabilityApps
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: !If [ create_cw_metrics_source, "Yes", "No" ]
         CloudWatchMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
@@ -559,7 +560,7 @@ Resources:
 
   sumoEC2MetricsAppStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: sumoNlbMetricsAppStack
+    DependsOn: sumoAlbMetricsAppStack
     Properties:
       TemplateURL: !Sub
         - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/ec2metrics/ec2_metrics_app.template.yaml"
