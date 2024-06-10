@@ -163,7 +163,6 @@ Resources:
 
   ClusterMetricRule:
     Type: Custom::SumoLogicMetricRules
-    DependsOn: AddDBIdentifierField
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
@@ -177,7 +176,6 @@ Resources:
 
   InstanceMetricRule:
     Type: Custom::SumoLogicMetricRules
-    DependsOn: AddDBIdentifierField
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
@@ -231,16 +229,6 @@ Resources:
                                            | tolowercase(dbidentifier) as dbidentifier
                                            | fields region, namespace, dBInstanceIdentifier, dBClusterIdentifier, dbidentifier, accountid'
       FieldExtractionRuleParseEnabled: true
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  AddDBIdentifierField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !Ref Section4aParentStackLambdaARN
-      FieldName: "dbidentifier"
-      RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
