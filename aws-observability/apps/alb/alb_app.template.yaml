@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.8.0: Template to setup the ALB app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.9.0: Template to setup the ALB app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -380,16 +380,6 @@ Resources:
                                             | "aws/applicationelb" as namespace
                                             | tolowercase(loadbalancer) as loadbalancer | fields loadbalancer, namespace'
       FieldExtractionRuleParseEnabled: true
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  AddLoadBalancerField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !Ref Section6aParentStackLambdaARN
-      FieldName: "loadbalancer"
-      RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
