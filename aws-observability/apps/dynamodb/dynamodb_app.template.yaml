@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.8.0: Template to setup the DynamoDB app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.9.0: Template to setup the DynamoDB app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -197,16 +197,6 @@ Resources:
                                            | tolowercase(tablename) as tablename
                                            | fields region, namespace, tablename, accountid'
       FieldExtractionRuleParseEnabled: true
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  AddTableNameField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !Ref Section4aParentStackLambdaARN
-      FieldName: "tablename"
-      RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment

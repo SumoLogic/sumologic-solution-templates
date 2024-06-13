@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.8.0: Template to setup the API Gateway app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.9.0: Template to setup the API Gateway app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -205,9 +205,6 @@ Resources:
   AccessLogsFieldExtractionRule:
     Type: Custom::SumoLogicFieldExtractionRule
     Condition: create_fer
-    DependsOn: 
-      - AddApiNameField
-      - AddApiIdField
     Properties:
       ServiceToken: !Ref Section4aParentStackLambdaARN
       RemoveOnDeleteStack: false
@@ -231,26 +228,6 @@ Resources:
       MatchExpression: "Namespace=AWS/ApiGateway apiid=*"
       ExtractVariables:
         apiname: "$apiid._1"
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  AddApiNameField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !Ref Section4aParentStackLambdaARN
-      FieldName: "apiname"
-      RemoveOnDeleteStack: false
-      SumoAccessID: !Ref Section1bSumoAccessID
-      SumoAccessKey: !Ref Section1cSumoAccessKey
-      SumoDeployment: !Ref Section1aSumoDeployment
-
-  AddApiIdField:
-    Type: Custom::SumoLogicFieldsSchema
-    Properties:
-      ServiceToken: !Ref Section4aParentStackLambdaARN
-      FieldName: "apiid"
-      RemoveOnDeleteStack: false
       SumoAccessID: !Ref Section1bSumoAccessID
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
