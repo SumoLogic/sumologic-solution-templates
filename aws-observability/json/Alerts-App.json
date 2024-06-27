@@ -1276,51 +1276,6 @@
       "automatedPlaybookIds": []
     },
     {
-      "name": "Amazon RDS MSSQL - Authentication failures from the same client IP on multiple databases",
-      "description": "This alert fires when we detect specific client IP attempting authentication failures on more than or equal to 10 databases over a 15 minute time-period.",
-      "type": "MonitorsLibraryMonitorExport",
-      "monitorType": "Logs",
-      "evaluationDelay": "0m",
-      "alertName": null,
-      "runAs": null,
-      "notificationGroupFields": [],
-      "queries": [
-        {
-          "rowId": "A",
-          "query": "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| count_distinct(dbidentifier) as unique_db by client_ip\n| 10 as threshold\n| where unique_db >= threshold\n| sort by unique_db, client_ip asc\n| fields - threshold"
-        }
-      ],
-      "triggers": [
-        {
-          "detectionMethod": "LogsStaticCondition",
-          "triggerType": "Critical",
-          "resolutionWindow": null,
-          "timeRange": "-15m",
-          "threshold": 1,
-          "thresholdType": "GreaterThan",
-          "field": null
-        },
-        {
-          "detectionMethod": "LogsStaticCondition",
-          "triggerType": "ResolvedCritical",
-          "resolutionWindow": "-15m",
-          "timeRange": "-15m",
-          "threshold": 1,
-          "thresholdType": "LessThanOrEqual",
-          "field": null
-        }
-      ],
-      "timeZone": "Asia/Kolkata",
-      "notifications": [],
-      "isDisabled": true,
-      "groupNotifications": true,
-      "playbook": "",
-      "sloId": null,
-      "monitorTemplateId": null,
-      "tags": null,
-      "automatedPlaybookIds": []
-    },
-    {
       "name": "Amazon Elasticache - High Redis Memory Fragmentation Ratio",
       "description": "This alert fires when the average Redis memory fragmentation ratio for within a 5 minute interval is high (>=1.5). Value equal to or greater than 1.5 Indicate significant memory fragmentation.",
       "type": "MonitorsLibraryMonitorExport",
@@ -2494,6 +2449,51 @@
       "notifications": [],
       "isDisabled": true,
       "groupNotifications": false,
+      "playbook": "",
+      "sloId": null,
+      "monitorTemplateId": null,
+      "tags": null,
+      "automatedPlaybookIds": []
+    },
+    {
+      "name": "Amazon RDS MSSQL - Authentication failures from the same client IP on multiple databases",
+      "description": "This alert fires when we detect specific client IP attempting authentication failures on more than or equal to 10 databases over a 15 minute time-period.",
+      "type": "MonitorsLibraryMonitorExport",
+      "monitorType": "Logs",
+      "evaluationDelay": "0m",
+      "alertName": null,
+      "runAs": null,
+      "notificationGroupFields": [],
+      "queries": [
+        {
+          "rowId": "A",
+          "query": "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| count_distinct(dbidentifier) as unique_db by client_ip\n| 10 as threshold\n| where unique_db >= threshold\n| sort by unique_db, client_ip asc\n| fields - threshold"
+        }
+      ],
+      "triggers": [
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "Critical",
+          "resolutionWindow": null,
+          "timeRange": "-15m",
+          "threshold": 1,
+          "thresholdType": "GreaterThanOrEqual",
+          "field": null
+        },
+        {
+          "detectionMethod": "LogsStaticCondition",
+          "triggerType": "ResolvedCritical",
+          "resolutionWindow": "-15m",
+          "timeRange": "-15m",
+          "threshold": 1,
+          "thresholdType": "LessThan",
+          "field": null
+        }
+      ],
+      "timeZone": "Asia/Kolkata",
+      "notifications": [],
+      "isDisabled": true,
+      "groupNotifications": true,
       "playbook": "",
       "sloId": null,
       "monitorTemplateId": null,
