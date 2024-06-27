@@ -5215,7 +5215,7 @@
                     "coloringRules": null,
                     "linkedDashboards": [
                         {
-                            "id": "Abkssnc1TyrHnPDUrUpid0NA6dsdUjk0Fo5OMHkYWbxkWr6Xcv70xrLyCBT4",
+                            "id": "TSs5j8Fdvs403tVwBZP4ZHPZzLpgzs6Yvjx88xxlzucFSOzQEPWqxhyK9ugj",
                             "relativePath": "../09. Amazon RDS - MySQL Logs - Audit Log Analysis",
                             "includeTimeRange": false,
                             "includeVariables": false
@@ -11394,6 +11394,821 @@
                         "variableSourceType": "LogQueryVariableSourceDefinition",
                         "query": "account=* region=* namespace=aws/rds _sourceHost=/aws/rds/*postgresql dbidentifier=* \n| parse \"* * *:*(*):*@*:[*]:*:*\" as date,time,time_zone,host,thread,user,database,processid,severity,msg\n| count by host\n| sort by host asc",
                         "field": "host"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "18. Amazon RDS - MSSQL Logs - Error Logs - Logon Analysis",
+            "description": "The Amazon RDS - MSSQL Logs - Error Logs - Logon Analysis dashboard provides information about the error logs, including failed authentications and logon errors.",
+            "title": "18. Amazon RDS - MSSQL Logs - Error Logs - Logon Analysis",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "ffe0d04967abc0c87d695d4a7f2700e0": [
+                        "*"
+                    ],
+                    "namespace": [
+                        "aws/rds"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "f049c8a107a343b5188930219d3063f5": [
+                        "*"
+                    ],
+                    "dbidentifier": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-5556565F9FF73B4A",
+                        "structure": "{\"height\":5,\"width\":6,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-C97F5EDEB22FB84E",
+                        "structure": "{\"height\":8,\"width\":16,\"x\":0,\"y\":10}"
+                    },
+                    {
+                        "key": "panelPANE-1359B3B4A25FF947",
+                        "structure": "{\"height\":10,\"width\":8,\"x\":16,\"y\":0}"
+                    },
+                    {
+                        "key": "panel2C0BFEAFBAC60849",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":10}"
+                    },
+                    {
+                        "key": "panel1B3270DCA521BA4A",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":18}"
+                    },
+                    {
+                        "key": "panelPANE-28DC265CAE0DEB4F",
+                        "structure": "{\"height\":8,\"width\":16,\"x\":0,\"y\":18}"
+                    },
+                    {
+                        "key": "panelA414E941A506CB41",
+                        "structure": "{\"height\":10,\"width\":10,\"x\":6,\"y\":0}"
+                    },
+                    {
+                        "key": "panel4F5E4422BA291842",
+                        "structure": "{\"height\":5,\"width\":6,\"x\":0,\"y\":5}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-5556565F9FF73B4A",
+                    "title": "Failed Authentication Attempts",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":1,\"color\":\"#16943E\"},{\"from\":1,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| where user != \"rdsadmin\" and !isEmpty(user) and user matches \"{{user}}\"\n| where !isEmpty(client_ip) and client_ip matches \"{{client_ip}}\"\n| count as eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-C97F5EDEB22FB84E",
+                    "title": "Failed Authentication - Details",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| where user != \"rdsadmin\" and !isEmpty(user) and user matches \"{{user}}\"\n| where !isEmpty(client_ip) and client_ip matches \"{{client_ip}}\"\n| timeslice 1s\n| count as frequency by _timeslice, user, dbidentifier, reason, client_ip\n| sort by _timeslice\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-1359B3B4A25FF947",
+                    "title": "Failed Authentication - User Location",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| where user != \"rdsadmin\" and !isEmpty(user) and user matches \"{{user}}\"\n| where !isEmpty(client_ip) and !isBlank(client_ip) and client_ip matches \"{{client_ip}}\"\n| count by client_ip\n| lookup latitude, longitude from geo://location on ip = client_ip\n| where !isNull(latitude)",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel2C0BFEAFBAC60849",
+                    "title": "Failed Auth Attempts by User",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| where user != \"rdsadmin\" and !isEmpty(user) and user matches \"{{user}}\"\n| where !isEmpty(client_ip) and client_ip matches \"{{client_ip}}\"\n| count as frequency by user\n| sort by frequency, user asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel1B3270DCA521BA4A",
+                    "title": "Failed Auth Attempts by Client IP",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| where user != \"rdsadmin\" and !isEmpty(user) and user matches \"{{user}}\"\n| where !isEmpty(client_ip) and client_ip matches \"{{client_ip}}\"\n| count as frequency by client_ip\n| sort by frequency, client_ip asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-28DC265CAE0DEB4F",
+                    "title": "Logon Errors",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Logon Error\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"Error: *, Severity: *, State: *.\" as error_code, severity, state\n| count as frequency by dbidentifier, error_code, severity, state\n| sort by severity, frequency",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA414E941A506CB41",
+                    "title": "Failed Authentication Attempts - Trend",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"Failed Auth Attempts\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| where user != \"rdsadmin\" and !isEmpty(user) and user matches \"{{user}}\"\n| where !isEmpty(client_ip) and client_ip matches \"{{client_ip}}\"\n| timeslice 15m\n| count as failedLogonAttempts by _timeslice, dbidentifier\n| transpose row _timeslice column dbidentifier",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel4F5E4422BA291842",
+                    "title": "Failed Authentication Attempts by dbidentifier",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| where user != \"rdsadmin\" and !isEmpty(user) and user matches \"{{user}}\"\n| where !isEmpty(client_ip) and client_ip matches \"{{client_ip}}\"\n| count as eventCount by dbidentifier\n| sort by eventCount, dbidentifier asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region=*",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/rds",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/rds",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "dbidentifier",
+                    "displayName": "dbidentifier",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "dbidentifier"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "user",
+                    "displayName": "user",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*Error Logon Login failed for user\n| parse \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| count by user\n| sort by user asc",
+                        "field": "user"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "client_ip",
+                    "displayName": "client_ip",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*Error Logon Login failed for user\n| parse \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| count by client_ip\n| sort by client_ip asc",
+                        "field": "client_ip"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "19. Amazon RDS - MSSQL Logs - Error Logs - Infrastructure Overview",
+            "description": "The Amazon RDS - MSSQL Logs - Error Logs - Infrastructure Overview dashboard provides details for hardware, authentications mode, collation, process, recent SQL Server terminations, and newly created databases.",
+            "title": "19. Amazon RDS - MSSQL Logs - Error Logs - Infrastructure Overview",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "ffe0d04967abc0c87d695d4a7f2700e0": [
+                        "*"
+                    ],
+                    "namespace": [
+                        "aws/rds"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "f049c8a107a343b5188930219d3063f5": [
+                        "*"
+                    ],
+                    "dbidentifier": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-1B625C63AFF01A43",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":18,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-44D782B2B2738B48",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":5,\"y\":0}"
+                    },
+                    {
+                        "key": "panel76EEA97B9A431944",
+                        "structure": "{\"height\":6,\"width\":9,\"x\":7,\"y\":6}"
+                    },
+                    {
+                        "key": "panelAFCBC601BB5F4A4D",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":6}"
+                    },
+                    {
+                        "key": "panel9F73C967AECF9A4C",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel227CB3299FF30948",
+                        "structure": "{\"height\":6,\"width\":14,\"x\":10,\"y\":12}"
+                    },
+                    {
+                        "key": "panelE0A53C29AD3B3840",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":11,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-E8CD03B485782844",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panel7B61E36EAF144940",
+                        "structure": "{\"height\":6,\"width\":10,\"x\":0,\"y\":12}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-1B625C63AFF01A43",
+                    "title": "Configured Authentication mode",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Authentication mode\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"Authentication mode is *.\" as mode\n| withtime mode\n| most_recent(mode_withtime) as mode by dbidentifier",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-44D782B2B2738B48",
+                    "title": "DB Setup Details",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error System Manufacturer\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"System Manufacturer: '*', System Model: '*'\" as service, instance_class\n| concat(service, \" - \", instance_class) as db_setup\n| withtime db_setup\n| most_recent(db_setup_withtime) as instance_class by dbidentifier",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel76EEA97B9A431944",
+                    "title": "DB Process IDs",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error SQL Server has been using a process ID\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"This instance of SQL Server has been using a process ID of * since * (local) * (UTC)\" as process_id, local_created_time, utc_created_time\n| withtime process_id\n| most_recent(process_id_withtime) as process_id by dbidentifier, process_id, utc_created_time",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelAFCBC601BB5F4A4D",
+                    "title": "DB Collation Details",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Default collation\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"Default collation: *\" as collation\n| withtime collation\n| most_recent(collation_withtime) as collation by dbidentifier, collation",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9F73C967AECF9A4C",
+                    "title": "DB Instance Type",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error System Manufacturer\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"System Manufacturer: '*', System Model: '*'\" as service, instance_class\n| withtime instance_class\n| most_recent(instance_class_withtime) as instance_class by dbidentifier\n| count by instance_class\n| sort by _count, instance_class asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel227CB3299FF30948",
+                    "title": "Recently Created Databases",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Starting up database\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"Starting up database '*'.\" as db_name\n| dedup by db_name, dbidentifier\n| values(db_name) as db_name by dbidentifier",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelE0A53C29AD3B3840",
+                    "title": "SQL Server Versions",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error Microsoft SQL Server\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"Microsoft SQL Server (?<version>\\d{4})\"  \n| parse regex field=message \"\\n(?<edition>[\\w\\s]+ Edition \\(\\d+-bit\\))\"\n| trim(edition) as edition\n| withtime edition \n| most_recent(edition_withtime) as edition by dbidentifier, version",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-E8CD03B485782844",
+                    "title": "DBCC CHECK DB",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error DBCC CHECKDB\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"DBCC CHECKDB (rdsadmin) WITH all_errormsgs, no_infomsgs, tableresults executed by NT AUTHORITY\\\\SYSTEM found * errors and repaired * errors.\" as error, repaired_error\n| count as frequency by dbidentifier, error, repaired_error",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel7B61E36EAF144940",
+                    "title": "Recently Terminated SQL Servers",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*Error SQL Server is terminating\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| withtime dbidentifier \n| most_recent(dbidentifier_withtime) as dbidentifier by dbidentifier",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region=*",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/rds",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/rds",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "dbidentifier",
+                    "displayName": "dbidentifier",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "dbidentifier"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
