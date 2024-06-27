@@ -12,6 +12,7 @@ Metadata:
           - Section1cSumoLogicAccessKey
           - Section1dSumoLogicOrganizationId
           - Section1eSumoLogicResourceRemoveOnDeleteStack
+          - Section1fSumoLogicSendTelemetry
 
       - Label:
           default: "2. AWS Account Alias"
@@ -87,6 +88,8 @@ Metadata:
         default: "Sumo Logic Organization Id"
       Section1eSumoLogicResourceRemoveOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
+      Section1fSumoLogicSendTelemetry:
+        default: "Send telemetry to Sumo Logic"
 
       Section2aAccountAlias:
         default: "Alias for AWS Account Identification. Please leave this blank if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
@@ -188,6 +191,13 @@ Parameters:
     Default: true
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Type: String
+  Section1fSumoLogicSendTelemetry:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "To send telemetry to Sumo Logic, set this parameter to True. Default is True."
     Type: String
 
   Section2aAccountAlias:
@@ -457,6 +467,9 @@ Conditions:
   # Condition for Stacks creation. Calling Nested Stack EveryTime to create FER and Metric Rule. If already present, marked as duplicate in Resource.
   install_overview_dashboards: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
 
+  # Condition for sending solution telemetry to sumo logic.
+  send_telemetry_to_sumo: !Equals [ !Ref Section1fSumoLogicSendTelemetry, 'true' ]
+
 Mappings:
   CommonData:
     NestedTemplate:
@@ -474,6 +487,120 @@ Mappings:
       ELBLogsSourceCategory: "aws/observability/clb/logs"
 
 Resources:
+  LambdaRole:
+    Condition: send_telemetry_to_sumo
+    Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaExecutePolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - lambda:DeleteFunction
+                Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*TelemetryLambda*'
+        - PolicyName: BasicLambdaPolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+        - PolicyName: CloudFormationRead
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:Describe*
+                Resource: !Sub '${AWS::StackId}'
+
+  TelemetryLambda:
+    Condition: send_telemetry_to_sumo
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Code:
+        S3Bucket: hsharma-codes
+        S3Key: 'telemetry.zip'
+      MemorySize: 128
+      Timeout: 900
+      Role: !GetAtt LambdaRole.Arn
+
+  LambdaPermission:
+    Condition: send_telemetry_to_sumo
+    Type: 'AWS::Lambda::Permission'
+    # DeletionPolicy: Retain
+    Properties:
+      FunctionName: !GetAtt TelemetryLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'cloudformation.amazonaws.com'
+  
+  Primerinvoke:
+    Condition: send_telemetry_to_sumo
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt TelemetryLambda.Arn
+      Handler: lambda_function.lambda_handler
+      stackID:
+          Ref: "AWS::StackId"
+      sumoDeployment:
+          !Ref Section1aSumoLogicDeployment
+      sumoOrgId:
+          !Ref Section1dSumoLogicOrganizationId
+      solutionName: 'AWSO'
+      solutionVersion: 'v2.9.0'
+      deploymentSource: 'cloudFormation'
+      TelemetryEndpoint: "https://collectors.sumologic.com/receiver/v1/http/ZaVnC4dhaV24CA_LXFO0iHFPLWH8VaEczkwtk-GZYMlTG_Dl2CPQ6YNbmKXf9K3dZQ2aAjTREC_C3TECzVQc1XN7zw5CI5lIR4O4-uYsk4bTELB1MU57AQ=="
+      scanInterval: 60
+      ToUpdate: 
+        Fn::Base64: !Sub
+          - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}"
+          - a: !Ref Section2aAccountAlias
+            b: !Ref Section3aInstallObservabilityApps
+            c: !Ref Section4aCreateMetricsSourceOptions
+            d: !Ref Section4bMetricsNameSpaces
+            e: !Ref Section4cCloudWatchExistingSourceAPIUrl
+            f: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
+            g: !Ref Section5bALBCreateLogSource
+            h: !Ref Section5cALBLogsSourceUrl
+            i: !Ref Section5dALBS3LogsBucketName
+            j: !Ref Section6aCreateCloudTrailLogSource
+            k: !Ref Section6bCloudTrailLogsSourceUrl
+            l: !Ref Section6cCloudTrailLogsBucketName
+            m: !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions
+            n: !Ref Section7bLambdaCloudWatchLogsSourceUrl
+            o: !Ref Section7cAutoSubscribeLogGroupsOptions
+            p: !Ref Section7dAutoSubscribeLogGroupPattern
+            q: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
+            r: !Ref Section9bELBCreateLogSource
+            s: !Ref Section9cELBLogsSourceUrl
+            t: !Ref Section9dELBS3LogsBucketName
+            u: !Ref Section10aAppInstallLocation
+            v: !FindInMap [CommonData, NestedTemplate, Version]
+
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
