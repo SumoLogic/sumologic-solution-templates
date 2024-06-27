@@ -576,7 +576,7 @@ module "rds_module" {
         },
         {
           detection_method = "LogsStaticCondition",
-          time_range       = "-5m",
+          time_range       = "-15m",
           trigger_type     = "ResolvedCritical",
           threshold        = 1,
           threshold_type   = "LessThan",
