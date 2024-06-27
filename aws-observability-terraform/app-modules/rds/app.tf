@@ -519,6 +519,74 @@ module "rds_module" {
       group_notifications      = var.group_notifications
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
+    },
+    "RdsMSSQLHighAuthFailureByClientIPsOnDB" = {
+      monitor_name         = "Amazon RDS MSSQL - Database observing authentication failures from multiple client IPs"
+      monitor_description  = "This alert fires when we detect more than or equal to 10 client IPs attempting authentication failures on the database over a 15-minute period."
+      monitor_monitor_type = "Logs"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
+      queries = {
+        A = "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon       Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| count_distinct(client_ip) as unique_client_ip by dbidentifier\n| 10 as threshold\n| where unique_client_ip >= threshold\n| sort by unique_client_ip\n| fields - threshold"
+      }
+      triggers = [
+        {
+          detection_method = "LogsStaticCondition",
+          time_range       = "-15m",
+          trigger_type     = "Critical",
+          threshold        = 1,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        },
+        {
+          detection_method = "LogsStaticCondition",
+          time_range       = "-15m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 1,
+          threshold_type   = "LessThan",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        }
+      ]
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "RdsMSSQLHighAuthFailureByClientIPOnDBs" = {
+      monitor_name         = "Amazon RDS MSSQL - Authentication failures from the same client IP on multiple databases"
+      monitor_description  = "This alert fires when we detect specific client IP attempting authentication failures on more than or equal to 10 databases over a 15 minute time-period."
+      monitor_monitor_type = "Logs"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
+      queries = {
+        A = "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*Error Logon Login failed for user\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"* Logon Login failed for user '*'. Reason: * [CLIENT: *]\" as time, user, reason, client_ip\n| count_distinct(dbidentifier) as unique_db by client_ip\n| 10 as threshold\n| where unique_db >= threshold\n| sort by unique_db, client_ip asc\n| fields - threshold"
+      }
+      triggers = [
+        {
+          detection_method = "LogsStaticCondition",
+          time_range       = "-15m",
+          trigger_type     = "Critical",
+          threshold        = 1,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        },
+        {
+          detection_method = "LogsStaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 1,
+          threshold_type   = "LessThan",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        }
+      ]
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
     }
   }
 }
