@@ -9,7 +9,7 @@ import (
 // It takes around 20 mins to execute following 4 test scenerios.
 
 // Main function
-// Testing scenerio 1 - default scenerio
+// Testing scenario 1 - default scenario
 func TestAppModule1(t *testing.T) {
 	// t.Parallel()
 
@@ -35,7 +35,7 @@ func TestAppModule1(t *testing.T) {
 
 }
 
-// Testing scenerio 2 - Install in Admin Recom folder,share - true, override -  Monitor folder name, enable log + metric monitor
+// Testing scenario 2 - Install in Admin Recom folder,share - true, override -  Monitor folder name, enable log + metric monitor
 func TestAppModule2(t *testing.T) {
 	// t.Parallel()
 
@@ -71,7 +71,7 @@ func TestAppModule2(t *testing.T) {
 	})
 }
 
-// Testing scenerio 3 - Install in Personal folder, share is false, override - App folder, enable log and metric monitor
+// Testing scenario 3 - Install in Personal folder, share is false, override - App folder, enable log and metric monitor
 func TestAppModule3(t *testing.T) {
 	// t.Parallel()
 
@@ -101,7 +101,7 @@ func TestAppModule3(t *testing.T) {
 	})
 }
 
-// Testing scenerio 4 - Install in Admin Recom folder,share - false, override - App folder name, Monitor folder name, enable metric monitor
+// Testing scenario 4 - Install in Admin Recom folder,share - false, override - App folder name, Monitor folder name, enable metric monitor
 func TestAppModule4(t *testing.T) {
 	// t.Parallel()
 
