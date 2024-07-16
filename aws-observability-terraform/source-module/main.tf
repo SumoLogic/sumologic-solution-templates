@@ -98,7 +98,7 @@ module "elb_module" {
   }
 
   auto_enable_access_logs = var.auto_enable_access_logs
-  app_semantic_version = "1.0.11"
+  app_semantic_version = "1.0.12"
   auto_enable_access_logs_options = {
     filter                 = "'Type': 'application'|'type': 'application'"
     remove_on_delete_stack = true
@@ -142,7 +142,7 @@ module "classic_lb_module" {
     }
   }
   auto_enable_access_logs = var.auto_enable_classic_lb_access_logs
-  app_semantic_version = "1.0.11"
+  app_semantic_version = "1.0.12"
   auto_enable_access_logs_options = {
     bucket_prefix          = local.auto_classic_lb_path_exp
     auto_enable_logging    = "ELB"
