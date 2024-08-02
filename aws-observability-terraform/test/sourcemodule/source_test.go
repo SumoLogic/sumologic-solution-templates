@@ -27,7 +27,7 @@ func TestSourceModule1(t *testing.T) {
 
 	// Assert count of Expected resources.
 	test_structure.RunTestStage(t, "AssertCount", func() {
-		AssertResourceCounts(t, resourceCount, 82, 0, 0)
+		AssertResourceCounts(t, resourceCount, 99, 0, 0)
 	})
 
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
@@ -132,7 +132,7 @@ func TestSourceModule2(t *testing.T) {
 
 	// Assert count of Expected resources.
 	test_structure.RunTestStage(t, "AssertCount", func() {
-		AssertResourceCounts(t, resourceCount, 16, 0, 0)
+		AssertResourceCounts(t, resourceCount, 32, 0, 0)
 	})
 
 	// At the end of the test, un-deploy the solution using Terraform
@@ -169,7 +169,7 @@ func TestSourceModule3(t *testing.T) {
 
 	// Assert count of Expected resources.
 	test_structure.RunTestStage(t, "AssertCount", func() {
-		AssertResourceCounts(t, resourceCount, 80, 0, 0)
+		AssertResourceCounts(t, resourceCount, 99, 0, 0)
 	})
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
 	terraformOptions := test_structure.LoadTerraformOptions(t, TerraformDir)
