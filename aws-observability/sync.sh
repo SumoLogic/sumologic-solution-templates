@@ -6,7 +6,7 @@ APPS_TEMPLATES_DIR=./apps
 APPS_JSON_DIR=./json
 
 # Bucket name
-CF_VERSION=v2.8.0
+CF_VERSION=v2.9.0
 BUCKET_REGION=us-east-1
 BUCKET=sumologic-appdev-aws-sam-apps
 S3_KEY_PREFIX=aws-observability-versions/${CF_VERSION}
