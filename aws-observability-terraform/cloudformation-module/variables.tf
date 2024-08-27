@@ -12,7 +12,7 @@ variable "CloudFormationStackName" {
 # Sumo Logic Access Configuration (Required)
 variable "Section1aSumoLogicDeployment" {
   type        = string
-  description = "Enter au, ca, de, eu, jp, us2, in, fed or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  description = "Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   validation {
     condition = contains([
       "au",

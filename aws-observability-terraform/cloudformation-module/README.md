@@ -63,7 +63,7 @@ Configure the following parameters in `main_variables.auto.tfvars`. For more det
 | Parameter |Description |Default Value
 | --- | --- | --- |
 | CloudFormationStackName | A unique name for your AWS CloudFormation Stack | |
-| Section1aSumoLogicDeployment | Enter au, ca, de, eu, jp, us2, in, fed or us1. [Visit](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security) | |
+| Section1aSumoLogicDeployment | Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2. [Visit](https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security) | |
 | Section1bSumoLogicAccessID | Sumo Logic Access ID. [Visit](https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key) | |
 | Section1cSumoLogicAccessKey| Sumo Logic Access Key. | |
 | Section1dSumoLogicOrganizationId | Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. [Visit](https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page) | |

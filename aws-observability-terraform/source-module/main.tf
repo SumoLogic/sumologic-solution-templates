@@ -25,8 +25,9 @@ resource "time_sleep" "wait_for_minutes" {
 module "cloudtrail_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_cloudtrail_source ? ["cloudtrail_module"] : [])
-
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudtrail?ref=sumo_246624"
+  
+  # source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
 
   create_collector          = false
   create_trail              = var.cloudtrail_source_details.bucket_details.create_bucket ? true : false
@@ -64,8 +65,8 @@ module "cloudtrail_module" {
 module "elb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_elb_source ? ["elb_module"] : [])
-
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/elb?ref=sumo_246624"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -110,7 +111,8 @@ module "classic_lb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_classic_lb_source ? ["classic_lb_module"] : [])
 
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/elasticloadbalancing?ref=sumo_246624"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -154,8 +156,8 @@ module "classic_lb_module" {
 module "cloudwatch_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = local.create_cw_metrics_source ? toset(var.cloudwatch_metrics_source_details.limit_to_namespaces) : []
-
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchmetrics?ref=sumo_246624"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -182,8 +184,8 @@ module "cloudwatch_metrics_source_module" {
 module "kinesis_firehose_for_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_metrics_source ? ["kinesis_firehose_for_metrics_source_module"] : [])
-
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/kinesisfirehoseformetrics?ref=sumo_246624"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -214,7 +216,8 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_llf_logs_source ? ["cloudwatch_logs_lambda_log_forwarder_module"] : [])
 
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchlogsforwarder?ref=sumo_246624"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder"
 
   create_collector = false
 
@@ -244,7 +247,8 @@ module "kinesis_firehose_for_logs_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_logs_source ? ["kinesis_firehose_for_logs_module"] : [])
 
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/kinesisfirehoseforlogs?ref=sumo_246624"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs"
 
   create_collector = false
 
@@ -273,7 +277,8 @@ module "root_cause_sources_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_root_cause_source ? ["root_cause_sources_module"] : [])
 
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/rootcause"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/rootcause?ref=sumo_246624"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/rootcause"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
