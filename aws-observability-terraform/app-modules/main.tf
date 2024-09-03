@@ -34,8 +34,14 @@ resource "sumologic_content_permission" "share_with_org" {
 	}
  }
 
+resource "time_sleep" "wait_for_5_minutes" {
+  #depends_on = [module.overview_app]
+  create_duration = "300s"
+}
+
 # Install the overview app and resources.
 module "overview_app" {
+  depends_on = [time_sleep.wait_for_5_minutes]
   source = "./overview"
 
   access_id                = var.access_id
@@ -43,11 +49,6 @@ module "overview_app" {
   environment              = var.environment
   json_file_directory_path = var.json_file_directory_path
   app_folder_id            = sumologic_folder.apps_folder.id
-}
-
-resource "time_sleep" "wait_for_5_minutes" {
-  depends_on = [module.overview_app]
-  create_duration = "300s"
 }
 
 # Install the ec2metrics app and resources.
