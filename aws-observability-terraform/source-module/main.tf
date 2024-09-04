@@ -25,7 +25,6 @@ resource "time_sleep" "wait_for_minutes" {
 module "cloudtrail_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_cloudtrail_source ? ["cloudtrail_module"] : [])
-
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
 
   create_collector          = false
@@ -64,7 +63,6 @@ module "cloudtrail_module" {
 module "elb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_elb_source ? ["elb_module"] : [])
-
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
 
   create_collector          = false
@@ -98,7 +96,7 @@ module "elb_module" {
   }
 
   auto_enable_access_logs = var.auto_enable_access_logs
-  app_semantic_version = "1.0.12"
+  app_semantic_version = "1.0.14"
   auto_enable_access_logs_options = {
     filter                 = "'Type': 'application'|'type': 'application'"
     remove_on_delete_stack = true
@@ -142,7 +140,7 @@ module "classic_lb_module" {
     }
   }
   auto_enable_access_logs = var.auto_enable_classic_lb_access_logs
-  app_semantic_version = "1.0.12"
+  app_semantic_version = "1.0.14"
   auto_enable_access_logs_options = {
     bucket_prefix          = local.auto_classic_lb_path_exp
     auto_enable_logging    = "ELB"
@@ -154,7 +152,6 @@ module "classic_lb_module" {
 module "cloudwatch_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = local.create_cw_metrics_source ? toset(var.cloudwatch_metrics_source_details.limit_to_namespaces) : []
-
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
 
   create_collector          = false
@@ -182,7 +179,6 @@ module "cloudwatch_metrics_source_module" {
 module "kinesis_firehose_for_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_metrics_source ? ["kinesis_firehose_for_metrics_source_module"] : [])
-
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
 
   create_collector          = false

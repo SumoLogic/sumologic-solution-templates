@@ -5,7 +5,7 @@ echo "Start S3 upload Script....."
 export AWS_PROFILE="prod"
 
 export bucket_name=sumologic-appdev-aws-sam-apps
-export version=v2.9.0
+export version=v2.10.0
 export match_case="App"
 
 if [[ ${AWS_PROFILE} == 'default' ]]
