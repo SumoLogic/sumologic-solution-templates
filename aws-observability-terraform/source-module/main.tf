@@ -230,7 +230,7 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-  app_semantic_version = "1.0.12"
+  app_semantic_version = "1.0.14"
   auto_enable_logs_subscription_options = {
     filter = var.auto_enable_logs_subscription_options.filter
   }
@@ -259,7 +259,7 @@ module "kinesis_firehose_for_logs_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-  app_semantic_version = "1.0.12"
+  app_semantic_version = "1.0.14"
   auto_enable_logs_subscription_options = {
     filter = var.auto_enable_logs_subscription_options.filter
   }
