@@ -70,6 +70,10 @@ Parameters:
     Type: String
     Default: '\/aws\/(lambda|apigateway|rds)'
     Description: "Enter regex for matching logGroups. Regex will check for the name. Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters"
+  AutoSubscribeLogGroupByTags:
+    Type: String
+    Default: ""
+    Description: "Enter comma separated key value pairs for filtering logGroups using tags. Ex KeyName1=string,KeyName2=string. This is optional leave it blank if tag based filtering is not needed. Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters"
   AutoSubscribeRoleArn:
     Type: String
     Default: ""
@@ -159,5 +163,6 @@ Resources:
         DestinationArnType: !Ref AutoSubscribeDestinationARNType
         DestinationArnValue: !Ref AutoSubscribeDestinationARN
         LogGroupPattern: !Ref AutoSubscribeLambdaLogGroupPattern
+        LogGroupTags: !Ref AutoSubscribeLogGroupByTags
         UseExistingLogs: !If [auto_subscribe_exisitng_log_groups, "true", "false"]
         RoleArn: !Ref AutoSubscribeRoleArn
