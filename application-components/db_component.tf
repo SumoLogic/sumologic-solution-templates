@@ -62,7 +62,7 @@ resource "sumologic_field" "pod_labels_db_cluster_port" {
 # ********************** Database component FERs ********************** #
 
 resource "sumologic_field_extraction_rule" "SumoLogicFieldExtractionRulesForDatabase" {
-  depends_on       = [sumologic_field.db_cluster, sumologic_field.db_system, sumologic_field.db_cluster_address, sumologic_field.db_cluster_port, sumologic_field.pod_labels_db_cluster, sumologic_field.pod_labels_db_system, sumologic_field.pod_labels_db_cluster_address, sumologic_field.pod_labels_db_cluster_port]
+  depends_on       = [sumologic_field.db_cluster, sumologic_field.db_system, sumologic_field.db_cluster_address, sumologic_field.db_cluster_port, sumologic_field.pod_labels_db_cluster, sumologic_field.pod_labels_db_system, sumologic_field.pod_labels_db_cluster_address, sumologic_field.pod_labels_db_cluster_port,sumologic_field.component,sumologic_field.environment, sumologic_field.pod_labels_environment, sumologic_field.pod_labels_component]
   count            = length(local.all_components_values) > 0 && local.has_any_kubernetes_deployments ? 1 : 0
   enabled          = true
   name             = local.database_fer_name
