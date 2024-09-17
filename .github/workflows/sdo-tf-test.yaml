@@ -1,5 +1,11 @@
-name: "TF template tests"
-on: [workflow_dispatch, pull_request]
+name: "SDO TF template tests"
+on:
+  push:
+    paths:
+      - 'software-development-optimization-terraform/**'
+  pull_request:
+    paths:
+      - 'software-development-optimization-terraform/**'
 
 jobs:
 
@@ -8,7 +14,7 @@ jobs:
     name: "Validatation (format & syntax)"
     defaults:
       run:
-        working-directory: ./aws-observability-terraform
+        working-directory: ./software-development-optimization-terraform
     steps:
     - uses: actions/checkout@v4
       name: Checkout source code
@@ -38,7 +44,7 @@ jobs:
 
       - uses: bridgecrewio/checkov-action@master
         with:
-          directory: 'aws-observability-terraform/'
+          directory: 'software-development-optimization-terraform/'
           quiet: true
           framework: terraform
           output_format: cli
