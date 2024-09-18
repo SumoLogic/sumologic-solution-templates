@@ -7,10 +7,13 @@ terraform {
     #   jira = "~> 0.1.11"
     github    = "~> 2.8"
     pagerduty = {
-      source  = "pagerduty/pagerduty"
+      source  = "Pagerduty/pagerduty"
       version = "2.2.1"
     }
-    sumologic = ">= 2.31.3, < 3.0.0"
+    sumologic = {
+      version = ">= 2.31.3, < 3.0.0"
+      source  = "SumoLogic/sumologic"
+    }
     gitlab    = "3.6.0"
   }
 }
