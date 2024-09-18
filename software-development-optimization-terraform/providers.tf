@@ -6,14 +6,8 @@ terraform {
     template = "~> 2.1"
     #   jira = "~> 0.1.11"
     github    = "~> 2.8"
-    pagerduty = {
-      source  = "Pagerduty/pagerduty"
-      version = "2.2.1"
-    }
-    sumologic = {
-      version = ">= 2.31.3, < 3.0.0"
-      source  = "SumoLogic/sumologic"
-    }
+    pagerduty = "~> 2.3"
+    sumologic = ">= 2.31.3, < 3.0.0"
     gitlab    = "3.6.0"
   }
 }
