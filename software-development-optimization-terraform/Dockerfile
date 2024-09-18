@@ -27,12 +27,13 @@ RUN curl -LO https://github.com/fourplusone/terraform-provider-jira/releases/dow
     && rm terraform-provider-jira_linux_amd64.zip 
 
 # Download and install the terraform-provider-restapi plugin
-RUN curl -LO https://github.com/Mastercard/terraform-provider-restapi/releases/download/v1.8.0/terraform-provider-restapi_v1.8.0-linux-amd64 \
-    && chmod +x terraform-provider-restapi_v1.8.0-linux-amd64 \
-    && mv terraform-provider-restapi_v1.8.0-linux-amd64 /usr/local/bin/terraform-provider-restapi
+RUN curl -LO https://github.com/Mastercard/terraform-provider-restapi/releases/download/v1.12.0/terraform-provider-restapi_v1.12.0-linux-amd64 \
+    && chmod +x terraform-provider-restapi_v1.12.0-linux-amd64 \
+    && mv terraform-provider-restapi_v1.12.0-linux-amd64 /usr/local/bin/terraform-provider-restapi
 
 # Set the working directory
 WORKDIR /sdo
+COPY . /sdo
 
 # Set an entry point for convenience (you can customize this)
 ENTRYPOINT ["bash"]
