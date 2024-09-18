@@ -7,7 +7,7 @@ terraform {
     #   jira = "~> 0.1.11"
     github    = "~> 2.8"
     pagerduty = "~> 2.3"
-    sumologic = "~> 2.1.0"
+    sumologic = ">= 2.31.3, < 3.0.0"
     gitlab    = "3.6.0"
   }
 }

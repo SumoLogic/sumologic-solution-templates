@@ -1,0 +1,60 @@
+name: "SDO TF template tests"
+on:
+  pull_request:
+    paths:
+      - 'software-development-optimization-terraform/**'
+
+jobs:
+
+  ValidateTF:
+    runs-on: ubuntu-latest
+    name: "Validatation (format & syntax)"
+    defaults:
+      run:
+        working-directory: ./software-development-optimization-terraform
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout source code
+
+    - uses: hashicorp/setup-terraform@v3
+      name: Setup Terraform
+      with:
+        terraform_version: "0.12.31"
+
+    - name: Download and extract the terraform-provider-jira plugin version 0.1.11
+      run: |
+        curl -LO https://github.com/fourplusone/terraform-provider-jira/releases/download/v0.1.11/terraform-provider-jira_linux_amd64.zip && mkdir -p ~/.terraform.d/plugins/linux_amd64 && unzip terraform-provider-jira_linux_amd64.zip -d ~/.terraform.d/plugins/linux_amd64/ && rm terraform-provider-jira_linux_amd64.zip
+
+    - name: Download and install the terraform-provider-restapi plugin version 1.12.0
+      run: |
+        curl -LO https://github.com/Mastercard/terraform-provider-restapi/releases/download/v1.12.0/terraform-provider-restapi_v1.12.0-linux-amd64 && chmod +x terraform-provider-restapi_v1.12.0-linux-amd64 && mv terraform-provider-restapi_v1.12.0-linux-amd64 ~/.terraform.d/plugins/linux_amd64/terraform-provider-restapi
+
+    - name: Terraform fmt
+      id: fmt
+      run: terraform fmt -check -recursive -diff
+      continue-on-error: true
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate
+
+  TFSecurityChecks:
+    name: "Security Checks (checkov)"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: 'software-development-optimization-terraform/'
+          quiet: true
+          framework: terraform
+          output_format: cli
+          output_bc_ids: false
+          download_external_modules: true
+          skip_check: CKV_TF_1,CKV_TF_2
