@@ -1,11 +1,8 @@
-name: "App Components TF template tests"
+name: "SDO TF template tests"
 on:
-  push:
-    paths:
-      - 'application-components/**'
   pull_request:
     paths:
-      - 'application-components/**'
+      - 'software-development-optimization-terraform/**'
 
 jobs:
 
@@ -14,13 +11,23 @@ jobs:
     name: "Validatation (format & syntax)"
     defaults:
       run:
-        working-directory: ./application-components
+        working-directory: ./software-development-optimization-terraform
     steps:
     - uses: actions/checkout@v4
       name: Checkout source code
 
     - uses: hashicorp/setup-terraform@v3
       name: Setup Terraform
+      with:
+        terraform_version: "0.12.20"
+
+    - name: Download and extract the terraform-provider-jira plugin version 0.1.11
+      run: |
+        curl -LO https://github.com/fourplusone/terraform-provider-jira/releases/download/v0.1.11/terraform-provider-jira_linux_amd64.zip && unzip terraform-provider-jira_linux_amd64.zip -d /usr/local/bin && rm terraform-provider-jira_linux_amd64.zip
+
+    - name: Download and install the terraform-provider-restapi plugin version 1.12.0
+      run: |
+        curl -LO https://github.com/Mastercard/terraform-provider-restapi/releases/download/v1.12.0/terraform-provider-restapi_v1.12.0-linux-amd64 && chmod +x terraform-provider-restapi_v1.12.0-linux-amd64 && mv terraform-provider-restapi_v1.12.0-linux-amd64 /usr/local/bin/terraform-provider-restapi
 
     - name: Terraform fmt
       id: fmt
@@ -44,7 +51,7 @@ jobs:
 
       - uses: bridgecrewio/checkov-action@master
         with:
-          directory: 'application-components/'
+          directory: 'software-development-optimization-terraform/'
           quiet: true
           framework: terraform
           output_format: cli
