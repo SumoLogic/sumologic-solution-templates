@@ -499,12 +499,18 @@ variable "auto_enable_logs_subscription" {
 variable "auto_enable_logs_subscription_options" {
   type = object({
     filter = string
+    tags_filter = string
   })
+
   description = <<EOT
-		    filter - Enter regex for matching CloudWatch Log groups name. Regex will check for the Log groups name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters
-	    EOT
+		filter - Enter regex for matching logGroups. Regex will check for the name.
+        tags_filter - Enter comma separated key value pairs for filtering logGroups using tags. Ex KeyName1=string,KeyName2=string. This is optional leave it blank if tag based filtering is not needed.
+        Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters
+	EOT
+
   default = {
     filter = "apigateway|lambda|rds"
+    tags_filter = ""
   }
 }
 
