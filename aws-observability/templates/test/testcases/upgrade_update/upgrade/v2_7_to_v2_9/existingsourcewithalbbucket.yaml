@@ -1,0 +1,225 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.10.0/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+TestCase:
+  TestName: existingsourcewithalbbucket
+  Regions:
+    - ap-southeast-1
+  Skip: false
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+      Section2aAccountAlias: 'test5env'
+      Section2bAccountAliasMappingS3URL: ''
+      Section3aInstallObservabilityApps: 'No'
+      Section4aCreateMetricsSourceOptions: 'None'
+      Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'Existing'
+      Section5bALBCreateLogSource: 'Yes'
+      Section5dALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-2'
+      Section5eALBS3BucketPathExpression: '*abc*'
+      Section6aCreateCloudTrailLogSource: 'Yes'
+      Section7aLambdaCreateCloudWatchLogsSourceOptions: 'None'
+      Section7bLambdaCloudWatchLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511499202'
+      Section8aRootCauseExplorerOptions: 'Xray Source'
+      Section9bELBCreateLogSource: 'No'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - LambdaRole
+          - LambdaPermission
+          - PrimerInvoke
+          - TelemetryLambda
+          - CreateCommonResources
+          - AutoEnableOptions
+          - sumoEC2MetricsAppStack
+          - sumoAlbMetricsAppStack
+          - sumoElbMetricsAppStack
+          - sumoDynamoDBMetricsAppStack
+          - sumoRdsMetricsAppStack
+          - sumoApiGatewayMetricsAppStack
+          - sumoSNSAppStack
+          - sumoSQSAppStack
+          - RootCauseAppStack
+          - sumoLambdaMetricsAppStack
+          - sumoECSMetricsAppStack
+          - sumoElasticCacheMetricsAppStack
+          - CreateCommonResources.AddAccountField
+          - CreateCommonResources.AddRegionField
+          - CreateCommonResources.AddNamespaceField
+          - CreateCommonResources.AddAccountIdField
+          - CreateCommonResources.SumoLogicALBS3Policy
+          - CreateCommonResources.SumoLogicCloudTrailS3Policy
+          - CreateCommonResources.LambdaRole
+          - CreateCommonResources.LambdaHelper
+          - CreateCommonResources.AccountCheck
+          - CreateCommonResources.CommonBucketSNSTopic
+          - CreateCommonResources.CommonS3Bucket
+          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.CommonSNSpolicy
+          - CreateCommonResources.CommonCloudTrail
+          - CreateCommonResources.CreateSumoLogicAWSExplorerView
+          - CreateCommonResources.SumoLogicSourceRole
+          - CreateCommonResources.SumoLogicHostedCollector
+          - CreateCommonResources.LambdaToDecideCWMetricsSources
+          - CreateCommonResources.Primerinvoke
+          - CreateCommonResources.ALBSource
+          - CreateCommonResources.ALBSNSTopic
+          - CreateCommonResources.ALBSNSpolicy
+          - CreateCommonResources.ALBSNSSubscription
+          - CreateCommonResources.CloudTrailSource
+          - CreateCommonResources.CloudTrailSNSSubscription
+          - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources
+          - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableExisitngAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.ExistingAWSResources
+          - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.SumoLambdaRole
+          - sumoAlbMetricsAppStack.SumoALBMetricsUpdateSource
+          - sumoRdsMetricsAppStack.ClusterMetricRule
+          - sumoRdsMetricsAppStack.InstanceMetricRule
+          - sumoLambdaMetricsAppStack.SumoHTTPUpdateSource
+          - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
+          - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
+          - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
+          - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
+          - sumoApiGatewayMetricsAppStack.MetricRule
+          - sumoSNSAppStack.FieldExtractionRule
+          - sumoSQSAppStack.FieldExtractionRule
+          - sumoDynamoDBMetricsAppStack.FieldExtractionRule
+          - sumoEC2MetricsAppStack.FieldExtractionRule
+          - sumoLambdaMetricsAppStack.LambdaCloudWatchLogsFieldExtractionRule
+          - sumoRdsMetricsAppStack.FieldExtractionRule
+          - sumoECSMetricsAppStack.FieldExtractionRule
+          - sumoElasticCacheMetricsAppStack.FieldExtractionRule
+          - sumoNlbMetricsAppStack
+          - sumoNlbMetricsAppStack.MetricRule
+          - CreateCommonResources.AccountAliasValue
+          - RootCauseAppStack.RootCauseRole
+          - RootCauseAppStack.SumoLogicHostedCollector
+          - RootCauseAppStack.XraySource
+          - RootCauseAppStack.AccountAliasValue
+          - RootCauseAppStack.LambdaHelper
+          - RootCauseAppStack.LambdaRole
+          - sumoAlbMetricsAppStack.AccountAliasValue
+          - sumoAlbMetricsAppStack.LambdaHelper
+          - sumoAlbMetricsAppStack.LambdaRole
+          - sumoElbMetricsAppStack.AccountAliasValue
+          - sumoElbMetricsAppStack.LambdaHelper
+          - sumoElbMetricsAppStack.LambdaRole
+          - sumoElbMetricsAppStack.SumoELBMetricsUpdateSource
+          - sumoLambdaMetricsAppStack.AccountAliasValue
+          - sumoLambdaMetricsAppStack.GenericCloudWatchLogsFieldExtractionRule
+          - CreateCommonResources.LambdaHelperAlias
+          - CreateCommonResources.LambdaRoleAlias
+    - AssertType: OutputsCheck
+      Assert:
+        Outputs:
+          - CreateCommonResources.LambdaHelperARN
+          - CreateCommonResources.EnterpriseCheck
+          - CreateCommonResources.PaidAccountCheck
+          - CreateCommonResources.Namespaces
+          - CreateCommonResources.LambdaRoleARN
+          - CreateCommonResources.BucketName
+          - AutoEnableOptions.AutoEnableS3LogsAlbAWSResources.EnableExisitngAWSResourcesLambda
+          - sumoLambdaMetricsAppStack.ExistingCloudWatchLogSourceName
+          - sumoAlbMetricsAppStack.ExistingMetricSourceName
+          - CreateCommonResources.CollectorName
+          - CreateCommonResources.AccountAlias
+    - AssertType: ParameterCheck
+      Assert:
+        CreateCommonResources:
+          AccountAlias: "test5env"
+          AccountAliasMappingS3URL: ""
+          CreateMetaDataSource: 'No'
+          MetaDataSourceName: ""
+          MetaDataSourceCategory: ""
+          CreateCloudWatchMetricsSource:  'No'
+          CloudWatchMetricsSourceName: ''
+          CloudWatchMetricsNameSpaces: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
+          ScanInterval: "30000"
+          CloudWatchMetricSourceCategory: ""
+          CreateALBLogSource: 'Yes'
+          CreateALBS3Bucket: 'No'
+          ALBS3LogsBucketName: "cf-templates-qpf3unpuo1hw-ap-southeast-2"
+          ALBS3BucketPathExpression: '/elasticloadbalancing/ap-southeast-1/*'
+          ALBLogsSourceName: "alb-logs-ap-southeast-1"
+          ALBLogsSourceCategory: "aws/observability/alb/logs"
+          CreateCloudTrailLogSource: 'Yes'
+          CreateCloudTrailBucket: 'Yes'
+          CloudTrailLogsBucketName: ""
+          CloudTrailBucketPathExpression: '/CloudTrail/ap-southeast-1/*'
+          CloudTrailLogsSourceName: "cloudtrail-logs-ap-southeast-1"
+          CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
+          CreateCloudWatchLogSource: 'No'
+          CloudWatchLogsSourceName: "cloudwatch-logs-ap-southeast-1"
+          CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
+          CreateKinesisFirehoseLogSource: 'No'
+          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-ap-southeast-1'
+          KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
+          CreateKinesisFirehoseMetricsSource: 'No'
+          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-ap-southeast-1'
+          KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
+        AutoEnableOptions:
+          ALBAutoEnableS3Logs: 'Yes'
+          ALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-2'
+          AutoSubscribeLogGroups: 'No'
+        AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
+          BucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-2'
+          AutoEnableResourceOptions: 'Existing'
+        sumoEC2MetricsAppStack:
+          Section2aInstallApp: 'No'
+        sumoAlbMetricsAppStack:
+          Section2aAccountAlias: 'test5env'
+          Section3aInstallApp: 'No'
+          Section4aCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
+          Section5aALBLogsAPIUrl: ''
+          Section5bALBLogsSourceName: '*alb-logs*'
+        sumoDynamoDBMetricsAppStack:
+          Section2aInstallApp: 'No'
+          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
+          Section3bCloudTrailSourceUpdated: 'No'
+        sumoRdsMetricsAppStack:
+          Section2aInstallApp: 'No'
+          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
+          Section3bCloudTrailSourceUpdated: 'No'
+        sumoApiGatewayMetricsAppStack:
+          Section2aInstallApp: 'No'
+          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
+          Section3bCloudTrailSourceUpdated: 'No'
+        RootCauseAppStack:
+          Section2aInstallApp: 'No'
+          Section2bCollectorName: ""
+          Section3aCreateAwsInventorySource: 'No'
+          Section3bAwsInventorySourceName: "inventory-ap-southeast-1"
+          Section3dInventorySourceCategory: "aws/observability/inventory"
+          Section4aCreateAwsXRaySource: 'Yes'
+          Section4bAwsXRaySourceName: "xray-ap-southeast-1"
+          Section4cXraySourceCategory: "aws/observability/xray"
+        sumoLambdaMetricsAppStack:
+          Section2aAccountAlias: 'test5env'
+          Section3aInstallApp: 'No'
+          Section4aCloudWatchExistingSourceAPIUrl: ''
+          Section5aCloudTrailLogsAPIUrl: ''
+          Section5bCloudTrailLogsSourceName: '*cloudtrail-logs*'
+          Section6aCloudWatchLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511499202'
+          Section6bCloudWatchLogsSourceName: ''
+        sumoECSMetricsAppStack:
+          Section2aInstallApp: 'No'
+          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
+          Section3bCloudTrailSourceUpdated: 'No'
+        sumoElasticCacheMetricsAppStack:
+          Section2aInstallApp: 'No'
+          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
+          Section3bCloudTrailSourceUpdated: 'No'
+        sumoNlbMetricsAppStack:
+          Section2aInstallApp: 'No'
+          Section3aNLBLogsSourceName: ''
+          Section3bNLBSourceUpdated: 'No'
