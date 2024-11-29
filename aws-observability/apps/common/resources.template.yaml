@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.10.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.11.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
@@ -98,6 +98,10 @@ Parameters:
   CloudWatchMetricSourceCategory:
     Type: String
     Description: "Provide a source Category for the CloudWatch Metrics Source."
+    Default: ""
+  MetricsSourceAWSTagFilters:
+    Type: String
+    Description: "Provide JSON format of the namespaces with it's tags values for Metrics Source."
     Default: ""
 
   CreateKinesisFirehoseMetricsSource:
@@ -487,7 +491,7 @@ Resources:
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.19.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.20.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -1138,6 +1142,7 @@ Resources:
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
         CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
         CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
+        MetricsSourceAWSTagFilters: !Ref MetricsSourceAWSTagFilters
         CreateFirstMetricsSource: !GetAtt Primerinvoke.ApplicationELB
         FirstMetricsSourceNamespace: "ApplicationELB"
         CreateSecondMetricsSource: !GetAtt Primerinvoke.ApiGateway
@@ -1165,6 +1170,7 @@ Resources:
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
         CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
         CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
+        MetricsSourceAWSTagFilters: !Ref MetricsSourceAWSTagFilters
         CreateFirstMetricsSource: !GetAtt Primerinvoke.ECS
         FirstMetricsSourceNamespace: "ECS"
         CreateSecondMetricsSource: !GetAtt Primerinvoke.ElastiCache
@@ -1193,6 +1199,7 @@ Resources:
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
         CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
         CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
+        MetricsSourceAWSTagFilters: !Ref MetricsSourceAWSTagFilters
         CreateFirstMetricsSource: !GetAtt Primerinvoke.SQS
         FirstMetricsSourceNamespace: "SQS"
         CreateSecondMetricsSource: !GetAtt Primerinvoke.SNS
@@ -1231,6 +1238,7 @@ Resources:
       SourceName: !Ref KinesisFirehoseMetricsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
       SourceCategory: !Ref KinesisFirehoseMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
