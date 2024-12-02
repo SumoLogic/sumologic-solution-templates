@@ -165,6 +165,7 @@ module "cloudwatch_metrics_source_module" {
     collector_id        = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
     limit_to_namespaces = [each.value]
     limit_to_regions    = [local.aws_region]
+    tag_filters         = [for tag_filter in var.cloudwatch_metrics_source_details.tag_filters : tag_filter if tag_filter.namespace == each.value]
     paused              = false
     scan_interval       = lookup(local.namespace_scan_interval,regex("^AWS/(\\w+)$", each.value)[0],"300000")
     sumo_account_id     = local.sumo_account_id
@@ -191,6 +192,7 @@ module "kinesis_firehose_for_metrics_source_module" {
     description         = var.cloudwatch_metrics_source_details.description
     collector_id        = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
     limit_to_namespaces = var.cloudwatch_metrics_source_details.limit_to_namespaces
+    tag_filters         = [for tag_filter in var.cloudwatch_metrics_source_details.tag_filters: tag_filter if contains(var.cloudwatch_metrics_source_details.limit_to_namespaces, tag_filter.namespace)]
     sumo_account_id     = local.sumo_account_id
     fields              = local.metrics_fields
     iam_details = {
