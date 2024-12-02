@@ -20,8 +20,8 @@ variable "environment" {
   validation {
     condition = contains([
       "US1",
-    "us1","US2","us2","AU","au","CA","ca","DE","de","EU","eu","FED","fed","JP","jp","IN","in"], var.environment)
-    error_message = "Argument \"environment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"de\",\"eu\",\"fed\",\"jp\",\"in\"."
+    "us1","US2","us2","AU","au","CA","ca","DE","de","EU","eu","FED","fed","JP","jp","IN","in", "KR", "kr"], var.environment)
+    error_message = "Argument \"environment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"de\",\"eu\",\"fed\",\"jp\",\"kr\",\"in\"."
   }
 }
 variable "folder" {

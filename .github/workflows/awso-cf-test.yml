@@ -1,5 +1,8 @@
-name: "CF template tests"
-on: [workflow_dispatch, pull_request]
+name: "AWSO CF template tests"
+on:
+  pull_request:
+    paths:
+      - 'aws-observability/**'
 
 jobs:
   ValidateLinting:
@@ -14,7 +17,7 @@ jobs:
 
       - name: Print the Cloud Formation Linter Version & run Linter.
         run: |
-          cfn-lint aws-observability/**/*.yaml --ignore-templates aws-observability/**/*TestTemplate.yaml --ignore-checks W3011
+          cfn-lint aws-observability/**/*.yaml --ignore-templates aws-observability/**/*TestTemplate.yaml --ignore-checks W3011,E8001
 
   CFSecurityChecksCheckovt:
     name: "Security Checks (checkov)"

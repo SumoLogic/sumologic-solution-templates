@@ -27,7 +27,7 @@ Required in the aws_slo.auto.tfvars file.
 |------|-------------|------|---------|:--------:|
 | <a name="input_access_id"></a> [access\_id](#access\_id) | Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key | `string` | n/a | yes |
 | <a name="input_access_key"></a> [access\_key](#access\_key) | Sumo Logic Access Key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key | `string` | n/a | yes |
-| <a name="input_environment"></a> [environment](#environment) | Enter au, ca, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security | `string` | n/a | yes |
+| <a name="input_environment"></a> [environment](#environment) | Enter au, ca, de, eu, jp, us2, in, kr, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security | `string` | n/a | yes |
 | <a name="input_folder"></a> [folder](#folder) | Indicates the SLO installation folder. | `string` | `"AWS"` | no |
 | <a name="input_aws_elb_data_filter"></a> [aws\_elb\_data\_filter](#aws\_elb\_data\_filter) | AWS ELB Data Filter. For eg: account=prod | `string` | `""` | yes |
 | <a name="input_time_zone"></a> [time\_zone](#time\_zone) | Time zone for the SLO compliance. Follow the format in the IANA Time Zone Database. | `string` | `"Asia/Kolkata"` | yes |

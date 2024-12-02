@@ -12,6 +12,21 @@ resource "sumologic_field" "environment" {
 }
 
 
+resource "sumologic_field" "pod_labels_environment" {
+  count      = length(local.all_components_values) > 0 && local.has_any_kubernetes_deployments ? 1 : 0
+  data_type  = "String"
+  field_name = "pod_labels_environment"
+  state      = "Enabled"
+}
+
+
+resource "sumologic_field" "pod_labels_component" {
+  count      = length(local.all_components_values) > 0 && local.has_any_kubernetes_deployments ? 1 : 0
+  data_type  = "String"
+  field_name = "pod_labels_component"
+  state      = "Enabled"
+}
+
 # ********************** Application Components App ********************** #
 locals {
   application_component_app_id          = "22aa033e-5a36-4a20-b07d-810096e18050"
