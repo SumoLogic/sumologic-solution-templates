@@ -1,0 +1,50 @@
+name: "App Components TF template tests"
+on:
+  pull_request:
+    paths:
+      - 'application-components/**'
+
+jobs:
+
+  ValidateTF:
+    runs-on: ubuntu-latest
+    name: "Validatation (format & syntax)"
+    defaults:
+      run:
+        working-directory: ./application-components
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout source code
+
+    - uses: hashicorp/setup-terraform@v3
+      name: Setup Terraform
+
+    - name: Terraform fmt
+      id: fmt
+      run: terraform fmt -check -recursive -diff
+      continue-on-error: true
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate
+
+  TFSecurityChecks:
+    name: "Security Checks (checkov)"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: bridgecrewio/checkov-action@master
+        with:
+          directory: 'application-components/'
+          quiet: true
+          framework: terraform
+          output_format: cli
+          output_bc_ids: false
+          download_external_modules: true
+          skip_check: CKV_TF_1,CKV_TF_2
