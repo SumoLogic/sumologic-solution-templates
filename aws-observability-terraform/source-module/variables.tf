@@ -369,6 +369,11 @@ variable "cloudwatch_metrics_source_details" {
     source_category     = string
     description         = string
     limit_to_namespaces = list(string)
+    tag_filters = list(object({
+      type      = string
+      namespace = string
+      tags      = list(string)
+    }))
     fields              = map(string)
     bucket_details = object({
       create_bucket        = bool
@@ -386,6 +391,7 @@ variable "cloudwatch_metrics_source_details" {
     source_category     = "aws/observability/cloudwatch/metrics"
     description         = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch metrics."
     limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/EC2"]
+    tag_filters         = []
     fields              = {}
     bucket_details = {
       create_bucket        = true
