@@ -119,6 +119,17 @@ Parameters:
     Type: String
     Description: "Provide the Namespace with which Source need to be created."
     Default: ''
+  CreateCustomMetricsSource:
+    Type: String
+    Description: "Select Yes if you would like to create the Metric Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CustomMetricsSourceNamespace:
+    Type: String
+    Description: "Provide the Namespace with which Source need to be created."
+    Default: ''
 
 Mappings:
   # Update the Namespaces mapping whenever CF starts supporting More Namespaces
@@ -155,6 +166,7 @@ Conditions:
   install_third_cw_source: !Equals [!Ref CreateThirdMetricsSource, 'Yes']
   install_fourth_cw_source: !Equals [!Ref CreateFourthMetricsSource, 'Yes']
   install_fifth_cw_source: !Equals [!Ref CreateFifthMetricsSource, 'Yes']
+  install_custom_cw_source: !Equals [!Ref CreateCustomMetricsSource, 'Yes']
 
 Resources:
 
@@ -253,6 +265,27 @@ Resources:
       Namespaces: !Split [ "," , !Sub "AWS/${FifthMetricsSourceNamespace}" ]
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${FifthMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref FifthMetricsSourceNamespace, ScanInterval]
+      SourceCategory: !Ref CloudWatchMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
+      CollectorId: !Ref SumoLogicCollectorId
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      RoleArn: !Ref SumoLogicSourceRole
+      Fields:
+        account: !Ref AccountAlias
+
+  CustomCloudwatchMetricsSource:
+    Type: Custom::AWSSource
+    Condition: install_custom_cw_source
+    Properties:
+      ServiceToken: !Ref LambdaARN
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceType: AwsCloudWatch
+      Namespaces: !Split [ "," , !Sub "${CustomMetricsSourceNamespace}" ]
+      SourceName: !Sub "${CloudWatchMetricsSourceName}-CustomMetrics"
+      ScanInterval: "300000"
       SourceCategory: !Ref CloudWatchMetricSourceCategory
       AWSTagFilters: !Ref MetricsSourceAWSTagFilters
       CollectorId: !Ref SumoLogicCollectorId
