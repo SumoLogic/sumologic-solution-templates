@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.10.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
+Description: "Version - v2.11.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -31,6 +31,7 @@ Metadata:
           - Section4aCreateMetricsSourceOptions
           - Section4bMetricsNameSpaces
           - Section4cCloudWatchExistingSourceAPIUrl
+          - Section4dAWSMetricsTagFilters
 
       - Label:
           default: "5. Sumo Logic AWS ALB Log Source"
@@ -106,6 +107,8 @@ Metadata:
         default: "Sumo Logic AWS Metrics Namespaces"
       Section4cCloudWatchExistingSourceAPIUrl:
         default: "Existing Sumo Logic Metrics Source API URL"
+      Section4dAWSMetricsTagFilters:
+        default: "Sumo Logic AWS Metrics Tag Filters"
 
       Section5aAutoEnableS3LogsALBResourcesOptions:
         default: "Enable ALB Access logging"
@@ -243,6 +246,11 @@ Parameters:
     Type: String
     Description: "Required when already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
+  Section4dAWSMetricsTagFilters:
+    Type: String
+    AllowedPattern: '^\{.*\}$'
+    Description: "Provide JSON format of the namespaces with it's tags values to add filters to your metrics. Use semicolons to separate multiple values for the same tag key. AWS Tag Filters will be added to the Source. For JSON format sample, visit https://help.sumologic.com/docs/observability/aws/deploy-use-aws-observability/deploy-with-aws-cloudformation/#step-5-sumo-logic-aws-cloudwatch-metrics-sources"
+    Default: "{}"
 
   Section5aAutoEnableS3LogsALBResourcesOptions:
     Type: String
@@ -635,30 +643,31 @@ Resources:
       scanInterval: 60
       ToUpdate: 
         Fn::Base64: !Sub
-          - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}-${w}"
+          - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}-${w}-${x}"
           - a: !Ref Section2aAccountAlias
             b: !Ref Section3aInstallObservabilityApps
             c: !Ref Section4aCreateMetricsSourceOptions
             d: !Ref Section4bMetricsNameSpaces
             e: !Ref Section4cCloudWatchExistingSourceAPIUrl
-            f: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
-            g: !Ref Section5bALBCreateLogSource
-            h: !Ref Section5cALBLogsSourceUrl
-            i: !Ref Section5dALBS3LogsBucketName
-            j: !Ref Section6aCreateCloudTrailLogSource
-            k: !Ref Section6bCloudTrailLogsSourceUrl
-            l: !Ref Section6cCloudTrailLogsBucketName
-            m: !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions
-            n: !Ref Section7bLambdaCloudWatchLogsSourceUrl
-            o: !Ref Section7cAutoSubscribeLogGroupsOptions
-            p: !Ref Section7dAutoSubscribeLogGroupPattern
-            q: !Ref Section7eAutoSubscribeLogGroupByTags
-            r: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
-            s: !Ref Section9bELBCreateLogSource
-            t: !Ref Section9cELBLogsSourceUrl
-            u: !Ref Section9dELBS3LogsBucketName
-            v: !Ref Section10aAppInstallLocation
-            w: !FindInMap [CommonData, NestedTemplate, Version]
+            f: !Ref Section4dAWSMetricsTagFilters
+            g: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
+            h: !Ref Section5bALBCreateLogSource
+            i: !Ref Section5cALBLogsSourceUrl
+            j: !Ref Section5dALBS3LogsBucketName
+            k: !Ref Section6aCreateCloudTrailLogSource
+            l: !Ref Section6bCloudTrailLogsSourceUrl
+            m: !Ref Section6cCloudTrailLogsBucketName
+            n: !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions
+            o: !Ref Section7bLambdaCloudWatchLogsSourceUrl
+            p: !Ref Section7cAutoSubscribeLogGroupsOptions
+            q: !Ref Section7dAutoSubscribeLogGroupPattern
+            r: !Ref Section7eAutoSubscribeLogGroupByTags
+            s: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
+            t: !Ref Section9bELBCreateLogSource
+            u: !Ref Section9cELBLogsSourceUrl
+            v: !Ref Section9dELBS3LogsBucketName
+            w: !Ref Section10aAppInstallLocation
+            x: !FindInMap [CommonData, NestedTemplate, Version]
 
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
@@ -682,6 +691,7 @@ Resources:
         CloudWatchMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
         CloudWatchMetricsNameSpaces: !Ref Section4bMetricsNameSpaces
         CloudWatchMetricSourceCategory: !FindInMap [CommonData, CollectorDetails, CloudWatchMetricSourceCategory]
+        MetricsSourceAWSTagFilters: !Ref Section4dAWSMetricsTagFilters
         ScanInterval: 300000
         CreateKinesisFirehoseMetricsSource: !If [ create_kf_metrics_source, "Yes", "No" ]
         KinesisFirehoseMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
