@@ -384,6 +384,27 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
+  AlbCloudTrailLogsFieldExtractionRule:
+    Type: Custom::SumoLogicFieldExtractionRule
+    Condition: create_fer
+    Properties:
+      ServiceToken: !Ref Section6aParentStackLambdaARN
+      RemoveOnDeleteStack: false
+      FieldExtractionRuleName: "AwsObservabilityALBCloudTrailLogsFER"
+      FieldExtractionRuleScope: "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2015-12-01\""
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "apiVersion" as event_source, region, accountid, loadbalancer, loadbalancertype, loadbalancerarn, api_version nodrop 
+                                            | "" as namespace
+                                            | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01" 
+                                            | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype, loadbalancer, f1 nodrop
+                                            | if(loadbalancertype matches "network", "aws/nlb", if(balancertype matches "net", "aws/nlb", namespace)) as namespace
+                                            | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype matches "app", "aws/applicationelb", namespace)) as namespace
+                                            | where namespace="aws/applicationelb" or isEmpty(namespace)
+                                            | toLowerCase(loadbalancer) as loadbalancer  
+                                            | fields region, namespace, loadbalancer, accountid'
+      FieldExtractionRuleParseEnabled: true
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
 Outputs:
   ExistingMetricSourceName:
     Description: "Existing CloudWatch Metrics Source Name"
