@@ -381,6 +381,23 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
+  ClbCloudTrailLogsFieldExtractionRule:
+    Type: Custom::SumoLogicFieldExtractionRule
+    Condition: create_fer
+    Properties:
+      ServiceToken: !Ref Section6aParentStackLambdaARN
+      RemoveOnDeleteStack: false
+      FieldExtractionRuleName: "AwsObservabilityCLBCloudTrailLogsFER"
+      FieldExtractionRuleScope: "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2012-06-01\""
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.loadBalancerName" as event_source, region, accountid, loadbalancername nodrop  
+                                            | where event_source = "elasticloadbalancing.amazonaws.com"
+                                            | toLowerCase(loadbalancername) as loadbalancername 
+                                            | "aws/elb" as namespace 
+                                            | fields region, namespace, loadbalancername, accountid'
+      FieldExtractionRuleParseEnabled: true
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
 
 Outputs:
   ExistingLogSourceName:
