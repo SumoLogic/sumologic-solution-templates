@@ -2214,10 +2214,10 @@
                     "namespace": [
                         "aws/rds"
                     ],
-                    "region": [
+                    "0b4d0d38df6d35b3906157b6ffd2f602": [
                         "*"
                     ],
-                    "0b4d0d38df6d35b3906157b6ffd2f602": [
+                    "region": [
                         "*"
                     ],
                     "account": [
@@ -2275,11 +2275,11 @@
                     },
                     {
                         "key": "panelPANE-CC660D25B034AA44",
-                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":27}"
+                        "structure": "{\"height\":6,\"width\":9,\"x\":6,\"y\":27}"
                     },
                     {
                         "key": "panelPANE-469F20CF9413EA4E",
-                        "structure": "{\"height\":6,\"width\":4,\"x\":6,\"y\":27}"
+                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":33}"
                     },
                     {
                         "key": "panelPANE-B0B0F243BB40184F",
@@ -2287,11 +2287,19 @@
                     },
                     {
                         "key": "panelPANE-AD8F9E7BB14C484D",
-                        "structure": "{\"height\":6,\"width\":5,\"x\":10,\"y\":27}"
+                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":27}"
                     },
                     {
                         "key": "panelPANE-F529A82EA659C844",
-                        "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":33}"
+                        "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":39}"
+                    },
+                    {
+                        "key": "panel30BDB1C4ACBA684A",
+                        "structure": "{\"height\":6,\"width\":9,\"x\":6,\"y\":33}"
+                    },
+                    {
+                        "key": "panel209708ACA1D8AA48",
+                        "structure": "{\"height\":6,\"width\":9,\"x\":15,\"y\":33}"
                     }
                 ]
             },
@@ -2306,7 +2314,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\") and isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isnull(latitude)",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\") and isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\"\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isnull(latitude)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2333,7 +2341,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\") and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isnull(latitude)",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\") and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\"\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude from geo://location on ip = src_ip\n| where !isnull(latitude)",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2360,7 +2368,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop \n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count by event_status\n| sort by _count, event_status asc",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop \n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count by event_status\n| sort by _count, event_status asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2387,7 +2395,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| count as Frequency by error_code, error_message\n| top 10 error_code, error_message by Frequency, error_code asc, error_message asc",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| count as Frequency by error_code, error_message\n| top 10 error_code, error_message by Frequency, error_code asc, error_message asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2414,7 +2422,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| timeslice 15m\n| count by _timeslice, event_status\n| fillmissing timeslice(15m), values (\"Success\", \"Failure\") in event_status\n| transpose row _timeslice column event_status",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| timeslice 15m\n| count by _timeslice, event_status\n| fillmissing timeslice(15m), values (\"Success\", \"Failure\") in event_status\n| transpose row _timeslice column event_status",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2441,7 +2449,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(userName), user, userName) as user\n| count as event_count by event_name\n| sort by event_count, event_name asc",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| if (isEmpty(userName), user, userName) as user\n| count as event_count by event_name\n| sort by event_count, event_name asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2468,7 +2476,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| timeslice 1s\n| count as Frequency by _timeslice, event_name, error_code, error_message, src_ip, user, type, requestID, user_agent, region, accountId, dBClusterIdentifier, dBInstanceIdentifier\n| sort by _timeslice\n| limit 100",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !isEmpty(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| timeslice 1s\n| count as Frequency by _timeslice, event_name, error_code, error_message, src_ip, user, type, requestID, user_agent, region, accountId, dBClusterIdentifier, dBInstanceIdentifier\n| sort by _timeslice\n| limit 100",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2495,7 +2503,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop \n| where event_source = \"rds.amazonaws.com\" and isBlank(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| count as event_count by event_name\n| sort by event_count, event_name asc",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop \n| where event_source = \"rds.amazonaws.com\" and isBlank(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| count as event_count by event_name\n| sort by event_count, event_name asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2522,7 +2530,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and isBlank(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| timeslice 1s\n| count as Frequency by _timeslice, event_name, src_ip, user, type, requestId, user_agent, region, accountId, dBClusterIdentifier, dBInstanceIdentifier\n| sort by _timeslice\n| limit 100",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and isBlank(error_code)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| timeslice 1s\n| count as Frequency by _timeslice, event_name, src_ip, user, type, requestId, user_agent, region, accountId, dBClusterIdentifier, dBInstanceIdentifier\n| sort by _timeslice\n| limit 100",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2549,7 +2557,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop \n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by type, user\n| topk(10, Frequency) by type | fields -_rank",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop \n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\"\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by type, user\n| topk(10, Frequency) by type | fields -_rank",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2576,7 +2584,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" engine account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\"\n| json \"requestParameters.engine\", \"responseElements.engine\" as engine1, engine2 nodrop\n| if (!isEmpty(engine1), engine1, engine2) as engine\n| where !isEmpty(engine)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by engine\n| sort by Frequency, engine asc",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" engine account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\"\n| json \"requestParameters.engine\", \"responseElements.engine\" as engine1, engine2 nodrop\n| if (!isEmpty(engine1), engine1, engine2) as engine\n| where !isEmpty(engine)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\"\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count as Frequency by engine\n| sort by Frequency, engine asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2603,7 +2611,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| timeslice 15m\n| count as Frequency by _timeslice, event_name\n| transpose row _timeslice column event_name",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| timeslice 15m\n| count as Frequency by _timeslice, event_name\n| transpose row _timeslice column event_name",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2630,7 +2638,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop \n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count by user, event_name | sort by _count, user asc, event_name asc",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop \n| where event_source = \"rds.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| if (isEmpty(userName), user, userName) as user\n| count by user, event_name | sort by _count, user asc, event_name asc",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2657,7 +2665,61 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| count by src_ip, event_name, user, user_agent\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| where  type=\"ip_address\" and malicious_confidence = \"high\"\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sort by _count\n| fields src_ip, event_name, user, user_agent, type, actor, malicious_confidence",
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop  | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(error_code), \"Success\", \"Failure\") as event_status\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| count by src_ip, event_name, user, user_agent\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip\n| where  type=\"ip_address\" and malicious_confidence = \"high\"\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sort by _count\n| fields src_ip, event_name, user, user_agent, type, actor, malicious_confidence",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel30BDB1C4ACBA684A",
+                    "title": "Rebooted DB Instance or Cluster",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" engine account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and event_name = \"RebootDBInstance\"\n| json \"requestParameters.engine\", \"responseElements.engine\" as engine1, engine2 nodrop\n| if (!isEmpty(engine1), engine1, engine2) as engine\n| where !isEmpty(engine)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| timeslice 1s\n| count as Frequency by _timeslice, dbidentifier\n| sort by _timeslice, dbidentifier\n| limit 100 ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel209708ACA1D8AA48",
+                    "title": "Stopped DB Instance or Cluster",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\"\\\"eventsource\\\":\\\"rds.amazonaws.com\\\"\" engine account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventTime\", \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"errorCode\", \"errorMessage\",  \"requestID\", \"sourceIPAddress\" as eventTime, event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, error_code, error_message, requestID, src_ip nodrop\n| where event_source = \"rds.amazonaws.com\" and event_name = \"StopDBInstance\"\n| json \"requestParameters.engine\", \"responseElements.engine\" as engine1, engine2 nodrop\n| if (!isEmpty(engine1), engine1, engine2) as engine\n| where !isEmpty(engine)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId, arn, username, type nodrop\n| parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"dBInstanceIdentifier\", \"resourceName\", \"dBClusterIdentifier\" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop\n| json field=responseElements \"dBInstanceIdentifier\" as dBInstanceIdentifier3 nodrop | json field=responseElements \"dBClusterIdentifier\" as dBClusterIdentifier3 nodrop\n| parse field=resourceName \"arn:aws:rds:*:db:*\" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName \"arn:aws:rds:*:cluster:*\" as f1, dBClusterIdentifier2 nodrop\n| if (resourceName matches \"arn:aws:rds:*:db:*\", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier\n| if (resourceName matches \"arn:aws:rds:*:cluster:*\", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier\n| if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier | tolowercase(dbidentifier) as dbidentifier\n| where dbidentifier matches \"{{dbidentifier}}\" or isBlank(dbidentifier)\n| timeslice 1s\n| count as Frequency by _timeslice, dbidentifier\n| sort by _timeslice, dbidentifier\n| limit 100 ",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -2715,6 +2777,21 @@
                         "variableSourceType": "MetadataVariableSourceDefinition",
                         "filter": "account={{account}} region={{region}} namespace=aws/rds",
                         "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "dbidentifier",
+                    "displayName": "dbidentifier",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "dbidentifier"
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": true,
@@ -11495,7 +11572,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11522,7 +11599,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11549,7 +11626,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11576,7 +11653,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11603,7 +11680,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11630,7 +11707,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11657,7 +11734,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11684,7 +11761,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11885,20 +11962,13 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
-                    "timeRange": {
-                        "type": "BeginBoundedTimeRange",
-                        "from": {
-                            "type": "RelativeTimeRangeBoundary",
-                            "relativeTime": "-1d"
-                        },
-                        "to": null
-                    },
+                    "timeRange": null,
                     "coloringRules": null,
                     "linkedDashboards": []
                 },
@@ -11919,7 +11989,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -11946,20 +12016,13 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
-                    "timeRange": {
-                        "type": "BeginBoundedTimeRange",
-                        "from": {
-                            "type": "RelativeTimeRangeBoundary",
-                            "relativeTime": "-1d"
-                        },
-                        "to": null
-                    },
+                    "timeRange": null,
                     "coloringRules": null,
                     "linkedDashboards": []
                 },
@@ -11980,20 +12043,13 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
-                    "timeRange": {
-                        "type": "BeginBoundedTimeRange",
-                        "from": {
-                            "type": "RelativeTimeRangeBoundary",
-                            "relativeTime": "-1d"
-                        },
-                        "to": null
-                    },
+                    "timeRange": null,
                     "coloringRules": null,
                     "linkedDashboards": []
                 },
@@ -12014,7 +12070,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -12041,20 +12097,13 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
-                    "timeRange": {
-                        "type": "BeginBoundedTimeRange",
-                        "from": {
-                            "type": "RelativeTimeRangeBoundary",
-                            "relativeTime": "-1d"
-                        },
-                        "to": null
-                    },
+                    "timeRange": null,
                     "coloringRules": null,
                     "linkedDashboards": []
                 },
@@ -12075,20 +12124,13 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
-                    "timeRange": {
-                        "type": "BeginBoundedTimeRange",
-                        "from": {
-                            "type": "RelativeTimeRangeBoundary",
-                            "relativeTime": "-1d"
-                        },
-                        "to": null
-                    },
+                    "timeRange": null,
                     "coloringRules": null,
                     "linkedDashboards": []
                 },
@@ -12109,7 +12151,7 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
@@ -12136,20 +12178,13 @@
                             "metricsQueryData": null,
                             "tracesQueryData": null,
                             "spansQueryData": null,
-                            "parseMode": "Auto",
+                            "parseMode": "Manual",
                             "timeSource": "Message",
                             "outputCardinalityLimit": 1000
                         }
                     ],
                     "description": "",
-                    "timeRange": {
-                        "type": "BeginBoundedTimeRange",
-                        "from": {
-                            "type": "RelativeTimeRangeBoundary",
-                            "relativeTime": "-1d"
-                        },
-                        "to": null
-                    },
+                    "timeRange": null,
                     "coloringRules": null,
                     "linkedDashboards": []
                 }
@@ -12197,6 +12232,1238 @@
                     },
                     "allowMultiSelect": false,
                     "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "dbidentifier",
+                    "displayName": "dbidentifier",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "dbidentifier"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "20. Amazon RDS - Oracle Logs - Alert Logs Analysis",
+            "description": "The Amazon RDS - Oracle Logs - Alert Logs Analysis dashboard provides details on Oracle errors, including counts of various error types, ORA messages, Oracle instance states, and other data derived from the Oracle Alert log.",
+            "title": "20. Amazon RDS - Oracle Logs - Alert Logs Analysis",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "ffe0d04967abc0c87d695d4a7f2700e0": [
+                        "*"
+                    ],
+                    "namespace": [
+                        "aws/rds"
+                    ],
+                    "0b4d0d38df6d35b3906157b6ffd2f602": [
+                        "*"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "f049c8a107a343b5188930219d3063f5": [
+                        "*"
+                    ],
+                    "dbidentifier": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel58491646AE36784B",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panel48893B4FBF128A40",
+                        "structure": "{\"height\":8,\"width\":16,\"x\":8,\"y\":6}"
+                    },
+                    {
+                        "key": "panel34187D19AF2DF94C",
+                        "structure": "{\"height\":8,\"width\":16,\"x\":8,\"y\":14}"
+                    },
+                    {
+                        "key": "panelFA3CEBDEA0DDAA4C",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":14}"
+                    },
+                    {
+                        "key": "panel1C5ACABF8E90E846",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":22}"
+                    },
+                    {
+                        "key": "panelA387BC04AEAE7A4F",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":22}"
+                    },
+                    {
+                        "key": "panel378F2A469B369B42",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":22}"
+                    },
+                    {
+                        "key": "panel263D97759E5C1942",
+                        "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":30}"
+                    },
+                    {
+                        "key": "panel47F26B7F8A638B43",
+                        "structure": "{\"height\":6,\"width\":4,\"x\":20,\"y\":0}"
+                    },
+                    {
+                        "key": "panel20974C0EBE703A4A",
+                        "structure": "{\"height\":6,\"width\":4,\"x\":16,\"y\":0}"
+                    },
+                    {
+                        "key": "panelFC5E4BB4A770CB42",
+                        "structure": "{\"height\":6,\"width\":4,\"x\":8,\"y\":0}"
+                    },
+                    {
+                        "key": "panel7C05075E9F41AA49",
+                        "structure": "{\"height\":6,\"width\":4,\"x\":4,\"y\":0}"
+                    },
+                    {
+                        "key": "panelFEF01260854FC84C",
+                        "structure": "{\"height\":6,\"width\":4,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel9210CAD08472B945",
+                        "structure": "{\"height\":6,\"width\":4,\"x\":12,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel58491646AE36784B",
+                    "title": "Top ORA Messages",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"svp\":{},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*alert ORA-*\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message \n| parse regex field=message \"(?<oraerr>ORA-\\d{5}): (?<oramsg>.*)\" multi\n| timeslice 1s\n| count as eventCount by oraerr, _timeslice\n| count by oraerr\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel48893B4FBF128A40",
+                    "title": "ORA Messages Over Time",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"errorCount\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*alert ORA-*\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message \n| parse regex field=message \"(?<oraerr>ORA-\\d{5}): (?<oramsg>.*)\" multi\n| timeslice 1s\n| count as eventCount by oraerr, _timeslice\n| transpose row _timeslice column oraerr",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel34187D19AF2DF94C",
+                    "title": "Top 10 TNS Errors",
+                    "visualSettings": "{\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"svp\":{},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*alert TNS-*\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message \n| parse regex field=message \"(?<TNSerr>TNS-\\d{5}): (?<tnsmsg>.*)\" multi\n| count as Frequency by tnserr, tnsmsg \n| sort by Frequency, tnserr asc\n| limit 10",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelFA3CEBDEA0DDAA4C",
+                    "title": "Top TNS Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"svp\":{},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*alert TNS-*\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message \n| parse regex field=message \"(?<TNSerr>TNS-\\d{5}): (?<tnsmsg>.*)\" multi\n| timeslice 1s\n| count as eventCount by tnserr, tnsmsg \n| count by tnserr\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel1C5ACABF8E90E846",
+                    "title": "Failures, Warnings and Errors by Instance Source",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"area\",\"displayType\":\"default\"},\"series\":{},\"legend\":{\"enabled\":false},\"axes\":{\"axisY\":{\"unit\":{\"value\":\" \",\"isCustom\":true},\"title\":\"errorCount\"},\"axisX\":{}},\"color\":{\"family\":\"Categorical Light\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*alert (fail* or warn* or error*)\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| timeslice by 1h\n| count as eventCount by _source, _timeslice \n| transpose row _timeslice column _source",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA387BC04AEAE7A4F",
+                    "title": "Archival Errors by Instance",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\"},\"series\":{},\"overrides\":[],\"axes\":{\"axisX\":{},\"axisY\":{\"title\":\"errorCount\"}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*alert \"Archival Error\"\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message  \"ORACLE Instance * - Archival Error\" as instance \n| timeslice by 1h\n| count as eventCount by instance, _timeslice\n| transpose row _timeslice column instance",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel378F2A469B369B42",
+                    "title": "Log Switch Activity By Hosts",
+                    "visualSettings": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"area\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*alert\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"(?<lgwr_switch>LGWR switch)\"\n| timeslice 1s\n| count as eventCount by _timeslice",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel263D97759E5C1942",
+                    "title": "Unable To Extend Tablespace Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"table\",\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":25,\"decimals\":0},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*alert unable to extend by tablespace\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message \n| parse regex field=message \"(?<oraerr>ORA-\\d{4,5}): (?<oramsg>.*)\" multi\n| parse regex field=oramsg \"unable to extend (?<object>[\\S\\s]+?)\\s+by \\d+ in tablespace\\s+(?<tablespace>\\S+)\"\n| timeslice 1s\n| count as Frequency by _timeslice, oraerr, oramsg, dbidentifier, object, tablespace\n| sort by _timeslice\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel47F26B7F8A638B43",
+                    "title": "Fatal NI Connect Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Errors\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":1,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*alert\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"Fatal NI connect error (?<oraerr>\\d+?)(?:,|\\.)\"\n| count as eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel20974C0EBE703A4A",
+                    "title": "Internal Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Errors\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":1,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*alert (\"ORA-00600\" or \"ORA-07445\") \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"(?<oraerr>ORA-\\d{5}): (?<oramsg>.*)\" multi\n| where oraerr in (\"ORA-00600\", \"ORA-07445\")\n| count as eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelFC5E4BB4A770CB42",
+                    "title": "Database Crash Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Errors\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":1,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*alert (\"ORA-00603\" or \"ORA-00449\" or \"ORA-00471\" or \"ORA-01092\") \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"(?<oraerr>ORA-\\d{5}): (?<oramsg>.*)\" multi\n| where oraerr in (\"ORA-00603\", \"ORA-00449\", \"ORA-00471\", \"ORA-01092\")\n| count as eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel7C05075E9F41AA49",
+                    "title": "Block Corruption Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Errors\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":1,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*alert\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"(?<oraerr>ORA-\\d{5}): (?<oramsg>.*)\" multi\n| where oraerr = \"ORA-01578\"\n| count as eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelFEF01260854FC84C",
+                    "title": "Dead Lock Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Errors\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":1,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*alert\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"(?<oraerr>ORA-\\d{5}): (?<oramsg>.*)\" multi\n| where oraerr = \"ORA-00060\"\n| count as eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9210CAD08472B945",
+                    "title": "Archival Log Creation Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Errors\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":1,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*alert \"ORA-00270\"\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"(?<oraerr>ORA-\\d{5}): (?<oramsg>.*)\" multi\n| where oraerr = \"ORA-00270\"\n| count as eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region=*",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/rds",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/rds",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "dbidentifier",
+                    "displayName": "dbidentifier",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "dbidentifier"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "21. Amazon RDS - Oracle Logs - Audit Logs Analysis",
+            "description": "The Amazon RDS - Oracle Logs - Audit Logs Analysis dashboard provides details on syslog audit trail, including successful and failed activities, and top usage by client, database user, and privileges used.",
+            "title": "21. Amazon RDS - Oracle Logs - Audit Logs Analysis",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "ffe0d04967abc0c87d695d4a7f2700e0": [
+                        "*"
+                    ],
+                    "namespace": [
+                        "aws/rds"
+                    ],
+                    "0b4d0d38df6d35b3906157b6ffd2f602": [
+                        "*"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "f049c8a107a343b5188930219d3063f5": [
+                        "*"
+                    ],
+                    "dbidentifier": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelAFA7A65EA57C9A43",
+                        "structure": "{\"height\":9,\"width\":10,\"x\":0,\"y\":9}"
+                    },
+                    {
+                        "key": "panel6ED4F9518AE1CB42",
+                        "structure": "{\"height\":9,\"width\":14,\"x\":10,\"y\":0}"
+                    },
+                    {
+                        "key": "panel28558F1E8AA84B4A",
+                        "structure": "{\"height\":9,\"width\":10,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelF3320885872F1A44",
+                        "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":18}"
+                    },
+                    {
+                        "key": "panelA3851B0BA3CB4A40",
+                        "structure": "{\"height\":9,\"width\":14,\"x\":10,\"y\":9}"
+                    },
+                    {
+                        "key": "panel6A2949C18DC6684D",
+                        "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":18}"
+                    },
+                    {
+                        "key": "panelE2CC446A902A5B4D",
+                        "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":18}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelAFA7A65EA57C9A43",
+                    "title": "Status Trend",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"legend\":{\"enabled\":true},\"axes\":{\"axisX\":{\"title\":\"\"},\"axisY\":{\"title\":\" \"}},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*audit LENGTH\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"\\nLENGTH : '*'\\nACTION :[*] '*'\\nDATABASE USER:[*] '*'\\nPRIVILEGE :[*] '*'\\nCLIENT USER:[*] '*'\\nCLIENT TERMINAL:[*] '*'\\nSTATUS:[*] '*'\\nDBID:[*] '*'\" as totallength, actionlength, Action, databaseuserlength, databaseUser, privilegelength, privilege, clientuserlength, clientUser, clientterminallength, clientTerminal, statuslength, status, dbidlength, dbid\n| if (status=\"0\", \"Sucess\", \"Failure\") as ActivityStatus\n| timeslice 1h\n| count as eventCount by _timeslice, ActivityStatus\n| transpose row _timeslice column ActivityStatus",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel6ED4F9518AE1CB42",
+                    "title": "Recent 20 Failure Activities",
+                    "visualSettings": "{\"general\":{\"mode\":\"table\",\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":25,\"decimals\":5},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*audit LENGTH\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"\\nLENGTH : '*'\\nACTION :[*] '*'\\nDATABASE USER:[*] '*'\\nPRIVILEGE :[*] '*'\\nCLIENT USER:[*] '*'\\nCLIENT TERMINAL:[*] '*'\\nSTATUS:[*] '*'\\nDBID:[*] '*'\" as totallength, actionlength, Action, databaseuserlength, databaseUser, privilegelength, privilege, clientuserlength, clientUser, clientterminallength, clientTerminal, statuslength, status, dbidlength, dbid\n| where status!=\"0\"\n| timeslice 1s\n| count as eventCount by _timeslice, Action, databaseUser, privilege, clientUser, clientTerminal, status, dbid\n| sort by _timeslice | fields -eventCount\n| limit 20",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel28558F1E8AA84B4A",
+                    "title": "Failure Status Trend",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"legend\":{\"enabled\":true},\"color\":{\"family\":\"Categorical Light\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*audit LENGTH\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"\\nLENGTH : '*'\\nACTION :[*] '*'\\nDATABASE USER:[*] '*'\\nPRIVILEGE :[*] '*'\\nCLIENT USER:[*] '*'\\nCLIENT TERMINAL:[*] '*'\\nSTATUS:[*] '*'\\nDBID:[*] '*'\" as totallength, actionlength, Action, databaseuserlength, databaseUser, privilegelength, privilege, clientuserlength, clientUser, clientterminallength, clientTerminal, statuslength, status, dbidlength, dbid\n| where status!=\"0\"\n| timeslice 1h\n| count as eventCount by _timeslice, status\n| transpose row _timeslice column status",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelF3320885872F1A44",
+                    "title": "Top 10 Client Users",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*audit LENGTH\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"\\nLENGTH : '*'\\nACTION :[*] '*'\\nDATABASE USER:[*] '*'\\nPRIVILEGE :[*] '*'\\nCLIENT USER:[*] '*'\\nCLIENT TERMINAL:[*] '*'\\nSTATUS:[*] '*'\\nDBID:[*] '*'\" as totallength, actionlength, Action, databaseuserlength, databaseUser, privilegelength, privilege, clientuserlength, clientUser, clientterminallength, clientTerminal, statuslength, status, dbidlength, dbid\n| where clientUser != \"\"\n| count as eventCount by clientUser\n| top 10 clientUser by eventCount, clientUser asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA3851B0BA3CB4A40",
+                    "title": "Recent 20 Successful Activities",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*audit LENGTH\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"\\nLENGTH : '*'\\nACTION :[*] '*'\\nDATABASE USER:[*] '*'\\nPRIVILEGE :[*] '*'\\nCLIENT USER:[*] '*'\\nCLIENT TERMINAL:[*] '*'\\nSTATUS:[*] '*'\\nDBID:[*] '*'\" as totallength, actionlength, Action, databaseuserlength, databaseUser, privilegelength, privilege, clientuserlength, clientUser, clientterminallength, clientTerminal, statuslength, status, dbidlength, dbid\n| where status=\"0\"\n| timeslice 1s\n| count as eventCount by _timeslice, Action, databaseUser, privilege, clientUser, clientTerminal, status, dbid\n| sort by _timeslice | fields -eventCount\n| limit 20",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel6A2949C18DC6684D",
+                    "title": "Top 10 Database Users",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*audit LENGTH\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"\\nLENGTH : '*'\\nACTION :[*] '*'\\nDATABASE USER:[*] '*'\\nPRIVILEGE :[*] '*'\\nCLIENT USER:[*] '*'\\nCLIENT TERMINAL:[*] '*'\\nSTATUS:[*] '*'\\nDBID:[*] '*'\" as totallength, actionlength, Action, databaseuserlength, databaseUser, privilegelength, privilege, clientuserlength, clientUser, clientterminallength, clientTerminal, statuslength, status, dbidlength, dbid\n| count as eventCount by databaseUser\n| top 10 databaseUser by eventCount, databaseUser asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelE2CC446A902A5B4D",
+                    "title": "Top 10 Privileges Used",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*audit LENGTH \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"\\nLENGTH : '*'\\nACTION :[*] '*'\\nDATABASE USER:[*] '*'\\nPRIVILEGE :[*] '*'\\nCLIENT USER:[*] '*'\\nCLIENT TERMINAL:[*] '*'\\nSTATUS:[*] '*'\\nDBID:[*] '*'\" as totallength, actionlength, Action, databaseuserlength, databaseUser, privilegelength, privilege, clientuserlength, clientUser, clientterminallength, clientTerminal, statuslength, status, dbidlength, dbid\n| count as eventCount by privilege\n| top 10 privilege by eventCount, privilege asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region=*",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/rds",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/rds",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "dbidentifier",
+                    "displayName": "dbidentifier",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "dbidentifier"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "22. Amazon RDS - Oracle Logs - Listener Troubleshooting",
+            "description": "The Amazon RDS - Oracle Logs - Listener Troubleshooting dashboard provides insights into Oracle listener process activity, including database connections by host and application, connection failures, command execution statuses and trends, and additional data from the Oracle Listener log.",
+            "title": "22. Amazon RDS - Oracle Logs - Listener Troubleshooting",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "ffe0d04967abc0c87d695d4a7f2700e0": [
+                        "*"
+                    ],
+                    "namespace": [
+                        "aws/rds"
+                    ],
+                    "0b4d0d38df6d35b3906157b6ffd2f602": [
+                        "*"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "f049c8a107a343b5188930219d3063f5": [
+                        "*"
+                    ],
+                    "dbidentifier": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel37C3A046A1DDDA44",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-4967562181D97840",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel1574861796B07840",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":18}"
+                    },
+                    {
+                        "key": "panel538E876187F8084E",
+                        "structure": "{\"height\":9,\"width\":7,\"x\":0,\"y\":9}"
+                    },
+                    {
+                        "key": "panelCCE28972AB613A49",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":30}"
+                    },
+                    {
+                        "key": "panel7C85397E9FE04843",
+                        "structure": "{\"height\":9,\"width\":9,\"x\":7,\"y\":9}"
+                    },
+                    {
+                        "key": "panelA1500972A6C33943",
+                        "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":9}"
+                    },
+                    {
+                        "key": "panel8E0DB386BACE784D",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":24}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel37C3A046A1DDDA44",
+                    "title": "DB Connections by Applications",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"legend\":{\"enabled\":true},\"axes\":{\"axisX\":{\"title\":\"\"},\"axisY\":{\"title\":\" \"}},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*listener establish \"PROGRAM=\" (\"SID=\" or \"SERVICE_NAME=\") \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex  field=message \"CONNECT_DATA[\\s\\S]+?SERVICE_NAME=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex  field=message \"CONNECT_DATA[\\s\\S]+?service_name=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex  field=message \"CONNECT_DATA[\\s\\S]+?SID=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex  field=message \"CONNECT_DATA[\\s\\S]+?sid=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex  field=message \"CONNECT_DATA[\\s\\S]+?PROGRAM=(?<userProgramName>[^)]*)\\)[\\s\\S]+?HOST=(?<userHost>[^)]*)\\)[\\s\\S]+?USER=(?<databaseUser>[^)]*)\\)\" nodrop\n| timeslice 1d\n| count as %\"ConnectionCount\" by _timeslice, userProgramName\n| transpose row _timeslice column userProgramName",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-4967562181D97840",
+                    "title": "DB Connections By Host",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{\"A_101.99.94.54\":{\"visible\":true},\"A_103.159.133.209\":{\"visible\":false},\"A_103.230.15.121\":{\"visible\":false},\"A_103.230.15.214\":{\"visible\":false},\"A_104.168.163.124\":{\"visible\":false},\"A_104.238.222.128\":{\"visible\":false},\"A_104.36.229.110\":{\"visible\":false},\"A_107.148.130.22\":{\"visible\":false},\"A_127.0.0.1\":{\"visible\":false},\"A_128.254.207.87\":{\"visible\":false},\"A_137.220.61.94\":{\"visible\":false},\"A_139.180.157.81\":{\"visible\":false},\"A_141.98.234.31\":{\"visible\":false},\"A_142.132.224.223\":{\"visible\":false},\"A_146.190.214.190\":{\"visible\":false},\"A_146.70.161.15\":{\"visible\":false},\"A_146.70.92.153\":{\"visible\":false},\"A_147.124.212.89\":{\"visible\":false},\"A_147.124.213.11\":{\"visible\":false},\"A_148.72.168.13\":{\"visible\":false},\"A_149.248.14.222\":{\"visible\":false},\"A_15.235.130.5\":{\"visible\":false},\"A_150.109.103.16\":{\"visible\":false},\"A_152.228.248.230\":{\"visible\":false},\"A_152.89.198.214\":{\"visible\":false},\"A_154.204.24.0\":{\"visible\":false},\"A_154.204.26.120\":{\"visible\":false},\"A_154.204.27.130\":{\"visible\":false},\"A_154.204.27.181\":{\"visible\":false},\"A_157.245.221.70\":{\"visible\":false},\"A_158.255.213.74\":{\"visible\":false},\"A_159.203.171.196\":{\"visible\":false},\"A_167.99.156.161\":{\"visible\":false},\"A_168.100.11.29\":{\"visible\":false},\"A_172.31.31.24\":{\"visible\":false},\"A_172.67.132.165\":{\"visible\":false},\"A_172.86.121.179\":{\"visible\":false},\"A_174.207.39.190\":{\"visible\":false},\"A_176.9.47.240\":{\"visible\":false},\"A_179.60.149.219\":{\"visible\":false},\"A_18.228.138.181\":{\"visible\":false},\"A_18.230.180.104\":{\"visible\":false},\"A_181.41.200.209\":{\"visible\":false},\"A_185.113.8.123\":{\"visible\":false},\"A_185.156.172.62\":{\"visible\":false},\"A_185.16.39.253\":{\"visible\":false},\"A_185.172.128.11\":{\"visible\":false},\"A_185.172.128.170\":{\"visible\":false},\"A_185.196.8.22\":{\"visible\":false},\"A_185.212.11.196\":{\"visible\":false},\"A_185.237.206.77\":{\"visible\":false},\"A_185.70.104.90\":{\"visible\":false},\"A_188.127.224.64\":{\"visible\":false},\"A_188.40.171.91\":{\"visible\":false},\"A_192.161.184.21\":{\"visible\":false},\"A_192.81.210.219\":{\"visible\":false},\"A_193.109.85.219\":{\"visible\":false},\"A_193.233.132.30\":{\"visible\":false},\"A_193.233.22.122\":{\"visible\":false},\"A_193.242.211.154\":{\"visible\":false},\"A_194.49.94.194\":{\"visible\":false},\"A_194.59.183.59\":{\"visible\":false},\"A_195.133.88.98\":{\"visible\":false},\"A_195.201.215.181\":{\"visible\":false},\"A_198.105.127.69\":{\"visible\":false},\"A_198.105.127.72\":{\"visible\":false},\"A_198.105.127.98\":{\"visible\":false},\"A_20.189.125.71\":{\"visible\":false},\"A_20.201.119.163\":{\"visible\":false},\"A_207.148.113.177\":{\"visible\":false},\"A_213.252.232.134\":{\"visible\":false},\"A_216.189.159.197\":{\"visible\":false},\"A_23.254.164.50\":{\"visible\":false},\"A_23.88.117.132\":{\"visible\":false},\"A_23.88.55.108\":{\"visible\":false},\"A_31.210.173.10\":{\"visible\":false},\"A_31.41.244.38\":{\"visible\":false},\"A_34.31.226.230\":{\"visible\":false},\"A_34.80.156.164\":{\"visible\":false},\"A_34.82.20.84\":{\"visible\":false},\"A_35.167.150.110\":{\"visible\":false},\"A_38.60.217.34\":{\"visible\":false},\"A_38.60.217.4\":{\"visible\":false},\"A_45.11.59.67\":{\"visible\":false},\"A_45.134.174.78\":{\"visible\":false},\"A_45.134.83.4\":{\"visible\":false},\"A_45.140.146.156\":{\"visible\":false},\"A_45.147.199.21\":{\"visible\":false},\"A_45.155.250.90\":{\"visible\":false},\"A_45.32.174.131\":{\"visible\":false},\"A_45.40.96.97\":{\"visible\":false},\"A_45.61.169.99\":{\"visible\":false},\"A_45.63.60.39\":{\"visible\":false},\"A_47.76.46.65\":{\"visible\":false},\"A_49.13.32.37\":{\"visible\":false},\"A_5.181.159.76\":{\"visible\":false},\"A_5.182.87.130\":{\"visible\":false},\"A_5.182.87.146\":{\"visible\":false},\"A_5.188.230.23\":{\"visible\":false},\"A_5.199.168.24\":{\"visible\":false},\"A_5.22.216.77\":{\"visible\":false},\"A_5.255.99.87\":{\"visible\":false},\"A_5.42.64.45\":{\"visible\":false},\"A_5.42.65.55\":{\"visible\":false},\"A_54.168.223.109\":{\"visible\":false},\"A_54.204.26.120\":{\"visible\":false},\"A_62.173.146.41\":{\"visible\":false},\"A_62.204.41.234\":{\"visible\":false},\"A_64.190.113.73\":{\"visible\":false},\"A_64.227.162.106\":{\"visible\":false},\"A_65.109.80.185\":{\"visible\":false},\"A_65.21.212.85\":{\"visible\":false},\"A_77.105.132.124\":{\"visible\":false},\"A_77.105.132.70\":{\"visible\":false},\"A_77.105.132.92\":{\"visible\":false},\"A_77.105.132.94\":{\"visible\":false},\"A_77.73.131.73\":{\"visible\":false},\"A_78.141.243.154\":{\"visible\":false},\"A_78.24.180.93\":{\"visible\":false},\"A_79.132.130.163\":{\"visible\":false},\"A_81.31.197.38\":{\"visible\":false},\"A_84.32.131.21\":{\"visible\":false},\"A_85.192.63.35\":{\"visible\":false},\"A_87.121.45.14\":{\"visible\":false},\"A_88.119.174.102\":{\"visible\":false},\"A_89.208.103.177\":{\"visible\":false},\"A_91.211.247.248\":{\"visible\":false},\"A_91.211.247.89\":{\"visible\":false},\"A_91.242.229.3\":{\"visible\":false},\"A_91.92.242.183\":{\"visible\":false},\"A_91.92.244.186\":{\"visible\":false},\"A_91.92.254.193\":{\"visible\":false},\"A_92.118.112.208\":{\"visible\":false},\"A_92.246.139.143\":{\"visible\":false},\"A_93.115.28.51\":{\"visible\":false},\"A_95.164.10.156\":{\"visible\":false},\"A_95.216.227.177\":{\"visible\":false},\"A_95.216.98.218\":{\"visible\":false}},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*listener establish \"PROGRAM=\" (\"SID=\" or \"SERVICE_NAME=\") \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?SERVICE_NAME=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?service_name=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?SID=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?sid=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?PROGRAM=(?<userProgramName>[^)]*)\\)[\\s\\S]+?HOST=(?<userHost>[^)]*)\\)[\\s\\S]+?USER=(?<databaseUser>[^)]*)\\)\" nodrop\n| parse field=message \"(ADDRESS=(PROTOCOL=*)(HOST=*)(PORT=*))\" as clientProtocol, clientHost, clientPort  nodrop\n| timeslice 1h\n| count as %\"ConnectionCount\" by _timeslice, clientHost\n| transpose row _timeslice column clientHost",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel1574861796B07840",
+                    "title": "Recent Failed Connection Attempts",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*listener establish \"PROGRAM=\" (\"SID=\" or \"SERVICE_NAME=\") and (\"\\nTNS-\" or \"TNS-\")\n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"\\* \\(CONNECT_DATA[\\s\\S]+?\\* establish \\* \\S+ \\* (?<status>\\d+)\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?SERVICE_NAME=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?service_name=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?SID=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?sid=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?PROGRAM=(?<userProgramName>[^)]*)\\)[\\s\\S]+?HOST=(?<userHost>[^)]*)\\)[\\s\\S]+?USER=(?<databaseUser>[^)]*)\\)\" nodrop\n| parse field=message \"(ADDRESS=(PROTOCOL=*)(HOST=*)(PORT=*))\" as clientProtocol, clientHost, clientPort nodrop\n| parse regex field=message \"(?<TNSerr>TNS-\\d{5}): (?<tnsmsg>.*)\" nodrop\n| where status != \"0\"\n| timeslice 1s\n| count as eventCount by _timeslice, SID, serviceName, status, userProgramName, userHost, databaseUser, clientProtocol, clientHost, clientPort, TNSerr, tnsmsg\n| sort by _timeslice\n| limit 10\n| fields -eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel538E876187F8084E",
+                    "title": "Failed to Success Connection Ratio - Outlier",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#8be2ff\",\"outlierBandMarkerColor\":\"#005982\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":1,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\"},\"series\":{},\"color\":{\"family\":\"Categorical Default\"},\"legend\":{\"enabled\":false},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*listener establish \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message \n| parse regex field=message \"\\* \\(CONNECT_DATA[\\s\\S]+?\\* establish \\* \\S+ \\* (?<status>\\d+)\" nodrop\n| if (status=\"0\", 1, 0) as Connected\n| if (status!=\"0\",1, 0) as NotConnected\n| timeslice 1h\n| sum(Connected) as Connected, sum(NotConnected) as NotConnected by _timeslice\n| (NotConnected/Connected)*100 as ratio\n| outlier ratio",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelCCE28972AB613A49",
+                    "title": "SID or Service Name Connections",
+                    "visualSettings": "{\"general\":{\"mode\":\"table\",\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":25,\"decimals\":0},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*listener establish \"PROGRAM=\" (\"SID=\" or \"SERVICE_NAME=\") \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?SERVICE_NAME=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?service_name=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?SID=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?sid=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop\n| parse regex field=message \"CONNECT_DATA[\\s\\S]+?PROGRAM=(?<userProgramName>[^)]*)\\)[\\s\\S]+?HOST=(?<userHost>[^)]*)\\)[\\s\\S]+?USER=(?<databaseUser>[^)]*)\\)\" nodrop\n| parse field=message \"(ADDRESS=(PROTOCOL=*)(HOST=*)(PORT=*))\" as clientProtocol, clientHost, clientPort nodrop\n| count as %\"ConnectionCount\" by SID, serviceName, userHost, clientHost, databaseUser\n| sort by SID, serviceName, userHost, clientHost, databaseUser, %\"ConnectionCount\"",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel7C85397E9FE04843",
+                    "title": "Command Execution Status",
+                    "visualSettings": "{\"general\":{\"mode\":\"table\",\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":25,\"decimals\":0},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*listener \"COMMAND=\" \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex field=message \"\\* \\(CONNECT_DATA[\\s\\S]+?COMMAND=(?<connect_data_command>[^)]*)\\)[\\s\\S]+?\\* (?<command>[^\\s]+)\\s+\\*\\s+(?<status>\\d+)\"\n| tolowercase(connect_data_command) as connect_data_command\n| if (status=\"0\", \"Success\", \"Failure\") as CommandExecutionStatus\n| count as eventCount by connect_data_command, CommandExecutionStatus\n| transpose row connect_data_command column CommandExecutionStatus",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA1500972A6C33943",
+                    "title": "Command Execution Trend",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"legend\":{\"enabled\":true},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}} _sourceHost=/aws/rds/*listener \"COMMAND=\" | json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse regex  field=message \"\\* \\(CONNECT_DATA[\\s\\S]+?COMMAND=(?<connect_data_command>[^)]*)\\)[\\s\\S]+?\\* (?<command>[^\\s]+)\\s+\\*\\s+(?<status>\\d+)\"\n| tolowercase(connect_data_command) as connect_data_command\n| timeslice 1d\n| count as eventCount by _timeslice, connect_data_command\n| transpose row _timeslice column connect_data_command",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel8E0DB386BACE784D",
+                    "title": "Recent  Listener Stopped Events",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "account={{account}} region={{region}} namespace={{namespace}} dbidentifier={{dbidentifier}}  _sourceHost=/aws/rds/*listener COMMAND stop \"COMMAND=stop\" \n| json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message\n| parse field=message \"(CONNECT_DATA=(CID=(PROGRAM=)(HOST=*)(USER=*))(COMMAND=*)(ARGUMENTS=*)(SERVICE=*)(VERSION=*))\" as userHost, databaseUser, connect_data_command, connect_data_arguments, connect_data_service, connect_data_version nodrop\n| parse regex field=message \"\\* \\(CONNECT_DATA[\\s\\S]+?COMMAND=(?<connect_data_command>[^)]*)\\)[\\s\\S]+?\\* (?<command>[^\\s]+)\\s+\\*\\s+(?<status>\\d+)\"\n| where connect_data_command=\"stop\"\n| if (status=\"0\", \"Success\", \"Failure\") as %\"CommandExecutionStatus\"\n| timeslice 1s\n| count as eventCount by _timeslice, userHost, databaseUser, connect_data_service, %\"CommandExecutionStatus\", status\n| sort by _timeslice | limit 10| fields -eventCount",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": "account",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": "region",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region=*",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": "namespace",
+                    "defaultValue": "aws/rds",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace=aws/rds",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
                     "hideFromUI": false,
                     "valueType": "Any"
                 },
