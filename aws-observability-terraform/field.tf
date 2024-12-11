@@ -177,6 +177,59 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityApiGatewayAccessLogs
       enabled = true
 }
 
+# ALB CloudTrail FER
+resource "sumologic_field_extraction_rule" "AwsObservabilityALBCloudTrailLogsFER" {
+      depends_on = [time_sleep.wait_for_10_seconds]
+      name = "AwsObservabilityALBCloudTrailLogsFER"
+      scope = "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2015-12-01\""
+      parse_expression = <<EOT
+              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "apiVersion" as event_source, region, accountid, loadbalancer, loadbalancertype, loadbalancerarn, api_version nodrop 
+              | "" as namespace
+              | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01" 
+              | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype, loadbalancer, f1 nodrop
+              | if(loadbalancertype matches "network", "aws/nlb", if(balancertype matches "net", "aws/nlb", namespace)) as namespace
+              | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype matches "app", "aws/applicationelb", namespace)) as namespace
+              | where namespace="aws/applicationelb" or isEmpty(namespace)
+              | toLowerCase(loadbalancer) as loadbalancer  
+              | fields region, namespace, loadbalancer, accountid'
+      EOT
+      enabled = true
+}
+
+# CLB CloudTrail FER
+resource "sumologic_field_extraction_rule" "AwsObservabilityCLBCloudTrailLogsFER" {
+      depends_on = [time_sleep.wait_for_10_seconds]
+      name = "AwsObservabilityCLBCloudTrailLogsFER"
+      scope = "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2012-06-01\""
+      parse_expression = <<EOT
+              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.loadBalancerName" as event_source, region, accountid, loadbalancername nodrop  
+              | where event_source = "elasticloadbalancing.amazonaws.com"
+              | toLowerCase(loadbalancername) as loadbalancername 
+              | "aws/elb" as namespace 
+              | fields region, namespace, loadbalancername, accountid
+      EOT
+      enabled = true
+}
+
+# NLB CloudTrail FER
+resource "sumologic_field_extraction_rule" "AwsObservabilityNLBCloudTrailLogsFER" {
+      depends_on = [time_sleep.wait_for_10_seconds]
+      name = "AwsObservabilityNLBCloudTrailLogsFER"
+      scope = "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2015-12-01\""
+      parse_expression = <<EOT
+              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "apiVersion" as event_source, region, accountid, loadbalancer, loadbalancertype, loadbalancerarn, api_version nodrop 
+              | "" as namespace
+              | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01" 
+              | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype, loadbalancer, f1 nodrop
+              | if(loadbalancertype matches "network", "aws/nlb", if(balancertype matches "net", "aws/nlb", namespace)) as namespace
+              | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype matches "app", "aws/applicationelb", namespace)) as namespace
+              | where namespace="aws/applicationelb" or isEmpty(namespace)
+              | toLowerCase(loadbalancer) as loadbalancer  
+              | fields region, namespace, loadbalancer, accountid
+      EOT
+      enabled = true
+}
+
 # DynamoDB CloudTrail FER
 resource "sumologic_field_extraction_rule" "AwsObservabilityDynamoDBCloudTrailLogsFER" {
       depends_on = [time_sleep.wait_for_10_seconds]
