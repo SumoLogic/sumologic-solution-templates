@@ -588,6 +588,74 @@ module "rds_module" {
       group_notifications      = var.group_notifications
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
+    },
+    "RDSOracleLogsDBCrash" = {
+      monitor_name         = "Amazon RDS - Oracle Logs - DB Crash"
+      monitor_description  = "This alert fires when we detect greater than or equal to 1 Oracle DB crash over a 5 minute time-period."
+      monitor_monitor_type = "Logs"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
+      queries = {
+        A = "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*alert ORA-* | json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message | parse regex field=message \"(?<oraerr>ORA-\\d{5}): (?<oramsg>.*)\" multi | count"
+      }
+      triggers = [
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 1,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        },
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 1,
+          threshold_type   = "LessThan",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "RDSOracleLogsFailedConnectionAttempts" = {
+      monitor_name         = "Amazon RDS - Oracle Logs - Failed Connection Attempts"
+      monitor_description  = "This alert fires when we detect greater than or equal to 25 failed connection attempts over a 5 minute time-period."
+      monitor_monitor_type = "Logs"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
+      queries = {
+        A = "account=* region=* namespace=aws/rds dbidentifier=* _sourceHost=/aws/rds/*listener establish \"PROGRAM=\" (\"SID=\" or \"SERVICE_NAME=\") and (\"\nTNS-\" or \"TNS-\") | json \"message\" nodrop | if (_raw matches \"{*\", message, _raw) as message | parse regex field=message \"\\* \\(CONNECT_DATA[\\s\\S]+?\\* establish \\* \\S+ \\* (?<status>\\d+)\" nodrop | parse regex field=message \"CONNECT_DATA[\\s\\S]+?SERVICE_NAME=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop | parse regex field=message \"CONNECT_DATA[\\s\\S]+?service_name=(?<serviceName>[^)]*)\\)[\\s\\S]+establish\" nodrop | parse regex field=message \"CONNECT_DATA[\\s\\S]+?SID=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop | parse regex field=message \"CONNECT_DATA[\\s\\S]+?sid=(?<SID>[^)]*)\\)[\\s\\S]+establish\" nodrop | parse regex field=message \"CONNECT_DATA[\\s\\S]+?PROGRAM=(?<userProgramName>[^)]*)\\)[\\s\\S]+?HOST=(?<userHost>[^)]*)\\)[\\s\\S]+?USER=(?<databaseUser>[^)]*)\\)\" nodrop | parse field=message \"(ADDRESS=(PROTOCOL=*)(HOST=*)(PORT=*))\" as clientProtocol, clientHost, clientPort nodrop | parse regex field=message \"(?<TNSerr>TNS-\\d{5}): (?<tnsmsg>.*)\" nodrop | where status != \"0\""
+      }
+      triggers = [
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 25,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        },
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 25,
+          threshold_type   = "LessThan",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
     }
   }
 }

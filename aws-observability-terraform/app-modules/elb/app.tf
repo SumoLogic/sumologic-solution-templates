@@ -122,6 +122,74 @@ module "classic_elb_module" {
       connection_notifications = var.connection_notifications
       email_notifications      = var.email_notifications
     },
+    "AWSClassicLoadBalancerDeletionAlert" = {
+      monitor_name         = "AWS Classic Load Balancer - Deletion Alert"
+      monitor_description  = "This alert fires when we detect greater than or equal to 2 classic load balancers are deleted over a 5 minute time-period."
+      monitor_monitor_type = "Logs"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
+      queries = {
+        A = "account=* region=* namespace=aws/elb \"\"eventsource\":\"elasticloadbalancing.amazonaws.com\"\" \"\"apiVersion\":\"2012-06-01\"\" | json \"eventSource\", \"eventName\" as event_source, event_name nodrop | where event_source = \"elasticloadbalancing.amazonaws.com\" | where event_name matches \"DeleteLoadBalancer\""
+      }
+      triggers = [
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 2,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        },
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 2,
+          threshold_type   = "LessThan",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "AWSClassicLoadBalancerTargetsDeregistered" = {
+      monitor_name         = "AWS Classic Load Balancer - Targets Deregistered"
+      monitor_description  = "This alert fires when we detect greater than or equal to 1 target is de-registered over a 5 minute time-period."
+      monitor_monitor_type = "Logs"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
+      queries = {
+        A = "account=* region=* namespace=aws/elb \"\"eventsource\":\"elasticloadbalancing.amazonaws.com\"\" \"\"apiVersion\":\"2012-06-01\"\" \n| json \"eventSource\", \"eventName\" as event_source, event_name nodrop \n| where event_source = \"elasticloadbalancing.amazonaws.com\" \n| where event_name matches \"DeregisterInstancesFromLoadBalancer\""
+      }
+      triggers = [
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 1,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        },
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 1,
+          threshold_type   = "LessThan",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
     "AWSClassicLoadBalancerHigh5XXErrors" = {
       monitor_name         = "AWS Classic Load Balancer - High 5XX Errors"
       monitor_description  = "This alert fires where there are too many HTTP requests (>5%) with a response status of 5xx within an interval of 5 minutes."
