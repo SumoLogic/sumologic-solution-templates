@@ -11,6 +11,12 @@ TestCase:
   TestName: existingCloudTrailBucket
   Regions: '${SUMO_REGIONS}'
   Skip: false
+  PreRequisitesInfra:
+    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+      ImpactedParametersPath:
+        BucketName:
+          - "parameters.Section6cCloudTrailLogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert.CreateCommonResources.CloudTrailLogsBucketName"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'

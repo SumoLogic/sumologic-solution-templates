@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create an sumologic collector and source.
+
+Parameters:
+  SumoLogicDeployment:
+    Type: String
+    Default: ""
+    Description: "Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2"
+  SumoLogicAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoLogicAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  SumoLambdaHelperArn:
+    Type: String
+    Default: ""
+    Description: "Sumo Logic Lambda Helper"
+    ConstraintDescription: "Sumo Logic Lambda Helper can not be empty."
+  SumoCollectorID:
+    Type: String
+    Default: ""
+    Description: "Sumo Logic Collector ID can not be empty"
+  AccountAlias:
+    Type: String
+    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
+    AllowedPattern: "[a-z0-9]*"
+    ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
+    MaxLength: 30
+
+Mappings:
+  SumoLogicEndpoints:
+    au:
+      apiendpoint: "https://api.au.sumologic.com/api/"
+    ca:
+      apiendpoint: "https://api.ca.sumologic.com/api/"
+    de:
+      apiendpoint: "https://api.de.sumologic.com/api/"
+    eu:
+      apiendpoint: "https://api.eu.sumologic.com/api/"
+    fed:
+      apiendpoint: "https://api.fed.sumologic.com/api/"
+    in:
+      apiendpoint: "https://api.in.sumologic.com/api/"
+    jp:
+      apiendpoint: "https://api.jp.sumologic.com/api/"
+    kr:
+      apiendpoint: "https://api.kr.sumologic.com/api/"
+    us1:
+      apiendpoint: "https://api.sumologic.com/api/"
+    us2:
+      apiendpoint: "https://api.us2.sumologic.com/api/"
+
+Resources:
+  CloudWatchHTTPSource:
+    Type: Custom::HTTPSource
+    Properties:
+      ServiceToken: !Ref SumoLambdaHelperArn
+      Region: !Ref "AWS::Region"
+      SourceName: "test-automation-awso-<TestcaseName>"
+      RemoveOnDeleteStack: true
+      SourceCategory: "test/automation/awso/cloudwatch/logs"
+      CollectorId: !Ref SumoCollectorID
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !Ref AccountAlias
+        region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
+
+
+Outputs:
+  SumoCloudWatchLogAPIURL:
+    Description: End point url of CloudWatch log source.
+    #https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842
+    Value: !Sub
+      - "${BaseUrl}v1/collectors/${CollectorID}/sources/${SourceID}"
+      - BaseUrl: !FindInMap [SumoLogicEndpoints, !Ref SumoLogicDeployment, apiendpoint]
+        CollectorID: !Ref SumoCollectorID
+        SourceID: !Select
+          - 1
+          - !Split
+            - "/"
+            - !Ref CloudWatchHTTPSource

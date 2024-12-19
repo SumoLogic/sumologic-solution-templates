@@ -8,9 +8,16 @@ Global:
       Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
       Section2aAccountAlias: 'infrat7'
 TestCase:
-- TestName: createSourceExistingBucketExistingSources
+  TestName: createSourceExistingBucketExistingSources
   Regions: '${SUMO_REGIONS}'
   Skip: false
+  PreRequisitesInfra:
+    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+      ImpactedParametersPath:
+        BucketName:
+          - "parameters.Section5dALBS3LogsBucketName"
+          - "parameters.Section6cCloudTrailLogsBucketName"
+          - "parameters.Section9dELBS3LogsBucketName"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
