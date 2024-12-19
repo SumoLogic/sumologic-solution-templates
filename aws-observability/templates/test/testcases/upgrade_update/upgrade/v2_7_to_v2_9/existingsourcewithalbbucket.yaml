@@ -1,6 +1,7 @@
 ---
 Global:
-  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.10.0/sumologic_observability.master.template.yaml"
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.7.0/sumologic_observability.master.template.yaml"
+  UpgradeTemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.9.0/sumologic_observability.master.template.yaml"
   StackName: AWSO
   ParallelTestsRun: 1
   GlobalParameters:
@@ -10,6 +11,38 @@ TestCase:
   TestName: existingsourcewithalbbucket
   Regions: '${SUMO_REGIONS}'
   Skip: false
+  PreRequisitesInfra:
+    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+      ImpactedParametersPath:
+        BucketName:
+          - "parameters.Section5dALBS3LogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert.CreateCommonResources.ALBS3LogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert.AutoEnableOptions.ALBS3LogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert['AutoEnableOptions#AutoEnableS3LogsAlbAWSResources'].BucketName"
+    - CFNTemplateURL: "test/setup-infra/create_sumo_lambda_hepler.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        AccountAlias: "upgradet1"
+    - CFNTemplateURL: "test/setup-infra/create_sumo_collector.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_log_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        AccountAlias: '${AccountAlias}'
+      ImpactedParametersPath:
+        SumoCloudWatchLogAPIURL:
+          - "parameters.Section7bLambdaCloudWatchLogsSourceUrl"
+          - "assertions[AssertType==ParameterCheck].Assert.sumoLambdaMetricsAppStack.Section6aCloudWatchLogsAPIUrl"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -23,7 +56,7 @@ TestCase:
       Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
       Section5aAutoEnableS3LogsALBResourcesOptions: 'Existing'
       Section5bALBCreateLogSource: 'Yes'
-      Section5dALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-2'
+      Section5dALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
       Section5eALBS3BucketPathExpression: '*abc*'
       Section6aCreateCloudTrailLogSource: 'Yes'
       Section7aLambdaCreateCloudWatchLogsSourceOptions: 'None'
@@ -147,7 +180,7 @@ TestCase:
           CloudWatchMetricSourceCategory: ""
           CreateALBLogSource: 'Yes'
           CreateALBS3Bucket: 'No'
-          ALBS3LogsBucketName: "cf-templates-qpf3unpuo1hw-ap-southeast-2"
+          ALBS3LogsBucketName: "cf-templates-qpf3unpuo1hw-ap-southeast-4"
           ALBS3BucketPathExpression: '/elasticloadbalancing/ap-southeast-1/*'
           ALBLogsSourceName: "alb-logs-ap-southeast-1"
           ALBLogsSourceCategory: "aws/observability/alb/logs"
@@ -168,10 +201,10 @@ TestCase:
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
         AutoEnableOptions:
           ALBAutoEnableS3Logs: 'Yes'
-          ALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-2'
+          ALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
           AutoSubscribeLogGroups: 'No'
         AutoEnableOptions.AutoEnableS3LogsAlbAWSResources:
-          BucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-2'
+          BucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
           AutoEnableResourceOptions: 'Existing'
         sumoEC2MetricsAppStack:
           Section2aInstallApp: 'No'
