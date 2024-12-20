@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template to create an sumologic source.
+Description: CloudFormation template to create an sumologic cloudtrail source.
 
 Parameters:
   SumoLogicDeployment:
@@ -22,10 +22,19 @@ Parameters:
     Default: ""
     Description: "Sumo Logic Lambda Helper"
     ConstraintDescription: "Sumo Logic Lambda Helper can not be empty."
+  SumoLogicSourceRoleArn:
+    Type: String
+    Default: ""
+    Description: "Sumo Logic Lambda source role"
+    ConstraintDescription: "Sumo Logic Lambda source role can not be empty."
   SumoCollectorID:
     Type: String
     Default: ""
     Description: "Sumo Logic Collector ID can not be empty"
+  CloudTrailLogsBucketName:
+    Type: String
+    Description: "Required when Bucket creation Flag = No. Provide an Existing bucket name that has CloudTrail logs."
+    Default: ""
   AccountAlias:
     Type: String
     Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
@@ -57,27 +66,52 @@ Mappings:
       apiendpoint: "https://api.us2.sumologic.com/api/"
 
 Resources:
-  CloudWatchHTTPSource:
-    Type: Custom::HTTPSource
+  SumoLogicCloudTrailS3Policy:
+    Type: AWS::IAM::Policy
     Properties:
+      PolicyName: SumoLogicAwsSourcesPoliciesS3CloudTrail
+      Roles:
+        - !Select [1, !Split ["/", !Ref SumoLogicSourceRoleArn]]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}"
+                - S3Bucket: !Ref CloudTrailLogsBucketName
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}/*"
+                - S3Bucket: !Ref CloudTrailLogsBucketName
+
+  CloudTrailSource:
+    Type: Custom::AWSSource
+    DependsOn: SumoLogicCloudTrailS3Policy
+    Properties:
+      SourceType: AwsCloudTrailBucket
       ServiceToken: !Ref SumoLambdaHelperArn
       Region: !Ref "AWS::Region"
       SourceName: "test-automation-awso-<TestcaseName>"
+      TargetBucketName: !Ref CloudTrailLogsBucketName
       RemoveOnDeleteStack: true
-      SourceCategory: "test/automation/awso/cloudwatch/logs"
+      SourceCategory: "test/automation/awso/cloudtrail/logs"
       CollectorId: !Ref SumoCollectorID
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
       SumoDeployment: !Ref SumoLogicDeployment
+      PathExpression: "*"
       Fields:
         account: !Ref AccountAlias
-        region: !Ref "AWS::Region"
-        accountid: !Ref "AWS::AccountId"
-
+      RoleArn: !Ref SumoLogicSourceRoleArn
 
 Outputs:
-  SumoCloudWatchLogAPIURL:
-    Description: End point url of CloudWatch log source.
+  SumoCloudTrailAPIURL:
+    Description: End point url of cloudtrail log source.
     #https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842
     Value: !Sub
       - "${BaseUrl}v1/collectors/${CollectorID}/sources/${SourceID}"
@@ -87,4 +121,7 @@ Outputs:
           - 1
           - !Split
             - "/"
-            - !Ref CloudWatchHTTPSource
+            - !Ref CloudTrailSource
+
+
+
