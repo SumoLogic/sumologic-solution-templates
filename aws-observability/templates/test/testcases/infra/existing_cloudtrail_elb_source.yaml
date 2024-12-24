@@ -46,6 +46,34 @@ TestCase:
         SumoCloudTrailAPIURL:
           - "parameters.Section6bCloudTrailLogsSourceUrl"
           - "assertions[AssertType==ParameterCheck].Assert.sumoLambdaMetricsAppStack.Section5aCloudTrailLogsAPIUrl"
+    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_metrics_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        AccountAlias: '${AccountAlias}'
+      ImpactedParametersPath:
+        SumoCloudWatchMetricsAPIURL:
+          - "parameters.Section4cCloudWatchExistingSourceAPIUrl"
+          - "assertions[AssertType==ParameterCheck].Assert.sumoAlbMetricsAppStack.Section4aCloudWatchExistingSourceAPIUrl"
+          - "assertions[AssertType==ParameterCheck].Assert.sumoLambdaMetricsAppStack.Section4aCloudWatchExistingSourceAPIUrl"
+    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_lb_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        AccountAlias: '${AccountAlias}'
+        LBLogsBucketName: '${BucketName}'
+      ImpactedParametersPath:
+        SumoLoadBalancerLogAPIURL:
+          - "parameters.Section9cELBLogsSourceUrl"
+          - "assertions[AssertType==ParameterCheck].Assert.sumoElbMetricsAppStack.Section5aELBLogsAPIUrl"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'

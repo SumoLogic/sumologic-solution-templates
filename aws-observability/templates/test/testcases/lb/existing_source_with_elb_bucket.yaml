@@ -42,6 +42,23 @@ TestCase:
         SumoCloudWatchLogAPIURL:
           - "parameters.Section7bLambdaCloudWatchLogsSourceUrl"
           - "assertions[AssertType==ParameterCheck].Assert.sumoLambdaMetricsAppStack.Section6aCloudWatchLogsAPIUrl"
+    - CFNTemplateURL: "test/setup-infra/create_sumo_role.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicOrganizationId: '${SUMO_ORG_ID}'
+    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_metrics_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        AccountAlias: '${AccountAlias}'
+      ImpactedParametersPath:
+        SumoCloudWatchMetricsAPIURL:
+          - "parameters.Section4cCloudWatchExistingSourceAPIUrl"
+          - "assertions[AssertType==ParameterCheck].Assert.sumoAlbMetricsAppStack.Section4aCloudWatchExistingSourceAPIUrl"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
