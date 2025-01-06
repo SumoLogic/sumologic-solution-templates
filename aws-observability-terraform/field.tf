@@ -191,7 +191,7 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityALBCloudTrailLogsFER
               | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype matches "app", "aws/applicationelb", namespace)) as namespace
               | where namespace="aws/applicationelb" or isEmpty(namespace)
               | toLowerCase(loadbalancer) as loadbalancer  
-              | fields region, namespace, loadbalancer, accountid'
+              | fields region, namespace, loadbalancer, accountid
       EOT
       enabled = true
 }
