@@ -1,6 +1,5 @@
 module "elasticache_module" {
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=sumo_246624"
-  #source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
