@@ -30,7 +30,7 @@ TestCase:
       Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
       Section5bALBCreateLogSource: 'Yes'
       Section6aCreateCloudTrailLogSource: 'Yes'
-      Section6cCloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-ap-southeast-1'
+      Section6cCloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-<REGION>'
       Section6dCloudTrailBucketPathExpression: '*abc*'
       Section7aLambdaCreateCloudWatchLogsSourceOptions: 'None'
       Section8aRootCauseExplorerOptions: 'Inventory Source'
@@ -125,6 +125,8 @@ TestCase:
           - sumoLambdaMetricsAppStack.AccountAliasValue
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
+          - sumoAlbMetricsAppStack.AlbCloudTrailLogsFieldExtractionRule
+          - sumoElbMetricsAppStack.ClbCloudTrailLogsFieldExtractionRule
     - AssertType: OutputsCheck
       Assert:
         Outputs:
@@ -145,7 +147,7 @@ TestCase:
           MetaDataSourceName: ""
           MetaDataSourceCategory: ""
           CreateCloudWatchMetricsSource:  'Yes'
-          CloudWatchMetricsSourceName: 'cloudwatch-metrics-ap-southeast-1'
+          CloudWatchMetricsSourceName: 'cloudwatch-metrics-<REGION>'
           CloudWatchMetricsNameSpaces: "AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache"
           ScanInterval: "30000"
           CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
@@ -153,28 +155,28 @@ TestCase:
           CreateALBS3Bucket: 'Yes'
           ALBS3LogsBucketName: ""
           ALBS3BucketPathExpression: '*AWSLogs/*/elasticloadbalancing/*'
-          ALBLogsSourceName: "alb-logs-ap-southeast-1"
+          ALBLogsSourceName: "alb-logs-<REGION>"
           ALBLogsSourceCategory: "aws/observability/alb/logs"
           CreateELBLogSource: 'Yes'
           CreateELBS3Bucket: 'Yes'
           ELBS3LogsBucketName: ""
           ELBS3BucketPathExpression: 'classicloadbalancing/AWSLogs/'
-          ELBLogsSourceName: "classic-lb-logs-ap-southeast-1"
+          ELBLogsSourceName: "classic-lb-logs-<REGION>"
           ELBLogsSourceCategory: "aws/observability/clb/logs"
           CreateCloudTrailLogSource: 'Yes'
           CreateCloudTrailBucket: 'No'
-          CloudTrailLogsBucketName: "cf-templates-1qpf3unpuo1hw-ap-southeast-1"
+          CloudTrailLogsBucketName: "cf-templates-1qpf3unpuo1hw-<REGION>"
           CloudTrailBucketPathExpression: '*abc*'
-          CloudTrailLogsSourceName: "cloudtrail-logs-ap-southeast-1"
+          CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
           CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
           CreateCloudWatchLogSource: 'No'
-          CloudWatchLogsSourceName: "cloudwatch-logs-ap-southeast-1"
+          CloudWatchLogsSourceName: "cloudwatch-logs-<REGION>"
           CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
           CreateKinesisFirehoseLogSource: 'No'
-          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-ap-southeast-1'
+          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-<REGION>'
           KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
           CreateKinesisFirehoseMetricsSource: 'No'
-          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-ap-southeast-1'
+          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
         sumoEC2MetricsAppStack:
           Section2aInstallApp: 'No'
@@ -206,10 +208,10 @@ TestCase:
           Section2aInstallApp: 'No'
           Section2bCollectorName: ""
           Section3aCreateAwsInventorySource: 'Yes'
-          Section3bAwsInventorySourceName: "inventory-ap-southeast-1"
+          Section3bAwsInventorySourceName: "inventory-<REGION>"
           Section3dInventorySourceCategory: "aws/observability/inventory"
           Section4aCreateAwsXRaySource: 'No'
-          Section4bAwsXRaySourceName: "xray-ap-southeast-1"
+          Section4bAwsXRaySourceName: "xray-<REGION>"
           Section4cXraySourceCategory: "aws/observability/xray"
         sumoLambdaMetricsAppStack:
           Section2aAccountAlias: 'infrat9'
