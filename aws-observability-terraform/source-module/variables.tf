@@ -516,7 +516,7 @@ variable "auto_enable_logs_subscription_options" {
 
   default = {
     filter = "apigateway|lambda|rds"
-    tags_filter = ""
+    tags_filter = null
   }
 }
 
