@@ -10,6 +10,7 @@ Global:
       Section1fSumoLogicSendTelemetry: 'true'
 TestCase:
   TestName: disabledTelemetry
+  UpgradeTemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.11.0/sumologic_observability.master.template.yaml"
   Regions: '${SUMO_REGIONS}'
   Skip: false
   PreRequisitesInfra:
@@ -168,7 +169,7 @@ TestCase:
     - AssertType: ParameterCheck
       Assert:
         CreateCommonResources:
-          AccountAlias: "test5env"
+          AccountAlias: "upgradeupdatet1"
           AccountAliasMappingS3URL: ""
           CreateMetaDataSource: 'No'
           MetaDataSourceName: ""
@@ -181,23 +182,23 @@ TestCase:
           CreateALBLogSource: 'Yes'
           CreateALBS3Bucket: 'No'
           ALBS3LogsBucketName: "cf-templates-qpf3unpuo1hw-ap-southeast-4"
-          ALBS3BucketPathExpression: '/elasticloadbalancing/ap-southeast-1/*'
-          ALBLogsSourceName: "alb-logs-ap-southeast-1"
+          ALBS3BucketPathExpression: '/elasticloadbalancing/<REGION>/*'
+          ALBLogsSourceName: "alb-logs-<REGION>"
           ALBLogsSourceCategory: "aws/observability/alb/logs"
           CreateCloudTrailLogSource: 'Yes'
           CreateCloudTrailBucket: 'Yes'
           CloudTrailLogsBucketName: ""
-          CloudTrailBucketPathExpression: '/CloudTrail/ap-southeast-1/*'
-          CloudTrailLogsSourceName: "cloudtrail-logs-ap-southeast-1"
+          CloudTrailBucketPathExpression: '/CloudTrail/<REGION>/*'
+          CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
           CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
           CreateCloudWatchLogSource: 'No'
-          CloudWatchLogsSourceName: "cloudwatch-logs-ap-southeast-1"
+          CloudWatchLogsSourceName: "cloudwatch-logs-<REGION>"
           CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
           CreateKinesisFirehoseLogSource: 'No'
-          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-ap-southeast-1'
+          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-<REGION>'
           KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
           CreateKinesisFirehoseMetricsSource: 'No'
-          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-ap-southeast-1'
+          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
         AutoEnableOptions:
           ALBAutoEnableS3Logs: 'Yes'
@@ -209,7 +210,7 @@ TestCase:
         sumoEC2MetricsAppStack:
           Section2aInstallApp: 'No'
         sumoAlbMetricsAppStack:
-          Section2aAccountAlias: 'test5env'
+          Section2aAccountAlias: 'upgradeupdatet1'
           Section3aInstallApp: 'No'
           Section4aCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
           Section5aALBLogsAPIUrl: ''
@@ -230,13 +231,13 @@ TestCase:
           Section2aInstallApp: 'No'
           Section2bCollectorName: ""
           Section3aCreateAwsInventorySource: 'No'
-          Section3bAwsInventorySourceName: "inventory-ap-southeast-1"
+          Section3bAwsInventorySourceName: "inventory-<REGION>"
           Section3dInventorySourceCategory: "aws/observability/inventory"
           Section4aCreateAwsXRaySource: 'Yes'
-          Section4bAwsXRaySourceName: "xray-ap-southeast-1"
+          Section4bAwsXRaySourceName: "xray-<REGION>"
           Section4cXraySourceCategory: "aws/observability/xray"
         sumoLambdaMetricsAppStack:
-          Section2aAccountAlias: 'test5env'
+          Section2aAccountAlias: 'upgradeupdatet1'
           Section3aInstallApp: 'No'
           Section4aCloudWatchExistingSourceAPIUrl: ''
           Section5aCloudTrailLogsAPIUrl: ''
