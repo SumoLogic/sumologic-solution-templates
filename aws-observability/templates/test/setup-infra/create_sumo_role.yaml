@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create role for sumologic resource.
+
+Parameters:
+  SumoLogicDeployment:
+    Type: String
+    Default: ""
+    Description: "Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2"
+  SumoLogicOrganizationId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/docs/get-started/account-settings-preferences/"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+  SumoLogicAccountID:
+    Description: "Sumo Logic AWS account no."
+    Type: String
+    Default: 926226587429
+
+Resources:
+  SumoLogicSourceRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Metrics are collected for all available resources."
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${SumoLogicAccountID}:root"
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${SumoLogicDeployment}:${SumoLogicOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoLogicAwsSourcesPolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - tag:GetResources
+                  - cloudwatch:ListMetrics
+                  - cloudwatch:GetMetricStatistics
+                Resource:
+                  "*"
+
+Outputs:
+  SumoLogicSourceRoleArn:
+    Description: Sumo Logic source role
+    Value: !GetAtt SumoLogicSourceRole.Arn
+
+

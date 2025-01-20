@@ -1,0 +1,126 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to create an sumologic collector and source.
+
+Parameters:
+  SumoLogicDeployment:
+    Type: String
+    Default: ""
+    Description: "Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2"
+  SumoLogicAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoLogicAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  SumoLambdaHelperArn:
+    Type: String
+    Default: ""
+    Description: "Sumo Logic Lambda Helper"
+    ConstraintDescription: "Sumo Logic Lambda Helper can not be empty."
+  SumoCollectorID:
+    Type: String
+    Default: ""
+    Description: "Sumo Logic Collector ID can not be empty"
+  SumoLogicSourceRoleArn:
+    Type: String
+    Default: ""
+    Description: "Sumo Logic Lambda source role"
+    ConstraintDescription: "Sumo Logic Lambda source role can not be empty."
+  LBLogsBucketName:
+    Type: String
+    Description: "Required when Bucket creation Flag = No. Provide an Existing bucket name that has Load balancer access logs."
+    Default: ""
+  AccountAlias:
+    Type: String
+    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs. Please do not include special characters."
+    AllowedPattern: "[a-z0-9]*"
+    ConstraintDescription: "Alias must only contain lowercase letters, number and length less than or equal to 30 characters."
+    MaxLength: 30
+
+Mappings:
+  SumoLogicEndpoints:
+    au:
+      apiendpoint: "https://api.au.sumologic.com/api/"
+    ca:
+      apiendpoint: "https://api.ca.sumologic.com/api/"
+    de:
+      apiendpoint: "https://api.de.sumologic.com/api/"
+    eu:
+      apiendpoint: "https://api.eu.sumologic.com/api/"
+    fed:
+      apiendpoint: "https://api.fed.sumologic.com/api/"
+    in:
+      apiendpoint: "https://api.in.sumologic.com/api/"
+    jp:
+      apiendpoint: "https://api.jp.sumologic.com/api/"
+    kr:
+      apiendpoint: "https://api.kr.sumologic.com/api/"
+    us1:
+      apiendpoint: "https://api.sumologic.com/api/"
+    us2:
+      apiendpoint: "https://api.us2.sumologic.com/api/"
+
+Resources:
+  SumoLogicLoadBalancerS3Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: SumoLogicAwsSourcesPoliciesS3LoadBalancer
+      Roles:
+        - !Select [1, !Split ["/", !Ref SumoLogicSourceRoleArn]]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}"
+                - S3Bucket: !Ref LBLogsBucketName
+              - !Sub
+                - "arn:aws:s3:::${S3Bucket}/*"
+                - S3Bucket: !Ref LBLogsBucketName
+  ALBSource:
+    Type: Custom::AWSSource
+    DependsOn: SumoLogicLoadBalancerS3Policy
+    Properties:
+      ServiceToken: !Ref SumoLambdaHelperArn
+      SourceType: AwsElbBucket
+      Region: !Ref "AWS::Region"
+      SourceName: "test-automation-awso-<TestcaseName>"
+      RemoveOnDeleteStack: true
+      SourceCategory: "test/automation/awso/cloudwatch/metrics"
+      CollectorId: !Ref SumoCollectorID
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      TargetBucketName: !Ref LBLogsBucketName
+      PathExpression: "*"
+      Fields:
+        account: !Ref AccountAlias
+        region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
+      RoleArn: !Ref SumoLogicSourceRoleArn
+
+Outputs:
+  SumoLoadBalancerLogAPIURL:
+    Description: End point url of load balancer access logs source.
+    #https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842
+    Value: !Sub
+      - "${BaseUrl}v1/collectors/${CollectorID}/sources/${SourceID}"
+      - BaseUrl:
+          !FindInMap [SumoLogicEndpoints, !Ref SumoLogicDeployment, apiendpoint]
+        CollectorID: !Ref SumoCollectorID
+        SourceID: !Select
+          - 1
+          - !Split
+            - "/"
+            - !Ref ALBSource
