@@ -369,6 +369,11 @@ variable "cloudwatch_metrics_source_details" {
     source_category     = string
     description         = string
     limit_to_namespaces = list(string)
+    tag_filters = list(object({
+      type      = string
+      namespace = string
+      tags      = list(string)
+    }))
     fields              = map(string)
     bucket_details = object({
       create_bucket        = bool
@@ -386,6 +391,7 @@ variable "cloudwatch_metrics_source_details" {
     source_category     = "aws/observability/cloudwatch/metrics"
     description         = "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch metrics."
     limit_to_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/EC2"]
+    tag_filters         = []
     fields              = {}
     bucket_details = {
       create_bucket        = true
@@ -499,12 +505,18 @@ variable "auto_enable_logs_subscription" {
 variable "auto_enable_logs_subscription_options" {
   type = object({
     filter = string
+    tags_filter = string
   })
+
   description = <<EOT
-		    filter - Enter regex for matching CloudWatch Log groups name. Regex will check for the Log groups name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters
-	    EOT
+		filter - Enter regex for matching logGroups. Regex will check for the name.
+        tags_filter - Enter comma separated key value pairs for filtering logGroups using tags. Ex KeyName1=string,KeyName2=string. This is optional leave it blank if tag based filtering is not needed.
+        Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters
+	EOT
+
   default = {
     filter = "apigateway|lambda|rds"
+    tags_filter = null
   }
 }
 

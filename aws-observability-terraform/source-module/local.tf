@@ -36,6 +36,8 @@ locals {
   create_metric_source     = var.collect_cloudwatch_metrics == "None" ? false : (local.update_metrics_source ? false : true)
   metrics_source_name      = var.cloudwatch_metrics_source_details.source_name == "CloudWatch Metrics (Region)" ? "CloudWatch Metrics ${local.aws_region}" : var.cloudwatch_metrics_source_details.source_name
   metrics_fields           = local.use_kf_metrics_source ? merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias }) : merge(var.cloudwatch_metrics_source_details.fields, { account = var.aws_account_alias, accountid = local.aws_account_id })
+  custom_namespace     =    [for namespace in var.cloudwatch_metrics_source_details.limit_to_namespaces : namespace if !startswith(namespace, "AWS/")]
+  aws_namespace        =    [for namespace in var.cloudwatch_metrics_source_details.limit_to_namespaces : namespace if startswith(namespace, "AWS/")]
 
   # CloudWatch logs source updated details
   create_llf_logs_source      = var.collect_cloudwatch_logs == "Lambda Log Forwarder" && var.cloudwatch_logs_source_url == ""

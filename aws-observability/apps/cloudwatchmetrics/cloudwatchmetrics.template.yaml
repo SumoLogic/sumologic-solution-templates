@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.10.0: Template to Setup Sumo Logic CloudWatch Metric Source. The template setup CW Metrics Sources for Namespaces."
+Description: "Version - v2.11.0: Template to Setup Sumo Logic CloudWatch Metric Source. The template setup CW Metrics Sources for Namespaces."
 
 Parameters:
   SumoLogicDeployment:
@@ -53,6 +53,11 @@ Parameters:
   CloudWatchMetricSourceCategory:
     Type: String
     Description: "Provide a Source Category for CloudWatch Metrics Source"
+    Default: ""
+
+  MetricsSourceAWSTagFilters:
+    Type: String
+    Description: "Provide JSON format of the namespaces with it's tags values for Metrics Source."
     Default: ""
 
   CreateFirstMetricsSource:
@@ -114,6 +119,17 @@ Parameters:
     Type: String
     Description: "Provide the Namespace with which Source need to be created."
     Default: ''
+  CreateCustomMetricsSource:
+    Type: String
+    Description: "Select Yes if you would like to create the Metric Source."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CustomMetricsSourceNamespace:
+    Type: String
+    Description: "Provide the Namespace with which Source need to be created."
+    Default: ''
 
 Mappings:
   # Update the Namespaces mapping whenever CF starts supporting More Namespaces
@@ -150,6 +166,7 @@ Conditions:
   install_third_cw_source: !Equals [!Ref CreateThirdMetricsSource, 'Yes']
   install_fourth_cw_source: !Equals [!Ref CreateFourthMetricsSource, 'Yes']
   install_fifth_cw_source: !Equals [!Ref CreateFifthMetricsSource, 'Yes']
+  install_custom_cw_source: !Equals [!Ref CreateCustomMetricsSource, 'Yes']
 
 Resources:
 
@@ -165,6 +182,7 @@ Resources:
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${FirstMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref FirstMetricsSourceNamespace, ScanInterval]
       SourceCategory: !Ref CloudWatchMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -185,6 +203,7 @@ Resources:
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${SecondMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref SecondMetricsSourceNamespace, ScanInterval]
       SourceCategory: !Ref CloudWatchMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -205,6 +224,7 @@ Resources:
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${ThirdMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref ThirdMetricsSourceNamespace, ScanInterval]
       SourceCategory: !Ref CloudWatchMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -225,6 +245,7 @@ Resources:
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${FourthMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref FourthMetricsSourceNamespace, ScanInterval]
       SourceCategory: !Ref CloudWatchMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
@@ -245,6 +266,28 @@ Resources:
       SourceName: !Sub "${CloudWatchMetricsSourceName}-${FifthMetricsSourceNamespace}"
       ScanInterval: !FindInMap [Namespaces, !Ref FifthMetricsSourceNamespace, ScanInterval]
       SourceCategory: !Ref CloudWatchMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
+      CollectorId: !Ref SumoLogicCollectorId
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      RoleArn: !Ref SumoLogicSourceRole
+      Fields:
+        account: !Ref AccountAlias
+
+  CustomCloudwatchMetricsSource:
+    Type: Custom::AWSSource
+    Condition: install_custom_cw_source
+    Properties:
+      ServiceToken: !Ref LambdaARN
+      Region: !Ref "AWS::Region"
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SourceType: AwsCloudWatch
+      Namespaces: !Split [ "," , !Sub "${CustomMetricsSourceNamespace}" ]
+      SourceName: !Sub "${CloudWatchMetricsSourceName}-CustomMetrics"
+      ScanInterval: "300000"
+      SourceCategory: !Ref CloudWatchMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
       CollectorId: !Ref SumoLogicCollectorId
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey

@@ -1,6 +1,5 @@
 module "alb_module" {
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=sumo_246624"
-  #source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
 
   access_id   = var.access_id
   access_key  = var.access_key
@@ -118,6 +117,74 @@ module "alb_module" {
           threshold_type   = "LessThan",
           occurrence_type  = "Always",
           trigger_source   = "AnyTimeSeries"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "AWSApplicationLoadBalancerDeletionAlert" = {
+      monitor_name         = "AWS Application Load Balancer - Deletion Alert"
+      monitor_description  = "This alert fires when we detect greater than or equal to 2 application load balancers are deleted over a 5 minute time-period."
+      monitor_monitor_type = "Logs"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
+      queries = {
+        A = "account=* region=* \"\"eventsource\":\"elasticloadbalancing.amazonaws.com\"\" \"errorCode\" \"2015-12-01\" | json \"eventSource\", \"eventName\",\"apiVersion\" as event_source, event_name, api_version nodrop | where event_source = \"elasticloadbalancing.amazonaws.com\" and api_version matches \"2015-12-01\" and namespace matches \"aws/applicationelb\" | where event_name matches \"DeleteLoadBalancer\""
+      }
+      triggers = [
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 2,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        },
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 2,
+          threshold_type   = "LessThan",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        }
+      ],
+      group_notifications      = var.group_notifications
+      connection_notifications = var.connection_notifications
+      email_notifications      = var.email_notifications
+    },
+    "AWSApplicationLoadBalancerTargetsDeregistered" = {
+      monitor_name         = "AWS Application Load Balancer - Targets Deregistered"
+      monitor_description  = "This alert fires when we detect greater than or equal to 1 target is de-registered over a 5 minute time-period."
+      monitor_monitor_type = "Logs"
+      monitor_parent_id    = var.monitor_folder_id
+      monitor_is_disabled  = var.monitors_disabled
+      monitor_evaluation_delay = "0m"
+      queries = {
+        A = "account=* region=* \"\"eventsource\":\"elasticloadbalancing.amazonaws.com\"\" \"errorCode\" \"2015-12-01\" | json \"eventSource\", \"eventName\",\"apiVersion\" as event_source, event_name, api_version nodrop | where event_source = \"elasticloadbalancing.amazonaws.com\" and api_version matches \"2015-12-01\" | where namespace matches \"aws/applicationelb\" and event_name=\"DeregisterTargets\""
+      }
+      triggers = [
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "Critical",
+          threshold        = 1,
+          threshold_type   = "GreaterThanOrEqual",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
+        },
+        {
+          detection_method = "StaticCondition",
+          time_range       = "-5m",
+          trigger_type     = "ResolvedCritical",
+          threshold        = 1,
+          threshold_type   = "LessThan",
+          occurrence_type  = "ResultCount",
+          trigger_source   = "AllResults"
         }
       ],
       group_notifications      = var.group_notifications

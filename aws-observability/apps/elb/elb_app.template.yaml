@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.10.0: Template to setup the ELB classic app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.11.0: Template to setup the ELB classic app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -288,10 +288,10 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.12
+      Runtime: python3.13
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.19.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.20.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -381,6 +381,23 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
+  ClbCloudTrailLogsFieldExtractionRule:
+    Type: Custom::SumoLogicFieldExtractionRule
+    Condition: create_fer
+    Properties:
+      ServiceToken: !Ref Section6aParentStackLambdaARN
+      RemoveOnDeleteStack: false
+      FieldExtractionRuleName: "AwsObservabilityCLBCloudTrailLogsFER"
+      FieldExtractionRuleScope: "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2012-06-01\""
+      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.loadBalancerName" as event_source, region, accountid, loadbalancername nodrop  
+                                            | where event_source = "elasticloadbalancing.amazonaws.com"
+                                            | toLowerCase(loadbalancername) as loadbalancername 
+                                            | "aws/elb" as namespace 
+                                            | fields region, namespace, loadbalancername, accountid'
+      FieldExtractionRuleParseEnabled: true
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
 
 Outputs:
   ExistingLogSourceName:

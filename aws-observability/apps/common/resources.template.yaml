@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.10.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.11.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
@@ -98,6 +98,10 @@ Parameters:
   CloudWatchMetricSourceCategory:
     Type: String
     Description: "Provide a source Category for the CloudWatch Metrics Source."
+    Default: ""
+  MetricsSourceAWSTagFilters:
+    Type: String
+    Description: "Provide JSON format of the namespaces with it's tags values for Metrics Source."
     Default: ""
 
   CreateKinesisFirehoseMetricsSource:
@@ -483,11 +487,11 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.12
+      Runtime: python3.13
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.19.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.20.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -527,11 +531,11 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.12
+      Runtime: python3.13
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.19.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.20.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -1083,6 +1087,7 @@ Resources:
 
           def lambda_handler(event, context):
               unique_namespaces = set(["AWS/AutoScaling"])
+              custom_namespace = set()
 
               response_value = {}
               for value in default:
@@ -1093,18 +1098,23 @@ Resources:
               if namespaces:
                   namespace_list = namespaces.split(",")
                   for namespace in namespace_list:
-                      name = namespace.split("/")[1]
-                      response_value[name] = "Yes"
-                      if name not in cw_metrics_specific:
-                          unique_namespaces.add(namespace.replace(" ", ""))
+                      if namespace.strip().startswith("AWS/"):
+                          name = namespace.split("/")[1]
+                          response_value[name] = "Yes"
+                          if name not in cw_metrics_specific:
+                              unique_namespaces.add(namespace.replace(" ", ""))
+                      else:
+                          custom_namespace.add(namespace.replace(" ", ""))
 
               response_value["namespaces"] = ", ".join(unique_namespaces)
+              response_value["createCustom"] = "No" if len(custom_namespace) == 0 else "Yes"
+              response_value["customNamespaces"] = ", ".join(custom_namespace)
               LOGGER.info("Response is {}".format(response_value))
               cfnresponse.send(event, context, cfnresponse.SUCCESS, response_value, "NamespaceSplitting")
       Handler: index.lambda_handler
       MemorySize: 128
       Role: !GetAtt "LambdaRole.Arn"
-      Runtime: python3.11
+      Runtime: python3.13
       Timeout: 60
       Environment:
         Variables:
@@ -1138,6 +1148,7 @@ Resources:
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
         CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
         CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
+        MetricsSourceAWSTagFilters: !Ref MetricsSourceAWSTagFilters
         CreateFirstMetricsSource: !GetAtt Primerinvoke.ApplicationELB
         FirstMetricsSourceNamespace: "ApplicationELB"
         CreateSecondMetricsSource: !GetAtt Primerinvoke.ApiGateway
@@ -1148,6 +1159,8 @@ Resources:
         FourthMetricsSourceNamespace: "Lambda"
         CreateFifthMetricsSource: !GetAtt Primerinvoke.RDS
         FifthMetricsSourceNamespace: "RDS"
+        CreateCustomMetricsSource: !GetAtt Primerinvoke.createCustom
+        CustomMetricsSourceNamespace: !GetAtt Primerinvoke.customNamespaces
 
   CloudWatchMetricsSecondStack:
     Type: AWS::CloudFormation::Stack
@@ -1165,6 +1178,7 @@ Resources:
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
         CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
         CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
+        MetricsSourceAWSTagFilters: !Ref MetricsSourceAWSTagFilters
         CreateFirstMetricsSource: !GetAtt Primerinvoke.ECS
         FirstMetricsSourceNamespace: "ECS"
         CreateSecondMetricsSource: !GetAtt Primerinvoke.ElastiCache
@@ -1193,6 +1207,7 @@ Resources:
         SumoLogicSourceRole: !GetAtt SumoLogicSourceRole.Arn
         CloudWatchMetricsSourceName: !Ref CloudWatchMetricsSourceName
         CloudWatchMetricSourceCategory: !Ref CloudWatchMetricSourceCategory
+        MetricsSourceAWSTagFilters: !Ref MetricsSourceAWSTagFilters
         CreateFirstMetricsSource: !GetAtt Primerinvoke.SQS
         FirstMetricsSourceNamespace: "SQS"
         CreateSecondMetricsSource: !GetAtt Primerinvoke.SNS
@@ -1231,6 +1246,7 @@ Resources:
       SourceName: !Ref KinesisFirehoseMetricsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
       SourceCategory: !Ref KinesisFirehoseMetricSourceCategory
+      AWSTagFilters: !Ref MetricsSourceAWSTagFilters
       CollectorId: !GetAtt SumoLogicHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey
