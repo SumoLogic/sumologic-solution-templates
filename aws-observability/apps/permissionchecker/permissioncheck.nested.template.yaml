@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.10.0: This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
+Description: "Version - v2.11.0: This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
 Transform: 'AWS::Serverless-2016-10-31'
 
 Metadata:
@@ -366,10 +366,10 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.12
+      Runtime: python3.13
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.19.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.20.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -536,7 +536,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
-        SemanticVersion: 1.0.14
+        SemanticVersion: 1.0.16
       Parameters:
         BucketName: !Ref CommonS3Bucket
         BucketPrefix: "elasticloadbalancing"
@@ -671,7 +671,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.12
+        SemanticVersion: 1.0.14
       Parameters:
         DestinationArnType: "Lambda"
         DestinationArnValue: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
