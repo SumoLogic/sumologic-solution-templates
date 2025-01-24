@@ -101,10 +101,28 @@ output "sumologic_field_extraction_rule_alb" {
   description = "This output contains sumologic ALB field extraction rule id."
 }
 
+# ALB CloudTrail FER id
+output "sumologic_field_extraction_rule_alb_cloudtrail" {
+  value       = sumologic_field_extraction_rule.AwsObservabilityALBCloudTrailLogsFER.id
+  description = "This output contains sumologic ALB CloudTrail field extraction rule id."
+}
+
 # CLB FER id
 output "sumologic_field_extraction_rule_elb" {
   value       = sumologic_field_extraction_rule.AwsObservabilityElbAccessLogsFER.id
   description = "This output contains sumologic CLB field extraction rule id."
+}
+
+# CLB CloudTrail FER id
+output "sumologic_field_extraction_rule_clb_cloudtrail" {
+  value       = sumologic_field_extraction_rule.AwsObservabilityCLBCloudTrailLogsFER.id
+  description = "This output contains sumologic CLB CloudTrail field extraction rule id."
+}
+
+# NLB CloudTrail FER id
+output "sumologic_field_extraction_rule_nlb_cloudtrail" {
+  value       = sumologic_field_extraction_rule.AwsObservabilityNLBCloudTrailLogsFER.id
+  description = "This output contains sumologic NLB CloudTrail field extraction rule id."
 }
 
 # DynamoDB FER id
