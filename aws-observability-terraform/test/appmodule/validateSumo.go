@@ -146,6 +146,16 @@ func validateSumoLogicResources(t *testing.T, workingDir string) {
 	// Validate if the EC2 FER is created successfully
 	ec2FerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_ec2metrics")
 	validateSumoLogicFER(t, terraformOptions, ec2FerID)
+	time.Sleep(2 * time.Second)
+	// Validate if the ALB CloudTrail Logs FER is created successfully
+	albCloudTrailFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_alb_cloudtrail")
+	validateSumoLogicFER(t, terraformOptions, albCloudTrailFerID)
+	// Validate if the CLB CloudTrail Logs FER is created successfully
+	clbCloudTrailFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_clb_cloudtrail")
+	validateSumoLogicFER(t, terraformOptions, clbCloudTrailFerID)
+	// Validate if the NLB CloudTrail Logs FER is created successfully
+	nlbCloudTrailFerID := terraform.Output(t, terraformOptions, "sumologic_field_extraction_rule_nlb_cloudtrail")
+	validateSumoLogicFER(t, terraformOptions, nlbCloudTrailFerID)
 
 	// Fields
 	// Validate if the account Field is created successfully
