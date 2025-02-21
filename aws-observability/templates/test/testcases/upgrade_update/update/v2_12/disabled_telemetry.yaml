@@ -1,6 +1,6 @@
 ---
 Global:
-  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.9.0/sumologic_observability.master.template.yaml"
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.12.0/sumologic_observability.master.template.yaml"
   StackName: AWSO
   ParallelTestsRun: 1
   GlobalParameters:
@@ -9,8 +9,7 @@ Global:
     Update:
       Section1fSumoLogicSendTelemetry: 'true'
 TestCase:
-  TestName: v2_9ToV2_10disabledTelemetry
-  UpgradeTemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.10.0/sumologic_observability.master.template.yaml"
+  TestName: disabledTelemetry
   Regions: '${SUMO_REGIONS}'
   Skip: false
   PreRequisitesInfra:
@@ -26,7 +25,7 @@ TestCase:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
         SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
-        AccountAlias: "upgradeupdatet1"
+        AccountAlias: "updatet1"
     - CFNTemplateURL: "test/setup-infra/create_sumo_collector.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -51,7 +50,8 @@ TestCase:
       Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
       Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
       Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
-      Section2aAccountAlias: 'upgradeupdatet1'
+      Section1fSumoLogicSendTelemetry: 'true'
+      Section2aAccountAlias: 'updatet1'
       Section2bAccountAliasMappingS3URL: ''
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'None'
@@ -152,6 +152,7 @@ TestCase:
           - sumoLambdaMetricsAppStack.GenericCloudWatchLogsFieldExtractionRule
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
+          - sumoAlbMetricsAppStack.AlbCloudTrailLogsFieldExtractionRule
     - AssertType: OutputsCheck
       Assert:
         Outputs:
@@ -169,7 +170,7 @@ TestCase:
     - AssertType: ParameterCheck
       Assert:
         CreateCommonResources:
-          AccountAlias: "upgradeupdatet1"
+          AccountAlias: "updatet1"
           AccountAliasMappingS3URL: ""
           CreateMetaDataSource: 'No'
           MetaDataSourceName: ""
@@ -210,7 +211,7 @@ TestCase:
         sumoEC2MetricsAppStack:
           Section2aInstallApp: 'No'
         sumoAlbMetricsAppStack:
-          Section2aAccountAlias: 'upgradeupdatet1'
+          Section2aAccountAlias: 'updatet1'
           Section3aInstallApp: 'No'
           Section4aCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
           Section5aALBLogsAPIUrl: ''
@@ -237,7 +238,7 @@ TestCase:
           Section4bAwsXRaySourceName: "xray-<REGION>"
           Section4cXraySourceCategory: "aws/observability/xray"
         sumoLambdaMetricsAppStack:
-          Section2aAccountAlias: 'upgradeupdatet1'
+          Section2aAccountAlias: 'updatet1'
           Section3aInstallApp: 'No'
           Section4aCloudWatchExistingSourceAPIUrl: ''
           Section5aCloudTrailLogsAPIUrl: ''

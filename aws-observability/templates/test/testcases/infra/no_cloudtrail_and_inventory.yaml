@@ -1,12 +1,12 @@
 ---
 Global:
-  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.11.0/sumologic_observability.master.template.yaml"
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.12.0/sumologic_observability.master.template.yaml"
   StackName: AWSO
   ParallelTestsRun: 1
   GlobalParameters:
     Default:
       Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
-      Section2aAccountAlias: 'testenv'
+      Section2aAccountAlias: 'infrat4'
 TestCase:
   TestName: noCloudTrailAndInventory
   Regions: '${SUMO_REGIONS}'
@@ -26,6 +26,7 @@ TestCase:
       Section6aCreateCloudTrailLogSource: 'No'
       Section7aLambdaCreateCloudWatchLogsSourceOptions: 'Lambda Log Forwarder'
       Section7cAutoSubscribeLogGroupsOptions: 'New'
+      Section7eAutoSubscribeLogGroupByTags: 'env=prod,creator=himan,team=app'
       Section8aRootCauseExplorerOptions: 'Xray Source'
       Section4bMetricsNameSpaces: 'AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/ApplicationELB, AWS/RDS, AWS/SQS, AWS/EC2, AWS/SNS'
       Section9aAutoEnableS3LogsELBResourcesOptions: 'New'
