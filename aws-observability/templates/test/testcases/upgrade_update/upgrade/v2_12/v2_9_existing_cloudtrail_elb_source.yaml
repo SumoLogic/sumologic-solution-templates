@@ -1,14 +1,16 @@
 ---
 Global:
-  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.12.0/sumologic_observability.master.template.yaml"
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.9.0/sumologic_observability.master.template.yaml"
   StackName: AWSO
   ParallelTestsRun: 1
   GlobalParameters:
     Default:
       Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
-      Section2aAccountAlias: 'infrat10'
+      Section2aAccountAlias: 'upgradev29to211'
 TestCase:
-  TestName: existingCloudTrailElbSource
+  TestName: v2_9ToV2_12ExistingCloudTrailElbSource
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.9.0/sumologic_observability.master.template.yaml"
+  UpgradeTemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.12.0/sumologic_observability.master.template.yaml"
   Regions: '${SUMO_REGIONS}'
   Skip: false
   PreRequisitesInfra:
@@ -78,7 +80,7 @@ TestCase:
       Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
       Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
       Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
-      Section2aAccountAlias: 'infrat10'
+      Section2aAccountAlias: 'upgradev29to211'
       Section2bAccountAliasMappingS3URL: ''
       Section3aInstallObservabilityApps: 'Yes'
       Section4aCreateMetricsSourceOptions: 'Kinesis Firehose Metrics Source'
@@ -238,7 +240,7 @@ TestCase:
     - AssertType: ParameterCheck
       Assert:
         CreateCommonResources:
-          AccountAlias: "infrat10"
+          AccountAlias: "upgradev29to211"
           AccountAliasMappingS3URL: ""
           CreateMetaDataSource: 'No'
           MetaDataSourceName: ""
@@ -275,30 +277,30 @@ TestCase:
         sumoEC2MetricsAppStack:
           Section2aInstallApp: 'Yes'
         sumoElbMetricsAppStack:
-          Section2aAccountAlias: 'infrat10'
+          Section2aAccountAlias: 'upgradev29to211'
           Section3aInstallApp: 'Yes'
           Section4aCloudWatchExistingSourceAPIUrl: ''
           Section5aELBLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
           Section5bELBLogsSourceName: ''
         sumoDynamoDBMetricsAppStack:
           Section2aInstallApp: 'Yes'
-          Section3aCloudTrailLogsSourceName: 'test-automation-awso-existingCloudTrailElbSource'
+          Section3aCloudTrailLogsSourceName: 'test-automation-awso-v2_9ToV2_12ExistingCloudTrailElbSource'
           Section3bCloudTrailSourceUpdated: 'Yes'
         sumoRdsMetricsAppStack:
           Section2aInstallApp: 'Yes'
-          Section3aCloudTrailLogsSourceName: 'test-automation-awso-existingCloudTrailElbSource'
+          Section3aCloudTrailLogsSourceName: 'test-automation-awso-v2_9ToV2_12ExistingCloudTrailElbSource'
           Section3bCloudTrailSourceUpdated: 'Yes'
         sumoApiGatewayMetricsAppStack:
           Section2aInstallApp: 'Yes'
-          Section3aCloudTrailLogsSourceName: 'test-automation-awso-existingCloudTrailElbSource'
+          Section3aCloudTrailLogsSourceName: 'test-automation-awso-v2_9ToV2_12ExistingCloudTrailElbSource'
           Section3bCloudTrailSourceUpdated: 'Yes'
         sumoSNSAppStack:
           Section2aInstallApp: 'Yes'
-          Section3aCloudTrailLogsSourceName: 'test-automation-awso-existingCloudTrailElbSource'
+          Section3aCloudTrailLogsSourceName: 'test-automation-awso-v2_9ToV2_12ExistingCloudTrailElbSource'
           Section3bCloudTrailSourceUpdated: 'Yes'
         sumoSQSAppStack:
           Section2aInstallApp: 'Yes'
-          Section3aCloudTrailLogsSourceName: 'test-automation-awso-existingCloudTrailElbSource'
+          Section3aCloudTrailLogsSourceName: 'test-automation-awso-v2_9ToV2_12ExistingCloudTrailElbSource'
           Section3bCloudTrailSourceUpdated: 'Yes'
         RootCauseAppStack:
           Section2aInstallApp: 'Yes'
@@ -310,7 +312,7 @@ TestCase:
           Section4bAwsXRaySourceName: "xray-<REGION>"
           Section4cXraySourceCategory: "aws/observability/xray"
         sumoLambdaMetricsAppStack:
-          Section2aAccountAlias: 'infrat10'
+          Section2aAccountAlias: 'upgradev29to211'
           Section3aInstallApp: 'Yes'
           Section4aCloudWatchExistingSourceAPIUrl: ''
           Section5aCloudTrailLogsAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
@@ -319,11 +321,11 @@ TestCase:
           Section6bCloudWatchLogsSourceName: ''
         sumoECSMetricsAppStack:
           Section2aInstallApp: 'Yes'
-          Section3aCloudTrailLogsSourceName: 'test-automation-awso-existingCloudTrailElbSource'
+          Section3aCloudTrailLogsSourceName: 'test-automation-awso-v2_9ToV2_12ExistingCloudTrailElbSource'
           Section3bCloudTrailSourceUpdated: 'Yes'
         sumoElasticCacheMetricsAppStack:
           Section2aInstallApp: 'Yes'
-          Section3aCloudTrailLogsSourceName: 'test-automation-awso-existingCloudTrailElbSource'
+          Section3aCloudTrailLogsSourceName: 'test-automation-awso-v2_9ToV2_12ExistingCloudTrailElbSource'
           Section3bCloudTrailSourceUpdated: 'Yes'
         sumoNlbMetricsAppStack:
           Section2aInstallApp: 'Yes'

@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM python:3.13-alpine
 
 # Install git using apk
 RUN apk update && apk add git ruby ruby-dev build-base
@@ -21,5 +21,4 @@ COPY requirements.txt /cf_test_automation/test/
 RUN pip install --no-cache-dir -r /cf_test_automation/test/requirements.txt
 
 # Install dependencies (if any, e.g., pip requirements)
-# RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir git+https://<username>:<password>@github.com/SumoLogic/sumologic-aws-cloudformation-test.git@cf_test_automation
+RUN pip install --no-cache-dir git+https://<username>:<password>@github.com/SumoLogic/sumologic-aws-cloudformation-test.git@1.0.0
