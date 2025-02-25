@@ -244,7 +244,8 @@ Parameters:
   Section4dAWSMetricsTagFilters:
     Type: String
     AllowedPattern: '^\{.*\}$'
-    Description: "Provide JSON format of the namespaces with it's tags values to add filters to your metrics. Use semicolons to separate multiple values for the same tag key. AWS Tag Filters will be added to the Source. For JSON format sample, visit <#TODO>"
+    Description: "Provide JSON format of the namespaces with it's tags values to add filters to your metrics. Use semicolons to separate multiple values for the same tag key. AWS Tag Filters will be added to the Source. For JSON format sample, visit https://help.sumologic.com/docs/observability/aws/deploy-use-aws-observability/deploy-with-aws-cloudformation/#step-5-sumo-logic-aws-cloudwatch-metrics-sources"
+    Default: "{}"
 
   Section5aAutoEnableS3LogsALBResourcesOptions:
     Type: String
@@ -745,10 +746,10 @@ Resources:
         ALBAutoEnableS3LogsOptions: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
         ALBS3LogsBucketName: !If [create_alb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section5dALBS3LogsBucketName]
         AutoSubscribeLogGroups: !If [create_kf_logs_source, "Yes", !If [ create_cw_logs_source, "Yes", "No" ] ]
-        AutoSubscribeLogGroupsOptions: !Ref Section7cAutoSubscribeLogGroupsOptions
+        AutoSubscribeLogGroupsLambdaOptions: !Ref Section7cAutoSubscribeLogGroupsOptions
         AutoSubscribeDestinationARNType: !If [create_kf_logs_source, "Kinesis",  "Lambda" ]
-        AutoSubscribeDestinationARNValue: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, !If [ create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, "" ] ]
-        AutoSubscribeLogGroupPattern: !Ref Section7dAutoSubscribeLogGroupPattern
+        AutoSubscribeDestinationARN: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, !If [ create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, "" ] ]
+        AutoSubscribeLambdaLogGroupPattern: !Ref Section7dAutoSubscribeLogGroupPattern
         AutoSubscribeRoleArn: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsRoleARN,  "" ]
         ELBAutoEnableS3Logs: !If [auto_enable_s3_logs_elb, "Yes", "No"]
         ELBAutoEnableS3LogsOptions: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
