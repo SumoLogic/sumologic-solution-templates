@@ -94,6 +94,7 @@ module "collection-module" {
   },
   "description": "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch metrics.",
   "fields": {},
+  "tag_filters" : [],
   "limit_to_namespaces": [
     "AWS/ApiGateway",
     "AWS/ApplicationELB",

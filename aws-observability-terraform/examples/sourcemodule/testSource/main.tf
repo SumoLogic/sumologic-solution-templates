@@ -26,12 +26,29 @@ module "collection-module" {
   # CW logs 
   # logs_source_url = "https://api.sumologic.com/api/v1/collectors/185689129/sources/915277706"
   collect_cloudwatch_logs = var.collect_logs_cloudwatch
+  auto_enable_logs_subscription_options = {
+   "filter": var.auto_enable_logs_filters
+   "tags_filter": var.auto_enable_logs_tags_filters
+   }
   
   # Enable Collection of Cloudtrail logs
   collect_cloudtrail_logs   = var.collect_cloudtrail
 
   # Collect CW metrics
   collect_cloudwatch_metrics = var.collect_metric_cloudwatch
+  cloudwatch_metrics_source_details = {
+  "bucket_details": {
+    "bucket_name": var.s3_name,
+    "create_bucket": var.create_s3_bucket,
+    "force_destroy_bucket": true
+  },
+  "description": "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch metrics.",
+  "fields": {},
+  "limit_to_namespaces": var.metric_namespaces
+  "tag_filters": var.metrics_tag_filters
+  "source_category": "aws/observability/cloudwatch/metrics/us-east-1",
+  "source_name": "CloudWatch Metrics us-east-1"
+}
 
   # RCE
   collect_root_cause_data = var.collect_rce

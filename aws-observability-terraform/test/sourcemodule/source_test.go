@@ -1,9 +1,11 @@
 package test
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -19,10 +21,24 @@ func TestSourceModule1(t *testing.T) {
 	Vars := map[string]interface{}{
 		"executeTest1": "true",
 	}
+	varsContent := []byte{}
+	// Create a temporary vars.tfvars file
+	varsFile := filepath.Join(TerraformDir, "vars.tfvars")
+	err := os.WriteFile(varsFile, varsContent, 0644)
+	if err != nil {
+		t.Fatalf("Failed to create vars.tfvars file: %v", err)
+	}
+
+	// Get absolute path
+	varsAbsPath, err := filepath.Abs(varsFile)
+	if err != nil {
+		fmt.Println("Error getting absolute path:", err)
+		return
+	}
 
 	// Deploy the solution using Terraform
 	test_structure.RunTestStage(t, "deploy", func() {
-		resourceCount = deployTerraform(t, TerraformDir, Vars)
+		resourceCount = deployTerraform(t, TerraformDir, Vars, varsAbsPath)
 	})
 
 	// Assert count of Expected resources.
@@ -104,6 +120,11 @@ func TestSourceModule1(t *testing.T) {
 	// At the end of the test, un-deploy the solution using Terraform
 	defer test_structure.RunTestStage(t, "cleanup", func() {
 		destroyTerraform(t, TerraformDir)
+		// Delete the temporary vars.tfvars file
+		err := os.Remove(varsAbsPath)
+		if err != nil {
+			t.Fatalf("Failed to delete vars.tfvars file: %v", err)
+		}
 	})
 }
 
@@ -125,9 +146,24 @@ func TestSourceModule2(t *testing.T) {
 		"collect_logs_cloudwatch":   "None",
 		"collect_metric_cloudwatch": "None",
 	}
+	varsContent := []byte{}
+	// Create a temporary vars.tfvars file
+	varsFile := filepath.Join(TerraformDir, "vars.tfvars")
+	err := os.WriteFile(varsFile, varsContent, 0644)
+	if err != nil {
+		t.Fatalf("Failed to create vars.tfvars file: %v", err)
+	}
+
+	// Get absolute path
+	varsAbsPath, err := filepath.Abs(varsFile)
+	if err != nil {
+		fmt.Println("Error getting absolute path:", err)
+		return
+	}
+
 	// Deploy the solution using Terraform
 	test_structure.RunTestStage(t, "deploy", func() {
-		resourceCount = deployTerraform(t, TerraformDir, Vars)
+		resourceCount = deployTerraform(t, TerraformDir, Vars, varsAbsPath)
 	})
 
 	// Assert count of Expected resources.
@@ -138,6 +174,11 @@ func TestSourceModule2(t *testing.T) {
 	// At the end of the test, un-deploy the solution using Terraform
 	defer test_structure.RunTestStage(t, "cleanup", func() {
 		destroyTerraform(t, TerraformDir)
+		// Delete the temporary vars.tfvars file
+		err := os.Remove(varsAbsPath)
+		if err != nil {
+			t.Fatalf("Failed to delete vars.tfvars file: %v", err)
+		}
 	})
 }
 
@@ -145,11 +186,6 @@ func TestSourceModule2(t *testing.T) {
 func TestSourceModule3(t *testing.T) {
 	// t.Parallel()
 
-	// The values to pass into the terraform CLI
-	// rootFolder := "../"
-	// terraformFolderRelativeToRoot := "examples/sourcemodule"
-	// Copy the terraform folder to a temp folder
-	// TerraformDir := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
 	TerraformDir := "../../examples/sourcemodule/testSource"
 	props = loadPropertiesFile("../../examples/sourcemodule/testSource/main.auto.tfvars")
 
@@ -162,9 +198,24 @@ func TestSourceModule3(t *testing.T) {
 		"collect_logs_cloudwatch":   "Lambda Log Forwarder",
 		"collect_metric_cloudwatch": "CloudWatch Metrics Source",
 	}
+	varsContent := []byte{}
+	// Create a temporary vars.tfvars file
+	varsFile := filepath.Join(TerraformDir, "vars.tfvars")
+	err := os.WriteFile(varsFile, varsContent, 0644)
+	if err != nil {
+		t.Fatalf("Failed to create vars.tfvars file: %v", err)
+	}
+
+	// Get absolute path
+	varsAbsPath, err := filepath.Abs(varsFile)
+	if err != nil {
+		fmt.Println("Error getting absolute path:", err)
+		return
+	}
+
 	// Deploy the solution using Terraform
 	test_structure.RunTestStage(t, "deploy", func() {
-		resourceCount = deployTerraform(t, TerraformDir, Vars)
+		resourceCount = deployTerraform(t, TerraformDir, Vars, varsAbsPath)
 	})
 
 	// Assert count of Expected resources.
@@ -199,6 +250,11 @@ func TestSourceModule3(t *testing.T) {
 	// At the end of the test, un-deploy the solution using Terraform
 	defer test_structure.RunTestStage(t, "cleanup", func() {
 		destroyTerraform(t, TerraformDir)
+		// Delete the temporary vars.tfvars file
+		err := os.Remove(varsAbsPath)
+		if err != nil {
+			t.Fatalf("Failed to delete vars.tfvars file: %v", err)
+		}
 	})
 }
 
@@ -224,15 +280,29 @@ func TestSourceModule4(t *testing.T) {
 		"collect_metric_cloudwatch": "CloudWatch Metrics Source",
 		"create_s3_bucket":          "false",
 	}
+	varsContent := []byte{}
+	// Create a temporary vars.tfvars file
+	varsFile := filepath.Join(TerraformDir, "vars.tfvars")
+	err := os.WriteFile(varsFile, varsContent, 0644)
+	if err != nil {
+		t.Fatalf("Failed to create vars.tfvars file: %v", err)
+	}
+
+	// Get absolute path
+	varsAbsPath, err := filepath.Abs(varsFile)
+	if err != nil {
+		fmt.Println("Error getting absolute path:", err)
+		return
+	}
 	// Deploy the solution using Terraform
 	test_structure.RunTestStage(t, "deploy", func() {
-		resourceCount = deployTerraform(t, TerraformDir, Vars)
+		resourceCount = deployTerraform(t, TerraformDir, Vars, varsAbsPath)
 	})
 
-	// // Assert count of Expected resources.
-	// test_structure.RunTestStage(t, "AssertCount", func() {
-	// 	AssertResourceCounts(t, resourceCount, 69, 0, 0)
-	// })
+	// Assert count of Expected resources.
+	test_structure.RunTestStage(t, "AssertCount", func() {
+		AssertResourceCounts(t, resourceCount, 192, 0, 0)
+	})
 
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
 	terraformOptions := test_structure.LoadTerraformOptions(t, TerraformDir)
@@ -292,5 +362,208 @@ func TestSourceModule4(t *testing.T) {
 	// At the end of the test, un-deploy the solution using Terraform
 	defer test_structure.RunTestStage(t, "cleanup", func() {
 		destroyTerraform(t, TerraformDir)
+		// Delete the temporary vars.tfvars file
+		err := os.Remove(varsAbsPath)
+		if err != nil {
+			t.Fatalf("Failed to delete vars.tfvars file: %v", err)
+		}
+	})
+}
+
+// Testing scenerio 5 - Collect CW Logs via Lambda Log forwarder + filter log groups based on AWS tag and CW Metrics via CW metric source + collect custom metrics namespace + filter metrics by AWS tags
+func TestSourceModule5(t *testing.T) {
+	// t.Parallel()
+
+	TerraformDir := "../../examples/sourcemodule/testSource"
+	props = loadPropertiesFile("../../examples/sourcemodule/testSource/main.auto.tfvars")
+
+	Vars := map[string]interface{}{
+		"executeTest5":                  "true",
+		"collect_elb":                   "false",
+		"collect_classic_lb":            "false",
+		"collect_cloudtrail":            "false",
+		"collect_rce":                   "None",
+		"collect_logs_cloudwatch":       "Lambda Log Forwarder",
+		"auto_enable_logs_tags_filters": "Environment=Production,Application=MyApp,creator=appsTeam",
+		"collect_metric_cloudwatch":     "CloudWatch Metrics Source",
+	}
+	// Define the variable values
+	varsContent := []byte(`
+	metric_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "cwagent"]
+	metrics_tag_filters = [
+		{
+			"type"=      "TagFilters",
+			"namespace"= "AWS/DynamoDB",
+			"tags"=      ["env=prod;dev"],
+		},
+		{
+			"type"=      "TagFilters",
+			"namespace"= "AWS/Lambda",
+			"tags"=      ["env=prod"],
+		},
+		{
+			"type"=      "TagFilters",
+			"namespace"= "AWS/EC2",
+			"tags"=      ["creator=appsTeam"],
+		},
+	]
+	`)
+
+	// Create a temporary vars.tfvars file
+	varsFile := filepath.Join(TerraformDir, "vars.tfvars")
+	err := os.WriteFile(varsFile, varsContent, 0644)
+	if err != nil {
+		t.Fatalf("Failed to create vars.tfvars file: %v", err)
+	}
+
+	// Get absolute path
+	varsAbsPath, err := filepath.Abs(varsFile)
+	if err != nil {
+		fmt.Println("Error getting absolute path:", err)
+		return
+	}
+
+	// Deploy the solution using Terraform
+	test_structure.RunTestStage(t, "deploy", func() {
+		resourceCount = deployTerraform(t, TerraformDir, Vars, varsAbsPath)
+	})
+
+	// Assert count of Expected resources.
+	test_structure.RunTestStage(t, "AssertCount", func() {
+		AssertResourceCounts(t, resourceCount, 73, 0, 0)
+	})
+	// Load the Terraform Options saved by the earlier deploy_terraform stage
+	terraformOptions := test_structure.LoadTerraformOptions(t, TerraformDir)
+
+	// Validate that the resources are created in Sumo Logic
+	test_structure.RunTestStage(t, "validateSumoLogic", func() {
+		// Collector
+		collectorID := terraform.Output(t, terraformOptions, "sumologic_collector")
+		validateSumoCollector(t, terraformOptions, collectorID)
+		// AWS IAM role
+		iamRole := terraform.Output(t, terraformOptions, "aws_iam_role")
+		validateIAMRole(t, terraformOptions, iamRole)
+		// LLF Logs Source
+		cwLogsSourceID := terraform.Output(t, terraformOptions, "sumologic_cloudwatch_logs_source")
+		validateSumoSource(t, terraformOptions, collectorID, cwLogsSourceID)
+		// CloudWatch logs lambda forwarder
+		lambdaName := terraform.Output(t, terraformOptions, "log_forwarder_lambda_name")
+		validateLambda(t, terraformOptions, lambdaName)
+		// // LLF logs CloudFormation Stack
+		llfLogsStack := terraform.Output(t, terraformOptions, "cw_logs_auto_enable_stack")
+		validateCFStack(t, terraformOptions, llfLogsStack)
+	})
+
+	// At the end of the test, un-deploy the solution using Terraform
+	defer test_structure.RunTestStage(t, "cleanup", func() {
+		destroyTerraform(t, TerraformDir)
+		// Delete the temporary vars.tfvars file
+		err := os.Remove(varsAbsPath)
+		if err != nil {
+			t.Fatalf("Failed to delete vars.tfvars file: %v", err)
+		}
+	})
+}
+
+// Testing scenerio 6 - Collect CW Logs via Kinesis source + filter log groups based on AWS tag and CW Metrics via Kinesis source + collect custom metrics namespace + filter metrics by AWS tags
+
+func TestSourceModule6(t *testing.T) {
+	// t.Parallel()
+
+	TerraformDir := "../../examples/sourcemodule/testSource"
+	props = loadPropertiesFile("../../examples/sourcemodule/testSource/main.auto.tfvars")
+
+	Vars := map[string]interface{}{
+		"executeTest6":                  "true",
+		"collect_elb":                   "false",
+		"collect_classic_lb":            "false",
+		"collect_cloudtrail":            "false",
+		"collect_rce":                   "None",
+		"auto_enable_logs_tags_filters": "Environment=Production,Application=MyApp,creator=appsTeam",
+	}
+	// Define the variable values
+	varsContent := []byte(`
+	metric_namespaces = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "cwagent"]
+	metrics_tag_filters = [
+		{
+			"type"=      "TagFilters",
+			"namespace"= "AWS/DynamoDB",
+			"tags"=      ["env=prod;dev"],
+		},
+		{
+			"type"=      "TagFilters",
+			"namespace"= "AWS/Lambda",
+			"tags"=      ["env=prod"],
+		},
+		{
+			"type"=      "TagFilters",
+			"namespace"= "AWS/EC2",
+			"tags"=      ["creator=appsTeam"],
+		},
+	]
+	`)
+
+	// Create a temporary vars.tfvars file
+	varsFile := filepath.Join(TerraformDir, "vars.tfvars")
+	err := os.WriteFile(varsFile, varsContent, 0644)
+	if err != nil {
+		t.Fatalf("Failed to create vars.tfvars file: %v", err)
+	}
+
+	// Get absolute path
+	varsAbsPath, err := filepath.Abs(varsFile)
+	if err != nil {
+		fmt.Println("Error getting absolute path:", err)
+		return
+	}
+
+	// Deploy the solution using Terraform
+	test_structure.RunTestStage(t, "deploy", func() {
+		resourceCount = deployTerraform(t, TerraformDir, Vars, varsAbsPath)
+	})
+
+	// Assert count of Expected resources.
+	test_structure.RunTestStage(t, "AssertCount", func() {
+		AssertResourceCounts(t, resourceCount, 70, 0, 0)
+	})
+	// Load the Terraform Options saved by the earlier deploy_terraform stage
+	terraformOptions := test_structure.LoadTerraformOptions(t, TerraformDir)
+
+	// Validate that the resources are created in Sumo Logic
+	test_structure.RunTestStage(t, "validateSumoLogic", func() {
+		// Collector
+		collectorID := terraform.Output(t, terraformOptions, "sumologic_collector")
+		validateSumoCollector(t, terraformOptions, collectorID)
+		// AWS IAM role
+		iamRole := terraform.Output(t, terraformOptions, "aws_iam_role")
+		validateIAMRole(t, terraformOptions, iamRole)
+		// Cloud Watch metric stream
+		cwMetricsStream := terraform.Output(t, terraformOptions, "cw_metrics_stream")
+		validateCWmetricstream(t, terraformOptions, cwMetricsStream)
+		// KF logs CloudFormation Stack
+		kfLogsStack := terraform.Output(t, terraformOptions, "kf_logs_auto_enable_stack")
+		validateCFStack(t, terraformOptions, kfLogsStack)
+		// Kinesis Firehose for Logs
+		kfLogsStream := terraform.Output(t, terraformOptions, "kf_logs_stream")
+		validateKFstream(t, terraformOptions, kfLogsStream)
+		// Kinesis Firehose for Metrics
+		kfMetricsStream := terraform.Output(t, terraformOptions, "kf_metrics_stream")
+		validateKFstream(t, terraformOptions, kfMetricsStream)
+		// Kf Logs Source
+		kfLogsSourceID := terraform.Output(t, terraformOptions, "sumologic_kinesis_firehose_for_logs_source")
+		validateSumoSource(t, terraformOptions, collectorID, kfLogsSourceID)
+		// Kf Metrics Source
+		kfMetricsSourceID := terraform.Output(t, terraformOptions, "sumologic_kinesis_firehose_for_metrics_source")
+		validateSumoSource(t, terraformOptions, collectorID, kfMetricsSourceID)
+	})
+
+	// At the end of the test, un-deploy the solution using Terraform
+	defer test_structure.RunTestStage(t, "cleanup", func() {
+		destroyTerraform(t, TerraformDir)
+		// Delete the temporary vars.tfvars file
+		err := os.Remove(varsAbsPath)
+		if err != nil {
+			t.Fatalf("Failed to delete vars.tfvars file: %v", err)
+		}
 	})
 }
