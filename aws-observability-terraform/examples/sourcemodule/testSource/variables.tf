@@ -94,6 +94,33 @@ variable "sumo_api_endpoint" {
   }
 }
 
+variable "auto_enable_logs_filters" {
+  type        = string
+  description = "Enter regex for matching logGroups. Regex will check for the name."
+  default = "apigateway|lambda|rds"
+}
+variable "auto_enable_logs_tags_filters" {
+  type        = string
+  description = "Enter comma separated key value pairs for filtering logGroups using tags."
+  default = null
+}
+variable "metric_namespaces" {
+  type        = list(string)
+  description = "Enter comma separated metric namespaces."
+  # ephemeral = true
+  default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/EC2"]
+}
+variable "metrics_tag_filters" {
+  type        = list(object({
+      type      = string
+      namespace = string
+      tags      = list(string)
+    }))
+  description = "Enter comma separated key value pairs for filtering metrics using tags."
+  default = []
+  # ephemeral = true
+}
+
 variable "apps_folder" {
   type        = string
   description = <<EOT
@@ -352,6 +379,16 @@ variable "executeTest3" {
   default     = false
 }
 variable "executeTest4" {
+  type        = bool
+  description = "True - If you want to execute this TestCase"
+  default     = false
+}
+variable "executeTest5" {
+  type        = bool
+  description = "True - If you want to execute this TestCase"
+  default     = false
+}
+variable "executeTest6" {
   type        = bool
   description = "True - If you want to execute this TestCase"
   default     = false

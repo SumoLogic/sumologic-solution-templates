@@ -9,8 +9,11 @@ import (
 )
 
 // Deploy the resources using Terraform
-func deployTerraform(t *testing.T, workingDir string, Variables map[string]interface{}) *terraform.ResourceCount {
+func deployTerraform(t *testing.T, workingDir string, Variables map[string]interface{}, varsFile string) *terraform.ResourceCount {
 
+	if varsFile == "" {
+		varsFile = "vars.tfvars"
+	}
 	// The values to pass into the terraform CLI
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 
@@ -19,6 +22,8 @@ func deployTerraform(t *testing.T, workingDir string, Variables map[string]inter
 
 		// Variables to pass to our Terraform code using -var options
 		Vars: Variables,
+		// VarFiles to pass vars.tfvars file
+		VarFiles: []string{varsFile},
 
 		// Disable colors in Terraform commands so its easier to parse stdout/stderr
 		NoColor: true,
