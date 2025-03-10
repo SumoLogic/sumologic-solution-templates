@@ -134,13 +134,3 @@ output "kinesis_firehose_for_logs_auto_subscribe_stack" {
   value       = local.create_kf_logs_source && var.auto_enable_logs_subscription != "None" ? module.kinesis_firehose_for_logs_module["kinesis_firehose_for_logs_module"].aws_serverlessapplicationrepository_cloudformation_stack : {}
   description = "AWS CloudFormation stack for Auto Enable logs subscription."
 }
-
-output "inventory_source" {
-  value       = local.create_inventory_source ? module.root_cause_sources_module["root_cause_sources_module"].inventory_sumologic_source : null
-  description = "Sumo Logic AWS Inventory source."
-}
-
-output "xray_source" {
-  value       = local.create_xray_source ? module.root_cause_sources_module["root_cause_sources_module"].xray_sumologic_source : null
-  description = "Sumo Logic AWS Xray source."
-}
