@@ -60,11 +60,6 @@ Metadata:
           - Section7eAutoSubscribeLogGroupByTags
 
       - Label:
-          default: "8. Sumo Logic Root Cause Explorer Sources"
-        Parameters:
-          - Section8aRootCauseExplorerOptions
-      
-      - Label:
           default: "9. Sumo Logic AWS ELB classic Log Source"
         Parameters:
           - Section9aAutoEnableS3LogsELBResourcesOptions
@@ -140,10 +135,6 @@ Metadata:
         default: "Regex for filtering CloudWatch Log Groups. If you want to collect from all CloudWatch Log Groups use .*"
       Section7eAutoSubscribeLogGroupByTags:
         default: "Tags for filtering CloudWatch Log Groups."
-
-
-      Section8aRootCauseExplorerOptions:
-        default: "Select the Sumo Logic Root Cause Explorer Sources"
 
       Section9aAutoEnableS3LogsELBResourcesOptions:
         default: "Enable ELB Access logging"
@@ -340,17 +331,6 @@ Parameters:
     Default: ""
     Description: "Enter comma separated key value pairs for filtering logGroups using tags. Ex KeyName1=string,KeyName2=string. This is optional leave it blank if tag based filtering is not needed. Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters"
 
-  Section8aRootCauseExplorerOptions:
-    Type: String
-    Description: "Inventory Source - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.
-                  Xray Source - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account."
-    Default: 'Both'
-    AllowedValues:
-      - 'Inventory Source'
-      - 'Xray Source'
-      - 'Both'
-      - 'None'
-  
   Section9aAutoEnableS3LogsELBResourcesOptions:
     Type: String
     Description: "New - Automatically enables S3 logging for newly created ELB resources to collect logs for ELB resources. This does not affect ELB resources already collecting logs.
@@ -402,14 +382,6 @@ Parameters:
       - 'False'
 
 Conditions:
-  # Condition for Metrics Source
-  install_inventory_source: !Or
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Inventory Source' ]
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Both' ]
-  install_xray_source: !Or
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Xray Source' ]
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Both' ]
-
   # Conditions for Bucket
   create_alb_bucket: !And
     - !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
@@ -942,36 +914,6 @@ Resources:
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
         Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
-        
-  RootCauseAppStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: sumoLambdaMetricsAppStack
-    Properties:
-      TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/rootcause/rootcauseexplorer.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
-      Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
-        Section2bSumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
-        Section2cAccountAlias: !Ref Section2aAccountAlias
-        Section2dAccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
-        Section3aCreateAwsInventorySource: !If [install_inventory_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
-        Section3bAwsInventorySourceName: !Sub "inventory-${AWS::Region}"
-        Section3cNamespaces: !GetAtt CreateCommonResources.Outputs.Namespaces
-        Section3dInventorySourceCategory: !FindInMap [CommonData, CollectorDetails, InventorySourceCategory]
-        Section4aCreateAwsXRaySource: !If [install_xray_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
-        Section4bAwsXRaySourceName: !Sub "xray-${AWS::Region}"
-        Section4cXraySourceCategory: !FindInMap [CommonData, CollectorDetails, XraySourceCategory]
-        Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section5bNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
-        Section6aAppInstallLocation: !Ref Section10aAppInstallLocation
-        Section6bShare: !Ref Section10bShare
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
