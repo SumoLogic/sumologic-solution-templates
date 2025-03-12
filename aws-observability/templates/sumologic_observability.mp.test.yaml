@@ -57,6 +57,7 @@ Metadata:
           - Section7bLambdaCloudWatchLogsSourceUrl
           - Section7cAutoSubscribeLogGroupsOptions
           - Section7dAutoSubscribeLogGroupPattern
+          - Section7eAutoSubscribeLogGroupByTags
 
       - Label:
           default: "9. Sumo Logic AWS ELB classic Log Source"
@@ -132,6 +133,8 @@ Metadata:
         default: "Subscribe log groups to Destination (Lambda or kinesis firehose delivery stream)"
       Section7dAutoSubscribeLogGroupPattern:
         default: "Regex for filtering CloudWatch Log Groups. If you want to collect from all CloudWatch Log Groups use .*"
+      Section7eAutoSubscribeLogGroupByTags:
+        default: "Tags for filtering CloudWatch Log Groups."
 
       Section9aAutoEnableS3LogsELBResourcesOptions:
         default: "Enable ELB Access logging"
@@ -323,7 +326,11 @@ Parameters:
     Type: String
     Default: "/aws/(lambda|apigateway|rds)"
     Description: "Enter regex for matching CloudWatch Log groups name. Regex will check for the Log group name. Visit https://help.sumologic.com/03Send-Data/Collect-from-Other-Data-Sources/Auto-Subscribe_AWS_Log_Groups_to_a_Lambda_Function#Configuring_parameters"
-  
+  Section7eAutoSubscribeLogGroupByTags:
+    Type: String
+    Default: ""
+    Description: "Enter comma separated key value pairs for filtering logGroups using tags. Ex KeyName1=string,KeyName2=string. This is optional leave it blank if tag based filtering is not needed. Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters"
+
   Section9aAutoEnableS3LogsELBResourcesOptions:
     Type: String
     Description: "New - Automatically enables S3 logging for newly created ELB resources to collect logs for ELB resources. This does not affect ELB resources already collecting logs.
@@ -723,6 +730,7 @@ Resources:
         AutoSubscribeDestinationARNType: !If [create_kf_logs_source, "Kinesis",  "Lambda" ]
         AutoSubscribeDestinationARN: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsDeliveryStreamARN, !If [ create_cw_logs_source, !GetAtt CreateCommonResources.Outputs.CloudWatchLambdaARN, "" ] ]
         AutoSubscribeLambdaLogGroupPattern: !Ref Section7dAutoSubscribeLogGroupPattern
+        AutoSubscribeLogGroupByTags: !Ref Section7eAutoSubscribeLogGroupByTags
         AutoSubscribeRoleArn: !If [create_kf_logs_source, !GetAtt CreateCommonResources.Outputs.KinesisLogsRoleARN,  "" ]
         ELBAutoEnableS3Logs: !If [auto_enable_s3_logs_elb, "Yes", "No"]
         ELBAutoEnableS3LogsOptions: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
