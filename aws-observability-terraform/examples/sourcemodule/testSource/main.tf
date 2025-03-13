@@ -49,9 +49,5 @@ module "collection-module" {
   "source_category": "aws/observability/cloudwatch/metrics/us-east-1",
   "source_name": "CloudWatch Metrics us-east-1"
 }
-
-  # RCE
-  collect_root_cause_data = var.collect_rce
-
   # wait_for_seconds = "10"
 }

@@ -135,16 +135,6 @@ output "alb_auto_enable_stack" {
   description = "This output contains ALB auto enable CloudFormation Name."
 }
 
-output "sumologic_inventory_source" {
-  value       = "${(var.collect_rce == "Both" || var.collect_rce == "Inventory Source") ? module.collection-module.inventory_source.aws_inventory_source.id : ""}"
-  description = "This output contains sumologic aws inventory source id."
-}
-
-output "sumologic_xray_source" {
-  value       = "${(var.collect_rce == "Both" || var.collect_rce == "Xray Source") ? module.collection-module.xray_source.aws_xray_source.id : ""}"
-  description = "This output contains sumologic aws xray source id."
-}
-
 output "sumologic_field_account" {
   value       = sumologic_field.account.id
   description = "This output contains sumologic Account field id."

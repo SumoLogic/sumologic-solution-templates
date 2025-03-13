@@ -43,7 +43,7 @@ func TestSourceModule1(t *testing.T) {
 
 	// Assert count of Expected resources.
 	test_structure.RunTestStage(t, "AssertCount", func() {
-		AssertResourceCounts(t, resourceCount, 99, 0, 0)
+		AssertResourceCounts(t, resourceCount, 93, 0, 0)
 	})
 
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
@@ -63,18 +63,12 @@ func TestSourceModule1(t *testing.T) {
 		// ELB Source
 		elbSourceID := terraform.Output(t, terraformOptions, "sumologic_elb_source")
 		validateSumoSource(t, terraformOptions, collectorID, elbSourceID)
-		// AWS Inventory Source
-		awsInventorySourceID := terraform.Output(t, terraformOptions, "sumologic_inventory_source")
-		validateSumoSource(t, terraformOptions, collectorID, awsInventorySourceID)
 		// Kf Logs Source
 		kfLogsSourceID := terraform.Output(t, terraformOptions, "sumologic_kinesis_firehose_for_logs_source")
 		validateSumoSource(t, terraformOptions, collectorID, kfLogsSourceID)
 		// Kf Metrics Source
 		kfMetricsSourceID := terraform.Output(t, terraformOptions, "sumologic_kinesis_firehose_for_metrics_source")
 		validateSumoSource(t, terraformOptions, collectorID, kfMetricsSourceID)
-		// XRAY Source
-		xraySourceID := terraform.Output(t, terraformOptions, "sumologic_xray_source")
-		validateSumoSource(t, terraformOptions, collectorID, xraySourceID)
 		// S3 bucket
 		s3bucket := terraform.Output(t, terraformOptions, "aws_s3")
 		validateS3Bucket(t, terraformOptions, s3bucket)
@@ -142,7 +136,6 @@ func TestSourceModule2(t *testing.T) {
 		"collect_elb":               "false",
 		"collect_classic_lb":        "false",
 		"collect_cloudtrail":        "false",
-		"collect_rce":               "None",
 		"collect_logs_cloudwatch":   "None",
 		"collect_metric_cloudwatch": "None",
 	}
@@ -194,7 +187,6 @@ func TestSourceModule3(t *testing.T) {
 		"collect_elb":               "false",
 		"collect_classic_lb":        "false",
 		"collect_cloudtrail":        "false",
-		"collect_rce":               "Inventory Source",
 		"collect_logs_cloudwatch":   "Lambda Log Forwarder",
 		"collect_metric_cloudwatch": "CloudWatch Metrics Source",
 	}
@@ -220,7 +212,7 @@ func TestSourceModule3(t *testing.T) {
 
 	// Assert count of Expected resources.
 	test_structure.RunTestStage(t, "AssertCount", func() {
-		AssertResourceCounts(t, resourceCount, 99, 0, 0)
+		AssertResourceCounts(t, resourceCount, 94, 0, 0)
 	})
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
 	terraformOptions := test_structure.LoadTerraformOptions(t, TerraformDir)
@@ -242,9 +234,6 @@ func TestSourceModule3(t *testing.T) {
 		// LLF logs CloudFormation Stack
 		llfLogsStack := terraform.Output(t, terraformOptions, "cw_logs_auto_enable_stack")
 		validateCFStack(t, terraformOptions, llfLogsStack)
-		// AWS Inventory Source
-		awsInventorySourceID := terraform.Output(t, terraformOptions, "sumologic_inventory_source")
-		validateSumoSource(t, terraformOptions, collectorID, awsInventorySourceID)
 	})
 
 	// At the end of the test, un-deploy the solution using Terraform
@@ -275,7 +264,6 @@ func TestSourceModule4(t *testing.T) {
 		"collect_elb":               "true",
 		"collect_classic_lb":        "true",
 		"collect_cloudtrail":        "true",
-		"collect_rce":               "Xray Source",
 		"collect_logs_cloudwatch":   "Kinesis Firehose Log Source",
 		"collect_metric_cloudwatch": "CloudWatch Metrics Source",
 		"create_s3_bucket":          "false",
@@ -301,7 +289,7 @@ func TestSourceModule4(t *testing.T) {
 
 	// Assert count of Expected resources.
 	test_structure.RunTestStage(t, "AssertCount", func() {
-		AssertResourceCounts(t, resourceCount, 192, 0, 0)
+		AssertResourceCounts(t, resourceCount, 187, 0, 0)
 	})
 
 	// Load the Terraform Options saved by the earlier deploy_terraform stage
@@ -354,9 +342,6 @@ func TestSourceModule4(t *testing.T) {
 		// Kinesis Firehose for Logs
 		kfLogsStream := terraform.Output(t, terraformOptions, "kf_logs_stream")
 		validateKFstream(t, terraformOptions, kfLogsStream)
-		// XRAY Source
-		xraySourceID := terraform.Output(t, terraformOptions, "sumologic_xray_source")
-		validateSumoSource(t, terraformOptions, Vars["collector_id"].(string), xraySourceID)
 	})
 
 	// At the end of the test, un-deploy the solution using Terraform
