@@ -21,4 +21,4 @@ COPY requirements.txt /cf_test_automation/test/
 RUN pip install --no-cache-dir -r /cf_test_automation/test/requirements.txt
 
 # Install dependencies (if any, e.g., pip requirements)
-RUN pip install --no-cache-dir git+https://<username>:<password>@github.com/SumoLogic/sumologic-aws-cloudformation-test.git@1.0.0
+RUN pip install --no-cache-dir git+https://<username>:<password>@github.com/SumoLogic/sumologic-aws-cloudformation-test.git@cf_2_12_0
