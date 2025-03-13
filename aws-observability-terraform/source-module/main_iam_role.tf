@@ -84,17 +84,3 @@ resource "aws_iam_role_policy_attachment" "cw_metrics_policy_attach" {
   policy_arn = aws_iam_policy.cw_metrics_policy["cw_metrics_policy"].arn
   role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
 }
-
-# Sumo Logic Root Cause Source Policy Attachment
-resource "aws_iam_policy" "root_cause_policy" {
-  for_each = toset(local.create_root_cause_source && local.create_iam_role ? ["root_cause_policy"] : [])
-
-  policy = templatefile("${path.module}/templates/iam_rootcause_source_policy.tmpl", {})
-}
-
-resource "aws_iam_role_policy_attachment" "root_cause_policy_attach" {
-  for_each = toset(local.create_root_cause_source && local.create_iam_role ? ["root_cause_policy_attach"] : [])
-
-  policy_arn = aws_iam_policy.root_cause_policy["root_cause_policy"].arn
-  role       = aws_iam_role.sumologic_iam_role["sumologic_iam_role"].name
-}
