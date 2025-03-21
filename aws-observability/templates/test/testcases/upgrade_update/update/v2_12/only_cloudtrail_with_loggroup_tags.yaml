@@ -8,7 +8,7 @@ Global:
       Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
       Section2aAccountAlias: 'infrat6'
 TestCase:
-  TestName: onlyCloudTrailInventorySourceWithLoggroupTags
+  TestName: onlyCloudTrailWithLoggroupTags
   Regions: '${SUMO_REGIONS}'
   Skip: false
   Parameters:
@@ -22,15 +22,17 @@ TestCase:
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'Kinesis Firehose Metrics Source'
       Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SNS, AWS/SQS, cwgent'
-      Section4dAWSMetricsTagFilters: '{ "AWS/ApiGateway": { "tags": [ "env=prod;dev" ] }, "AWS/DynamoDB": { "tags": [ "env=dev", "creator=himan" , "creator=aki" ] }, "AWS/ElastiCache": { "tags": [ "env=prod;dev", "creator=himan" ] }, "All": { "tags": [ "env=dev" ] } }'
       Section5aAutoEnableS3LogsALBResourcesOptions: 'New'
       Section5bALBCreateLogSource: 'No'
       Section6aCreateCloudTrailLogSource: 'Yes'
       Section7aLambdaCreateCloudWatchLogsSourceOptions: 'Kinesis Firehose Log Source'
       Section7cAutoSubscribeLogGroupsOptions: 'Existing'
-      Section7eAutoSubscribeLogGroupByTags: 'env=prod,creator=himan,team=app'
       Section9aAutoEnableS3LogsELBResourcesOptions: 'New'
       Section9bELBCreateLogSource: 'No'
+  UpdateParameters:
+    Values:
+      Section4dAWSMetricsTagFilters: '{ "AWS/ApiGateway": { "tags": [ "env=prod;dev" ] }, "AWS/DynamoDB": { "tags": [ "env=dev", "creator=himan" , "creator=aki" ] }, "AWS/ElastiCache": { "tags": [ "env=prod;dev", "creator=himan" ] }, "All": { "tags": [ "env=dev" ] } }'
+      Section7eAutoSubscribeLogGroupByTags: 'env=prod,creator=himan,team=app'
   Assertions:
     - AssertType: ResourceExistence
       Assert:
@@ -51,6 +53,7 @@ TestCase:
           - sumoLambdaMetricsAppStack
           - sumoECSMetricsAppStack
           - sumoElasticCacheMetricsAppStack
+          - sumoGISAppStack
           - CreateCommonResources.SumoLogicCloudTrailS3Policy
           - CreateCommonResources.AddAccountField
           - CreateCommonResources.AddRegionField
