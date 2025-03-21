@@ -1018,3 +1018,23 @@ Resources:
         Section4cNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
+
+  sumoGISAppStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: sumoAlbMetricsAppStack
+    Properties:
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/gis/gis.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
+      Parameters:
+        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
+        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
+        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
+        Section3aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section3bNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section4aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section4bShare: !Ref Section10bShare
