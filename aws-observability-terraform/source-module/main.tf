@@ -1,6 +1,6 @@
 # AWS Observability Sources
 # 1. Create Common Collector
-# 2. Create Common IAM role with permissions for alb and cloudtrail S3 Bucket, cloudwatch metrics, inventory and xray source. -> main_iam_role.tf
+# 2. Create Common IAM role with permissions for alb and cloudtrail S3 Bucket, cloudwatch metrics -> main_iam_role.tf
 # 3. S3 Bucket and SNS Topic and policy -> main_s3_bucket.tf
 
 resource "random_string" "aws_random" {

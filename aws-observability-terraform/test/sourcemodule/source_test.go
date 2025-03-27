@@ -175,7 +175,7 @@ func TestSourceModule2(t *testing.T) {
 	})
 }
 
-// Testing scenerio 3 - Collect CW Logs via Lambda Log forwarder, CW Metrics via CW metric source & Inventory source
+// Testing scenerio 3 - Collect CW Logs via Lambda Log forwarder, CW Metrics via CW metric source
 func TestSourceModule3(t *testing.T) {
 	// t.Parallel()
 
@@ -367,7 +367,6 @@ func TestSourceModule5(t *testing.T) {
 		"collect_elb":                   "false",
 		"collect_classic_lb":            "false",
 		"collect_cloudtrail":            "false",
-		"collect_rce":                   "None",
 		"collect_logs_cloudwatch":       "Lambda Log Forwarder",
 		"auto_enable_logs_tags_filters": "Environment=Production,Application=MyApp,creator=appsTeam",
 		"collect_metric_cloudwatch":     "CloudWatch Metrics Source",
@@ -463,7 +462,6 @@ func TestSourceModule6(t *testing.T) {
 		"collect_elb":                   "false",
 		"collect_classic_lb":            "false",
 		"collect_cloudtrail":            "false",
-		"collect_rce":                   "None",
 		"auto_enable_logs_tags_filters": "Environment=Production,Application=MyApp,creator=appsTeam",
 	}
 	// Define the variable values

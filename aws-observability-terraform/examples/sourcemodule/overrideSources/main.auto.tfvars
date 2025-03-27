@@ -20,7 +20,6 @@ sumo_api_endpoint         = ""  #"<YOUR SUMOLOGIC API ENDPOINT>"
 # collect_elb = "true"
 # collect_classic_lb = "true"
 # collect_cloudtrail = "true"
-# collect_rce = "Xray Source"
 # collect_logs_cloudwatch = "Kinesis Firehose Log Source"
 # collect_metric_cloudwatch = "CloudWatch Metrics Source"
 # create_s3_bucket = false
