@@ -210,27 +210,6 @@ variable "collect_metric_cloudwatch" {
   default = "Kinesis Firehose Metrics Source"
 }
 
-variable "collect_rce" {
-  type        = string
-  description = <<EOT
-            Select the Sumo Logic Root Cause Explorer Source.
-            You have the following options:
-            Inventory Source - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.
-            Xray Source - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account.
-            Both - Install both Inventory and Xray sources.
-            None - Skips installation of both sources.
-        EOT
-  validation {
-    condition = contains([
-      "Inventory Source",
-      "Xray Source",
-      "Both",
-    "None", ], var.collect_rce)
-    error_message = "The value must be one of \"Inventory Source\", \"Xray Source\", \"Both\" and None."
-  }
-  default = "Both"
-}
-
 variable "elb_details" {
   type = object({
     source_name     = string
