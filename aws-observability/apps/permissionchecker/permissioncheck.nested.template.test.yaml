@@ -211,7 +211,7 @@ Resources:
 
   ################# Create Lambda Role and Lambda Function to create Sumo Logic Custom Resources #################
   ################# Checks for IAM and Lambda Permissions #################
-  ################# Checks for IAM ROLE - Sumo Source, Inventory Source also #################
+  ################# Checks for IAM ROLE - Sumo Source #################
   LambdaRole:
     Type: AWS::IAM::Role
     Metadata:
@@ -280,79 +280,6 @@ Resources:
                   - cloudwatch:GetMetricStatistics
                 Resource:
                   "*"
-
-  RootCauseRole:
-    Type: AWS::IAM::Role
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W11
-            reason: "Operations are performed across resources."
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: arn:aws:iam::246946804217:root
-            Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Sub "${Section1aSumoLogicDeployment}:${Section1dSumoLogicOrganizationId}"
-      Path: "/"
-      Policies:
-        - PolicyName: SumoInventoryPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - apigateway:GET
-                  - autoscaling:Describe*
-                  - cloudfront:GetDistributionConfig
-                  - cloudfront:ListDistributions
-                  - cloudtrail:DescribeTrails
-                  - cloudtrail:GetTrailStatus
-                  - cloudwatch:Describe*
-                  - cloudwatch:Get*
-                  - cloudwatch:List*
-                  - codedeploy:List*
-                  - codedeploy:BatchGet*
-                  - dynamodb:Describe*
-                  - dynamodb:List*
-                  - ec2:Describe*
-                  - ecs:Describe*
-                  - ecs:List*
-                  - elasticache:Describe*
-                  - elasticache:List*
-                  - elasticfilesystem:Describe*
-                  - elasticloadbalancing:Describe*
-                  - elasticmapreduce:Describe*
-                  - elasticmapreduce:List*
-                  - es:Describe*
-                  - es:List*
-                  - health:Describe*
-                  - kinesis:Describe*
-                  - kinesis:List*
-                  - lambda:List*
-                  - mq:Describe*
-                  - mq:List*
-                  - rds:Describe*
-                  - rds:List*
-                  - redshift:Describe*
-                  - route53:List*
-                  - sqs:ListQueues
-                  - ses:GetSendStatistics
-                  - ses:GetSendQuota
-                  - sns:List*
-                  - tag:GetResources
-                  - tag:GetTagKeys
-                  - tag:GetTagValues
-                  - xray:BatchGetTraces
-                  - xray:Get*
-                  - pi:DescribeDimensionKeys
-                  - pi:GetResourceMetrics
-                Effect: Allow
-                Resource: "*"
 
   LambdaHelper:
     Type: 'AWS::Serverless::Function'
