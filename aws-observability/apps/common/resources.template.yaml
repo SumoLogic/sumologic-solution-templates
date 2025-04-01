@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.11.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.12.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
     Type: String
     Default: ""
-    Description: "Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2"
+    Description: "Enter au, ca, de, eu, fed, jp, kr, us1 or us2"
   SumoLogicAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
@@ -491,7 +491,7 @@ Resources:
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.20.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.21.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -535,7 +535,7 @@ Resources:
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.20.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.21.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -1606,7 +1606,7 @@ Outputs:
     Description: "Check If Account is Paid or Not"
     Value: !GetAtt AccountCheck.is_paid
   Namespaces:
-    Description: "Comma Delimited String of CloudWatch Metrics Namespaces for Inventory Source."
+    Description: "Comma Delimited String of CloudWatch Metrics Namespaces."
     Value: !GetAtt Primerinvoke.namespaces
   KinesisLogsDeliveryStreamARN:
     Description: "The ARN for your Kinesis Firehose Delivery Stream, use this as the destination when adding CloudWatch Logs subscription filters."
