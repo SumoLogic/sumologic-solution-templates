@@ -1,6 +1,6 @@
 ---
 Global:
-  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.11.0/sumologic_observability.master.template.yaml"
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.12.0/sumologic_observability.master.template.yaml"
   StackName: AWSO
   ParallelTestsRun: 1
   GlobalParameters:
@@ -42,10 +42,10 @@ TestCase:
           - sumoApiGatewayMetricsAppStack
           - sumoSNSAppStack
           - sumoSQSAppStack
-          - RootCauseAppStack
           - sumoLambdaMetricsAppStack
           - sumoECSMetricsAppStack
           - sumoElasticCacheMetricsAppStack
+          - RootCauseAppStack
           - CreateCommonResources.AddAccountField
           - CreateCommonResources.AddRegionField
           - CreateCommonResources.AddNamespaceField
@@ -165,14 +165,6 @@ TestCase:
           - sumoNlbMetricsAppStack.sumoApp
           - sumoEC2MetricsAppStack.sumoAppCW
           - CreateCommonResources.AccountAliasValue
-          - RootCauseAppStack.AccountAliasValue
-          - RootCauseAppStack.LambdaHelper
-          - RootCauseAppStack.LambdaRole
-          - RootCauseAppStack.CloudTrailDevOps
-          - RootCauseAppStack.InventorySource
-          - RootCauseAppStack.RootCauseRole
-          - RootCauseAppStack.SumoLogicHostedCollector
-          - RootCauseAppStack.XraySource
           - sumoAlbMetricsAppStack.AccountAliasValue
           - sumoAlbMetricsAppStack.LambdaHelper
           - sumoAlbMetricsAppStack.LambdaRole
@@ -189,6 +181,7 @@ TestCase:
           - sumoAlbMetricsAppStack.AlbCloudTrailLogsFieldExtractionRule
           - sumoElbMetricsAppStack.ClbCloudTrailLogsFieldExtractionRule
           - sumoNlbMetricsAppStack.NlbCloudTrailLogsFieldExtractionRule
+          - RootCauseAppStack.CloudTrailDevOps
     - AssertType: OutputsCheck
       Assert:
         Outputs:
@@ -317,15 +310,6 @@ TestCase:
           Section2aInstallApp: 'Yes'
           Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
           Section3bCloudTrailSourceUpdated: 'No'
-        RootCauseAppStack:
-          Section2aInstallApp: 'Yes'
-          Section2bCollectorName: ""
-          Section3aCreateAwsInventorySource: 'Yes'
-          Section3bAwsInventorySourceName: "inventory-<REGION>"
-          Section3dInventorySourceCategory: "aws/observability/inventory"
-          Section4aCreateAwsXRaySource: 'Yes'
-          Section4bAwsXRaySourceName: "xray-<REGION>"
-          Section4cXraySourceCategory: "aws/observability/xray"
         sumoLambdaMetricsAppStack:
           Section2aAccountAlias: ''
           Section3aInstallApp: 'Yes'

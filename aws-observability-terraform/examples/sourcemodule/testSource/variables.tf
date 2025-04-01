@@ -1,6 +1,6 @@
 variable "sumologic_environment" {
   type        = string
-  description = "Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  description = "Enter au, ca, de, eu, fed, jp, kr, us1 or us2. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
 
   validation {
     condition = contains([
@@ -9,12 +9,11 @@ variable "sumologic_environment" {
       "de",
       "eu",
       "fed",
-      "in",
       "jp",
       "kr",
       "us1",
       "us2"], var.sumologic_environment)
-    error_message = "The value must be one of au, ca, de, eu, fed, in, jp, kr, us1 or us2."
+    error_message = "The value must be one of au, ca, de, eu, fed, jp, kr, us1 or us2."
   }
 }
 
@@ -93,6 +92,33 @@ variable "sumo_api_endpoint" {
     "https://api.ca.sumologic.com/api/", "https://api.de.sumologic.com/api/", "https://api.eu.sumologic.com/api/", "https://api.fed.sumologic.com/api/", "https://api.in.sumologic.com/api/", "https://api.jp.sumologic.com/api/", "https://api.sumologic.com/api/", "https://api.us2.sumologic.com/api/"], var.sumo_api_endpoint)
     error_message = "Argument \"sumo_api_endpoint\" must be one of the values specified at https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security."
   }
+}
+
+variable "auto_enable_logs_filters" {
+  type        = string
+  description = "Enter regex for matching logGroups. Regex will check for the name."
+  default = "apigateway|lambda|rds"
+}
+variable "auto_enable_logs_tags_filters" {
+  type        = string
+  description = "Enter comma separated key value pairs for filtering logGroups using tags."
+  default = null
+}
+variable "metric_namespaces" {
+  type        = list(string)
+  description = "Enter comma separated metric namespaces."
+  # ephemeral = true
+  default = ["AWS/ApplicationELB", "AWS/ApiGateway", "AWS/DynamoDB", "AWS/Lambda", "AWS/RDS", "AWS/ECS", "AWS/ElastiCache", "AWS/ELB", "AWS/NetworkELB", "AWS/SQS", "AWS/SNS", "AWS/EC2"]
+}
+variable "metrics_tag_filters" {
+  type        = list(object({
+      type      = string
+      namespace = string
+      tags      = list(string)
+    }))
+  description = "Enter comma separated key value pairs for filtering metrics using tags."
+  default = []
+  # ephemeral = true
 }
 
 variable "apps_folder" {
@@ -209,27 +235,6 @@ variable "collect_metric_cloudwatch" {
     error_message = "The value must be one of \"CloudWatch Metrics Source\", \"Kinesis Firehose Metrics Source\", and None."
   }
   default = "Kinesis Firehose Metrics Source"
-}
-
-variable "collect_rce" {
-  type        = string
-  description = <<EOT
-            Select the Sumo Logic Root Cause Explorer Source.
-            You have the following options:
-            Inventory Source - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.
-            Xray Source - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account.
-            Both - Install both Inventory and Xray sources.
-            None - Skips installation of both sources.
-        EOT
-  validation {
-    condition = contains([
-      "Inventory Source",
-      "Xray Source",
-      "Both",
-    "None", ], var.collect_rce)
-    error_message = "The value must be one of \"Inventory Source\", \"Xray Source\", \"Both\" and None."
-  }
-  default = "Both"
 }
 
 variable "elb_details" {
@@ -353,6 +358,16 @@ variable "executeTest3" {
   default     = false
 }
 variable "executeTest4" {
+  type        = bool
+  description = "True - If you want to execute this TestCase"
+  default     = false
+}
+variable "executeTest5" {
+  type        = bool
+  description = "True - If you want to execute this TestCase"
+  default     = false
+}
+variable "executeTest6" {
   type        = bool
   description = "True - If you want to execute this TestCase"
   default     = false

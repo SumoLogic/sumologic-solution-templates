@@ -1,6 +1,6 @@
 ---
 Global:
-  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.11.0/sumologic_observability.master.template.yaml"
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.12.0/sumologic_observability.master.template.yaml"
   StackName: AWSO
   ParallelTestsRun: 1
   GlobalParameters:
@@ -46,7 +46,7 @@ TestCase:
         SumoCloudTrailAPIURL:
           - "parameters.Section6bCloudTrailLogsSourceUrl"
           - "assertions[AssertType==ParameterCheck].Assert.sumoLambdaMetricsAppStack.Section5aCloudTrailLogsAPIUrl"
-    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_metrics_source.yaml"
+    - CFNTemplateURL: "test/setup-infra/create_sumo_kinesis_firehose_metrics_source.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
@@ -91,7 +91,6 @@ TestCase:
       Section6aCreateCloudTrailLogSource: 'No'
       Section6bCloudTrailLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
       Section7aLambdaCreateCloudWatchLogsSourceOptions: 'None'
-      Section8aRootCauseExplorerOptions: 'Both'
       Section9aAutoEnableS3LogsELBResourcesOptions: 'None'
       Section9bELBCreateLogSource: 'No'
   Assertions:
@@ -112,10 +111,10 @@ TestCase:
           - sumoApiGatewayMetricsAppStack
           - sumoSNSAppStack
           - sumoSQSAppStack
-          - RootCauseAppStack
           - sumoLambdaMetricsAppStack
           - sumoECSMetricsAppStack
           - sumoElasticCacheMetricsAppStack
+          - RootCauseAppStack
           - CreateCommonResources.AddAccountField
           - CreateCommonResources.AddRegionField
           - CreateCommonResources.AddNamespaceField
@@ -196,14 +195,6 @@ TestCase:
           - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambda
           - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambdaRole
           - CreateCommonResources.AccountAliasValue
-          - RootCauseAppStack.CloudTrailDevOps
-          - RootCauseAppStack.InventorySource
-          - RootCauseAppStack.RootCauseRole
-          - RootCauseAppStack.SumoLogicHostedCollector
-          - RootCauseAppStack.XraySource
-          - RootCauseAppStack.AccountAliasValue
-          - RootCauseAppStack.LambdaHelper
-          - RootCauseAppStack.LambdaRole
           - sumoAlbMetricsAppStack.AccountAliasValue
           - sumoAlbMetricsAppStack.LambdaHelper
           - sumoAlbMetricsAppStack.LambdaRole
@@ -216,6 +207,7 @@ TestCase:
           - CreateCommonResources.LambdaRoleAlias
           - sumoAlbMetricsAppStack.AlbCloudTrailLogsFieldExtractionRule
           - sumoNlbMetricsAppStack.NlbCloudTrailLogsFieldExtractionRule
+          - RootCauseAppStack.CloudTrailDevOps
     - AssertType: OutputsCheck
       Assert:
         Outputs:
@@ -301,15 +293,6 @@ TestCase:
           Section2aInstallApp: 'Yes'
           Section3aCloudTrailLogsSourceName: 'test-automation-awso-existingCloudTrailAlbSource'
           Section3bCloudTrailSourceUpdated: 'Yes'
-        RootCauseAppStack:
-          Section2aInstallApp: 'Yes'
-          Section2bCollectorName: ""
-          Section3aCreateAwsInventorySource: 'Yes'
-          Section3bAwsInventorySourceName: "inventory-<REGION>"
-          Section3dInventorySourceCategory: "aws/observability/inventory"
-          Section4aCreateAwsXRaySource: 'Yes'
-          Section4bAwsXRaySourceName: "xray-<REGION>"
-          Section4cXraySourceCategory: "aws/observability/xray"
         sumoLambdaMetricsAppStack:
           Section2aAccountAlias: 'infrat8'
           Section3aInstallApp: 'Yes'

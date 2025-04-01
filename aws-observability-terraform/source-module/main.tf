@@ -1,6 +1,6 @@
 # AWS Observability Sources
 # 1. Create Common Collector
-# 2. Create Common IAM role with permissions for alb and cloudtrail S3 Bucket, cloudwatch metrics, inventory and xray source. -> main_iam_role.tf
+# 2. Create Common IAM role with permissions for alb and cloudtrail S3 Bucket, cloudwatch metrics -> main_iam_role.tf
 # 3. S3 Bucket and SNS Topic and policy -> main_s3_bucket.tf
 
 resource "random_string" "aws_random" {
@@ -26,6 +26,7 @@ module "cloudtrail_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_cloudtrail_source ? ["cloudtrail_module"] : [])
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
+  version = "1.0.19"
 
   create_collector          = false
   create_trail              = var.cloudtrail_source_details.bucket_details.create_bucket ? true : false
@@ -64,6 +65,7 @@ module "elb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_elb_source ? ["elb_module"] : [])
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
+  version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -96,7 +98,7 @@ module "elb_module" {
   }
 
   auto_enable_access_logs = var.auto_enable_access_logs
-  app_semantic_version = "1.0.16"
+  app_semantic_version = "1.0.17"
   auto_enable_access_logs_options = {
     filter                 = "'Type': 'application'|'type': 'application'"
     remove_on_delete_stack = true
@@ -107,8 +109,8 @@ module "elb_module" {
 module "classic_lb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_classic_lb_source ? ["classic_lb_module"] : [])
-
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing"
+  version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -140,7 +142,7 @@ module "classic_lb_module" {
     }
   }
   auto_enable_access_logs = var.auto_enable_classic_lb_access_logs
-  app_semantic_version = "1.0.16"
+  app_semantic_version = "1.0.17"
   auto_enable_access_logs_options = {
     bucket_prefix          = local.auto_classic_lb_path_exp
     auto_enable_logging    = "ELB"
@@ -153,6 +155,7 @@ module "cloudwatch_custom_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_cw_metrics_source && length(local.custom_namespace) > 0 ? ["Custom"] : [])
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
+  version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -181,6 +184,7 @@ module "cloudwatch_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = local.create_cw_metrics_source && length(local.aws_namespace) > 0 ? toset(local.aws_namespace) : []
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
+  version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -209,6 +213,7 @@ module "kinesis_firehose_for_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_metrics_source ? ["kinesis_firehose_for_metrics_source_module"] : [])
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
+  version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -240,6 +245,7 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_llf_logs_source ? ["cloudwatch_logs_lambda_log_forwarder_module"] : [])
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder"
+  version = "1.0.19"
 
   create_collector = false
 
@@ -259,7 +265,7 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-  app_semantic_version = "1.0.14"
+  app_semantic_version = "1.0.15"
   auto_enable_logs_subscription_options = {
     filter = var.auto_enable_logs_subscription_options.filter
     tags_filter = var.auto_enable_logs_subscription_options.tags_filter
@@ -270,6 +276,7 @@ module "kinesis_firehose_for_logs_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_logs_source ? ["kinesis_firehose_for_logs_module"] : [])
   source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs"
+  version = "1.0.19"
 
   create_collector = false
 
@@ -288,52 +295,9 @@ module "kinesis_firehose_for_logs_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-  app_semantic_version = "1.0.14"
+  app_semantic_version = "1.0.15"
   auto_enable_logs_subscription_options = {
     filter = var.auto_enable_logs_subscription_options.filter
     tags_filter = var.auto_enable_logs_subscription_options.tags_filter
-  }
-}
-
-module "root_cause_sources_module" {
-  depends_on = [time_sleep.wait_for_minutes]
-  for_each   = toset(local.create_root_cause_source ? ["root_cause_sources_module"] : [])
-
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/rootcause"
-
-  create_collector          = false
-  sumologic_organization_id = var.sumologic_organization_id
-
-  wait_for_seconds = 1
-  iam_details = {
-    create_iam_role = false
-    iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
-  }
-
-  create_inventory_source = local.create_inventory_source
-  inventory_source_details = {
-    source_name         = local.inventory_source_name
-    source_category     = var.inventory_source_details.source_category
-    collector_id        = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
-    description         = var.inventory_source_details.description
-    limit_to_namespaces = var.inventory_source_details.limit_to_namespaces
-    limit_to_regions    = [local.aws_region]
-    paused              = false
-    scan_interval       = 300000
-    sumo_account_id     = local.sumo_account_id
-    fields              = var.inventory_source_details.fields
-  }
-
-  create_xray_source = local.create_xray_source
-  xray_source_details = {
-    source_name      = local.xray_source_name
-    source_category  = var.xray_source_details.source_category
-    collector_id     = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
-    description      = var.xray_source_details.description
-    limit_to_regions = [local.aws_region]
-    paused           = false
-    scan_interval    = 300000
-    sumo_account_id  = local.sumo_account_id
-    fields           = var.xray_source_details.fields
   }
 }

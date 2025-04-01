@@ -23,7 +23,7 @@ No resources.
 | <a name="input_access_id"></a> [access\_id](#input\_access\_id) | Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key | `string` | n/a | yes |
 | <a name="input_access_key"></a> [access\_key](#input\_access\_key) | Sumo Logic Access Key. | `string` | n/a | yes |
 | <a name="input_app_folder_id"></a> [app\_folder\_id](#input\_app\_folder\_id) | Please provide a folder ID where you would like the app to be installed. | `string` | `""` | no |
-| <a name="input_environment"></a> [environment](#input\_environment) | Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security | `string` | n/a | yes |
+| <a name="input_environment"></a> [environment](#input\_environment) | Enter au, ca, de, eu, fed, jp, kr, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security | `string` | n/a | yes |
 | <a name="input_json_file_directory_path"></a> [json\_file\_directory\_path](#input\_json\_file\_directory\_path) | Directory path where all the JSONs are present. | `string` | n/a | yes |
 
 ## Outputs

@@ -1,6 +1,6 @@
 ---
 Global:
-  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.11.0/sumologic_observability.master.template.yaml"
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.12.0/sumologic_observability.master.template.yaml"
   StackName: AWSO
   ParallelTestsRun: 1
   GlobalParameters:
@@ -42,7 +42,6 @@ TestCase:
       Section7aLambdaCreateCloudWatchLogsSourceOptions: 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)'
       Section7bLambdaCloudWatchLogsSourceUrl: "https://api.us2.sumologic.com/api/v1/collectors/350831942/sources/2763257213"
       Section7cAutoSubscribeLogGroupsOptions: "Both"
-      Section8aRootCauseExplorerOptions: 'Inventory Source'
       Section9aAutoEnableS3LogsELBResourcesOptions: 'None'
       Section9bELBCreateLogSource: 'Yes'
       Section9cELBLogsSourceUrl: 'https://api.us2.sumologic.com/api/v1/collectors/350831942/sources/2763251087'
@@ -59,13 +58,13 @@ TestCase:
           - CreateCommonResources
           - sumoEC2MetricsAppStack
           - sumoAlbMetricsAppStack
+          - RootCauseAppStack
           - sumoElbMetricsAppStack
           - sumoDynamoDBMetricsAppStack
           - sumoRdsMetricsAppStack
           - sumoApiGatewayMetricsAppStack
           - sumoSNSAppStack
           - sumoSQSAppStack
-          - RootCauseAppStack
           - sumoLambdaMetricsAppStack
           - sumoECSMetricsAppStack
           - sumoElasticCacheMetricsAppStack
@@ -104,9 +103,6 @@ TestCase:
           - CreateCommonResources.CloudTrailSNSTopic
           - CreateCommonResources.CloudTrailSNSpolicy
           - CreateCommonResources.CloudTrailSNSSubscription
-          - RootCauseAppStack.RootCauseRole
-          - RootCauseAppStack.SumoLogicHostedCollector
-          - RootCauseAppStack.InventorySource
           - sumoRdsMetricsAppStack.ClusterMetricRule
           - sumoRdsMetricsAppStack.InstanceMetricRule
           - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
@@ -163,9 +159,6 @@ TestCase:
           - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
           - CreateCommonResources.CloudWatchEventFunction.SumoCWSpilloverAlarm
           - CreateCommonResources.AccountAliasValue
-          - RootCauseAppStack.AccountAliasValue
-          - RootCauseAppStack.LambdaHelper
-          - RootCauseAppStack.LambdaRole
           - sumoAlbMetricsAppStack.AccountAliasValue
           - sumoAlbMetricsAppStack.LambdaHelper
           - sumoAlbMetricsAppStack.LambdaRole
@@ -279,15 +272,6 @@ TestCase:
           Section2aInstallApp: 'No'
           Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
           Section3bCloudTrailSourceUpdated: 'No'
-        RootCauseAppStack:
-          Section2aInstallApp: 'No'
-          Section2bCollectorName: ""
-          Section3aCreateAwsInventorySource: 'Yes'
-          Section3bAwsInventorySourceName: "inventory-<REGION>"
-          Section3dInventorySourceCategory: "aws/observability/inventory"
-          Section4aCreateAwsXRaySource: 'No'
-          Section4bAwsXRaySourceName: "xray-<REGION>"
-          Section4cXraySourceCategory: "aws/observability/xray"
         sumoLambdaMetricsAppStack:
           Section2aAccountAlias: 'infrat7'
           Section3aInstallApp: 'No'

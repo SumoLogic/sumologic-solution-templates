@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.11.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
+Description: "Version - v2.12.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -60,12 +60,7 @@ Metadata:
           - Section7eAutoSubscribeLogGroupByTags
 
       - Label:
-          default: "8. Sumo Logic Root Cause Explorer Sources"
-        Parameters:
-          - Section8aRootCauseExplorerOptions
-      
-      - Label:
-          default: "9. Sumo Logic AWS ELB classic Log Source"
+          default: "8. Sumo Logic AWS ELB classic Log Source"
         Parameters:
           - Section9aAutoEnableS3LogsELBResourcesOptions
           - Section9bELBCreateLogSource
@@ -74,7 +69,7 @@ Metadata:
           - Section9eELBS3BucketPathExpression
 
       - Label:
-          default: "10. App Installation and Sharing"
+          default: "9. App Installation and Sharing"
         Parameters:
           - Section10aAppInstallLocation
           - Section10bShare
@@ -141,10 +136,6 @@ Metadata:
       Section7eAutoSubscribeLogGroupByTags:
         default: "Tags for filtering CloudWatch Log Groups."
 
-
-      Section8aRootCauseExplorerOptions:
-        default: "Select the Sumo Logic Root Cause Explorer Sources"
-
       Section9aAutoEnableS3LogsELBResourcesOptions:
         default: "Enable ELB Access logging"
       Section9bELBCreateLogSource:
@@ -170,12 +161,11 @@ Parameters:
       - de
       - eu
       - fed
-      - in
       - jp
       - kr
       - us1
       - us2
-    Description: "Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+    Description: "Enter au, ca, de, eu, fed, jp, kr, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   Section1bSumoLogicAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
@@ -240,7 +230,7 @@ Parameters:
       - 'None'
   Section4bMetricsNameSpaces:
     Default: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2"
-    Description: "Provide Comma delimited list of the namespaces which will be used for both AWS CloudWatch Metrics and Inventory Sources. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2. AWS/AutoScaling will be appended to Namespaces for Inventory Sources. See the list of AWS services that publish CloudWatch metrics: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
+    Description: "Provide Comma delimited list of the namespaces which will be used for AWS CloudWatch Metrics. Default will be AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2. See the list of AWS services that publish CloudWatch metrics: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
     Type: String
   Section4cCloudWatchExistingSourceAPIUrl:
     Type: String
@@ -341,17 +331,6 @@ Parameters:
     Default: ""
     Description: "Enter comma separated key value pairs for filtering logGroups using tags. Ex KeyName1=string,KeyName2=string. This is optional leave it blank if tag based filtering is not needed. Visit https://help.sumologic.com/docs/send-data/collect-from-other-data-sources/autosubscribe-arn-destination/#configuringparameters"
 
-  Section8aRootCauseExplorerOptions:
-    Type: String
-    Description: "Inventory Source - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.
-                  Xray Source - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account."
-    Default: 'Both'
-    AllowedValues:
-      - 'Inventory Source'
-      - 'Xray Source'
-      - 'Both'
-      - 'None'
-  
   Section9aAutoEnableS3LogsELBResourcesOptions:
     Type: String
     Description: "New - Automatically enables S3 logging for newly created ELB resources to collect logs for ELB resources. This does not affect ELB resources already collecting logs.
@@ -403,14 +382,6 @@ Parameters:
       - 'False'
 
 Conditions:
-  # Condition for Metrics Source
-  install_inventory_source: !Or
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Inventory Source' ]
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Both' ]
-  install_xray_source: !Or
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Xray Source' ]
-    - !Equals [ !Ref Section8aRootCauseExplorerOptions, 'Both' ]
-
   # Conditions for Bucket
   create_alb_bucket: !And
     - !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
@@ -491,7 +462,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.11.0"
+      Version: "v2.12.0"
     CollectorDetails:
       SumoLogicAccountID: 926226587429
       CollectorNamePrefix: "aws-observability"
@@ -499,8 +470,6 @@ Mappings:
       ALBLogsSourceCategory: "aws/observability/alb/logs"
       CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
       CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
-      InventorySourceCategory: "aws/observability/inventory"
-      XraySourceCategory: "aws/observability/xray"
       ELBLogsSourceCategory: "aws/observability/clb/logs"
   RegionMap:
     us-east-1:
@@ -637,7 +606,7 @@ Resources:
       sumoOrgId:
           !Ref Section1dSumoLogicOrganizationId
       solutionName: 'AWSO'
-      solutionVersion: 'v2.11.0'
+      solutionVersion: 'v2.12.0'
       deploymentSource: 'cloudFormation'
       TelemetryEndpoint: "https://endpoint1.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV1S68eao6UYB3LFtqQ7ur1xYlT1EHCfXdhvi6uPNc0aUXIpvq5i_aHewOp5xxxwnGZ5MmSWDR6qV5td4exMM4pZE4Tk6rqKvgextLx7I6IRpg=="
       scanInterval: 60
@@ -943,36 +912,6 @@ Resources:
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
         Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
-        
-  RootCauseAppStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: sumoLambdaMetricsAppStack
-    Properties:
-      TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/rootcause/rootcauseexplorer.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
-      Parameters:
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
-        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
-        Section2bSumoLogicAccountID: !FindInMap [CommonData, CollectorDetails, SumoLogicAccountID]
-        Section2cAccountAlias: !Ref Section2aAccountAlias
-        Section2dAccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
-        Section3aCreateAwsInventorySource: !If [install_inventory_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
-        Section3bAwsInventorySourceName: !Sub "inventory-${AWS::Region}"
-        Section3cNamespaces: !GetAtt CreateCommonResources.Outputs.Namespaces
-        Section3dInventorySourceCategory: !FindInMap [CommonData, CollectorDetails, InventorySourceCategory]
-        Section4aCreateAwsXRaySource: !If [install_xray_source, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
-        Section4bAwsXRaySourceName: !Sub "xray-${AWS::Region}"
-        Section4cXraySourceCategory: !FindInMap [CommonData, CollectorDetails, XraySourceCategory]
-        Section5aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-        Section5bNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
-        Section6aAppInstallLocation: !Ref Section10aAppInstallLocation
-        Section6bShare: !Ref Section10bShare
 
   sumoLambdaMetricsAppStack:
     Type: AWS::CloudFormation::Stack
@@ -1069,3 +1008,23 @@ Resources:
         Section5aAppInstallLocation: !Ref Section10aAppInstallLocation
         Section5bShare: !Ref Section10bShare
         Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
+
+  RootCauseAppStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: sumoAlbMetricsAppStack
+    Properties:
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/gis/gis.template.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
+      Parameters:
+        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
+        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
+        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1dSumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        Section1eRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        Section2aInstallApp: !If [install_overview_dashboards, !GetAtt CreateCommonResources.Outputs.EnterpriseCheck, "No"]
+        Section3aParentStackLambdaARN: !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
+        Section3bNestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        Section4aAppInstallLocation: !Ref Section10aAppInstallLocation
+        Section4bShare: !Ref Section10bShare
