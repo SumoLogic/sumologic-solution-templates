@@ -2,7 +2,7 @@ name: "Azure TF template tests"
 on:
   pull_request:
     paths:
-      - 'azure-observability-terraform/**'
+      - 'azure-collection-terraform/**'
 
 jobs:
 
@@ -11,7 +11,7 @@ jobs:
     name: "Validatation (format & syntax)"
     defaults:
       run:
-        working-directory: ./azure-observability-terraform
+        working-directory: ./azure-collection-terraform
     steps:
     - uses: actions/checkout@v4
       name: Checkout source code
@@ -44,7 +44,7 @@ jobs:
 
       - uses: bridgecrewio/checkov-action@master
         with:
-          directory: 'azure-observability-terraform/'
+          directory: 'azure-collection-terraform/'
           quiet: true
           framework: terraform
           output_format: cli
@@ -63,4 +63,4 @@ jobs:
       - name: tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
-          working_directory: 'azure-observability-terraform/'
+          working_directory: 'azure-collection-terraform/'
