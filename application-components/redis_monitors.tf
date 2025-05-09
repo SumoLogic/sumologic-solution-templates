@@ -4,6 +4,11 @@ resource "sumologic_monitor_folder" "redis_monitor_folder" {
   name        = var.redis_monitor_folder
   description = "Folder for Redis Monitors"
   parent_id   = sumologic_monitor_folder.root_monitor_folder.id
+  obj_permission {
+    subject_type = "org"
+    subject_id = var.sumologic_organization_id
+    permissions = ["Create", "Read", "Update", "Delete", "Manage"]
+  }
 }
 
 # Sumo Logic Redis Metric Monitors
