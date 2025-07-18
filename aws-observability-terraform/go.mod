@@ -1,6 +1,7 @@
 module github.com/SumoLogic/sumologic-solution-templates/aws-observability-terraform
 
-go 1.22.0
+go 1.23.0
+
 toolchain go1.23.7
 
 require (
@@ -86,7 +87,7 @@ require (
 	golang.org/x/exp v0.0.0-20240707233637-46b078467d37 // indirect
 	golang.org/x/mod v0.19.0 // indirect
 	golang.org/x/net v0.36.0 // indirect
-	golang.org/x/oauth2 v0.21.0 // indirect
+	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/term v0.29.0 // indirect
