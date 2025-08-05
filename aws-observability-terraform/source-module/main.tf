@@ -25,8 +25,9 @@ resource "time_sleep" "wait_for_minutes" {
 module "cloudtrail_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_cloudtrail_source ? ["cloudtrail_module"] : [])
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
-  version = "1.0.19"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudtrail?ref=fy26q3"
+  #version = "1.0.19"
 
   create_collector          = false
   create_trail              = var.cloudtrail_source_details.bucket_details.create_bucket ? true : false
@@ -58,14 +59,16 @@ module "cloudtrail_module" {
       sns_topic_arn    = var.cloudtrail_source_details.bucket_details.create_bucket ? aws_sns_topic.sns_topic["sns_topic"].arn : ""
     }
   }
+  aws_resource_tags = var.aws_resource_tags
 }
 
 #ALB module
 module "elb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_elb_source ? ["elb_module"] : [])
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
-  version = "1.0.19"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/elb?ref=fy26q3"
+  #version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -98,19 +101,21 @@ module "elb_module" {
   }
 
   auto_enable_access_logs = var.auto_enable_access_logs
-  app_semantic_version = "1.0.17"
+  app_semantic_version    = "1.0.17"
   auto_enable_access_logs_options = {
     filter                 = "'Type': 'application'|'type': 'application'"
     remove_on_delete_stack = true
   }
+  aws_resource_tags = var.aws_resource_tags
 }
 
 #CLB module
 module "classic_lb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_classic_lb_source ? ["classic_lb_module"] : [])
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing"
-  version = "1.0.19"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/elasticloadbalancing?ref=fy26q3"
+  #version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -142,20 +147,22 @@ module "classic_lb_module" {
     }
   }
   auto_enable_access_logs = var.auto_enable_classic_lb_access_logs
-  app_semantic_version = "1.0.17"
+  app_semantic_version    = "1.0.17"
   auto_enable_access_logs_options = {
     bucket_prefix          = local.auto_classic_lb_path_exp
     auto_enable_logging    = "ELB"
     filter                 = "'apiVersion': '2012-06-01'"
     remove_on_delete_stack = true
   }
+  aws_resource_tags = var.aws_resource_tags
 }
 
 module "cloudwatch_custom_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_cw_metrics_source && length(local.custom_namespace) > 0 ? ["Custom"] : [])
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
-  version = "1.0.19"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchmetrics?ref=fy26q3"
+  #version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -178,13 +185,15 @@ module "cloudwatch_custom_metrics_source_module" {
       iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
     }
   }
+  aws_resource_tags = var.aws_resource_tags
 }
 
 module "cloudwatch_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = local.create_cw_metrics_source && length(local.aws_namespace) > 0 ? toset(local.aws_namespace) : []
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
-  version = "1.0.19"
+  # source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchmetrics?ref=fy26q3"
+  #version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -199,7 +208,7 @@ module "cloudwatch_metrics_source_module" {
     limit_to_regions    = [local.aws_region]
     tag_filters         = [for tag_filter in var.cloudwatch_metrics_source_details.tag_filters : tag_filter if tag_filter.namespace == each.value]
     paused              = false
-    scan_interval       = lookup(local.namespace_scan_interval,regex("^AWS/(\\w+)$", each.value)[0],"300000")
+    scan_interval       = lookup(local.namespace_scan_interval, regex("^AWS/(\\w+)$", each.value)[0], "300000")
     sumo_account_id     = local.sumo_account_id
     fields              = local.metrics_fields
     iam_details = {
@@ -207,13 +216,15 @@ module "cloudwatch_metrics_source_module" {
       iam_role_arn    = local.create_iam_role ? aws_iam_role.sumologic_iam_role["sumologic_iam_role"].arn : var.existing_iam_details.iam_role_arn
     }
   }
+  aws_resource_tags = var.aws_resource_tags
 }
 
 module "kinesis_firehose_for_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_metrics_source ? ["kinesis_firehose_for_metrics_source_module"] : [])
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
-  version = "1.0.19"
+  # source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/kinesisfirehoseformetrics?ref=fy26q3"
+  #version = "1.0.19"
 
   create_collector          = false
   sumologic_organization_id = var.sumologic_organization_id
@@ -225,7 +236,7 @@ module "kinesis_firehose_for_metrics_source_module" {
     description         = var.cloudwatch_metrics_source_details.description
     collector_id        = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
     limit_to_namespaces = var.cloudwatch_metrics_source_details.limit_to_namespaces
-    tag_filters         = [for tag_filter in var.cloudwatch_metrics_source_details.tag_filters: tag_filter if contains(var.cloudwatch_metrics_source_details.limit_to_namespaces, tag_filter.namespace)]
+    tag_filters         = [for tag_filter in var.cloudwatch_metrics_source_details.tag_filters : tag_filter if contains(var.cloudwatch_metrics_source_details.limit_to_namespaces, tag_filter.namespace)]
     sumo_account_id     = local.sumo_account_id
     fields              = local.metrics_fields
     iam_details = {
@@ -239,13 +250,15 @@ module "kinesis_firehose_for_metrics_source_module" {
     bucket_name          = var.cloudwatch_metrics_source_details.bucket_details.create_bucket ? aws_s3_bucket.s3_bucket["s3_bucket"].bucket : var.cloudwatch_metrics_source_details.bucket_details.bucket_name
     force_destroy_bucket = false
   }
+  aws_resource_tags = var.aws_resource_tags
 }
 
 module "cloudwatch_logs_lambda_log_forwarder_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_llf_logs_source ? ["cloudwatch_logs_lambda_log_forwarder_module"] : [])
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder"
-  version = "1.0.19"
+  # source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchlogsforwarder?ref=fy26q3"
+  #version = "1.0.19"
 
   create_collector = false
 
@@ -265,18 +278,20 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-  app_semantic_version = "1.0.15"
+  app_semantic_version          = "1.0.15"
   auto_enable_logs_subscription_options = {
-    filter = var.auto_enable_logs_subscription_options.filter
+    filter      = var.auto_enable_logs_subscription_options.filter
     tags_filter = var.auto_enable_logs_subscription_options.tags_filter
   }
+  aws_resource_tags = var.aws_resource_tags
 }
 
 module "kinesis_firehose_for_logs_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_logs_source ? ["kinesis_firehose_for_logs_module"] : [])
-  source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs"
-  version = "1.0.19"
+  #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/kinesisfirehoseforlogs?ref=fy26q3"
+  #version = "1.0.19"
 
   create_collector = false
 
@@ -295,9 +310,10 @@ module "kinesis_firehose_for_logs_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-  app_semantic_version = "1.0.15"
+  app_semantic_version          = "1.0.15"
   auto_enable_logs_subscription_options = {
-    filter = var.auto_enable_logs_subscription_options.filter
+    filter      = var.auto_enable_logs_subscription_options.filter
     tags_filter = var.auto_enable_logs_subscription_options.tags_filter
   }
+  aws_resource_tags = var.aws_resource_tags
 }
