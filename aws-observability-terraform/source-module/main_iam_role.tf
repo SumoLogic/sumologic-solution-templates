@@ -16,6 +16,7 @@ resource "aws_iam_role" "sumologic_iam_role" {
     ENVIRONMENT           = data.sumologic_caller_identity.current.environment,
     SUMO_LOGIC_ORG_ID     = var.sumologic_organization_id
   })
+  tags = var.aws_resource_tags
 }
 
 # Sumo Logic CloudTrail Source Policy Attachment
@@ -26,6 +27,7 @@ resource "aws_iam_policy" "cloudtrail_policy" {
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME = local.create_cloudtrail_bucket ? local.common_bucket_name : var.cloudtrail_source_details.bucket_details.bucket_name
   })
+  tags = var.aws_resource_tags
 }
 
 resource "aws_iam_role_policy_attachment" "cloudtrail_policy_attach" {
@@ -43,6 +45,7 @@ resource "aws_iam_policy" "elb_policy" {
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME = local.create_elb_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
   })
+  tags = var.aws_resource_tags
 }
 
 # Sumo Logic Classic LB Source Policy Attachment
@@ -52,6 +55,7 @@ resource "aws_iam_policy" "classic_lb_policy" {
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME = local.create_classic_lb_bucket ? local.common_bucket_name : var.classic_lb_source_details.bucket_details.bucket_name
   })
+  tags = var.aws_resource_tags
 }
 
 # Attaching ALB policy to IAM role
@@ -75,7 +79,8 @@ resource "aws_iam_role_policy_attachment" "classic_lb_policy_attach" {
 resource "aws_iam_policy" "cw_metrics_policy" {
   for_each = toset(local.create_metric_source && local.create_iam_role ? ["cw_metrics_policy"] : [])
 
-  policy = templatefile("${path.module}/templates/iam_cw_metrics_source_policy.tmpl", {})
+  policy            = templatefile("${path.module}/templates/iam_cw_metrics_source_policy.tmpl", {})
+  tags = var.aws_resource_tags
 }
 
 resource "aws_iam_role_policy_attachment" "cw_metrics_policy_attach" {
