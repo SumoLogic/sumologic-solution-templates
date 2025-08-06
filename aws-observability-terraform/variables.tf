@@ -82,3 +82,9 @@ variable "sumologic_folder_share_with_org" {
   default     = true
 
 }
+
+variable "aws_resource_tags" {
+  description = "Map of tags to apply to all AWS resources provisioned through the AWS Observability Solution"
+  type        = map(string)
+  default     = {}
+}

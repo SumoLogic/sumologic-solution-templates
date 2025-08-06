@@ -86,7 +86,7 @@ output "cloudwatch_metrics_source" {
 }
 
 output "cloudwatch_custom_metrics_source" {
-  value = local.create_cw_metrics_source && length(local.custom_namespace) > 0 ? module.cloudwatch_custom_metrics_source_module["Custom"].sumologic_source : null
+  value       = local.create_cw_metrics_source && length(local.custom_namespace) > 0 ? module.cloudwatch_custom_metrics_source_module["Custom"].sumologic_source : null
   description = "Sumo Logic CloudWatch Custom Metrics source."
 }
 
