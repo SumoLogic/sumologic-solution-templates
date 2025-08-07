@@ -25,7 +25,7 @@ module "collection-module" {
     bucket_details = {
         create_bucket        = var.create_s3_bucket
         bucket_name          = var.s3_name
-        path_expression      = "*AWSLogs/*/elasticloadbalancing/*/*"
+        path_expression      = "AWSLog"
         force_destroy_bucket = false
     }
     fields = {}
@@ -41,7 +41,7 @@ module "collection-module" {
   bucket_details = {
       create_bucket        = var.create_s3_bucket
       bucket_name          = var.s3_name
-      path_expression      = "*AWSLogs/*/elasticloadbalancing/*/*"
+      path_expression      = "AWSLog"
       force_destroy_bucket = false
   }
   fields = {}
@@ -78,7 +78,7 @@ module "collection-module" {
   bucket_details = {
       create_bucket        = var.create_s3_bucket
       bucket_name          = var.s3_name
-      path_expression      = "AWSLogs/*/CloudTrail/*/*"
+      path_expression      = "*AWSLog/*/CloudTrail/*/*"
       force_destroy_bucket = false
   }
   fields = {}
@@ -94,6 +94,7 @@ module "collection-module" {
   },
   "description": "This source is created using Sumo Logic terraform AWS Observability module to collect AWS Cloudwatch metrics.",
   "fields": {},
+  "tag_filters" : [],
   "limit_to_namespaces": [
     "AWS/ApiGateway",
     "AWS/ApplicationELB",
@@ -136,7 +137,4 @@ module "collection-module" {
   "source_category": "aws/observability/cloudwatch/metrics/us-east-1",
   "source_name": "CloudWatch Metrics us-east-1"
 }
-
-  # RCE
-  collect_root_cause_data = var.collect_rce
 }

@@ -5,15 +5,15 @@
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.16.2, < 6.0.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1.0 |
-| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.31.3, < 3.0.0 |
+| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.31.3, < 4.0.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.11.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 2.31.1 |
-| <a name="provider_time"></a> [time](#provider\_time) | 0.11.2 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.31.3, < 4.0.0 |
+| <a name="provider_time"></a> [time](#provider\_time) | >= 0.11.1 |
 
 ## Modules
 
@@ -69,7 +69,6 @@
 | <a name="input_collect_elb"></a> [collect\_elb](#input\_collect\_elb) | Create a Sumo Logic ALB Logs Source.<br/>            You have the following options:<br/>			true - to ingest load balancer logs into Sumo Logic. Creates a Sumo Logic Log Source that collects application load balancer logs from an existing bucket or a new bucket.<br/>			If true, please configure \"elb\_source\_details\" with configuration information including the bucket name and path expression to ingest load balancer logs.<br/>			false - you are already ingesting load balancer logs into Sumo Logic. | `bool` | `true` | no |
 | <a name="input_collect_logs_cloudwatch"></a> [collect\_logs\_cloudwatch](#input\_collect\_logs\_cloudwatch) | Select the kind of Sumo Logic CloudWatch Logs Sources to create<br/>            You have the following options:<br/>            "Lambda Log Forwarder" - Creates a Sumo Logic CloudWatch Log Source that collects CloudWatch logs via a Lambda function.<br/>            "Kinesis Firehose Log Source" - Creates a Sumo Logic Kinesis Firehose Log Source to collect CloudWatch logs.<br/>            "None" - Skips installation of both sources. | `string` | `"Kinesis Firehose Log Source"` | no |
 | <a name="input_collect_metric_cloudwatch"></a> [collect\_metric\_cloudwatch](#input\_collect\_metric\_cloudwatch) | Select the kind of CloudWatch Metrics Source to create<br/>            You have the following options:<br/>            "CloudWatch Metrics Source" - Creates Sumo Logic AWS CloudWatch Metrics Sources.<br/>            "Kinesis Firehose Metrics Source" (Recommended) - Creates a Sumo Logic AWS Kinesis Firehose for Metrics Source. Note: This new source has cost and performance benefits over the CloudWatch Metrics Source and is therefore recommended.<br/>            "None" - Skips the Installation of both the Sumo Logic Metric Sources | `string` | `"Kinesis Firehose Metrics Source"` | no |
-| <a name="input_collect_rce"></a> [collect\_rce](#input\_collect\_rce) | Select the Sumo Logic Root Cause Explorer Source.<br/>            You have the following options:<br/>            Inventory Source - Creates a Sumo Logic Inventory Source used by Root Cause Explorer.<br/>            Xray Source - Creates a Sumo Logic AWS X-Ray Source that collects X-Ray Trace Metrics from your AWS account.<br/>            Both - Install both Inventory and Xray sources.<br/>            None - Skips installation of both sources. | `string` | `"Both"` | no |
 | <a name="input_collector_id"></a> [collector\_id](#input\_collector\_id) | Required if you already have collector. | `string` | `""` | no |
 | <a name="input_create_collector"></a> [create\_collector](#input\_create\_collector) | Create a Sumo Logic Collector.<br/>            You have the following options:<br/>			true - If you want to create collector.<br/>			false - If you already have a collector. | `bool` | `true` | no |
 | <a name="input_create_s3_bucket"></a> [create\_s3\_bucket](#input\_create\_s3\_bucket) | Create a AWS S3 bucket.<br/>            You have the following options:<br/>			true - If you want to create S3 bucket.<br/>			false - If you already have a S3 bucket. | `bool` | `true` | no |
@@ -86,7 +85,7 @@
 | <a name="input_sumo_api_endpoint"></a> [sumo\_api\_endpoint](#input\_sumo\_api\_endpoint) | n/a | `string` | n/a | yes |
 | <a name="input_sumologic_access_id"></a> [sumologic\_access\_id](#input\_sumologic\_access\_id) | Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key | `string` | n/a | yes |
 | <a name="input_sumologic_access_key"></a> [sumologic\_access\_key](#input\_sumologic\_access\_key) | Sumo Logic Access Key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key | `string` | n/a | yes |
-| <a name="input_sumologic_environment"></a> [sumologic\_environment](#input\_sumologic\_environment) | Enter au, ca, de, eu, fed, in, jp, kr, us1 or us2. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security | `string` | n/a | yes |
+| <a name="input_sumologic_environment"></a> [sumologic\_environment](#input\_sumologic\_environment) | Enter au, ca, de, eu, fed, jp, kr, us1 or us2. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security | `string` | n/a | yes |
 | <a name="input_sumologic_folder_installation_location"></a> [sumologic\_folder\_installation\_location](#input\_sumologic\_folder\_installation\_location) | Indicates where to install the app folder. Enter "Personal Folder" for installing in "Personal" folder and "Admin Recommended Folder" for installing in "Admin Recommended" folder. | `string` | `"Personal Folder"` | no |
 | <a name="input_sumologic_folder_share_with_org"></a> [sumologic\_folder\_share\_with\_org](#input\_sumologic\_folder\_share\_with\_org) | Indicates if AWS Observability folder should be shared (view access) with entire organization. true to enable; false to disable. | `bool` | `true` | no |
 | <a name="input_sumologic_organization_id"></a> [sumologic\_organization\_id](#input\_sumologic\_organization\_id) | You can find your org on the Preferences page in the Sumo Logic UI. For more information, see the Preferences Page topic. Your org ID will be used to configure the IAM Role for Sumo Logic AWS Sources."<br/>            For more details, visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page | `string` | n/a | yes |
@@ -133,7 +132,5 @@
 | <a name="output_sumologic_field_networkloadbalancer"></a> [sumologic\_field\_networkloadbalancer](#output\_sumologic\_field\_networkloadbalancer) | This output contains sumologic networkloadbalancer field id. |
 | <a name="output_sumologic_field_region"></a> [sumologic\_field\_region](#output\_sumologic\_field\_region) | This output contains sumologic Region field id. |
 | <a name="output_sumologic_field_tablename"></a> [sumologic\_field\_tablename](#output\_sumologic\_field\_tablename) | This output contains sumologic tablename field id. |
-| <a name="output_sumologic_inventory_source"></a> [sumologic\_inventory\_source](#output\_sumologic\_inventory\_source) | This output contains sumologic aws inventory source id. |
 | <a name="output_sumologic_kinesis_firehose_for_logs_source"></a> [sumologic\_kinesis\_firehose\_for\_logs\_source](#output\_sumologic\_kinesis\_firehose\_for\_logs\_source) | This output contains sumologic kinesis firehose for logs source id. |
 | <a name="output_sumologic_kinesis_firehose_for_metrics_source"></a> [sumologic\_kinesis\_firehose\_for\_metrics\_source](#output\_sumologic\_kinesis\_firehose\_for\_metrics\_source) | This output contains sumologic kinesis firehose for metrics source id. |
-| <a name="output_sumologic_xray_source"></a> [sumologic\_xray\_source](#output\_sumologic\_xray\_source) | This output contains sumologic aws xray source id. |

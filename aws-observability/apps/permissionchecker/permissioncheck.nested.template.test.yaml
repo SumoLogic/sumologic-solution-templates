@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.11.0: This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
+Description: "Version - v2.12.0: This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
 Transform: 'AWS::Serverless-2016-10-31'
 
 Metadata:
@@ -211,7 +211,7 @@ Resources:
 
   ################# Create Lambda Role and Lambda Function to create Sumo Logic Custom Resources #################
   ################# Checks for IAM and Lambda Permissions #################
-  ################# Checks for IAM ROLE - Sumo Source, Inventory Source also #################
+  ################# Checks for IAM ROLE - Sumo Source #################
   LambdaRole:
     Type: AWS::IAM::Role
     Metadata:
@@ -281,79 +281,6 @@ Resources:
                 Resource:
                   "*"
 
-  RootCauseRole:
-    Type: AWS::IAM::Role
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W11
-            reason: "Operations are performed across resources."
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: arn:aws:iam::246946804217:root
-            Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Sub "${Section1aSumoLogicDeployment}:${Section1dSumoLogicOrganizationId}"
-      Path: "/"
-      Policies:
-        - PolicyName: SumoInventoryPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - apigateway:GET
-                  - autoscaling:Describe*
-                  - cloudfront:GetDistributionConfig
-                  - cloudfront:ListDistributions
-                  - cloudtrail:DescribeTrails
-                  - cloudtrail:GetTrailStatus
-                  - cloudwatch:Describe*
-                  - cloudwatch:Get*
-                  - cloudwatch:List*
-                  - codedeploy:List*
-                  - codedeploy:BatchGet*
-                  - dynamodb:Describe*
-                  - dynamodb:List*
-                  - ec2:Describe*
-                  - ecs:Describe*
-                  - ecs:List*
-                  - elasticache:Describe*
-                  - elasticache:List*
-                  - elasticfilesystem:Describe*
-                  - elasticloadbalancing:Describe*
-                  - elasticmapreduce:Describe*
-                  - elasticmapreduce:List*
-                  - es:Describe*
-                  - es:List*
-                  - health:Describe*
-                  - kinesis:Describe*
-                  - kinesis:List*
-                  - lambda:List*
-                  - mq:Describe*
-                  - mq:List*
-                  - rds:Describe*
-                  - rds:List*
-                  - redshift:Describe*
-                  - route53:List*
-                  - sqs:ListQueues
-                  - ses:GetSendStatistics
-                  - ses:GetSendQuota
-                  - sns:List*
-                  - tag:GetResources
-                  - tag:GetTagKeys
-                  - tag:GetTagValues
-                  - xray:BatchGetTraces
-                  - xray:Get*
-                  - pi:DescribeDimensionKeys
-                  - pi:GetResourceMetrics
-                Effect: Allow
-                Resource: "*"
-
   LambdaHelper:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -361,7 +288,7 @@ Resources:
       Runtime: python3.13
       CodeUri:
         Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.20.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.21.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -528,7 +455,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
-        SemanticVersion: 1.0.16
+        SemanticVersion: 1.0.17
       Parameters:
         BucketName: !Ref CommonS3Bucket
         BucketPrefix: "elasticloadbalancing"
@@ -663,7 +590,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.14
+        SemanticVersion: 1.0.15
       Parameters:
         DestinationArnType: "Lambda"
         DestinationArnValue: !GetAtt CloudWatchEventFunction.Outputs.SumoCWLogsLambdaArn
