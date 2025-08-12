@@ -1,19 +1,20 @@
 # have to use version as hardcoded because during apply command latest always tries to update app resource and fails if the app with latest version is already installed
-resource "sumologic_app" "azure_function_app" {
-    uuid = "a0fb1bf0-2ab4-4f69-bf7e-5d97a176c7ea"
+resource "sumologic_app" "azure_storage_app" {
+    uuid = "53376d23-2687-4500-b61e-4a2e2a119658"
     version = "1.0.3"
     # Todo namespace to app mapping
     # separate app module
-    count = contains(local.apps_to_install, "Azure Functions") ? 1 : 0
+    count = contains(local.apps_to_install, "Azure Storage") ? 1 : 0
 }
 
-resource "sumologic_app" "azure_web_app" {
-    uuid = "a4741497-31c6-4fb2-a236-0223e98b59e8"
-    version = "1.0.1"
+resource "sumologic_app" "azure_key_vault_app" {
+    uuid = "449c796e-5da2-47ea-a304-e9299dd7435d"
+    version = "1.0.2"
     count = contains(local.apps_to_install, "Azure Web Apps") ? 1 : 0
 }
-resource "sumologic_app" "azure_cosmos_db_app" {
-    uuid = "d9ac4e28-13d6-4e69-8dcc-63fd6cb3bc80"
-    version = "1.0.1"
-    count = contains(local.apps_to_install, "Azure CosmosDB") ? 1 : 0
+
+resource "sumologic_app" "azure_virtual_machine" {
+    uuid = "dfa576fc-7d3b-4946-b414-149567e25d6a"
+    version = "1.0.3"
+    count = contains(local.apps_to_install, "Azure Virtual Machine") ? 1 : 0
 }

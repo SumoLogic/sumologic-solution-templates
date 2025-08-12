@@ -47,7 +47,7 @@ resource "azurerm_eventhub_namespace_authorization_rule" "sumo_collection_policy
 resource "sumologic_collector" "sumo_collector" {
   # Todo collector name from the variable
   # Todo add tenant subscription in collector to uniquely identify
-  name          =  "Azure Observability Collector"
+  name        = join("-", [var.sumo_collector_name, var.azure_subscription_id])
   description = "created via terraform"
 
   # name        = local.collector_name
@@ -119,42 +119,30 @@ data "azurerm_eventhub_namespace_authorization_rule" "default_rule" {
 }
 
 # Todo for each for each target resource
-data "azurerm_monitor_diagnostic_categories" "function_app_category" {
-  # Todo take in variable
-  resource_id = var.target_resource_ids[0]
+data "azurerm_monitor_diagnostic_categories" "all_categories" {
+  for_each    = toset(var.target_resource_ids)
+  resource_id = each.value
 }
 
 # Todo Create a autosubscribe function to create diagnostic settings
 # Create a Diagnostic Setting for Function App logs
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
-  name               = "sumo_export_logs"
-  eventhub_name = var.eventhub_name
-  target_resource_id = var.target_resource_ids[0]
-  eventhub_authorization_rule_id  = data.azurerm_eventhub_namespace_authorization_rule.default_rule.id
-
-  # Select the resource from the list https://learn.microsoft.com/en-gb/azure/azure-monitor/platform/resource-logs-schema#service-specific-schemas
-  # Select the category from the link opened from above link for example for function app it opens this link - https://learn.microsoft.com/en-us/azure/azure-functions/monitor-functions-reference?tabs=consumption-plan#resource-logs
 
 
-  dynamic "enabled_log" {
-    for_each = data.azurerm_monitor_diagnostic_categories.function_app_category.log_category_types
 
-    content {
-      category = enabled_log.value
+  for_each = data.azurerm_monitor_diagnostic_categories.all_categories
+
+    name                  = join("_", ["sumo_export_logs", index(var.target_resource_ids, each.key)])
+    eventhub_name         = var.eventhub_name
+    target_resource_id    = each.key
+    eventhub_authorization_rule_id = data.azurerm_eventhub_namespace_authorization_rule.default_rule.id
+
+    dynamic "enabled_log" {
+      for_each = each.value.log_category_types
+      content {
+        category = enabled_log.value
+      }
     }
-  }
-
-
-  metric {
-    category = "AllMetrics"
-    enabled  = false
-
-    retention_policy {
-      days    = 0
-      enabled = false
-    }
-  }
-
   # dynamic log {
   #   for_each = sort(data.azurerm_monitor_diagnostic_categories.default.logs)
   #   content {

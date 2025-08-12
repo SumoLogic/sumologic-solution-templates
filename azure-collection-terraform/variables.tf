@@ -3,51 +3,59 @@
 variable "azure_subscription_id" {
   description = "The subscription id where your azure resources are present"
   type        = string
+  default     = ""
 }
 
 variable "azure_client_id" {
   description = "The client id "
   type        = string
+  default     = ""
 }
 
 variable "azure_client_secret" {
   description = "The client secret"
   type        = string
+  default     = ""
 }
 
 variable target_resource_ids {
   type = list
   description = "List of target azure resources whose logs and metrics you want to collect in the provided region and subscription"
-  default = ["/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/azurefunctiontrace/providers/Microsoft.Web/sites/azurefunctiontrace/"]
+  default = [
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/blobServices/default",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/fileServices/default",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/tableServices/default",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/queueServices/default",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.KeyVault/vaults/TFtest001",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Compute/virtualMachines/VM001",
+    ]
 }
-
-
 
 
 variable "resource_group_name" {
   description = "The name of the Resource Group."
-  default = "hpalazureobservability"
+  default = "SUMO-267667"
   type        = string
 }
 
 variable "eventhub_namespace_name" {
   description = "The name of the Event Hub Namespace."
   type        = string
-  default = "sumologiclogseventhubnamespace"
+  default = "SUMO-267667-Hub"
 }
 
 
 variable "eventhub_name" {
   description = "The name of the Event Hub."
   type        = string
-  default = "sumologiclogseventhub"
+  default = "SUMO-267667-Hub-Logs-Collector"
 }
 
-variable "eventhub_metrics_name" {
-  description = "The name of the Event Hub."
-  type        = string
-  default = "sumologicmetricseventhub"
-}
+# variable "eventhub_metrics_name" {
+#   description = "The name of the Event Hub."
+#   type        = string
+#   default = "sumologicmetricseventhub"
+# }
 
 variable "location" {
   description = "The location for the resources."
@@ -87,6 +95,7 @@ variable "sumologic_environment" {
     "fed"], var.sumologic_environment)
     error_message = "The value must be one of au, ca, de, eu, jp, us1, us2, in, kr or fed."
   }
+  default = "us1"
 }
 
 variable "sumologic_access_id" {
@@ -97,6 +106,7 @@ variable "sumologic_access_id" {
     condition     = can(regex("\\w+", var.sumologic_access_id))
     error_message = "The SumoLogic access ID must contain valid characters."
   }
+  default = "suBxl4FJhYL8DO"
 }
 
 variable "sumologic_access_key" {
@@ -108,6 +118,7 @@ variable "sumologic_access_key" {
     condition     = can(regex("\\w+", var.sumologic_access_key))
     error_message = "The SumoLogic access key must contain valid characters."
   }
+  default = ""
 }
 
 
@@ -119,13 +130,16 @@ variable "apps_names_to_install" {
         EOT
   validation {
     condition     = anytrue([for engine in split(",", var.apps_names_to_install) : contains(["",
-      "Azure Web Apps",
-      "Azure Service Bus",
       "Azure Storage",
-      "Azure Functions",
-      "Azure Load Balancer",
-      "Azure CosmosDB"], engine)])
+      "Azure Key Vault", "Azure Virtual Machine"], engine)])
     error_message = "The value must be one of \"Azure Web Apps,Azure Service Bus,Azure Storage,Azure Load Balancer,Azure CosmosDB\""
   }
-  default = "Azure Functions"
+  default = "Azure Storage,Azure Key Vault,Azure Virtual Machine"
+}
+
+
+variable "sumo_collector_name" {
+  type        = string
+  description = "Sumologic collector name"
+  default = "SUMO-267667-Collector"
 }
