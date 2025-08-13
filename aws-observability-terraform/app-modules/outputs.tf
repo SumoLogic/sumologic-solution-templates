@@ -163,11 +163,6 @@ output "sumologic_metric_rules_nlb" {
   description = "This output contains metric rules required for nlb app."
 }
 
-output "sumologic_content_rce" {
-  value       = module.rce_app.sumologic_content
-  description = "This output contains rce Apps."
-}
-
 output "sumologic_field_sns" {
   value       = module.sns_app.sumologic_field
   description = "This output contains fields required for sns app."
