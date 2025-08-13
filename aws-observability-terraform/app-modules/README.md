@@ -27,7 +27,6 @@
 | <a name="module_lambda_app"></a> [lambda\_app](#module\_lambda\_app) | ./lambda | n/a |
 | <a name="module_nlb_app"></a> [nlb\_app](#module\_nlb\_app) | ./nlb | n/a |
 | <a name="module_overview_app"></a> [overview\_app](#module\_overview\_app) | ./overview | n/a |
-| <a name="module_rce_app"></a> [rce\_app](#module\_rce\_app) | ./rce | n/a |
 | <a name="module_rds_app"></a> [rds\_app](#module\_rds\_app) | ./rds | n/a |
 | <a name="module_sns_app"></a> [sns\_app](#module\_sns\_app) | ./sns | n/a |
 | <a name="module_sqs_app"></a> [sqs\_app](#module\_sqs\_app) | ./sqs | n/a |
@@ -89,7 +88,6 @@
 | <a name="output_sumologic_content_lambda"></a> [sumologic\_content\_lambda](#output\_sumologic\_content\_lambda) | This output contains lambda App. |
 | <a name="output_sumologic_content_nlb"></a> [sumologic\_content\_nlb](#output\_sumologic\_content\_nlb) | This output contains nlb App. |
 | <a name="output_sumologic_content_overview"></a> [sumologic\_content\_overview](#output\_sumologic\_content\_overview) | This output contains overview App. |
-| <a name="output_sumologic_content_rce"></a> [sumologic\_content\_rce](#output\_sumologic\_content\_rce) | This output contains rce Apps. |
 | <a name="output_sumologic_content_rds"></a> [sumologic\_content\_rds](#output\_sumologic\_content\_rds) | This output contains rds App. |
 | <a name="output_sumologic_content_sns"></a> [sumologic\_content\_sns](#output\_sumologic\_content\_sns) | This output contains sns App. |
 | <a name="output_sumologic_content_sqs"></a> [sumologic\_content\_sqs](#output\_sumologic\_content\_sqs) | This output contains sqs App. |
