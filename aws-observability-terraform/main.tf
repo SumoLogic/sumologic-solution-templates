@@ -3,14 +3,14 @@
 # NOTE - The "app-modules" should be installed per Sumo Logic organization.
 #
 module "sumo-module" {
-  source                   = "./app-modules"
-  access_id                = var.sumologic_access_id
-  access_key               = var.sumologic_access_key
-  environment              = var.sumologic_environment
-  json_file_directory_path = dirname(path.cwd)
+  source                       = "./app-modules"
+  access_id                    = var.sumologic_access_id
+  access_key                   = var.sumologic_access_key
+  environment                  = var.sumologic_environment
+  json_file_directory_path     = dirname(path.cwd)
   folder_installation_location = var.sumologic_folder_installation_location
-  folder_share_with_org    = var.sumologic_folder_share_with_org
-  sumologic_organization_id = var.sumologic_organization_id
+  folder_share_with_org        = var.sumologic_folder_share_with_org
+  sumologic_organization_id    = var.sumologic_organization_id
 }
 
 #
@@ -24,5 +24,6 @@ module "collection-module" {
   sumologic_organization_id = var.sumologic_organization_id
   access_id                 = var.sumologic_access_id
   access_key                = var.sumologic_access_key
-  environment               = var.sumologic_environment  
+  environment               = var.sumologic_environment
+  aws_resource_tags         = var.aws_resource_tags
 }
