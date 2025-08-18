@@ -335,3 +335,8 @@ variable "executeTest4" {
   description = "True - If you want to execute this TestCase"
   default     = false
 }
+variable "aws_resource_tags" {
+  description = "Map of tags to apply to all AWS resources provisioned through the test Source Module"
+  type        = map(string)
+  default     = {}
+}

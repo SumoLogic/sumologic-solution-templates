@@ -58,6 +58,7 @@ output "sumologic_kinesis_firehose_for_metrics_source" {
 output "kf_metrics_stream" {
   value       = "${var.collect_metric_cloudwatch == "Kinesis Firehose Metrics Source" ? module.collection-module.aws_kinesis_firehose_metrics_delivery_stream.name : ""}"
   description = "This output contains Kinesis Firehose for metrics stream Name."
+  sensitive = true
 }
 
 output "cw_metrics_stream" {
@@ -83,6 +84,7 @@ output "kf_logs_auto_enable_stack" {
 output "kf_logs_stream" {
   value       = "${var.collect_logs_cloudwatch == "Kinesis Firehose Log Source" ? module.collection-module.aws_kinesis_firehose_logs_delivery_stream.name : ""}"
   description = "This output contains Kinesis Firehose for logs stream Name."
+  sensitive = true
 }
 
 output "sumologic_cloudwatch_logs_source" {

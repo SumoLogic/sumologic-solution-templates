@@ -6,7 +6,7 @@ import (
 )
 
 // Following Test cases are executed in sequence one after another.
-// It takes around 20 mins to execute following 4 test scenerios.
+// It takes around 20 mins to execute following 4 test scenarios.
 
 // Main function
 // Testing scenario 1 - default scenario
@@ -35,7 +35,9 @@ func TestAppModule1(t *testing.T) {
 
 }
 
-// Testing scenario 2 - Install in Admin Recom folder,share - true, override -  Monitor folder name, enable log + metric monitor
+// Testing scenario 2 - Install in Admin Recom folder, share - true,
+// override - Monitor folder name, enable log + metric monitor
+// update - share - false
 func TestAppModule2(t *testing.T) {
 	// t.Parallel()
 
@@ -65,13 +67,25 @@ func TestAppModule2(t *testing.T) {
 		validateSumoLogicResources(t, TerraformDir)
 	})
 
+	Vars = map[string]interface{}{
+		"sumologic_folder_installation_location": "Admin Recommended Folder",
+		"sumologic_folder_share_with_org":        "false",
+	}
+
+	// Deploy the solution using Terraform
+	test_structure.RunTestStage(t, "deploy", func() {
+		deployTerraform(t, TerraformDir, Vars)
+	})
+
 	// At the end of the test, un-deploy the solution using Terraform
 	defer test_structure.RunTestStage(t, "cleanup", func() {
 		destroyTerraform(t, TerraformDir)
 	})
 }
 
-// Testing scenario 3 - Install in Personal folder, share is false, override - App folder, enable log and metric monitor
+// Testing scenario 3 - Install in Personal folder, share is false,
+// override - App folder, enable log and metric monitor
+// update - share - true
 func TestAppModule3(t *testing.T) {
 	// t.Parallel()
 
@@ -95,13 +109,24 @@ func TestAppModule3(t *testing.T) {
 		validateSumoLogicResources(t, TerraformDir)
 	})
 
+	Vars = map[string]interface{}{
+		"sumologic_folder_share_with_org":        "true",
+	}
+
+	// Deploy the solution using Terraform
+	test_structure.RunTestStage(t, "deploy", func() {
+		deployTerraform(t, TerraformDir, Vars)
+	})
+
 	// At the end of the test, un-deploy the solution using Terraform
 	defer test_structure.RunTestStage(t, "cleanup", func() {
 		destroyTerraform(t, TerraformDir)
 	})
 }
 
-// Testing scenario 4 - Install in Admin Recom folder,share - false, override - App folder name, Monitor folder name, enable metric monitor
+// Testing scenario 4 - Install in Admin Recom folder, share - false,
+// override - App folder name, Monitor folder name, enable metric monitor
+// update - Personal folder,  share - true
 func TestAppModule4(t *testing.T) {
 	// t.Parallel()
 
@@ -125,6 +150,16 @@ func TestAppModule4(t *testing.T) {
 	// Validate that the resources are created in Sumo Logic
 	test_structure.RunTestStage(t, "validateSumoLogic", func() {
 		validateSumoLogicResources(t, TerraformDir)
+	})
+
+	Vars = map[string]interface{}{
+		"sumologic_folder_installation_location": "Personal Folder",
+		"sumologic_folder_share_with_org":        "true",
+	}
+
+	// Deploy the solution using Terraform
+	test_structure.RunTestStage(t, "deploy", func() {
+		deployTerraform(t, TerraformDir, Vars)
 	})
 
 	// At the end of the test, un-deploy the solution using Terraform
