@@ -78,6 +78,7 @@ output "kf_logs_auto_enable_stack" {
 output "kf_logs_stream" {
   value       = "${var.collect_logs_cloudwatch == "Kinesis Firehose Log Source" ? module.collection-module.aws_kinesis_firehose_logs_delivery_stream.name : ""}"
   description = "This output contains Kinesis Firehose for logs stream Name."
+  sensitive = true
 }
 
 output "sumologic_cloudwatch_logs_source" {
