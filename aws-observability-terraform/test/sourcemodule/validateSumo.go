@@ -21,7 +21,7 @@ func loadPropertiesFile(file string) map[string]string {
 	return props
 }
 
-//SumoLogic Environment URL
+// SumoLogic Environment URL
 var sumologicURL = getSumologicURL()
 
 func getSumologicURL() string {

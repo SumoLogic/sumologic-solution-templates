@@ -1,9 +1,7 @@
 package test
 
 import (
-	"testing"
-    "context"
-    "log"
+	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
@@ -15,17 +13,19 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/gruntwork-io/terratest/modules/terraform"
+	"log"
+	"testing"
 )
 
 var (
-	s3Client          *s3.Client
-	snsClient         *sns.Client
-	iamClient         *iam.Client
-	lambdaClient      *lambda.Client
-	cfClient          *cloudformation.Client
-	firehoseClient    *firehose.Client
-	cloudwatchClient  *cloudwatch.Client
-	cloudtrailClient  *cloudtrail.Client
+	s3Client         *s3.Client
+	snsClient        *sns.Client
+	iamClient        *iam.Client
+	lambdaClient     *lambda.Client
+	cfClient         *cloudformation.Client
+	firehoseClient   *firehose.Client
+	cloudwatchClient *cloudwatch.Client
+	cloudtrailClient *cloudtrail.Client
 )
 
 const (
@@ -38,12 +38,12 @@ func init() {
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
-    s3Client = s3.NewFromConfig(cfg)
+	s3Client = s3.NewFromConfig(cfg)
 	snsClient = sns.NewFromConfig(cfg)
 	iamClient = iam.NewFromConfig(cfg)
-	lambdaClient  =    lambda.NewFromConfig(cfg)
-	cfClient      =   cloudformation.NewFromConfig(cfg)
-	firehoseClient   = firehose.NewFromConfig(cfg)
+	lambdaClient = lambda.NewFromConfig(cfg)
+	cfClient = cloudformation.NewFromConfig(cfg)
+	firehoseClient = firehose.NewFromConfig(cfg)
 	cloudwatchClient = cloudwatch.NewFromConfig(cfg)
 	cloudtrailClient = cloudtrail.NewFromConfig(cfg)
 }
