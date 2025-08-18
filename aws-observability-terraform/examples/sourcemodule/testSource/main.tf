@@ -48,6 +48,7 @@ module "collection-module" {
   "tag_filters": var.metrics_tag_filters
   "source_category": "aws/observability/cloudwatch/metrics/us-east-1",
   "source_name": "CloudWatch Metrics us-east-1"
-}
+  }
+  aws_resource_tags = var.aws_resource_tags
   # wait_for_seconds = "10"
 }
