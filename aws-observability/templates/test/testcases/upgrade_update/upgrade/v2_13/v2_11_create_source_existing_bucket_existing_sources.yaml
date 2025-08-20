@@ -1,14 +1,16 @@
 ---
 Global:
-  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.13.0/sumologic_observability.master.template.yaml"
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.11.0/sumologic_observability.master.template.yaml"
   StackName: AWSO
   ParallelTestsRun: 1
   GlobalParameters:
     Default:
       Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
-      Section2aAccountAlias: 'infrat7'
+      Section2aAccountAlias: 'upgradev210to211'
 TestCase:
-  TestName: createSourceExistingBucketExistingSources
+  TestName: v2_11ToV2_13CreateSourceExistingBucketExistingSources
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.11.0/sumologic_observability.master.template.yaml"
+  UpgradeTemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.13.0/sumologic_observability.master.template.yaml"
   Regions: '${SUMO_REGIONS}'
   Skip: false
   PreRequisitesInfra:
@@ -24,7 +26,7 @@ TestCase:
       Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
       Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
       Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
-      Section2aAccountAlias: 'infrat7'
+      Section2aAccountAlias: 'upgradev210to211'
       Section2bAccountAliasMappingS3URL: ''
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'CloudWatch Metrics Source'
@@ -67,6 +69,7 @@ TestCase:
           - sumoLambdaMetricsAppStack
           - sumoECSMetricsAppStack
           - sumoElasticCacheMetricsAppStack
+          - RootCauseAppStack
           - CreateCommonResources.AddAccountField
           - CreateCommonResources.AddRegionField
           - CreateCommonResources.AddNamespaceField
@@ -191,7 +194,7 @@ TestCase:
     - AssertType: ParameterCheck
       Assert:
         CreateCommonResources:
-          AccountAlias: "infrat7"
+          AccountAlias: "upgradev210to211"
           AccountAliasMappingS3URL: ""
           CreateMetaDataSource: 'No'
           MetaDataSourceName: ""
@@ -248,13 +251,13 @@ TestCase:
         sumoEC2MetricsAppStack:
           Section2aInstallApp: 'No'
         sumoAlbMetricsAppStack:
-          Section2aAccountAlias: 'infrat7'
+          Section2aAccountAlias: 'upgradev210to211'
           Section3aInstallApp: 'No'
           Section4aCloudWatchExistingSourceAPIUrl: ''
           Section5aALBLogsAPIUrl: ''
           Section5bALBLogsSourceName: '*alb-logs*'
         sumoElbMetricsAppStack:
-          Section2aAccountAlias: 'infrat7'
+          Section2aAccountAlias: 'upgradev210to211'
           Section3aInstallApp: 'No'
           Section4aCloudWatchExistingSourceAPIUrl: ''
           Section5aELBLogsAPIUrl: ''
@@ -272,7 +275,7 @@ TestCase:
           Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
           Section3bCloudTrailSourceUpdated: 'No'
         sumoLambdaMetricsAppStack:
-          Section2aAccountAlias: 'infrat7'
+          Section2aAccountAlias: 'upgradev210to211'
           Section3aInstallApp: 'No'
           Section4aCloudWatchExistingSourceAPIUrl: ''
           Section5aCloudTrailLogsAPIUrl: ''
