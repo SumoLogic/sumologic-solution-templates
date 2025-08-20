@@ -10,7 +10,7 @@
 # resource "sumologic_app" "azure_key_vault_app" {
 #     uuid = "449c796e-5da2-47ea-a304-e9299dd7435d"
 #     version = "1.0.2"
-#     count = contains(local.apps_to_install, "Azure Web Apps") ? 1 : 0
+#     count = contains(local.apps_to_install, "Azure Key Vault App") ? 1 : 0
 # }
 
 # resource "sumologic_app" "azure_virtual_machine" {

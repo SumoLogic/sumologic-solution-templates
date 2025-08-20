@@ -1,5 +1,3 @@
-
-
 variable "azure_subscription_id" {
   description = "The subscription id where your azure resources are present"
   type        = string
@@ -22,7 +20,12 @@ variable target_resource_ids {
   type = list
   description = "List of target azure resources whose logs and metrics you want to collect in the provided region and subscription"
   default = [
-
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/blobServices/default",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/fileServices/default",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/tableServices/default",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/queueServices/default",
+    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.KeyVault/vaults/TFtest001",
+     "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.ServiceBus/namespaces/SBUS002"
     ]
 }
 
@@ -46,11 +49,6 @@ variable "eventhub_name" {
   default = "SUMO-267667-Hub-Logs-Collector"
 }
 
-# variable "eventhub_metrics_name" {
-#   description = "The name of the Event Hub."
-#   type        = string
-#   default = "sumologicmetricseventhub"
-# }
 
 variable "location" {
   description = "The location for the resources."
