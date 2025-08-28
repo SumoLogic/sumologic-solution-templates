@@ -2,7 +2,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.7 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.16.2, < 7.0.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.1.0 |
 | <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.31.3, < 4.0.0 |
@@ -12,8 +12,8 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 3.1.3 |
-| <a name="provider_time"></a> [time](#provider\_time) | 0.13.1 |
+| <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | >= 2.31.3, < 4.0.0 |
+| <a name="provider_time"></a> [time](#provider\_time) | >= 0.11.1 |
 
 ## Modules
 
