@@ -16,17 +16,19 @@ variable "azure_client_secret" {
   default     = ""
 }
 
-variable target_resource_ids {
-  type = list
-  description = "List of target azure resources whose logs and metrics you want to collect in the provided region and subscription"
+variable "azure_tenant_id" {
+  description = "The Tenant Id"
+  type        = string
+  default     = ""
+}
+
+variable "target_resource_types" {
+  type        = list(string)
+  description = "List of Azure resource types whose logs and metrics you want to collect."
   default = [
-    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/blobServices/default",
-    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/fileServices/default",
-    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/tableServices/default",
-    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.Storage/storageAccounts/sumo267667eastus/queueServices/default",
-    "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.KeyVault/vaults/TFtest001",
-     "/subscriptions/c088dc46-d692-42ad-a4b6-9a542d28ad2a/resourceGroups/SUMO-267667-stable/providers/Microsoft.ServiceBus/namespaces/SBUS002"
-    ]
+    "Microsoft.KeyVault/vaults",
+    "Microsoft.ServiceBus/namespaces"
+  ]
 }
 
 
@@ -72,6 +74,12 @@ variable "activity_log_export_name" {
   type        = string
   description = "Activity Log Export Name"
   default = "activity_logs_export"
+}
+
+variable "activity_log_export_category" {
+  type        = string
+  description = "Activity Log Export Category"
+  default = "azure/activity-logs"
 }
 
 variable "sumologic_environment" {
@@ -130,10 +138,10 @@ variable "apps_names_to_install" {
   validation {
     condition     = anytrue([for engine in split(",", var.apps_names_to_install) : contains(["",
       "Azure Storage",
-      "Azure Key Vault", "Azure Virtual Machine"], engine)])
+      "Azure Key Vault", "Azure Service Bus"], engine)])
     error_message = "The value must be one of \"Azure Web Apps,Azure Service Bus,Azure Storage,Azure Load Balancer,Azure CosmosDB\""
   }
-  default = "Azure Storage,Azure Key Vault,Azure Virtual Machine"
+  default = "Azure Service Bus,Azure Key Vault,Azure Storage"
 }
 
 
@@ -141,4 +149,10 @@ variable "sumo_collector_name" {
   type        = string
   description = "Sumologic collector name"
   default = "SUMO-267667-Collector"
+}
+
+variable "index_value" {
+  type        = string
+  description = "The _index if the collection is configured with custom partition."
+  default = "sumologic_default"
 }
