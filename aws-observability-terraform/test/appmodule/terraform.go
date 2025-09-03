@@ -3,7 +3,8 @@ package test
 import (
 	"fmt"
 	"testing"
-
+    "os"
+    "path/filepath"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 )
@@ -42,4 +43,12 @@ func destroyTerraform(t *testing.T, workingDir string) {
 		terraform.DestroyE(t, terraformOptions)
 	}
 	fmt.Println(out)
+	fmt.Println("####################################################################")
+	fmt.Println("Clean up local state files")
+	fmt.Println("####################################################################")
+	// Clean up local state files
+	os.RemoveAll(filepath.Join(workingDir, ".terraform"))
+	os.Remove(filepath.Join(workingDir, ".test-data"))
+	os.Remove(filepath.Join(workingDir, "terraform.tfstate"))
+	os.Remove(filepath.Join(workingDir, "terraform.tfstate.backup"))
 }
