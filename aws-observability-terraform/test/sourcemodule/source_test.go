@@ -179,7 +179,7 @@ func TestSourceModule2(t *testing.T) {
 	})
 }
 
-Testing scenerio 3 - Collect CW Logs via Lambda Log forwarder, CW Metrics via CW metric source
+// Testing scenario 3 - Collect CW Logs via Lambda Log forwarder, CW Metrics via CW metric source
 func TestSourceModule3(t *testing.T) {
 	// t.Parallel()
 
