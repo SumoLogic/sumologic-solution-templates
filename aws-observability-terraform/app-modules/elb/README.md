@@ -10,7 +10,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_classic_elb_module"></a> [classic\_elb\_module](#module\_classic\_elb\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | n/a |
+| <a name="module_classic_elb_module"></a> [classic\_elb\_module](#module\_classic\_elb\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.1.0 |
 
 ## Resources
 
