@@ -2,11 +2,11 @@ package test
 
 import (
 	"fmt"
-	"testing"
-    "os"
-    "path/filepath"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
+	"os"
+	"path/filepath"
+	"testing"
 )
 
 // Deploy the resources using Terraform

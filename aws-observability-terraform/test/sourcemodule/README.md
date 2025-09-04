@@ -20,7 +20,7 @@
    - Run following command to execute all Test functions, with function name pattern as Test* 
    ```go test -v -timeout 100m ./test/sourcemodule```
    For single Terratest case
-   ``go test -v -timeout 20m ./test/sourcemodule -run ^TestAppModule1$``
+   ``go test -v -timeout 20m ./test/sourcemodule -run ^TestSourceModule1$``
 5. Go test command runs all functions starting with name Test*. So if you want to run a particular test case according to your use case, comment the rest of the Testing functions. It’ll take less time to run than running all test cases.
 6. For example if you only run testcase 3 you can expect successful test execution as follows:
 
