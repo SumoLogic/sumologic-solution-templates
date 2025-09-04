@@ -10,7 +10,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_sns_module"></a> [sns\_module](#module\_sns\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | n/a |
+| <a name="module_sns_module"></a> [sns\_module](#module\_sns\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.1.0 |
 
 ## Resources
 

@@ -10,7 +10,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_overview_module"></a> [overview\_module](#module\_overview\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | n/a |
+| <a name="module_overview_module"></a> [overview\_module](#module\_overview\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.1.0 |
 
 ## Resources
 
