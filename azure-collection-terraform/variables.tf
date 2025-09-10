@@ -25,12 +25,12 @@ variable "azure_tenant_id" {
 variable "target_resource_types" {
   type        = list(string)
   description = "List of Azure resource types whose logs and metrics you want to collect."
-  default = [
-    "Microsoft.KeyVault/vaults",
-    "Microsoft.ServiceBus/namespaces"
-  ]
 }
 
+variable "required_resource_tags" {
+  description = "A map of tags to filter Azure resources by."
+  type        = map(string)
+}
 
 variable "resource_group_name" {
   description = "The name of the Resource Group."
@@ -80,6 +80,11 @@ variable "activity_log_export_category" {
   type        = string
   description = "Activity Log Export Category"
   default = "azure/activity-logs"
+}
+
+variable "enable_activity_logs" {
+  description = "Set to true to enable subscription-level activity log export."
+  type        = bool
 }
 
 variable "sumologic_environment" {
