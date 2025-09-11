@@ -15,7 +15,6 @@ resource "azurerm_eventhub_namespace" "namespaces_by_location" {
   location            = each.key
   resource_group_name = azurerm_resource_group.rg.name
   sku                 = "Standard"
-  zone_redundant      = true
   capacity            = var.throughput_units
   tags = {
     version = local.solution_version
