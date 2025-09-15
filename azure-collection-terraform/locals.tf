@@ -2,60 +2,73 @@ locals {
   sumologic_service_endpoint = var.sumologic_environment == "us1" ? "https://service.sumologic.com" : (contains(["stag", "long"], var.sumologic_environment) ? "https://${var.sumologic_environment}.sumologic.net" : "https://service.${var.sumologic_environment}.sumologic.com")
   sumologic_api_endpoint     = var.sumologic_environment == "us1" ? "https://api.sumologic.com/api" : (contains(["stag", "long"], var.sumologic_environment) ? "https://${var.sumologic_environment}-api.sumologic.net/api" : "https://api.${var.sumologic_environment}.sumologic.com/api")
 
-  # is_adminMode = var.apps_folder_installation_location == "Admin Recommended Folder" ? true : false
-
-  apps_to_install = compact([for s in split(",", var.apps_names_to_install) : trimspace(s)])
-
+  apps_to_install  = compact([for s in split(",", var.apps_names_to_install) : trimspace(s)])
   solution_version = "v1.0.0"
 
-  resources_by_location = {
-    for res in flatten([
-      for type, resources in data.azurerm_resources.all_target_resources : resources.resources
-    ]) : res.id => res
-  }
+  parents_with_nested_configs = keys(var.nested_namespace_configs)
 
-  resources_by_type_and_location = {
-    for res in flatten([
-      for type, resources in data.azurerm_resources.all_target_resources : resources.resources
-    ]) : "${res.type}-${res.location}" => res...
-  }
+  all_resources_list = flatten([    
+    [for type, resources in data.azurerm_resources.all_target_resources : [
+      for res in resources.resources : res
+      if !contains(local.parents_with_nested_configs, type)
+    ]],
+    [for parent_type, children_types in var.nested_namespace_configs : [
+      for parent_res in data.azurerm_resources.all_target_resources[parent_type].resources : [
+        for child_type in children_types : {
+          id                  = "${parent_res.id}/${element(split("/", child_type), length(split("/", child_type)) - 1)}/default"
+          name                = "${parent_res.name}/${element(split("/", child_type), length(split("/", child_type)) - 1)}/default"
+          type                = child_type
+          location            = parent_res.location
+          resource_group_name = parent_res.resource_group_name
+          parent_resource_id  = parent_res.id
+          parent_type         = parent_type
+        }
+      ]
+    ]]
+  ])
+
+  all_monitored_resources = { for res in local.all_resources_list : res.id => res }
 
   resources_by_location_only = {
-    for res in values(local.resources_by_location) :
+    for res in values(local.all_monitored_resources) :
     res.location => res...
   }
 
-  unique_locations = distinct([for res in values(local.resources_by_location) : res.location])
-
-  grouped_filters = {
-    for filter in local.tag_filters :
-    (length(split("/", filter.namespace)) > 2 ? join("/", slice(split("/", filter.namespace), 0, length(split("/", filter.namespace)) - 1)) : filter.namespace) => filter...
+  resources_by_type_and_location = {
+    for res in values(local.all_monitored_resources) : 
+    "${lookup(res, "parent_type", res.type)}-${res.location}" => res...
   }
+
+  unique_locations = distinct([for res in values(local.all_monitored_resources) : res.location])
 
   metrics_source_groups = {
-    for parent_namespace, filters in local.grouped_filters : parent_namespace => {
-      namespaces = [for filter in filters : filter.namespace]
-      regions    = [for filter in filters : filter.region]
-      tag_filters = filters
+    for parent_namespace in var.target_resource_types : parent_namespace => {
+      namespaces = lookup(var.nested_namespace_configs, parent_namespace, [parent_namespace])
+
+      regions = [distinct([
+        for res in values(local.all_monitored_resources) :
+        replace(res.location, " ", "")
+        if res.type == parent_namespace || lookup(res, "parent_type", "") == parent_namespace
+      ])]
+      
+      tag_filters = [{
+        type      = "AzureTagFilters"
+        namespace = parent_namespace
+        region    = distinct([
+          for res in values(local.all_monitored_resources) :
+          replace(res.location, " ", "")
+          if res.type == parent_namespace || lookup(res, "parent_type", "") == parent_namespace
+        ])
+        tags = length(var.required_resource_tags) > 0 ? {
+          name   = keys(var.required_resource_tags)[0]
+          values = [values(var.required_resource_tags)[0]]
+        } : {
+          name   = ""
+          values = []
+        }
+      }]
     }
   }
 
-  tag_filters = [
-    for type in var.target_resource_types : {
-      type      = "AzureTagFilters"
-      region    = distinct([
-        for res in data.azurerm_resources.all_target_resources[type].resources :
-        replace(res.location, " ", "")
-      ])
-      namespace = type
-      tags = length(var.required_resource_tags) > 0 ? {
-        name   = keys(var.required_resource_tags)[0]
-        values = [values(var.required_resource_tags)[0]]
-      } : {
-        name   = ""
-        values = []
-      }
-    }
-  ]
   has_resources = length(data.azurerm_resources.all_target_resources) > 0
 }

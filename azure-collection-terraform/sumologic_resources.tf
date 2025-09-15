@@ -1,15 +1,5 @@
-# have to use version as hardcoded because during apply command latest always tries to update app resource and fails if the app with latest version is already installed
-# resource "sumologic_app" "azure_storage_app" {
-#     uuid = "53376d23-2687-4500-b61e-4a2e2a119658"
-#     version = "1.0.3"
-#     count = contains(local.apps_to_install, "Azure Storage") ? 1 : 0
-#     parameters = {
-#         "index_value": var.index_value
-#     }
-# }
-
 resource "sumologic_collector" "sumo_collector" {
-  name   = join("-", [var.sumo_collector_name, var.azure_subscription_id])
+  name        = join("-", [var.sumo_collector_name, var.azure_subscription_id])
   description = "Azure Collector"
   fields = {
     tenant_name = "azure_account"
@@ -27,13 +17,19 @@ resource "sumologic_azure_event_hub_log_source" "sumo_azure_event_hub_log_source
 
   authentication {
     type                      = "AzureEventHubAuthentication"
-    shared_access_policy_name = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[local.resources_by_type_and_location[each.key][0].location].name
-    shared_access_policy_key  = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[local.resources_by_type_and_location[each.key][0].location].primary_key
+    shared_access_policy_name = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[
+      local.resources_by_type_and_location[each.key][0].location
+    ].name
+    shared_access_policy_key = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[
+      local.resources_by_type_and_location[each.key][0].location
+    ].primary_key
   }
 
   path {
     type           = "AzureEventHubPath"
-    namespace      = azurerm_eventhub_namespace.namespaces_by_location[local.resources_by_type_and_location[each.key][0].location].name
+    namespace      = azurerm_eventhub_namespace.namespaces_by_location[
+      local.resources_by_type_and_location[each.key][0].location
+    ].name
     event_hub_name = each.value.name
     consumer_group = "$Default"
     region         = "Commercial"
@@ -46,11 +42,11 @@ resource "sumologic_azure_metrics_source" "terraform_azure_metrics_source" {
     if length(data.azurerm_resources.all_target_resources[k].resources) > 0
   }
 
-  name              = replace(replace(each.key, "/", "-"), ".", "-")
-  description       = "Metrics for ${each.key}"
-  category          = "azure/${lower(replace(replace(each.key, "/", "-"), ".", "-"))}/metrics"
-  content_type      = "AzureMetrics"
-  collector_id      = sumologic_collector.sumo_collector.id
+  name         = replace(replace(each.key, "/", "-"), ".", "-")
+  description  = "Metrics for ${each.key}"
+  category     = "azure/${lower(replace(replace(each.key, "/", "-"), ".", "-"))}/metrics"
+  content_type = "AzureMetrics"
+  collector_id = sumologic_collector.sumo_collector.id
 
   authentication {
     type          = "AzureClientSecretAuthentication"
