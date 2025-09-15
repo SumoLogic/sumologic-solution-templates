@@ -1,13 +1,13 @@
 variable "azure_subscription_id" {
   description = "The subscription id where your azure resources are present"
   type        = string
-  default     = ""
+  default     = "c088dc46-d692-42ad-a4b6-9a542d28ad2a"
 }
 
 variable "azure_client_id" {
   description = "The client id "
   type        = string
-  default     = ""
+  default     = "a1e5fb4a-8644-4867-be4d-a54d0aeaaeed"
 }
 
 variable "azure_client_secret" {
@@ -19,43 +19,54 @@ variable "azure_client_secret" {
 variable "azure_tenant_id" {
   description = "The Tenant Id"
   type        = string
-  default     = ""
+  default     = "a39bedba-be8f-4c0f-bfe2-b8c7913501ea"
 }
 
 variable "target_resource_types" {
   type        = list(string)
   description = "List of Azure resource types whose logs and metrics you want to collect."
+  default     = ["Microsoft.KeyVault/vaults", "Microsoft.ServiceBus/Namespaces", "Microsoft.Storage/storageAccounts"]
 }
 
 variable "required_resource_tags" {
   description = "A map of tags to filter Azure resources by."
   type        = map(string)
+  default     = {"logs-collection-destination":"sumologic"}
+}
+
+variable "nested_namespace_configs" {
+  description = "Map of parent resource types to their child resource types that should be monitored"
+  type        = map(list(string))
+  default     = {
+    "Microsoft.Storage/storageAccounts" = [
+      "Microsoft.Storage/storageAccounts/blobServices",
+      "Microsoft.Storage/storageAccounts/fileServices"
+    ]
+  }
 }
 
 variable "resource_group_name" {
   description = "The name of the Resource Group."
-  default = "SUMO-267667"
+  default     = "RG-SUMO-267667"
   type        = string
 }
 
 variable "eventhub_namespace_name" {
   description = "The name of the Event Hub Namespace."
   type        = string
-  default = "SUMO-267667-Hub"
+  default     = "SUMO-267667-Hub"
 }
-
 
 variable "eventhub_name" {
   description = "The name of the Event Hub."
   type        = string
-  default = "SUMO-267667-Hub-Logs-Collector"
+  default     = "SUMO-267667-Hub-Logs-Collector"
 }
-
 
 variable "location" {
   description = "The location for the resources."
   type        = string
-  default = "East US"
+  default     = "East US"
 }
 
 variable "throughput_units" {
@@ -67,24 +78,25 @@ variable "throughput_units" {
 variable "policy_name" {
   description = "The name of the Shared Access Policy."
   type        = string
-  default = "SumoCollectionPolicy"
+  default     = "SumoCollectionPolicy"
 }
 
 variable "activity_log_export_name" {
   type        = string
   description = "Activity Log Export Name"
-  default = "activity_logs_export"
+  default     = "activity_logs_export"
 }
 
 variable "activity_log_export_category" {
   type        = string
   description = "Activity Log Export Category"
-  default = "azure/activity-logs"
+  default     = "azure/activity-logs"
 }
 
 variable "enable_activity_logs" {
   description = "Set to true to enable subscription-level activity log export."
   type        = bool
+  default     = false
 }
 
 variable "sumologic_environment" {
@@ -104,7 +116,8 @@ variable "sumologic_environment" {
       "us2",
       "in",
       "kr",
-    "fed"], var.sumologic_environment)
+      "fed"
+    ], var.sumologic_environment)
     error_message = "The value must be one of au, ca, de, eu, jp, us1, us2, in, kr or fed."
   }
   default = "us1"
@@ -118,7 +131,7 @@ variable "sumologic_access_id" {
     condition     = can(regex("\\w+", var.sumologic_access_id))
     error_message = "The SumoLogic access ID must contain valid characters."
   }
-  default = ""
+  default = "suBxl4FJhYL8DO"
 }
 
 variable "sumologic_access_key" {
@@ -133,15 +146,13 @@ variable "sumologic_access_key" {
   default = ""
 }
 
-
-
 variable "apps_names_to_install" {
   type        = string
   description = <<EOT
             Provide comma separated list of applications for which sumologic resources (collection and apps) needs to be created. Allowed values are "Azure Web Apps,Azure Service Bus,Azure Storage,Azure Load Balancer,Azure CosmosDB".
         EOT
   validation {
-    condition     = anytrue([for engine in split(",", var.apps_names_to_install) : contains(["",
+    condition = anytrue([for engine in split(",", var.apps_names_to_install) : contains(["",
       "Azure Storage",
       "Azure Key Vault", "Azure Service Bus"], engine)])
     error_message = "The value must be one of \"Azure Web Apps,Azure Service Bus,Azure Storage,Azure Load Balancer,Azure CosmosDB\""
@@ -149,15 +160,14 @@ variable "apps_names_to_install" {
   default = "Azure Service Bus,Azure Key Vault,Azure Storage"
 }
 
-
 variable "sumo_collector_name" {
   type        = string
   description = "Sumologic collector name"
-  default = "SUMO-267667-Collector"
+  default     = "SUMO-267667-Collector"
 }
 
 variable "index_value" {
   type        = string
   description = "The _index if the collection is configured with custom partition."
-  default = "sumologic_default"
+  default     = "sumologic_default"
 }
