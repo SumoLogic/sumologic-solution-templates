@@ -4,21 +4,21 @@ terraform {
   required_providers {
 
     sumologic = {
-      version = ">= 3.0.2"
+      version = ">= 3.1.5"
       source  = "SumoLogic/sumologic"
     }
     time = {
       source  = "hashicorp/time"
-      version = ">= 0.7.1"
+      version = ">= 0.13.1"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.1.0"
+      version = ">= 3.7.2"
     }
 
     azurerm = {
       source = "hashicorp/azurerm"
-      version = ">= 4.19.0"
+      version = ">= 4.44.0"
     }
 
   }
