@@ -1,3 +1,15 @@
+resource "sumologic_app" "apps" {
+  for_each = {
+    for app in var.installation_apps_list : app.name => app
+  }
+
+  uuid    = each.value.uuid
+  version = each.value.version
+  
+  parameters = {
+    "index_value" = var.index_value
+  }
+}
 resource "sumologic_collector" "sumo_collector" {
   name        = join("-", [var.sumo_collector_name, var.azure_subscription_id])
   description = "Azure Collector"

@@ -96,7 +96,6 @@ variable "activity_log_export_category" {
 variable "enable_activity_logs" {
   description = "Set to true to enable subscription-level activity log export."
   type        = bool
-  default     = false
 }
 
 variable "sumologic_environment" {
@@ -131,7 +130,7 @@ variable "sumologic_access_id" {
     condition     = can(regex("\\w+", var.sumologic_access_id))
     error_message = "The SumoLogic access ID must contain valid characters."
   }
-  default = "suBxl4FJhYL8DO"
+  default = ""
 }
 
 variable "sumologic_access_key" {
@@ -145,19 +144,22 @@ variable "sumologic_access_key" {
   }
   default = ""
 }
-
-variable "apps_names_to_install" {
-  type        = string
-  description = <<EOT
-            Provide comma separated list of applications for which sumologic resources (collection and apps) needs to be created. Allowed values are "Azure Web Apps,Azure Service Bus,Azure Storage,Azure Load Balancer,Azure CosmosDB".
-        EOT
-  validation {
-    condition = anytrue([for engine in split(",", var.apps_names_to_install) : contains(["",
-      "Azure Storage",
-      "Azure Key Vault", "Azure Service Bus"], engine)])
-    error_message = "The value must be one of \"Azure Web Apps,Azure Service Bus,Azure Storage,Azure Load Balancer,Azure CosmosDB\""
-  }
-  default = "Azure Service Bus,Azure Key Vault,Azure Storage"
+variable "installation_apps_list" {
+  description = "list of apps to be installed"
+  type = list(object({
+    uuid        = string
+    name        = string
+    version     = string
+  }))
+  default     = [{
+      uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"
+      name    = "Azure Storage"
+      version = "1.0.3"
+    },{
+      uuid    = "449c796e-5da2-47ea-a304-e9299dd7435d"
+      name    = "Azure Key Vault"
+      version = "1.0.2"
+    }]
 }
 
 variable "sumo_collector_name" {
