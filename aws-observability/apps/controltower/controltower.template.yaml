@@ -1,11 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: "Version - v2.13.0: The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets."
-
-Globals:
-  Function:
-    Timeout: 300
-    MemorySize: 128
+Description: "Version - v3.0.0: The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -93,7 +87,7 @@ Resources:
         - Sid: Allow administration of the key
           Effect: Allow
           Principal:
-            AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            AWS: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
           Action:
             - kms:Create*
             - kms:Describe*
@@ -167,7 +161,7 @@ Resources:
                   - 'cloudformation:CreateStackInstances'
                   - 'cloudformation:CreateStackSet'
                   - 'cloudformation:UpdateStackInstances'
-                Resource: !Join [':',['arn:aws:cloudformation:*', !Ref 'AWS::AccountId', 'stackset/*:*']]
+                Resource: !Join [':',['arn:${AWS::Partition}:cloudformation:*', !Ref 'AWS::AccountId', 'stackset/*:*']]
               - Effect: Allow
                 Action:
                   - 's3:GetObject'
@@ -197,7 +191,7 @@ Resources:
                   - kms:Decrypt
                 Resource: !GetAtt SumoLogicControlTowerKMSKey.Arn
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
   TriggerCustomizationsOnLifeCycleEvent:
     Type: AWS::Lambda::Function
@@ -212,7 +206,7 @@ Resources:
           from botocore.exceptions import ClientError
 
           name = 'SUMO-LOGIC-AWS-OBSERVABILITY'
-          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.13.0/sumologic_observability.master.template.yaml"
+          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/sumologic_observability.master.template.yaml"
           ALL = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
 
 

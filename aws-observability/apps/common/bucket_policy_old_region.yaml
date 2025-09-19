@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Version - v3.0.0: Template to setup S3 Bucket policy based on old Region before Aug 2022  for AWS Observability Solution."
+
+Parameters:
+  CommonS3Bucket:
+    Type: String
+    Description: "Provide the name of an existing Common S3 bucket."
+    Default: ""
+
+  AccountAlias:
+    Type: String
+    Description: "Provide an Alias for AWS account for identification in Sumo Logic Explorer View, metrics and logs."
+    Default: ""
+
+  RegionAccountId:
+    Type: String
+    Description: "Provide the AWS account id associated with the Load Balancer."
+    Default: ""
+
+Resources:
+  CommonBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CommonS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Sid: AWSBucketExistenceCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
+          - Sid: AWSAlbLogDeliveryAclCheck
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action:
+              - s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
+          - Sid: AWSAlbLogDeliveryWrite
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Sid: AWSAlbLogsPutObjects
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:${AWS::Partition}:iam::${RegionAccountId}:root"
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
+
+  CommonCloudTrail:
+    Type: AWS::CloudTrail::Trail
+    DependsOn: CommonBucketPolicy
+    Properties:
+      IsLogging: true
+      IsMultiRegionTrail: false
+      S3BucketName: !Ref CommonS3Bucket
+      TrailName: !Join
+        - ""
+        - - "Aws-Observability-"
+          - !Ref AccountAlias

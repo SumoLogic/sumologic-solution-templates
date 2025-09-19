@@ -1,6 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.13.0: Template to setup the Lambda app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v3.0.0: Template to setup the Lambda app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -311,11 +310,11 @@ Resources:
         - - "(_source="
           - !If [update_cloudtrail_logs_source, !Sub "\"${SumoCloudTrailLogsUpdateSource.source_name}\"", !Ref Section5bCloudTrailLogsSourceName]
           - " (\"lambda.amazonaws.com\"))"
-      FieldExtractionRuleParseExpression: '| json "eventSource", "awsRegion", "requestParameters", "recipientAccountId" as eventSource, region, requestParameters, accountid nodrop
+      FieldExtractionRuleParseExpression: !Sub '| json "eventSource", "awsRegion", "requestParameters", "recipientAccountId" as eventSource, region, requestParameters, accountid nodrop
                                            | where eventSource = "lambda.amazonaws.com"
                                            | json field=requestParameters "functionName", "resource" as functionname, resource nodrop
                                            | parse regex field=functionname "\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$" nodrop
-                                           | parse field=resource "arn:aws:lambda:*:function:*" as f1, functionname2 nodrop
+                                           | parse field=resource "arn:${AWS::Partition}:lambda:*:function:*" as f1, functionname2 nodrop
                                            | if (isEmpty(functionname), functionname2, functionname) as functionname
                                            | "aws/lambda" as namespace
                                            | tolowercase(functionname) as functionname

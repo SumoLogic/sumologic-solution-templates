@@ -1,6 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.13.0: Note: Before deploying this template, please select the appropriate region. This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
-Transform: 'AWS::Serverless-2016-10-31'
+Description: "Version - v3.0.0: Note: Before deploying this template, please select the appropriate region. This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -51,7 +50,7 @@ Mappings:
   CommonData:
     NestedTemplate:
       BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v2.13.0"
+      Version: "v3.0.0"
 
 Resources:
 
@@ -133,7 +132,7 @@ Resources:
                   - "cloudwatch:DeleteMetricStream"
                 Resource: "*"
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
   DeleteCFNLambda:
     Type: "AWS::Lambda::Function"
