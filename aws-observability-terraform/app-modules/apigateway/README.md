@@ -10,7 +10,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_apigateway_module"></a> [apigateway\_module](#module\_apigateway\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.1.0 |
+| <a name="module_apigateway_module"></a> [apigateway\_module](#module\_apigateway\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.0.20 |
 
 ## Resources
 

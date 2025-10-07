@@ -10,7 +10,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_sqs_module"></a> [sqs\_module](#module\_sqs\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.1.0 |
+| <a name="module_sqs_module"></a> [sqs\_module](#module\_sqs\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.0.20 |
 
 ## Resources
 
