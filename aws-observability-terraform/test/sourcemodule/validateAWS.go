@@ -1,30 +1,31 @@
 package test
 
 import (
-	"testing"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/aws/aws-sdk-go/service/cloudtrail"
-	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"github.com/aws/aws-sdk-go/service/firehose"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/lambda"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/sns"
+	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	"github.com/aws/aws-sdk-go-v2/service/firehose"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/gruntwork-io/terratest/modules/terraform"
+	"log"
+	"testing"
 )
 
 var (
-	s3session         *s3.S3
-	SNSsession        *sns.SNS
-	IAMsession        *iam.IAM
-	lambdasession     *lambda.Lambda
-	cfSession         *cloudformation.CloudFormation
-	kfSession         *firehose.Firehose
-	cwSession         *cloudwatch.CloudWatch
-	cloudTrailsession *cloudtrail.CloudTrail
+	s3Client         *s3.Client
+	snsClient        *sns.Client
+	iamClient        *iam.Client
+	lambdaClient     *lambda.Client
+	cfClient         *cloudformation.Client
+	firehoseClient   *firehose.Client
+	cloudwatchClient *cloudwatch.Client
+	cloudtrailClient *cloudtrail.Client
 )
 
 const (
@@ -32,34 +33,23 @@ const (
 )
 
 func init() {
-	s3session = s3.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-	SNSsession = sns.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-	IAMsession = iam.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-	cloudTrailsession = cloudtrail.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-	lambdasession = lambda.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-	cfSession = cloudformation.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-	kfSession = firehose.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-	cwSession = cloudwatch.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
+	// Load default config with custom region
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(REGION))
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+	s3Client = s3.NewFromConfig(cfg)
+	snsClient = sns.NewFromConfig(cfg)
+	iamClient = iam.NewFromConfig(cfg)
+	lambdaClient = lambda.NewFromConfig(cfg)
+	cfClient = cloudformation.NewFromConfig(cfg)
+	firehoseClient = firehose.NewFromConfig(cfg)
+	cloudwatchClient = cloudwatch.NewFromConfig(cfg)
+	cloudtrailClient = cloudtrail.NewFromConfig(cfg)
 }
 
 func validateS3Bucket(t *testing.T, terraformOptions *terraform.Options, bucketName string) (resp *s3.GetBucketAclOutput) {
-	resp, err := s3session.GetBucketAcl(&s3.GetBucketAclInput{
+	resp, err := s3Client.GetBucketAcl(context.TODO(), &s3.GetBucketAclInput{
 		Bucket: aws.String(bucketName),
 	})
 	if err != nil {
@@ -69,7 +59,7 @@ func validateS3Bucket(t *testing.T, terraformOptions *terraform.Options, bucketN
 }
 
 func validateSNSTopic(t *testing.T, terraformOptions *terraform.Options, topicName string) (resp *sns.GetTopicAttributesOutput) {
-	resp, err := SNSsession.GetTopicAttributes(&sns.GetTopicAttributesInput{
+	resp, err := snsClient.GetTopicAttributes(context.TODO(), &sns.GetTopicAttributesInput{
 		TopicArn: aws.String(topicName),
 	})
 	if err != nil {
@@ -79,7 +69,7 @@ func validateSNSTopic(t *testing.T, terraformOptions *terraform.Options, topicNa
 }
 
 func validateSNSsub(t *testing.T, terraformOptions *terraform.Options, subscriptionARN string) (resp *sns.GetSubscriptionAttributesOutput) {
-	resp, err := SNSsession.GetSubscriptionAttributes(&sns.GetSubscriptionAttributesInput{
+	resp, err := snsClient.GetSubscriptionAttributes(context.TODO(), &sns.GetSubscriptionAttributesInput{
 		SubscriptionArn: aws.String(subscriptionARN),
 	})
 	if err != nil {
@@ -89,7 +79,7 @@ func validateSNSsub(t *testing.T, terraformOptions *terraform.Options, subscript
 }
 
 func validateIAMRole(t *testing.T, terraformOptions *terraform.Options, roleName string) (resp *iam.GetRoleOutput) {
-	resp, err := IAMsession.GetRole(&iam.GetRoleInput{
+	resp, err := iamClient.GetRole(context.TODO(), &iam.GetRoleInput{
 		RoleName: aws.String(roleName),
 	})
 	if err != nil {
@@ -99,7 +89,7 @@ func validateIAMRole(t *testing.T, terraformOptions *terraform.Options, roleName
 }
 
 func validateCloudTrail(t *testing.T, terraformOptions *terraform.Options, trailName string) (resp *cloudtrail.GetTrailOutput) {
-	resp, err := cloudTrailsession.GetTrail(&cloudtrail.GetTrailInput{
+	resp, err := cloudtrailClient.GetTrail(context.TODO(), &cloudtrail.GetTrailInput{
 		Name: aws.String(trailName),
 	})
 	if err != nil {
@@ -109,7 +99,7 @@ func validateCloudTrail(t *testing.T, terraformOptions *terraform.Options, trail
 }
 
 func validateLambda(t *testing.T, terraformOptions *terraform.Options, functionName string) (resp *lambda.GetFunctionOutput) {
-	resp, err := lambdasession.GetFunction(&lambda.GetFunctionInput{
+	resp, err := lambdaClient.GetFunction(context.TODO(), &lambda.GetFunctionInput{
 		FunctionName: aws.String(functionName),
 	})
 	if err != nil {
@@ -119,7 +109,7 @@ func validateLambda(t *testing.T, terraformOptions *terraform.Options, functionN
 }
 
 func validateCFStack(t *testing.T, terraformOptions *terraform.Options, stackName string) (resp *cloudformation.DescribeStacksOutput) {
-	resp, err := cfSession.DescribeStacks(&cloudformation.DescribeStacksInput{
+	resp, err := cfClient.DescribeStacks(context.TODO(), &cloudformation.DescribeStacksInput{
 		StackName: aws.String(stackName),
 	})
 	if err != nil {
@@ -129,7 +119,7 @@ func validateCFStack(t *testing.T, terraformOptions *terraform.Options, stackNam
 }
 
 func validateKFstream(t *testing.T, terraformOptions *terraform.Options, streamName string) (resp *firehose.DescribeDeliveryStreamOutput) {
-	resp, err := kfSession.DescribeDeliveryStream(&firehose.DescribeDeliveryStreamInput{
+	resp, err := firehoseClient.DescribeDeliveryStream(context.TODO(), &firehose.DescribeDeliveryStreamInput{
 		DeliveryStreamName: aws.String(streamName),
 	})
 	if err != nil {
@@ -139,7 +129,7 @@ func validateKFstream(t *testing.T, terraformOptions *terraform.Options, streamN
 }
 
 func validateCWmetricstream(t *testing.T, terraformOptions *terraform.Options, metricStreamName string) (resp *cloudwatch.GetMetricStreamOutput) {
-	resp, err := cwSession.GetMetricStream(&cloudwatch.GetMetricStreamInput{
+	resp, err := cloudwatchClient.GetMetricStream(context.TODO(), &cloudwatch.GetMetricStreamInput{
 		Name: aws.String(metricStreamName),
 	})
 	if err != nil {

@@ -136,21 +136,9 @@ module "lambda_app" {
   group_notifications      = var.group_notifications
 }
 
-# Install the rce app and resources.
-module "rce_app" {
-  depends_on = [module.rds_app]
-  source     = "./rce"
-
-  access_id                = var.access_id
-  access_key               = var.access_key
-  environment              = var.environment
-  json_file_directory_path = var.json_file_directory_path
-  app_folder_id            = sumologic_folder.apps_folder.id
-}
-
 # Install the alb app and resources.
 module "alb_app" {
-  depends_on = [module.lambda_app]
+  depends_on = [module.rds_app]
   source     = "./alb"
 
   access_id                = var.access_id
@@ -167,7 +155,7 @@ module "alb_app" {
 
 # Install the dynamodb app and resources.
 module "dynamodb_app" {
-  depends_on = [module.rce_app]
+  depends_on = [module.lambda_app]
   source     = "./dynamodb"
 
   access_id                = var.access_id
