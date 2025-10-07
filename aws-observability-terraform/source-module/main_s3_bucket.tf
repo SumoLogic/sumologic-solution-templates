@@ -6,8 +6,9 @@
 resource "aws_s3_bucket" "s3_bucket" {
   for_each = toset(local.create_common_bucket ? ["s3_bucket"] : [])
 
-  bucket        = local.common_bucket_name
-  force_destroy = local.common_force_destroy
+  bucket            = local.common_bucket_name
+  force_destroy     = local.common_force_destroy
+  tags = var.aws_resource_tags
 }
 
 resource "aws_s3_bucket_policy" "dump_access_logs_to_s3" {
@@ -38,6 +39,7 @@ resource "aws_sns_topic" "sns_topic" {
     SNS_TOPIC_NAME = "SumoLogic-Aws-Observability-Module-${random_string.aws_random.id}",
     AWS_ACCOUNT    = local.aws_account_id
   })
+  tags = var.aws_resource_tags
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
