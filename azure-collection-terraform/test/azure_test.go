@@ -16,21 +16,23 @@ const (
 	terraformDir   = "../"
 )
 
-// Helper function to create terraform options with a specific tfvars file
+// Helper function to create terraform options with base + override pattern
 func createTerraformOptions(tfvarsFile string) *terraform.Options {
-	// Convert tfvars file path to be relative to terraform directory
-	var varFilePath string
-	if strings.HasPrefix(tfvarsFile, fixturesDir) {
-		// For fixture files, prepend test directory path
-		varFilePath = filepath.Join("test", tfvarsFile)
-	} else {
-		// For test.tfvars, prepend test directory path
-		varFilePath = filepath.Join("test", tfvarsFile)
+	var varFiles []string
+
+	// Always load base test.tfvars first for common configuration
+	baseVarFile := filepath.Join("test", baseTfvarsFile)
+	varFiles = append(varFiles, baseVarFile)
+
+	// If using a fixture file, load it second to override specific values
+	if tfvarsFile != baseTfvarsFile && tfvarsFile != "" {
+		// The tfvarsFile parameter already includes the full path (e.g., "test/fixtures/file.tfvars")
+		varFiles = append(varFiles, tfvarsFile)
 	}
 
 	return &terraform.Options{
 		TerraformDir: terraformDir,
-		VarFiles:     []string{varFilePath},
+		VarFiles:     varFiles,
 		NoColor:      true,
 	}
 }
@@ -79,13 +81,13 @@ func TestAzureSubscriptionIDValidation(t *testing.T) {
 	}{
 		{
 			name:        "ValidSubscriptionID",
-			tfvarsFile:  filepath.Join(fixturesDir, "valid-config.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
 			description: "Valid Azure subscription ID should pass validation",
 		},
 		{
 			name:        "InvalidSubscriptionIDFormat",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-subscription.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-subscription.tfvars"),
 			expectError: true,
 			description: "Invalid subscription ID format should fail validation",
 		},
@@ -107,13 +109,13 @@ func TestEventHubNamespaceNameValidation(t *testing.T) {
 	}{
 		{
 			name:        "ValidNamespaceName",
-			tfvarsFile:  filepath.Join(fixturesDir, "valid-config.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
 			description: "Valid Event Hub namespace name should pass validation",
 		},
 		{
 			name:        "NamespaceNameTooShort",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-namespace.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-namespace.tfvars"),
 			expectError: true,
 			description: "Namespace name shorter than 6 characters should fail validation",
 		},
@@ -135,31 +137,31 @@ func TestThroughputUnitsValidation(t *testing.T) {
 	}{
 		{
 			name:        "ValidThroughputUnits",
-			tfvarsFile:  filepath.Join(fixturesDir, "valid-config.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
 			description: "Valid throughput units (10) should pass validation",
 		},
 		{
 			name:        "MinimumThroughputUnits",
-			tfvarsFile:  filepath.Join(fixturesDir, "min-throughput.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "min-throughput.tfvars"),
 			expectError: false,
 			description: "Minimum throughput units (1) should pass validation",
 		},
 		{
 			name:        "MaximumThroughputUnits",
-			tfvarsFile:  filepath.Join(fixturesDir, "max-throughput.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "max-throughput.tfvars"),
 			expectError: false,
 			description: "Maximum throughput units (20) should pass validation",
 		},
 		{
 			name:        "ThroughputUnitsBelowMinimum",
-			tfvarsFile:  filepath.Join(fixturesDir, "below-min-throughput.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "below-min-throughput.tfvars"),
 			expectError: true,
 			description: "Throughput units below minimum (0) should fail validation",
 		},
 		{
 			name:        "ThroughputUnitsAboveMaximum",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-throughput.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-throughput.tfvars"),
 			expectError: true,
 			description: "Throughput units above maximum (25) should fail validation",
 		},
@@ -181,13 +183,13 @@ func TestAzureResourceTypeFormatValidation(t *testing.T) {
 	}{
 		{
 			name:        "ValidResourceTypes",
-			tfvarsFile:  filepath.Join(fixturesDir, "valid-config.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
 			description: "Valid resource type formats should pass validation",
 		},
 		{
 			name:        "InvalidResourceTypeFormats",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-resource-types.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-resource-types.tfvars"),
 			expectError: true,
 			description: "Invalid resource type formats should fail validation",
 		},
@@ -202,7 +204,7 @@ func TestAzureResourceTypeFormatValidation(t *testing.T) {
 
 func TestEventHubNamespaceAuthorizationRulePermissions(t *testing.T) {
 	// Test that we can validate the authorization rule configuration exists
-	terraformOptions := createTerraformOptions(filepath.Join(fixturesDir, "valid-config.tfvars"))
+	terraformOptions := createTerraformOptions(filepath.Join("test", fixturesDir, "valid-config.tfvars"))
 
 	terraform.Init(t, terraformOptions)
 
@@ -367,14 +369,14 @@ func TestAzureCredentialsValidation(t *testing.T) {
 	}{
 		{
 			name:        "ValidCredentials",
-			tfvarsFile:  filepath.Join(fixturesDir, "valid-config.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
 			description: "Valid Azure credentials should pass validation and authenticate successfully",
 			testType:    "api",
 		},
 		{
 			name:        "InvalidSubscriptionIDFormat",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-subscription.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-subscription.tfvars"),
 			expectError: true,
 			description: "Invalid Azure subscription ID format should fail validation",
 			testType:    "format",
@@ -468,11 +470,7 @@ func TestAzureCredentialsFormatValidation(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			terraformOptions := &terraform.Options{
-				TerraformDir: "../",
-				VarFiles:     []string{tc.tfvarsFile},
-				NoColor:      true,
-			}
+			terraformOptions := createTerraformOptions(tc.tfvarsFile)
 
 			terraform.Init(t, terraformOptions)
 			_, err := terraform.PlanE(t, terraformOptions)
@@ -517,43 +515,43 @@ func TestResourceGroupNameValidation(t *testing.T) {
 	}{
 		{
 			name:        "ValidResourceGroupName",
-			tfvarsFile:  filepath.Join(fixturesDir, "valid-config.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
 			description: "Valid resource group name should pass validation",
 		},
 		{
 			name:        "InvalidSpecialCharacters",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-resource-group-special-chars.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-resource-group-special-chars.tfvars"),
 			expectError: true,
 			description: "Resource group name with spaces and special characters (@) should fail validation",
 		},
 		{
 			name:        "InvalidStartsWithHyphen",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-resource-group-starts-hyphen.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-resource-group-starts-hyphen.tfvars"),
 			expectError: true,
 			description: "Resource group name starting with hyphen should fail validation",
 		},
 		{
 			name:        "InvalidEndsWithPeriod",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-resource-group-ends-period.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-resource-group-ends-period.tfvars"),
 			expectError: true,
 			description: "Resource group name ending with period should fail validation",
 		},
 		{
 			name:        "InvalidReservedName",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-resource-group-reserved-name.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-resource-group-reserved-name.tfvars"),
 			expectError: true,
 			description: "Resource group name using reserved name 'azure' should fail validation",
 		},
 		{
 			name:        "InvalidTooLong",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-resource-group-too-long.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-resource-group-too-long.tfvars"),
 			expectError: true,
 			description: "Resource group name exceeding 90 characters should fail validation",
 		},
 		{
 			name:        "InvalidEmpty",
-			tfvarsFile:  filepath.Join(fixturesDir, "invalid-resource-group-empty.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "invalid-resource-group-empty.tfvars"),
 			expectError: true,
 			description: "Empty resource group name should fail validation",
 		},

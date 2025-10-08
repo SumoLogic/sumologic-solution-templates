@@ -1,11 +1,11 @@
-# Example Terraform variables file for Azure Collection Tests
-# Copy this to test.tfvars and fill in your actual values
+# Test configuration tfvars file
+# This file contains working test values for CI/CD
 
-# Azure Authentication
-azure_subscription_id = "your-subscription-id-here"
-azure_client_id       = "your-client-id-here"
-azure_client_secret   = "your-client-secret-here"
-azure_tenant_id       = "your-tenant-id-here"
+# Azure Authentication (use environment variables for real values)
+azure_subscription_id = ""
+azure_client_id       = ""
+azure_client_secret   = ""
+azure_tenant_id       = ""
 
 # Azure Resource Configuration
 resource_group_name      = "test-sumo-rg"
@@ -21,12 +21,16 @@ enable_activity_logs         = false
 
 # Resource Targeting
 target_resource_types    = ["Microsoft.KeyVault/vaults", "Microsoft.Storage/storageAccounts"]
-required_resource_tags   = "{\"logs-collection-destination\":\"sumologic\"}"
-nested_namespace_configs = "{\"Microsoft.KeyVault/vaults\": {\"logs\": true, \"metrics\": true}}"
+required_resource_tags   = {
+  "logs-collection-destination" = "sumologic"
+}
+nested_namespace_configs = {
+  "Microsoft.KeyVault/vaults" = ["logs", "metrics"]
+}
 
 # Sumo Logic Configuration
-sumologic_access_id    = "your-access-id-here"
-sumologic_access_key   = "your-access-key-here"
+sumologic_access_id    = "test-access-id"
+sumologic_access_key   = "test-access-key"
 sumologic_environment  = "us2"
 sumo_collector_name    = "Azure-Test-Collector"
 installation_apps_list = []

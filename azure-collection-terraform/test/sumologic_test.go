@@ -30,25 +30,25 @@ func TestSumoLogicResourceTypesValidation(t *testing.T) {
 	}{
 		{
 			name:        "ValidApps",
-			tfvarsFile:  filepath.Join(fixturesDir, "sumo-valid-apps.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "sumo-valid-apps.tfvars"),
 			shouldPass:  true,
 			description: "Valid UUIDs, names, and versions should pass validation",
 		},
 		{
 			name:        "InvalidEmptyApps",
-			tfvarsFile:  filepath.Join(fixturesDir, "sumo-invalid-empty-apps.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "sumo-invalid-empty-apps.tfvars"),
 			shouldPass:  false,
 			description: "Empty UUIDs, names, and versions should fail validation",
 		},
 		{
 			name:        "InvalidUUID",
-			tfvarsFile:  filepath.Join(fixturesDir, "sumo-invalid-uuid.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "sumo-invalid-uuid.tfvars"),
 			shouldPass:  false,
 			description: "Invalid UUID format should fail validation",
 		},
 		{
 			name:        "InvalidVersion",
-			tfvarsFile:  filepath.Join(fixturesDir, "sumo-invalid-version.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "sumo-invalid-version.tfvars"),
 			shouldPass:  false,
 			description: "Invalid semantic version should fail validation",
 		},
@@ -70,19 +70,19 @@ func TestSumoLogicCollectorResourceConfiguration(t *testing.T) {
 	}{
 		{
 			name:        "ValidCollectorConfiguration",
-			tfvarsFile:  filepath.Join(fixturesDir, "valid-config.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
 			description: "Valid collector with proper naming",
 		},
 		{
 			name:        "CollectorNameWithSpecialChars",
-			tfvarsFile:  filepath.Join(fixturesDir, "sumo-invalid-collector-name.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "sumo-invalid-collector-name.tfvars"),
 			expectError: true,
 			description: "Collector name with special characters should fail validation",
 		},
 		{
 			name:        "EmptyCollectorName",
-			tfvarsFile:  filepath.Join(fixturesDir, "sumo-empty-collector-name.tfvars"),
+			tfvarsFile:  filepath.Join("test", fixturesDir, "sumo-empty-collector-name.tfvars"),
 			expectError: true,
 			description: "Empty collector name should fail validation",
 		},
@@ -97,7 +97,7 @@ func TestSumoLogicCollectorResourceConfiguration(t *testing.T) {
 
 func TestSumoLogicEventHubLogSourceConfiguration(t *testing.T) {
 	// Test Event Hub log source configuration
-	terraformOptions := createTerraformOptions(filepath.Join(fixturesDir, "valid-config.tfvars"))
+	terraformOptions := createTerraformOptions(filepath.Join("test", fixturesDir, "valid-config.tfvars"))
 
 	terraform.Init(t, terraformOptions)
 	plan, err := terraform.PlanE(t, terraformOptions)
@@ -227,14 +227,14 @@ func TestSumoLogicActivityLogSourceConfiguration(t *testing.T) {
 	}{
 		{
 			name:                  "ActivityLogsEnabled",
-			tfvarsFile:            filepath.Join(fixturesDir, "activity-logs-enabled.tfvars"),
+			tfvarsFile:            filepath.Join("test", fixturesDir, "activity-logs-enabled.tfvars"),
 			activityLogsEnabled:   true,
 			expectedResourceCount: 16, // 11 base resources + 5 activity log resources
 			description:           "Activity logs enabled should create dedicated Activity Log infrastructure",
 		},
 		{
 			name:                  "ActivityLogsDisabled",
-			tfvarsFile:            filepath.Join(fixturesDir, "activity-logs-disabled.tfvars"),
+			tfvarsFile:            filepath.Join("test", fixturesDir, "activity-logs-disabled.tfvars"),
 			activityLogsEnabled:   false,
 			expectedResourceCount: 11, // Only base resources (Event Hubs, collector, etc.)
 			description:           "Activity logs disabled should not create Activity Log infrastructure",
@@ -431,7 +431,7 @@ func validateActivityLogPlanContent(t *testing.T, planContent string, activityLo
 
 func TestSumoLogicAzureMetricsSourceConfiguration(t *testing.T) {
 	// Test Azure Metrics source configuration
-	terraformOptions := createTerraformOptions(filepath.Join(fixturesDir, "activity-logs-enabled.tfvars"))
+	terraformOptions := createTerraformOptions(filepath.Join("test", fixturesDir, "activity-logs-enabled.tfvars"))
 
 	terraform.Init(t, terraformOptions)
 	plan, err := terraform.PlanE(t, terraformOptions)
@@ -723,11 +723,7 @@ func TestSumoLogicAppValidationPatterns(t *testing.T) {
 // TestSumoLogicAppsInstallationPlanValidation tests installation_apps_list validation - HIGH PRIORITY MISSING
 func TestSumoLogicAppsInstallationPlanValidation(t *testing.T) {
 	// Simple test using the existing helper patterns from azure_test.go
-	terraformOptions := &terraform.Options{
-		TerraformDir: "../",
-		VarFiles:     []string{"test/fixtures/sumo-valid-apps.tfvars"},
-		NoColor:      true,
-	}
+	terraformOptions := createTerraformOptions(filepath.Join("test", fixturesDir, "sumo-valid-apps.tfvars"))
 
 	terraform.Init(t, terraformOptions)
 	_, err := terraform.PlanE(t, terraformOptions)
@@ -770,11 +766,7 @@ func TestSumoLogicCollectorNameValidation(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			terraformOptions := &terraform.Options{
-				TerraformDir: "../",
-				VarFiles:     []string{tc.tfvarsFile},
-				NoColor:      true,
-			}
+			terraformOptions := createTerraformOptions(tc.tfvarsFile)
 
 			terraform.Init(t, terraformOptions)
 			_, err := terraform.PlanE(t, terraformOptions)
