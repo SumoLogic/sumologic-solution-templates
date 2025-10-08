@@ -25,11 +25,13 @@ go test -v -run TestEventHub -timeout 15m   # EventHub configuration tests
 go test -v -run TestAzureCredentialsFormatValidation -timeout 5m
 ```
 
-**Note:** Tests validate Terraform plans and may show runtime errors due to missing credentials - this is expected behavior and doesn't affect validation testing.
+**Note:** Tests can run in two modes:
+- **Validation Mode:** Tests Terraform configuration validation without real credentials (default)
+- **Integration Mode:** Tests against real Azure resources when `test.tfvars` contains actual credentials
 
 ## 📋 Test Suite Overview
 
-Our test suite includes **20 comprehensive tests** covering:
+Our test suite includes **69 comprehensive test scenarios** across **20 test functions** covering:
 
 ### 🔵 Azure Infrastructure Tests (`azure_test.go`)
 - **TestAzureSubscriptionIDValidation** - Azure subscription ID format validation
@@ -60,25 +62,46 @@ Our test suite includes **20 comprehensive tests** covering:
 ## 📁 Test Structure
 
 ### Configuration Files
-- `terraform.tfvars.example` - Template showing all required variables
+- `test.tfvars.example` - Template showing all required variables  
 - `test.tfvars` - Working test configuration (copy from example and customize)
 
-### Test Fixtures (`fixtures/` directory)
-Specialized tfvars files for testing specific validation scenarios:
+### Base+Override Architecture
+Our tests use a **base+override pattern** for maximum efficiency:
+- **Base Configuration:** `test.tfvars` contains all common variables with working values
+- **Override Fixtures:** Individual fixture files override only specific variables being tested
+- **Terraform Command:** `terraform plan -var-file test/test.tfvars -var-file test/fixtures/specific-test.tfvars`
+- **Benefits:** DRY principles, easy maintenance, isolated test scenarios
 
-- `valid-config.tfvars` - Valid configuration for positive tests
+### Test Fixtures (`fixtures/` directory)
+**31 specialized tfvars files** for testing specific validation scenarios:
+
+#### Baseline Configuration
+- `valid-config.tfvars` - Uses all base configuration values (no overrides)
+
+#### Azure Credential Validation  
 - `invalid-subscription.tfvars` - Invalid Azure subscription ID format
-- `invalid-namespace.tfvars` - Event Hub namespace name too short
-- `invalid-throughput.tfvars` - Throughput units above maximum (25)
-- `below-min-throughput.tfvars` - Throughput units below minimum (0)
+- `invalid-client-id.tfvars` - Invalid Azure client ID format
+- `invalid-tenant-id.tfvars` - Invalid Azure tenant ID format
+- `empty-client-id.tfvars` - Empty Azure client ID
+- `empty-tenant-id.tfvars` - Empty Azure tenant ID
+
+#### Azure Infrastructure Validation
+- `invalid-namespace.tfvars` - Event Hub namespace name validation
+- `invalid-throughput.tfvars` - Throughput units above maximum
+- `below-min-throughput.tfvars` - Throughput units below minimum  
 - `min-throughput.tfvars` - Minimum valid throughput units (1)
 - `max-throughput.tfvars` - Maximum valid throughput units (20)
 - `invalid-resource-types.tfvars` - Invalid Azure resource type formats
-- `invalid-tenant-id.tfvars` - Invalid Azure tenant ID format
-- `empty-tenant-id.tfvars` - Empty Azure tenant ID
+- `invalid-resource-group-*.tfvars` - Resource group naming validation (6 scenarios)
+- `activity-logs-enabled.tfvars` - Activity logs configuration testing
+- `activity-logs-disabled.tfvars` - Activity logs disabled testing
+- `eventhub-test-config.tfvars` - Event Hub configuration testing
+
+#### SumoLogic Configuration Validation
 - `sumo-valid-apps.tfvars` - Valid SumoLogic app configuration
-- `sumo-collector-dashes.tfvars` - Valid collector name with dashes
-- `sumo-invalid-collector-special.tfvars` - Invalid collector name with special chars
+- `sumo-invalid-*.tfvars` - Invalid app configurations (UUID, version, empty fields)
+- `sumo-collector-*.tfvars` - Collector naming validation scenarios
+- `sumo-*-collector-*.tfvars` - Various collector configuration tests
 
 ### Test Files
 - `azure_test.go` - Azure infrastructure and credentials validation tests
@@ -117,7 +140,7 @@ If you want to test against actual resources (optional - validation tests work w
 1. **Prepare test configuration**:
    ```bash
    # Copy the example tfvars file
-   cp terraform.tfvars.example test.tfvars
+   cp test.tfvars.example test.tfvars
    ```
 
 2. **Configure Azure credentials** in `test.tfvars`:
