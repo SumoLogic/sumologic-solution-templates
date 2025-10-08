@@ -60,8 +60,8 @@ variable "target_resource_types" {
   }
 
   validation {
-    condition = length(var.target_resource_types) > 0
-    error_message = "At least one target resource type must be specified."
+    condition = length(var.target_resource_types) >= 0
+    error_message = "Target resource types must be a valid list."
   }
 
   validation {
@@ -264,7 +264,7 @@ variable "installation_apps_list" {
   }))
 
   validation {
-    condition = alltrue([
+    condition = length(var.installation_apps_list) == 0 || alltrue([
       for app in var.installation_apps_list : 
       can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", app.uuid))
     ])
@@ -272,7 +272,7 @@ variable "installation_apps_list" {
   }
 
   validation {
-    condition = alltrue([
+    condition = length(var.installation_apps_list) == 0 || alltrue([
       for app in var.installation_apps_list : 
       length(app.name) > 0 && length(app.name) <= 100
     ])
@@ -280,7 +280,7 @@ variable "installation_apps_list" {
   }
 
   validation {
-    condition = alltrue([
+    condition = length(var.installation_apps_list) == 0 || alltrue([
       for app in var.installation_apps_list : 
       can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", app.version))
     ])

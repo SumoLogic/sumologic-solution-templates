@@ -1,3 +1,30 @@
+# Azure Collection Terraform Module
+
+This Terraform module provisions Azure infrastructure for log and metric collection with Sumo Logic integration.
+
+## 🚀 Quick Start
+
+1. **Configure variables:**
+   ```bash
+   cp terraform.tfvars.example terraform.tfvars
+   # Edit terraform.tfvars with your Azure and Sumo Logic credentials
+   ```
+
+2. **Deploy:**
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+
+3. **Run tests:** See [`test/README.md`](test/README.md) for comprehensive testing instructions.
+
+## 📁 Configuration Files
+
+- `terraform.tfvars.example` - Template with all variables and detailed documentation
+- `terraform.tfvars` - Your actual configuration (customize and keep secure)
+- `test/` - Comprehensive test suite with 69 test scenarios
+
 ## Requirements
 
 | Name | Version |
@@ -80,3 +107,92 @@ No modules.
 | <a name="output_sumo_collector_id"></a> [sumo\_collector\_id](#output\_sumo\_collector\_id) | The ID of the Sumo Logic Hosted Collector. |
 | <a name="output_sumo_eventhub_log_sources"></a> [sumo\_eventhub\_log\_sources](#output\_sumo\_eventhub\_log\_sources) | A map of Sumo Logic Event Hub log source IDs by resource type and location. |
 | <a name="output_sumo_metrics_sources"></a> [sumo\_metrics\_sources](#output\_sumo\_metrics\_sources) | A map of Sumo Logic metrics source IDs by namespace. |
+
+## Testing
+
+This module includes comprehensive tests to validate both the Terraform configuration and the Azure/SumoLogic integration.
+
+### Test Structure
+
+- **`test/azure_test.go`**: Integration tests that validate Azure resource creation and configuration
+- **`test/sumologic_test.go`**: Integration tests that validate SumoLogic resource configuration  
+- **`test/basic_test.go`**: Basic Terraform syntax validation tests
+- **`test/diagnostic_setting_naming_test.go`**: Unit tests for Azure diagnostic setting naming logic
+- **`test/resource_type_parsing_test.go`**: Unit tests for resource type parsing and environment variable handling
+
+### Running Tests
+
+#### Quick Unit Tests (Fast - ~2 seconds)
+```bash
+cd test
+go test -v -run "TestResourceTypesParsing|TestTestEnvironmentHelperMethods|TestDiagnosticSettingNaming|TestBasicSyntax" -timeout 30s
+```
+
+#### Full Integration Tests (Requires Azure credentials - ~10-30 minutes)
+```bash
+cd test
+go test -v -timeout 30m
+```
+
+#### Specific Test Categories
+```bash
+# Unit tests only
+go test -v -run "TestResourceTypesParsing|TestDiagnosticSettingNaming"
+
+# Basic validation tests
+go test -v -run "TestBasicSyntax|TestBasicTerraformVariableValidation"
+
+# Azure integration tests
+go test -v -run "TestAzure.*"
+
+# SumoLogic integration tests  
+go test -v -run "TestSumoLogic.*"
+```
+
+### Test Configuration
+
+Tests use environment variables from `.env.test` file. Copy `.env.test.example` to `.env.test` and configure:
+
+#### Required Azure Configuration
+```bash
+AZURE_SUBSCRIPTION_ID=your-subscription-id
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+AZURE_TENANT_ID=your-tenant-id
+```
+
+#### Required SumoLogic Configuration
+```bash
+SUMOLOGIC_ENVIRONMENT=us1
+SUMOLOGIC_ACCESS_ID=your-access-id
+SUMOLOGIC_ACCESS_KEY=your-access-key
+```
+
+#### Target Resource Types (Unified Format)
+The `TARGET_RESOURCE_TYPES` variable supports multiple formats:
+
+```bash
+# JSON Array Format (Recommended)
+TARGET_RESOURCE_TYPES=["Microsoft.KeyVault/vaults","Microsoft.Storage/storageAccounts"]
+
+# Comma-separated Format
+TARGET_RESOURCE_TYPES=Microsoft.KeyVault/vaults,Microsoft.Storage/storageAccounts
+
+# Single Resource Type
+TARGET_RESOURCE_TYPES=["Microsoft.KeyVault/vaults"]
+```
+
+#### Test Control Flags
+```bash
+RUN_INTEGRATION_TESTS=true    # Enable integration tests
+CLEANUP_RESOURCES=true        # Auto-cleanup test resources
+```
+
+### Test Features
+
+- **✅ Unified Resource Type Parsing**: Tests validate flexible parsing of `TARGET_RESOURCE_TYPES`
+- **✅ Diagnostic Setting Naming**: Tests ensure Azure naming compliance with SumoLogic conventions
+- **✅ Backward Compatibility**: Tests verify helper methods maintain compatibility with legacy variable names
+- **✅ Environment Validation**: Tests validate all required environment variables and configurations
+- **✅ Azure Resource Discovery**: Tests validate dynamic discovery of Azure resources
+- **✅ SumoLogic Integration**: Tests validate proper SumoLogic collector and source configuration

@@ -1,0 +1,106 @@
+# Example Terraform variables file for Azure Collection Terraform Module
+# Copy this to terraform.tfvars and fill in your actual values
+
+# ================================
+# Azure Authentication
+# ================================
+# Get these from your Azure Service Principal or App Registration
+azure_subscription_id = "your-azure-subscription-id-here"       # Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+azure_client_id       = "your-azure-client-id-here"             # Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  
+azure_client_secret   = "your-azure-client-secret-here"         # Secret from your Azure App Registration
+azure_tenant_id       = "your-azure-tenant-id-here"             # Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# ================================
+# Azure Infrastructure Configuration  
+# ================================
+resource_group_name      = "sumo-azure-collection-rg"           # Name for the resource group to create
+location                = "East US"                             # Azure region (e.g., "East US", "West US 2", "North Europe")
+eventhub_namespace_name = "SUMO-Azure-EventHub"                 # Event Hub namespace name (6-50 chars, alphanumeric + hyphens)
+policy_name             = "SumoLogicCollectionPolicy"           # Shared access policy name
+throughput_units        = 2                                     # Event Hub throughput units (1-20)
+
+# ================================
+# Activity Log Configuration
+# ================================
+activity_log_export_name     = "SumoActivityLogExport"          # Name for activity log export
+activity_log_export_category = "Administrative"                 # Activity log categories to export
+enable_activity_logs         = true                             # Set to false to disable activity log collection
+
+# ================================
+# Resource Targeting Configuration
+# ================================
+# Azure resource types to collect logs and metrics from
+target_resource_types = [
+  "Microsoft.KeyVault/vaults",
+  "Microsoft.Storage/storageAccounts",
+  "Microsoft.Compute/virtualMachines",
+  "Microsoft.Web/sites",
+  "Microsoft.Sql/servers"
+]
+
+# Tags to filter resources by (only resources with these tags will be monitored)
+required_resource_tags = {
+  "environment"                 = "production"
+  "logs-collection-destination" = "sumologic"
+}
+
+# Configure which namespaces to collect for each resource type
+nested_namespace_configs = {
+  "Microsoft.KeyVault/vaults"         = ["logs", "metrics"]
+  "Microsoft.Storage/storageAccounts" = ["logs", "metrics"]
+  "Microsoft.Compute/virtualMachines" = ["logs", "metrics"]
+  "Microsoft.Web/sites"               = ["logs", "metrics"]
+  "Microsoft.Sql/servers"             = ["logs", "metrics"]
+}
+
+# ================================
+# Sumo Logic Configuration
+# ================================
+# Get these from your Sumo Logic account: Administration > Security > Access Keys
+sumologic_access_id    = "your-sumologic-access-id-here"        # Sumo Logic Access ID
+sumologic_access_key   = "your-sumologic-access-key-here"       # Sumo Logic Access Key  
+sumologic_environment  = "us2"                                  # Your Sumo Logic deployment (us1, us2, eu, au, etc.)
+sumo_collector_name    = "Azure-Production-Collector"           # Name for the Sumo Logic collector
+index_value           = "azure_logs"                            # Custom partition index (optional)
+
+# ================================
+# App Installation Configuration
+# ================================
+# List of Sumo Logic apps to install (optional)
+# To find app UUIDs, visit: https://help.sumologic.com/Solutions/Azure-Collection/Install-and-Use-the-Azure-Apps
+installation_apps_list = [
+  {
+    uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"           # Azure Storage App
+    name    = "Azure Storage"
+    version = "1.0.3"
+  },
+  {
+    uuid    = "b20abced-0122-4c7a-8833-c68c3c29c3d3"           # Azure Key Vault App  
+    name    = "Azure Key Vault"
+    version = "1.0.2"
+  }
+]
+
+# ================================
+# SETUP INSTRUCTIONS:
+# ================================
+# 1. Copy this file: cp terraform.tfvars.example terraform.tfvars
+# 2. Fill in your Azure Service Principal credentials
+# 3. Fill in your Sumo Logic access credentials  
+# 4. Customize resource types and tags for your environment
+# 5. Run: terraform init && terraform plan && terraform apply
+
+# ================================
+# GETTING AZURE CREDENTIALS:
+# ================================
+# 1. Azure Portal > App Registrations > New registration
+# 2. Note the Application (client) ID and Directory (tenant) ID
+# 3. Certificates & secrets > New client secret > Copy the value
+# 4. Subscriptions > Your subscription > Access control (IAM) > Add role assignment
+# 5. Assign "Contributor" role to your app registration
+
+# ================================  
+# GETTING SUMO LOGIC CREDENTIALS:
+# ================================
+# 1. Sumo Logic Console > Administration > Security > Access Keys
+# 2. Add Access Key > Note the Access ID and Access Key
