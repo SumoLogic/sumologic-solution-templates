@@ -1,5 +1,5 @@
 data "azurerm_resources" "all_target_resources" {
-  for_each      = toset(var.target_resource_types)
+  for_each      = toset(local.log_namespaces)
   type          = each.key
   required_tags = var.required_resource_tags
 }
@@ -31,7 +31,15 @@ resource "azurerm_eventhub_namespace" "namespaces_by_location" {
 }
 
 resource "azurerm_eventhub" "eventhubs_by_type_and_location" {
-  for_each = local.resources_by_type_and_location
+  for_each = {
+    for k, v in local.resources_by_type_and_location : k => v
+    if length([
+      for config in var.target_resource_types :
+      config if config.log_namespace == local.eventhub_key_to_log_namespace[k] &&
+      config.log_namespace != null &&
+      config.log_namespace != ""
+    ]) > 0
+  }
 
   name              = "eventhub-${replace(each.key, "/", "-")}"
   namespace_id      = azurerm_eventhub_namespace.namespaces_by_location[each.value[0].location].id
@@ -51,12 +59,20 @@ resource "azurerm_eventhub_namespace_authorization_rule" "sumo_collection_policy
 }
 
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
-  for_each = local.all_monitored_resources
+  for_each = {
+    for k, v in local.all_monitored_resources : k => v
+    if length([
+      for config in var.target_resource_types :
+      config if config.log_namespace == lookup(v, "parent_type", v.type) &&
+      config.log_namespace != null &&
+      config.log_namespace != ""
+    ]) > 0
+  }
 
   name                           = "diag-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
   target_resource_id             = each.value.id
   eventhub_authorization_rule_id = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[each.value.location].id
-  
+
   eventhub_name = azurerm_eventhub.eventhubs_by_type_and_location[
     "${lookup(each.value, "parent_type", each.value.type)}-${each.value.location}"
   ].name
@@ -66,6 +82,25 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
     content {
       category = enabled_log.value
     }
+  }
+
+  dynamic "enabled_metric" {
+    for_each = length(data.azurerm_monitor_diagnostic_categories.all_categories[each.key].log_category_types) == 0 ? data.azurerm_monitor_diagnostic_categories.all_categories[each.key].metrics : []
+    content {
+      category = enabled_metric.value
+    }
+  }
+
+  depends_on = [
+    azurerm_eventhub_namespace.namespaces_by_location,
+    azurerm_eventhub.eventhubs_by_type_and_location,
+    azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy
+  ]
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+    delete = "30m"
   }
 }
 
@@ -123,5 +158,17 @@ resource "azurerm_monitor_diagnostic_setting" "activity_logs_to_event_hub" {
   }
   enabled_log {
     category = "Autoscale"
+  }
+
+  depends_on = [
+    azurerm_eventhub_namespace.activity_logs_namespace,
+    azurerm_eventhub.eventhub_for_activity_logs,
+    azurerm_eventhub_namespace_authorization_rule.activity_logs_policy
+  ]
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+    delete = "30m"
   }
 }

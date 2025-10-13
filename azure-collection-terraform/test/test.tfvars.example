@@ -1,37 +1,52 @@
-# Example Terraform variables file for Azure Collection Tests
-# Copy this to test.tfvars and fill in your actual values
+azure_subscription_id = "your-azure-subscription-id"
+azure_client_id       = "your-azure-client-id"
+azure_client_secret   = "your-azure-client-secret"
+azure_tenant_id       = "your-azure-tenant-id"
 
-# Azure Authentication
-azure_subscription_id = "your-subscription-id-here"
-azure_client_id       = "your-client-id-here"
-azure_client_secret   = "your-client-secret-here"
-azure_tenant_id       = "your-tenant-id-here"
-
-# Azure Resource Configuration
-resource_group_name      = "test-sumo-rg"
+resource_group_name     = "SUMO-267667-INTEGRATION-TEST"
 location                = "East US"
-eventhub_namespace_name = "SUMO-TEST-HUB"
-policy_name             = "SumoLogicCollectionPolicy"
-throughput_units        = 5
+eventhub_namespace_name = "SUMO-267667-EventHub-test"
+policy_name             = "SumoLogicTestCollectionPolicy-test"
+throughput_units        = 2
 
-# Activity Log Configuration
-activity_log_export_name     = "SumoActivityLogExport"
+activity_log_export_name     = "SumoTestActivityLogExport-test"
 activity_log_export_category = "Administrative"
 enable_activity_logs         = false
 
-# Resource Targeting
-target_resource_types    = ["Microsoft.KeyVault/vaults", "Microsoft.Storage/storageAccounts"]
-required_resource_tags   = {
-  "logs-collection-destination" = "sumologic"
+target_resource_types = [
+  {
+    log_namespace    = "Microsoft.KeyVault/vaults"
+    metric_namespace = "Microsoft.KeyVault/vaults"
+  },
+  {
+    log_namespace    = "Microsoft.Storage/storageAccounts"
+    metric_namespace = "Microsoft.Storage/storageAccounts"
+  },
+  {
+    metric_namespace = "Microsoft.Compute/virtualMachines"
+  }
+]
+required_resource_tags = {
+  "logs-collection-destination" = "sumologic-test"
 }
 nested_namespace_configs = {
-  "Microsoft.KeyVault/vaults" = ["logs", "metrics"]
+  "Microsoft.Storage/storageAccounts" = [
+    "Microsoft.Storage/storageAccounts/blobServices",
+    "Microsoft.Storage/storageAccounts/fileServices"
+  ]
 }
 
-# Sumo Logic Configuration
-sumologic_access_id    = "your-access-id-here"
-sumologic_access_key   = "your-access-key-here"
-sumologic_environment  = "us2"
-sumo_collector_name    = "Azure-Test-Collector"
-installation_apps_list = []
+sumologic_access_id   = "your-sumologic-access-id"
+sumologic_access_key  = "your-sumologic-access-key"
+sumologic_environment = "us1"
+sumo_collector_name   = "SUMO-267667-Collector-test"
 index_value           = "test-index"
+installation_apps_list = [{
+  uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"
+  name    = "Azure Storage"
+  version = "1.0.3"
+  }, {
+  uuid    = "449c796e-5da2-47ea-a304-e9299dd7435d"
+  name    = "Azure Key Vault"
+  version = "1.0.2"
+}]

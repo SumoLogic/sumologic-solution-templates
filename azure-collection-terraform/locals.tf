@@ -1,14 +1,33 @@
 locals {
-  sumologic_service_endpoint = var.sumologic_environment == "us1" ? "https://service.sumologic.com" : (contains(["stag", "long"], var.sumologic_environment) ? "https://${var.sumologic_environment}.sumologic.net" : "https://service.${var.sumologic_environment}.sumologic.com")
-  sumologic_api_endpoint     = var.sumologic_environment == "us1" ? "https://api.sumologic.com/api" : (contains(["stag", "long"], var.sumologic_environment) ? "https://${var.sumologic_environment}-api.sumologic.net/api" : "https://api.${var.sumologic_environment}.sumologic.com/api")
-  
   solution_version = "v1.0.0"
+
+  log_namespaces = distinct([
+    for config in var.target_resource_types : config.log_namespace
+    if config.log_namespace != null && config.log_namespace != ""
+  ])
+
+  metric_namespaces = distinct([
+    for config in var.target_resource_types : config.metric_namespace
+    if config.metric_namespace != null && config.metric_namespace != ""
+  ])
+
+  namespace_mapping = {
+    for config in var.target_resource_types :
+    config.log_namespace => config.metric_namespace
+    if config.log_namespace != null && config.log_namespace != ""
+  }
+
+  metric_to_log_mapping = {
+    for config in var.target_resource_types :
+    config.metric_namespace => config.log_namespace
+    if config.metric_namespace != null && config.metric_namespace != ""
+  }
 
   parents_with_nested_configs = keys(var.nested_namespace_configs)
 
-  all_resources_list = flatten([    
-    [for type, resources in data.azurerm_resources.all_target_resources : [
-      for res in resources.resources : res
+  all_resources_list = flatten([
+    [for type in local.log_namespaces : [
+      for res in data.azurerm_resources.all_target_resources[type].resources : res
       if !contains(local.parents_with_nested_configs, type)
     ]],
     [for parent_type, children_types in var.nested_namespace_configs : [
@@ -34,40 +53,55 @@ locals {
   }
 
   resources_by_type_and_location = {
-    for res in values(local.all_monitored_resources) : 
+    for res in values(local.all_monitored_resources) :
     "${lookup(res, "parent_type", res.type)}-${res.location}" => res...
   }
 
-  unique_locations = distinct([for res in values(local.all_monitored_resources) : res.location])
+  eventhub_key_to_log_namespace_grouped = {
+    for res in values(local.all_monitored_resources) :
+    "${lookup(res, "parent_type", res.type)}-${res.location}" => lookup(res, "parent_type", res.type)...
+  }
+
+  eventhub_key_to_log_namespace = {
+    for k, v in local.eventhub_key_to_log_namespace_grouped : k => v[0]
+  }
 
   metrics_source_groups = {
-    for parent_namespace in var.target_resource_types : parent_namespace => {
-      namespaces = lookup(var.nested_namespace_configs, parent_namespace, [parent_namespace])
+    for config in var.target_resource_types :
+    config.metric_namespace => {
+      namespaces = config.log_namespace != null && config.log_namespace != "" ? (
+        lookup(var.nested_namespace_configs, config.log_namespace, [config.metric_namespace])
+      ) : [config.metric_namespace]
+
+      enabled = config.metric_namespace != null && config.metric_namespace != ""
 
       regions = [distinct([
         for res in values(local.all_monitored_resources) :
         replace(res.location, " ", "")
-        if res.type == parent_namespace || lookup(res, "parent_type", "") == parent_namespace
+        if config.log_namespace != null && config.log_namespace != "" && (
+          res.type == config.log_namespace || lookup(res, "parent_type", "") == config.log_namespace
+        )
       ])]
-      
+
       tag_filters = [{
         type      = "AzureTagFilters"
-        namespace = parent_namespace
-        region    = distinct([
+        namespace = config.metric_namespace
+        region = distinct([
           for res in values(local.all_monitored_resources) :
           replace(res.location, " ", "")
-          if res.type == parent_namespace || lookup(res, "parent_type", "") == parent_namespace
+          if config.log_namespace != null && config.log_namespace != "" && (
+            res.type == config.log_namespace || lookup(res, "parent_type", "") == config.log_namespace
+          )
         ])
         tags = length(var.required_resource_tags) > 0 ? {
           name   = keys(var.required_resource_tags)[0]
           values = [values(var.required_resource_tags)[0]]
-        } : {
+          } : {
           name   = ""
           values = []
         }
       }]
     }
+    if config.metric_namespace != null && config.metric_namespace != ""
   }
-
-  has_resources = length(data.azurerm_resources.all_target_resources) > 0
 }

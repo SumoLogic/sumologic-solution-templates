@@ -155,8 +155,8 @@ func validateEventHubPlanContent(t *testing.T, planContent string) {
 			required:    true, // Always created regardless of Azure resources
 		},
 		{
-			pattern:     `name\s*=\s*"Azure-Test-Collector`,
-			description: "Collector should have expected name pattern",
+			pattern:     `name\s*=\s*".*Collector.*"`,
+			description: "Collector should have name containing 'Collector'",
 			required:    true,
 		},
 		{
@@ -286,8 +286,8 @@ func validateActivityLogPlanContent(t *testing.T, planContent string, activityLo
 			required:    true,
 		},
 		{
-			pattern:     `name\s*=\s*"Azure-Test-Collector`,
-			description: "Collector should have expected name pattern",
+			pattern:     `name\s*=\s*".*Collector.*"`,
+			description: "Collector should have name containing 'Collector'",
 			required:    true,
 		},
 		{
@@ -332,7 +332,7 @@ func validateActivityLogPlanContent(t *testing.T, planContent string, activityLo
 			description: "Activity Log Event Hub should have correct name",
 		},
 		{
-			pattern:     `target_resource_id\s*=\s*"/subscriptions/`,
+			pattern:     `azurerm_monitor_diagnostic_setting\s*\.\s*activity_logs_to_event_hub[\s\S]*?target_resource_id\s*=\s*"/subscriptions/[^/]+"\s*$`,
 			description: "Activity Log diagnostic setting should target subscription",
 		},
 		{

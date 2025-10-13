@@ -1,106 +1,169 @@
-# Example Terraform variables file for Azure Collection Terraform Module
-# Copy this to terraform.tfvars and fill in your actual values
+azure_subscription_id   = "your-azure-subscription-id"
+azure_client_id         = "your-azure-client-id"
+azure_client_secret     = "your-azure-client-secret"
+azure_tenant_id         = "your-azure-tenant-id"
+resource_group_name     = "SUMO-267667"
+location                = "East US"
+eventhub_namespace_name = "SUMO-Azure-EventHub"
+policy_name             = "SumoLogicCollectionPolicy"
+throughput_units        = 5
 
-# ================================
-# Azure Authentication
-# ================================
-# Get these from your Azure Service Principal or App Registration
-azure_subscription_id = "your-azure-subscription-id-here"       # Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-azure_client_id       = "your-azure-client-id-here"             # Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  
-azure_client_secret   = "your-azure-client-secret-here"         # Secret from your Azure App Registration
-azure_tenant_id       = "your-azure-tenant-id-here"             # Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+activity_log_export_name     = "SumoActivityLogExport"
+activity_log_export_category = "azure/activity-logs"
+enable_activity_logs         = false
 
-# ================================
-# Azure Infrastructure Configuration  
-# ================================
-resource_group_name      = "sumo-azure-collection-rg"           # Name for the resource group to create
-location                = "East US"                             # Azure region (e.g., "East US", "West US 2", "North Europe")
-eventhub_namespace_name = "SUMO-Azure-EventHub"                 # Event Hub namespace name (6-50 chars, alphanumeric + hyphens)
-policy_name             = "SumoLogicCollectionPolicy"           # Shared access policy name
-throughput_units        = 2                                     # Event Hub throughput units (1-20)
+target_resource_types = [{
+  log_namespace    = "Microsoft.Network/applicationGateways"
+  metric_namespace = "Microsoft.Network/applicationgateways"
+  },
+  {
+    log_namespace    = "Microsoft.Network/loadBalancers"
+    metric_namespace = "Microsoft.Network/loadBalancers"
+  },
+  {
+    log_namespace    = "Microsoft.Cache/Redis"
+    metric_namespace = "Microsoft.Cache/redis"
+  },
+  {
+    log_namespace    = "Microsoft.Web/sites"
+    metric_namespace = "Microsoft.Web/sites"
+  },
+  {
+    log_namespace    = "Microsoft.DBforPostgreSQL/flexibleServers"
+    metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
+  },
+  {
+    log_namespace    = "Microsoft.ApiManagement/service"
+    metric_namespace = "Microsoft.ApiManagement/service"
+  },
+  {
+    log_namespace    = "Microsoft.ServiceBus/namespaces"
+    metric_namespace = "Microsoft.ServiceBus/Namespaces"
+  },
+  {
+    log_namespace    = "Microsoft.EventGrid/domains"
+    metric_namespace = "Microsoft.EventGrid/domains"
+  },
+  {
+    metric_namespace = "Microsoft.EventGrid/systemTopics"
+  },
+  {
+    metric_namespace = "Microsoft.EventGrid/topics"
+  },
+  {
+    log_namespace    = "Microsoft.EventGrid/namespaces"
+    metric_namespace = "Microsoft.EventGrid/namespaces"
+  },
+  {
+    log_namespace    = "Microsoft.Network/virtualNetworks"
+    metric_namespace = "Microsoft.Network/virtualNetworks"
+  },
+  {
+    log_namespace    = "Microsoft.ContainerInstance/containerGroups"
+    metric_namespace = "Microsoft.ContainerInstance/containerGroups"
+  },
+  {
+    metric_namespace = "Microsoft.ContainerInstance/containerScaleSets"
+  },
+  {
+    metric_namespace = "Microsoft.Compute/virtualMachines"
+  },
+  {
+    metric_namespace = "Microsoft.Compute/virtualmachineScaleSets"
+  },
+  {
+    log_namespace    = "Microsoft.KeyVault/vaults"
+    metric_namespace = "Microsoft.KeyVault/vaults"
+  },
+  {
+    log_namespace    = "Microsoft.Storage/storageAccounts"
+    metric_namespace = "Microsoft.Storage/storageAccounts"
+}]
 
-# ================================
-# Activity Log Configuration
-# ================================
-activity_log_export_name     = "SumoActivityLogExport"          # Name for activity log export
-activity_log_export_category = "Administrative"                 # Activity log categories to export
-enable_activity_logs         = true                             # Set to false to disable activity log collection
-
-# ================================
-# Resource Targeting Configuration
-# ================================
-# Azure resource types to collect logs and metrics from
-target_resource_types = [
-  "Microsoft.KeyVault/vaults",
-  "Microsoft.Storage/storageAccounts",
-  "Microsoft.Compute/virtualMachines",
-  "Microsoft.Web/sites",
-  "Microsoft.Sql/servers"
-]
-
-# Tags to filter resources by (only resources with these tags will be monitored)
 required_resource_tags = {
-  "environment"                 = "production"
   "logs-collection-destination" = "sumologic"
 }
 
-# Configure which namespaces to collect for each resource type
 nested_namespace_configs = {
-  "Microsoft.KeyVault/vaults"         = ["logs", "metrics"]
-  "Microsoft.Storage/storageAccounts" = ["logs", "metrics"]
-  "Microsoft.Compute/virtualMachines" = ["logs", "metrics"]
-  "Microsoft.Web/sites"               = ["logs", "metrics"]
-  "Microsoft.Sql/servers"             = ["logs", "metrics"]
+  "Microsoft.Storage/storageAccounts" = [
+    "Microsoft.Storage/storageAccounts/blobServices",
+    "Microsoft.Storage/storageAccounts/fileServices"
+  ]
 }
 
-# ================================
-# Sumo Logic Configuration
-# ================================
-# Get these from your Sumo Logic account: Administration > Security > Access Keys
-sumologic_access_id    = "your-sumologic-access-id-here"        # Sumo Logic Access ID
-sumologic_access_key   = "your-sumologic-access-key-here"       # Sumo Logic Access Key  
-sumologic_environment  = "us2"                                  # Your Sumo Logic deployment (us1, us2, eu, au, etc.)
-sumo_collector_name    = "Azure-Production-Collector"           # Name for the Sumo Logic collector
-index_value           = "azure_logs"                            # Custom partition index (optional)
+sumologic_access_id   = "your-sumologic-access-id"
+sumologic_access_key  = "your-sumologic-access-key"
+sumologic_environment = "us1"
+sumo_collector_name   = "SUMO-267667-Collector"
+index_value           = "sumologic_default"
 
-# ================================
-# App Installation Configuration
-# ================================
-# List of Sumo Logic apps to install (optional)
-# To find app UUIDs, visit: https://help.sumologic.com/Solutions/Azure-Collection/Install-and-Use-the-Azure-Apps
-installation_apps_list = [
+installation_apps_list = [{
+  uuid    = "547aa2ec-1a6f-4fbe-84ca-e5e2bc57fd44"
+  name    = "Azure Application Gateway"
+  version = "1.0.5"
+  },
   {
-    uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"           # Azure Storage App
-    name    = "Azure Storage"
+    uuid    = "63e4bd6d-8e15-41c4-a65d-74589574adf2"
+    name    = "Azure Load Balancer"
+    version = "1.0.4"
+  },
+  {
+    uuid    = "4a240798-d68f-464d-a6e8-ba2be85eba0f"
+    name    = "Azure Cache for Redis"
     version = "1.0.3"
   },
   {
-    uuid    = "b20abced-0122-4c7a-8833-c68c3c29c3d3"           # Azure Key Vault App  
-    name    = "Azure Key Vault"
+    uuid    = "a0fb1bf0-2ab4-4f69-bf7e-5d97a176c7ea"
+    name    = "Azure Functions"
+    version = "1.0.4"
+  },
+  {
+    uuid    = "8bb63bc0-d6f4-4276-b546-780840c4d423"
+    name    = "Azure Database for MySQL"
+    version = "1.0.3"
+  },
+  {
+    uuid    = "73a729f2-49b1-4cf1-8494-04a605152358"
+    name    = "Azure Database for PostgreSQL"
+    version = "1.0.3"
+  },
+  {
+    uuid    = "e78d9390-7365-4fdc-b309-e4a4b369b53d"
+    name    = "Azure API Management"
     version = "1.0.2"
-  }
-]
-
-# ================================
-# SETUP INSTRUCTIONS:
-# ================================
-# 1. Copy this file: cp terraform.tfvars.example terraform.tfvars
-# 2. Fill in your Azure Service Principal credentials
-# 3. Fill in your Sumo Logic access credentials  
-# 4. Customize resource types and tags for your environment
-# 5. Run: terraform init && terraform plan && terraform apply
-
-# ================================
-# GETTING AZURE CREDENTIALS:
-# ================================
-# 1. Azure Portal > App Registrations > New registration
-# 2. Note the Application (client) ID and Directory (tenant) ID
-# 3. Certificates & secrets > New client secret > Copy the value
-# 4. Subscriptions > Your subscription > Access control (IAM) > Add role assignment
-# 5. Assign "Contributor" role to your app registration
-
-# ================================  
-# GETTING SUMO LOGIC CREDENTIALS:
-# ================================
-# 1. Sumo Logic Console > Administration > Security > Access Keys
-# 2. Add Access Key > Note the Access ID and Access Key
+  },
+  {
+    uuid    = "4bacb88a-0e8d-4c52-bea9-9f9656087459"
+    name    = "Azure Service Bus"
+    version = "1.0.3"
+  },
+  {
+    uuid    = "4e5b7c3f-b881-4dab-8609-5261ad14e420"
+    name    = "Azure Event Grid"
+    version = "1.0.3"
+  },
+  {
+    uuid    = "37e3ed67-5f42-4acf-baf1-1dc44834039b"
+    name    = "Azure Virtual Network"
+    version = "1.0.2"
+  },
+  {
+    uuid    = "bc9969aa-fb5b-49b7-96fb-d3f027396602"
+    name    = "Azure Container Instances (ACI)"
+    version = "1.0.2"
+  },
+  {
+    uuid    = "dfa576fc-7d3b-4946-b414-149567e25d6a"
+    name    = "Azure Virtual Machine"
+    version = "1.0.3"
+  },
+  {
+    uuid    = "449c796e-5da2-47ea-a304-e9299dd7435d"
+    name    = "Azure Key Vaults"
+    version = "1.0.2"
+  },
+  {
+    uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"
+    name    = "Azure Storage"
+    version = "1.0.3"
+}]

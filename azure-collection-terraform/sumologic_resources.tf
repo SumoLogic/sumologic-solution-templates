@@ -5,13 +5,14 @@ resource "sumologic_app" "apps" {
 
   uuid    = each.value.uuid
   version = each.value.version
-  
+
   parameters = {
     "index_value" = var.index_value
   }
 }
+
 resource "sumologic_collector" "sumo_collector" {
-  name        = join("-", [var.sumo_collector_name, var.azure_subscription_id])
+  name        = join("-", [var.sumo_collector_name, var.azure_subscription_id != null ? var.azure_subscription_id : data.azurerm_client_config.current.subscription_id])
   description = "Azure Collector"
   fields = {
     tenant_name = "azure_account"
@@ -19,7 +20,15 @@ resource "sumologic_collector" "sumo_collector" {
 }
 
 resource "sumologic_azure_event_hub_log_source" "sumo_azure_event_hub_log_source" {
-  for_each = azurerm_eventhub.eventhubs_by_type_and_location
+  for_each = {
+    for k, v in azurerm_eventhub.eventhubs_by_type_and_location : k => v
+    if length([
+      for config in var.target_resource_types :
+      config if config.log_namespace == local.eventhub_key_to_log_namespace[k] &&
+      config.log_namespace != null &&
+      config.log_namespace != ""
+    ]) > 0
+  }
 
   name         = each.value.name
   description  = "Azure Logs Source for ${each.key}"
@@ -28,7 +37,7 @@ resource "sumologic_azure_event_hub_log_source" "sumo_azure_event_hub_log_source
   collector_id = sumologic_collector.sumo_collector.id
 
   authentication {
-    type                      = "AzureEventHubAuthentication"
+    type = "AzureEventHubAuthentication"
     shared_access_policy_name = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[
       local.resources_by_type_and_location[each.key][0].location
     ].name
@@ -38,8 +47,8 @@ resource "sumologic_azure_event_hub_log_source" "sumo_azure_event_hub_log_source
   }
 
   path {
-    type           = "AzureEventHubPath"
-    namespace      = azurerm_eventhub_namespace.namespaces_by_location[
+    type = "AzureEventHubPath"
+    namespace = azurerm_eventhub_namespace.namespaces_by_location[
       local.resources_by_type_and_location[each.key][0].location
     ].name
     event_hub_name = each.value.name
@@ -51,7 +60,7 @@ resource "sumologic_azure_event_hub_log_source" "sumo_azure_event_hub_log_source
 resource "sumologic_azure_metrics_source" "terraform_azure_metrics_source" {
   for_each = {
     for k, v in local.metrics_source_groups : k => v
-    if length(data.azurerm_resources.all_target_resources[k].resources) > 0
+    if v.enabled == true && length(flatten(v.regions)) > 0
   }
 
   name         = replace(replace(each.key, "/", "-"), ".", "-")
@@ -62,9 +71,9 @@ resource "sumologic_azure_metrics_source" "terraform_azure_metrics_source" {
 
   authentication {
     type          = "AzureClientSecretAuthentication"
-    tenant_id     = var.azure_tenant_id
-    client_id     = var.azure_client_id
-    client_secret = var.azure_client_secret
+    tenant_id     = var.azure_tenant_id != null ? var.azure_tenant_id : data.azurerm_client_config.current.tenant_id
+    client_id     = var.azure_client_id != null ? var.azure_client_id : data.azurerm_client_config.current.client_id
+    client_secret = var.azure_client_secret != null ? var.azure_client_secret : ""
   }
 
   path {

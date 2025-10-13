@@ -18,18 +18,18 @@ provider "azurerm" {
   # and a Service Principal. More information on the authentication methods supported by
   # the AzureRM Provider can be found here:
   # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure
-  # recommended authenticating using the Azure CLI when running Terraform locally.
+  # We recommend authenticating using the Azure CLI when running Terraform locally.
 
   # The features block allows changing the behaviour of the Azure Provider, more
   # information can be found here:
   # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/features-block
-  subscription_id = var.azure_subscription_id
-  features {
 
+  # Use Azure CLI authentication with explicit subscription ID
+  subscription_id = var.azure_subscription_id
+
+  features {
     resource_group {
       prevent_deletion_if_contains_resources = true
     }
-
-
   }
 }
