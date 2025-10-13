@@ -185,17 +185,17 @@ variable "location" {
 }
 
 variable "throughput_units" {
-  description = "The number of throughput units for the Event Hub Namespace."
+  description = "The number of processing units for the Event Hub Namespace."
   type        = number
 
   validation {
-    condition     = var.throughput_units >= 1 && var.throughput_units <= 20
-    error_message = "Throughput units must be between 1 and 20 for Event Hub Standard tier."
+    condition     = contains([1, 2, 4, 8, 16], var.throughput_units)
+    error_message = "Processing units must be one of: 1, 2, 4, 8, or 16 for Event Hub Premium tier."
   }
 
   validation {
     condition     = floor(var.throughput_units) == var.throughput_units
-    error_message = "Throughput units must be a whole number."
+    error_message = "Processing units must be a whole number."
   }
 }
 

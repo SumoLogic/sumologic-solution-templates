@@ -139,7 +139,7 @@ func TestThroughputUnitsValidation(t *testing.T) {
 			name:        "ValidThroughputUnits",
 			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
-			description: "Valid throughput units (10) should pass validation",
+			description: "Valid throughput units (2) should pass validation",
 		},
 		{
 			name:        "MinimumThroughputUnits",
@@ -151,7 +151,7 @@ func TestThroughputUnitsValidation(t *testing.T) {
 			name:        "MaximumThroughputUnits",
 			tfvarsFile:  filepath.Join("test", fixturesDir, "max-throughput.tfvars"),
 			expectError: false,
-			description: "Maximum throughput units (20) should pass validation",
+			description: "Maximum throughput units (16) should pass validation",
 		},
 		{
 			name:        "ThroughputUnitsBelowMinimum",

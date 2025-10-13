@@ -22,7 +22,7 @@ resource "azurerm_eventhub_namespace" "namespaces_by_location" {
   name                = "${var.eventhub_namespace_name}-${replace(lower(each.key), " ", "")}"
   location            = each.key
   resource_group_name = azurerm_resource_group.rg.name
-  sku                 = "Standard"
+  sku                 = "Premium"
   capacity            = var.throughput_units
 
   tags = {
@@ -109,7 +109,7 @@ resource "azurerm_eventhub_namespace" "activity_logs_namespace" {
   name                = "${var.eventhub_namespace_name}-activity-logs"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  sku                 = "Standard"
+  sku                 = "Premium"
   capacity            = var.throughput_units
 }
 
