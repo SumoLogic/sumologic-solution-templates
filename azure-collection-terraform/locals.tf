@@ -38,10 +38,12 @@ locals {
     ]],
     # Nested resources (with optional tag filtering and OR logic)
     [for parent_type, children_types in var.nested_namespace_configs : [
-      for parent_res in concat(
-        length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[parent_type].resources : [],
-        length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[parent_type].resources : [],
-        length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[parent_type].resources : []
+      for parent_res in (
+        contains(local.log_namespaces, parent_type) ? concat(
+          length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[parent_type].resources : [],
+          length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[parent_type].resources : [],
+          length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[parent_type].resources : []
+        ) : []
       ) : [
         for child_type in children_types : {
           id                  = "${parent_res.id}/${element(split("/", child_type), length(split("/", child_type)) - 1)}/default"
