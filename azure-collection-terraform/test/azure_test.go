@@ -569,3 +569,31 @@ func TestResourceGroupNameValidation(t *testing.T) {
 		})
 	}
 }
+
+func TestAzureRequiredResourceTagsValidation(t *testing.T) {
+	tests := []struct {
+		name        string
+		tfvarsFile  string
+		expectError bool
+		description string
+	}{
+		{
+			name:        "TagsExist",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
+			expectError: false,
+			description: "Configuration with tags should pass validation and filter resources",
+		},
+		{
+			name:        "EmptyTags",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-empty-tags.tfvars"),
+			expectError: false,
+			description: "Empty tags should pass validation and collect from all resources without filtering",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			runValidationTest(t, tt.name, tt.tfvarsFile, tt.expectError, tt.description)
+		})
+	}
+}

@@ -268,7 +268,7 @@ Before running this module, ensure you have:
      - `Reader` on target resources
      - `Contributor` on resource group for EventHub creation
      - `Monitoring Contributor` for diagnostic settings
-   - Azure CLI configured or service principal credentials
+   - Azure CLI configured
 
 2. **Sumo Logic**:
    - Active Sumo Logic account

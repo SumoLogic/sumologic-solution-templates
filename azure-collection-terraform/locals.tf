@@ -25,13 +25,24 @@ locals {
 
   parents_with_nested_configs = keys(var.nested_namespace_configs)
 
+  # Flatten resources with OR logic for tags (no distinct needed, will dedupe by ID in map)
   all_resources_list = flatten([
+    # Non-nested resources (with optional tag filtering and OR logic)
     [for type in local.log_namespaces : [
-      for res in data.azurerm_resources.all_target_resources[type].resources : res
+      for res in concat(
+        length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[type].resources : [],
+        length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[type].resources : [],
+        length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[type].resources : []
+      ) : res
       if !contains(local.parents_with_nested_configs, type)
     ]],
+    # Nested resources (with optional tag filtering and OR logic)
     [for parent_type, children_types in var.nested_namespace_configs : [
-      for parent_res in data.azurerm_resources.all_target_resources[parent_type].resources : [
+      for parent_res in concat(
+        length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[parent_type].resources : [],
+        length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[parent_type].resources : [],
+        length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[parent_type].resources : []
+      ) : [
         for child_type in children_types : {
           id                  = "${parent_res.id}/${element(split("/", child_type), length(split("/", child_type)) - 1)}/default"
           name                = "${parent_res.name}/${element(split("/", child_type), length(split("/", child_type)) - 1)}/default"
@@ -83,7 +94,7 @@ locals {
         )
       ])]
 
-      tag_filters = [{
+      tag_filters = length(var.required_resource_tags) > 0 ? [{
         type      = "AzureTagFilters"
         namespace = config.metric_namespace
         region = distinct([
@@ -93,14 +104,11 @@ locals {
             res.type == config.log_namespace || lookup(res, "parent_type", "") == config.log_namespace
           )
         ])
-        tags = length(var.required_resource_tags) > 0 ? {
+        tags = {
           name   = keys(var.required_resource_tags)[0]
           values = [values(var.required_resource_tags)[0]]
-          } : {
-          name   = ""
-          values = []
         }
-      }]
+      }] : []
     }
     if config.metric_namespace != null && config.metric_namespace != ""
   }

@@ -374,6 +374,17 @@ func analyzeAppUninstallationErrors(errorStr string) []AppInstallationResult {
 		})
 	}
 
+	// Check for Azure Backup lock scenario during destroy
+	if strings.Contains(errorStr, "ScopeLocked") ||
+		strings.Contains(errorStr, "AzureBackupProtectionLock") {
+		results = append(results, AppInstallationResult{
+			Success:   true, // This is an acceptable scenario in production
+			Message:   "Resources are protected by Azure Backup locks (cannot delete diagnostic settings)",
+			ErrorCode: "azure:scope_locked",
+			Scenario:  "Azure Backup Protection",
+		})
+	}
+
 	return results
 }
 

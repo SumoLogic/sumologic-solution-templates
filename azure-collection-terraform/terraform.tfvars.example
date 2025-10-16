@@ -3,14 +3,18 @@ azure_client_id         = "your-azure-client-id"
 azure_client_secret     = "your-azure-client-secret"
 azure_tenant_id         = "your-azure-tenant-id"
 resource_group_name     = "SUMO-267667"
-location                = "East US"
 eventhub_namespace_name = "SUMO-Azure-EventHub"
+eventhub_namespace_sku  = "Premium"
 policy_name             = "SumoLogicCollectionPolicy"
-throughput_units        = 5
+throughput_units        = 2
 
+# Activity Log Configuration
 activity_log_export_name     = "SumoActivityLogExport"
 activity_log_export_category = "azure/activity-logs"
+location                     = "East US"
 enable_activity_logs         = false
+
+# Resource Targeting Configuration
 
 target_resource_types = [{
   log_namespace    = "Microsoft.Network/applicationGateways"
@@ -42,7 +46,7 @@ target_resource_types = [{
   },
   {
     log_namespace    = "Microsoft.EventGrid/domains"
-    metric_namespace = "Microsoft.EventGrid/domains"
+    metric_namespace = "Microsoft.EventGrid/domains",
   },
   {
     metric_namespace = "Microsoft.EventGrid/systemTopics"
@@ -81,9 +85,11 @@ target_resource_types = [{
 }]
 
 required_resource_tags = {
-  "logs-collection-destination" = "sumologic"
+  "logs-collection-destination"  = "sumologic"
+  "logs-collection-destination2" = "sumologic2"
 }
 
+#ToDo: test for all nested namespaces(Storage, Azure SQL, OpenAI)
 nested_namespace_configs = {
   "Microsoft.Storage/storageAccounts" = [
     "Microsoft.Storage/storageAccounts/blobServices",
@@ -91,79 +97,11 @@ nested_namespace_configs = {
   ]
 }
 
+# Sumo Logic Configuration
 sumologic_access_id   = "your-sumologic-access-id"
 sumologic_access_key  = "your-sumologic-access-key"
 sumologic_environment = "us1"
 sumo_collector_name   = "SUMO-267667-Collector"
-index_value           = "sumologic_default"
 
-installation_apps_list = [{
-  uuid    = "547aa2ec-1a6f-4fbe-84ca-e5e2bc57fd44"
-  name    = "Azure Application Gateway"
-  version = "1.0.5"
-  },
-  {
-    uuid    = "63e4bd6d-8e15-41c4-a65d-74589574adf2"
-    name    = "Azure Load Balancer"
-    version = "1.0.4"
-  },
-  {
-    uuid    = "4a240798-d68f-464d-a6e8-ba2be85eba0f"
-    name    = "Azure Cache for Redis"
-    version = "1.0.3"
-  },
-  {
-    uuid    = "a0fb1bf0-2ab4-4f69-bf7e-5d97a176c7ea"
-    name    = "Azure Functions"
-    version = "1.0.4"
-  },
-  {
-    uuid    = "8bb63bc0-d6f4-4276-b546-780840c4d423"
-    name    = "Azure Database for MySQL"
-    version = "1.0.3"
-  },
-  {
-    uuid    = "73a729f2-49b1-4cf1-8494-04a605152358"
-    name    = "Azure Database for PostgreSQL"
-    version = "1.0.3"
-  },
-  {
-    uuid    = "e78d9390-7365-4fdc-b309-e4a4b369b53d"
-    name    = "Azure API Management"
-    version = "1.0.2"
-  },
-  {
-    uuid    = "4bacb88a-0e8d-4c52-bea9-9f9656087459"
-    name    = "Azure Service Bus"
-    version = "1.0.3"
-  },
-  {
-    uuid    = "4e5b7c3f-b881-4dab-8609-5261ad14e420"
-    name    = "Azure Event Grid"
-    version = "1.0.3"
-  },
-  {
-    uuid    = "37e3ed67-5f42-4acf-baf1-1dc44834039b"
-    name    = "Azure Virtual Network"
-    version = "1.0.2"
-  },
-  {
-    uuid    = "bc9969aa-fb5b-49b7-96fb-d3f027396602"
-    name    = "Azure Container Instances (ACI)"
-    version = "1.0.2"
-  },
-  {
-    uuid    = "dfa576fc-7d3b-4946-b414-149567e25d6a"
-    name    = "Azure Virtual Machine"
-    version = "1.0.3"
-  },
-  {
-    uuid    = "449c796e-5da2-47ea-a304-e9299dd7435d"
-    name    = "Azure Key Vaults"
-    version = "1.0.2"
-  },
-  {
-    uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"
-    name    = "Azure Storage"
-    version = "1.0.3"
-}]
+# App Installation Configuration
+installation_apps_list = []

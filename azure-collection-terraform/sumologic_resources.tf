@@ -7,7 +7,7 @@ resource "sumologic_app" "apps" {
   version = each.value.version
 
   parameters = {
-    "index_value" = var.index_value
+    "index_value" = each.value.sumologic_partition
   }
 }
 

@@ -1,7 +1,23 @@
-data "azurerm_resources" "all_target_resources" {
-  for_each      = toset(local.log_namespaces)
-  type          = each.key
-  required_tags = var.required_resource_tags
+# Query resources with optional tag filtering (supports OR logic for multiple tags)
+data "azurerm_resources" "all_target_resources_no_tags" {
+  for_each = length(var.required_resource_tags) == 0 ? toset(local.log_namespaces) : []
+  type     = each.key
+}
+
+data "azurerm_resources" "all_target_resources_tag1" {
+  for_each = length(var.required_resource_tags) > 0 ? toset(local.log_namespaces) : []
+  type     = each.key
+  required_tags = {
+    (keys(var.required_resource_tags)[0]) = values(var.required_resource_tags)[0]
+  }
+}
+
+data "azurerm_resources" "all_target_resources_tag2" {
+  for_each = length(var.required_resource_tags) > 1 ? toset(local.log_namespaces) : []
+  type     = each.key
+  required_tags = {
+    (keys(var.required_resource_tags)[1]) = values(var.required_resource_tags)[1]
+  }
 }
 
 data "azurerm_client_config" "current" {}
@@ -22,7 +38,7 @@ resource "azurerm_eventhub_namespace" "namespaces_by_location" {
   name                = "${var.eventhub_namespace_name}-${replace(lower(each.key), " ", "")}"
   location            = each.key
   resource_group_name = azurerm_resource_group.rg.name
-  sku                 = "Premium"
+  sku                 = var.eventhub_namespace_sku
   capacity            = var.throughput_units
 
   tags = {
@@ -100,7 +116,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
   timeouts {
     create = "30m"
     update = "30m"
-    delete = "30m"
+    delete = "60m" # Increased from 30m to handle potential Azure Backup lock retries
   }
 }
 
@@ -109,7 +125,7 @@ resource "azurerm_eventhub_namespace" "activity_logs_namespace" {
   name                = "${var.eventhub_namespace_name}-activity-logs"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  sku                 = "Premium"
+  sku                 = var.eventhub_namespace_sku
   capacity            = var.throughput_units
 }
 

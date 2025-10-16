@@ -104,7 +104,7 @@ variable "target_resource_types" {
 }
 
 variable "required_resource_tags" {
-  description = "A map of tags to filter Azure resources by."
+  description = "A map of tags to filter Azure resources by. Supports 0 (collect all), 1 (single tag filter), or 2 tags (OR logic)."
   type        = map(string)
 }
 
@@ -196,6 +196,16 @@ variable "throughput_units" {
   validation {
     condition     = floor(var.throughput_units) == var.throughput_units
     error_message = "Processing units must be a whole number."
+  }
+}
+
+variable "eventhub_namespace_sku" {
+  description = "The SKU (pricing tier) of the Event Hub Namespace."
+  type        = string
+
+  validation {
+    condition     = contains(["Standard", "Premium"], var.eventhub_namespace_sku)
+    error_message = "Event Hub namespace SKU must be either 'Standard' or 'Premium'."
   }
 }
 
@@ -291,9 +301,10 @@ variable "sumologic_access_key" {
 variable "installation_apps_list" {
   description = "list of apps to be installed"
   type = list(object({
-    uuid    = string
-    name    = string
-    version = string
+    uuid                = string
+    name                = string
+    version             = string
+    sumologic_partition = optional(string, "sumologic_default")
   }))
 
   validation {
@@ -329,9 +340,4 @@ variable "sumo_collector_name" {
     condition     = can(regex("^[a-zA-Z0-9_-]+$", var.sumo_collector_name)) && length(var.sumo_collector_name) > 0 && length(var.sumo_collector_name) <= 128
     error_message = "Collector name contains invalid characters. Please use alphanumeric characters, hyphens (-), and underscores (_) only."
   }
-}
-
-variable "index_value" {
-  type        = string
-  description = "The _index if the collection is configured with custom partition."
 }
