@@ -1,11 +1,11 @@
 # Query resources with optional tag filtering (supports OR logic for multiple tags)
 data "azurerm_resources" "all_target_resources_no_tags" {
-  for_each = length(var.required_resource_tags) == 0 ? toset(local.log_namespaces) : []
+  for_each = length(var.required_resource_tags) == 0 ? toset(local.resource_types_for_discovery) : []
   type     = each.key
 }
 
 data "azurerm_resources" "all_target_resources_tag1" {
-  for_each = length(var.required_resource_tags) > 0 ? toset(local.log_namespaces) : []
+  for_each = length(var.required_resource_tags) > 0 ? toset(local.resource_types_for_discovery) : []
   type     = each.key
   required_tags = {
     (keys(var.required_resource_tags)[0]) = values(var.required_resource_tags)[0]
@@ -13,7 +13,7 @@ data "azurerm_resources" "all_target_resources_tag1" {
 }
 
 data "azurerm_resources" "all_target_resources_tag2" {
-  for_each = length(var.required_resource_tags) > 1 ? toset(local.log_namespaces) : []
+  for_each = length(var.required_resource_tags) > 1 ? toset(local.resource_types_for_discovery) : []
   type     = each.key
   required_tags = {
     (keys(var.required_resource_tags)[1]) = values(var.required_resource_tags)[1]

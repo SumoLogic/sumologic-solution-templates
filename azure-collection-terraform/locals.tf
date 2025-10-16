@@ -11,6 +11,16 @@ locals {
     if config.metric_namespace != null && config.metric_namespace != ""
   ])
 
+  # Combined list: prioritize log_namespace, but include metric_namespace if log_namespace is missing
+  resource_types_for_discovery = distinct(concat(
+    local.log_namespaces,
+    [
+      for config in var.target_resource_types : config.metric_namespace
+      if config.metric_namespace != null && config.metric_namespace != "" &&
+      (config.log_namespace == null || config.log_namespace == "")
+    ]
+  ))
+
   namespace_mapping = {
     for config in var.target_resource_types :
     config.log_namespace => config.metric_namespace
@@ -28,7 +38,7 @@ locals {
   # Flatten resources with OR logic for tags (no distinct needed, will dedupe by ID in map)
   all_resources_list = flatten([
     # Non-nested resources (with optional tag filtering and OR logic)
-    [for type in local.log_namespaces : [
+    [for type in local.resource_types_for_discovery : [
       for res in concat(
         length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[type].resources : [],
         length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[type].resources : [],
@@ -39,7 +49,7 @@ locals {
     # Nested resources (with optional tag filtering and OR logic)
     [for parent_type, children_types in var.nested_namespace_configs : [
       for parent_res in (
-        contains(local.log_namespaces, parent_type) ? concat(
+        contains(local.resource_types_for_discovery, parent_type) ? concat(
           length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[parent_type].resources : [],
           length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[parent_type].resources : [],
           length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[parent_type].resources : []
@@ -91,8 +101,10 @@ locals {
       regions = [distinct([
         for res in values(local.all_monitored_resources) :
         replace(res.location, " ", "")
-        if config.log_namespace != null && config.log_namespace != "" && (
+        if config.log_namespace != null && config.log_namespace != "" ? (
           res.type == config.log_namespace || lookup(res, "parent_type", "") == config.log_namespace
+        ) : (
+          res.type == config.metric_namespace
         )
       ])]
 
@@ -102,8 +114,10 @@ locals {
         region = distinct([
           for res in values(local.all_monitored_resources) :
           replace(res.location, " ", "")
-          if config.log_namespace != null && config.log_namespace != "" && (
+          if config.log_namespace != null && config.log_namespace != "" ? (
             res.type == config.log_namespace || lookup(res, "parent_type", "") == config.log_namespace
+          ) : (
+            res.type == config.metric_namespace
           )
         ])
         tags = {
