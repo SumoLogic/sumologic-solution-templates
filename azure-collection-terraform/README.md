@@ -52,11 +52,27 @@ To destroy all resources:
 terraform destroy
 ```
 
-**Warning**: This will:
+**⚠️ Warning**: This will:
 - Delete all EventHub namespaces and hubs
 - Remove diagnostic settings from Azure resources
 - Delete Sumo Logic collector and all sources
 - Remove installed Sumo Logic apps
+- **Remove subscription-level activity log diagnostic settings** (if `enable_activity_logs = true`)
+  - This affects the **ENTIRE subscription**, not just resources managed by this Terraform configuration
+  - Other monitoring solutions or Terraform workspaces relying on activity logs will be impacted
+
+**💡 To safely remove activity logs before destroying:**
+```bash
+# Step 1: Disable activity logs in your terraform.tfvars
+# Change: enable_activity_logs = true
+# To:     enable_activity_logs = false
+
+# Step 2: Apply the change (this removes only activity logs, keeps everything else)
+terraform apply
+
+# Step 3: Now safely destroy the rest
+terraform destroy
+```
 
 Data in Sumo Logic will be retained based on your retention policy.
 
@@ -136,9 +152,13 @@ Creates authorization rule for Sumo Logic to access activity logs.
 #### 9. **azurerm_monitor_diagnostic_setting.activity_logs_to_event_hub** (Conditional)
 Configures subscription-level diagnostic settings to stream activity logs.
 - **Purpose**: Routes subscription audit logs to dedicated EventHub
-- **Scope**: Subscription-level (not resource-level)
+- **Scope**: **Subscription-level** (not resource-level)
 - **Condition**: Created when `enable_activity_logs = true`
 - **Categories**: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy, Autoscale
+- **⚠️ Important**: Azure allows only **ONE** activity log diagnostic setting per subscription
+  - Creating this setting will **replace** any existing activity log diagnostic setting
+  - Deleting this (via `terraform destroy`) will **remove** activity logs for the **entire subscription**
+  - Coordinate with your team to avoid conflicts on shared subscriptions
 
 ### SumoLogic Resources
 
@@ -161,7 +181,7 @@ Creates log sources that consume from EventHubs.
 Creates metrics sources for Azure metrics collection via API.
 - **Purpose**: Collects metrics directly from Azure Monitor API
 - **Cardinality**: One source per unique metric_namespace group
-- **Authentication**: Uses Azure service principal credentials
+- **Authentication**: Uses configured Azure credentials
 - **Polling**: Periodic collection (configurable interval)
 - **Filtering**: Only created for resources with `metric_namespace` defined
 
@@ -264,11 +284,8 @@ Before running this module, ensure you have:
 
 1. **Azure**:
    - Active Azure subscription
-   - Service Principal with permissions:
-     - `Reader` on target resources
-     - `Contributor` on resource group for EventHub creation
-     - `Monitoring Contributor` for diagnostic settings
-   - Azure CLI configured
+   - Azure CLI configured and authenticated (`az login`)
+   - Required Azure RBAC roles (see [Azure RBAC Requirements](#azure-rbac-requirements) below)
 
 2. **Sumo Logic**:
    - Active Sumo Logic account
@@ -280,16 +297,79 @@ Before running this module, ensure you have:
    - Azure provider >= 4.19.0
    - Sumo Logic provider >= 3.0.2
 
+### Azure RBAC Requirements
+
+This module uses **Azure CLI authentication** for Terraform operations. The Azure CLI user needs appropriate roles assigned.
+
+#### 🔵 **Required Azure Roles**
+
+**Option A: Single Role (Recommended for Simplicity)** ⭐
+```bash
+# Assign Contributor role at subscription level
+az role assignment create \
+  --assignee <user-email> \
+  --role "Contributor" \
+  --scope "/subscriptions/<subscription-id>"
+```
+
+**Option B: Principle of Least Privilege (More Secure)**
+```bash
+# 1. Reader - For resource discovery
+az role assignment create \
+  --assignee <user-email> \
+  --role "Reader" \
+  --scope "/subscriptions/<subscription-id>"
+
+# 2. Contributor - For EventHub infrastructure (specific resource group)
+az role assignment create \
+  --assignee <user-email> \
+  --role "Contributor" \
+  --scope "/subscriptions/<subscription-id>/resourceGroups/<resource-group-name>"
+
+# 3. Monitoring Contributor - For diagnostic settings and metrics access
+az role assignment create \
+  --assignee <user-email> \
+  --role "Monitoring Contributor" \
+  --scope "/subscriptions/<subscription-id>"
+```
+
+**Required Permissions:**
+| Operation | Required Permission | Role |
+|-----------|-------------------|------|
+| Query resources by type/tags | `*/read` | Reader |
+| Read diagnostic categories | `Microsoft.Insights/DiagnosticSettings/Read` | Reader |
+| Create resource groups | `Microsoft.Resources/subscriptions/resourcegroups/write` | Contributor |
+| Create EventHub namespaces | `Microsoft.EventHub/namespaces/*` | Contributor |
+| Create EventHubs | `Microsoft.EventHub/namespaces/eventhubs/*` | Contributor |
+| Create authorization rules | `Microsoft.EventHub/namespaces/authorizationRules/*` | Contributor |
+| Create diagnostic settings | `Microsoft.Insights/DiagnosticSettings/Write` | Monitoring Contributor |
+| Activity logs (subscription) | `Microsoft.Insights/DiagnosticSettings/Write` | Monitoring Contributor |
+| Read Azure Monitor metrics | `Microsoft.Insights/Metrics/Read` | Monitoring Contributor |
+
+#### ✅ **Verify Your Permissions**
+
+Check your current role assignments:
+```bash
+# For current CLI user
+az role assignment list \
+  --assignee $(az account show --query user.name -o tsv) \
+  --output table
+```
+
+#### 📋 **Authentication**
+
+This module uses **Azure CLI Authentication**:
+- Setup: Run `az login` before executing Terraform
+- Terraform will use your Azure CLI session for all operations
+- Best for: Local development and manual deployments
+
 ### Key Variables
 
 #### Required Variables
 
 ```hcl
-# Azure Authentication
-azure_subscription_id = "your-subscription-id"
-azure_client_id       = "your-client-id"
-azure_client_secret   = "your-client-secret"
-azure_tenant_id       = "your-tenant-id"
+# Azure Configuration (uses Azure CLI authentication)
+azure_subscription_id = "your-subscription-id"  # Optional: defaults to current CLI context
 
 # Sumo Logic Authentication
 sumologic_access_id      = "your-access-id"
@@ -363,6 +443,27 @@ Enable subscription-level activity log collection:
 enable_activity_logs = true
 ```
 
+**⚠️ Important: Activity Logs Are Subscription-Level Resources**
+
+Activity logs operate at the **Azure subscription level**, not at the resource level. This has important implications:
+
+- **Scope**: Activity logs capture ALL operations across the ENTIRE subscription (all resource groups, all resources)
+- **Single Configuration**: Azure only allows **ONE** diagnostic setting for activity logs per subscription
+- **Shared Resource**: If multiple Terraform configurations or users enable activity logs on the same subscription, **only the last one applied will be active**
+- **Deletion Impact**: Running `terraform destroy` on ANY Terraform configuration that manages activity logs will **delete the subscription-level diagnostic setting**, affecting **ALL** other configurations that depend on it
+
+**Best Practices:**
+1. ✅ Enable activity logs in **only ONE** Terraform workspace per subscription
+2. ✅ Coordinate with your team to avoid conflicts
+3. ✅ Consider managing activity logs separately from resource-level monitoring
+4. ⚠️ Be cautious when running `terraform destroy` - it will remove activity log collection for the entire subscription
+
+**Alternative Approach:**
+If multiple teams need activity logs, consider:
+- Creating a dedicated Terraform configuration for subscription-level resources (activity logs, policies, etc.)
+- Using `terraform import` to manage existing activity log settings
+- Documenting ownership and avoiding duplicate configurations
+
 ## How to Run This Project
 
 ### Step 1: Clone and Navigate
@@ -376,11 +477,8 @@ cd azure-collection-terraform
 Create `terraform.tfvars` with your configuration:
 
 ```hcl
-# Azure Configuration
-azure_subscription_id = "your-subscription-id"
-azure_client_id       = "your-service-principal-client-id"
-azure_client_secret   = "your-service-principal-secret"
-azure_tenant_id       = "your-tenant-id"
+# Azure Configuration (uses Azure CLI authentication - run 'az login' first)
+azure_subscription_id = "your-subscription-id"  # Optional: defaults to current context
 
 # Sumo Logic Configuration
 sumologic_access_id      = "your-sumo-access-id"

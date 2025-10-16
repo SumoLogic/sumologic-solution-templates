@@ -14,9 +14,9 @@ provider "sumologic" {
 }
 
 provider "azurerm" {
-  # The AzureRM Provider supports authenticating using via the Azure CLI, a Managed Identity
-  # and a Service Principal. More information on the authentication methods supported by
-  # the AzureRM Provider can be found here:
+  # The AzureRM Provider supports authenticating using Azure CLI or Managed Identity.
+  # More information on the authentication methods supported by the AzureRM Provider
+  # can be found here:
   # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure
   # We recommend authenticating using the Azure CLI when running Terraform locally.
 

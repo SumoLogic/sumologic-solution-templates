@@ -10,25 +10,25 @@ variable "azure_subscription_id" {
 }
 
 variable "azure_client_id" {
-  description = "The client id for Service Principal authentication. If not provided, will use Azure CLI authentication."
+  description = "The client id for Azure authentication. If not provided, will use Azure CLI context."
   type        = string
   default     = null
 
   validation {
     condition     = var.azure_client_id == null || can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.azure_client_id))
-    error_message = "The azure_client_id must be a valid UUID format or null for Azure CLI authentication."
+    error_message = "The azure_client_id must be a valid UUID format or null."
   }
 }
 
 variable "azure_client_secret" {
-  description = "The client secret for Service Principal authentication. If not provided, will use Azure CLI authentication."
+  description = "The client secret for Azure authentication. If not provided, will use Azure CLI context."
   type        = string
   default     = null
   sensitive   = true
 
   validation {
     condition     = var.azure_client_secret == null || try(length(var.azure_client_secret) > 0, false)
-    error_message = "The azure_client_secret must be a non-empty string or null for Azure CLI authentication."
+    error_message = "The azure_client_secret must be a non-empty string or null."
   }
 }
 
@@ -39,7 +39,7 @@ variable "azure_tenant_id" {
 
   validation {
     condition     = var.azure_tenant_id == null || can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.azure_tenant_id))
-    error_message = "The azure_tenant_id must be a valid UUID format or null for Azure CLI auto-detection."
+    error_message = "The azure_tenant_id must be a valid UUID format or null."
   }
 }
 
@@ -104,7 +104,7 @@ variable "target_resource_types" {
 }
 
 variable "required_resource_tags" {
-  description = "A map of tags to filter Azure resources by. Supports 0 (collect all), 1 (single tag filter), or 2 tags (OR logic)."
+  description = "A map of tags to filter Azure resources by."
   type        = map(string)
 }
 
