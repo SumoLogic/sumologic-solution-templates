@@ -400,7 +400,7 @@ cd azure-collection-terraform
 
 ### Step 2: Create Configuration File
 
-Create `terraform.tfvars` with your configuration:
+Create `terraform.tfvars` with your configuration. Here is a sample configuration:
 
 ```hcl
 # Azure Configuration (uses Azure CLI authentication - run 'az login' first)
