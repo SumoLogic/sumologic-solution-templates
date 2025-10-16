@@ -10,7 +10,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_dynamodb_module"></a> [dynamodb\_module](#module\_dynamodb\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | n/a |
+| <a name="module_dynamodb_module"></a> [dynamodb\_module](#module\_dynamodb\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.0.20 |
 
 ## Resources
 

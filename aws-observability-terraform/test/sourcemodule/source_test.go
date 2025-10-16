@@ -11,7 +11,7 @@ import (
 
 var resourceCount *terraform.ResourceCount
 
-// Testing scenerio 1 - Install source module with all defaults
+// Testing scenario 1 - Install source module with all defaults
 func TestSourceModule1(t *testing.T) {
 	// t.Parallel()
 
@@ -122,7 +122,7 @@ func TestSourceModule1(t *testing.T) {
 	})
 }
 
-// Testing scenerio 2 - Install with no collection of any source
+// Testing scenario 2 - Install with no collection of any source
 func TestSourceModule2(t *testing.T) {
 	// t.Parallel()
 
@@ -138,6 +138,10 @@ func TestSourceModule2(t *testing.T) {
 		"collect_cloudtrail":        "false",
 		"collect_logs_cloudwatch":   "None",
 		"collect_metric_cloudwatch": "None",
+		"aws_resource_tags": map[string]interface{}{
+		    "Creator": "SumoLogic",
+			"Environment": "Test",
+		},
 	}
 	varsContent := []byte{}
 	// Create a temporary vars.tfvars file
@@ -175,7 +179,7 @@ func TestSourceModule2(t *testing.T) {
 	})
 }
 
-// Testing scenerio 3 - Collect CW Logs via Lambda Log forwarder, CW Metrics via CW metric source
+// Testing scenario 3 - Collect CW Logs via Lambda Log forwarder, CW Metrics via CW metric source
 func TestSourceModule3(t *testing.T) {
 	// t.Parallel()
 
@@ -189,6 +193,10 @@ func TestSourceModule3(t *testing.T) {
 		"collect_cloudtrail":        "false",
 		"collect_logs_cloudwatch":   "Lambda Log Forwarder",
 		"collect_metric_cloudwatch": "CloudWatch Metrics Source",
+		"aws_resource_tags": map[string]interface{}{
+		    "Creator": "SumoLogic",
+			"Environment": "Test",
+ 		},
 	}
 	varsContent := []byte{}
 	// Create a temporary vars.tfvars file
@@ -247,7 +255,8 @@ func TestSourceModule3(t *testing.T) {
 	})
 }
 
-// Testing scenerio 4 - Override bucket details of sources ALB, CLB, CloudTrail, CloudWatch logs and metrics with existing collector. X-Ray source
+// Testing scenario 4 - Override bucket details of sources ALB, CLB, CloudTrail, CloudWatch logs
+// And metrics with existing collector.
 // Takes 14 mins to execute
 func TestSourceModule4(t *testing.T) {
 	// t.Parallel()
@@ -267,6 +276,10 @@ func TestSourceModule4(t *testing.T) {
 		"collect_logs_cloudwatch":   "Kinesis Firehose Log Source",
 		"collect_metric_cloudwatch": "CloudWatch Metrics Source",
 		"create_s3_bucket":          "false",
+		"aws_resource_tags": map[string]interface{}{
+		    "Creator": "SumoLogic",
+			"Environment": "Test",
+ 		},
 	}
 	varsContent := []byte{}
 	// Create a temporary vars.tfvars file
@@ -355,7 +368,9 @@ func TestSourceModule4(t *testing.T) {
 	})
 }
 
-// Testing scenerio 5 - Collect CW Logs via Lambda Log forwarder + filter log groups based on AWS tag and CW Metrics via CW metric source + collect custom metrics namespace + filter metrics by AWS tags
+// Testing scenario 5 - Collect CW Logs via Lambda Log forwarder
+// filter log groups based on AWS tag and CW Metrics via CW metric source
+// collect custom metrics namespace, filter metrics by AWS tags
 func TestSourceModule5(t *testing.T) {
 	// t.Parallel()
 
@@ -449,8 +464,9 @@ func TestSourceModule5(t *testing.T) {
 	})
 }
 
-// Testing scenerio 6 - Collect CW Logs via Kinesis source + filter log groups based on AWS tag and CW Metrics via Kinesis source + collect custom metrics namespace + filter metrics by AWS tags
-
+// Testing scenario 6 - Collect CW Logs via Kinesis source,
+// filter log groups based on AWS tag and CW Metrics via Kinesis source
+// Collect custom metrics namespace, filter metrics by AWS tags
 func TestSourceModule6(t *testing.T) {
 	// t.Parallel()
 
