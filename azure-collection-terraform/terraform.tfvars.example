@@ -6,63 +6,38 @@
 # - This prevents configuration errors and maintains consistency
 # - Example: If not using activity logs, set enable_activity_logs = false
 #           (don't delete the variable)
+#
+# For detailed descriptions of all variables, see the Configuration Variables
+# section in README.md
 # ============================================================================
 
 # Azure Authentication Configuration
-# Your Azure subscription and service principal credentials
-azure_subscription_id   = "your-azure-subscription-id"   # Azure Subscription ID where resources will be created
-azure_client_id         = "your-azure-client-id"         # Service Principal Application (client) ID (optional, uses Azure CLI if not provided)
-azure_client_secret     = "your-azure-client-secret"     # Service Principal client secret value (optional, uses Azure CLI if not provided)
-azure_tenant_id         = "your-azure-tenant-id"         # Azure Active Directory Tenant ID (optional, uses Azure CLI if not provided)
+azure_subscription_id   = "your-azure-subscription-id"
+azure_client_id         = "your-azure-client-id"
+azure_client_secret     = "your-azure-client-secret"
+azure_tenant_id         = "your-azure-tenant-id"
 
 # Azure Resource Configuration
-# This should be a new resource group where all Event Hub namespaces will be created.
-# These Event Hubs are used to configure resource logs and activity logs collection sources in Sumo Logic.
-resource_group_name     = "sumologic-azure-collection-rg"         # Name for the new resource group
-eventhub_namespace_name = "sumologic-azure-collection-EventHub"   # Name for the Event Hub namespace (must be globally unique)
-eventhub_namespace_sku  = "Premium"                               # Event Hub SKU tier (Basic, Standard, or Premium)
-policy_name             = "SumoLogicAzureCollectionPolicy"        # Name for the Event Hub authorization policy
-throughput_units        = 2                                       # Number of throughput units (1-20 for Standard, 1-10 for Premium)
+resource_group_name     = "sumologic-azure-collection-rg"
+eventhub_namespace_name = "sumologic-azure-collection-EventHub"
+eventhub_namespace_sku  = "Premium"
+policy_name             = "SumoLogicAzureCollectionPolicy"
+throughput_units        = 2
 
 # Activity Log Configuration
-activity_log_export_name     = "SumoLogicAzureActivityLogExport"  # Name for the activity log diagnostic setting
-activity_log_export_category = "azure/activity-logs"              # Source category for activity logs in Sumo Logic
-location                     = "East US"                          # Azure region for resources (must match subscription location)
-enable_activity_logs         = false                              # Enable/disable activity log collection (subscription-level setting)
+activity_log_export_name     = "SumoLogicAzureActivityLogExport"
+activity_log_export_category = "azure/activity-logs"
+location                     = "East US"
+enable_activity_logs         = false
 
 # Resource Targeting Configuration
-# Defines which Azure resource types to monitor for logs and metrics
-# Each object in the list specifies:
-#   - log_namespace: Azure resource type for diagnostic log collection (optional)
-#                    Used to create Azure Diagnostic Settings for log export to EventHub
-#                    Example: "Microsoft.Network/applicationGateways"
-#   - metric_namespace: Azure resource type for metrics collection (optional)
-#                       Used to query Azure Monitor API for performance metrics
-#                       Example: "Microsoft.Network/applicationgateways"
-# 
-# Notes:
-#   - At least one of log_namespace or metric_namespace must be specified
-#   - Both can be specified to collect logs AND metrics for the same resource type
-#   - Namespaces may differ in casing (Azure inconsistency): logs use PascalCase, metrics often use lowercase
-#   - For metrics-only collection (VMs, scale sets), specify only metric_namespace
-#   - Resources must have tags matching required_resource_tags to be monitored
-
 target_resource_types = [{
-  log_namespace    = "Microsoft.Network/applicationGateways"  # Collect diagnostic logs from App Gateways
-  metric_namespace = "Microsoft.Network/applicationgateways"  # Collect performance metrics from App Gateways
+  log_namespace    = "Microsoft.Network/applicationGateways"
+  metric_namespace = "Microsoft.Network/applicationgateways"
 }]
 
-# Resource Tag Filtering
-# Only resources with these tags will be monitored
-# Format: { "tag_key" = "tag_value" }
-# Use empty {} to monitor all resources (no tag filtering)
 required_resource_tags = {}
 
-# Nested Namespace Configuration
-# Some Azure resources have nested sub-resources that require separate log collection
-# Format: "parent_namespace" = ["nested_namespace1", "nested_namespace2"]
-# Example: Storage Accounts have separate namespaces for blobServices and fileServices
-# Leave empty {} if not monitoring nested resources
 nested_namespace_configs = {
   "Microsoft.Storage/storageAccounts" = [
     "Microsoft.Storage/storageAccounts/blobServices",
@@ -71,15 +46,12 @@ nested_namespace_configs = {
 }
 
 # Sumo Logic Configuration
-sumologic_access_id   = "your-sumologic-access-id"       # Sumo Logic Access ID from your account preferences
-sumologic_access_key  = "your-sumologic-access-key"      # Sumo Logic Access Key from your account preferences
-sumologic_environment = "us1"                            # Sumo Logic deployment (us1, us2, eu, au, etc.)
-sumo_collector_name   = "sumologic-azure-collection"     # Name for the Sumo Logic hosted collector
+sumologic_access_id   = "your-sumologic-access-id"
+sumologic_access_key  = "your-sumologic-access-key"
+sumologic_environment = "us1"
+sumo_collector_name   = "sumologic-azure-collection"
 
 # App Installation Configuration
-# List of Sumo Logic apps to install automatically
-# Each app requires: uuid, name, version, and sumologic_partition
-# Use empty [] to skip app installation
 installation_apps_list = [{
   uuid                = "547aa2ec-1a6f-4fbe-84ca-e5e2bc57fd44"
   name                = "Azure Application Gateway"
