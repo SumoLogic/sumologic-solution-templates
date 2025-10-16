@@ -9,7 +9,7 @@ This module creates a complete data pipeline to collect logs and metrics from Az
 - Discovers Azure resources based on tags
 - Creates EventHub infrastructure per location
 - Configures diagnostic settings for log collection
-- Sets up Sumo Logic collecto| <a name="output_sumo_metrics_sources"></a> [sumo\_metrics\_sources](#output\_sumo\_metrics\_sources) | A map of Sumo Logic metrics source IDs by namespace. |
+- Sets up Sumo Logic collector| <a name="output_sumo_metrics_sources"></a> [sumo\_metrics\_sources](#output\_sumo\_metrics\_sources) | A map of Sumo Logic metrics source IDs by namespace. |
 
 ## Troubleshooting
 
