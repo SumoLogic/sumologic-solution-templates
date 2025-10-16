@@ -488,9 +488,28 @@ Type `yes` when prompted. Deployment typically takes 5-10 minutes.
    - Check sources show "Receiving Data"
    - View installed apps in App Catalog
 
-### Step 7: Access Dashboards
+### Step 7: Access Dashboards and Monitors
 
-Navigate to Sumo Logic dashboards for installed apps to view logs and metrics.
+Access your installed Sumo Logic content:
+
+1. **Dashboards**:
+   - Navigate to **Sumo Logic** → **App Catalog**
+   - Find your installed apps (e.g., "Azure Application Gateway", "Azure Key Vault")
+   - Click on the app name to view pre-built dashboards
+
+2. **Monitors** (Alerts):
+   - Navigate to **Sumo Logic** → **Manage Data** → **Monitoring** → **Monitors**
+   - Installed apps include monitor templates that you can configure
+   - Click **"+ Add"** → **"From Monitor Template"** to create monitors from installed app templates
+   - Configure thresholds, notification channels, and alert conditions
+   - Example monitors: High error rate, Resource unavailability, Performance degradation
+
+3. **Content Location**:
+   - All app content (dashboards, searches, monitors) is installed in your **Personal** folder by default
+   - You can move content to **Admin Recommended** folder for team-wide access
+   - Path: **Personal** → **[App Name]** (e.g., Personal → Azure Application Gateway)
+
+**💡 Tip**: Monitor templates provide pre-configured alerting for common issues. Customize thresholds based on your environment.
 
 ## Outputs
 
