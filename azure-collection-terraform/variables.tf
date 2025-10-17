@@ -299,13 +299,14 @@ variable "sumologic_access_key" {
 }
 
 variable "installation_apps_list" {
-  description = "list of apps to be installed"
+  description = "List of Sumo Logic apps to be installed. Each app can have custom parameters specific to that app."
   type = list(object({
-    uuid                = string
-    name                = string
-    version             = string
-    sumologic_partition = optional(string, "sumologic_default")
+    uuid       = string
+    name       = string
+    version    = string
+    parameters = optional(map(string), {})
   }))
+  default = []
 
   validation {
     condition = length(var.installation_apps_list) == 0 || alltrue([
@@ -329,6 +330,17 @@ variable "installation_apps_list" {
       can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", app.version))
     ])
     error_message = "App versions must be in semantic version format (x.y.z)."
+  }
+
+  validation {
+    condition = length(var.installation_apps_list) == 0 || alltrue([
+      for app in var.installation_apps_list :
+      alltrue([
+        for key, value in app.parameters :
+        length(key) > 0 && length(key) <= 128 && length(value) <= 1024
+      ])
+    ])
+    error_message = "Parameter keys must be between 1-128 characters and values must be 1024 characters or less."
   }
 }
 

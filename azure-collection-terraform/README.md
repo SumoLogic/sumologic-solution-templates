@@ -328,7 +328,7 @@ The following table describes all available configuration variables. For a compl
 | `sumologic_access_key` | Sumo Logic Access Key from your account preferences. Used for API authentication. | `string` (sensitive) | - | **Yes** |
 | `sumologic_environment` | Sumo Logic deployment region. Options: `us1`, `us2`, `eu`, `au`, `ca`, `de`, `jp`, `in`, `kr`, `fed`. | `string` | - | **Yes** |
 | `sumo_collector_name` | Name for the Sumo Logic hosted collector (alphanumeric, hyphens, underscores, max 128 characters). | `string` | - | **Yes** |
-| `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `sumologic_partition`. Use empty `[]` to skip app installation. | `list(object)` | - | **Yes** |
+| `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `parameters` (map of key-value pairs for app configuration). Use empty `[]` to skip app installation. | `list(object)` | `[]` | No |
 
 #### Variable Examples
 
@@ -358,14 +358,37 @@ nested_namespace_configs = {
 **installation_apps_list structure:**
 ```hcl
 installation_apps_list = [
+  # Example 1: App with single parameter (most common)
   {
-    uuid                = "0f2af8dd-447f-460f-95f7-3c7898a1eb25"
-    name                = "Azure SQL"
-    version             = "1.0.0"
-    sumologic_partition = "sumologic_default"  # Optional, defaults to "sumologic_default"
+    uuid       = "e6a61074-f173-458e-8c47-2e48b4b630a4"
+    name       = "Azure SQL"
+    version    = "1.0.3"
+    parameters = {
+      "index_value" = "sumologic_default"  # Partition name, defaults to "sumologic_default"
+    }
+  },
+  # Example 2: App with multiple parameters
+  {
+    uuid       = "449c796e-5da2-47ea-a304-e9299dd7435d"
+    name       = "Azure Key Vaults"
+    version    = "1.0.2"
+    parameters = {
+      "index_value"     = "sumologic_default"
+      "custom_filter_1" = "production"
+      "region"          = "eastus"
+    }
+  },
+  # Example 3: App with no parameters (uses defaults)
+  {
+    uuid       = "547aa2ec-1a6f-4fbe-84ca-e5e2bc57fd44"
+    name       = "Azure Application Gateway"
+    version    = "1.0.5"
+    parameters = {}  # Optional: can be omitted
   }
 ]
 ```
+
+**Note**: The `parameters` field is a flexible map that can contain app-specific configuration. Consult each app's documentation for supported parameters.
 
 #### Important Notes
 
@@ -436,9 +459,12 @@ target_resource_types = [
 # Apps to Install
 installation_apps_list = [
   {
-    uuid    = "0f2af8dd-447f-460f-95f7-3c7898a1eb25"
-    name    = "Azure SQL"
-    version = "1.0.0"
+    uuid       = "e6a61074-f173-458e-8c47-2e48b4b630a4"
+    name       = "Azure SQL"
+    version    = "1.0.3"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
   }
 ]
 

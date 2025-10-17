@@ -385,7 +385,7 @@ sumologic_access_id   = "your-sumologic-access-id"
 sumologic_access_key  = "your-sumologic-access-key"
 sumologic_environment = "us1"  # or your environment
 
-# Activity Logs (MUST BE FALSE for integration tests)
+# Activity Logs (MUST BE FALSE for integration tests) 
 enable_activity_logs = false
 
 # Resource Configuration
@@ -401,13 +401,19 @@ target_resource_types = [
 
 # App Installation (optional - tests app installation scenarios)
 installation_apps_list = [{
-  uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"
-  name    = "Azure Storage"
-  version = "1.0.3"
+  uuid       = "53376d23-2687-4500-b61e-4a2e2a119658"
+  name       = "Azure Storage"
+  version    = "1.0.3"
+  parameters = {
+    "index_value" = "sumologic_default"
+  }
 },{
-  uuid    = "449c796e-5da2-47ea-a304-e9299dd7435d"
-  name    = "Azure Key Vault"
-  version = "1.0.2"
+  uuid       = "449c796e-5da2-47ea-a304-e9299dd7435d"
+  name       = "Azure Key Vault"
+  version    = "1.0.2"
+  parameters = {
+    "index_value" = "sumologic_default"
+  }
 }]
 ```
 

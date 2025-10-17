@@ -120,10 +120,12 @@ locals {
             res.type == config.metric_namespace
           )
         ])
-        tags = {
-          name   = keys(var.required_resource_tags)[0]
-          values = [values(var.required_resource_tags)[0]]
-        }
+        tags = [
+          for tag_key, tag_value in var.required_resource_tags : {
+            name   = tag_key
+            values = [tag_value]
+          }
+        ]
       }] : []
     }
     if config.metric_namespace != null && config.metric_namespace != ""

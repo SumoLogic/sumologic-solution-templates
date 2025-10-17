@@ -85,7 +85,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
     ]) > 0
   }
 
-  name                           = "diag-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
+  name                           = "diag-sachin-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
   target_resource_id             = each.value.id
   eventhub_authorization_rule_id = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[each.value.location].id
 

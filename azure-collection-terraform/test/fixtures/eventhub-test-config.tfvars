@@ -16,15 +16,19 @@ nested_namespace_configs = {
 sumo_collector_name = "Azure-EventHub-Test-Collector"
 installation_apps_list = [
   {
-    uuid                = "53376d23-2687-4500-b61e-4a2e2a119658"
-    name                = "Azure Storage"
-    version             = "1.0.3"
-    sumologic_partition = "azure_logs"
+    uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"
+    name    = "Azure Storage"
+    version = "1.0.3"
+    parameters = {
+      "index_value" = "azure_logs"
+    }
   },
   {
-    uuid                = "b20abced-0122-4c7a-8833-c68c3c29c3d3"
-    name                = "Azure Key Vault"
-    version             = "1.0.2"
-    sumologic_partition = "azure_logs"
+    uuid    = "b20abced-0122-4c7a-8833-c68c3c29c3d3"
+    name    = "Azure Key Vault"
+    version = "1.0.2"
+    parameters = {
+      "index_value" = "azure_logs"
+    }
   }
 ]

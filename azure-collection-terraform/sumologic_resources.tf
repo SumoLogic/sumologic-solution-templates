@@ -6,9 +6,7 @@ resource "sumologic_app" "apps" {
   uuid    = each.value.uuid
   version = each.value.version
 
-  parameters = {
-    "index_value" = each.value.sumologic_partition
-  }
+  parameters = each.value.parameters
 }
 
 resource "sumologic_collector" "sumo_collector" {
@@ -87,9 +85,13 @@ resource "sumologic_azure_metrics_source" "terraform_azure_metrics_source" {
       content {
         type      = azure_tag_filters.value.type
         namespace = azure_tag_filters.value.namespace
-        tags {
-          name   = azure_tag_filters.value.tags.name
-          values = azure_tag_filters.value.tags.values
+        
+        dynamic "tags" {
+          for_each = azure_tag_filters.value.tags
+          content {
+            name   = tags.value.name
+            values = tags.value.values
+          }
         }
       }
     }
