@@ -33,6 +33,10 @@ resource "sumologic_azure_event_hub_log_source" "sumo_azure_event_hub_log_source
   category     = "azure/logs/${each.key}"
   content_type = "AzureEventHubLog"
   collector_id = sumologic_collector.sumo_collector.id
+  
+  fields = {
+    location = local.resources_by_type_and_location[each.key][0].location
+  }
 
   authentication {
     type = "AzureEventHubAuthentication"
