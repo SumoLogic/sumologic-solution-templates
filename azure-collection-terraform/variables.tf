@@ -352,3 +352,14 @@ variable "sumo_collector_name" {
     error_message = "Collector name contains invalid characters. Please use alphanumeric characters, hyphens (-), and underscores (_) only."
   }
 }
+
+variable "prevent_deletion_if_contains_resources" {
+  description = <<-EOT
+    Controls the azurerm provider's resource_group.prevent_deletion_if_contains_resources feature.
+    When true, the provider will prevent deletion of resource groups that still contain resources.
+    Default is true (safer for production). Tests can override this variable and set it to false
+    so that test cleanup can delete resource groups that still contain nested resources.
+  EOT
+  type    = bool
+  default = true
+}

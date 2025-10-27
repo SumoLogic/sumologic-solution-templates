@@ -29,7 +29,10 @@ provider "azurerm" {
 
   features {
     resource_group {
-      prevent_deletion_if_contains_resources = true
+      # Parameterized so the default behavior (prevent deletion if resource group contains resources)
+      # remains unchanged for normal use. Tests can override this variable to `false` when they
+      # need to delete resource groups containing nested resources.
+      prevent_deletion_if_contains_resources = var.prevent_deletion_if_contains_resources
     }
   }
 }
