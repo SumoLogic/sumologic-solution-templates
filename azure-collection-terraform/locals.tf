@@ -130,4 +130,27 @@ locals {
     }
     if config.metric_namespace != null && config.metric_namespace != ""
   }
+
+  # Region-specific SKU compatibility mapping
+  # Some regions don't support Premium SKU for EventHubs
+  regions_without_premium_support = [
+    "westindia",
+    "southindia",
+    "centralindia",
+    "koreasouth",
+    "koreacentral",
+    "southafricanorth",
+    "southafricawest",
+    "uaenorth",
+    "uaecentral"
+  ]
+
+  # Dynamic SKU selection based on region support
+  eventhub_namespace_configs = {
+    for location, resources in local.resources_by_location_only : location => {
+      sku = contains(local.regions_without_premium_support, replace(lower(location), " ", "")) ? "Standard" : var.eventhub_namespace_sku
+      capacity = contains(local.regions_without_premium_support, replace(lower(location), " ", "")) ? (var.eventhub_namespace_sku == "Premium" ? min(var.throughput_units, 20) : var.throughput_units) : var.throughput_units
+      name = "${var.eventhub_namespace_name}-${replace(lower(location), " ", "")}"
+    }
+  }
 }

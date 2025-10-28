@@ -33,16 +33,19 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_eventhub_namespace" "namespaces_by_location" {
-  for_each = local.resources_by_location_only
+  for_each = local.eventhub_namespace_configs
 
-  name                = "${var.eventhub_namespace_name}-${replace(lower(each.key), " ", "")}"
+  name                = each.value.name
   location            = each.key
   resource_group_name = azurerm_resource_group.rg.name
-  sku                 = var.eventhub_namespace_sku
-  capacity            = var.throughput_units
+  sku                 = each.value.sku
+  capacity            = each.value.capacity
 
   tags = {
     version = local.solution_version
+    original_sku = var.eventhub_namespace_sku
+    applied_sku = each.value.sku
+    region_fallback = each.value.sku != var.eventhub_namespace_sku ? "true" : "false"
   }
 }
 

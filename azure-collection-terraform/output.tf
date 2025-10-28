@@ -40,3 +40,35 @@ output "installed_apps" {
   } }
   description = "Information about installed Sumo Logic apps"
 }
+
+output "eventhub_sku_fallback_info" {
+  value = {
+    for location, config in local.eventhub_namespace_configs : location => {
+      requested_sku = var.eventhub_namespace_sku
+      applied_sku = config.sku
+      fallback_applied = config.sku != var.eventhub_namespace_sku
+      reason = config.sku != var.eventhub_namespace_sku ? "Region does not support Premium SKU" : "No fallback needed"
+    }
+  }
+  description = "Information about SKU fallbacks applied per region"
+}
+
+output "regions_with_sku_fallback" {
+  value = [
+    for location, config in local.eventhub_namespace_configs : location
+    if config.sku != var.eventhub_namespace_sku
+  ]
+  description = "List of regions where SKU fallback was applied"
+}
+
+output "eventhub_namespace_details" {
+  value = {
+    for k, v in azurerm_eventhub_namespace.namespaces_by_location : k => {
+      name = v.name
+      sku = v.sku
+      capacity = v.capacity
+      location = v.location
+    }
+  }
+  description = "Detailed information about all EventHub namespaces created"
+}
