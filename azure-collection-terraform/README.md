@@ -9,7 +9,7 @@ This module creates a complete data pipeline to collect logs and metrics from Az
 - Discovers Azure resources based on tags
 - Creates EventHub infrastructure per location
 - Configures diagnostic settings for log collection
-- Sets up Sumo Logic collector
+- Sets up Sumo Logic sources and collectors
 
 ## Architecture
 
