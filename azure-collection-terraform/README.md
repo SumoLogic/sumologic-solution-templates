@@ -330,6 +330,25 @@ The following table describes all available configuration variables. For a compl
 | `sumo_collector_name` | Name for the Sumo Logic hosted collector (alphanumeric, hyphens, underscores, max 128 characters). | `string` | - | **Yes** |
 | `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `parameters` (map of key-value pairs for app configuration). Use empty `[]` to skip app installation. | `list(object)` | `[]` | No |
 
+#### Provider deletion safety
+
+This module exposes a boolean variable named `prevent_deletion_if_contains_resources` which controls the azurerm provider feature `resource_group.prevent_deletion_if_contains_resources`.
+
+- Default: `true` (safe for production) — the provider will prevent deletion of a Resource Group if it still contains nested resources.
+- For automated integration tests you may set this to `false` so the tests can clean up Resource Groups that still contain nested Azure resources (test-only usage).
+
+Example (override via CLI):
+
+```
+terraform apply -var 'prevent_deletion_if_contains_resources=false'
+```
+
+Or in a tfvars file:
+
+```hcl
+prevent_deletion_if_contains_resources = false
+```
+
 #### Variable Examples
 
 **target_resource_types structure:**

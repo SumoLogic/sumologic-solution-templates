@@ -115,6 +115,13 @@ sumologic_environment = "us1"
 # IMPORTANT: Must be false for integration tests
 enable_activity_logs = false
 
+# IMPORTANT (tests only): To allow automated cleanup of Resource Groups that
+# may still contain nested resources, set the provider safety toggle to false
+# in your test tfvars. This sets the azurerm provider feature
+# `resource_group.prevent_deletion_if_contains_resources = false` and allows
+# tests to remove test resource groups during teardown.
+prevent_deletion_if_contains_resources = false
+
 # Resources to test
 target_resource_types = [
   {
