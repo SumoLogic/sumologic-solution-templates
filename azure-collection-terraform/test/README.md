@@ -4,7 +4,7 @@ Comprehensive test suite for Azure Collection Terraform module with 20 test func
 
 ## Prerequisites
 
-- Go 1.19+
+- Go 1.21+
 - Terraform
 - Azure CLI (for integration tests)
 
