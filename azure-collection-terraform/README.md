@@ -1,6 +1,6 @@
 # Azure Collection Terraform Module
 
-Terraform module for automated log and metrics collection from Azure resources to Sumo Logic using EventHubs.
+Terraform module for automated log and metrics collection from Azure resources to Sumo Logic.
 
 ## Overview
 
