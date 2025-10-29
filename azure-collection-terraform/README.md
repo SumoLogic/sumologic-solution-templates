@@ -591,7 +591,7 @@ sumologic_environment = "us1"                        # Options: us1, us2, eu, au
 # ============================================================================
 installation_apps_list = [
   {
-    uuid       = "53376d23-2687-4500-b61e-4a2e2a119658"
+    uuid       = "azure-storage-app-uuid"
     name       = "Azure Storage"
     version    = "1.0.3"
     parameters = {
