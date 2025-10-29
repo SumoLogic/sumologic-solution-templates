@@ -21,70 +21,70 @@ Azure Resources → Azure Monitor (Metrics API) → Sumo Logic Metrics Sources �
 ```
 
 **Key Components:**
-1. **Resource Discovery**: Queries Azure for resources matching specified tags
-2. **EventHub Infrastructure**: Creates namespaces and hubs per location
-3. **Diagnostic Settings**: Configures log streaming from resources to EventHubs
-4. **Sumo Logic Integration**: Sets up collector, log/metric sources, and installs apps
+- **Resource Discovery**. Queries Azure for resources matching specified tags.
+- **EventHub Infrastructure**. Creates namespaces and hubs per location.
+- **Diagnostic Settings**. Configures log streaming from resources to EventHubs.
+- **Sumo Logic Integration**. Sets up collector, log/metric sources, and installs apps.
 
-## Resources managed by this module (Terraform resources)
+## Terraform Resources
 
 ### Azure Resources
-
-#### 1. **azurerm_resource_group.rg**
+Following are the list of Azure Terraform Resources managed by this module.
+#### azurerm_resource_group.rg
 Creates a resource group to contain all EventHub infrastructure.
 - **Purpose**: Logical container for EventHub namespaces and hubs
 - **Configuration**: Set via `resource_group_name` and `location` variables
 - **Lifecycle**: Managed by Terraform; deletion removes all contained resources
 
-#### 2. **azurerm_eventhub_namespace.namespaces_by_location**
+#### azurerm_eventhub_namespace.namespaces_by_location
 Creates EventHub namespaces, one per unique Azure region where target resources exist.
 - **Purpose**: Regional EventHub service for high-performance log streaming
 - **Naming**: `{eventhub_namespace}-{location}` (e.g., `sumo-logs-eastus`)
 - **SKU**: Configurable via `eventhub_namespace_sku` (default: Standard)
 - **Scaling**: Capacity units set via `eventhub_namespace_capacity`
 
-#### 3. **azurerm_eventhub.eventhubs_by_type_and_location**
+#### azurerm_eventhub.eventhubs_by_type_and_location
 Creates individual EventHubs for each resource type and location combination.
 - **Purpose**: Separate data streams per resource type for organized log collection
 - **Naming**: `insights-logs-{resource_type}` per namespace
 - **Configuration**: Partition count and message retention configurable
 - **Cardinality**: One EventHub per (resource_type × location) combination
 
-#### 4. **azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy**
+#### azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy
 Creates authorization rules for Sumo Logic to access EventHub namespaces.
 - **Purpose**: Secure authentication for Sumo Logic log sources
 - **Permissions**: Listen only (read access)
 - **Scope**: One per namespace (location-based)
 - **Usage**: Connection strings used by Sumo Logic sources
 
-#### 5. **azurerm_monitor_diagnostic_setting.diagnostic_setting_logs**
+#### azurerm_monitor_diagnostic_setting.diagnostic_setting_logs
 Attaches diagnostic settings to each target Azure resource for log streaming.
 - **Purpose**: Routes resource logs to appropriate EventHub
 - **Configuration**: Automatically maps resources to EventHubs based on type and location
 - **Log Categories**: Streams all available diagnostic log categories
 - **Metrics**: Can optionally include metrics data
 
-#### 6. **azurerm_eventhub_namespace.activity_logs_namespace** (Conditional)
+#### azurerm_eventhub_namespace.activity_logs_namespace (Conditional)
 Creates a dedicated namespace for Azure subscription-level activity logs.
 - **Purpose**: Separate infrastructure for subscription audit logs
 - **Condition**: Created when `enable_activity_logs = true`
 - **Isolation**: Keeps subscription logs separate from resource logs
 - **Location**: Uses primary subscription region
 
-#### 7. **azurerm_eventhub.eventhub_for_activity_logs** (Conditional)
+#### azurerm_eventhub.eventhub_for_activity_logs (Conditional)
 Creates the EventHub within activity logs namespace.
 - **Purpose**: Receives subscription-level activity and audit logs
 - **Naming**: `insights-activity-logs`
 - **Condition**: Created when `enable_activity_logs = true`
 - **Special Use**: Captures subscription-wide operations and changes
 
-#### 8. **azurerm_eventhub_namespace_authorization_rule.activity_logs_policy** (Conditional)
+#### azurerm_eventhub_namespace_authorization_rule.activity_logs_policy (Conditional)
 Creates authorization rule for Sumo Logic to access activity logs.
 - **Purpose**: Secure authentication for activity log collection
 - **Permissions**: Listen only
 - **Condition**: Created when `enable_activity_logs = true`
 
-#### 9. **azurerm_monitor_diagnostic_setting.activity_logs_to_event_hub** (Conditional)
+#### azurerm_monitor_diagnostic_setting.activity_logs_to_event_hub (Conditional)
 Configures subscription-level diagnostic settings to stream activity logs.
 - **Purpose**: Routes subscription audit logs to dedicated EventHub
 - **Scope**: **Subscription-level** (not resource-level)
@@ -97,14 +97,16 @@ Configures subscription-level diagnostic settings to stream activity logs.
 
 ### SumoLogic Resources
 
-#### 1. **sumologic_collector.sumo_collector**
+Following are the list of Sumologic Terraform Resources managed by this module.
+
+#### sumologic_collector.sumo_collector
 Creates a hosted collector in Sumo Logic for receiving logs and metrics.
 - **Purpose**: Central collection point for all Azure data
 - **Type**: Hosted (cloud-based, no agent required)
 - **Configuration**: Named via `collector_name` variable
 - **Capacity**: Single collector handles all sources
 
-#### 2. **sumologic_azure_event_hub_log_source.sumo_azure_event_hub_log_source**
+####  sumologic_azure_event_hub_log_source.sumo_azure_event_hub_log_source
 Creates log sources that consume from EventHubs.
 - **Purpose**: Reads logs from EventHubs and ingests into Sumo Logic
 - **Cardinality**: One source per EventHub (filtered by log_namespace)
@@ -112,7 +114,7 @@ Creates log sources that consume from EventHubs.
 - **Processing**: Parses Azure diagnostic log JSON format
 - **Filtering**: Only created for resources with `log_namespace` defined
 
-#### 3. **sumologic_azure_metrics_source.terraform_azure_metrics_source**
+#### sumologic_azure_metrics_source.terraform_azure_metrics_source
 Creates metrics sources for Azure metrics collection via API.
 - **Purpose**: Collects metrics directly from Azure Monitor API
 - **Cardinality**: One source per unique metric_namespace group
@@ -120,14 +122,14 @@ Creates metrics sources for Azure metrics collection via API.
 - **Polling**: Periodic collection (configurable interval)
 - **Filtering**: Only created for resources with `metric_namespace` defined
 
-#### 4. **sumologic_azure_event_hub_log_source.sumo_activity_log_source** (Conditional)
+#### sumologic_azure_event_hub_log_source.sumo_activity_log_source (Conditional)
 Creates a dedicated source for subscription activity logs.
 - **Purpose**: Ingests subscription-level audit and activity logs
 - **Condition**: Created when `enable_activity_logs = true`
 - **Isolation**: Separate from resource log sources
 - **Usage**: Security auditing, compliance, change tracking
 
-#### 5. **sumologic_app.apps** (Optional)
+#### sumologic_app.apps
 Installs pre-built Sumo Logic apps for visualization and analysis.
 - **Purpose**: Provides dashboards, searches, and alerts for Azure services
 - **Configuration**: Specified via `installation_apps_list` variable
@@ -136,37 +138,35 @@ Installs pre-built Sumo Logic apps for visualization and analysis.
 
 ### Data Sources
 
-#### 1. **azurerm_client_config.current**
+#### azurerm_client_config.current
 Retrieves current Azure authentication context.
 - **Usage**: Gets subscription ID and tenant ID for resource tagging
 - **Read-Only**: Does not create resources
 
-#### 2. **azurerm_resources.all_target_resources**
+#### azurerm_resources.all_target_resources
 Queries Azure for resources matching specified tags.
 - **Purpose**: Discovers target resources for log collection
 - **Filter**: Uses `resource_group_name_filter` and `resource_tags` variables
 - **Output**: List of resource IDs, types, and locations
 - **Dynamic**: Results determine EventHub and diagnostic setting creation
 
-#### 3. **azurerm_monitor_diagnostic_categories.all_categories**
+#### azurerm_monitor_diagnostic_categories.all_categories
 Retrieves available diagnostic categories for each discovered resource.
 - **Purpose**: Determines what logs and metrics each resource can export
 - **Dynamic**: Queries per discovered resource
 - **Usage**: Ensures diagnostic settings enable all available log categories
 
-## Requirements
-
 ## Requirements & compatibility
 
 This section documents the module's runtime requirements and compatibility expectations. It highlights which Terraform and provider versions the module is tested against, and which runtime tools are required for integration tests. Use supported versions to avoid unexpected provider schema or feature mismatches.
 
-## 📁 Configuration Files
+### 📁 Configuration Files
 
 - `terraform.tfvars.example` - Template with all variables and detailed documentation
 - `terraform.tfvars` - Your actual configuration (customize and keep secure)
 - `test/` - Comprehensive test suite with 69 test scenarios
 
-## Supported versions
+### Supported versions
 
 | Name | Version |
 |------|---------|
@@ -176,18 +176,15 @@ This section documents the module's runtime requirements and compatibility expec
 | <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 3.0.2 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.7.1 |
 
-## Providers
+### Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.43.0 |
 | <a name="provider_sumologic"></a> [sumologic](#provider\_sumologic) | 3.1.4 |
 
-## Modules
 
-No modules.
-
-## Terraform resource reference (provider resources)
+### Terraform resource reference (provider resources)
 
 | Name | Type |
 |------|------|
@@ -299,7 +296,7 @@ This module uses **Azure CLI Authentication**:
 
 The following table describes all available configuration variables. For a complete example, see `terraform.tfvars.example`.
 
-| Name | Description | Type | Default | Required |
+| Name | Description | Type | Sample | Required |
 |------|-------------|------|---------|:--------:|
 | **Azure Authentication** |||||
 | `azure_subscription_id` | Azure Subscription ID where resources will be created. If not provided, uses current Azure CLI context. | `string` | `"your-azure-subscription-id"` | Yes |
@@ -318,15 +315,15 @@ The following table describes all available configuration variables. For a compl
 | `activity_log_export_name` | Name for the activity log diagnostic setting (1-128 characters, alphanumeric with underscores, periods, hyphens). | `string` | `"SumoLogicAzureActivityLogExport"` | **Yes** |
 | `activity_log_export_category` | Source category for activity logs in Sumo Logic. | `string` | `"azure/activity-logs"` | **Yes** |
 | **Resource Targeting** |||||
-| `target_resource_types` | List of Azure resource types to monitor. Each object specifies `log_namespace` (for log collection via EventHub) and/or `metric_namespace` (for metrics collection via Azure Monitor API). At least one must be specified per resource type. | `list(object)` | `see terraform.tfvars.example` | **Yes** |
-| `required_resource_tags` | Map of tags to filter Azure resources. Only resources with these tags will be monitored. Use empty `{}` to monitor all resources without tag filtering. | `map(string)` | `{}` | **Yes** |
-| `nested_namespace_configs` | Map of parent resource types to their child resource types for nested resources (e.g., Storage Accounts → blobServices/fileServices). Use empty `{}` if not monitoring nested resources. | `map(list(string))` | `{}` | **Yes** |
+| `target_resource_types` | List of Azure resource types to monitor. Each object specifies `log_namespace` (for log collection via EventHub) and/or `metric_namespace` (for metrics collection via Azure Monitor API). At least one must be specified per resource type. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L72) | **Yes** |
+| `required_resource_tags` | Map of tags to filter Azure resources. Only resources with these tags will be monitored. Use empty `{}` to monitor all resources without tag filtering. | `map(string)` | `{"tag-name": "tag-value"}` | **Yes** |
+| `nested_namespace_configs` | Map of parent resource types to their child resource types for nested resources (e.g., Storage Accounts → blobServices/fileServices). Use empty `{}` if not monitoring nested resources. | `map(list(string))` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L226) | **Yes** |
 | **Sumo Logic Configuration** |||||
 | `sumologic_access_id` | Sumo Logic Access ID from your account preferences. Used for API authentication. | `string` | `"your-sumologic-access-id"` | **Yes** |
 | `sumologic_access_key` | Sumo Logic Access Key from your account preferences. Used for API authentication. | `string` (sensitive) | `"your-sumologic-access-key"` | **Yes** |
 | `sumologic_environment` | Sumo Logic deployment region. Options: `us1`, `us2`, `eu`, `au`, `ca`, `de`, `jp`, `in`, `kr`, `fed`. | `string` | `"us1"` | **Yes** |
 | `sumo_collector_name` | Name for the Sumo Logic hosted collector (alphanumeric, hyphens, underscores, max 128 characters). | `string` | `"sumologic-azure-collection"` | **Yes** |
-| `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `parameters` (map of key-value pairs for app configuration). Use empty `[]` to skip app installation. | `list(object)` | `[]` | No |
+| `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `parameters` (map of key-value pairs for app configuration). Use empty `[]` to skip app installation. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L253) | No |
 
 #### Provider deletion safety
 
@@ -347,65 +344,6 @@ Or in a tfvars file:
 prevent_deletion_if_contains_resources = false
 ```
 
-#### Variable Examples
-
-**target_resource_types structure:**
-```hcl
-target_resource_types = [
-  {
-    log_namespace    = "Microsoft.Sql/servers/databases"       # For logs via EventHub
-    metric_namespace = "Microsoft.Sql/servers/databases"       # For metrics via Azure Monitor API
-  },
-  {
-    metric_namespace = "Microsoft.Compute/virtualMachines"     # Metrics only (no logs)
-  }
-]
-```
-
-**nested_namespace_configs structure:**
-```hcl
-nested_namespace_configs = {
-  "Microsoft.Storage/storageAccounts" = [
-    "Microsoft.Storage/storageAccounts/blobServices",
-    "Microsoft.Storage/storageAccounts/fileServices"
-  ]
-}
-```
-
-**installation_apps_list structure:**
-```hcl
-installation_apps_list = [
-  # Example 1: App with single parameter (most common)
-  {
-    uuid       = "e6a61074-f173-458e-8c47-2e48b4b630a4"
-    name       = "Azure SQL"
-    version    = "1.0.3"
-    parameters = {
-      "index_value" = "sumologic_default"  # Partition name, defaults to "sumologic_default"
-    }
-  },
-  # Example 2: App with multiple parameters
-  {
-    uuid       = "449c796e-5da2-47ea-a304-e9299dd7435d"
-    name       = "Azure Key Vaults"
-    version    = "1.0.2"
-    parameters = {
-      "index_value"     = "sumologic_default"
-      "custom_filter_1" = "production"
-      "region"          = "eastus"
-    }
-  },
-  # Example 3: App with no parameters (uses defaults)
-  {
-    uuid       = "547aa2ec-1a6f-4fbe-84ca-e5e2bc57fd44"
-    name       = "Azure Application Gateway"
-    version    = "1.0.5"
-    parameters = {}  # Optional: can be omitted
-  }
-]
-```
-
-**Note**: The `parameters` field is a flexible map that can contain app-specific configuration. Consult each app's documentation for supported parameters.
 
 #### Important Notes
 
@@ -413,10 +351,10 @@ installation_apps_list = [
 
 Activity logs operate at the **Azure subscription level**, not at the resource level. This has important implications:
 
-- **Scope**: Activity logs capture ALL operations across the ENTIRE subscription (all resource groups, all resources)
-- **Single Configuration**: Azure only allows **ONE** diagnostic setting for activity logs per subscription
-- **Shared Resource**: If multiple Terraform configurations or users enable activity logs on the same subscription, **only the last one applied will be active**
-- **Deletion Impact**: Running `terraform destroy` on ANY Terraform configuration that manages activity logs will **delete the subscription-level diagnostic setting**, affecting **ALL** other configurations that depend on it
+- **Scope**. Activity logs capture ALL operations across the ENTIRE subscription (all resource groups, all resources).
+- **Single Configuration**. Azure only allows **ONE** diagnostic setting for activity logs per subscription.
+- **Shared Resource**. If multiple Terraform configurations or users enable activity logs on the same subscription, **only the last one applied will be active**.
+- **Deletion Impact**. Running `terraform destroy` on ANY Terraform configuration that manages activity logs will **delete the subscription-level diagnostic setting**, affecting **ALL** other configurations that depend on it.
 
 **Best Practices:**
 1. ✅ Enable activity logs in **only ONE** Terraform workspace per subscription
@@ -440,93 +378,164 @@ cd azure-collection-terraform
 
 ### Step 2: Create Configuration File
 
-Create `terraform.tfvars` with your configuration. Here is a sample configuration:
+Copy the `terraform.tfvars.example` file to `terraform.tfvars` and configure the variables as described below:
+
+```bash
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Edit `terraform.tfvars` and configure variables according to these groups:
+
+#### 🔴 **Required - Must Configure** (Set these values for your environment)
 
 ```hcl
-# Azure Configuration (uses Azure CLI authentication - run 'az login' first)
-azure_subscription_id = "your-subscription-id"  # Optional: defaults to current context
+# ============================================================================
+# Azure Authentication - Get these from Azure Portal
+# ============================================================================
+azure_subscription_id = "your-azure-subscription-id"  # Your Azure subscription ID
+azure_client_id       = "your-azure-client-id"        # Service principal client ID
+azure_client_secret   = "your-azure-client-secret"    # Service principal secret
+azure_tenant_id       = "your-azure-tenant-id"        # Your Azure AD tenant ID
 
-# Sumo Logic Configuration
-sumologic_access_id      = "your-sumo-access-id"
-sumologic_access_key     = "your-sumo-access-key"
-sumologic_environment    = "us2"
+# ============================================================================
+# Event Hub Configuration - Choose SKU and throughput based on your needs
+# ============================================================================
+eventhub_namespace_sku    = "Standard"  # Options: "Standard" or "Premium"
+standard_throughput_units = 2           # For Standard SKU: 1, 2, 4, 8, or 16
+premium_throughput_units  = 4           # For Premium SKU: 1, 2, 4, 8, or 16
 
-# Infrastructure Configuration
-resource_group_name        = "rg-sumologic-collection"
-location                   = "eastus"
-collector_name             = "Azure Production Collector"
-eventhub_namespace         = "sumo-logs"
-eventhub_namespace_sku     = "Standard"
+# ============================================================================
+# Azure Region - Where to deploy Event Hub infrastructure
+# ============================================================================
+location = "East US"  # Example: "East US", "West Europe", "Southeast Asia"
 
-# Resource Discovery
-resource_group_name_filter = "rg-production-*"
-resource_tags = {
-  Environment = "Production"
-  Monitoring  = "Enabled"
-}
+# ============================================================================
+# Activity Logs - Enable/disable subscription-level activity log collection
+# ============================================================================
+enable_activity_logs = false  # Set to true to collect Azure activity logs
 
-# Target Resources
+# ============================================================================
+# Target Resources - Define which Azure resources to monitor
+# ============================================================================
 target_resource_types = [
   {
-    log_namespace    = "Microsoft.Sql/servers/databases"
-    metric_namespace = "Microsoft.Sql/servers/databases"
+    log_namespace    = "Microsoft.Storage/storageAccounts"
+    metric_namespace = "Microsoft.Storage/storageAccounts"
   }
+  # Add more resource types as needed
 ]
 
-# Apps to Install
+# ============================================================================
+# Sumo Logic Configuration - Get these from your Sumo Logic account
+# ============================================================================
+sumologic_access_id   = "your-sumologic-access-id"   # From Sumo Logic → Preferences → My Access Keys
+sumologic_access_key  = "your-sumologic-access-key"  # From Sumo Logic → Preferences → My Access Keys
+sumologic_environment = "us1"                        # Options: us1, us2, eu, au, ca, de, jp, in, kr, fed
+
+# ============================================================================
+# Sumo Logic Apps - Specify apps to install automatically
+# ============================================================================
 installation_apps_list = [
   {
-    uuid       = "e6a61074-f173-458e-8c47-2e48b4b630a4"
-    name       = "Azure SQL"
+    uuid       = "53376d23-2687-4500-b61e-4a2e2a119658"
+    name       = "Azure Storage"
     version    = "1.0.3"
     parameters = {
       "index_value" = "sumologic_default"
     }
   }
+  # Add more apps as needed
 ]
-
-# Activity Logs
-enable_activity_logs = true
 ```
 
-Replace with current example values in `terraform.tfvars`:
+#### 🟡 **Optional - Configure If Needed** (Leave empty or customize)
 
 ```hcl
-# Azure Credentials
-azure_subscription_id   = "your-azure-subscription-id"
-azure_client_id         = "your-azure-client-id"
-azure_client_secret     = "your-azure-client-secret"
-azure_tenant_id         = "your-azure-tenant-id"
+# ============================================================================
+# Resource Filtering - Filter Azure resources by tags (optional)
+# ============================================================================
+required_resource_tags = {
+  # Example: Only monitor resources with these tags
+  # "Environment" = "Production"
+  # "Monitoring"  = "Enabled"
+}
+# Leave as {} to monitor all resources without tag filtering
 
-# Infrastructure
-resource_group_name     = "sumologic-azure-collection-rg"
-eventhub_namespace_name = "sumologic-azure-collection-EventHub"
-eventhub_namespace_sku  = "Standard"
-policy_name             = "SumoLogicAzureCollectionPolicy"
-throughput_units        = 4
+# ============================================================================
+# Nested Resources - Configure child resources for monitoring (optional)
+# ============================================================================
+nested_namespace_configs = {
+  # Example: Monitor blob services within storage accounts
+  # "Microsoft.Storage/storageAccounts" = [
+  #   "Microsoft.Storage/storageAccounts/blobServices",
+  #   "Microsoft.Storage/storageAccounts/fileServices"
+  # ]
+}
+# Leave as {} if not monitoring nested resources
+```
 
-# Activity Log Configuration
-activity_log_export_name     = "SumoLogicAzureActivityLogExport"
-activity_log_export_category = "azure/activity-logs"
-location                     = "East US"
-enable_activity_logs         = false
+#### 🟢 **Optional - Customize or Keep Defaults** (Pre-configured with sensible defaults)
 
-# Resource Targeting
-target_resource_types = []
-required_resource_tags = {}
+These variables have default values and typically don't need changes:
+
+```hcl
+# ============================================================================
+# Resource Naming - Customize if you want different names
+# ============================================================================
+resource_group_name                          = "sumologic-azure-collection-rg"
+eventhub_namespace_name                      = "sumologic-azure-collection-EventHub"
+policy_name                                  = "SumoLogicAzureCollectionPolicy"
+activity_log_export_name                     = "SumoLogicAzureActivityLogExport"
+activity_log_export_category                 = "azure/activity-logs"
+sumo_collector_name                          = "sumologic-azure-collection"
+
+# ============================================================================
+# Regional Support - Pre-configured with known limitations
+# ============================================================================
+eventhub_namespace_unsupported_locations     = [ /* 19 unsupported regions */ ]
+eventhub_namespace_limited_sku_locations     = ["West India", "Mexico Central"]
+
+# ============================================================================
+# Provider Safety - Keep default for production
+# ============================================================================
+prevent_deletion_if_contains_resources       = true  # Safety feature - don't change
+```
+
+**💡 Quick Start Example:**
+
+For a minimal configuration to get started quickly:
+
+```hcl
+# Azure (Required)
+azure_subscription_id = "c088dc46-d692-42ad-a4b6-9a542d28ad2a"
+azure_client_id       = "a1e5fb4a-8644-4867-be4d-a54d0aeaaeed"
+azure_client_secret   = "your-secret-here"
+azure_tenant_id       = "a39bedba-be8f-4c0f-bfe2-b8c7913501ea"
+
+# Event Hub (Required)
+eventhub_namespace_sku    = "Standard"
+standard_throughput_units = 2
+premium_throughput_units  = 4
+location                  = "East US"
+
+# Monitoring (Required)
+enable_activity_logs = false
+target_resource_types = [
+  {
+    log_namespace    = "Microsoft.Storage/storageAccounts"
+    metric_namespace = "Microsoft.Storage/storageAccounts"
+  }
+]
+
+# Sumo Logic (Required)
+sumologic_access_id   = "your-access-id"
+sumologic_access_key  = "your-access-key"
+sumologic_environment = "us1"
+installation_apps_list = []  # Start with no apps, add later
+
+# Optional - Leave as default
+required_resource_tags   = {}
 nested_namespace_configs = {}
-
-# Sumo Logic
-sumologic_access_id   = "your-sumologic_access_id"
-sumologic_access_key  = "<REDACTED - your Sumo Logic access key>"
-sumologic_environment = "your-sumologic_environment"
-sumo_collector_name   = "sumologic-azure-collection"
-
-# Provider/test toggle
-prevent_deletion_if_contains_resources = true
-
-# App installation (none by default)
-installation_apps_list = []
 ```
 
 ### Step 3: Initialize Terraform
@@ -832,68 +841,18 @@ The table below shows Event Hub namespace availability across Azure regions by S
 
 ---
 
-#### 📊 Quick Summary
-
-- **✅ Fully Supported Regions**: 47 regions support all SKU tiers (Basic, Standard, Premium)
-- **⚠️ Limited Support Regions**: 2 regions (West India, Mexico Central) - Premium SKU not available
-- **❌ Unsupported Regions**: 19 regions - No Event Hub namespace support at any tier
-
-**Important Notes:**
-
-1. **Unsupported Regions** (marked with "No" for all SKUs):
-   - These regions do not support Event Hub namespace creation at any tier
-   - This module automatically skips these regions during deployment
-   - Resources in these regions cannot be monitored via Event Hub-based log collection
-
-2. **Premium SKU Restrictions** (marked with "No" only for Premium):
-   - **West India** and **Mexico Central** only support Basic and Standard SKUs
-   - If you configure `eventhub_namespace_sku = "Premium"`, the module automatically downgrades to Standard SKU for these regions
-   - No action required - the module handles this automatically
-
-3. **Module Behavior**:
-   - Regions marked "No" for all tiers are automatically excluded from Event Hub creation
-   - Regions with limited SKU support automatically use the highest supported SKU
-   - You can override this behavior using `eventhub_namespace_unsupported_locations` and `eventhub_namespace_limited_sku_locations` variables
-
-**Configuration Variables for Regional Control:**
-
-```hcl
-# Skip Event Hub creation in specific regions (in addition to defaults)
-eventhub_namespace_unsupported_locations = [
-  "South Africa West",
-  "China East",
-  # ... add more regions as needed
-]
-
-# Force Standard SKU in specific regions (in addition to West India and Mexico Central)
-eventhub_namespace_limited_sku_locations = [
-  "West India",
-  "Mexico Central",
-  # ... add more regions as needed
-]
-
-# Separate throughput units for Standard vs Premium SKUs
-standard_throughput_units = 2  # Used for Standard SKU (1, 2, 4, 8, or 16)
-premium_throughput_units  = 4  # Used for Premium SKU (1, 2, 4, 8, or 16)
-```
-
 ### Common Issues
 
-**Issue**: `Error creating diagnostic settings - resource already has a diagnostic setting`
-- **Solution**: Each Azure resource can have a limited number of diagnostic settings. Check existing settings or use `terraform import` for existing configurations.
-
-**Issue**: `EventHub throughput exceeded`
-- **Solution**: Increase `standard_throughput_units` or `premium_throughput_units` based on your SKU, or upgrade to Premium SKU for higher throughput.
-
-**Issue**: `Sumo Logic sources show "Not Receiving Data"`
-- **Solution**: 
-  1. Verify diagnostic settings are active in Azure Portal
-  2. Check EventHub is receiving messages
-  3. Confirm authorization rules have Listen permission
-  4. Verify Sumo Logic connection string is correct
-
-**Issue**: `Event Hub namespace creation failed in specific region`
-- **Solution**: Check the regional support table above. The region may not support Event Hub namespaces or may have SKU restrictions. The module should automatically handle this, but you can manually add the region to `eventhub_namespace_unsupported_locations` if needed.
+| Issue | Solution |
+|-------|----------|
+| **Error creating diagnostic settings - resource already has a diagnostic setting** | Each Azure resource can have a limited number of diagnostic settings. Check existing settings in Azure Portal or use `terraform import` to manage existing configurations. |
+| **EventHub throughput exceeded** | Increase `standard_throughput_units` or `premium_throughput_units` based on your SKU tier, or upgrade to Premium SKU for higher throughput capacity. Valid values: `1`, `2`, `4`, `8`, or `16`. |
+| **Sumo Logic sources show "Not Receiving Data"** | 1. Verify diagnostic settings are active in Azure Portal<br>2. Check EventHub is receiving messages (Monitor → Metrics → Incoming Messages)<br>3. Confirm authorization rules have Listen permission<br>4. Verify Sumo Logic connection string is correct<br>5. Check collector is online in Sumo Logic |
+| **Event Hub namespace creation failed in specific region** | Check the [regional support table](#azure-event-hub-regional-support) above. The region may not support Event Hub namespaces or may have SKU restrictions. The module automatically handles unsupported regions, but you can manually configure `eventhub_namespace_unsupported_locations` if needed. |
+| **Premium SKU forced to Standard in certain regions** | West India and Mexico Central only support Basic and Standard SKUs. The module automatically downgrades to Standard SKU in these regions. No action required unless you need Premium features (use a different region). |
+| **App installation fails with "app already installed" error** | The app is already installed in your Sumo Logic account. Either:<br>• Remove the app from `installation_apps_list` to skip installation<br>• Manually uninstall the existing app in Sumo Logic UI<br>• Use `terraform import` to manage the existing app installation |
+| **Authentication failures with Azure provider** | 1. Ensure you've run `az login` and are authenticated<br>2. Verify your Azure credentials have sufficient permissions (Contributor + Monitoring Contributor roles)<br>3. Check subscription ID matches your target subscription<br>4. Run `az account show` to verify current context |
+| **Variables validation errors** | 1. Check `eventhub_namespace_name` is 6-50 characters, starts with letter, globally unique<br>2. Verify `throughput_units` is one of: `1`, `2`, `4`, `8`, `16`<br>3. Ensure `location` matches a valid Azure region name<br>4. Validate `resource_group_name` doesn't contain special characters or spaces |
 
 ### Debugging
 
