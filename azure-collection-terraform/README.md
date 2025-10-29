@@ -661,10 +661,10 @@ For a minimal configuration to get started quickly:
 
 ```hcl
 # Azure (Required)
-azure_subscription_id = "c088dc46-d692-42ad-a4b6-9a542d28ad2a"
-azure_client_id       = "a1e5fb4a-8644-4867-be4d-a54d0aeaaeed"
-azure_client_secret   = "your-secret-here"
-azure_tenant_id       = "a39bedba-be8f-4c0f-bfe2-b8c7913501ea"
+azure_subscription_id = "your-azure-subscription-id"
+azure_client_id       = "your-azure-client-id"
+azure_client_secret   = "your-azure-client-secret"
+azure_tenant_id       = "your-azure-tenant-id"
 
 # Event Hub (Required)
 eventhub_namespace_sku    = "Standard"
