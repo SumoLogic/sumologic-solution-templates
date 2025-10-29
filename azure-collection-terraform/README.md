@@ -2,6 +2,132 @@
 
 Terraform module for automated log and metrics collection from Azure resources to Sumo Logic.
 
+## 📑 Table of Contents
+
+> **Click on any section below to expand and view detailed contents**
+
+<details>
+<summary><strong>Overview & Architecture</strong></summary>
+<br>
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+
+</details>
+
+<details>
+<summary><strong>Terraform Resources</strong></summary>
+<br>
+
+**Azure Resources**
+- [azurerm_resource_group.rg](#azurerm_resource_grouprg)
+- [azurerm_eventhub_namespace.namespaces_by_location](#azurerm_eventhub_namespacenamespaces_by_location)
+- [azurerm_eventhub.eventhubs_by_type_and_location](#azurerm_eventhubeventhubs_by_type_and_location)
+- [azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy](#azurerm_eventhub_namespace_authorization_rulesumo_collection_policy)
+- [azurerm_monitor_diagnostic_setting.diagnostic_setting_logs](#azurerm_monitor_diagnostic_settingdiagnostic_setting_logs)
+- [Activity Logs Resources (Conditional)](#azurerm_eventhub_namespaceactivity_logs_namespace-conditional)
+
+**SumoLogic Resources**
+- [sumologic_collector.sumo_collector](#sumologic_collectorsumo_collector)
+- [sumologic_azure_event_hub_log_source](#sumologic_azure_event_hub_log_sourcesumo_azure_event_hub_log_source)
+- [sumologic_azure_metrics_source](#sumologic_azure_metrics_sourceterraform_azure_metrics_source)
+- [sumologic_app.apps](#sumologic_appapps)
+
+**Data Sources**
+- [azurerm_client_config.current](#azurerm_client_configcurrent)
+- [azurerm_resources.all_target_resources](#azurerm_resourcesall_target_resources)
+- [azurerm_monitor_diagnostic_categories.all_categories](#azurerm_monitor_diagnostic_categoriesall_categories)
+
+</details>
+
+<details>
+<summary><strong>Requirements & Compatibility</strong></summary>
+<br>
+
+- [Configuration Files](#-configuration-files)
+- [Supported Versions](#supported-versions)
+- [Providers](#providers)
+- [Terraform Resource Reference](#terraform-resource-reference-provider-resources)
+
+</details>
+
+<details>
+<summary><strong>Configuration</strong></summary>
+<br>
+
+- [Prerequisites](#prerequisites)
+- [Azure RBAC Requirements](#azure-rbac-requirements)
+  - Required Azure Roles
+  - Verify Your Permissions
+  - Authentication
+- [Configuration Variables](#configuration-variables)
+- [Provider Deletion Safety](#provider-deletion-safety)
+- [Important Notes](#important-notes)
+
+</details>
+
+<details>
+<summary><strong>How to Run This Project</strong></summary>
+<br>
+
+- [Step 1: Clone and Navigate](#step-1-clone-and-navigate)
+- [Step 2: Create Configuration File](#step-2-create-configuration-file)
+  - Required Variables (Must Configure)
+  - Optional Variables (Configure If Needed)
+  - Default Variables (Customize or Keep Defaults)
+- [Step 3: Initialize Terraform](#step-3-initialize-terraform)
+- [Step 4: Review Plan](#step-4-review-plan)
+- [Step 5: Deploy](#step-5-deploy)
+- [Step 6: Verify](#step-6-verify)
+- [Step 7: Access Dashboards and Monitors](#step-7-access-dashboards-and-monitors)
+
+</details>
+
+<details>
+<summary><strong>Outputs</strong></summary>
+<br>
+
+- [Terraform Outputs](#outputs)
+
+</details>
+
+<details>
+<summary><strong>Testing</strong></summary>
+<br>
+
+- [Test Structure](#test-structure)
+- [Running Tests](#running-tests)
+  - Quick Unit Tests
+  - Full Integration Tests
+  - Specific Test Categories
+- [Test Configuration](#test-configuration)
+- [Test Features](#test-features)
+
+</details>
+
+<details>
+<summary><strong>Troubleshooting</strong></summary>
+<br>
+
+- [Azure Event Hub Regional Support](#azure-event-hub-regional-support)
+  - Regional Support Tables by Geography
+  - Quick Summary
+- [Common Issues](#common-issues)
+- [Debugging](#debugging)
+
+</details>
+
+<details>
+<summary><strong>Cleanup</strong></summary>
+<br>
+
+- [Destroying Resources](#cleanup)
+- [Safe Cleanup Steps](#-to-safely-remove-activity-logs-before-destroying)
+
+</details>
+
+---
+
 ## Overview
 
 This module creates a complete data pipeline to collect logs and metrics from Azure resources and send them to Sumo Logic for monitoring and analysis. It automatically:
@@ -405,7 +531,7 @@ standard_throughput_units = 2           # For Standard SKU: 1, 2, 4, 8, or 16
 premium_throughput_units  = 4           # For Premium SKU: 1, 2, 4, 8, or 16
 
 # ============================================================================
-# Azure Region - Where to deploy Event Hub infrastructure
+# Azure Region - Where to deploy Event Hub infrastructure for Activity Logs
 # ============================================================================
 location = "East US"  # Example: "East US", "West Europe", "Southeast Asia"
 
