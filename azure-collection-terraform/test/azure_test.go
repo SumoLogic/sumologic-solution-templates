@@ -139,19 +139,19 @@ func TestThroughputUnitsValidation(t *testing.T) {
 			name:        "ValidThroughputUnits",
 			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
 			expectError: false,
-			description: "Valid throughput units (2) should pass validation",
+			description: "Valid throughput units should pass validation",
 		},
 		{
 			name:        "MinimumThroughputUnits",
 			tfvarsFile:  filepath.Join("test", fixturesDir, "min-throughput.tfvars"),
 			expectError: false,
-			description: "Minimum throughput units (1) should pass validation",
+			description: "Minimum throughput units (1) should pass validation for both Standard and Premium",
 		},
 		{
 			name:        "MaximumThroughputUnits",
 			tfvarsFile:  filepath.Join("test", fixturesDir, "max-throughput.tfvars"),
 			expectError: false,
-			description: "Maximum throughput units (16) should pass validation",
+			description: "Maximum throughput units (16) should pass validation for both Standard and Premium",
 		},
 		{
 			name:        "ThroughputUnitsBelowMinimum",
@@ -594,6 +594,183 @@ func TestAzureRequiredResourceTagsValidation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			runValidationTest(t, tt.name, tt.tfvarsFile, tt.expectError, tt.description)
+		})
+	}
+}
+
+// TestEventHubNamespaceRegionHandling tests the region-specific logic for Event Hub namespaces
+func TestEventHubNamespaceRegionHandling(t *testing.T) {
+	testCases := []struct {
+		name                 string
+		location             string
+		unsupportedLocations []string
+		limitedSKULocations  []string
+		expectedSKU          string
+		shouldSkipCreation   bool
+		description          string
+	}{
+		{
+			name:                 "SupportedRegionWithPremiumSKU",
+			location:             "East US",
+			unsupportedLocations: []string{"China East", "USGov Arizona"},
+			limitedSKULocations:  []string{"West India", "Mexico Central"},
+			expectedSKU:          "Premium",
+			shouldSkipCreation:   false,
+			description:          "Supported regions should allow Premium SKU",
+		},
+		{
+			name:                 "UnsupportedRegionShouldSkip",
+			location:             "China East",
+			unsupportedLocations: []string{"China East", "USGov Arizona"},
+			limitedSKULocations:  []string{"West India", "Mexico Central"},
+			expectedSKU:          "",
+			shouldSkipCreation:   true,
+			description:          "Unsupported regions should skip Event Hub namespace creation",
+		},
+		{
+			name:                 "LimitedSKURegionForcesStandard",
+			location:             "West India",
+			unsupportedLocations: []string{"China East", "USGov Arizona"},
+			limitedSKULocations:  []string{"West India", "Mexico Central"},
+			expectedSKU:          "Standard",
+			shouldSkipCreation:   false,
+			description:          "Limited-SKU regions should force Standard SKU even if Premium is configured",
+		},
+		{
+			name:                 "CaseInsensitiveRegionMatching",
+			location:             "west india",
+			unsupportedLocations: []string{"China East"},
+			limitedSKULocations:  []string{"West India", "Mexico Central"},
+			expectedSKU:          "Standard",
+			shouldSkipCreation:   false,
+			description:          "Region matching should be case-insensitive",
+		},
+		{
+			name:                 "SpaceIgnoredInRegionMatching",
+			location:             "WestIndia",
+			unsupportedLocations: []string{"China East"},
+			limitedSKULocations:  []string{"West India"},
+			expectedSKU:          "Standard",
+			shouldSkipCreation:   false,
+			description:          "Region matching should ignore spaces",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Normalize the location for comparison (same logic as in locals.tf)
+			normalizedLocation := strings.ReplaceAll(strings.ToLower(tc.location), " ", "")
+
+			// Check if location should be skipped
+			shouldSkip := false
+			for _, unsupportedLoc := range tc.unsupportedLocations {
+				normalizedUnsupported := strings.ReplaceAll(strings.ToLower(unsupportedLoc), " ", "")
+				if normalizedLocation == normalizedUnsupported {
+					shouldSkip = true
+					break
+				}
+			}
+
+			assert.Equal(t, tc.shouldSkipCreation, shouldSkip,
+				fmt.Sprintf("Location %s skip status should match expected", tc.location))
+
+			if !shouldSkip {
+				// Check if location has limited SKU support
+				forcedToStandard := false
+				for _, limitedLoc := range tc.limitedSKULocations {
+					normalizedLimited := strings.ReplaceAll(strings.ToLower(limitedLoc), " ", "")
+					if normalizedLocation == normalizedLimited {
+						forcedToStandard = true
+						break
+					}
+				}
+
+				expectedSKU := "Premium" // Default assumption
+				if forcedToStandard {
+					expectedSKU = "Standard"
+				}
+
+				assert.Equal(t, tc.expectedSKU, expectedSKU,
+					fmt.Sprintf("Location %s should have expected SKU: %s", tc.location, tc.description))
+			}
+
+			t.Logf("✓ %s: %s", tc.name, tc.description)
+		})
+	}
+}
+
+// TestEventHubNamespaceThroughputByRegion tests throughput unit assignment based on region and SKU
+func TestEventHubNamespaceThroughputByRegion(t *testing.T) {
+	testCases := []struct {
+		name                string
+		location            string
+		limitedSKULocations []string
+		configuredSKU       string
+		standardThroughput  int
+		premiumThroughput   int
+		expectedThroughput  int
+		description         string
+	}{
+		{
+			name:                "PremiumSKUInSupportedRegion",
+			location:            "East US",
+			limitedSKULocations: []string{"West India"},
+			configuredSKU:       "Premium",
+			standardThroughput:  2,
+			premiumThroughput:   4,
+			expectedThroughput:  4,
+			description:         "Premium SKU in supported region should use premium_throughput_units",
+		},
+		{
+			name:                "StandardSKUInSupportedRegion",
+			location:            "East US",
+			limitedSKULocations: []string{"West India"},
+			configuredSKU:       "Standard",
+			standardThroughput:  2,
+			premiumThroughput:   4,
+			expectedThroughput:  2,
+			description:         "Standard SKU should use standard_throughput_units",
+		},
+		{
+			name:                "LimitedSKURegionUsesStandardThroughput",
+			location:            "West India",
+			limitedSKULocations: []string{"West India", "Mexico Central"},
+			configuredSKU:       "Premium",
+			standardThroughput:  2,
+			premiumThroughput:   4,
+			expectedThroughput:  2,
+			description:         "Limited-SKU region should use standard_throughput_units regardless of configured SKU",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Simulate the logic from azure_resources.tf
+			normalizedLocation := strings.ReplaceAll(strings.ToLower(tc.location), " ", "")
+
+			// Check if location has limited SKU support
+			isLimitedSKU := false
+			for _, limitedLoc := range tc.limitedSKULocations {
+				normalizedLimited := strings.ReplaceAll(strings.ToLower(limitedLoc), " ", "")
+				if normalizedLocation == normalizedLimited {
+					isLimitedSKU = true
+					break
+				}
+			}
+
+			var actualThroughput int
+			if isLimitedSKU {
+				actualThroughput = tc.standardThroughput
+			} else if tc.configuredSKU == "Premium" {
+				actualThroughput = tc.premiumThroughput
+			} else {
+				actualThroughput = tc.standardThroughput
+			}
+
+			assert.Equal(t, tc.expectedThroughput, actualThroughput,
+				fmt.Sprintf("%s: Expected throughput %d but got %d", tc.description, tc.expectedThroughput, actualThroughput))
+
+			t.Logf("✓ %s: throughput=%d", tc.description, actualThroughput)
 		})
 	}
 }

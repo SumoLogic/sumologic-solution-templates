@@ -27,6 +27,13 @@ locals {
     if config.log_namespace != null && config.log_namespace != ""
   }
 
+  # Normalized list of unsupported regions for Event Hub namespace creation.
+  # We normalize by lower-casing and removing spaces so inputs like "East US" and "eastus" match.
+  unsupported_eventhub_locations = [for loc in var.eventhub_namespace_unsupported_locations : lower(replace(loc, " ", ""))]
+
+  # Normalized list of locations that only support Basic/Standard SKUs for Event Hub namespaces
+  limited_eventhub_sku_locations = [for loc in var.eventhub_namespace_limited_sku_locations : lower(replace(loc, " ", ""))]
+
   metric_to_log_mapping = {
     for config in var.target_resource_types :
     config.metric_namespace => config.log_namespace
@@ -48,13 +55,13 @@ locals {
     ]],
     # Nested resources (with optional tag filtering and OR logic)
     [for parent_type, children_types in var.nested_namespace_configs : [
-      for parent_res in (
+      for parent_res in(
         contains(local.resource_types_for_discovery, parent_type) ? concat(
           length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[parent_type].resources : [],
           length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[parent_type].resources : [],
           length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[parent_type].resources : []
         ) : []
-      ) : [
+        ) : [
         for child_type in children_types : {
           id                  = "${parent_res.id}/${element(split("/", child_type), length(split("/", child_type)) - 1)}/default"
           name                = "${parent_res.name}/${element(split("/", child_type), length(split("/", child_type)) - 1)}/default"
@@ -73,11 +80,13 @@ locals {
   resources_by_location_only = {
     for res in values(local.all_monitored_resources) :
     res.location => res...
+    if !contains(local.unsupported_eventhub_locations, lower(replace(res.location, " ", "")))
   }
 
   resources_by_type_and_location = {
     for res in values(local.all_monitored_resources) :
     "${lookup(res, "parent_type", res.type)}-${res.location}" => res...
+    if !contains(local.unsupported_eventhub_locations, lower(replace(res.location, " ", "")))
   }
 
   eventhub_key_to_log_namespace_grouped = {
@@ -103,7 +112,7 @@ locals {
         replace(res.location, " ", "")
         if config.log_namespace != null && config.log_namespace != "" ? (
           res.type == config.log_namespace || lookup(res, "parent_type", "") == config.log_namespace
-        ) : (
+          ) : (
           res.type == config.metric_namespace
         )
       ])]
@@ -116,7 +125,7 @@ locals {
           replace(res.location, " ", "")
           if config.log_namespace != null && config.log_namespace != "" ? (
             res.type == config.log_namespace || lookup(res, "parent_type", "") == config.log_namespace
-          ) : (
+            ) : (
             res.type == config.metric_namespace
           )
         ])

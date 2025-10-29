@@ -1,2 +1,3 @@
 # Invalid throughput units (above maximum) for testing validation
-throughput_units = 25
+standard_throughput_units = 25
+premium_throughput_units = 25

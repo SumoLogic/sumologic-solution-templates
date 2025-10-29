@@ -22,7 +22,39 @@ resource_group_name     = "sumologic-azure-collection-rg"
 eventhub_namespace_name = "sumologic-azure-collection-EventHub"
 eventhub_namespace_sku  = "Premium"
 policy_name             = "SumoLogicAzureCollectionPolicy"
-throughput_units        = 2
+
+# Throughput units for Standard vs Premium SKUs
+standard_throughput_units = 4  # Used for Standard SKU and limited-SKU regions
+premium_throughput_units  = 4  # Used for Premium SKU when allowed in the region
+
+# Regions that only support Basic & Standard SKUs for Event Hub namespaces
+eventhub_namespace_limited_sku_locations = [
+  "West India",
+  "Mexico Central",
+]
+
+# Regions where Event Hub Namespace creation is not supported
+eventhub_namespace_unsupported_locations = [
+  "South Africa West",
+  "Australia Central 2",
+  "USGov Arizona",
+  "USGov Texas",
+  "USGov Virginia",
+  "Brazil Southeast",
+  "China East",
+  "China East 2",
+  "China East 3",
+  "China North",
+  "China North 2",
+  "China North 3",
+  "France South",
+  "Germany North",
+  "Norway West",
+  "Sweden South",
+  "Switzerland West",
+  "Taiwan North",
+  "UAE Central",
+]
 
 # Controls azurerm provider behavior for Resource Group deletion.
 # Default is true (safe). Set to false in test environments to allow cleanup of

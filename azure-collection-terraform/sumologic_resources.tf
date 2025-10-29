@@ -33,7 +33,7 @@ resource "sumologic_azure_event_hub_log_source" "sumo_azure_event_hub_log_source
   category     = "azure/logs/${each.key}"
   content_type = "AzureEventHubLog"
   collector_id = sumologic_collector.sumo_collector.id
-  
+
   fields = {
     location = local.resources_by_type_and_location[each.key][0].location
   }
@@ -89,7 +89,7 @@ resource "sumologic_azure_metrics_source" "terraform_azure_metrics_source" {
       content {
         type      = azure_tag_filters.value.type
         namespace = azure_tag_filters.value.namespace
-        
+
         dynamic "tags" {
           for_each = azure_tag_filters.value.tags
           content {

@@ -8,28 +8,57 @@ location                = "East US"
 eventhub_namespace_name = "SUMO-267667-EventHub-test"
 eventhub_namespace_sku  = "Standard"
 policy_name             = "SumoLogicTestCollectionPolicy-test"
-throughput_units        = 2
 
-activity_log_export_name     = "SumoTestActivityLogExport-test"
-activity_log_export_category = "Administrative"
-enable_activity_logs         = false
+# Throughput units for Standard vs Premium SKUs
+standard_throughput_units = 2
+premium_throughput_units  = 2
+
+# Regions where Event Hub Namespace creation is not supported
+eventhub_namespace_unsupported_locations = [
+  "South Africa West",
+  "Australia Central 2",
+  "USGov Arizona",
+  "USGov Texas",
+  "USGov Virginia",
+  "Brazil Southeast",
+  "China East",
+  "China East 2",
+  "China East 3",
+  "China North",
+  "China North 2",
+  "China North 3",
+  "France South",
+  "Germany North",
+  "Norway West",
+  "Sweden South",
+  "Switzerland West",
+  "Taiwan North",
+  "UAE Central",
+]
+
+# Regions that only support Basic & Standard SKUs for Event Hub namespaces
+eventhub_namespace_limited_sku_locations = [
+  "West India",
+  "Mexico Central",
+]
 
 # For integration tests we disable the azurerm provider safety that prevents
 # deletion of resource groups containing nested resources so test cleanup can remove
 # test RGs. Set this to false in your test tfvars to allow cleanup.
 prevent_deletion_if_contains_resources = false
 
+activity_log_export_name     = "SumoTestActivityLogExport-test"
+activity_log_export_category = "Administrative"
+enable_activity_logs         = false
+
 target_resource_types = [
   {
-    log_namespace    = "Microsoft.KeyVault/vaults"
-    metric_namespace = "Microsoft.KeyVault/vaults"
+    log_namespace    = "Microsoft.Network/loadBalancers"
+    metric_namespace = "Microsoft.Network/loadBalancers"
   },
   {
     log_namespace    = "Microsoft.Storage/storageAccounts"
     metric_namespace = "Microsoft.Storage/storageAccounts"
-  },
-  {
-    metric_namespace = "Microsoft.Compute/virtualMachines"
   }
 ]
 required_resource_tags = {
@@ -37,8 +66,7 @@ required_resource_tags = {
 }
 nested_namespace_configs = {
   "Microsoft.Storage/storageAccounts" = [
-    "Microsoft.Storage/storageAccounts/blobServices",
-    "Microsoft.Storage/storageAccounts/fileServices"
+    "Microsoft.Storage/storageAccounts/blobServices"
   ]
 }
 
@@ -47,17 +75,17 @@ sumologic_access_key  = "your-sumologic-access-key"
 sumologic_environment = "us1"
 sumo_collector_name   = "SUMO-267667-Collector-test"
 installation_apps_list = [{
-  uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"
-  name    = "Azure Storage"
-  version = "1.0.3"
+  uuid    = "63e4bd6d-8e15-41c4-a65d-74589574adf2"
+  name    = "Azure Load Balancer"
+  version = "1.0.4"
   parameters = {
     "index_value" = "sumologic_default"
   }
-  }, {
-  uuid    = "449c796e-5da2-47ea-a304-e9299dd7435d"
-  name    = "Azure Key Vault"
-  version = "1.0.2"
-  parameters = {
-    "index_value" = "sumologic_default"
-  }
+},{
+    uuid    = "53376d23-2687-4500-b61e-4a2e2a119658"
+    name    = "Azure Storage"
+    version = "1.0.3"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
 }]

@@ -184,18 +184,36 @@ variable "location" {
   }
 }
 
-variable "throughput_units" {
-  description = "The number of processing units for the Event Hub Namespace."
+# Throughput controls for Standard vs Premium SKUs
+variable "standard_throughput_units" {
+  description = "The number of throughput units to assign for Event Hub namespaces using the Standard SKU."
   type        = number
+  default     = 4
 
   validation {
-    condition     = contains([1, 2, 4, 8, 16], var.throughput_units)
-    error_message = "Processing units must be one of: 1, 2, 4, 8, or 16 for Event Hub Premium tier."
+    condition     = contains([1, 2, 4, 8, 16], var.standard_throughput_units)
+    error_message = "Standard throughput units must be one of: 1, 2, 4, 8, or 16."
   }
 
   validation {
-    condition     = floor(var.throughput_units) == var.throughput_units
-    error_message = "Processing units must be a whole number."
+    condition     = floor(var.standard_throughput_units) == var.standard_throughput_units
+    error_message = "Standard throughput units must be a whole number."
+  }
+}
+
+variable "premium_throughput_units" {
+  description = "The number of throughput units to assign for Event Hub namespaces using the Premium SKU."
+  type        = number
+  default     = 4
+
+  validation {
+    condition     = contains([1, 2, 4, 8, 16], var.premium_throughput_units)
+    error_message = "Premium throughput units must be one of: 1, 2, 4, 8, or 16."
+  }
+
+  validation {
+    condition     = floor(var.premium_throughput_units) == var.premium_throughput_units
+    error_message = "Premium throughput units must be a whole number."
   }
 }
 
@@ -207,6 +225,41 @@ variable "eventhub_namespace_sku" {
     condition     = contains(["Standard", "Premium"], var.eventhub_namespace_sku)
     error_message = "Event Hub namespace SKU must be either 'Standard' or 'Premium'."
   }
+}
+
+variable "eventhub_namespace_unsupported_locations" {
+  description = "List of locations (regions) where Event Hub Namespace creation is not supported or should be skipped. Values can be human-friendly region names; comparison is case-insensitive and ignores spaces. Example: [\"China East\", \"US Gov Virginia\"]"
+  type        = list(string)
+  default = [
+    "South Africa West",
+    "Australia Central 2",
+    "USGov Arizona",
+    "USGov Texas",
+    "USGov Virginia",
+    "Brazil Southeast",
+    "China East",
+    "China East 2",
+    "China East 3",
+    "China North",
+    "China North 2",
+    "China North 3",
+    "France South",
+    "Germany North",
+    "Norway West",
+    "Sweden South",
+    "Switzerland West",
+    "Taiwan North",
+    "UAE Central",
+  ]
+}
+
+variable "eventhub_namespace_limited_sku_locations" {
+  description = "List of locations (regions) that only support Basic & Standard SKUs for Event Hub namespaces. Values are human-friendly names; comparison is case-insensitive and ignores spaces. Example: [\"West India\", \"Mexico Central\"]"
+  type        = list(string)
+  default = [
+    "West India",
+    "Mexico Central",
+  ]
 }
 
 variable "policy_name" {
@@ -360,6 +413,6 @@ variable "prevent_deletion_if_contains_resources" {
     Default is true (safer for production). Tests can override this variable and set it to false
     so that test cleanup can delete resource groups that still contain nested resources.
   EOT
-  type    = bool
-  default = true
+  type        = bool
+  default     = true
 }

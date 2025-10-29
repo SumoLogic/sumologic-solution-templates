@@ -699,13 +699,191 @@ CLEANUP_RESOURCES=true        # Auto-cleanup test resources
 
 ## Troubleshooting
 
+### Azure Event Hub Regional Support
+
+The table below shows Event Hub namespace availability across Azure regions by SKU tier. This module automatically handles region-specific SKU limitations.
+
+**Legend:**
+- ✅ = **Fully Supported** - Event Hub namespace available for this SKU tier
+- ❌ = **Not Supported** - Event Hub namespace not available
+- ⚠️ = **Limited Support** - Only Basic/Standard SKUs available (Premium not supported)
+
+---
+
+#### 🌍 Africa
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| South Africa North | ✅ | ✅ | ✅ | Fully supported |
+| South Africa West | ❌ | ❌ | ❌ | No Event Hub support |
+
+#### 🌏 Asia Pacific
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| East Asia | ✅ | ✅ | ✅ | Fully supported |
+| Southeast Asia | ✅ | ✅ | ✅ | Fully supported |
+| Australia Central | ✅ | ✅ | ✅ | Fully supported |
+| Australia Central 2 | ❌ | ❌ | ❌ | No Event Hub support |
+| Australia East | ✅ | ✅ | ✅ | Fully supported |
+| Australia Southeast | ✅ | ✅ | ✅ | Fully supported |
+| Indonesia Central | ✅ | ✅ | ✅ | Fully supported |
+| Malaysia West | ✅ | ✅ | ✅ | Fully supported |
+| New Zealand North | ✅ | ✅ | ✅ | Fully supported |
+
+#### 🇨🇳 China
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| China East | ❌ | ❌ | ❌ | No Event Hub support |
+| China East 2 | ❌ | ❌ | ❌ | No Event Hub support |
+| China East 3 | ❌ | ❌ | ❌ | No Event Hub support |
+| China North | ❌ | ❌ | ❌ | No Event Hub support |
+| China North 2 | ❌ | ❌ | ❌ | No Event Hub support |
+| China North 3 | ❌ | ❌ | ❌ | No Event Hub support |
+
+#### 🇪🇺 Europe
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| North Europe | ✅ | ✅ | ✅ | Fully supported |
+| West Europe | ✅ | ✅ | ✅ | Fully supported |
+| Austria East | ✅ | ✅ | ✅ | Fully supported |
+| France Central | ✅ | ✅ | ✅ | Fully supported |
+| France South | ❌ | ❌ | ❌ | No Event Hub support |
+| Germany North | ❌ | ❌ | ❌ | No Event Hub support |
+| Germany West Central | ✅ | ✅ | ✅ | Fully supported |
+| Italy North | ✅ | ✅ | ✅ | Fully supported |
+| Norway East | ✅ | ✅ | ✅ | Fully supported |
+| Norway West | ❌ | ❌ | ❌ | No Event Hub support |
+| Poland Central | ✅ | ✅ | ✅ | Fully supported |
+| Spain Central | ✅ | ✅ | ✅ | Fully supported |
+| Sweden Central | ✅ | ✅ | ✅ | Fully supported |
+| Sweden South | ❌ | ❌ | ❌ | No Event Hub support |
+| Switzerland North | ✅ | ✅ | ✅ | Fully supported |
+| Switzerland West | ❌ | ❌ | ❌ | No Event Hub support |
+| UK South | ✅ | ✅ | ✅ | Fully supported |
+| UK West | ✅ | ✅ | ✅ | Fully supported |
+
+#### 🇮🇳 India
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| Central India | ✅ | ✅ | ✅ | Fully supported |
+| South India | ✅ | ✅ | ✅ | Fully supported |
+| West India | ✅ | ✅ | ⚠️ | **Premium SKU not available** - Module auto-downgrades to Standard |
+
+#### 🇯🇵 Japan
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| Japan East | ✅ | ✅ | ✅ | Fully supported |
+| Japan West | ✅ | ✅ | ✅ | Fully supported |
+
+#### 🇰🇷 Korea
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| Korea Central | ✅ | ✅ | ✅ | Fully supported |
+| Korea South | ✅ | ✅ | ✅ | Fully supported |
+
+#### 🌎 Americas
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| Brazil South | ✅ | ✅ | ✅ | Fully supported |
+| Brazil Southeast | ❌ | ❌ | ❌ | No Event Hub support |
+| Canada Central | ✅ | ✅ | ✅ | Fully supported |
+| Canada East | ✅ | ✅ | ✅ | Fully supported |
+| Chile Central | ✅ | ✅ | ✅ | Fully supported |
+| Mexico Central | ✅ | ✅ | ⚠️ | **Premium SKU not available** - Module auto-downgrades to Standard |
+
+#### 🇺🇸 United States
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| Central US | ✅ | ✅ | ✅ | Fully supported |
+| East US | ✅ | ✅ | ✅ | Fully supported |
+| East US 2 | ✅ | ✅ | ✅ | Fully supported |
+| North Central US | ✅ | ✅ | ✅ | Fully supported |
+| South Central US | ✅ | ✅ | ✅ | Fully supported |
+| West Central US | ✅ | ✅ | ✅ | Fully supported |
+| West US | ✅ | ✅ | ✅ | Fully supported |
+| West US 2 | ✅ | ✅ | ✅ | Fully supported |
+| West US 3 | ✅ | ✅ | ✅ | Fully supported |
+
+#### 🏛️ US Government
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| USGov Arizona | ❌ | ❌ | ❌ | No Event Hub support |
+| USGov Texas | ❌ | ❌ | ❌ | No Event Hub support |
+| USGov Virginia | ❌ | ❌ | ❌ | No Event Hub support |
+
+#### 🌐 Middle East
+
+| Region Name | Basic | Standard | Premium | Notes |
+|-------------|:-----:|:--------:|:-------:|-------|
+| Israel Central | ✅ | ✅ | ✅ | Fully supported |
+| Qatar Central | ✅ | ✅ | ✅ | Fully supported |
+| Taiwan North | ❌ | ❌ | ❌ | No Event Hub support |
+| UAE Central | ❌ | ❌ | ❌ | No Event Hub support |
+| UAE North | ✅ | ✅ | ✅ | Fully supported |
+
+---
+
+#### 📊 Quick Summary
+
+- **✅ Fully Supported Regions**: 47 regions support all SKU tiers (Basic, Standard, Premium)
+- **⚠️ Limited Support Regions**: 2 regions (West India, Mexico Central) - Premium SKU not available
+- **❌ Unsupported Regions**: 19 regions - No Event Hub namespace support at any tier
+
+**Important Notes:**
+
+1. **Unsupported Regions** (marked with "No" for all SKUs):
+   - These regions do not support Event Hub namespace creation at any tier
+   - This module automatically skips these regions during deployment
+   - Resources in these regions cannot be monitored via Event Hub-based log collection
+
+2. **Premium SKU Restrictions** (marked with "No" only for Premium):
+   - **West India** and **Mexico Central** only support Basic and Standard SKUs
+   - If you configure `eventhub_namespace_sku = "Premium"`, the module automatically downgrades to Standard SKU for these regions
+   - No action required - the module handles this automatically
+
+3. **Module Behavior**:
+   - Regions marked "No" for all tiers are automatically excluded from Event Hub creation
+   - Regions with limited SKU support automatically use the highest supported SKU
+   - You can override this behavior using `eventhub_namespace_unsupported_locations` and `eventhub_namespace_limited_sku_locations` variables
+
+**Configuration Variables for Regional Control:**
+
+```hcl
+# Skip Event Hub creation in specific regions (in addition to defaults)
+eventhub_namespace_unsupported_locations = [
+  "South Africa West",
+  "China East",
+  # ... add more regions as needed
+]
+
+# Force Standard SKU in specific regions (in addition to West India and Mexico Central)
+eventhub_namespace_limited_sku_locations = [
+  "West India",
+  "Mexico Central",
+  # ... add more regions as needed
+]
+
+# Separate throughput units for Standard vs Premium SKUs
+standard_throughput_units = 2  # Used for Standard SKU (1, 2, 4, 8, or 16)
+premium_throughput_units  = 4  # Used for Premium SKU (1, 2, 4, 8, or 16)
+```
+
 ### Common Issues
 
 **Issue**: `Error creating diagnostic settings - resource already has a diagnostic setting`
 - **Solution**: Each Azure resource can have a limited number of diagnostic settings. Check existing settings or use `terraform import` for existing configurations.
 
 **Issue**: `EventHub throughput exceeded`
-- **Solution**: Increase `eventhub_namespace_capacity` or upgrade to Premium SKU for higher throughput.
+- **Solution**: Increase `standard_throughput_units` or `premium_throughput_units` based on your SKU, or upgrade to Premium SKU for higher throughput.
 
 **Issue**: `Sumo Logic sources show "Not Receiving Data"`
 - **Solution**: 
@@ -713,6 +891,9 @@ CLEANUP_RESOURCES=true        # Auto-cleanup test resources
   2. Check EventHub is receiving messages
   3. Confirm authorization rules have Listen permission
   4. Verify Sumo Logic connection string is correct
+
+**Issue**: `Event Hub namespace creation failed in specific region`
+- **Solution**: Check the regional support table above. The region may not support Event Hub namespaces or may have SKU restrictions. The module should automatically handle this, but you can manually add the region to `eventhub_namespace_unsupported_locations` if needed.
 
 ### Debugging
 
