@@ -139,18 +139,44 @@ This module creates a complete data pipeline to collect logs and metrics from Az
 
 ## Architecture
 
-The following diagram illustrates the data flow architecture:
+This module implements a dual-pipeline architecture for comprehensive Azure monitoring.
 
-```
-Azure Resources → Diagnostic Settings → EventHubs → Sumo Logic Sources → Sumo Logic Apps
-Azure Resources → Azure Monitor (Metrics API) → Sumo Logic Metrics Sources → Sumo Logic Apps
-```
+### 📊 Log Collection Data Flow
 
-**Key Components:**
-- **Resource Discovery**. Queries Azure for resources matching specified tags.
-- **EventHub Infrastructure**. Creates namespaces and hubs per location.
-- **Diagnostic Settings**. Configures log streaming from resources to EventHubs.
-- **Sumo Logic Integration**. Sets up collector, log/metric sources, and installs apps.
+The following sequence outlines how Azure resource logs are collected and sent to Sumo Logic:
+
+1. **Azure Resources** generate diagnostic logs (access logs, audit logs, error logs) → View in: [Azure Portal](https://portal.azure.com) → Resource Groups → Resources
+
+2. **→ Diagnostic Settings** automatically route logs from each resource to Event Hubs → View in: Azure Portal → Resource → Monitoring → Diagnostic settings
+
+3. **→ Event Hub Namespaces & Hubs** receive and buffer logs organized by region and resource type → View in: Azure Portal → Resource Groups → Event Hub Namespaces
+
+4. **→ Sumo Logic Log Sources** consume logs from Event Hubs in real-time and parse JSON format → View in: [Sumo Logic](https://service.sumologic.com) → Manage Data → Collection → Collectors
+
+5. **→ Sumo Logic Apps & Dashboards** provide pre-built visualizations, searches, and alerts → Access in: Sumo Logic → App Catalog → Installed Apps
+
+### 📈 Metrics Collection Data Flow
+
+The following sequence outlines how Azure resource metrics are collected and sent to Sumo Logic:
+
+1. **Azure Resources** emit performance metrics (CPU, memory, throughput) automatically collected by Azure Monitor
+
+2. **→ Azure Monitor Metrics API** provides centralized access to all resource metrics via REST API → [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-platform-metrics)
+
+3. **→ Sumo Logic Metrics Sources** poll Azure Monitor API at regular intervals for metrics data → View in: Sumo Logic → Manage Data → Collection → Metrics Sources
+
+4. **→ Sumo Logic Apps & Dashboards** visualize time-series data and provide metric-based alerts → Access in: Sumo Logic → App Catalog → Installed Apps
+
+### 🔑 Key Components Summary
+
+| Component | Purpose | Where to View |
+|-----------|---------|---------------|
+| **Resource Discovery** | Queries Azure for resources matching specified tags and types | Azure Portal → Resources |
+| **EventHub Infrastructure** | Regional log streaming backbone for efficient routing | Azure Portal → Event Hub Namespaces |
+| **Diagnostic Settings** | Configures each resource to stream logs to EventHubs | Azure Portal → Resource → Monitoring → Diagnostic settings |
+| **Sumo Logic Collectors** | Hosted collectors that receive logs and metrics | Sumo Logic → Manage Data → Collection |
+| **Sumo Logic Sources** | Log sources (EventHub) and Metrics sources (API polling) | Sumo Logic → Collectors → Sources |
+| **Sumo Logic Apps** | Pre-built dashboards, searches, and monitors | Sumo Logic → App Catalog |
 
 ## Terraform Resources
 
@@ -174,7 +200,7 @@ Creates individual EventHubs for each resource type and location combination.
 - **Purpose**: Separate data streams per resource type for organized log collection
 - **Naming**: `insights-logs-{resource_type}` per namespace
 - **Configuration**: Partition count and message retention configurable
-- **Cardinality**: One EventHub per (resource_type × location) combination
+- **Cardinality**: One EventHub per (`resource_type` × `location`) combination
 
 #### azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy
 Creates authorization rules for Sumo Logic to access EventHub namespaces.
@@ -234,11 +260,11 @@ Creates a hosted collector in Sumo Logic for receiving logs and metrics.
 
 ####  sumologic_azure_event_hub_log_source.sumo_azure_event_hub_log_source
 Creates log sources that consume from EventHubs.
-- **Purpose**: Reads logs from EventHubs and ingests into Sumo Logic
-- **Cardinality**: One source per EventHub (filtered by log_namespace)
-- **Authentication**: Uses connection strings from authorization rules
-- **Processing**: Parses Azure diagnostic log JSON format
-- **Filtering**: Only created for resources with `log_namespace` defined
+- **Purpose**. Reads logs from EventHubs and ingests into Sumo Logic.
+- **Cardinality**. One source per EventHub (filtered by `log_namespace`).
+- **Authentication**. Uses connection strings from authorization rules.
+- **Processing**. Parses Azure diagnostic log JSON format.
+- **Filtering**. Only created for resources with `log_namespace` defined.
 
 #### sumologic_azure_metrics_source.terraform_azure_metrics_source
 Creates metrics sources for Azure metrics collection via API.
@@ -263,6 +289,8 @@ Installs pre-built Sumo Logic apps for visualization and analysis.
 - **Requirement**: Each app requires specific log/metric sources to be configured
 
 ### Data Sources
+
+Following are the list of Data Sources managed by this module.
 
 #### azurerm_client_config.current
 Retrieves current Azure authentication context.

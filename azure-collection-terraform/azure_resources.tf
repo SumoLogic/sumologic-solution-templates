@@ -33,6 +33,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_eventhub_namespace" "namespaces_by_location" {
+  #checkov:skip=CKV_AZURE_228:Zone redundancy is automatically enabled by Azure for Event Hub namespaces in regions with availability zones. There is no explicit configuration property in the Azure API or Terraform provider - it's implicit based on region support.
   for_each = local.resources_by_location_only
 
   name                = "${var.eventhub_namespace_name}-${replace(lower(each.key), " ", "")}"
@@ -121,6 +122,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
 }
 
 resource "azurerm_eventhub_namespace" "activity_logs_namespace" {
+  #checkov:skip=CKV_AZURE_228:Zone redundancy is automatically enabled by Azure for Event Hub namespaces in regions with availability zones. There is no explicit configuration property in the Azure API or Terraform provider - it's implicit based on region support.
   count               = var.enable_activity_logs && !(contains(local.unsupported_eventhub_locations, lower(replace(var.location, " ", "")))) ? 1 : 0
   name                = "${var.eventhub_namespace_name}-activity-logs"
   location            = var.location
