@@ -663,6 +663,14 @@ func TestSumoLogicAppValidationPatterns(t *testing.T) {
 			description: "Valid Azure Key Vault app should pass validation",
 		},
 		{
+			name:        "ValidLatestVersion",
+			appUUID:     "53376d23-2687-4500-b61e-4a2e2a119658",
+			appName:     "Test App",
+			appVersion:  "latest",
+			shouldPass:  true,
+			description: "Version 'latest' should pass validation",
+		},
+		{
 			name:        "InvalidUUIDFormat",
 			appUUID:     "invalid-uuid",
 			appName:     "Test App",
@@ -695,10 +703,13 @@ func TestSumoLogicAppValidationPatterns(t *testing.T) {
 			uuidMatched, err := regexp.MatchString(uuidPattern, tc.appUUID)
 			require.NoError(t, err)
 
-			// Test semantic version pattern
+			// Test semantic version pattern or "latest"
 			versionPattern := `^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$`
-			versionMatched, err := regexp.MatchString(versionPattern, tc.appVersion)
-			require.NoError(t, err)
+			versionMatched := tc.appVersion == "latest" || func() bool {
+				matched, err := regexp.MatchString(versionPattern, tc.appVersion)
+				require.NoError(t, err)
+				return matched
+			}()
 
 			// Test name is not empty
 			nameValid := strings.TrimSpace(tc.appName) != ""

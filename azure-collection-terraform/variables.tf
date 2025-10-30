@@ -380,9 +380,9 @@ variable "installation_apps_list" {
   validation {
     condition = length(var.installation_apps_list) == 0 || alltrue([
       for app in var.installation_apps_list :
-      can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", app.version))
+      app.version == "latest" || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", app.version))
     ])
-    error_message = "App versions must be in semantic version format (x.y.z)."
+    error_message = "App versions must be either 'latest' or in semantic version format (x.y.z)."
   }
 
   validation {
