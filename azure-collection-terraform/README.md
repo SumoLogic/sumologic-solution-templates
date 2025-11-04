@@ -147,7 +147,7 @@ The following sequence outlines how Azure resource logs are collected and sent t
 
 1. **Azure Resources** generate diagnostic logs (access logs, audit logs, error logs) → View in: [Azure Portal](https://portal.azure.com) → Resource Groups → Resources
 
-2. **→ Diagnostic Settings** automatically route logs from each resource to Event Hubs → View in: Azure Portal → Resource → Monitoring → Diagnostic settings
+2. **→ Diagnostic Settings** automatically route logs from all categories of each resource to Event Hubs → View in: Azure Portal → Resource → Monitoring → Diagnostic settings
 
 3. **→ Event Hub Namespaces & Hubs** receive and buffer logs organized by region and resource type → View in: Azure Portal → Resource Groups → Event Hub Namespaces
 
@@ -478,6 +478,8 @@ The following table describes all available configuration variables. For a compl
 | `sumologic_environment` | Sumo Logic deployment region. Options: `us1`, `us2`, `eu`, `au`, `ca`, `de`, `jp`, `in`, `kr`, `fed`. | `string` | `"us1"` | **Yes** |
 | `sumo_collector_name` | Name for the Sumo Logic hosted collector (alphanumeric, hyphens, underscores, max 128 characters). | `string` | `"sumologic-azure-collection"` | **Yes** |
 | `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `parameters` (map of key-value pairs for app configuration). Use empty `[]` to skip app installation. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L253) | No |
+
+To obtain these values follow [these steps](https://www.sumologic.com/help/docs/send-data/hosted-collectors/microsoft-source/azure-metrics-source/#vendor-configuration)
 
 #### Provider deletion safety
 
