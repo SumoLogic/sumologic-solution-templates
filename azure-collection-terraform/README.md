@@ -864,6 +864,9 @@ CLEANUP_RESOURCES=true        # Auto-cleanup test resources
 
 ## Troubleshooting
 
+### Azure Event Hub Limitation
+Please visit [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-quotas) to find out more details about Azure Event Hub Limitations
+
 ### Azure Event Hub Regional Support
 
 The table below shows Event Hub namespace availability across Azure regions by SKU tier. This module automatically handles region-specific SKU limitations.
@@ -1034,7 +1037,8 @@ To destroy all resources:
 terraform destroy
 ```
 
-**⚠️ Warning**: This will:
+**⚠️ Warning**
+This will:
 - Delete all EventHub namespaces and hubs
 - Remove diagnostic settings from Azure resources
 - Delete Sumo Logic collector and all sources
