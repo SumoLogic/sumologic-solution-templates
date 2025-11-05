@@ -1038,6 +1038,7 @@ terraform destroy
 ```
 
 **⚠️ Warning**
+
 This will:
 - Delete all EventHub namespaces and hubs
 - Remove diagnostic settings from Azure resources
