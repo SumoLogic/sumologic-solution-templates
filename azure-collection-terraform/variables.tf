@@ -47,8 +47,9 @@ variable "target_resource_types" {
   type = list(object({
     log_namespace    = optional(string)
     metric_namespace = optional(string)
+    log_categories   = optional(list(string), [])
   }))
-  description = "List of Azure resource types with their log and metric namespace configuration. log_namespace is used for Event Hubs and diagnostic settings, metric_namespace is used for metrics collection. Both fields are optional, but at least one must be provided."
+  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided."
 
   validation {
     condition = alltrue([
@@ -101,6 +102,8 @@ variable "target_resource_types" {
     ])
     error_message = "Duplicate log_namespace values are not allowed."
   }
+  
+
 }
 
 variable "required_resource_tags" {

@@ -76,21 +76,18 @@ func TestAzureCollectionIntegration(t *testing.T) {
 	// Get Terraform outputs for validation
 	t.Log("📋 Retrieving Terraform outputs...")
 	resourceGroupName := terraform.Output(t, terraformOptions, "resource_group_name")
-	eventhubNamespaceName := terraform.Output(t, terraformOptions, "eventhub_namespace_name")
 	collectorID := terraform.Output(t, terraformOptions, "sumologic_collector_id")
 	logSourceIDs := terraform.OutputMap(t, terraformOptions, "sumologic_log_source_ids")
 	metricsSourceID := terraform.Output(t, terraformOptions, "sumologic_metrics_source_id")
 
 	// Validate that we got the expected outputs
 	require.NotEmpty(t, resourceGroupName, "Resource group name should not be empty")
-	require.NotEmpty(t, eventhubNamespaceName, "EventHub namespace name should not be empty")
 	require.NotEmpty(t, collectorID, "Sumo Logic collector ID should not be empty")
 	require.NotEmpty(t, logSourceIDs, "Sumo Logic log source IDs should not be empty")
 	require.NotEmpty(t, metricsSourceID, "Sumo Logic metrics source ID should not be empty")
 
 	t.Logf("📊 Terraform Outputs Retrieved:")
 	t.Logf("  - Resource Group: %s", resourceGroupName)
-	t.Logf("  - EventHub Namespace: %s", eventhubNamespaceName)
 	t.Logf("  - Collector ID: %s", collectorID)
 	t.Logf("  - Metrics Source ID: %s", metricsSourceID)
 	t.Logf("  - Log Source IDs: %v", logSourceIDs)
@@ -99,7 +96,7 @@ func TestAzureCollectionIntegration(t *testing.T) {
 	t.Log("🔍 Phase 1: Verifying Azure Resources...")
 	// Derive expected EventHubs from terraform output 'eventhub_names' so tests follow actual config
 	eventhubNamesMap := terraform.OutputMap(t, terraformOptions, "eventhub_names")
-	verifyAzureResources(t, resourceGroupName, eventhubNamespaceName, eventhubNamesMap)
+	verifyAzureResources(t, resourceGroupName, eventhubNamesMap)
 
 	// Phase 2: Verify Sumo Logic Resources
 	t.Log("🔍 Phase 2: Verifying Sumo Logic Resources...")
@@ -111,13 +108,13 @@ func TestAzureCollectionIntegration(t *testing.T) {
 
 	// Phase 4: Verify Diagnostic Settings
 	t.Log("🔍 Phase 4: Verifying Diagnostic Settings...")
-	verifyDiagnosticSettings(t, resourceGroupName, eventhubNamespaceName)
+	verifyDiagnosticSettings(t, resourceGroupName)
 
 	t.Log("✅ All integration tests passed successfully!")
 }
 
 // verifyAzureResources validates that Azure resources are properly created
-func verifyAzureResources(t *testing.T, resourceGroupName, eventhubNamespaceName string, expectedEventhubMap map[string]string) {
+func verifyAzureResources(t *testing.T, resourceGroupName string, expectedEventhubMap map[string]string) {
 	t.Log("🔍 Verifying Azure Resource Group...")
 
 	// Verify Resource Group exists
@@ -133,65 +130,78 @@ func verifyAzureResources(t *testing.T, resourceGroupName, eventhubNamespaceName
 	assert.Equal(t, resourceGroupName, rg.Name, "Resource Group name mismatch")
 	t.Logf("✅ Resource Group '%s' verified", resourceGroupName)
 
-	// Verify EventHub Namespace exists
-	t.Log("🔍 Verifying EventHub Namespace...")
-	cmd = exec.Command("az", "eventhubs", "namespace", "show",
+	// Verify EventHub Namespaces exist - Query ALL namespaces in the resource group
+	t.Log("🔍 Verifying EventHub Namespaces...")
+	cmd = exec.Command("az", "eventhubs", "namespace", "list",
 		"--resource-group", resourceGroupName,
-		"--name", eventhubNamespaceName,
 		"--output", "json")
 	output, err = cmd.Output()
 	if err != nil {
-		t.Fatalf("❌ Failed to find EventHub Namespace '%s': %v", eventhubNamespaceName, err)
+		t.Fatalf("❌ Failed to list EventHub Namespaces: %v", err)
 	}
 
-	var ehns AzureResource
-	err = json.Unmarshal(output, &ehns)
-	require.NoError(t, err, "Failed to parse EventHub Namespace JSON")
-	assert.Equal(t, eventhubNamespaceName, ehns.Name, "EventHub Namespace name mismatch")
-	t.Logf("✅ EventHub Namespace '%s' verified", eventhubNamespaceName)
+	var namespaces []AzureResource
+	err = json.Unmarshal(output, &namespaces)
+	require.NoError(t, err, "Failed to parse EventHub Namespaces JSON")
 
-	// Verify EventHubs exist
-	t.Log("🔍 Verifying EventHubs...")
-	cmd = exec.Command("az", "eventhubs", "eventhub", "list",
-		"--resource-group", resourceGroupName,
-		"--namespace-name", eventhubNamespaceName,
-		"--output", "json")
-	output, err = cmd.Output()
-	if err != nil {
-		t.Fatalf("❌ Failed to list EventHubs: %v", err)
+	if len(namespaces) == 0 {
+		t.Fatalf("❌ No EventHub Namespaces found in resource group '%s'", resourceGroupName)
 	}
 
-	var eventhubs []AzureResource
-	err = json.Unmarshal(output, &eventhubs)
-	require.NoError(t, err, "Failed to parse EventHubs JSON")
+	t.Logf("✅ Found %d EventHub Namespace(s)", len(namespaces))
+	for _, ns := range namespaces {
+		t.Logf("  - %s", ns.Name)
+	}
 
-	// Use the expectedEventhubMap produced by Terraform outputs to know which EventHubs we should have
-	// expectedEventhubMap keys look like "Microsoft.Storage/storageAccounts-eastus" and values are eventhub names
-	eventHubNames := make([]string, len(eventhubs))
-	for i, eh := range eventhubs {
-		eventHubNames[i] = eh.Name
+	// Collect EventHubs from ALL namespaces
+	t.Log("🔍 Verifying EventHubs across all namespaces...")
+	allEventHubNames := []string{}
+
+	for _, ns := range namespaces {
+		cmd = exec.Command("az", "eventhubs", "eventhub", "list",
+			"--resource-group", resourceGroupName,
+			"--namespace-name", ns.Name,
+			"--output", "json")
+		output, err = cmd.Output()
+		if err != nil {
+			t.Logf("⚠️  Failed to list EventHubs in namespace '%s': %v", ns.Name, err)
+			continue
+		}
+
+		var eventhubs []AzureResource
+		err = json.Unmarshal(output, &eventhubs)
+		if err != nil {
+			t.Logf("⚠️  Failed to parse EventHubs JSON for namespace '%s': %v", ns.Name, err)
+			continue
+		}
+
+		for _, eh := range eventhubs {
+			allEventHubNames = append(allEventHubNames, eh.Name)
+			t.Logf("  - Found EventHub '%s' in namespace '%s'", eh.Name, ns.Name)
+		}
 	}
 
 	// If Terraform produced no expected mapping, fall back to asserting that at least one EventHub exists
 	if len(expectedEventhubMap) == 0 {
-		assert.True(t, len(eventhubs) > 0, "No EventHubs found and no expected EventHubs were provided")
-		t.Logf("✅ Found %d EventHubs: %v", len(eventhubs), eventHubNames)
+		assert.True(t, len(allEventHubNames) > 0, "No EventHubs found and no expected EventHubs were provided")
+		t.Logf("✅ Found %d EventHubs: %v", len(allEventHubNames), allEventHubNames)
 		return
 	}
 
-	// For each expected eventhub name from Terraform, assert it exists in the actual EventHub list
+	// For each expected eventhub name from Terraform, assert it exists in the combined EventHub list from all namespaces
 	for _, expectedName := range expectedEventhubMap {
 		found := false
-		for _, ehName := range eventHubNames {
-			if ehName == expectedName || strings.Contains(strings.ToLower(ehName), strings.ToLower(expectedName)) {
+		for _, ehName := range allEventHubNames {
+			// Case-insensitive comparison to handle Azure API returning lowercase names
+			if strings.EqualFold(ehName, expectedName) {
 				found = true
 				break
 			}
 		}
-		assert.True(t, found, "Missing EventHub '%s'. Available EventHubs: %v", expectedName, eventHubNames)
+		assert.True(t, found, "Missing EventHub '%s'. Available EventHubs: %v", expectedName, allEventHubNames)
 	}
 
-	t.Logf("✅ All %d EventHubs verified: %v", len(eventhubs), eventHubNames)
+	t.Logf("✅ All %d EventHubs verified: %v", len(allEventHubNames), allEventHubNames)
 }
 
 // verifySumoLogicResources validates that Sumo Logic resources are properly created
@@ -263,7 +273,7 @@ func verifyAppInstallationStatus(t *testing.T, options *terraform.Options) {
 }
 
 // verifyDiagnosticSettings validates that diagnostic settings are properly configured
-func verifyDiagnosticSettings(t *testing.T, resourceGroupName, eventhubNamespaceName string) {
+func verifyDiagnosticSettings(t *testing.T, resourceGroupName string) {
 	t.Log("🔍 Verifying Diagnostic Settings...")
 
 	// Get list of diagnostic settings (this will show if any are configured)

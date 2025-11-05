@@ -69,11 +69,27 @@ enable_activity_logs         = false
 
 # Resource Targeting Configuration
 # Complete list of all supported Azure resources (as of 17-Oct-2025)
+#
+# Each resource type can optionally specify log_categories to collect:
+# - Omit log_categories field: Collects ALL available log categories (default)
+# - Empty array []: Collects ALL available log categories (same as omitted)
+# - Specific categories: Only collects the specified log categories
+#
+# To find valid log categories for a resource, use Azure CLI:
+# az monitor diagnostic-settings categories list --resource <resource-id>
+#
+# Example with specific log categories:
+# {
+#   log_namespace    = "Microsoft.KeyVault/vaults"
+#   metric_namespace = "Microsoft.KeyVault/vaults"
+#   log_categories   = ["AuditEvent", "AzurePolicyEvaluationDetails"]
+# }
 target_resource_types = [
   # Azure Application Gateway
   {
     log_namespace    = "Microsoft.Network/applicationgateways"
     metric_namespace = "Microsoft.Network/applicationgateways"
+    # log_categories = []  # Optional: Specify log categories or omit to collect all
   },
   # Azure Load Balancer
   {
@@ -112,6 +128,8 @@ target_resource_types = [
   {
     log_namespace    = "Microsoft.DBforPostgreSQL/flexibleServers"
     metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
+    # Example: Collect only specific PostgreSQL logs
+    # log_categories = ["PostgreSQLLogs", "PostgreSQLFlexSessions", "PostgreSQLFlexTableStats"]
   },
   # Azure Cosmos DB for PostgreSQL
   {
@@ -182,11 +200,15 @@ target_resource_types = [
   {
     log_namespace    = "Microsoft.KeyVault/vaults"
     metric_namespace = "Microsoft.KeyVault/vaults"
+    # Example: Collect specific log categories only
+    # log_categories = ["AuditEvent", "AzurePolicyEvaluationDetails"]
   },
   # Azure Storage (primary namespace - use nested_namespace_configs for nested resources)
   {
     log_namespace    = "Microsoft.Storage/storageAccounts"
     metric_namespace = "Microsoft.Storage/storageAccounts"
+    # Example: Collect all available log categories (default behavior)
+    # log_categories = []
   },
   # Azure SQL
   {

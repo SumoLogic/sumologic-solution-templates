@@ -1,6 +1,67 @@
 locals {
   solution_version = "v1.0.0"
 
+  # Get valid categories from Azure for each unique resource type
+  unique_resource_types = distinct([
+    for config in var.target_resource_types :
+    config.log_namespace
+    if config.log_namespace != null && config.log_namespace != ""
+  ])
+
+  # We need at least one resource of each type to get valid categories
+  # First, search for resources of each type
+  # Use the correct data source based on tag configuration (matches logic in all_resources_list)
+  resource_type_examples = {
+    for type in local.unique_resource_types :
+    type => try(
+      concat(
+        length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[type].resources : [],
+        length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[type].resources : [],
+        length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[type].resources : []
+      )[0].id,
+      null
+    )
+  }
+
+  # Get diagnostic categories for each resource type using the example resources
+  valid_log_categories_by_type = {
+    for type, resource_id in local.resource_type_examples :
+    type => resource_id != null ? try(
+      data.azurerm_monitor_diagnostic_categories.type_categories[type].log_category_types,
+      []
+    ) : []
+  }
+
+  # Resource types that need category validation (have non-empty log_categories)
+  resources_needing_validation = toset([
+    for config in var.target_resource_types :
+    config.log_namespace
+    if config.log_namespace != null &&
+       config.log_categories != null &&
+       length(config.log_categories) > 0
+  ])
+
+  # Get valid categories for each resource type that needs validation
+  # Uses the efficient type_categories data source (one query per resource type)
+  valid_categories_by_resource = {
+    for type in local.resources_needing_validation :
+    type => try(
+      data.azurerm_monitor_diagnostic_categories.type_categories[type].log_category_types,
+      []
+    )
+  }
+
+  # Validate log categories and collect any errors
+  log_category_validation_errors = flatten([
+    for config in var.target_resource_types : [
+      for category in coalesce(config.log_categories, []) :
+      "Invalid category '${category}' for resource type '${config.log_namespace}'. Valid categories are: ${join(", ", try(local.valid_categories_by_resource[config.log_namespace], []))}"
+      if config.log_namespace != null &&
+         length(coalesce(config.log_categories, [])) > 0 &&
+         !contains(try(local.valid_categories_by_resource[config.log_namespace], []), category)
+    ]
+  ])
+
   log_namespaces = distinct([
     for config in var.target_resource_types : config.log_namespace
     if config.log_namespace != null && config.log_namespace != ""

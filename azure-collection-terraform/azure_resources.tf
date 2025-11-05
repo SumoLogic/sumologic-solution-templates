@@ -27,6 +27,16 @@ data "azurerm_monitor_diagnostic_categories" "all_categories" {
   resource_id = each.value.id
 }
 
+# Get diagnostic categories for each resource type
+data "azurerm_monitor_diagnostic_categories" "type_categories" {
+  for_each = {
+    for type, resource_id in local.resource_type_examples :
+    type => resource_id
+    if resource_id != null
+  }
+  resource_id = each.value
+}
+
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
@@ -76,6 +86,14 @@ resource "azurerm_eventhub_namespace_authorization_rule" "sumo_collection_policy
 }
 
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
+  # Fail early if any log categories are invalid
+  lifecycle {
+    precondition {
+      condition     = length(local.log_category_validation_errors) == 0
+      error_message = "Invalid log categories detected:\n${join("\n", local.log_category_validation_errors)}"
+    }
+  }
+
   for_each = {
     for k, v in local.all_monitored_resources : k => v
     if !contains(local.unsupported_eventhub_locations, lower(replace(v.location, " ", ""))) && length([
@@ -86,7 +104,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
     ]) > 0
   }
 
-  name                           = "diag-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
+  name                           = "diag-sachin-test-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
   target_resource_id             = each.value.id
   eventhub_authorization_rule_id = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[each.value.location].id
 
@@ -95,7 +113,26 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
   ].name
 
   dynamic "enabled_log" {
-    for_each = data.azurerm_monitor_diagnostic_categories.all_categories[each.key].log_category_types
+    # Select categories to enable: use the union of configured `log_categories` for the resource's
+    # log_namespace when provided; otherwise enable all available categories returned by Azure.
+    for_each = (
+      length([
+        for config in var.target_resource_types :
+        config if config.log_namespace == lookup(each.value, "parent_type", each.value.type)
+      ]) > 0
+        ? (
+            length([
+              for config in var.target_resource_types :
+              config if config.log_namespace == lookup(each.value, "parent_type", each.value.type) && length(lookup(config, "log_categories", [])) > 0
+            ]) > 0
+              ? distinct(flatten([
+                  for config in var.target_resource_types :
+                  lookup(config, "log_categories", []) if config.log_namespace == lookup(each.value, "parent_type", each.value.type)
+                ]))
+              : data.azurerm_monitor_diagnostic_categories.all_categories[each.key].log_category_types
+          )
+        : []
+    )
     content {
       category = enabled_log.value
     }
@@ -117,7 +154,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
   timeouts {
     create = "30m"
     update = "30m"
-    delete = "60m" # Increased from 30m to handle potential Azure Backup lock retries
+    delete = "60m"
   }
 }
 
