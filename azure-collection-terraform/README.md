@@ -1012,6 +1012,9 @@ The table below shows Event Hub namespace availability across Azure regions by S
 | **App installation fails with "app already installed" error** | The app is already installed in your Sumo Logic account. Either:<br>• Remove the app from `installation_apps_list` to skip installation<br>• Manually uninstall the existing app in Sumo Logic UI<br>• Use `terraform import` to manage the existing app installation |
 | **Authentication failures with Azure provider** | 1. Ensure you've run `az login` and are authenticated<br>2. Verify your Azure credentials have sufficient permissions (Contributor + Monitoring Contributor roles)<br>3. Check subscription ID matches your target subscription<br>4. Run `az account show` to verify current context |
 | **Variables validation errors** | 1. Check `eventhub_namespace_name` is 6-50 characters, starts with letter, globally unique<br>2. Verify `throughput_units` is one of: `1`, `2`, `4`, `8`, `16`<br>3. Ensure `location` matches a valid Azure region name<br>4. Validate `resource_group_name` doesn't contain special characters or spaces |
+| **Invalid log categories validation error** | Terraform fails during `terraform plan` if you specify invalid log categories. **To find valid categories:** Use Azure CLI: `az monitor diagnostic-settings categories list --resource <resource-id> --query "logs[].name"` or check [Azure documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/resource-logs-categories). **Quick fix:** Omit the `log_categories` field to collect all available logs. Note: Category names are case-sensitive. |
+
+---
 
 ### Debugging
 
