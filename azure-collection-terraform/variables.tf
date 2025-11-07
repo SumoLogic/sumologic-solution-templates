@@ -45,11 +45,12 @@ variable "azure_tenant_id" {
 
 variable "target_resource_types" {
   type = list(object({
-    log_namespace    = optional(string)
-    metric_namespace = optional(string)
-    log_categories   = optional(list(string), [])
+    log_namespace          = optional(string)
+    metric_namespace       = optional(string)
+    log_categories         = optional(list(string), [])
+    required_resource_tags = optional(map(string), {})
   }))
-  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided."
+  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided. The required_resource_tags field filters resources for this specific type using AND logic (all tags must match)."
 
   validation {
     condition = alltrue([

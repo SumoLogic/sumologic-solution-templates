@@ -570,34 +570,6 @@ func TestResourceGroupNameValidation(t *testing.T) {
 	}
 }
 
-func TestAzureRequiredResourceTagsValidation(t *testing.T) {
-	tests := []struct {
-		name        string
-		tfvarsFile  string
-		expectError bool
-		description string
-	}{
-		{
-			name:        "TagsExist",
-			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
-			expectError: false,
-			description: "Configuration with tags should pass validation and filter resources",
-		},
-		{
-			name:        "EmptyTags",
-			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-empty-tags.tfvars"),
-			expectError: false,
-			description: "Empty tags should pass validation and collect from all resources without filtering",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			runValidationTest(t, tt.name, tt.tfvarsFile, tt.expectError, tt.description)
-		})
-	}
-}
-
 // TestEventHubNamespaceRegionHandling tests the region-specific logic for Event Hub namespaces
 func TestEventHubNamespaceRegionHandling(t *testing.T) {
 	testCases := []struct {
@@ -771,6 +743,73 @@ func TestEventHubNamespaceThroughputByRegion(t *testing.T) {
 				fmt.Sprintf("%s: Expected throughput %d but got %d", tc.description, tc.expectedThroughput, actualThroughput))
 
 			t.Logf("✓ %s: throughput=%d", tc.description, actualThroughput)
+		})
+	}
+}
+
+// TestAzureResourceTagFiltering tests per-resource-type required_resource_tags for log sources
+// Validates that tag filtering works correctly for Azure diagnostic settings and log collection
+func TestAzureResourceTagFiltering(t *testing.T) {
+	tests := []struct {
+		name        string
+		tfvarsFile  string
+		expectError bool
+		description string
+	}{
+		{
+			name:        "NoRequiredResourceTags",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "tag-filter-omitted.tfvars"),
+			expectError: false,
+			description: "Omitted required_resource_tags field should discover all Azure resources for log collection",
+		},
+		{
+			name:        "EmptyRequiredResourceTags",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "tag-filter-empty.tfvars"),
+			expectError: false,
+			description: "Empty required_resource_tags = {} should discover all Azure resources for log collection",
+		},
+		{
+			name:        "SingleTagFilter",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "tag-filter-single.tfvars"),
+			expectError: false,
+			description: "Single tag in required_resource_tags should filter Azure resources for log collection",
+		},
+		{
+			name:        "MultipleTagsFilter",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "tag-filter-multiple.tfvars"),
+			expectError: false,
+			description: "Multiple tags should use AND logic to filter Azure resources for log collection",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			terraformOptions := createTerraformOptions(tt.tfvarsFile)
+
+			terraform.Init(t, terraformOptions)
+
+			_, err := terraform.PlanE(t, terraformOptions)
+
+			if tt.expectError {
+				assert.Error(t, err, tt.description)
+			} else {
+				// For valid configurations, validation should pass
+				// We might get API errors if resources don't exist, but validation itself should pass
+				if err != nil {
+					errStr := err.Error()
+					// Check for validation errors - these would indicate a problem
+					if strings.Contains(errStr, "Invalid category") ||
+						strings.Contains(errStr, "Invalid log categories detected") ||
+						strings.Contains(errStr, "Resource precondition failed") {
+						t.Errorf("Test case '%s' should pass validation but got validation error: %v", tt.name, err)
+					} else {
+						// API/runtime errors are expected for validation-only tests without real resources
+						t.Logf("✓ Test case '%s' passed validation but failed at runtime (expected): %v", tt.name, err)
+					}
+				} else {
+					t.Logf("✅ Test case '%s' passed successfully", tt.name)
+				}
+			}
 		})
 	}
 }

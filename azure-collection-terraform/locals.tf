@@ -9,16 +9,11 @@ locals {
   ])
 
   # We need at least one resource of each type to get valid categories
-  # First, search for resources of each type
-  # Use the correct data source based on tag configuration (matches logic in all_resources_list)
+  # Use the new per-type data source
   resource_type_examples = {
     for type in local.unique_resource_types :
     type => try(
-      concat(
-        length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[type].resources : [],
-        length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[type].resources : [],
-        length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[type].resources : []
-      )[0].id,
+      data.azurerm_resources.target_resources_by_type[type].resources[0].id,
       null
     )
   }
@@ -52,12 +47,14 @@ locals {
   }
 
   # Validate log categories and collect any errors
+  # Skip validation if no resources found for the type (after tag filtering)
   log_category_validation_errors = flatten([
     for config in var.target_resource_types : [
       for category in coalesce(config.log_categories, []) :
       "Invalid category '${category}' for resource type '${config.log_namespace}'. Valid categories are: ${join(", ", try(local.valid_categories_by_resource[config.log_namespace], []))}"
       if config.log_namespace != null &&
          length(coalesce(config.log_categories, [])) > 0 &&
+         local.resource_type_examples[config.log_namespace] != null &&  # Only validate if resources exist
          !contains(try(local.valid_categories_by_resource[config.log_namespace], []), category)
     ]
   ])
@@ -103,25 +100,18 @@ locals {
 
   parents_with_nested_configs = keys(var.nested_namespace_configs)
 
-  # Flatten resources with OR logic for tags (no distinct needed, will dedupe by ID in map)
+  # Flatten resources using per-type data source (no distinct needed, will dedupe by ID in map)
   all_resources_list = flatten([
-    # Non-nested resources (with optional tag filtering and OR logic)
+    # Non-nested resources
     [for type in local.resource_types_for_discovery : [
-      for res in concat(
-        length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[type].resources : [],
-        length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[type].resources : [],
-        length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[type].resources : []
-      ) : res
+      for res in data.azurerm_resources.target_resources_by_type[type].resources : res
       if !contains(local.parents_with_nested_configs, type)
     ]],
-    # Nested resources (with optional tag filtering and OR logic)
+    # Nested resources
     [for parent_type, children_types in var.nested_namespace_configs : [
       for parent_res in(
-        contains(local.resource_types_for_discovery, parent_type) ? concat(
-          length(var.required_resource_tags) == 0 ? data.azurerm_resources.all_target_resources_no_tags[parent_type].resources : [],
-          length(var.required_resource_tags) > 0 ? data.azurerm_resources.all_target_resources_tag1[parent_type].resources : [],
-          length(var.required_resource_tags) > 1 ? data.azurerm_resources.all_target_resources_tag2[parent_type].resources : []
-        ) : []
+        contains(local.resource_types_for_discovery, parent_type) ?
+        data.azurerm_resources.target_resources_by_type[parent_type].resources : []
         ) : [
         for child_type in children_types : {
           id                  = "${parent_res.id}/${element(split("/", child_type), length(split("/", child_type)) - 1)}/default"
@@ -178,7 +168,7 @@ locals {
         )
       ])]
 
-      tag_filters = length(var.required_resource_tags) > 0 ? [{
+      tag_filters = length(config.required_resource_tags) > 0 ? [{
         type      = "AzureTagFilters"
         namespace = config.metric_namespace
         region = distinct([
@@ -191,7 +181,7 @@ locals {
           )
         ])
         tags = [
-          for tag_key, tag_value in var.required_resource_tags : {
+          for tag_key, tag_value in config.required_resource_tags : {
             name   = tag_key
             values = [tag_value]
           }

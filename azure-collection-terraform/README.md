@@ -469,8 +469,7 @@ The following table describes all available configuration variables. For a compl
 | `activity_log_export_name` | Name for the activity log diagnostic setting (1-128 characters, alphanumeric with underscores, periods, hyphens). | `string` | `"SumoLogicAzureActivityLogExport"` | **Yes** |
 | `activity_log_export_category` | Source category for activity logs in Sumo Logic. | `string` | `"azure/activity-logs"` | **Yes** |
 | **Resource Targeting** |||||
-| `target_resource_types` | List of Azure resource types to monitor. Each object specifies `log_namespace` (for log collection via EventHub) and/or `metric_namespace` (for metrics collection via Azure Monitor API). At least one must be specified per resource type.<br><br>**Optional `log_categories` field**: Within each entry, you can optionally specify `log_categories` (e.g., `["AuditEvent", "MySqlSlowLogs"]`) to control which diagnostic log categories are enabled. If omitted or set to empty array `[]`, all available categories are enabled automatically. Invalid categories are validated during plan phase.<br>**Discover valid categories**: `az monitor diagnostic-settings categories list --resource "<RESOURCE_ID>" --output table` | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L87) | **Yes** |
-| `required_resource_tags` | Map of tags to filter Azure resources. Only resources with these tags will be monitored. Use empty `{}` to monitor all resources without tag filtering. | `map(string)` | `{"tag-name": "tag-value"}` | **Yes** |
+| `target_resource_types` | List of Azure resource types to monitor. Each object specifies `log_namespace` (for log collection via EventHub) and/or `metric_namespace` (for metrics collection via Azure Monitor API). At least one must be specified per resource type.<br><br>**Optional `log_categories` field**: Within each entry, you can optionally specify `log_categories` (e.g., `["AuditEvent", "MySqlSlowLogs"]`) to control which diagnostic log categories are enabled. If omitted or set to empty array `[]`, all available categories are enabled automatically. Invalid categories are validated during plan phase.<br>**Discover valid categories**: `az monitor diagnostic-settings categories list --resource "<RESOURCE_ID>" --output table`<br><br>**Optional `required_resource_tags` field**: Within each entry, you can optionally specify `required_resource_tags` (e.g., `{"environment": "production", "team": "security"}`) to filter resources by tags using **AND logic** (all specified tags must match). If omitted or empty `{}`, all resources of this type are discovered without tag filtering. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L87) | **Yes** |
 | `nested_namespace_configs` | Map of parent resource types to their child resource types for nested resources (e.g., Storage Accounts → blobServices/fileServices). Use empty `{}` if not monitoring nested resources. | `map(list(string))` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L258) | **Yes** |
 | **Sumo Logic Configuration** |||||
 | `sumologic_access_id` | Sumo Logic Access ID from your account preferences. Used for API authentication. | `string` | `"your-sumologic-access-id"` | **Yes** |
@@ -577,6 +576,11 @@ target_resource_types = [
   {
     log_namespace    = "Microsoft.Storage/storageAccounts"
     metric_namespace = "Microsoft.Storage/storageAccounts"
+    # Optional: Filter by tags (AND logic - all tags must match)
+    # required_resource_tags = {
+    #   "environment" = "production"
+    #   "monitoring"  = "enabled"
+    # }
   }
   # Add more resource types as needed
 ]
@@ -607,16 +611,6 @@ installation_apps_list = [
 #### 🟡 **Optional - Configure If Needed** (Leave empty or customize)
 
 ```hcl
-# ============================================================================
-# Resource Filtering - Filter Azure resources by tags (optional)
-# ============================================================================
-required_resource_tags = {
-  # Example: Only monitor resources with these tags
-  # "Environment" = "Production"
-  # "Monitoring"  = "Enabled"
-}
-# Leave as {} to monitor all resources without tag filtering
-
 # ============================================================================
 # Nested Resources - Configure child resources for monitoring (optional)
 # ============================================================================
@@ -680,6 +674,11 @@ target_resource_types = [
   {
     log_namespace    = "Microsoft.Storage/storageAccounts"
     metric_namespace = "Microsoft.Storage/storageAccounts"
+    # Optional: Filter this resource type by tags
+    # required_resource_tags = {
+    #   "environment" = "production"
+    #   "team"        = "platform"
+    # }
   }
 ]
 
@@ -690,7 +689,6 @@ sumologic_environment = "us1"
 installation_apps_list = []  # Start with no apps, add later
 
 # Optional - Leave as default
-required_resource_tags   = {}
 nested_namespace_configs = {}
 ```
 
@@ -1016,6 +1014,47 @@ The table below shows Event Hub namespace availability across Azure regions by S
 
 ---
 
+### Resource Tag Filtering Guide
+
+Filter which Azure resources are monitored by adding `required_resource_tags` to each resource type in `target_resource_types`.
+
+**Key Behavior:**
+- **AND Logic**: ALL specified tags must match
+- **Case-Sensitive**: Exact match required for keys and values
+- **Optional**: Omit or use `{}` to monitor all resources of that type
+- **Per-Resource-Type**: Different filters for different resource types
+
+**Example:**
+```hcl
+target_resource_types = [
+  {
+    log_namespace          = "Microsoft.KeyVault/vaults"
+    required_resource_tags = {"environment" = "production"}  # Only production vaults
+  },
+  {
+    log_namespace          = "Microsoft.Storage/storageAccounts"
+    required_resource_tags = {}  # All storage accounts
+  }
+]
+```
+
+**Verify which resources match:**
+```bash
+# Check resources and their tags
+az resource list --resource-type "Microsoft.KeyVault/vaults" \
+  --query "[].{name:name, tags:tags}" --output table
+
+# Verify in Terraform plan
+terraform plan 2>&1 | grep -A 5 "azurerm_monitor_diagnostic_setting"
+```
+
+**Common issues:**
+- **No resources discovered**: Tags don't match (check case sensitivity)
+- **Missing resources**: Verify ALL tags present (AND logic)
+- **Whitespace**: `"team": "platform "` ≠ `"team": "platform"`
+
+---
+
 ### Debugging
 
 Enable detailed logs:
@@ -1028,9 +1067,20 @@ terraform apply
 az account show --debug
 ```
 
-Check EventHub metrics in Azure Portal:
-- Monitor → Metrics → Select EventHub namespace
-- View "Incoming Messages" and "Outgoing Messages"
+**Check EventHub metrics in Azure Portal:**
+- Navigate to: Monitor → Metrics → Select EventHub namespace
+- View "Incoming Messages" and "Outgoing Messages" to verify data flow
+
+**Verify Terraform resource discovery:**
+```bash
+# See which resources will be configured
+terraform plan 2>&1 | grep -A 5 "azurerm_monitor_diagnostic_setting"
+
+# Check data source outputs
+terraform plan 2>&1 | grep "data.azurerm_resources"
+```
+
+For tag filtering verification, see the [Resource Tag Filtering Guide](#resource-tag-filtering-guide) section above.
 
 ## Cleanup
 

@@ -1,23 +1,13 @@
-# Query resources with optional tag filtering (supports OR logic for multiple tags)
-data "azurerm_resources" "all_target_resources_no_tags" {
-  for_each = length(var.required_resource_tags) == 0 ? toset(local.resource_types_for_discovery) : []
-  type     = each.key
-}
-
-data "azurerm_resources" "all_target_resources_tag1" {
-  for_each = length(var.required_resource_tags) > 0 ? toset(local.resource_types_for_discovery) : []
-  type     = each.key
-  required_tags = {
-    (keys(var.required_resource_tags)[0]) = values(var.required_resource_tags)[0]
+# Query resources with per-resource-type tag filtering (supports AND logic)
+data "azurerm_resources" "target_resources_by_type" {
+  for_each = {
+    for config in var.target_resource_types :
+    coalesce(config.log_namespace, config.metric_namespace) => config.required_resource_tags
+    if coalesce(config.log_namespace, config.metric_namespace) != null
   }
-}
-
-data "azurerm_resources" "all_target_resources_tag2" {
-  for_each = length(var.required_resource_tags) > 1 ? toset(local.resource_types_for_discovery) : []
-  type     = each.key
-  required_tags = {
-    (keys(var.required_resource_tags)[1]) = values(var.required_resource_tags)[1]
-  }
+  
+  type          = each.key
+  required_tags = each.value
 }
 
 data "azurerm_client_config" "current" {}
@@ -104,7 +94,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
     ]) > 0
   }
 
-  name                           = "diag-sachin-test-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
+  name                           = "diag-test-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
   target_resource_id             = each.value.id
   eventhub_authorization_rule_id = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[each.value.location].id
 

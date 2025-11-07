@@ -70,19 +70,27 @@ enable_activity_logs         = false
 # Resource Targeting Configuration
 # Complete list of all supported Azure resources (as of 17-Oct-2025)
 #
-# Each resource type can optionally specify log_categories to collect:
-# - Omit log_categories field: Collects ALL available log categories (default)
-# - Empty array []: Collects ALL available log categories (same as omitted)
-# - Specific categories: Only collects the specified log categories
+# Each resource type can optionally specify:
+#
+# 1. log_categories - Filters which log categories to collect:
+#    - Omit field: Collects ALL available log categories (default)
+#    - Empty array []: Collects ALL available log categories (same as omitted)
+#    - Specific categories: Only collects the specified log categories
+#
+# 2. required_resource_tags - Filters resources by tags (AND logic - all tags must match):
+#    - Omit field: No tag filtering, monitors all resources of this type
+#    - Empty map {}: No tag filtering (same as omitted)
+#    - Specific tags: Only monitors resources with ALL specified tags
 #
 # To find valid log categories for a resource, use Azure CLI:
 # az monitor diagnostic-settings categories list --resource <resource-id>
 #
-# Example with specific log categories:
+# Example with specific log categories and tag filtering:
 # {
-#   log_namespace    = "Microsoft.KeyVault/vaults"
-#   metric_namespace = "Microsoft.KeyVault/vaults"
-#   log_categories   = ["AuditEvent", "AzurePolicyEvaluationDetails"]
+#   log_namespace          = "Microsoft.KeyVault/vaults"
+#   metric_namespace       = "Microsoft.KeyVault/vaults"
+#   log_categories         = ["AuditEvent", "AzurePolicyEvaluationDetails"]
+#   required_resource_tags = { Environment = "Production", Team = "Security" }
 # }
 target_resource_types = [
   # Azure Application Gateway
@@ -90,6 +98,7 @@ target_resource_types = [
     log_namespace    = "Microsoft.Network/applicationgateways"
     metric_namespace = "Microsoft.Network/applicationgateways"
     # log_categories = []  # Optional: Specify log categories or omit to collect all
+    # required_resource_tags = { Environment = "Production" }  # Optional: Filter by tags (AND logic)
   },
   # Azure Load Balancer
   {
