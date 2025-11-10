@@ -51,11 +51,24 @@ activity_log_export_name     = "SumoTestActivityLogExport-test"
 activity_log_export_category = "Administrative"
 enable_activity_logs         = false
 
+# Resource Targeting Configuration for Testing
+# 
+# Each resource type can optionally specify:
+# 1. log_categories - Filters which log categories to collect
+# 2. required_resource_tags - Filters resources by tags (AND logic)
+#
+# Test scenarios covered:
+# - Load Balancer: Specific log categories + tag filtering
+# - Storage Account: Default behavior (all categories, no tag filter)
 target_resource_types = [
   {
     log_namespace    = "Microsoft.Network/loadBalancers"
     metric_namespace = "Microsoft.Network/loadBalancers"
+    
+    # Test: Collect only specific log categories
     log_categories   = ["LoadBalancerAlertEvent", "LoadBalancerProbeHealthStatus"]
+    
+    # Test: Filter resources by tags (AND logic - all tags must match)
     required_resource_tags = {
       "logs-collection-destination" = "sumologic-test"
     }
@@ -63,7 +76,8 @@ target_resource_types = [
   {
     log_namespace    = "Microsoft.Storage/storageAccounts"
     metric_namespace = "Microsoft.Storage/storageAccounts"
-    # log_categories omitted to test default (all enabled)
+    # Test: log_categories omitted = collects ALL available log categories
+    # Test: required_resource_tags omitted = monitors ALL storage accounts (no tag filtering)
   }
 ]
 

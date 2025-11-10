@@ -97,8 +97,16 @@ target_resource_types = [
   {
     log_namespace    = "Microsoft.Network/applicationgateways"
     metric_namespace = "Microsoft.Network/applicationgateways"
-    # log_categories = []  # Optional: Specify log categories or omit to collect all
-    # required_resource_tags = { Environment = "Production" }  # Optional: Filter by tags (AND logic)
+    
+    # Optional: Specify which log categories to collect
+    # - Omit this field or use [] to collect ALL available log categories
+    # - Specify categories to collect only those logs
+    # - Find valid categories: az monitor diagnostic-settings categories list --resource <resource-id>
+    # log_categories = ["ApplicationGatewayAccessLog", "ApplicationGatewayPerformanceLog", "ApplicationGatewayFirewallLog"]
+    
+    # Optional: Filter resources by tags (AND logic - all tags must match)
+    # - Omit this field or use {} to monitor all resources of this type
+    # required_resource_tags = { "environment" = "production", "team" = "platform" }
   },
   # Azure Load Balancer
   {
@@ -137,8 +145,9 @@ target_resource_types = [
   {
     log_namespace    = "Microsoft.DBforPostgreSQL/flexibleServers"
     metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
-    # Example: Collect only specific PostgreSQL logs
-    # log_categories = ["PostgreSQLLogs", "PostgreSQLFlexSessions", "PostgreSQLFlexTableStats"]
+    
+    # Optional: Collect only specific log categories (otherwise collects all)
+    # log_categories = ["PostgreSQLLogs", "PostgreSQLFlexSessions", "PostgreSQLFlexTableStats", "PostgreSQLFlexQueryStoreRuntime", "PostgreSQLFlexQueryStoreWaitStats"]
   },
   # Azure Cosmos DB for PostgreSQL
   {
