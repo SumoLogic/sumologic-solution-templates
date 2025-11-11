@@ -82,15 +82,23 @@ enable_activity_logs         = false
 #    - Empty map {}: No tag filtering (same as omitted)
 #    - Specific tags: Only monitors resources with ALL specified tags
 #
+# 3. name_filter - Filters resources by regex pattern (case-insensitive):
+#    - Omit field: No name filtering, monitors all resources of this type
+#    - Empty string "": No name filtering (same as omitted)
+#    - Regex pattern: Only monitors resources whose names match the pattern
+#    - Examples: "^prod-.*" (starts with prod-), ".*-test$" (ends with -test),
+#                "dev-.*-[0-9]+" (complex pattern), "^(prod|staging)-.*" (multiple prefixes)
+#
 # To find valid log categories for a resource, use Azure CLI:
 # az monitor diagnostic-settings categories list --resource <resource-id>
 #
-# Example with specific log categories and tag filtering:
+# Example with all optional filters:
 # {
 #   log_namespace          = "Microsoft.KeyVault/vaults"
 #   metric_namespace       = "Microsoft.KeyVault/vaults"
 #   log_categories         = ["AuditEvent", "AzurePolicyEvaluationDetails"]
-#   required_resource_tags = { Environment = "Production", Team = "Security" }
+#   required_resource_tags = { "environment" = "production", "team" = "security" }
+#   name_filter            = "^prod-.*"
 # }
 target_resource_types = [
   # Azure Application Gateway
@@ -107,6 +115,11 @@ target_resource_types = [
     # Optional: Filter resources by tags (AND logic - all tags must match)
     # - Omit this field or use {} to monitor all resources of this type
     # required_resource_tags = { "environment" = "production", "team" = "platform" }
+    
+    # Optional: Filter resources by regex pattern (case-insensitive)
+    # - Omit this field or use "" to monitor all resources of this type
+    # - Examples: "^prod-.*" (starts with prod-), ".*-test$" (ends with -test)
+    # name_filter = "^prod-.*"
   },
   # Azure Load Balancer
   {
@@ -220,6 +233,11 @@ target_resource_types = [
     metric_namespace = "Microsoft.KeyVault/vaults"
     # Example: Collect specific log categories only
     # log_categories = ["AuditEvent", "AzurePolicyEvaluationDetails"]
+    
+    # Example: Apply all three optional filters together
+    # log_categories         = ["AuditEvent"]
+    # required_resource_tags = { "environment" = "production", "team" = "security" }
+    # name_filter            = "^prod-.*"  # Only production key vaults starting with "prod-"
   },
   # Azure Storage (primary namespace - use nested_namespace_configs for nested resources)
   {
@@ -227,6 +245,12 @@ target_resource_types = [
     metric_namespace = "Microsoft.Storage/storageAccounts"
     # Example: Collect all available log categories (default behavior)
     # log_categories = []
+    
+    # Example: Different name_filter patterns
+    # name_filter = "^prod-.*"           # Starts with "prod-"
+    # name_filter = ".*-test$"           # Ends with "-test"
+    # name_filter = ".*critical.*"       # Contains "critical"
+    # name_filter = "^(prod|staging)-.*" # Starts with "prod-" or "staging-"
   },
   # Azure SQL
   {

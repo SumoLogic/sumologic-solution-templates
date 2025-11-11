@@ -49,8 +49,9 @@ variable "target_resource_types" {
     metric_namespace       = optional(string)
     log_categories         = optional(list(string), [])
     required_resource_tags = optional(map(string), {})
+    name_filter            = optional(string, "")
   }))
-  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided. The required_resource_tags field filters resources for this specific type using AND logic (all tags must match)."
+  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided. The required_resource_tags field filters resources for this specific type using AND logic (all tags must match). The name_filter field is optional and filters resources by regex pattern (case-insensitive); if omitted or empty string, no name filtering is applied."
 
   validation {
     condition = alltrue([

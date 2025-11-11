@@ -100,12 +100,20 @@ locals {
 
   parents_with_nested_configs = keys(var.nested_namespace_configs)
 
+  # Map of resource type to name_filter (regex pattern) for filtering
+  type_to_name_filter = {
+    for config in var.target_resource_types :
+    coalesce(config.log_namespace, config.metric_namespace) => lookup(config, "name_filter", "")
+    if coalesce(config.log_namespace, config.metric_namespace) != null
+  }
+
   # Flatten resources using per-type data source (no distinct needed, will dedupe by ID in map)
   all_resources_list = flatten([
-    # Non-nested resources
+    # Non-nested resources with name_filter (regex) filtering
     [for type in local.resource_types_for_discovery : [
       for res in data.azurerm_resources.target_resources_by_type[type].resources : res
-      if !contains(local.parents_with_nested_configs, type)
+      if !contains(local.parents_with_nested_configs, type) &&
+         (local.type_to_name_filter[type] == "" || can(regex(local.type_to_name_filter[type], lower(res.name))))
     ]],
     # Nested resources
     [for parent_type, children_types in var.nested_namespace_configs : [
@@ -171,15 +179,6 @@ locals {
       tag_filters = length(config.required_resource_tags) > 0 ? [{
         type      = "AzureTagFilters"
         namespace = config.metric_namespace
-        region = distinct([
-          for res in values(local.all_monitored_resources) :
-          replace(res.location, " ", "")
-          if config.log_namespace != null && config.log_namespace != "" ? (
-            res.type == config.log_namespace || lookup(res, "parent_type", "") == config.log_namespace
-            ) : (
-            res.type == config.metric_namespace
-          )
-        ])
         tags = [
           for tag_key, tag_value in config.required_resource_tags : {
             name   = tag_key

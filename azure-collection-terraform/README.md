@@ -469,7 +469,7 @@ The following table describes all available configuration variables. For a compl
 | `activity_log_export_name` | Name for the activity log diagnostic setting (1-128 characters, alphanumeric with underscores, periods, hyphens). | `string` | `"SumoLogicAzureActivityLogExport"` | **Yes** |
 | `activity_log_export_category` | Source category for activity logs in Sumo Logic. | `string` | `"azure/activity-logs"` | **Yes** |
 | **Resource Targeting** |||||
-| `target_resource_types` | List of Azure resource types to monitor. Each object specifies `log_namespace` (for log collection via EventHub) and/or `metric_namespace` (for metrics collection via Azure Monitor API). At least one must be specified per resource type.<br><br>**Optional `log_categories` field**: Within each entry, you can optionally specify `log_categories` (e.g., `["AuditEvent", "MySqlSlowLogs"]`) to control which diagnostic log categories are enabled. If omitted or set to empty array `[]`, all available categories are enabled automatically. Invalid categories are validated during plan phase.<br>**Discover valid categories**: `az monitor diagnostic-settings categories list --resource "<RESOURCE_ID>" --output table`<br><br>**Optional `required_resource_tags` field**: Within each entry, you can optionally specify `required_resource_tags` (e.g., `{"environment": "production", "team": "security"}`) to filter resources by tags using **AND logic** (all specified tags must match). If omitted or empty `{}`, all resources of this type are discovered without tag filtering. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L87) | **Yes** |
+| `target_resource_types` | List of Azure resource types to monitor. Each object specifies `log_namespace` (for log collection via EventHub) and/or `metric_namespace` (for metrics collection via Azure Monitor API). At least one must be specified per resource type.<br><br>**Optional `log_categories` field**: Within each entry, you can optionally specify `log_categories` (e.g., `["AuditEvent", "MySqlSlowLogs"]`) to control which diagnostic log categories are enabled. If omitted or set to empty array `[]`, all available categories are enabled automatically. Invalid categories are validated during plan phase.<br>**Discover valid categories**: `az monitor diagnostic-settings categories list --resource "<RESOURCE_ID>" --output table`<br><br>**Optional `required_resource_tags` field**: Within each entry, you can optionally specify `required_resource_tags` (e.g., `{"environment": "production", "team": "security"}`) to filter resources by tags using **AND logic** (all specified tags must match). If omitted or empty `{}`, all resources of this type are discovered without tag filtering. **Applies to both logs and metrics collection.**<br><br>**Optional `name_filter` field**: Within each entry, you can optionally specify `name_filter` (e.g., `"^prod-.*"`, `".*-test$"`) to filter resources by regex pattern (case-insensitive). Supports full regex syntax for flexible matching. If omitted or empty `""`, all resources of this type are discovered without name filtering. **Important: Only applies to log collection (`log_namespace`), not metrics. For metrics filtering, use `required_resource_tags`.** Nested resources are not filtered by name.<br><br>**Field Details:**<br><table><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr><tr><td>`log_namespace`</td><td>string</td><td>No*</td><td>Azure resource type for log collection</td></tr><tr><td>`metric_namespace`</td><td>string</td><td>No*</td><td>Azure resource type for metrics collection</td></tr><tr><td>`log_categories`</td><td>list(string)</td><td>No</td><td>Specific log categories to collect (default: all)</td></tr><tr><td>`required_resource_tags`</td><td>map(string)</td><td>No</td><td>Tag filters for both logs and metrics (AND logic, default: no filtering)</td></tr><tr><td>`name_filter`</td><td>string</td><td>No</td><td>Regex pattern for logs only (case-insensitive, default: no filtering)</td></tr></table>*At least one of `log_namespace` or `metric_namespace` required | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L87) | **Yes** |
 | `nested_namespace_configs` | Map of parent resource types to their child resource types for nested resources (e.g., Storage Accounts → blobServices/fileServices). Use empty `{}` if not monitoring nested resources. | `map(list(string))` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L258) | **Yes** |
 | **Sumo Logic Configuration** |||||
 | `sumologic_access_id` | Sumo Logic Access ID from your account preferences. Used for API authentication. | `string` | `"your-sumologic-access-id"` | **Yes** |
@@ -1052,6 +1052,59 @@ terraform plan 2>&1 | grep -A 5 "azurerm_monitor_diagnostic_setting"
 - **No resources discovered**: Tags don't match (check case sensitivity)
 - **Missing resources**: Verify ALL tags present (AND logic)
 - **Whitespace**: `"team": "platform "` ≠ `"team": "platform"`
+
+---
+
+### Resource Name Filtering Guide
+
+Filter which Azure resources are monitored by name using regex patterns with the `name_filter` field in `target_resource_types`.
+
+**Key Behavior:**
+- **Regex Matching**: Supports full regex syntax for flexible patterns
+- **Case-Insensitive**: Pattern matching ignores case
+- **Optional**: Omit or use `""` to monitor all resources of that type
+- **Per-Resource-Type**: Different patterns for different resource types
+- **Not Applied to Nested Resources**: Child resources inherit parent filtering
+- **⚠️ Logs Only**: Name filtering only applies to log collection (`log_namespace`), not metrics (`metric_namespace`)
+
+**For metrics filtering, use `required_resource_tags` instead.**
+
+**Common Patterns:**
+```hcl
+target_resource_types = [
+  {
+    log_namespace = "Microsoft.Compute/virtualMachines"
+    name_filter   = "^prod-"              # Starts with "prod-"
+  },
+  {
+    log_namespace = "Microsoft.Storage/storageAccounts"
+    name_filter   = ".*-test$"            # Ends with "-test"
+  },
+  {
+    log_namespace = "Microsoft.KeyVault/vaults"
+    name_filter   = ".*critical.*"        # Contains "critical"
+  },
+  {
+    log_namespace = "Microsoft.Network/loadBalancers"
+    name_filter   = "^(prod|staging)-.*"  # Starts with "prod-" or "staging-"
+  }
+]
+```
+
+**Verify which resources match:**
+```bash
+# List all resources and test your pattern
+az resource list --resource-type "Microsoft.Compute/virtualMachines" \
+  --query "[].name" --output table
+
+# Verify in Terraform plan
+terraform plan 2>&1 | grep -A 5 "azurerm_monitor_diagnostic_setting"
+```
+
+**Common issues:**
+- **No resources matched**: Check your regex pattern syntax
+- **Too many resources**: Pattern too broad (e.g., `"prod"` matches "production", "nonprod")
+- **Use anchors**: `^` (start) and `$` (end) for precise matching
 
 ---
 

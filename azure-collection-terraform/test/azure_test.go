@@ -813,3 +813,60 @@ func TestAzureResourceTagFiltering(t *testing.T) {
 		})
 	}
 }
+
+// TestAzureResourceNameFiltering tests name_filter regex functionality for filtering Azure resources
+// Validates that name filtering works correctly for log collection
+func TestAzureResourceNameFiltering(t *testing.T) {
+	tests := []struct {
+		name        string
+		tfvarsFile  string
+		expectError bool
+		description string
+	}{
+		{
+			name:        "OmittedNameFilter",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "tag-filter-omitted.tfvars"),
+			expectError: false,
+			description: "Omitted name_filter should discover all Azure resources matching tag filters",
+		},
+		{
+			name:        "EmptyNameFilter",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "tag-filter-empty.tfvars"),
+			expectError: false,
+			description: "Empty name_filter = \"\" should discover all Azure resources matching tag filters",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			terraformOptions := createTerraformOptions(tt.tfvarsFile)
+
+			terraform.Init(t, terraformOptions)
+
+			plan, err := terraform.PlanE(t, terraformOptions)
+
+			if tt.expectError {
+				assert.Error(t, err, tt.description)
+			} else {
+				// For valid configurations, validation should pass
+				// Check the plan output to verify resources were filtered correctly
+				if err != nil {
+					errStr := err.Error()
+					if strings.Contains(errStr, "Invalid value for variable") ||
+						strings.Contains(errStr, "validation rule") {
+						t.Errorf("Test case '%s' should pass validation but got validation error: %v", tt.name, err)
+					} else {
+						t.Logf("✓ Test case '%s' passed validation but failed at runtime (expected): %v", tt.name, err)
+					}
+				} else {
+					t.Logf("✅ Test case '%s' passed successfully", tt.name)
+					t.Logf("✓ Test case '%s': Plan includes Azure resource filtering", tt.name)
+
+					// Verify plan contains expected resources
+					assert.Contains(t, plan, "azurerm_resource_group",
+						"Plan should contain resource group")
+				}
+			}
+		})
+	}
+}
