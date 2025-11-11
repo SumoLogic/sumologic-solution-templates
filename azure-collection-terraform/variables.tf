@@ -189,46 +189,94 @@ variable "location" {
   }
 }
 
-# Throughput controls for Standard vs Premium SKUs
-variable "standard_throughput_units" {
-  description = "The number of throughput units to assign for Event Hub namespaces using the Standard SKU."
+# Throughput units (applies to Standard and Premium SKUs only)
+variable "default_throughput_units" {
+  description = "The number of throughput units to assign for Event Hub namespaces (global default). Only applicable for Standard and Premium SKUs. Valid values: 1, 2, 4, 8, or 16."
   type        = number
   default     = 4
 
   validation {
-    condition     = contains([1, 2, 4, 8, 16], var.standard_throughput_units)
-    error_message = "Standard throughput units must be one of: 1, 2, 4, 8, or 16."
+    condition     = contains([1, 2, 4, 8, 16], var.default_throughput_units)
+    error_message = "Throughput units must be one of: 1, 2, 4, 8, or 16."
   }
 
   validation {
-    condition     = floor(var.standard_throughput_units) == var.standard_throughput_units
-    error_message = "Standard throughput units must be a whole number."
-  }
-}
-
-variable "premium_throughput_units" {
-  description = "The number of throughput units to assign for Event Hub namespaces using the Premium SKU."
-  type        = number
-  default     = 4
-
-  validation {
-    condition     = contains([1, 2, 4, 8, 16], var.premium_throughput_units)
-    error_message = "Premium throughput units must be one of: 1, 2, 4, 8, or 16."
-  }
-
-  validation {
-    condition     = floor(var.premium_throughput_units) == var.premium_throughput_units
-    error_message = "Premium throughput units must be a whole number."
+    condition     = floor(var.default_throughput_units) == var.default_throughput_units
+    error_message = "Throughput units must be a whole number."
   }
 }
 
 variable "eventhub_namespace_sku" {
-  description = "The SKU (pricing tier) of the Event Hub Namespace."
+  description = <<-EOT
+    The SKU (pricing tier) of the Event Hub Namespace (global default). Valid values: Basic, Standard, Premium, or Dedicated.
+    
+    IMPORTANT: Auto-Upgrade Behavior
+    If a region has more than 10 Event Hub instances and the SKU is Basic or Standard, the system will automatically 
+    upgrade to Premium SKU for that region. This is necessary because:
+    - Basic/Standard SKUs support max 10 Event Hubs per namespace
+    - Premium SKU supports up to 100 Event Hubs per namespace
+    
+    You can override this auto-upgrade behavior using region_specific_eventhub_skus.
+  EOT
   type        = string
 
   validation {
-    condition     = contains(["Standard", "Premium"], var.eventhub_namespace_sku)
-    error_message = "Event Hub namespace SKU must be either 'Standard' or 'Premium'."
+    condition     = contains(["Basic", "Standard", "Premium", "Dedicated"], var.eventhub_namespace_sku)
+    error_message = "Event Hub namespace SKU must be one of: Basic, Standard, Premium, or Dedicated."
+  }
+}
+
+variable "region_specific_eventhub_skus" {
+  description = <<-EOT
+    Optional map to override Event Hub SKU and throughput units for specific regions.
+    Keys are region names (case-insensitive, spaces ignored). Each value specifies:
+    - sku: "Basic", "Standard", "Premium", or "Dedicated" (overrides global eventhub_namespace_sku)
+    - throughput_units: 1, 2, 4, 8, or 16 (for Standard/Premium; ignored for Basic/Dedicated)
+    
+    Example:
+    {
+      "East US" = {
+        sku              = "Premium"
+        throughput_units = 8
+      }
+      "West Europe" = {
+        sku              = "Standard"
+        throughput_units = 2
+      }
+      "Central US" = {
+        sku              = "Basic"
+        throughput_units = 1
+      }
+    }
+  EOT
+  type = map(object({
+    sku              = string
+    throughput_units = number
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for region, config in var.region_specific_eventhub_skus :
+      contains(["Basic", "Standard", "Premium", "Dedicated"], config.sku)
+    ])
+    error_message = "All region-specific SKUs must be one of: Basic, Standard, Premium, or Dedicated."
+  }
+
+  validation {
+    condition = alltrue([
+      for region, config in var.region_specific_eventhub_skus :
+      contains([1, 2, 4, 8, 16], config.throughput_units)
+    ])
+    error_message = "All region-specific throughput units must be one of: 1, 2, 4, 8, or 16."
+  }
+
+  validation {
+    condition = alltrue([
+      for region, config in var.region_specific_eventhub_skus :
+      floor(config.throughput_units) == config.throughput_units
+    ])
+    error_message = "All region-specific throughput units must be whole numbers."
   }
 }
 

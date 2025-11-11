@@ -1,11 +1,19 @@
 locals {
   solution_version = "v1.0.0"
 
+  # Normalize region-specific SKU overrides (lowercase, no spaces) for lookup
+  normalized_region_skus = {
+    for region, config in var.region_specific_eventhub_skus :
+    lower(replace(region, " ", "")) => config
+  }
+
   # Get valid categories from Azure for each unique resource type
+  # Use coalesce to match the data source logic: prefer log_namespace, fall back to metric_namespace
   unique_resource_types = distinct([
     for config in var.target_resource_types :
-    config.log_namespace
-    if config.log_namespace != null && config.log_namespace != ""
+    coalesce(config.log_namespace, config.metric_namespace)
+    if coalesce(config.log_namespace, config.metric_namespace) != null &&
+       coalesce(config.log_namespace, config.metric_namespace) != ""
   ])
 
   # We need at least one resource of each type to get valid categories
@@ -54,7 +62,7 @@ locals {
       "Invalid category '${category}' for resource type '${config.log_namespace}'. Valid categories are: ${join(", ", try(local.valid_categories_by_resource[config.log_namespace], []))}"
       if config.log_namespace != null &&
          length(coalesce(config.log_categories, [])) > 0 &&
-         local.resource_type_examples[config.log_namespace] != null &&  # Only validate if resources exist
+         try(local.resource_type_examples[config.log_namespace], null) != null &&  # Only validate if resources exist
          !contains(try(local.valid_categories_by_resource[config.log_namespace], []), category)
     ]
   ])
@@ -188,5 +196,52 @@ locals {
       }] : []
     }
     if config.metric_namespace != null && config.metric_namespace != ""
+  }
+
+  # Count Event Hub instances per location (for auto-upgrade to Premium if >10)
+  # Basic and Standard SKUs support max 10 Event Hubs per namespace
+  # Premium SKU supports up to 100 Event Hubs per namespace
+  eventhub_count_by_location = {
+    for location in keys(local.resources_by_location_only) :
+    location => length([
+      for k, v in local.resources_by_type_and_location :
+      k if v[0].location == location && length([
+        for config in var.target_resource_types :
+        config if config.log_namespace == local.eventhub_key_to_log_namespace[k] &&
+        config.log_namespace != null &&
+        config.log_namespace != ""
+      ]) > 0
+    ])
+  }
+
+  # Helper function to get SKU and throughput for a region
+  # Priority: 
+  # 1) region_specific override
+  # 2) Auto-upgrade to Premium if >10 Event Hubs and SKU is Basic/Standard
+  # 3) limited SKU regions → Standard
+  # 4) global default
+  eventhub_sku_by_region = {
+    for location in distinct(concat(
+      [for res in values(local.all_monitored_resources) : res.location if !contains(local.unsupported_eventhub_locations, lower(replace(res.location, " ", "")))],
+      var.enable_activity_logs && !(contains(local.unsupported_eventhub_locations, lower(replace(var.location, " ", "")))) ? [var.location] : []
+    )) :
+    location => (
+      # Check if there's a region-specific override
+      contains(keys(local.normalized_region_skus), lower(replace(location, " ", ""))) ?
+      # Region-specific override exists - use it
+      local.normalized_region_skus[lower(replace(location, " ", ""))] :
+      # No region-specific override - apply auto-upgrade logic
+      {
+        sku = (
+          # First check: if limited SKU region and global is Premium/Dedicated, downgrade to Standard
+          contains(local.limited_eventhub_sku_locations, lower(replace(location, " ", ""))) && contains(["Premium", "Dedicated"], var.eventhub_namespace_sku) ? "Standard" :
+          # Second check: if >10 Event Hubs and SKU is Basic/Standard, auto-upgrade to Premium
+          lookup(local.eventhub_count_by_location, location, 0) > 10 && contains(["Basic", "Standard"], var.eventhub_namespace_sku) ? "Premium" :
+          # Default: use global SKU
+          var.eventhub_namespace_sku
+        )
+        throughput_units = var.default_throughput_units
+      }
+    )
   }
 }

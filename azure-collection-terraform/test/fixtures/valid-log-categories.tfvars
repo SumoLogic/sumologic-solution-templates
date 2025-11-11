@@ -9,11 +9,10 @@ azure_tenant_id         = "a39bedba-be8f-4c0f-bfe2-b8c7913501ea"
 resource_group_name     = "test-rg"
 eventhub_namespace_name = "test-eventhub"
 eventhub_namespace_sku  = "Standard"
+default_throughput_units = 2
 location                = "East US"
 policy_name             = "TestPolicy"
 
-standard_throughput_units = 2
-premium_throughput_units  = 4
 
 enable_activity_logs         = false
 activity_log_export_name     = "TestActivityLog"

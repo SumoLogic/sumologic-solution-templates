@@ -460,10 +460,11 @@ The following table describes all available configuration variables. For a compl
 | **Azure Infrastructure** |||||
 | `resource_group_name` | Name for the new resource group where all Event Hub namespaces will be created. These Event Hubs are used to configure resource logs and activity logs collection sources in Sumo Logic. | `string` | `"sumologic-azure-collection-rg"` | **Yes** |
 | `eventhub_namespace_name` | Name for the Event Hub namespace (must be globally unique across Azure, 6-50 characters, starts with letter). | `string` | `"sumologic-azure-collection-EventHub"` | Yes |
-| `eventhub_namespace_sku` | Event Hub SKU tier. Options: `Standard` or `Premium`. | `string` | `"Premium"` | **Yes** |
+| `eventhub_namespace_sku` | Event Hub SKU tier (global default). Options: `"Basic"`, `"Standard"`, `"Premium"`, or `"Dedicated"`. Can be overridden per region using `region_specific_eventhub_skus`. Module automatically upgrades to Premium SKU when >10 Event Hubs exist in a region with Basic/Standard SKU. | `string` | `"Standard"` | **Yes** |
+| `default_throughput_units` | Default throughput units (processing capacity) for Event Hub namespaces. Valid values: `1`, `2`, `4`, `8`, or `16`. Applies to Standard and Premium SKUs. Can be overridden per region using `region_specific_eventhub_skus`. | `number` | `2` | **Yes** |
+| `region_specific_eventhub_skus` | Optional map to override SKU and throughput units for specific Azure regions. Each entry specifies `sku` and `throughput_units`. Region names are case-insensitive with spaces ignored. Use empty `{}` if no regional overrides needed.<br><br>**Example:**<br>```hcl<br>region_specific_eventhub_skus = {<br>  "eastus" = {<br>    sku = "Premium"<br>    throughput_units = 4<br>  }<br>  "westindia" = {<br>    sku = "Basic"<br>    throughput_units = 1<br>  }<br>}<br>```<br>**Auto-upgrade behavior:** When >10 Event Hubs exist in a region with Basic/Standard SKU, the module automatically upgrades to Premium SKU (unless explicitly overridden in this map). | `map(object({ sku = string, throughput_units = number }))` | `{}` | No |
 | `location` | Azure region for resources (must match subscription location). Example: `East US`, `West US 2`, `North Europe`. | `string` | `"East US"` | **Yes** |
 | `policy_name` | Name for the Event Hub authorization policy (1-64 characters, alphanumeric and hyphens only). | `string` | `"SumoLogicAzureCollectionPolicy"` | **Yes** |
-| `throughput_units` | Number of throughput units (processing capacity) for Event Hub Premium tier. Options: `1`, `2`, `4`, `8`, or `16`. | `number` | `2` | **Yes** |
 | **Activity Logs** |||||
 | `enable_activity_logs` | Enable/disable subscription-level activity log collection. **Warning**: Affects entire subscription, not just this Terraform workspace. | `bool` | `false` | **Yes** |
 | `activity_log_export_name` | Name for the activity log diagnostic setting (1-128 characters, alphanumeric with underscores, periods, hyphens). | `string` | `"SumoLogicAzureActivityLogExport"` | **Yes** |
@@ -501,6 +502,51 @@ prevent_deletion_if_contains_resources = false
 
 
 #### Important Notes
+
+**Event Hub SKU Configuration & Auto-Upgrade:**
+
+This module provides flexible Event Hub SKU configuration with intelligent auto-upgrade capabilities:
+
+**SKU Selection Priority (per region):**
+1. **Region-Specific Override** → If configured in `region_specific_eventhub_skus`, uses that SKU/throughput
+2. **Auto-Upgrade to Premium** → If >10 Event Hubs exist in region with Basic/Standard SKU, automatically upgrades to Premium
+3. **Limited SKU Regions** → Regions with SKU restrictions (West India, Mexico Central) automatically use Standard SKU
+4. **Global Default** → Falls back to `eventhub_namespace_sku` and `default_throughput_units`
+
+**Auto-Upgrade Behavior:**
+- **Trigger**: When a region contains >10 Event Hubs and is using Basic or Standard SKU
+- **Action**: Automatically upgrades to Premium SKU for that region
+- **Reason**: Azure limits Basic/Standard SKUs to 10 Event Hubs per namespace; Premium supports up to 100
+- **Override**: Can be prevented by explicitly setting the region's SKU in `region_specific_eventhub_skus`
+
+**Example Configuration:**
+```hcl
+eventhub_namespace_sku   = "Standard"  # Global default
+default_throughput_units = 2           # Global default throughput
+
+region_specific_eventhub_skus = {
+  "eastus" = {
+    sku              = "Premium"  # Override: Use Premium in East US
+    throughput_units = 4
+  }
+  "westindia" = {
+    sku              = "Basic"    # Override: Use Basic in West India
+    throughput_units = 1
+  }
+}
+# Result:
+# - East US: Premium (4 TU) - explicit override
+# - West India: Basic (1 TU) - explicit override
+# - Other regions: Standard (2 TU) - global default
+# - Regions with >10 Event Hubs: Auto-upgraded to Premium (unless explicitly overridden)
+```
+
+**Regional SKU Limitations:**
+- **West India** and **Mexico Central**: Only support Basic and Standard SKUs (Premium not available)
+- The module automatically handles these limitations by defaulting to Standard SKU in these regions
+- You can still override to Basic SKU using `region_specific_eventhub_skus` if needed
+
+---
 
 **Activity Logs - Subscription-Level Warning:**
 
@@ -555,9 +601,11 @@ azure_tenant_id       = "your-azure-tenant-id"        # Your Azure AD tenant ID
 # ============================================================================
 # Event Hub Configuration - Choose SKU and throughput based on your needs
 # ============================================================================
-eventhub_namespace_sku    = "Standard"  # Options: "Standard" or "Premium"
-standard_throughput_units = 2           # For Standard SKU: 1, 2, 4, 8, or 16
-premium_throughput_units  = 4           # For Premium SKU: 1, 2, 4, 8, or 16
+eventhub_namespace_sku   = "Standard"  # Options: "Basic", "Standard", "Premium", or "Dedicated"
+default_throughput_units = 2           # Throughput units: 1, 2, 4, 8, or 16 (applies to Standard/Premium SKUs)
+
+# Note: Module automatically upgrades to Premium SKU when >10 Event Hubs exist in a region with Basic/Standard SKU
+# Note: See "Optional" section below for region-specific SKU overrides (region_specific_eventhub_skus)
 
 # ============================================================================
 # Azure Region - Where to deploy Event Hub infrastructure for Activity Logs
@@ -612,6 +660,21 @@ installation_apps_list = [
 
 ```hcl
 # ============================================================================
+# Regional SKU Overrides - Override SKU/throughput for specific regions
+# ============================================================================
+# region_specific_eventhub_skus = {
+#   "eastus" = {
+#     sku              = "Premium"
+#     throughput_units = 4
+#   }
+#   "westindia" = {
+#     sku              = "Basic"
+#     throughput_units = 1
+#   }
+# }
+# Leave as {} if using global defaults for all regions
+
+# ============================================================================
 # Nested Resources - Configure child resources for monitoring (optional)
 # ============================================================================
 nested_namespace_configs = {
@@ -663,10 +726,9 @@ azure_client_secret   = "your-azure-client-secret"
 azure_tenant_id       = "your-azure-tenant-id"
 
 # Event Hub (Required)
-eventhub_namespace_sku    = "Standard"
-standard_throughput_units = 2
-premium_throughput_units  = 4
-location                  = "East US"
+eventhub_namespace_sku   = "Standard"
+default_throughput_units = 2
+location                 = "East US"
 
 # Monitoring (Required)
 enable_activity_logs = false
@@ -1003,13 +1065,13 @@ The table below shows Event Hub namespace availability across Azure regions by S
 | Issue | Solution |
 |-------|----------|
 | **Error creating diagnostic settings - resource already has a diagnostic setting** | Each Azure resource can have a limited number of diagnostic settings. Check existing settings in Azure Portal or use `terraform import` to manage existing configurations. |
-| **EventHub throughput exceeded** | Increase `standard_throughput_units` or `premium_throughput_units` based on your SKU tier, or upgrade to Premium SKU for higher throughput capacity. Valid values: `1`, `2`, `4`, `8`, or `16`. |
+| **EventHub throughput exceeded** | Increase `default_throughput_units` (valid values: `1`, `2`, `4`, `8`, or `16`) or upgrade to a higher SKU tier. Alternatively, use `region_specific_eventhub_skus` to configure higher capacity for specific regions. The module automatically upgrades to Premium SKU when >10 Event Hubs exist in a region. |
 | **Sumo Logic sources show "Not Receiving Data"** | 1. Verify diagnostic settings are active in Azure Portal<br>2. Check EventHub is receiving messages (Monitor → Metrics → Incoming Messages)<br>3. Confirm authorization rules have Listen permission<br>4. Verify Sumo Logic connection string is correct<br>5. Check collector is online in Sumo Logic |
 | **Event Hub namespace creation failed in specific region** | Check the [regional support table](#azure-event-hub-regional-support) above. The region may not support Event Hub namespaces or may have SKU restrictions. The module automatically handles unsupported regions, but you can manually configure `eventhub_namespace_unsupported_locations` if needed. |
 | **Premium SKU forced to Standard in certain regions** | West India and Mexico Central only support Basic and Standard SKUs. The module automatically downgrades to Standard SKU in these regions. No action required unless you need Premium features (use a different region). |
 | **App installation fails with "app already installed" error** | The app is already installed in your Sumo Logic account. Either:<br>• Remove the app from `installation_apps_list` to skip installation<br>• Manually uninstall the existing app in Sumo Logic UI<br>• Use `terraform import` to manage the existing app installation |
 | **Authentication failures with Azure provider** | 1. Ensure you've run `az login` and are authenticated<br>2. Verify your Azure credentials have sufficient permissions (Contributor + Monitoring Contributor roles)<br>3. Check subscription ID matches your target subscription<br>4. Run `az account show` to verify current context |
-| **Variables validation errors** | 1. Check `eventhub_namespace_name` is 6-50 characters, starts with letter, globally unique<br>2. Verify `throughput_units` is one of: `1`, `2`, `4`, `8`, `16`<br>3. Ensure `location` matches a valid Azure region name<br>4. Validate `resource_group_name` doesn't contain special characters or spaces |
+| **Variables validation errors** | 1. Check `eventhub_namespace_name` is 6-50 characters, starts with letter, globally unique<br>2. Verify `default_throughput_units` is one of: `1`, `2`, `4`, `8`, `16`<br>3. Ensure `eventhub_namespace_sku` is one of: `"Basic"`, `"Standard"`, `"Premium"`, `"Dedicated"`<br>4. Validate `location` matches a valid Azure region name<br>5. Check `resource_group_name` doesn't contain special characters or spaces<br>6. If using `region_specific_eventhub_skus`, verify each entry has valid `sku` and `throughput_units` values |
 | **Invalid log categories validation error** | Terraform fails during `terraform plan` if you specify invalid log categories. **To find valid categories:** Use Azure CLI: `az monitor diagnostic-settings categories list --resource <resource-id> --query "logs[].name"` or check [Azure documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/resource-logs-categories). **Quick fix:** Omit the `log_categories` field to collect all available logs. Note: Category names are case-sensitive. |
 
 ---

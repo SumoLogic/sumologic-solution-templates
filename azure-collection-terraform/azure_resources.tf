@@ -39,8 +39,8 @@ resource "azurerm_eventhub_namespace" "namespaces_by_location" {
   name                = "${var.eventhub_namespace_name}-${replace(lower(each.key), " ", "")}"
   location            = each.key
   resource_group_name = azurerm_resource_group.rg.name
-  sku                 = contains(local.limited_eventhub_sku_locations, lower(replace(each.key, " ", ""))) ? "Standard" : var.eventhub_namespace_sku
-  capacity            = contains(local.limited_eventhub_sku_locations, lower(replace(each.key, " ", ""))) ? var.standard_throughput_units : (var.eventhub_namespace_sku == "Premium" ? var.premium_throughput_units : var.standard_throughput_units)
+  sku                 = local.eventhub_sku_by_region[each.key].sku
+  capacity            = local.eventhub_sku_by_region[each.key].throughput_units
 
   tags = {
     version = local.solution_version
@@ -61,7 +61,8 @@ resource "azurerm_eventhub" "eventhubs_by_type_and_location" {
   name              = "eventhub-${replace(each.key, "/", "-")}"
   namespace_id      = azurerm_eventhub_namespace.namespaces_by_location[each.value[0].location].id
   partition_count   = 4
-  message_retention = 7
+  # Basic SKU only supports 1 day retention; Standard/Premium/Dedicated support up to 7 days
+  message_retention = local.eventhub_sku_by_region[each.value[0].location].sku == "Basic" ? 1 : 7
 }
 
 resource "azurerm_eventhub_namespace_authorization_rule" "sumo_collection_policy" {
@@ -94,7 +95,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
     ]) > 0
   }
 
-  name                           = "diag-test-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
+  name                           = "diag-${replace(replace(each.value.name, "/", "-"), ".", "-")}"
   target_resource_id             = each.value.id
   eventhub_authorization_rule_id = azurerm_eventhub_namespace_authorization_rule.sumo_collection_policy[each.value.location].id
 
@@ -154,8 +155,8 @@ resource "azurerm_eventhub_namespace" "activity_logs_namespace" {
   name                = "${var.eventhub_namespace_name}-activity-logs"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  sku                 = contains(local.limited_eventhub_sku_locations, lower(replace(var.location, " ", ""))) ? "Standard" : var.eventhub_namespace_sku
-  capacity            = contains(local.limited_eventhub_sku_locations, lower(replace(var.location, " ", ""))) ? var.standard_throughput_units : (var.eventhub_namespace_sku == "Premium" ? var.premium_throughput_units : var.standard_throughput_units)
+  sku                 = local.eventhub_sku_by_region[var.location].sku
+  capacity            = local.eventhub_sku_by_region[var.location].throughput_units
 }
 
 resource "azurerm_eventhub_namespace_authorization_rule" "activity_logs_policy" {
@@ -173,7 +174,8 @@ resource "azurerm_eventhub" "eventhub_for_activity_logs" {
   name              = var.activity_log_export_name
   namespace_id      = azurerm_eventhub_namespace.activity_logs_namespace[0].id
   partition_count   = 4
-  message_retention = 7
+  # Basic SKU only supports 1 day retention; Standard/Premium/Dedicated support up to 7 days
+  message_retention = local.eventhub_sku_by_region[var.location].sku == "Basic" ? 1 : 7
 }
 
 resource "azurerm_monitor_diagnostic_setting" "activity_logs_to_event_hub" {
@@ -203,6 +205,9 @@ resource "azurerm_monitor_diagnostic_setting" "activity_logs_to_event_hub" {
   }
   enabled_log {
     category = "Autoscale"
+  }
+  enabled_log {
+    category = "ResourceHealth"
   }
 
   depends_on = [

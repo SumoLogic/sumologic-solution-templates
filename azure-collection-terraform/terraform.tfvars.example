@@ -20,12 +20,51 @@ azure_tenant_id         = "your-azure-tenant-id"
 # Azure Resource Configuration
 resource_group_name     = "sumologic-azure-collection-rg"
 eventhub_namespace_name = "sumologic-azure-collection-EventHub"
-eventhub_namespace_sku  = "Standard"
 policy_name             = "SumoLogicAzureCollectionPolicy"
 
-# Throughput units for Standard vs Premium SKUs
-standard_throughput_units = 4  # Used for Standard SKU and limited-SKU regions
-premium_throughput_units  = 4  # Used for Premium SKU when allowed in the region
+# Event Hub SKU Configuration (Global Defaults)
+# These settings apply to all regions unless overridden in region_specific_eventhub_skus
+# Valid SKUs: Basic, Standard, Premium, or Dedicated
+#
+# IMPORTANT: Auto-Upgrade Behavior
+# - If a region has more than 10 Event Hub instances and the SKU is Basic or Standard,
+#   the system will automatically upgrade to Premium SKU for that region
+# - This is necessary because Basic/Standard SKUs have a limit of 10 Event Hubs per namespace
+# - Premium SKU supports up to 100 Event Hubs per namespace
+# - You can override this behavior using region_specific_eventhub_skus
+eventhub_namespace_sku  = "Standard"
+
+# Throughput units (applies to Standard and Premium SKUs only)
+# Valid values: 1, 2, 4, 8, or 16
+# Note: Basic SKU has fixed throughput; Dedicated SKU uses Capacity Units instead
+default_throughput_units = 4
+
+# Optional: Region-Specific Event Hub SKU Configuration
+# Use this to override the global SKU and throughput settings for specific regions
+# This override takes precedence over auto-upgrade logic
+# Useful when:
+# - Different regions have different data volumes
+# - Cost optimization requires different SKUs per region
+# - Testing different configurations before global rollout
+# - Compliance requires specific SKU tiers in certain regions
+# - You want to prevent auto-upgrade to Premium (manually set SKU per region)
+#
+# Example:
+# region_specific_eventhub_skus = {
+#   "East US" = {
+#     sku              = "Premium"
+#     throughput_units = 8
+#   }
+#   "West Europe" = {
+#     sku              = "Standard"
+#     throughput_units = 2
+#   }
+#   "Central US" = {
+#     sku              = "Basic"
+#     throughput_units = 1  # Ignored for Basic SKU (fixed throughput)
+#   }
+# }
+region_specific_eventhub_skus = {}
 
 # Regions that only support Basic & Standard SKUs for Event Hub namespaces
 eventhub_namespace_limited_sku_locations = [
