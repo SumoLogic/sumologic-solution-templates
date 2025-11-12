@@ -63,6 +63,8 @@ Terraform module for automated log and metrics collection from Azure resources t
 - [Configuration Variables](#configuration-variables)
 - [Provider Deletion Safety](#provider-deletion-safety)
 - [Important Notes](#important-notes)
+  - Event Hub SKU Configuration & Auto-Upgrade
+  - Activity Logs - Subscription-Level Warning
 
 </details>
 
