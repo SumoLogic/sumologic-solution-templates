@@ -57,6 +57,31 @@ resource "sumologic_azure_event_hub_log_source" "sumo_azure_event_hub_log_source
     consumer_group = "$Default"
     region         = "Commercial"
   }
+
+  # Apply filters from target_resource_types configuration
+  dynamic "filters" {
+    for_each = flatten([
+      for config in var.target_resource_types :
+      [
+        for filter in config.log_source_filters :
+        filter
+        if config.log_namespace == local.eventhub_key_to_log_namespace[each.key] &&
+        config.log_namespace != null &&
+        config.log_namespace != "" &&
+        (length(filter.regions) == 0 || contains([for r in filter.regions : lower(replace(r, " ", ""))], lower(replace(local.resources_by_type_and_location[each.key][0].location, " ", ""))))
+      ]
+      if config.log_namespace == local.eventhub_key_to_log_namespace[each.key] &&
+      config.log_namespace != null &&
+      config.log_namespace != "" &&
+      length(config.log_source_filters) > 0
+    ])
+    content {
+      filter_type = filters.value.filter_type
+      name        = filters.value.name
+      regexp      = filters.value.regexp
+      mask        = filters.value.mask
+    }
+  }
 }
 
 resource "sumologic_azure_metrics_source" "terraform_azure_metrics_source" {
@@ -123,5 +148,16 @@ resource "sumologic_azure_event_hub_log_source" "sumo_activity_log_source" {
     event_hub_name = azurerm_eventhub.eventhub_for_activity_logs[0].name
     consumer_group = "$Default"
     region         = "Commercial"
+  }
+
+  # Apply filters for activity logs
+  dynamic "filters" {
+    for_each = var.activity_log_filters
+    content {
+      filter_type = filters.value.filter_type
+      name        = filters.value.name
+      regexp      = filters.value.regexp
+      mask        = filters.value.mask
+    }
   }
 }

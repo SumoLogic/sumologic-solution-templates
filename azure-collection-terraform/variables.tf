@@ -50,8 +50,15 @@ variable "target_resource_types" {
     log_categories         = optional(list(string), [])
     required_resource_tags = optional(map(string), {})
     name_filter            = optional(string, "")
+    log_source_filters = optional(list(object({
+      filter_type = string
+      name        = string
+      regexp      = string
+      mask        = optional(string, null)
+      regions     = optional(list(string), [])
+    })), [])
   }))
-  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided. The required_resource_tags field filters resources for this specific type using AND logic (all tags must match). The name_filter field is optional and filters resources by regex pattern (case-insensitive); if omitted or empty string, no name filtering is applied."
+  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided. The required_resource_tags field filters resources for this specific type using AND logic (all tags must match). The name_filter field is optional and filters resources by regex pattern (case-insensitive); if omitted or empty string, no name filtering is applied. The log_source_filters field is optional and specifies filters to apply to the Sumo Logic Azure Event Hub log source for this resource type. Each filter can optionally specify regions (list of region names); if omitted or empty, the filter applies to all regions."
 
   validation {
     condition = alltrue([
@@ -358,6 +365,17 @@ variable "activity_log_export_category" {
 variable "enable_activity_logs" {
   description = "Set to true to enable subscription-level activity log export."
   type        = bool
+}
+
+variable "activity_log_filters" {
+  type = list(object({
+    filter_type = string
+    name        = string
+    regexp      = string
+    mask        = optional(string, null)
+  }))
+  default     = []
+  description = "Optional filters to apply to the Sumo Logic Activity Log source. Each filter can Include, Exclude, or Mask log messages based on regex patterns. The mask field is required only for Mask filter type."
 }
 
 variable "sumologic_environment" {

@@ -106,6 +106,40 @@ activity_log_export_category = "azure/activity-logs"
 location                     = "East US"
 enable_activity_logs         = false
 
+# Activity Log Filters Configuration
+# Filters applied at the Sumo Logic activity log source level
+# Activity logs are subscription-level, so no region filtering is available
+#
+# Filter types: "Include" (only match), "Exclude" (reject match), "Mask" (redact match)
+# Each filter requires:
+# - filter_type: "Include", "Exclude", or "Mask"
+# - name: Descriptive name for the filter
+# - regexp: RE2 regex pattern (must match entire log message)
+# - mask (optional): Replacement string for Mask filters (cannot contain colons)
+#
+# Filters are evaluated in order; first match wins
+#
+# Example configurations:
+# activity_log_filters = [
+#   {
+#     filter_type = "Include"
+#     name        = "Include Write operations only"
+#     regexp      = ".*\"operationName\".*write.*"
+#   },
+#   {
+#     filter_type = "Mask"
+#     name        = "Mask sensitive fields"
+#     regexp      = "(\\\"password\\\".*)"
+#     mask        = "***REDACTED***"  # Cannot contain colons
+#   },
+#   {
+#     filter_type = "Exclude"
+#     name        = "Exclude read operations"
+#     regexp      = ".*\"operationName\".*read.*"
+#   },
+# ]
+activity_log_filters = []
+
 # Resource Targeting Configuration
 # Complete list of all supported Azure resources (as of 17-Oct-2025)
 #
@@ -128,6 +162,18 @@ enable_activity_logs         = false
 #    - Examples: "^prod-.*" (starts with prod-), ".*-test$" (ends with -test),
 #                "dev-.*-[0-9]+" (complex pattern), "^(prod|staging)-.*" (multiple prefixes)
 #
+# 4. log_source_filters - Filters applied at the Sumo Logic log source level:
+#    - Omit field or empty array []: No content filtering at source level
+#    - Filter types: "Include" (only match), "Exclude" (reject match), "Mask" (redact match)
+#    - Each filter requires:
+#      * filter_type: "Include", "Exclude", or "Mask"
+#      * name: Descriptive name for the filter
+#      * regexp: RE2 regex pattern (must match entire log message)
+#      * mask (optional): Replacement string for Mask filters (cannot contain colons)
+#      * regions (optional): List of regions to apply filter to (empty = all regions)
+#    - Region matching is case-insensitive with spaces removed ("East US" = "eastus")
+#    - Filters are evaluated in order; first match wins
+#
 # To find valid log categories for a resource, use Azure CLI:
 # az monitor diagnostic-settings categories list --resource <resource-id>
 #
@@ -138,6 +184,26 @@ enable_activity_logs         = false
 #   log_categories         = ["AuditEvent", "AzurePolicyEvaluationDetails"]
 #   required_resource_tags = { "environment" = "production", "team" = "security" }
 #   name_filter            = "^prod-.*"
+#   log_source_filters     = [
+#     {
+#       filter_type = "Include"
+#       name        = "Include only successful operations"
+#       regexp      = ".*\"ResultType\":\"Success\".*"
+#       regions     = ["East US", "West US"]  # Apply only to these regions
+#     },
+#     {
+#       filter_type = "Mask"
+#       name        = "Mask sensitive data"
+#       regexp      = "(\\\"password\\\"\\s*:\\s*\\\"[^\\\"]+\\\")"
+#       mask        = "***REDACTED***"  # Cannot contain colons
+#       # No regions specified = applies to all regions
+#     },
+#     {
+#       filter_type = "Exclude"
+#       name        = "Exclude health checks"
+#       regexp      = ".*healthcheck.*"
+#     },
+#   ]
 # }
 target_resource_types = [
   # Azure Application Gateway
@@ -215,6 +281,23 @@ target_resource_types = [
   {
     log_namespace    = "Microsoft.ServiceBus/namespaces"
     metric_namespace = "Microsoft.ServiceBus/Namespaces"
+    
+    # Example: Apply log source filters (content filtering at Sumo Logic)
+    # log_source_filters = [
+    #   {
+    #     filter_type = "Include"
+    #     name        = "Include specific resources"
+    #     regexp      = ".*\"resourceId\".*SBUS002.*"
+    #     regions     = ["East US"]  # Apply only to East US region
+    #   },
+    #   {
+    #     filter_type = "Mask"
+    #     name        = "Mask credit cards"
+    #     regexp      = "(\\d{16})"
+    #     mask        = "MaskedID"
+    #     # No regions specified = applies to all regions globally
+    #   },
+    # ]
   },
   # Azure Event Grid - Domains
   {
