@@ -471,15 +471,294 @@ The following table describes all available configuration variables. For a compl
 | `enable_activity_logs` | Enable/disable subscription-level activity log collection. **Warning**: Affects entire subscription, not just this Terraform workspace. | `bool` | `false` | **Yes** |
 | `activity_log_export_name` | Name for the activity log diagnostic setting (1-128 characters, alphanumeric with underscores, periods, hyphens). | `string` | `"SumoLogicAzureActivityLogExport"` | **Yes** |
 | `activity_log_export_category` | Source category for activity logs in Sumo Logic. | `string` | `"azure/activity-logs"` | **Yes** |
-| **Resource Targeting** |||||
-| `target_resource_types` | List of Azure resource types to monitor. Each object specifies `log_namespace` (for log collection via EventHub) and/or `metric_namespace` (for metrics collection via Azure Monitor API). At least one must be specified per resource type.<br><br>**Optional `log_categories` field**: Within each entry, you can optionally specify `log_categories` (e.g., `["AuditEvent", "MySqlSlowLogs"]`) to control which diagnostic log categories are enabled. If omitted or set to empty array `[]`, all available categories are enabled automatically. Invalid categories are validated during plan phase.<br>**Discover valid categories**: `az monitor diagnostic-settings categories list --resource "<RESOURCE_ID>" --output table`<br><br>**Optional `required_resource_tags` field**: Within each entry, you can optionally specify `required_resource_tags` (e.g., `{"environment": "production", "team": "security"}`) to filter resources by tags using **AND logic** (all specified tags must match). If omitted or empty `{}`, all resources of this type are discovered without tag filtering. **Applies to both logs and metrics collection.**<br><br>**Optional `name_filter` field**: Within each entry, you can optionally specify `name_filter` (e.g., `"^prod-.*"`, `".*-test$"`) to filter resources by regex pattern (case-insensitive). Supports full regex syntax for flexible matching. If omitted or empty `""`, all resources of this type are discovered without name filtering. **Important: Only applies to log collection (`log_namespace`), not metrics. For metrics filtering, use `required_resource_tags`.** Nested resources are not filtered by name.<br><br>**Field Details:**<br><table><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr><tr><td>`log_namespace`</td><td>string</td><td>No*</td><td>Azure resource type for log collection</td></tr><tr><td>`metric_namespace`</td><td>string</td><td>No*</td><td>Azure resource type for metrics collection</td></tr><tr><td>`log_categories`</td><td>list(string)</td><td>No</td><td>Specific log categories to collect (default: all)</td></tr><tr><td>`required_resource_tags`</td><td>map(string)</td><td>No</td><td>Tag filters for both logs and metrics (AND logic, default: no filtering)</td></tr><tr><td>`name_filter`</td><td>string</td><td>No</td><td>Regex pattern for logs only (case-insensitive, default: no filtering)</td></tr></table>*At least one of `log_namespace` or `metric_namespace` required | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L87) | **Yes** |
-| `nested_namespace_configs` | Map of parent resource types to their child resource types for nested resources (e.g., Storage Accounts → blobServices/fileServices). Use empty `{}` if not monitoring nested resources. | `map(list(string))` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L258) | **Yes** |
+| `activity_log_filters` | List of filters to apply to activity log sources in Sumo Logic. Each filter requires `filter_type` ("Include", "Exclude", or "Mask"), `name` (descriptive), `regexp` (RE2 pattern), and optional `mask` (replacement string, cannot contain colons). Filters are evaluated in order; first match wins. Use empty `[]` for no filtering. See [Activity Log Filters Configuration](#activity-log-filters-configuration) for details and examples. | `list(object)` | `[]` | No |
 | **Sumo Logic Configuration** |||||
 | `sumologic_access_id` | Sumo Logic Access ID from your account preferences. Used for API authentication. | `string` | `"your-sumologic-access-id"` | **Yes** |
 | `sumologic_access_key` | Sumo Logic Access Key from your account preferences. Used for API authentication. | `string` (sensitive) | `"your-sumologic-access-key"` | **Yes** |
 | `sumologic_environment` | Sumo Logic deployment region. Options: `us1`, `us2`, `eu`, `au`, `ca`, `de`, `jp`, `in`, `kr`, `fed`. | `string` | `"us1"` | **Yes** |
 | `sumo_collector_name` | Name for the Sumo Logic hosted collector (alphanumeric, hyphens, underscores, max 128 characters). | `string` | `"sumologic-azure-collection"` | **Yes** |
 | `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `parameters` (map of key-value pairs for app configuration). Use empty `[]` to skip app installation. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L285) | No |
+| **Resource Targeting** |||||
+| `target_resource_types` | List of Azure resource types to monitor. Supports multiple optional fields for filtering and customization. See [Target Resource Types Configuration](#target-resource-types-configuration) for detailed field descriptions, examples, and usage patterns. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L87) | **Yes** |
+| `nested_namespace_configs` | Map of parent resource types to their child resource types for nested resources (e.g., Storage Accounts → blobServices/fileServices). Use empty `{}` if not monitoring nested resources. | `map(list(string))` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L258) | **Yes** |
+
+To obtain these values follow [these steps](https://www.sumologic.com/help/docs/send-data/hosted-collectors/microsoft-source/azure-metrics-source/#vendor-configuration)
+
+#### Target Resource Types Configuration
+
+The `target_resource_types` variable is a list of objects where each object defines which Azure resources to monitor and how to collect their data. This table details all available fields:
+
+| Field Name | Type | Required | Description | Examples |
+|------------|------|:--------:|-------------|----------|
+| **Basic Configuration** ||||||
+| `log_namespace` | `string` | No* | Azure resource type for log collection via Event Hub. Defines which resource type's logs to stream to Sumo Logic. | `"Microsoft.Storage/storageAccounts"`<br>`"Microsoft.KeyVault/vaults"` |
+| `metric_namespace` | `string` | No* | Azure resource type for metrics collection via Azure Monitor API. Defines which resource type's metrics to poll from Azure. | `"Microsoft.Storage/storageAccounts"`<br>`"Microsoft.Compute/virtualMachines"` |
+| **Log Category Filtering** ||||||
+| `log_categories` | `list(string)` | No | Specific diagnostic log categories to collect. If omitted or empty `[]`, collects ALL available categories. Invalid categories cause validation errors during `terraform plan`. | `["AuditEvent"]`<br>`["PostgreSQLLogs", "PostgreSQLFlexSessions"]`<br>`[]` (all categories) |
+| **Resource Discovery Filtering** ||||||
+| `required_resource_tags` | `map(string)` | No | **[Azure-side filtering]** Filter which resources are discovered and monitored by matching Azure tags (AND logic - all tags must match). Case-sensitive. Applies to both logs and metrics. If omitted or empty `{}`, monitors all resources of this type. | `{"environment" = "production"}`<br>`{"team" = "security", "critical" = "true"}` |
+| `name_filter` | `string` | No | **[Azure-side filtering]** Filter which resources are discovered by regex pattern on resource name (case-insensitive). **Only applies to log collection (`log_namespace`), not metrics.** For metrics filtering, use `required_resource_tags`. If omitted or empty `""`, monitors all resources of this type. | `"^prod-.*"` (starts with prod-)<br>`".*-test$"` (ends with -test)<br>`"^(prod\|staging)-.*"` (multiple prefixes) |
+| **Content Filtering (Sumo Logic Source Level)** ||||||
+| `log_source_filters` | `list(object)` | No | **[Sumo Logic-side filtering]** Filter, exclude, or mask log content at the Sumo Logic Event Hub source after logs are collected from Azure. Each filter is an object with specific fields (see sub-table below). Evaluated in order; first match wins. Empty `[]` = no filtering. | See [Log Source Filters Configuration](#log-source-filters-configuration) |
+
+**\*At least one of `log_namespace` or `metric_namespace` must be specified per entry.**
+
+**Filtering Stages:**
+- **Stage 1 - Azure Discovery** (`required_resource_tags`, `name_filter`): Controls **which Azure resources** are monitored (happens in Azure)
+- **Stage 2 - Sumo Logic Ingestion** (`log_source_filters`): Controls **which log messages** are ingested from discovered resources (happens in Sumo Logic)
+
+**Example with all fields:**
+```hcl
+target_resource_types = [
+  {
+    # Basic Configuration
+    log_namespace    = "Microsoft.KeyVault/vaults"
+    metric_namespace = "Microsoft.KeyVault/vaults"
+    
+    # Log Category Filtering
+    log_categories = ["AuditEvent", "AzurePolicyEvaluationDetails"]
+    
+    # Resource Discovery Filtering
+    required_resource_tags = {
+      "environment" = "production"
+      "team"        = "security"
+    }
+    name_filter = "^prod-.*"  # Only production key vaults
+    
+    # Content Filtering (Sumo Logic)
+    log_source_filters = [
+      {
+        filter_type = "Include"
+        name        = "Include only successful operations"
+        regexp      = ".*\"ResultType\":\"Success\".*"
+        regions     = ["East US"]  # Region-specific filter
+      },
+      {
+        filter_type = "Mask"
+        name        = "Mask sensitive data"
+        regexp      = "(\\\"secretValue\\\"\\s*:\\s*\\\"[^\\\"]+\\\")"
+        mask        = "***REDACTED***"
+        # No regions = applies globally
+      }
+    ]
+  }
+]
+```
+
+**Common Patterns:**
+
+<details>
+<summary><strong>Logs Only (No Metrics)</strong></summary>
+
+```hcl
+{
+  log_namespace = "Microsoft.Web/sites"
+  # Omit metric_namespace - no metrics collected
+}
+```
+</details>
+
+<details>
+<summary><strong>Metrics Only (No Logs)</strong></summary>
+
+```hcl
+{
+  metric_namespace = "Microsoft.Compute/virtualMachines"
+  # Omit log_namespace - no logs collected
+}
+```
+</details>
+
+<details>
+<summary><strong>Both Logs and Metrics</strong></summary>
+
+```hcl
+{
+  log_namespace    = "Microsoft.Storage/storageAccounts"
+  metric_namespace = "Microsoft.Storage/storageAccounts"
+}
+```
+</details>
+
+<details>
+<summary><strong>Specific Log Categories</strong></summary>
+
+```hcl
+{
+  log_namespace  = "Microsoft.DBforPostgreSQL/flexibleServers"
+  log_categories = ["PostgreSQLLogs", "PostgreSQLFlexSessions"]
+}
+```
+</details>
+
+<details>
+<summary><strong>Tag-Based Filtering</strong></summary>
+
+```hcl
+{
+  log_namespace          = "Microsoft.KeyVault/vaults"
+  required_resource_tags = {
+    "environment" = "production"
+    "compliance"  = "pci-dss"
+  }
+}
+```
+</details>
+
+<details>
+<summary><strong>Name-Based Filtering (Logs Only)</strong></summary>
+
+```hcl
+{
+  log_namespace = "Microsoft.Network/applicationGateways"
+  name_filter   = "^prod-.*"  # Only resources starting with "prod-"
+}
+```
+</details>
+
+#### Log Source Filters Configuration
+
+The `log_source_filters` field within each `target_resource_types` entry allows content-level filtering at the Sumo Logic Event Hub log source. Each filter is an object with the following fields:
+
+| Field Name | Type | Required | Description | Examples |
+|------------|------|:--------:|-------------|----------|
+| `filter_type` | `string` | **Yes** | Type of filter to apply. Must be one of: `"Include"` (only matching logs), `"Exclude"` (reject matching logs), or `"Mask"` (redact matching content). | `"Include"`<br>`"Exclude"`<br>`"Mask"` |
+| `name` | `string` | **Yes** | Descriptive name for the filter (shown in Sumo Logic UI). | `"Include successful operations"`<br>`"Mask credit cards"` |
+| `regexp` | `string` | **Yes** | RE2 regex pattern that must match the **entire log message** (JSON as string). Use `.*` prefix/suffix to match partial content. | `".*\"ResultType\":\"Success\".*"`<br>`"(\\d{16})"` |
+| `mask` | `string` | No | Replacement string for `"Mask"` filter type. **Cannot contain colons (:)**. Ignored for `"Include"` and `"Exclude"` filters. | `"***REDACTED***"`<br>`"MASKED_VALUE"` |
+| `regions` | `list(string)` | No | List of Azure regions where this filter applies. Region matching is case-insensitive with spaces removed ("East US" = "eastus"). Empty `[]` or omitted = applies to **all regions globally**. | `["East US", "West US"]`<br>`[]` (all regions) |
+
+**Filter Evaluation:**
+- Filters are processed **in order** of definition
+- **First matching filter wins** (subsequent filters ignored for that log message)
+- Multiple filters can apply to different regions
+
+**Important Notes:**
+- **Regex must match entire message**: Azure diagnostic logs are JSON strings; your regex must account for the full structure
+- **Mask validation**: Sumo Logic API rejects mask strings containing colons (`:`)
+- **Region normalization**: "East US", "east us", "EastUS" all match the same region
+- **Empty regions list**: Filter applies globally across all regions
+
+**Example:**
+```hcl
+log_source_filters = [
+  # Region-specific Include filter (East US only)
+  {
+    filter_type = "Include"
+    name        = "Include specific resources"
+    regexp      = ".*\"resourceId\".*SBUS002.*"
+    regions     = ["East US"]
+  },
+  
+  # Global Mask filter (all regions)
+  {
+    filter_type = "Mask"
+    name        = "Mask credit card numbers"
+    regexp      = "(\\d{16})"
+    mask        = "XXXX-XXXX-XXXX-XXXX"
+    regions     = []  # or omit entirely
+  },
+  
+  # Exclude filter
+  {
+    filter_type = "Exclude"
+    name        = "Exclude health checks"
+    regexp      = ".*healthcheck.*"
+  }
+]
+```
+
+**Filter Types Explained:**
+
+| Filter Type | Behavior | Use Case |
+|-------------|----------|----------|
+| **Include** | Only logs matching the regex are ingested; all others are dropped | Reduce data volume by collecting only relevant logs (e.g., errors only, specific operations) |
+| **Exclude** | Logs matching the regex are dropped; all others are ingested | Remove noisy or irrelevant logs (e.g., health checks, debug logs) |
+| **Mask** | Matching content is replaced with the `mask` string | Redact sensitive data before ingestion (e.g., PII, credentials, credit cards) |
+
+**Common Regex Patterns:**
+
+<details>
+<summary><strong>Match JSON Field Values</strong></summary>
+
+```hcl
+# Match specific operation names
+regexp = ".*\"operationName\"\\s*:\\s*\"[^\"]*write[^\"]*\".*"
+
+# Match result types
+regexp = ".*\"ResultType\"\\s*:\\s*\"Success\".*"
+
+# Match severity levels
+regexp = ".*\"severity\"\\s*:\\s*\"Error\".*"
+```
+</details>
+
+<details>
+<summary><strong>Mask Sensitive Data</strong></summary>
+
+```hcl
+# Mask password fields
+regexp = "(\\\"password\\\"\\s*:\\s*\\\"[^\\\"]+\\\")"
+mask   = "***REDACTED***"
+
+# Mask credit card numbers
+regexp = "(\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4})"
+mask   = "XXXX-XXXX-XXXX-XXXX"
+
+# Mask email addresses
+regexp = "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})"
+mask   = "***EMAIL***"
+```
+</details>
+
+<details>
+<summary><strong>Include/Exclude Patterns</strong></summary>
+
+```hcl
+# Include only errors
+regexp = ".*\"level\"\\s*:\\s*\"(error|Error|ERROR)\".*"
+
+# Exclude health checks
+regexp = ".*healthcheck.*"
+
+# Include specific resource IDs
+regexp = ".*\"resourceId\".*prod-.*"
+```
+</details>
+
+#### Activity Log Filters Configuration
+
+The `activity_log_filters` variable applies filters to subscription-level activity log sources in Sumo Logic. These filters work identically to `log_source_filters`, but **do not support the `regions` field** (activity logs are subscription-wide, not region-specific).
+
+| Field Name | Type | Required | Description | Examples |
+|------------|------|:--------:|-------------|----------|
+| `filter_type` | `string` | **Yes** | Type of filter: `"Include"`, `"Exclude"`, or `"Mask"`. | `"Include"`<br>`"Mask"` |
+| `name` | `string` | **Yes** | Descriptive name for the filter. | `"Include Write operations only"` |
+| `regexp` | `string` | **Yes** | RE2 regex pattern (must match entire log message). | `".*\"operationName\".*write.*"` |
+| `mask` | `string` | No | Replacement string for `"Mask"` filters. **Cannot contain colons**. | `"***REDACTED***"` |
+
+**Example:**
+```hcl
+activity_log_filters = [
+  {
+    filter_type = "Include"
+    name        = "Include Write operations only"
+    regexp      = ".*\"operationName\"\\s*:\\s*\"[^\"]*write[^\"]*\".*"
+  },
+  {
+    filter_type = "Mask"
+    name        = "Mask sensitive fields"
+    regexp      = "(\\\"password\\\".*)"
+    mask        = "***REDACTED***"
+  }
+]
+```
+
+**Key Differences from Log Source Filters:**
+- ❌ No `regions` field (subscription-level, not regional)
+- ✅ Same filter types: Include, Exclude, Mask
+- ✅ Same mask validation (no colons)
+- ✅ Same evaluation order (first match wins)
 
 To obtain these values follow [these steps](https://www.sumologic.com/help/docs/send-data/hosted-collectors/microsoft-source/azure-metrics-source/#vendor-configuration)
 
@@ -1068,7 +1347,10 @@ The table below shows Event Hub namespace availability across Azure regions by S
 |-------|----------|
 | **Error creating diagnostic settings - resource already has a diagnostic setting** | Each Azure resource can have a limited number of diagnostic settings. Check existing settings in Azure Portal or use `terraform import` to manage existing configurations. |
 | **EventHub throughput exceeded** | Increase `default_throughput_units` (valid values: `1`, `2`, `4`, `8`, or `16`) or upgrade to a higher SKU tier. Alternatively, use `region_specific_eventhub_skus` to configure higher capacity for specific regions. The module automatically upgrades to Premium SKU when >10 Event Hubs exist in a region. |
-| **Sumo Logic sources show "Not Receiving Data"** | 1. Verify diagnostic settings are active in Azure Portal<br>2. Check EventHub is receiving messages (Monitor → Metrics → Incoming Messages)<br>3. Confirm authorization rules have Listen permission<br>4. Verify Sumo Logic connection string is correct<br>5. Check collector is online in Sumo Logic |
+| **Sumo Logic sources show "Not Receiving Data"** | 1. Verify diagnostic settings are active in Azure Portal<br>2. Check EventHub is receiving messages (Monitor → Metrics → Incoming Messages)<br>3. Confirm authorization rules have Listen permission<br>4. Verify Sumo Logic connection string is correct<br>5. Check collector is online in Sumo Logic<br>6. **If using filters**: Check filter configuration isn't too restrictive (see [Filter Configuration Guide](#filter-configuration-guide)) |
+| **All logs dropped after adding filters** | Check that Include filters aren't too restrictive. With Include filters present, logs must match to be ingested. Test regex patterns with sample logs. See [Filter Configuration Guide](#filter-configuration-guide). |
+| **Filter mask validation error: "mask string should not contain any colons"** | Sumo Logic API rejects mask strings containing colons (`:`). Remove all colons from `mask` values. Example: Change `"password":"***REDACTED***"` to `***REDACTED***`. See [Filter Mask Validation](#filter-mask-validation). |
+| **Region-specific filter applies globally** | Check HCL syntax - ensure trailing comma after `regions` field in object lists: `regions = ["East US"],` (note comma). See [Filter Regional Behavior](#filter-regional-behavior). |
 | **Event Hub namespace creation failed in specific region** | Check the [regional support table](#azure-event-hub-regional-support) above. The region may not support Event Hub namespaces or may have SKU restrictions. The module automatically handles unsupported regions, but you can manually configure `eventhub_namespace_unsupported_locations` if needed. |
 | **Premium SKU forced to Standard in certain regions** | West India and Mexico Central only support Basic and Standard SKUs. The module automatically downgrades to Standard SKU in these regions. No action required unless you need Premium features (use a different region). |
 | **App installation fails with "app already installed" error** | The app is already installed in your Sumo Logic account. Either:<br>• Remove the app from `installation_apps_list` to skip installation<br>• Manually uninstall the existing app in Sumo Logic UI<br>• Use `terraform import` to manage the existing app installation |
@@ -1169,6 +1451,196 @@ terraform plan 2>&1 | grep -A 5 "azurerm_monitor_diagnostic_setting"
 - **No resources matched**: Check your regex pattern syntax
 - **Too many resources**: Pattern too broad (e.g., `"prod"` matches "production", "nonprod")
 - **Use anchors**: `^` (start) and `$` (end) for precise matching
+
+---
+
+### Filter Configuration Guide
+
+This section covers content-level filtering at the Sumo Logic source level using `log_source_filters` and `activity_log_filters`.
+
+#### Filter Types and Behavior
+
+| Filter Type | Behavior | When to Use |
+|-------------|----------|-------------|
+| **Include** | Only matching logs ingested; all others dropped | Reduce data volume - collect only errors, specific operations, or critical resources |
+| **Exclude** | Matching logs dropped; all others ingested | Remove noise - exclude health checks, debug logs, or test traffic |
+| **Mask** | Matching content replaced with `mask` string | Redact sensitive data - mask PII, credentials, API keys, credit cards |
+
+**Evaluation Order:**
+- Filters process **in definition order**; **first match wins**
+- If Include filters exist and log doesn't match any: **dropped**
+- If only Exclude/Mask filters exist and log doesn't match: **ingested**
+
+**Example:**
+```hcl
+log_source_filters = [
+  { filter_type = "Include", regexp = ".*\"level\":\"error\".*", ... },  # Evaluated first
+  { filter_type = "Mask", regexp = "(\\\"password\\\".*)", ... }         # Evaluated second
+]
+# Result: Only error logs ingested. Password masking never applies to info logs (dropped before reaching mask filter).
+```
+
+#### Common Filter Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| **Filters not applied / All logs ingested** | Regex doesn't match log message format | Azure diagnostic logs are JSON strings. Ensure your regex matches the **entire message** using `.*` prefix/suffix. Test with sample logs. |
+| **No logs ingested (all dropped)** | Include filter too restrictive or regex error | Check regex syntax. Verify pattern matches expected log structure. Use `terraform plan` to review filter configuration. |
+| **Mask filter validation error: "mask string should not contain any colons"** | Sumo Logic API rejects mask strings with colons (`:`) | Remove all colons from `mask` value. Use alternatives like `***REDACTED***`, `MASKED_VALUE`, or `****`. |
+| **Region-specific filter applies to all regions** | Missing trailing comma in HCL object list with optional fields | Add trailing comma after `regions` field: `regions = ["East US"],` (note comma before closing brace) |
+| **Filter only applies to some regions, not all** | Empty `regions` list not specified or HCL syntax error | Explicitly set `regions = []` or omit the field entirely. Ensure trailing comma if present. |
+| **Masked content still visible in logs** | Regex doesn't capture the sensitive portion | Use capture groups `()` in regex. The mask replaces the **captured content**, not the entire match. Example: `"(\\d{16})"` captures card number. |
+| **Filters work for log sources but not metrics sources** | Metrics sources don't support content filters | Content filtering (`log_source_filters`) only applies to Event Hub log sources. For metrics, use `azure_tag_filters` (resource-level filtering). |
+
+#### Filter Regex Patterns Guide
+
+Azure diagnostic logs are JSON formatted. Your regex must match the complete message.
+
+**Key Principles:**
+- Use `.*` prefix/suffix for partial matching (e.g., `".*\"level\":\"error\".*"`)
+- Escape JSON special chars: `\"`, `\{`, `\:`
+- RE2 syntax (Google's regex library)
+- Test patterns before deploying
+
+**Common Patterns:**
+
+<details>
+<summary><strong>Match JSON Fields</strong></summary>
+
+```hcl
+# Operation names with "write"
+regexp = ".*\"operationName\"\\s*:\\s*\"[^\"]*write[^\"]*\".*"
+
+# Result types
+regexp = ".*\"ResultType\"\\s*:\\s*\"Success\".*"
+
+# Severity levels
+regexp = ".*\"severity\"\\s*:\\s*\"(Error|Critical)\".*"
+
+# Resource IDs
+regexp = ".*\"resourceId\"\\s*:\\s*\"[^\"]*SBUS002[^\"]*\".*"
+```
+</details>
+
+<details>
+<summary><strong>Mask Sensitive Data</strong></summary>
+
+```hcl
+# Password fields
+regexp = "(\\\"password\\\"\\s*:\\s*\\\"[^\\\"]+\\\")"
+mask   = "***REDACTED***"
+
+# Credit cards (16 digits)
+regexp = "(\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4})"
+mask   = "XXXX-XXXX-XXXX-XXXX"
+
+# Email addresses
+regexp = "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})"
+mask   = "***EMAIL***"
+
+# IP addresses
+regexp = "(\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b)"
+mask   = "***IP***"
+```
+</details>
+
+<details>
+<summary><strong>Include/Exclude Patterns</strong></summary>
+
+```hcl
+# Include only errors and warnings
+regexp = ".*\"level\"\\s*:\\s*\"(error|warning)\".*"
+
+# Exclude health checks
+regexp = ".*healthcheck.*"
+
+# Include write operations only
+regexp = ".*\"operationName\"\\s*:\\s*\"[^\"]*write[^\"]*\".*"
+```
+</details>
+
+**Test Your Regex:**
+```bash
+# Online tester: https://regex101.com/ (select "Golang" flavor)
+# Or verify in Terraform plan:
+terraform plan 2>&1 | grep -A 10 "filters {"
+```
+
+#### Filter Regional Behavior
+
+Control where filters apply using the `regions` field in `log_source_filters`.
+
+**Behavior:**
+- **Region matching**: Case-insensitive, spaces removed (`"East US"` = `"eastus"`)
+- **Empty list** (`[]`) or **omitted**: Applies to **all regions**
+- **Specific regions**: `["East US", "West US"]` - applies only to those regions
+- **Not available**: Activity logs (subscription-level, no regions field)
+
+**Examples:**
+
+<details>
+<summary><strong>Different Filters Per Region</strong></summary>
+
+```hcl
+log_source_filters = [
+  # Production: Strict filtering (East US only)
+  { filter_type = "Include", regexp = ".*\"level\":\"error\".*", regions = ["East US"] },
+  
+  # Development: All logs (West US only)
+  { filter_type = "Include", regexp = ".*", regions = ["West US"] },
+  
+  # Global: Mask passwords everywhere
+  { filter_type = "Mask", regexp = "(\\\"password\\\".*)", mask = "***REDACTED***" }
+]
+```
+</details>
+
+<details>
+<summary><strong>Compliance-Specific Filtering</strong></summary>
+
+```hcl
+log_source_filters = [
+  # EU GDPR: Extra PII masking
+  { filter_type = "Mask", regexp = "([a-zA-Z0-9._%+-]+@[^\"]+)", mask = "***EMAIL***", 
+    regions = ["North Europe", "West Europe"] },
+  
+  # US: Include audit events
+  { filter_type = "Include", regexp = ".*\"category\":\"AuditEvent\".*", 
+    regions = ["East US", "West US", "Central US"] }
+]
+```
+</details>
+
+**Verify:**
+```bash
+# Check resource regions
+az resource list --query "[].location" -o tsv | sort -u
+
+# Verify filter distribution in plan
+terraform plan 2>&1 | grep -B 5 "filters {"
+```
+
+#### Filter Mask Validation
+
+**Rules:**
+- ✅ Allowed: Alphanumeric, spaces, underscores, hyphens, asterisks, periods
+- ❌ **Not Allowed: Colons (`:`)** - causes API error
+
+**Common Errors:**
+
+| Invalid | Error | Fixed |
+|---------|-------|-------|
+| `"password":"***"` | Contains colon | `***REDACTED***` |
+| `"masked:value"` | Contains colon | `masked_value` |
+
+**Fix:**
+```hcl
+# ❌ WRONG
+mask = "\"password\":\"***REDACTED***\""
+
+# ✅ CORRECT
+mask = "***REDACTED***"
+```
 
 ---
 

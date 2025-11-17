@@ -854,7 +854,7 @@ func TestSumoLogicLogSourceFilters(t *testing.T) {
 					} else {
 						// API/runtime errors are expected
 						t.Logf("✓ Test case '%s' passed validation but failed at runtime (expected): %v", tt.name, err)
-						
+
 						// Check if plan was generated before error
 						if strings.Contains(errStr, "Terraform planned the following actions") ||
 							strings.Contains(errStr, "filters") {
@@ -927,7 +927,7 @@ func TestSumoLogicActivityLogFilters(t *testing.T) {
 					} else {
 						// API/runtime errors are expected
 						t.Logf("✓ Test case '%s' passed validation but failed at runtime (expected): %v", tt.name, err)
-						
+
 						// Check if plan contains filter configuration
 						if strings.Contains(errStr, "filters {") ||
 							strings.Contains(errStr, "filter_type") {
