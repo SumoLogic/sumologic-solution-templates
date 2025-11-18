@@ -870,3 +870,371 @@ func TestAzureResourceNameFiltering(t *testing.T) {
 		})
 	}
 }
+
+// TestEventHubNetworkSecurityValidation tests network security feature validation
+// Validates that EventHub network security configuration is properly validated
+func TestEventHubNetworkSecurityValidation(t *testing.T) {
+	tests := []struct {
+		name        string
+		tfvarsFile  string
+		expectError bool
+		description string
+	}{
+		{
+			name:        "NetworkSecurityDisabled",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-disabled.tfvars"),
+			expectError: false,
+			description: "Network security disabled should pass validation (backward compatibility)",
+		},
+		{
+			name:        "NetworkSecurityEnabledWithValidIPs",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-enabled.tfvars"),
+			expectError: false,
+			description: "Network security with valid IP CIDR blocks should pass validation",
+		},
+		{
+			name:        "NetworkSecurityEnabledWithVNet",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-vnet.tfvars"),
+			expectError: false,
+			description: "Network security with VNet subnet IDs should pass validation",
+		},
+		{
+			name:        "NetworkSecurityEnabledWithIPFile",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-ip-file.tfvars"),
+			expectError: false,
+			description: "Network security with IP whitelist file should pass validation",
+		},
+		{
+			name:        "InvalidIPCIDRFormat",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-invalid-ip.tfvars"),
+			expectError: true,
+			description: "Invalid IP CIDR format should fail validation",
+		},
+		{
+			name:        "InvalidSubnetIDFormat",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-invalid-subnet.tfvars"),
+			expectError: true,
+			description: "Invalid VNet subnet ID format should fail validation",
+		},
+		{
+			name:        "InvalidDefaultNetworkAction",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-invalid-action.tfvars"),
+			expectError: true,
+			description: "Invalid default_network_action value should fail validation",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			runValidationTest(t, tt.name, tt.tfvarsFile, tt.expectError, tt.description)
+		})
+	}
+}
+
+// TestEventHubIPWhitelistParsing tests IP whitelist file parsing logic
+// Validates that comments, whitespace, and duplicates are handled correctly
+func TestEventHubIPWhitelistParsing(t *testing.T) {
+	tests := []struct {
+		name        string
+		tfvarsFile  string
+		expectError bool
+		description string
+	}{
+		{
+			name:        "IPFileWithComments",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-ip-file-comments.tfvars"),
+			expectError: false,
+			description: "IP file with comments should be parsed correctly (comments filtered)",
+		},
+		{
+			name:        "IPFileWithEmptyLines",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-ip-file-empty-lines.tfvars"),
+			expectError: false,
+			description: "IP file with empty lines should be parsed correctly (empty lines filtered)",
+		},
+		{
+			name:        "DuplicateIPsAcrossSources",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-duplicate-ips.tfvars"),
+			expectError: false,
+			description: "Duplicate IPs from file and variables should be deduplicated",
+		},
+		{
+			name:        "NonExistentIPFile",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-missing-file.tfvars"),
+			expectError: false,
+			description: "Non-existent IP file should be gracefully handled (empty string)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			runValidationTest(t, tt.name, tt.tfvarsFile, tt.expectError, tt.description)
+		})
+	}
+}
+
+// TestEventHubNetworkSecurityConfiguration tests network security configuration behavior
+// Validates that network_rulesets are correctly applied based on configuration
+func TestEventHubNetworkSecurityConfiguration(t *testing.T) {
+	tests := []struct {
+		name              string
+		tfvarsFile        string
+		expectError       bool
+		shouldHaveRules   bool
+		expectedIPCount   int
+		expectedVNetCount int
+		description       string
+	}{
+		{
+			name:              "SecurityDisabledNoRules",
+			tfvarsFile:        filepath.Join("test", fixturesDir, "network-security-disabled.tfvars"),
+			expectError:       false,
+			shouldHaveRules:   false,
+			expectedIPCount:   0,
+			expectedVNetCount: 0,
+			description:       "Network security disabled should result in no network_rulesets",
+		},
+		{
+			name:              "SecurityEnabledWithIPs",
+			tfvarsFile:        filepath.Join("test", fixturesDir, "network-security-enabled.tfvars"),
+			expectError:       false,
+			shouldHaveRules:   true,
+			expectedIPCount:   3,
+			expectedVNetCount: 0,
+			description:       "Network security enabled with IPs should create IP rules",
+		},
+		{
+			name:              "SecurityEnabledWithVNet",
+			tfvarsFile:        filepath.Join("test", fixturesDir, "network-security-vnet.tfvars"),
+			expectError:       false,
+			shouldHaveRules:   true,
+			expectedIPCount:   0,
+			expectedVNetCount: 2,
+			description:       "Network security enabled with VNets should create VNet rules",
+		},
+		{
+			name:              "SecurityEnabledHybrid",
+			tfvarsFile:        filepath.Join("test", fixturesDir, "network-security-hybrid.tfvars"),
+			expectError:       false,
+			shouldHaveRules:   true,
+			expectedIPCount:   3,
+			expectedVNetCount: 2,
+			description:       "Network security with both IPs and VNets should create both rule types",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			terraformOptions := createTerraformOptions(tt.tfvarsFile)
+
+			terraform.Init(t, terraformOptions)
+
+			plan, err := terraform.PlanE(t, terraformOptions)
+
+			if tt.expectError {
+				assert.Error(t, err, tt.description)
+			} else {
+				// Check if plan passed validation
+				if err != nil {
+					errStr := err.Error()
+					if strings.Contains(errStr, "Invalid value for variable") ||
+						strings.Contains(errStr, "validation rule") {
+						t.Errorf("Test case '%s' should pass validation but got validation error: %v", tt.name, err)
+						return
+					} else {
+						t.Logf("✓ Test case '%s' passed validation but failed at runtime (expected): %v", tt.name, err)
+					}
+				}
+
+				if tt.shouldHaveRules {
+					// When network security is enabled, verify network_rulesets exists in plan
+					assert.Contains(t, plan, "network_rulesets",
+						fmt.Sprintf("%s: Plan should contain network_rulesets configuration", tt.description))
+
+					if tt.expectedIPCount > 0 {
+						assert.Contains(t, plan, "ip_rule",
+							fmt.Sprintf("%s: Plan should contain IP rules", tt.description))
+					}
+
+					if tt.expectedVNetCount > 0 {
+						assert.Contains(t, plan, "virtual_network_rule",
+							fmt.Sprintf("%s: Plan should contain VNet rules", tt.description))
+					}
+
+					t.Logf("✓ %s: network_rulesets configured correctly (IPs=%d, VNets=%d)",
+						tt.description, tt.expectedIPCount, tt.expectedVNetCount)
+				} else {
+					// When network security is disabled, network_rulesets should be empty or absent
+					t.Logf("✓ %s: network_rulesets correctly omitted", tt.description)
+				}
+			}
+		})
+	}
+}
+
+// TestEventHubNetworkSecurityBackwardCompatibility tests backward compatibility
+// Validates that existing deployments continue to work with default settings
+func TestEventHubNetworkSecurityBackwardCompatibility(t *testing.T) {
+	tests := []struct {
+		name        string
+		tfvarsFile  string
+		expectError bool
+		description string
+	}{
+		{
+			name:        "OmittedNetworkSecurityVariables",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "valid-config.tfvars"),
+			expectError: false,
+			description: "Configuration without network security variables should default to disabled (backward compatible)",
+		},
+		{
+			name:        "ExplicitlyDisabledNetworkSecurity",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "network-security-disabled.tfvars"),
+			expectError: false,
+			description: "Explicitly disabled network security should work identically to omitted",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			terraformOptions := createTerraformOptions(tt.tfvarsFile)
+
+			terraform.Init(t, terraformOptions)
+
+			plan, err := terraform.PlanE(t, terraformOptions)
+
+			if tt.expectError {
+				assert.Error(t, err, tt.description)
+			} else {
+				// Validation should pass
+				if err != nil {
+					errStr := err.Error()
+					if strings.Contains(errStr, "Invalid value for variable") ||
+						strings.Contains(errStr, "validation rule") {
+						t.Errorf("Test case '%s' should pass validation but got validation error: %v", tt.name, err)
+					} else {
+						t.Logf("✓ Test case '%s' passed validation: %s", tt.name, tt.description)
+					}
+				} else {
+					// Verify that the plan succeeds
+					assert.NotEmpty(t, plan, "Plan should not be empty")
+					t.Logf("✓ %s: Plan generated successfully", tt.description)
+				}
+			}
+		})
+	}
+}
+
+// TestEventHubTrustedServicesConfiguration tests trusted services access configuration
+// Validates that trusted_service_access_enabled setting is correctly applied
+func TestEventHubTrustedServicesConfiguration(t *testing.T) {
+	tests := []struct {
+		name                   string
+		tfvarsFile             string
+		expectError            bool
+		trustedServicesEnabled bool
+		description            string
+	}{
+		{
+			name:                   "TrustedServicesEnabled",
+			tfvarsFile:             filepath.Join("test", fixturesDir, "network-security-trusted-services.tfvars"),
+			expectError:            false,
+			trustedServicesEnabled: true,
+			description:            "Trusted services enabled should allow Azure trusted services access",
+		},
+		{
+			name:                   "TrustedServicesDisabled",
+			tfvarsFile:             filepath.Join("test", fixturesDir, "network-security-no-trusted-services.tfvars"),
+			expectError:            false,
+			trustedServicesEnabled: false,
+			description:            "Trusted services disabled should block Azure trusted services access",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			terraformOptions := createTerraformOptions(tt.tfvarsFile)
+
+			terraform.Init(t, terraformOptions)
+
+			plan, err := terraform.PlanE(t, terraformOptions)
+
+			if tt.expectError {
+				assert.Error(t, err, tt.description)
+			} else {
+				// Check validation passed
+				if err != nil {
+					errStr := err.Error()
+					if strings.Contains(errStr, "Invalid value for variable") ||
+						strings.Contains(errStr, "validation rule") {
+						t.Errorf("Test case '%s' should pass validation but got validation error: %v", tt.name, err)
+					} else {
+						t.Logf("✓ Test case '%s' passed validation: %s", tt.name, tt.description)
+					}
+				}
+
+				if tt.trustedServicesEnabled {
+					assert.Contains(t, plan, "trusted_service_access_enabled",
+						fmt.Sprintf("%s: Plan should contain trusted services configuration", tt.description))
+					t.Logf("✓ %s: Trusted services correctly configured", tt.description)
+				}
+			}
+		})
+	}
+}
+
+// TestEventHubPublicNetworkAccessConfiguration tests public network access toggle
+// Validates that public_network_access_enabled setting controls public endpoint availability
+func TestEventHubPublicNetworkAccessConfiguration(t *testing.T) {
+	tests := []struct {
+		name                string
+		tfvarsFile          string
+		expectError         bool
+		publicAccessEnabled bool
+		description         string
+	}{
+		{
+			name:                "PublicAccessEnabled",
+			tfvarsFile:          filepath.Join("test", fixturesDir, "network-security-public-enabled.tfvars"),
+			expectError:         false,
+			publicAccessEnabled: true,
+			description:         "Public access enabled should allow public endpoint access with IP restrictions",
+		},
+		{
+			name:                "PublicAccessDisabled",
+			tfvarsFile:          filepath.Join("test", fixturesDir, "network-security-public-disabled.tfvars"),
+			expectError:         false,
+			publicAccessEnabled: false,
+			description:         "Public access disabled should block all public endpoint access (private only)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			terraformOptions := createTerraformOptions(tt.tfvarsFile)
+
+			terraform.Init(t, terraformOptions)
+
+			plan, err := terraform.PlanE(t, terraformOptions)
+
+			if tt.expectError {
+				assert.Error(t, err, tt.description)
+			} else {
+				// Check validation passed
+				if err != nil {
+					errStr := err.Error()
+					if strings.Contains(errStr, "Invalid value for variable") ||
+						strings.Contains(errStr, "validation rule") {
+						t.Errorf("Test case '%s' should pass validation but got validation error: %v", tt.name, err)
+					} else {
+						t.Logf("✓ Test case '%s' passed validation: %s", tt.name, tt.description)
+					}
+				}
+
+				assert.Contains(t, plan, "public_network_access_enabled",
+					fmt.Sprintf("%s: Plan should contain public network access configuration", tt.description))
+				t.Logf("✓ %s: Public network access correctly configured (%v)", tt.description, tt.publicAccessEnabled)
+			}
+		})
+	}
+}

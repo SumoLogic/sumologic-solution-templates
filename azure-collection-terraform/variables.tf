@@ -104,7 +104,7 @@ variable "target_resource_types" {
     ])
     error_message = "Duplicate log_namespace values are not allowed."
   }
-  
+
 
 }
 
@@ -469,4 +469,158 @@ variable "prevent_deletion_if_contains_resources" {
   EOT
   type        = bool
   default     = true
+}
+
+variable "eventhub_enable_network_security" {
+  description = <<-EOT
+    Enable network security features for EventHub namespaces (IP filtering and VNet integration).
+    When enabled, applies network rules to restrict access. When disabled, allows all network access.
+    Default is false (allows all access) to maintain backward compatibility.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "eventhub_public_network_enabled" {
+  description = <<-EOT
+    Enable or disable public network access to EventHub namespaces.
+    When true, EventHub can be accessed from the internet (subject to IP filtering if configured).
+    When false, EventHub can only be accessed from configured VNets.
+    Default is true to support Sumo Logic (external SaaS) access.
+    
+    IMPORTANT: Sumo Logic requires public network access with IP whitelisting.
+    Set to false only if using alternative data collection methods.
+  EOT
+  type        = bool
+  default     = true
+}
+
+variable "eventhub_default_network_action" {
+  description = <<-EOT
+    Default action for EventHub namespace network rules when network security is enabled.
+    - "Allow": Allows all traffic by default (then deny specific IPs/VNets - not recommended)
+    - "Deny": Denies all traffic by default (then allow specific IPs/VNets - recommended)
+    
+    When eventhub_enable_network_security is false, this setting is ignored.
+    Default is "Deny" for security best practices.
+  EOT
+  type        = string
+  default     = "Deny"
+
+  validation {
+    condition     = contains(["Allow", "Deny"], var.eventhub_default_network_action)
+    error_message = "Default network action must be either 'Allow' or 'Deny'."
+  }
+}
+
+variable "eventhub_trusted_services_enabled" {
+  description = <<-EOT
+    Allow trusted Azure services to bypass EventHub network rules.
+    When true, Azure services like Azure Monitor, Azure Stream Analytics can access EventHub
+    even when network restrictions are applied.
+    Default is true to allow Azure diagnostic settings to work properly.
+  EOT
+  type        = bool
+  default     = true
+}
+
+variable "sumologic_ip_whitelist_file" {
+  description = <<-EOT
+    Path to a file containing Sumo Logic IP addresses to whitelist (one IP/CIDR per line).
+    This allows you to maintain IP addresses separately from Terraform code.
+    
+    File format (plain text, one entry per line):
+      13.52.5.14/32
+      13.52.80.64/32
+      # Comments starting with # are ignored
+      54.193.127.96/27
+    
+    If both this file and sumologic_ip_whitelist variable are provided, IPs from both sources are merged.
+    Use empty string "" to skip file-based IP whitelisting.
+    
+    Recommended: Create sumologic_ips.txt based on sumologic_ips.txt.example
+  EOT
+  type        = string
+  default     = ""
+}
+
+variable "sumologic_ip_whitelist" {
+  description = <<-EOT
+    List of Sumo Logic IP addresses/CIDR ranges to whitelist for EventHub access.
+    These IPs will be allowed to access EventHub namespaces when network security is enabled.
+    
+    Format: ["13.52.5.14/32", "54.193.127.96/27", "10.0.0.0/24"]
+    
+    IMPORTANT: Get the correct IPs for your Sumo Logic deployment region:
+    - US1: Different IPs than US2
+    - EU: Different IPs than US
+    - etc.
+    
+    Reference: https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security
+    
+    If both this variable and sumologic_ip_whitelist_file are provided, IPs from both sources are merged.
+    Default is empty list (no IP whitelisting unless file is provided).
+  EOT
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for ip in var.sumologic_ip_whitelist :
+      can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(/[0-9]{1,2})?$", ip))
+    ])
+    error_message = "All IP addresses must be in valid IPv4 or CIDR format (e.g., '13.52.5.14/32' or '10.0.0.0/24')."
+  }
+}
+
+variable "eventhub_vnet_subnet_ids" {
+  description = <<-EOT
+    List of Azure VNet subnet IDs to allow access to EventHub namespaces.
+    Use this when you have Azure resources (VMs, App Services, etc.) that need to access EventHub
+    from within a VNet.
+    
+    Format: [
+      "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.Network/virtualNetworks/{vnet-name}/subnets/{subnet-name}",
+      "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.Network/virtualNetworks/{vnet-name}/subnets/{subnet-name2}"
+    ]
+    
+    IMPORTANT: 
+    - Subnets must have service endpoint 'Microsoft.EventHub' enabled
+    - EventHub namespace must be Standard tier or higher for VNet integration
+    - This is optional - only needed if you have internal Azure services accessing EventHub
+    
+    Default is empty list (no VNet restrictions).
+  EOT
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for subnet_id in var.eventhub_vnet_subnet_ids :
+      can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Network/virtualNetworks/[^/]+/subnets/[^/]+$", subnet_id))
+    ])
+    error_message = "All subnet IDs must be valid Azure resource IDs for subnets."
+  }
+}
+
+variable "eventhub_additional_ip_rules" {
+  description = <<-EOT
+    Additional IP addresses/CIDR ranges to whitelist for EventHub access (beyond Sumo Logic IPs).
+    Use this for other services, management IPs, or testing purposes.
+    
+    Format: ["203.0.113.0/24", "198.51.100.42/32"]
+    
+    These IPs are merged with Sumo Logic IPs (from sumologic_ip_whitelist and sumologic_ip_whitelist_file).
+    Default is empty list.
+  EOT
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for ip in var.eventhub_additional_ip_rules :
+      can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(/[0-9]{1,2})?$", ip))
+    ])
+    error_message = "All IP addresses must be in valid IPv4 or CIDR format (e.g., '13.52.5.14/32' or '10.0.0.0/24')."
+  }
 }

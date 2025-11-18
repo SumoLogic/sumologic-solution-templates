@@ -100,6 +100,118 @@ eventhub_namespace_unsupported_locations = [
 # resource groups that still contain nested resources (useful for integration tests).
 prevent_deletion_if_contains_resources = true
 
+# ============================================================================
+# EventHub Network Security Configuration (Optional)
+# ============================================================================
+# These settings control network access to EventHub namespaces.
+# Network security is DISABLED by default for backward compatibility.
+# 
+# IMPORTANT: 
+# - Sumo Logic (external SaaS) requires public network access with IP whitelisting
+# - Azure Diagnostic Settings use Azure's trusted services (no VNet needed)
+# - VNet integration is available but rarely needed for Sumo Logic use cases
+#
+# Recommended Configuration for Production:
+# 1. Enable network security: eventhub_enable_network_security = true
+# 2. Keep public access enabled: eventhub_public_network_enabled = true
+# 3. Set default action to Deny: eventhub_default_network_action = "Deny"
+# 4. Keep trusted services enabled: eventhub_trusted_services_enabled = true
+# 5. Whitelist Sumo Logic IPs for your region (see sumologic_ips.txt.example)
+
+# Enable network security features (IP filtering, VNet integration)
+# Set to true to restrict access; false to allow all access (default)
+eventhub_enable_network_security = false
+
+# Enable/disable public network access
+# true = EventHub accessible from internet (with IP filtering if enabled)
+# false = EventHub only accessible from VNets (private only)
+# IMPORTANT: Must be true for Sumo Logic access
+eventhub_public_network_enabled = true
+
+# Default network action when network security is enabled
+# "Deny" = Block all traffic except whitelisted IPs/VNets (recommended)
+# "Allow" = Allow all traffic except blacklisted IPs/VNets (not recommended)
+eventhub_default_network_action = "Deny"
+
+# Allow trusted Azure services to bypass network rules
+# Recommended: true (allows Azure Monitor diagnostic settings to work)
+eventhub_trusted_services_enabled = true
+
+# ----------------------------------------------------------------------------
+# Option 1: IP Whitelist from File (Recommended)
+# ----------------------------------------------------------------------------
+# Path to file containing Sumo Logic IP addresses (one per line)
+# 
+# Setup steps:
+# 1. Copy example file: cp sumologic_ips.txt.example sumologic_ips.txt
+# 2. Uncomment IPs for your Sumo Logic deployment region
+# 3. Enable below:
+#
+# sumologic_ip_whitelist_file = "sumologic_ips.txt"
+sumologic_ip_whitelist_file = ""
+
+# ----------------------------------------------------------------------------
+# Option 2: IP Whitelist from Variable (Alternative or Additional)
+# ----------------------------------------------------------------------------
+# Directly specify Sumo Logic IPs in terraform.tfvars
+# Can be used together with sumologic_ip_whitelist_file (IPs are merged)
+#
+# Example for US1 deployment:
+# sumologic_ip_whitelist = [
+#   "13.52.5.14/32",
+#   "13.52.80.64/32",
+#   "54.193.127.96/27",
+#   "54.67.101.192/27",
+#   "50.18.205.192/27",
+#   "35.160.181.32/27",
+#   "44.242.147.64/27",
+#   "54.212.90.0/26"
+# ]
+#
+# Get IPs for your region:
+# https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security
+sumologic_ip_whitelist = []
+
+# ----------------------------------------------------------------------------
+# Additional IP Rules (Optional)
+# ----------------------------------------------------------------------------
+# Whitelist additional IPs beyond Sumo Logic (management, testing, etc.)
+#
+# Example:
+# eventhub_additional_ip_rules = [
+#   "203.0.113.0/24",    # Corporate network
+#   "198.51.100.42/32"   # DevOps pipeline
+# ]
+eventhub_additional_ip_rules = []
+
+# ----------------------------------------------------------------------------
+# VNet Integration (Advanced - Rarely Needed)
+# ----------------------------------------------------------------------------
+# NOTE: VNet integration is NOT typically needed for Sumo Logic deployments.
+# EventHubs are accessed by:
+# - Sumo Logic (external) via whitelisted public IPs (configured above)
+# - Azure Diagnostic Settings via trusted services (no VNet needed)
+#
+# Only configure VNet access if you have internal Azure services (VMs, AKS, etc.)
+# that need to push data directly to EventHub (uncommon use case).
+#
+# Requirements if using VNet:
+# - EventHub namespace must be Standard tier or higher
+# - Subnets must have service endpoint 'Microsoft.EventHub' enabled
+#
+# Example:
+# eventhub_vnet_subnet_ids = [
+#   "/subscriptions/12345678-1234-1234-1234-123456789abc/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/my-subnet"
+# ]
+#
+# To enable service endpoint on subnet (Azure CLI):
+# az network vnet subnet update \
+#   --resource-group my-rg \
+#   --vnet-name my-vnet \
+#   --name my-subnet \
+#   --service-endpoints Microsoft.EventHub
+eventhub_vnet_subnet_ids = []
+
 # Activity Log Configuration
 activity_log_export_name     = "SumoLogicAzureActivityLogExport"
 activity_log_export_category = "azure/activity-logs"

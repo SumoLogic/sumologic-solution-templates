@@ -5,7 +5,7 @@ data "azurerm_resources" "target_resources_by_type" {
     coalesce(config.log_namespace, config.metric_namespace) => config.required_resource_tags
     if coalesce(config.log_namespace, config.metric_namespace) != null
   }
-  
+
   type          = each.key
   required_tags = each.value
 }
@@ -42,6 +42,32 @@ resource "azurerm_eventhub_namespace" "namespaces_by_location" {
   sku                 = local.eventhub_sku_by_region[each.key].sku
   capacity            = local.eventhub_sku_by_region[each.key].throughput_units
 
+  # Network security settings
+  public_network_access_enabled = var.eventhub_public_network_enabled
+
+  # Network rules (only applied when network security is enabled)
+  network_rulesets = var.eventhub_enable_network_security ? [{
+    default_action                 = var.eventhub_default_network_action
+    trusted_service_access_enabled = var.eventhub_trusted_services_enabled
+    public_network_access_enabled  = var.eventhub_public_network_enabled
+
+    # IP rules - Sumo Logic and additional IPs
+    ip_rule = [
+      for ip in local.sumologic_ip_whitelist : {
+        ip_mask = ip
+        action  = "Allow"
+      }
+    ]
+
+    # VNet rules - Allow access from specified subnets
+    virtual_network_rule = [
+      for subnet_id in var.eventhub_vnet_subnet_ids : {
+        subnet_id                                       = subnet_id
+        ignore_missing_virtual_network_service_endpoint = false
+      }
+    ]
+  }] : []
+
   tags = {
     version = local.solution_version
   }
@@ -58,9 +84,9 @@ resource "azurerm_eventhub" "eventhubs_by_type_and_location" {
     ]) > 0
   }
 
-  name              = "eventhub-${replace(each.key, "/", "-")}"
-  namespace_id      = azurerm_eventhub_namespace.namespaces_by_location[each.value[0].location].id
-  partition_count   = 4
+  name            = "eventhub-${replace(each.key, "/", "-")}"
+  namespace_id    = azurerm_eventhub_namespace.namespaces_by_location[each.value[0].location].id
+  partition_count = 4
   # Basic SKU only supports 1 day retention; Standard/Premium/Dedicated support up to 7 days
   message_retention = local.eventhub_sku_by_region[each.value[0].location].sku == "Basic" ? 1 : 7
 }
@@ -111,18 +137,18 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting_logs" {
         for config in var.target_resource_types :
         config if config.log_namespace == lookup(each.value, "parent_type", each.value.type)
       ]) > 0
-        ? (
-            length([
-              for config in var.target_resource_types :
-              config if config.log_namespace == lookup(each.value, "parent_type", each.value.type) && length(lookup(config, "log_categories", [])) > 0
-            ]) > 0
-              ? distinct(flatten([
-                  for config in var.target_resource_types :
-                  lookup(config, "log_categories", []) if config.log_namespace == lookup(each.value, "parent_type", each.value.type)
-                ]))
-              : data.azurerm_monitor_diagnostic_categories.all_categories[each.key].log_category_types
-          )
-        : []
+      ? (
+        length([
+          for config in var.target_resource_types :
+          config if config.log_namespace == lookup(each.value, "parent_type", each.value.type) && length(lookup(config, "log_categories", [])) > 0
+        ]) > 0
+        ? distinct(flatten([
+          for config in var.target_resource_types :
+          lookup(config, "log_categories", []) if config.log_namespace == lookup(each.value, "parent_type", each.value.type)
+        ]))
+        : data.azurerm_monitor_diagnostic_categories.all_categories[each.key].log_category_types
+      )
+      : []
     )
     content {
       category = enabled_log.value
@@ -157,6 +183,32 @@ resource "azurerm_eventhub_namespace" "activity_logs_namespace" {
   resource_group_name = azurerm_resource_group.rg.name
   sku                 = local.eventhub_sku_by_region[var.location].sku
   capacity            = local.eventhub_sku_by_region[var.location].throughput_units
+
+  # Network security settings
+  public_network_access_enabled = var.eventhub_public_network_enabled
+
+  # Network rules (only applied when network security is enabled)
+  network_rulesets = var.eventhub_enable_network_security ? [{
+    default_action                 = var.eventhub_default_network_action
+    trusted_service_access_enabled = var.eventhub_trusted_services_enabled
+    public_network_access_enabled  = var.eventhub_public_network_enabled
+
+    # IP rules - Sumo Logic and additional IPs
+    ip_rule = [
+      for ip in local.sumologic_ip_whitelist : {
+        ip_mask = ip
+        action  = "Allow"
+      }
+    ]
+
+    # VNet rules - Allow access from specified subnets
+    virtual_network_rule = [
+      for subnet_id in var.eventhub_vnet_subnet_ids : {
+        subnet_id                                       = subnet_id
+        ignore_missing_virtual_network_service_endpoint = false
+      }
+    ]
+  }] : []
 }
 
 resource "azurerm_eventhub_namespace_authorization_rule" "activity_logs_policy" {
@@ -170,10 +222,10 @@ resource "azurerm_eventhub_namespace_authorization_rule" "activity_logs_policy" 
 }
 
 resource "azurerm_eventhub" "eventhub_for_activity_logs" {
-  count             = var.enable_activity_logs && !(contains(local.unsupported_eventhub_locations, lower(replace(var.location, " ", "")))) ? 1 : 0
-  name              = var.activity_log_export_name
-  namespace_id      = azurerm_eventhub_namespace.activity_logs_namespace[0].id
-  partition_count   = 4
+  count           = var.enable_activity_logs && !(contains(local.unsupported_eventhub_locations, lower(replace(var.location, " ", "")))) ? 1 : 0
+  name            = var.activity_log_export_name
+  namespace_id    = azurerm_eventhub_namespace.activity_logs_namespace[0].id
+  partition_count = 4
   # Basic SKU only supports 1 day retention; Standard/Premium/Dedicated support up to 7 days
   message_retention = local.eventhub_sku_by_region[var.location].sku == "Basic" ? 1 : 7
 }

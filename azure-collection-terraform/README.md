@@ -65,6 +65,15 @@ Terraform module for automated log and metrics collection from Azure resources t
 - [Important Notes](#important-notes)
   - Event Hub SKU Configuration & Auto-Upgrade
   - Activity Logs - Subscription-Level Warning
+- [EventHub Network Security](#eventhub-network-security)
+  - Security Models
+  - Setup Guide: IP Whitelisting
+  - Sumo Logic IP Addresses by Region
+  - VNet Integration (Optional)
+  - Security Best Practices
+  - Verification
+  - Updating IP Whitelist
+  - Cost Considerations
 
 </details>
 
@@ -480,6 +489,15 @@ The following table describes all available configuration variables. For a compl
 | `sumologic_environment` | Sumo Logic deployment region. Options: `us1`, `us2`, `eu`, `au`, `ca`, `de`, `jp`, `in`, `kr`, `fed`. | `string` | `"us1"` | **Yes** |
 | `sumo_collector_name` | Name for the Sumo Logic hosted collector (alphanumeric, hyphens, underscores, max 128 characters). | `string` | `"sumologic-azure-collection"` | **Yes** |
 | `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `parameters` (map of key-value pairs for app configuration). Use empty `[]` to skip app installation. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L285) | No |
+| **EventHub Network Security (Optional)** |||||
+| `eventhub_enable_network_security` | Enable network security features (IP filtering, VNet integration) for EventHub namespaces. When `false` (default), allows all network access. When `true`, applies network rules to restrict access. | `bool` | `false` | No |
+| `eventhub_public_network_enabled` | Enable/disable public network access to EventHub. `true` = accessible from internet (with IP filtering if configured). `false` = only accessible from VNets. **Must be `true` for Sumo Logic access.** | `bool` | `true` | No |
+| `eventhub_default_network_action` | Default action for network rules when security is enabled. `"Deny"` = block all except whitelisted (recommended). `"Allow"` = allow all except blacklisted. | `string` | `"Deny"` | No |
+| `eventhub_trusted_services_enabled` | Allow trusted Azure services (Monitor, Stream Analytics) to bypass network rules. Recommended: `true` for diagnostic settings to work. | `bool` | `true` | No |
+| `sumologic_ip_whitelist_file` | Path to file containing Sumo Logic IPs to whitelist (one IP/CIDR per line). See `sumologic_ips.txt.example`. Use `""` to skip file-based whitelisting. | `string` | `"sumologic_ips.txt"` | No |
+| `sumologic_ip_whitelist` | List of Sumo Logic IP addresses/CIDR ranges to whitelist. Format: `["13.52.5.14/32", "54.193.127.96/27"]`. Get IPs for your deployment region from [Sumo Logic docs](https://help.sumologic.com/docs/api/getting-started/). Merged with `sumologic_ip_whitelist_file` if both provided. | `list(string)` | `[]` | No |
+| `eventhub_vnet_subnet_ids` | List of Azure VNet subnet IDs allowed to access EventHub. Only needed for internal Azure services. Subnets must have `Microsoft.EventHub` service endpoint enabled. Format: `["/subscriptions/{id}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}"]` | `list(string)` | `[]` | No |
+| `eventhub_additional_ip_rules` | Additional IP addresses/CIDR ranges to whitelist beyond Sumo Logic IPs (management, testing, etc.). Format: `["203.0.113.0/24", "198.51.100.42/32"]`. Merged with Sumo Logic IPs. | `list(string)` | `[]` | No |
 
 To obtain these values follow [these steps](https://www.sumologic.com/help/docs/send-data/hosted-collectors/microsoft-source/azure-metrics-source/#vendor-configuration)
 
@@ -570,6 +588,205 @@ If multiple teams need activity logs, consider:
 - Creating a dedicated Terraform configuration for subscription-level resources (activity logs, policies, etc.)
 - Using `terraform import` to manage existing activity log settings
 - Documenting ownership and avoiding duplicate configurations
+
+---
+
+### EventHub Network Security (Optional - Advanced Feature)
+
+> ⚠️ **IMPORTANT:** Network security is an **optional feature** with **significant cost implications**. It is NOT required for Sumo Logic integration and is only recommended for customers with specific security or compliance requirements.
+
+By default, EventHub namespaces created by this module allow access from all networks. This is the **standard and recommended configuration** for most Sumo Logic customers. 
+
+**Why Network Security is Optional:**
+- 💰 **Cost:** Enabling network security may increase Azure costs significantly
+- 🔧 **Complexity:** Requires additional configuration and maintenance
+- 🔒 **Security:** Sumo Logic already provides end-to-end encryption and secure data handling
+- ✅ **Access Control:** Azure already provides authentication via connection strings
+
+**When to Consider Network Security:**
+- ✅ Your organization has strict compliance requirements (e.g., PCI-DSS, HIPAA)
+- ✅ Security policy mandates IP-based firewall rules for all public endpoints
+- ✅ You need to audit and restrict which external IPs can access EventHub
+- ✅ You understand and accept the additional costs and complexity
+
+If you do not have these specific requirements, **skip this section** and use the default open access configuration.
+
+---
+
+#### 🔒 **Security Configuration Options**
+
+This module supports two network security configurations:
+
+**1. Open Access (Default - Recommended for Most Customers)**
+```hcl
+eventhub_enable_network_security = false
+```
+- ✅ Simple setup, no network configuration needed
+- ✅ Works immediately after deployment
+- ✅ Lower cost - no network security overhead
+- ✅ Sumo Logic connection strings provide authentication
+- ✅ Data encrypted in transit (TLS) and at rest
+- **Use case:** Standard Sumo Logic deployments (recommended)
+
+**2. IP Whitelisting (Optional - For Customers with Security/Compliance Requirements)**
+```hcl
+eventhub_enable_network_security = true
+eventhub_public_network_enabled  = true
+eventhub_default_network_action  = "Deny"
+sumologic_ip_whitelist_file      = "sumologic_ips.txt"
+```
+- ⚠️ **Additional cost** - network security features increase Azure charges
+- ⚠️ **Maintenance required** - must update IPs when Sumo Logic changes them
+- ✅ Restricts access to Sumo Logic IPs only (defense in depth)
+- ✅ Maintains public endpoint for SaaS integration
+- ✅ Allows Azure Diagnostic Settings via trusted services
+- **Use case:** Organizations with strict compliance or security policies
+
+> **Note:** VNet integration is available but not typically needed for Sumo Logic integration. The EventHubs are accessed by:
+> 1. Sumo Logic (external SaaS) - via whitelisted public IPs
+> 2. Azure Diagnostic Settings - via Azure's trusted services (internal backbone)
+> 
+> If you have a specific use case requiring VNet access from internal Azure services, see `variables.tf` for `eventhub_vnet_subnet_ids` configuration.
+
+---
+
+#### 📋 **Setup Guide: IP Whitelisting (Optional)**
+
+> ⚠️ **Only follow this guide if you have decided to enable network security** based on your organization's specific security/compliance requirements.
+
+**Step 1: Create IP Whitelist File**
+
+```bash
+# Copy the example file
+cp sumologic_ips.txt.example sumologic_ips.txt
+
+# Edit and uncomment IPs for your Sumo Logic deployment region
+# For example, if using US1, uncomment the US1 section
+vim sumologic_ips.txt
+```
+
+**Step 2: Configure Network Security in terraform.tfvars**
+
+```hcl
+# Enable network security
+eventhub_enable_network_security = true
+eventhub_public_network_enabled  = true
+eventhub_default_network_action  = "Deny"
+eventhub_trusted_services_enabled = true
+
+# Point to your IP whitelist file
+sumologic_ip_whitelist_file = "sumologic_ips.txt"
+
+# Optional: Add additional IPs
+eventhub_additional_ip_rules = [
+  "203.0.113.0/24"    # Corporate network
+]
+```
+
+**Step 3: Apply Configuration**
+
+```bash
+terraform plan   # Review network security changes
+terraform apply  # Apply network restrictions
+```
+
+#### 🌐 **Sumo Logic IP Addresses by Region**
+
+You must whitelist the correct IPs for your Sumo Logic deployment. Check your Sumo Logic URL:
+
+| Deployment | URL | Example IPs | Full List |
+|------------|-----|-------------|-----------|
+| **US1** | `https://service.sumologic.com` | `13.52.5.14/32`, `54.193.127.96/27` | [See sumologic_ips.txt.example](sumologic_ips.txt.example) |
+| **US2** | `https://service.us2.sumologic.com` | `34.192.0.0/16`, `52.206.0.0/15` | [See sumologic_ips.txt.example](sumologic_ips.txt.example) |
+| **EU** | `https://service.eu.sumologic.com` | `52.212.0.0/14`, `99.80.0.0/15` | [See sumologic_ips.txt.example](sumologic_ips.txt.example) |
+| **AU** | `https://service.au.sumologic.com` | `13.236.0.0/14`, `52.62.0.0/15` | [See sumologic_ips.txt.example](sumologic_ips.txt.example) |
+| **CA** | `https://service.ca.sumologic.com` | `35.182.0.0/15`, `52.60.0.0/14` | [See sumologic_ips.txt.example](sumologic_ips.txt.example) |
+| **Other** | Check your URL | Varies by region | [See sumologic_ips.txt.example](sumologic_ips.txt.example) |
+
+**Reference:** [Sumo Logic Endpoints and Firewall Security](https://help.sumologic.com/docs/api/getting-started/#sumo-logic-endpoints-by-deployment-and-firewall-security)
+
+####  **Security Best Practices**
+
+1. **✅ Enable Network Security for Production**
+   ```hcl
+   eventhub_enable_network_security = true
+   eventhub_default_network_action  = "Deny"  # Deny by default, allow specific IPs
+   ```
+
+2. **✅ Use File-Based IP Whitelist**
+   - Easier to maintain and update
+   - Can be version-controlled separately
+   - Clear audit trail of IP changes
+
+3. **✅ Keep Trusted Services Enabled**
+   ```hcl
+   eventhub_trusted_services_enabled = true  # Allow Azure Monitor diagnostic settings
+   ```
+
+4. **⚠️ Monitor Sumo Logic IP Changes**
+   - Sumo Logic may update their IP ranges
+   - Subscribe to [Sumo Logic status page](https://status.sumologic.com/) for updates
+   - Periodically review and update `sumologic_ips.txt`
+
+5. **⚠️ Test Before Production**
+   - Test network configuration in dev/staging first
+   - Verify Sumo Logic connectivity after applying rules
+   - Check Azure Monitor diagnostic settings continue to work
+
+#### ❌ **What NOT to Do**
+
+- **DON'T disable public access** if using Sumo Logic (external SaaS)
+  ```hcl
+  eventhub_public_network_enabled = false  # ❌ Breaks Sumo Logic access
+  ```
+
+- **DON'T use "Allow" as default action** (security risk)
+  ```hcl
+  eventhub_default_network_action = "Allow"  # ❌ Allows all IPs by default
+  ```
+  ```bash
+  # ❌ Will fail if service endpoint not enabled on subnet
+  ```
+
+#### 🧪 **Verification**
+
+After applying network security, verify configuration:
+
+```bash
+# Check EventHub namespace network rules
+az eventhub namespace network-rule list \
+  --resource-group sumologic-azure-collection-rg \
+  --namespace-name sumologic-azure-collection-EventHub-eastus
+
+# Test connectivity from Sumo Logic (check collector status)
+# Go to: Sumo Logic → Manage Data → Collection → Collectors
+# Status should show "Online" and sources should be collecting data
+```
+
+#### 🔄 **Updating IP Whitelist**
+
+To update the IP whitelist without redeploying:
+
+```bash
+# 1. Update sumologic_ips.txt file
+vim sumologic_ips.txt
+
+# 2. Apply changes
+terraform plan   # Shows only network rule changes
+terraform apply  # Updates network rules in-place (no downtime)
+```
+
+#### 💰 **Cost Considerations**
+
+Network security features have different cost implications:
+
+| Feature | Cost Impact |
+|---------|-------------|
+| **IP Whitelisting** | ✅ No additional cost |
+| **VNet Integration (Service Endpoints)** | ✅ No additional cost |
+| **Private Endpoints** | ❌ ~$7.30/month per endpoint + data processing charges |
+
+**Recommendation:** Use IP whitelisting for cost-effective security with Sumo Logic.
 
 ## How to Run This Project
 
