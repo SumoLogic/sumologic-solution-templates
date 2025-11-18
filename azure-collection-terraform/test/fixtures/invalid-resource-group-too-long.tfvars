@@ -1,0 +1,2 @@
+# Invalid resource group name that's too long (over 90 characters)
+resource_group_name = "test-sumo-rg-with-a-very-long-name-that-exceeds-the-maximum-allowed-length-of-90-characters-for-azure-resource-groups" # Invalid: 120+ characters
