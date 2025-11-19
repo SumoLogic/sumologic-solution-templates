@@ -15,9 +15,14 @@ resource "aws_s3_bucket_policy" "dump_access_logs_to_s3" {
   for_each = toset(local.create_common_bucket ? ["s3_bucket"] : [])
 
   bucket = aws_s3_bucket.s3_bucket["s3_bucket"].id
-  policy = templatefile("${path.module}/templates/s3_bucket_policy.tmpl", {
+
+  # Use old policy template with ELB_ACCOUNT_ID for old regions
+  # Use new policy template with only BUCKET_NAME for new regions
+  policy = local.is_old_region ? templatefile("${path.module}/templates/s3_bucket_old_policy.tmpl", {
     BUCKET_NAME     = local.common_bucket_name
     ELB_ACCCOUNT_ID = local.region_to_elb_account_id[local.aws_region]
+  }) : templatefile("${path.module}/templates/s3_bucket_new_policy.tmpl", {
+    BUCKET_NAME = local.common_bucket_name
   })
 }
 
