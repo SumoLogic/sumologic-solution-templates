@@ -57,8 +57,14 @@ variable "target_resource_types" {
       mask        = optional(string, null)
       regions     = optional(list(string), [])
     })), [])
+    metrics_source_filters = optional(list(object({
+      filter_type = string
+      name        = string
+      regexp      = string
+      mask        = optional(string, null)
+    })), [])
   }))
-  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided. The required_resource_tags field filters resources for this specific type using AND logic (all tags must match). The name_filter field is optional and filters resources by regex pattern (case-insensitive); if omitted or empty string, no name filtering is applied. The log_source_filters field is optional and specifies filters to apply to the Sumo Logic Azure Event Hub log source for this resource type. Each filter can optionally specify regions (list of region names); if omitted or empty, the filter applies to all regions."
+  description = "List of Azure resource types with their log and metric namespace configuration. Both namespace fields are optional, but at least one must be provided. The required_resource_tags field filters resources for this specific type using AND logic (all tags must match). The name_filter field is optional and filters resources by regex pattern (case-insensitive); if omitted or empty string, no name filtering is applied. The log_source_filters field is optional and specifies filters to apply to the Sumo Logic Azure Event Hub log source for this resource type. Each filter can optionally specify regions (list of region names); if omitted or empty, the filter applies to all regions. The metrics_source_filters field is optional and specifies filters to apply to the Sumo Logic Azure metrics source for this resource type."
 
   validation {
     condition = alltrue([
@@ -111,7 +117,7 @@ variable "target_resource_types" {
     ])
     error_message = "Duplicate log_namespace values are not allowed."
   }
-  
+
 
 }
 

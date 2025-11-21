@@ -125,6 +125,24 @@ resource "sumologic_azure_metrics_source" "terraform_azure_metrics_source" {
       }
     }
   }
+
+  # Apply filters from target_resource_types configuration
+  dynamic "filters" {
+    for_each = flatten([
+      for config in var.target_resource_types :
+      config.metrics_source_filters
+      if config.metric_namespace == each.key &&
+      config.metric_namespace != null &&
+      config.metric_namespace != "" &&
+      length(config.metrics_source_filters) > 0
+    ])
+    content {
+      filter_type = filters.value.filter_type
+      name        = filters.value.name
+      regexp      = filters.value.regexp
+      mask        = filters.value.mask
+    }
+  }
 }
 
 resource "sumologic_azure_event_hub_log_source" "sumo_activity_log_source" {

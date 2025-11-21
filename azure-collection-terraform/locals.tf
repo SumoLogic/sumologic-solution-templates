@@ -13,7 +13,7 @@ locals {
     for config in var.target_resource_types :
     coalesce(config.log_namespace, config.metric_namespace)
     if coalesce(config.log_namespace, config.metric_namespace) != null &&
-       coalesce(config.log_namespace, config.metric_namespace) != ""
+    coalesce(config.log_namespace, config.metric_namespace) != ""
   ])
 
   # We need at least one resource of each type to get valid categories
@@ -40,8 +40,8 @@ locals {
     for config in var.target_resource_types :
     config.log_namespace
     if config.log_namespace != null &&
-       config.log_categories != null &&
-       length(config.log_categories) > 0
+    config.log_categories != null &&
+    length(config.log_categories) > 0
   ])
 
   # Get valid categories for each resource type that needs validation
@@ -61,9 +61,9 @@ locals {
       for category in coalesce(config.log_categories, []) :
       "Invalid category '${category}' for resource type '${config.log_namespace}'. Valid categories are: ${join(", ", try(local.valid_categories_by_resource[config.log_namespace], []))}"
       if config.log_namespace != null &&
-         length(coalesce(config.log_categories, [])) > 0 &&
-         try(local.resource_type_examples[config.log_namespace], null) != null &&  # Only validate if resources exist
-         !contains(try(local.valid_categories_by_resource[config.log_namespace], []), category)
+      length(coalesce(config.log_categories, [])) > 0 &&
+      try(local.resource_type_examples[config.log_namespace], null) != null && # Only validate if resources exist
+      !contains(try(local.valid_categories_by_resource[config.log_namespace], []), category)
     ]
   ])
 
@@ -121,7 +121,7 @@ locals {
     [for type in local.resource_types_for_discovery : [
       for res in data.azurerm_resources.target_resources_by_type[type].resources : res
       if !contains(local.parents_with_nested_configs, type) &&
-         (local.type_to_name_filter[type] == "" || can(regex(local.type_to_name_filter[type], lower(res.name))))
+      (local.type_to_name_filter[type] == "" || can(regex(local.type_to_name_filter[type], lower(res.name))))
     ]],
     # Nested resources
     [for parent_type, children_types in var.nested_namespace_configs : [
