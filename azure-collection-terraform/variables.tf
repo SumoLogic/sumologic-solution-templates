@@ -494,3 +494,17 @@ variable "prevent_deletion_if_contains_resources" {
   type        = bool
   default     = true
 }
+
+variable "whitelist_ips" {
+  description = "List of IP addresses or CIDR blocks to whitelist for Event Hub namespace access. Public network access will be enabled from these selected networks only."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for ip in var.whitelist_ips :
+      can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(/[0-9]{1,2})?$", ip))
+    ])
+    error_message = "All whitelist IPs must be valid IPv4 addresses or CIDR blocks (e.g., '192.168.1.1' or '10.0.0.0/24')."
+  }
+}
