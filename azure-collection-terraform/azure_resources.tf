@@ -42,6 +42,21 @@ resource "azurerm_eventhub_namespace" "namespaces_by_location" {
   sku                 = local.eventhub_sku_by_region[each.key].sku
   capacity            = local.eventhub_sku_by_region[each.key].throughput_units
 
+  public_network_access_enabled = true
+
+  network_rulesets {
+    default_action                 = "Deny"
+    public_network_access_enabled  = true
+    trusted_service_access_enabled = true
+
+    dynamic "ip_rule" {
+      for_each = var.whitelist_ips
+      content {
+        ip_mask = ip_rule.value
+      }
+    }
+  }
+
   tags = {
     version = local.solution_version
   }
@@ -157,6 +172,21 @@ resource "azurerm_eventhub_namespace" "activity_logs_namespace" {
   resource_group_name = azurerm_resource_group.rg.name
   sku                 = local.eventhub_sku_by_region[var.location].sku
   capacity            = local.eventhub_sku_by_region[var.location].throughput_units
+
+  public_network_access_enabled = true
+
+  network_rulesets {
+    default_action                 = "Deny"
+    public_network_access_enabled  = true
+    trusted_service_access_enabled = true
+
+    dynamic "ip_rule" {
+      for_each = var.whitelist_ips
+      content {
+        ip_mask = ip_rule.value
+      }
+    }
+  }
 }
 
 resource "azurerm_eventhub_namespace_authorization_rule" "activity_logs_policy" {
