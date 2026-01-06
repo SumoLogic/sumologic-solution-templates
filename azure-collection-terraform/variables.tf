@@ -386,7 +386,7 @@ variable "activity_log_filters" {
 
 variable "sumologic_environment" {
   type        = string
-  description = "Enter au, ca, de, eu, jp, us2, kr, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  description = "Enter au, ca, de, eu, jp, us2, kr, fed ch or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
 
   validation {
     condition = contains([
@@ -404,6 +404,17 @@ variable "sumologic_environment" {
       "ch"
     ], var.sumologic_environment)
     error_message = "The value must be one of au, ca, de, eu, jp, us1, us2, kr, ch or fed."
+  }
+}
+
+variable "sumologic_environment_base_url" {
+  type        = string
+  description = "Base URL for custom Sumo Logic environments (e.g., 'https://api.ch.sumologic.com/api/' for Switzerland). If provided, this takes precedence over the sumologic_environment parameter. Leave empty for standard deployments."
+  default     = null
+
+  validation {
+    condition     = var.sumologic_environment_base_url == null || can(regex("^https://[a-zA-Z0-9.-]+\\.sumologic\\.com/api/?$", var.sumologic_environment_base_url))
+    error_message = "The base URL must be null or a valid Sumo Logic API endpoint URL (e.g., 'https://api.ch.sumologic.com/api/')."
   }
 }
 
@@ -493,4 +504,15 @@ variable "prevent_deletion_if_contains_resources" {
   EOT
   type        = bool
   default     = true
+}
+
+variable "scan_interval" {
+  description = "Time interval in milliseconds of scans for new metrics data. The default is 300000 (5 minutes) and the minimum value is 1000 milliseconds (1 second)."
+  type        = number
+  default     = 300000
+
+  validation {
+    condition     = var.scan_interval >= 1000
+    error_message = "The scan_interval must be at least 1000 milliseconds (1 second)."
+  }
 }

@@ -1077,3 +1077,58 @@ func TestSumoLogicMetricsSourceFilters(t *testing.T) {
 		})
 	}
 }
+func TestScanIntervalValidation(t *testing.T) {
+	testCases := []struct {
+		name        string
+		tfvarsFile  string
+		shouldPass  bool
+		description string
+	}{
+		{
+			name:        "ValidScanIntervalMinimum",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "scan-interval-valid.tfvars"),
+			shouldPass:  true,
+			description: "Minimum scan_interval value (1000ms) should pass validation",
+		},
+		{
+			name:        "InvalidScanIntervalBelowMin",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "scan-interval-invalid-below-min.tfvars"),
+			shouldPass:  false,
+			description: "scan_interval below minimum (999ms) should fail validation",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			runValidationTest(t, tc.name, tc.tfvarsFile, !tc.shouldPass, tc.description)
+		})
+	}
+}
+
+func TestSumoLogicEnvironmentBaseURLValidation(t *testing.T) {
+	testCases := []struct {
+		name        string
+		tfvarsFile  string
+		shouldPass  bool
+		description string
+	}{
+		{
+			name:        "ValidBaseURL",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "sumo-base-url-valid.tfvars"),
+			shouldPass:  true,
+			description: "Valid base URL for Switzerland deployment should pass",
+		},
+		{
+			name:        "InvalidBaseURLFormat",
+			tfvarsFile:  filepath.Join("test", fixturesDir, "sumo-base-url-invalid-protocol.tfvars"),
+			shouldPass:  false,
+			description: "Base URL with invalid format should fail validation",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			runValidationTest(t, tc.name, tc.tfvarsFile, !tc.shouldPass, tc.description)
+		})
+	}
+}

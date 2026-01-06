@@ -90,11 +90,12 @@ resource "sumologic_azure_metrics_source" "terraform_azure_metrics_source" {
     if v.enabled == true && length(flatten(v.regions)) > 0
   }
 
-  name         = replace(replace(each.key, "/", "-"), ".", "-")
-  description  = "Metrics for ${each.key}"
-  category     = "azure/${lower(replace(replace(each.key, "/", "-"), ".", "-"))}/metrics"
-  content_type = "AzureMetrics"
-  collector_id = sumologic_collector.sumo_collector.id
+  name          = replace(replace(each.key, "/", "-"), ".", "-")
+  description   = "Metrics for ${each.key}"
+  category      = "azure/${lower(replace(replace(each.key, "/", "-"), ".", "-"))}/metrics"
+  content_type  = "AzureMetrics"
+  scan_interval = var.scan_interval
+  collector_id  = sumologic_collector.sumo_collector.id
 
   authentication {
     type          = "AzureClientSecretAuthentication"

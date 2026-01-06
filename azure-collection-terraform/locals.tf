@@ -152,13 +152,13 @@ locals {
 
   resources_by_type_and_location = {
     for res in values(local.all_monitored_resources) :
-    "${lookup(res, "parent_type", res.type)}-${res.location}" => res...
+    "${res.type}-${res.location}" => res...
     if !contains(local.unsupported_eventhub_locations, lower(replace(res.location, " ", "")))
   }
 
   eventhub_key_to_log_namespace_grouped = {
     for res in values(local.all_monitored_resources) :
-    "${lookup(res, "parent_type", res.type)}-${res.location}" => lookup(res, "parent_type", res.type)...
+    "${res.type}-${res.location}" => lookup(res, "parent_type", res.type)...
   }
 
   eventhub_key_to_log_namespace = {
@@ -198,9 +198,6 @@ locals {
     if config.metric_namespace != null && config.metric_namespace != ""
   }
 
-  # Count Event Hub instances per location (for auto-upgrade to Premium if >10)
-  # Basic and Standard SKUs support max 10 Event Hubs per namespace
-  # Premium SKU supports up to 100 Event Hubs per namespace
   eventhub_count_by_location = {
     for location in keys(local.resources_by_location_only) :
     location => length([
@@ -214,30 +211,27 @@ locals {
     ])
   }
 
-  # Helper function to get SKU and throughput for a region
-  # Priority: 
-  # 1) region_specific override
-  # 2) Auto-upgrade to Premium if >10 Event Hubs and SKU is Basic/Standard
-  # 3) limited SKU regions → Standard
-  # 4) global default
+  max_possible_eventhubs_per_config = length([
+    for config in var.target_resource_types :
+    config.log_namespace
+    if config.log_namespace != null && config.log_namespace != ""
+  ])
+
   eventhub_sku_by_region = {
     for location in distinct(concat(
       [for res in values(local.all_monitored_resources) : res.location if !contains(local.unsupported_eventhub_locations, lower(replace(res.location, " ", "")))],
       var.enable_activity_logs && !(contains(local.unsupported_eventhub_locations, lower(replace(var.location, " ", "")))) ? [var.location] : []
     )) :
     location => (
-      # Check if there's a region-specific override
       contains(keys(local.normalized_region_skus), lower(replace(location, " ", ""))) ?
-      # Region-specific override exists - use it
       local.normalized_region_skus[lower(replace(location, " ", ""))] :
-      # No region-specific override - apply auto-upgrade logic
       {
         sku = (
-          # First check: if limited SKU region and global is Premium/Dedicated, downgrade to Standard
-          contains(local.limited_eventhub_sku_locations, lower(replace(location, " ", ""))) && contains(["Premium", "Dedicated"], var.eventhub_namespace_sku) ? "Standard" :
-          # Second check: if >10 Event Hubs and SKU is Basic/Standard, auto-upgrade to Premium
-          lookup(local.eventhub_count_by_location, location, 0) > 10 && contains(["Basic", "Standard"], var.eventhub_namespace_sku) ? "Premium" :
-          # Default: use global SKU
+          contains(local.limited_eventhub_sku_locations, lower(replace(location, " ", ""))) ? "Standard" :
+          max(
+            lookup(local.eventhub_count_by_location, location, 0),
+            local.max_possible_eventhubs_per_config
+          ) >= 9 && contains(["Basic", "Standard"], var.eventhub_namespace_sku) ? "Premium" :
           var.eventhub_namespace_sku
         )
         throughput_units = var.default_throughput_units

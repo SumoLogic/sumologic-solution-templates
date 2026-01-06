@@ -480,6 +480,8 @@ The following table describes all available configuration variables. For a compl
 | `sumologic_access_id` | Sumo Logic Access ID from your account preferences. Used for API authentication. | `string` | `"your-sumologic-access-id"` | **Yes** |
 | `sumologic_access_key` | Sumo Logic Access Key from your account preferences. Used for API authentication. | `string` (sensitive) | `"your-sumologic-access-key"` | **Yes** |
 | `sumologic_environment` | Sumo Logic deployment region. Options: `us1`, `us2`, `eu`, `au`, `ca`, `de`, `jp`, `in`, `kr`, `fed`. | `string` | `"us1"` | **Yes** |
+| `sumologic_environment_base_url` | Base URL for custom Sumo Logic environments (e.g., `https://api.ch.sumologic.com/api/` for Switzerland). If provided, this overrides `sumologic_environment`. Use `null` for standard deployments. | `string` | `null` | **Yes** |
+| `scan_interval` | Polling interval (in milliseconds) for the Azure Metrics source. Controls how frequently metrics are collected from Azure Monitor API. Minimum value: `1000` (1 second). Default: `300000` (5 minutes). | `number` | `300000` | **Yes** |
 | `sumo_collector_name` | Name for the Sumo Logic hosted collector (alphanumeric, hyphens, underscores, max 128 characters). | `string` | `"sumologic-azure-collection"` | **Yes** |
 | `installation_apps_list` | List of Sumo Logic apps to install automatically. Each app requires `uuid`, `name`, `version`, and optionally `parameters` (map of key-value pairs for app configuration). Use empty `[]` to skip app installation. | `list(object)` | Refer to [terraform.tfvars.example](/azure-collection-terraform/terraform.tfvars.example#L285) | No |
 | **Resource Targeting** |||||
@@ -1186,6 +1188,60 @@ CLEANUP_RESOURCES=true        # Auto-cleanup test resources
 
 ## Troubleshooting
 
+### "HTTP response was nil" Errors During Deployment
+
+#### Problem
+During large deployments (100+ resources), you may see:
+```
+Error: creating Monitor Diagnostics Setting "..." HTTP response was nil; connection may have been reset
+```
+
+#### Root Cause
+Azure API throttling or transient network issues during high-volume operations.
+
+#### Solutions
+
+**1. Use the Deployment Script (Recommended)**
+```bash
+./deploy.sh deploy
+```
+
+This handles everything automatically including retries and imports.
+
+**2. Manual Deployment with Reduced Parallelism**
+```bash
+terraform apply -parallelism=5
+```
+
+Lower parallelism (5-10) prevents overwhelming Azure's API.
+
+**3. If Errors Still Occur - Recovery Process**
+
+The resource **is created in Azure** but not in terraform state. To fix:
+
+**Step 1**: Verify the resource exists:
+```bash
+az monitor diagnostic-settings show \
+  --resource "<resource-id-from-error>" \
+  --name "<diagnostic-setting-name>"
+```
+
+**Step 2**: Import it into terraform:
+```bash
+terraform import '<terraform-resource-address>' '<azure-resource-id>|<diagnostic-setting-name>'
+```
+
+**Step 3**: Retry the apply:
+```bash
+terraform apply
+```
+
+#### Prevention Tips
+- Use `./deploy.sh` script for all deployments
+- For very large deployments (500+ resources), deploy in batches
+- Monitor Azure service health before deployments
+- Consider increasing `parallelism` gradually: 5 → 10 → 20
+
 ### Azure Event Hub Limitation
 Please visit [here](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-quotas) to find out more details about Azure Event Hub Limitations
 
@@ -1660,9 +1716,20 @@ To destroy all resources:
 terraform destroy
 ```
 
-**⚠️ Warning**
+### Automated Lock Handling
+
+This module automatically removes Azure resource locks before deleting diagnostic settings to prevent "ScopeLocked" errors.
+
+**Requirements:**
+- Azure CLI authentication (`az login`)
+- **Owner** or **User Access Administrator** role to remove locks
+
+**Note:** Only locks on resources with diagnostic settings are checked and removed. Other resources remain unaffected.
+
+### ⚠️ Warning
 
 This will:
+- **Automatically remove Azure resource locks** (subscription, resource group, and resource-level)
 - Delete all EventHub namespaces and hubs
 - Remove diagnostic settings from Azure resources
 - Delete Sumo Logic collector and all sources
