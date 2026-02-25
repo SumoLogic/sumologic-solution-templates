@@ -105,7 +105,7 @@ Parameters:
   Section1aSumoDeployment:
     Type: String
     Default: ""
-    Description: "Enter au, ca, de, eu, fed, jp, kr, us1 or us2"
+    Description: "Enter au, ca, ch, de, eu, fed, jp, kr, us1 or us2"
   Section1bSumoAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
@@ -315,7 +315,7 @@ Resources:
                                            | where eventSource = "lambda.amazonaws.com"
                                            | json field=requestParameters "functionName", "resource" as functionname, resource nodrop
                                            | parse regex field=functionname "\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$" nodrop
-                                           | parse field=resource "arn:aws:lambda:*:function:*" as f1, functionname2 nodrop
+                                           | parse field=resource "arn:*:lambda:*:function:*" as arn_part, f1, functionname2 nodrop
                                            | if (isEmpty(functionname), functionname2, functionname) as functionname
                                            | "aws/lambda" as namespace
                                            | tolowercase(functionname) as functionname
