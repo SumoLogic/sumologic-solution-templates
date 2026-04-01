@@ -1,5 +1,5 @@
 module "classic_elb_module" {
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=fy27q1"
   #version = "1.0.21"
 
   access_id   = var.access_id

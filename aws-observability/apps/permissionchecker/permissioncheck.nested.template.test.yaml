@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.14.0: This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
+Description: "Version - v2.15.0: This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
 Transform: 'AWS::Serverless-2016-10-31'
 
 Metadata:
@@ -258,7 +258,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::246946804217:root
+              AWS: !Sub "arn:${AWS::Partition}:iam::246946804217:root"
             Action: sts:AssumeRole
             Condition:
               StringEquals:
@@ -364,14 +364,14 @@ Resources:
               Service: cloudtrail.amazonaws.com
             Action: s3:GetBucketAcl
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
           - Sid: AWSCloudTrailWrite
             Effect: Allow
             Principal:
               Service: cloudtrail.amazonaws.com
             Action: s3:PutObject
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
@@ -381,32 +381,30 @@ Resources:
               Service: cloudtrail.amazonaws.com
             Action: s3:ListBucket
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
           - Sid: AWSAlbLogsPutObjects
             Effect: Allow
             Principal:
-              AWS: !Join
-                - ""
-                - - "arn:aws:iam::"
-                  - !FindInMap [Region2ELBAccountId, !Ref 'AWS::Region', AccountId]
-                  - ":root"
+              AWS: !Sub
+                - "arn:${AWS::Partition}:iam::${ELBAccount}:root"
+                - ELBAccount: !FindInMap [ Region2ELBAccountId, !Ref "AWS::Region", AccountId ]
             Action: s3:PutObject
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
           - Sid: AWSAlbLogDeliveryAclCheck
             Effect: Allow
             Principal:
               Service: delivery.logs.amazonaws.com
             Action: s3:GetBucketAcl
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
           - Sid: AWSAlbLogDeliveryWrite
             Effect: Allow
             Principal:
               Service: delivery.logs.amazonaws.com
             Action: s3:PutObject
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
@@ -423,16 +421,15 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Ref "AWS::AccountId"
               ArnLike:
-                aws:SourceArn: !Join
-                  - ""
-                  - - "arn:aws:s3:::aws-test-observability-logs-"
-                    - !Select
+                aws:SourceArn: !Sub
+                  - "arn:${AWS::Partition}:s3:::aws-test-observability-logs-${StackSuffix}"
+                  - StackSuffix: !Select
                       - 0
                       - !Split
                         - "-"
                         - !Select
                           - 2
-                          - !Split ["/", !Ref "AWS::StackId"]
+                          - !Split [ "/", !Ref "AWS::StackId" ]
             Effect: Allow
             Principal:
               "Service": "s3.amazonaws.com"

@@ -1,5 +1,5 @@
 module "elasticache_module" {
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=fy27q1"
   #version = "1.0.21"
 
   access_id   = var.access_id
@@ -28,7 +28,7 @@ module "elasticache_module" {
       monitor_is_disabled  = var.monitors_disabled
       monitor_evaluation_delay = "0m"
       queries = {
-        A = "account=* region=* namespace=aws/elasticache \"\\\"eventSource\\\":\\\"elasticache.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventSource\", \"errorCode\", \"errorMessage\", \"userIdentity\", \"requestParameters\", \"responseElements\"  as event_source, error_code, error_message, user_identity, requestParameters, responseElements nodrop\n| json field=requestParameters \"cacheClusterId\" as req_cacheClusterId nodrop\n| json field=responseElements \"cacheClusterId\" as res_cacheClusterId nodrop\n| json field=user_identity \"arn\", \"userName\" nodrop \n| parse field=arn \":assumed-role/*\" as user nodrop  \n| parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(req_cacheClusterId), res_cacheClusterId, req_cacheClusterId) as cacheclusterid\n| where event_source matches \"elasticache.amazonaws.com\" and !isEmpty(error_code) and !isEmpty(error_message) and !isEmpty(user)\n| count as event_count by _messageTime, account, region, event_source, error_code, error_message, user, cacheclusterid\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS Z\") as message_date\n| fields message_date, account, region, event_source, error_code, error_message, user, cacheclusterid\n| fields -_messageTime"
+        A = "account=* region=* namespace=aws/elasticache \"\\\"eventSource\\\":\\\"elasticache.amazonaws.com\\\"\" errorCode errorMessage\n| json \"eventSource\", \"errorCode\", \"errorMessage\", \"userIdentity\", \"requestParameters\", \"responseElements\"  as event_source, error_code, error_message, user_identity, requestParameters, responseElements nodrop\n| json field=requestParameters \"cacheClusterId\" as req_cacheClusterId nodrop\n| json field=responseElements \"cacheClusterId\" as res_cacheClusterId nodrop\n| json field=user_identity \"arn\", \"userName\" nodrop \n| parse field=arn \":assumed-role/*\" as user nodrop  \n| parse field=arn \"arn:*:iam::*:*\" as arn_part, accountId, user nodrop\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(req_cacheClusterId), res_cacheClusterId, req_cacheClusterId) as cacheclusterid\n| where event_source matches \"elasticache.amazonaws.com\" and !isEmpty(error_code) and !isEmpty(error_message) and !isEmpty(user)\n| count as event_count by _messageTime, account, region, event_source, error_code, error_message, user, cacheclusterid\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS Z\") as message_date\n| fields message_date, account, region, event_source, error_code, error_message, user, cacheclusterid\n| fields -_messageTime"
       }
       triggers = [
         {

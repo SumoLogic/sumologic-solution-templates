@@ -26,7 +26,7 @@ module "cloudtrail_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_cloudtrail_source ? ["cloudtrail_module"] : [])
   #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail"
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudtrail?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudtrail?ref=fy27q1"
   #version = "1.0.21"
 
   create_collector          = false
@@ -47,7 +47,7 @@ module "cloudtrail_module" {
     }
     paused               = false
     scan_interval        = 60000
-    sumo_account_id      = local.sumo_account_id
+    sumo_account_id      = local.sumo_account_ids[data.aws_partition.current.partition]
     cutoff_relative_time = "-1d"
     fields               = local.cloudtrail_fields
     iam_details = {
@@ -67,7 +67,7 @@ module "elb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_elb_source ? ["elb_module"] : [])
   #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elb"
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/elb?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/elb?ref=fy27q1"
   #version = "1.0.21"
 
   create_collector          = false
@@ -87,7 +87,7 @@ module "elb_module" {
     }
     paused               = false
     scan_interval        = 60000
-    sumo_account_id      = local.sumo_account_id
+    sumo_account_id      = local.sumo_account_ids[data.aws_partition.current.partition]
     cutoff_relative_time = "-1d"
     fields               = local.elb_fields
     iam_details = {
@@ -114,7 +114,7 @@ module "classic_lb_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_classic_lb_source ? ["classic_lb_module"] : [])
   #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing"
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/elasticloadbalancing?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/elasticloadbalancing?ref=fy27q1"
   #version = "1.0.21"
 
   create_collector          = false
@@ -134,7 +134,7 @@ module "classic_lb_module" {
     }
     paused               = false
     scan_interval        = 60000
-    sumo_account_id      = local.sumo_account_id
+    sumo_account_id      = local.sumo_account_ids[data.aws_partition.current.partition]
     cutoff_relative_time = "-1d"
     fields               = local.classic_lb_fields
     iam_details = {
@@ -161,7 +161,7 @@ module "cloudwatch_custom_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_cw_metrics_source && length(local.custom_namespace) > 0 ? ["Custom"] : [])
   #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchmetrics?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchmetrics?ref=fy27q1"
   #version = "1.0.21"
 
   create_collector          = false
@@ -178,7 +178,7 @@ module "cloudwatch_custom_metrics_source_module" {
     tag_filters         = []
     paused              = false
     scan_interval       = 30000
-    sumo_account_id     = local.sumo_account_id
+    sumo_account_id     = local.sumo_account_ids[data.aws_partition.current.partition]
     fields              = local.metrics_fields
     iam_details = {
       create_iam_role = false
@@ -192,7 +192,7 @@ module "cloudwatch_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = local.create_cw_metrics_source && length(local.aws_namespace) > 0 ? toset(local.aws_namespace) : []
   # source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics"
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchmetrics?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchmetrics?ref=fy27q1"
   #version = "1.0.21"
 
   create_collector          = false
@@ -209,7 +209,7 @@ module "cloudwatch_metrics_source_module" {
     tag_filters         = [for tag_filter in var.cloudwatch_metrics_source_details.tag_filters : tag_filter if tag_filter.namespace == each.value]
     paused              = false
     scan_interval       = lookup(local.namespace_scan_interval, regex("^AWS/(\\w+)$", each.value)[0], "300000")
-    sumo_account_id     = local.sumo_account_id
+    sumo_account_id     = local.sumo_account_ids[data.aws_partition.current.partition]
     fields              = local.metrics_fields
     iam_details = {
       create_iam_role = false
@@ -223,7 +223,7 @@ module "kinesis_firehose_for_metrics_source_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_metrics_source ? ["kinesis_firehose_for_metrics_source_module"] : [])
   # source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics"
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/kinesisfirehoseformetrics?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/kinesisfirehoseformetrics?ref=fy27q1"
   #version = "1.0.21"
 
   create_collector          = false
@@ -237,7 +237,7 @@ module "kinesis_firehose_for_metrics_source_module" {
     collector_id        = local.create_collector ? sumologic_collector.collector["collector"].id : var.sumologic_existing_collector_details.collector_id
     limit_to_namespaces = var.cloudwatch_metrics_source_details.limit_to_namespaces
     tag_filters         = [for tag_filter in var.cloudwatch_metrics_source_details.tag_filters : tag_filter if contains(var.cloudwatch_metrics_source_details.limit_to_namespaces, tag_filter.namespace)]
-    sumo_account_id     = local.sumo_account_id
+    sumo_account_id     = local.sumo_account_ids[data.aws_partition.current.partition]
     fields              = local.metrics_fields
     iam_details = {
       create_iam_role = false
@@ -257,7 +257,7 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_llf_logs_source ? ["cloudwatch_logs_lambda_log_forwarder_module"] : [])
   # source = "SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder"
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchlogsforwarder?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/cloudwatchlogsforwarder?ref=fy27q1"
   #version = "1.0.21"
 
   create_collector = false
@@ -290,7 +290,7 @@ module "kinesis_firehose_for_logs_module" {
   depends_on = [time_sleep.wait_for_minutes]
   for_each   = toset(local.create_kf_logs_source ? ["kinesis_firehose_for_logs_module"] : [])
   #source = "SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs"
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/kinesisfirehoseforlogs?ref=fy26q4"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//aws/kinesisfirehoseforlogs?ref=fy27q1"
   #version = "1.0.21"
 
   create_collector = false

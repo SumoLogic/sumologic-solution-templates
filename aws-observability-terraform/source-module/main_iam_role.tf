@@ -12,9 +12,10 @@ resource "aws_iam_role" "sumologic_iam_role" {
   path = "/"
 
   assume_role_policy = templatefile("${path.module}/templates/iam_assume_role_policy.tmpl", {
-    SUMO_LOGIC_ACCOUNT_ID = local.sumo_account_id,
+    SUMO_LOGIC_ACCOUNT_ID = local.sumo_account_ids[data.aws_partition.current.partition],
     ENVIRONMENT           = data.sumologic_caller_identity.current.environment,
     SUMO_LOGIC_ORG_ID     = var.sumologic_organization_id
+    AWS_PARTITION         = data.aws_partition.current.partition
   })
   tags = var.aws_resource_tags
 }
@@ -26,6 +27,7 @@ resource "aws_iam_policy" "cloudtrail_policy" {
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME = local.create_cloudtrail_bucket ? local.common_bucket_name : var.cloudtrail_source_details.bucket_details.bucket_name
+    AWS_PARTITION         = data.aws_partition.current.partition
   })
   tags = var.aws_resource_tags
 }
