@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Parent CloudFormation template that launches a nested stack from S3.
+
+Mappings:
+  CommonData:
+    NestedTemplate:
+      BucketName: "maketplace90"
+      BucketRegion: "ap-southeast-1"
+      BucketKeyPrefix: "mapping/"
+
+Resources:
+  ChildStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}child.yaml"
+          - MPS3BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+            MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, BucketRegion]
+            MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, BucketKeyPrefix]
+      Parameters:
+        MPS3BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+        MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, BucketRegion]
+        MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, BucketKeyPrefix]
+
+Outputs:
+  ChildStackOutput:
+    Description: Output returned from Child stack
+    Value: !GetAtt ChildStack.Outputs.ChildBucketName

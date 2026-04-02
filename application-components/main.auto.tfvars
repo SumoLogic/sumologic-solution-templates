@@ -3,7 +3,7 @@
 
 ####### SUMOLOGIC CONFIGURATION #######
 
-sumologic_environment     = ""   # Please replace <YOUR SUMO DEPLOYMENT> (including brackets) with au, ca, ch, de, eu, jp, us2, fed, kr or us1.
+sumologic_environment     = ""   # Please replace <YOUR SUMO DEPLOYMENT> (including brackets) with au, ca, ch, de, eu, esc, jp, us2, fed, kr or us1.
 sumologic_access_id       = ""   # Please replace <YOUR SUMO ACCESS ID> (including brackets) with your Sumo Logic Access ID.
 sumologic_access_key      = ""   # Please replace <YOUR SUMO ACCESS KEY> (including brackets) with your Sumo Logic Access KEY.
 sumologic_organization_id = ""   # Please replace <YOUR SUMO ORG ID> (including brackets) with your Sumo Logic Organization ID.

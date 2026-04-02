@@ -2,7 +2,7 @@
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------
 # This script imports the existing fields and FERs (required by aws observability solution) if field(s) and FER(s) are already present in the user's Sumo Logic account.
-# For SUMOLOGIC_ENV, provide one from the list : au, ca, ch, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+# For SUMOLOGIC_ENV, provide one from the list : au, ca, ch, de, eu, esc, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
 # Before using this script, set following environment variables using below commands:
 # export SUMOLOGIC_ENV=""
 # export SUMOLOGIC_ACCESSID=""
@@ -11,7 +11,7 @@
 
 # Validate Sumo Logic environment/deployment.
 if ! [[ "$SUMOLOGIC_ENV" =~ ^(au|ca|de|eu|jp|us2|in|fed|us1)$ ]]; then
-    echo "$SUMOLOGIC_ENV is invalid Sumo Logic deployment. For SUMOLOGIC_ENV, provide one from list : au, ca, ch, de, eu, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+    echo "$SUMOLOGIC_ENV is invalid Sumo Logic deployment. For SUMOLOGIC_ENV, provide one from list : au, ca, ch, de, eu, esc, jp, us2, in, fed or us1. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
     exit 1
 fi
 

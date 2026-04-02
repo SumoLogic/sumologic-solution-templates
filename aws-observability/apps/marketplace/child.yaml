@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Child template that deploys the Grandchild stack.
+
+Parameters:
+  MPS3BucketName:
+    Type: String
+  MPS3BucketRegion:
+    Type: String
+  MPS3KeyPrefix:
+    Type: String
+
+Resources:
+  GrandchildStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}grandchild.yaml"
+
+  ChildBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::Region}-2324234231"
+
+Outputs:
+  ChildBucketName:
+    Description: "Bucket created in the child stack"
+    Value: !Ref ChildBucket
+
+  GrandchildOutput:
+    Description: "Output from grandchild stack"
+    Value: !GetAtt GrandchildStack.Outputs.GrandchildBucketName

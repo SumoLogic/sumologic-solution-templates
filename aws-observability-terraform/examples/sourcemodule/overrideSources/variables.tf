@@ -1,6 +1,6 @@
 variable "sumologic_environment" {
   type        = string
-  description = "Enter au, ca, ch, de, eu, fed, jp, kr, us1 or us2. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  description = "Enter au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
 
   validation {
     condition = contains([
@@ -9,12 +9,13 @@ variable "sumologic_environment" {
       "ch",
       "de",
       "eu",
+      "esc",
       "fed",
       "jp",
       "kr",
       "us1",
       "us2"], var.sumologic_environment)
-    error_message = "The value must be one of au, ca, ch, de, eu, fed, jp, kr, us1 or us2."
+    error_message = "The value must be one of au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2."
   }
 }
 
@@ -90,7 +91,7 @@ variable "sumo_api_endpoint" {
   validation {
     condition = contains([
       "https://api.au.sumologic.com/api/",
-    "https://api.ca.sumologic.com/api/", "https://api.ch.sumologic.com/api/", "https://api.de.sumologic.com/api/", "https://api.eu.sumologic.com/api/", "https://api.fed.sumologic.com/api/", "https://api.in.sumologic.com/api/", "https://api.jp.sumologic.com/api/", "https://api.sumologic.com/api/", "https://api.us2.sumologic.com/api/", "https://api.kr.sumologic.com/api/"], var.sumo_api_endpoint)
+    "https://api.ca.sumologic.com/api/", "https://api.ch.sumologic.com/api/", "https://api.de.sumologic.com/api/", "https://api.eu.sumologic.com/api/", "https://api.esc.sumologic.com/api/", "https://api.fed.sumologic.com/api/", "https://api.in.sumologic.com/api/", "https://api.jp.sumologic.com/api/", "https://api.sumologic.com/api/", "https://api.us2.sumologic.com/api/", "https://api.kr.sumologic.com/api/"], var.sumo_api_endpoint)
     error_message = "Argument \"sumo_api_endpoint\" must be one of the values specified at https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security."
   }
 }
