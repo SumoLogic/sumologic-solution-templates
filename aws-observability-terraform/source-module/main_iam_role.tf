@@ -45,7 +45,8 @@ resource "aws_iam_policy" "elb_policy" {
   for_each = toset(local.create_elb_source && local.create_iam_role ? ["elb_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
-    BUCKET_NAME = local.create_elb_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
+    BUCKET_NAME    = local.create_elb_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
+    AWS_PARTITION  = data.aws_partition.current.partition
   })
   tags = var.aws_resource_tags
 }
@@ -55,7 +56,8 @@ resource "aws_iam_policy" "classic_lb_policy" {
   for_each = toset(local.create_classic_lb_source && local.create_iam_role ? ["classic_lb_policy"] : [])
 
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
-    BUCKET_NAME = local.create_classic_lb_bucket ? local.common_bucket_name : var.classic_lb_source_details.bucket_details.bucket_name
+    BUCKET_NAME    = local.create_classic_lb_bucket ? local.common_bucket_name : var.classic_lb_source_details.bucket_details.bucket_name
+    AWS_PARTITION  = data.aws_partition.current.partition
   })
   tags = var.aws_resource_tags
 }
