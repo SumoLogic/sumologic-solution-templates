@@ -27,7 +27,7 @@ variable "deployment" {
     condition = contains([
       "US1",
     "us1", "US2", "us2", "AU", "au", "CA", "ca", "DE", "de", "EU", "eu", "ESC", "esc", "FED", "fed", "JP", "jp", "kr", "KR", "ch", "CH"], var.deployment)
-    error_message = "Argument \"deployment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"de\",\"eu\",\"fed\",\"jp\",\"kr\",\"ch\"."
+    error_message = "Argument \"deployment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"de\",\"eu\", \"esc\", \"fed\",\"jp\",\"kr\",\"ch\"."
   }
 }
 variable "sumo_api_endpoint" {

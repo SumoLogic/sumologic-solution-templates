@@ -38,7 +38,7 @@ resource "aws_sns_topic" "sns_topic" {
     BUCKET_NAME    = local.common_bucket_name,
     AWS_REGION     = local.aws_region,
     SNS_TOPIC_NAME = "SumoLogic-Aws-Observability-Module-${random_string.aws_random.id}",
-    AWS_ACCOUNT    = local.sumo_account_ids[data.aws_partition.current.partition]
+    AWS_ACCOUNT    = local.aws_account_id
     AWS_PARTITION  = data.aws_partition.current.partition
   })
   tags = var.aws_resource_tags
