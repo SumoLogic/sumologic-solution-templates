@@ -24,7 +24,7 @@ variable "Section1aSumoLogicDeployment" {
       "us2",
       "fed",
     "us1"], var.Section1aSumoLogicDeployment)
-    error_message = "Argument \"Section1aSumoLogicDeployment\" must be either \"au\", \"ca\", \"de\", \"eu\", \"jp\", \"us2\", \"fed\" or \"us1\"."
+    error_message = "Argument \"Section1aSumoLogicDeployment\" must be either \"au\", \"ca\", \"ch\", \"de\", \"eu\", \"jp\", \"us2\", \"fed\" or \"us1\"."
   }
 }
 variable "Section1bSumoLogicAccessID" {
