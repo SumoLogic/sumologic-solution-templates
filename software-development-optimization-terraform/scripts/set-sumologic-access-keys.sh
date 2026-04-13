@@ -36,9 +36,6 @@ case $sumologic_deployment_region  in
   "kr")
     sumologic_api_endpoint="https://api.kr.sumologic.com/api/"
     ;;
-  "in")
-    sumologic_api_endpoint="https://api.in.sumologic.com/api/"
-    ;;
   "fed")
     sumologic_api_endpoint="https://api.fed.sumologic.com/api/"
     ;;
