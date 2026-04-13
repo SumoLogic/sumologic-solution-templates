@@ -10,7 +10,7 @@
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Validate Sumo Logic environment/deployment.
-if ! [[ "$SUMOLOGIC_ENV" =~ ^(au|ca|ch|de|eu|jp|us2|fed|us1|kr)$ ]]; then
+if ! [[ "$SUMOLOGIC_ENV" =~ ^(au|ca|ch|de|eu|jp|us2|fed|kr|us1)$ ]]; then
     echo "$SUMOLOGIC_ENV is invalid Sumo Logic deployment. For SUMOLOGIC_ENV, provide one from list : au, ca, ch, de, eu, fed, jp, kr, us1 or us2. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
     exit 1
 fi
