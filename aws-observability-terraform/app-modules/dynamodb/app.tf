@@ -1,6 +1,6 @@
 module "dynamodb_module" {
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=fy26q4"
-  #version = "1.0.21"
+  source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
+  version = "1.0.22"
 
   access_id   = var.access_id
   access_key  = var.access_key
