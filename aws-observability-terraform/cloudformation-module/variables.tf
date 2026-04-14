@@ -12,18 +12,20 @@ variable "CloudFormationStackName" {
 # Sumo Logic Access Configuration (Required)
 variable "Section1aSumoLogicDeployment" {
   type        = string
-  description = "Enter au, ca, de, eu, fed, jp, kr, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  description = "Enter au, ca, ch, de, eu, fed, jp, kr, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   validation {
     condition = contains([
       "au",
       "ca",
+      "ch",
       "de",
       "eu",
       "jp",
       "us2",
+      "kr",
       "fed",
     "us1"], var.Section1aSumoLogicDeployment)
-    error_message = "Argument \"Section1aSumoLogicDeployment\" must be either \"au\", \"ca\", \"de\", \"eu\", \"jp\", \"us2\", \"fed\" or \"us1\"."
+    error_message = "Argument \"Section1aSumoLogicDeployment\" must be either \"au\", \"ca\", \"ch\", \"de\", \"eu\", \"jp\", \"us2\", \"kr\", \"fed\" or \"us1\"."
   }
 }
 variable "Section1bSumoLogicAccessID" {
