@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.13.0: Template to setup the RDS app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.14.0: Template to setup the RDS app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -74,7 +74,7 @@ Parameters:
   Section1aSumoDeployment:
     Type: String
     Default: ""
-    Description: "Enter au, ca, de, eu, fed, jp, kr, us1 or us2"
+    Description: "Enter au, ca, ch, de, eu, fed, jp, kr, us1 or us2"
   Section1bSumoAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
@@ -222,9 +222,9 @@ Resources:
                                            | "aws/rds" as namespace
                                            | json field=requestParameters "dBInstanceIdentifier", "resourceName", "dBClusterIdentifier" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop
                                            | json field=responseElements "dBInstanceIdentifier" as dBInstanceIdentifier3 nodrop | json field=responseElements "dBClusterIdentifier" as dBClusterIdentifier3 nodrop
-                                           | parse field=resourceName "arn:aws:rds:*:db:*" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName "arn:aws:rds:*:cluster:*" as f1, dBClusterIdentifier2 nodrop
-                                           | if (resourceName matches "arn:aws:rds:*:db:*", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier
-                                           | if (resourceName matches "arn:aws:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
+                                           | parse field=resourceName "arn:*:rds:*:db:*" as arn_part, f1, dBInstanceIdentifier2 nodrop | parse field=resourceName "arn:*:rds:*:cluster:*" as arn_part, f1, dBClusterIdentifier2 nodrop
+                                           | if (resourceName matches "arn:*:rds:*:db:*", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier
+                                           | if (resourceName matches "arn:*:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
                                            | if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier
                                            | tolowercase(dbidentifier) as dbidentifier
                                            | fields region, namespace, dBInstanceIdentifier, dBClusterIdentifier, dbidentifier, accountid'

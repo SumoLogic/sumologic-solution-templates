@@ -183,14 +183,16 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityALBCloudTrailLogsFER
       name = "AwsObservabilityALBCloudTrailLogsFER"
       scope = "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2015-12-01\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "apiVersion" as event_source, region, accountid, loadbalancer, loadbalancertype, loadbalancerarn, api_version nodrop 
+              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "requestParameters.listenerArn", "apiVersion" as event_source, region, accountid, loadbalancer, loadbalancertype, loadbalancerarn, listenerarn, api_version nodrop
+              | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01"
               | "" as namespace
-              | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01" 
-              | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype, loadbalancer, f1 nodrop
-              | if(loadbalancertype matches "network", "aws/nlb", if(balancertype matches "net", "aws/nlb", namespace)) as namespace
-              | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype matches "app", "aws/applicationelb", namespace)) as namespace
+              | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype1, loadbalancer1, f1 nodrop
+              | parse field=listenerarn ":listener/*/*/*/*" as balancertype2, loadbalancer2, f1, f2 nodrop
+              | if(loadbalancertype matches "network", "aws/networkelb", if(balancertype1 matches "net", "aws/networkelb", if(balancertype2 matches "net", "aws/networkelb", namespace))) as namespace
+              | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype1 matches "app", "aws/applicationelb", if(balancertype2 matches "app", "aws/applicationelb", namespace))) as namespace
               | where namespace="aws/applicationelb" or isEmpty(namespace)
-              | toLowerCase(loadbalancer) as loadbalancer  
+              | if (!isEmpty(loadbalancer), loadbalancer, if (!isEmpty(loadbalancer1), loadbalancer1, loadbalancer2)) as loadbalancer
+              | toLowerCase(loadbalancer) as loadbalancer
               | fields region, namespace, loadbalancer, accountid
       EOT
       enabled = true
@@ -217,15 +219,17 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityNLBCloudTrailLogsFER
       name = "AwsObservabilityNLBCloudTrailLogsFER"
       scope = "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2015-12-01\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "apiVersion" as event_source, region, accountid, loadbalancer, loadbalancertype, loadbalancerarn, api_version nodrop 
+              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "requestParameters.listenerArn", "apiVersion" as event_source, region, accountid, networkloadbalancer, loadbalancertype, loadbalancerarn, listenerarn, api_version nodrop
+              | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01"
               | "" as namespace
-              | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01" 
-              | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype, loadbalancer, f1 nodrop
-              | if(loadbalancertype matches "network", "aws/nlb", if(balancertype matches "net", "aws/nlb", namespace)) as namespace
-              | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype matches "app", "aws/applicationelb", namespace)) as namespace
-              | where namespace="aws/applicationelb" or isEmpty(namespace)
-              | toLowerCase(loadbalancer) as loadbalancer  
-              | fields region, namespace, loadbalancer, accountid
+              | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype1, networkloadbalancer1, f1 nodrop
+              | parse field=listenerarn ":listener/*/*/*/*" as balancertype2, networkloadbalancer2, f1, f2 nodrop
+              | if(loadbalancertype matches "network", "aws/networkelb", if(balancertype1 matches "net", "aws/networkelb", if(balancertype2 matches "net", "aws/networkelb", namespace))) as namespace
+              | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype1 matches "app", "aws/applicationelb", if(balancertype2 matches "app", "aws/applicationelb", namespace))) as namespace
+              | where namespace="aws/networkelb" or isEmpty(namespace)
+              | if (!isEmpty(networkloadbalancer), networkloadbalancer, if (!isEmpty(networkloadbalancer1), networkloadbalancer1, networkloadbalancer2)) as networkloadbalancer
+              | toLowerCase(networkloadbalancer) as networkloadbalancer
+              | fields region, namespace, networkloadbalancer, accountid
       EOT
       enabled = true
 }
@@ -327,7 +331,7 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityFieldExtractionRule"
               | where eventSource = "lambda.amazonaws.com"
               | json field=requestParameters "functionName", "resource" as functionname, resource nodrop
               | parse regex field=functionname "\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$" nodrop
-              | parse field=resource "arn:aws:lambda:*:function:*" as f1, functionname2 nodrop
+              | parse field=resource "arn:*:lambda:*:function:*" as arn_part, f1, functionname2 nodrop
               | if (isEmpty(functionname), functionname2, functionname) as functionname
               | "aws/lambda" as namespace
               | tolowercase(functionname) as functionname
@@ -386,9 +390,9 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityRdsCloudTrailLogsFER
               | "aws/rds" as namespace
               | json field=requestParameters "dBInstanceIdentifier", "resourceName", "dBClusterIdentifier" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop
               | json field=responseElements "dBInstanceIdentifier" as dBInstanceIdentifier3 nodrop | json field=responseElements "dBClusterIdentifier" as dBClusterIdentifier3 nodrop
-              | parse field=resourceName "arn:aws:rds:*:db:*" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName "arn:aws:rds:*:cluster:*" as f1, dBClusterIdentifier2 nodrop
-              | if (resourceName matches "arn:aws:rds:*:db:*", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier
-              | if (resourceName matches "arn:aws:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
+              | parse field=resourceName "arn:*:rds:*:db:*" as arn_part, f1, dBInstanceIdentifier2 nodrop | parse field=resourceName "arn:*:rds:*:cluster:*" as arn_part, f1, dBClusterIdentifier2 nodrop
+              | if (resourceName matches "arn:*:rds:*:db:*", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier
+              | if (resourceName matches "arn:*:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
               | if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier
               | tolowercase(dbidentifier) as dbidentifier
               | fields region, namespace, dBInstanceIdentifier, dBClusterIdentifier, dbidentifier, accountid
@@ -406,13 +410,13 @@ resource "sumologic_field_extraction_rule" "AwsObservabilitySNSCloudTrailLogsFER
               | where event_source = "sns.amazonaws.com"
               | json field=userIdentity "accountId", "type", "arn", "userName"  as accountid, type, arn, username nodrop
               | parse field=arn ":assumed-role/*" as user nodrop 
-              | parse field=arn "arn:aws:iam::*:*" as accountid, user nodrop
+              | parse field=arn "arn:*:iam::*:*" as arn_part, accountid, user nodrop
               | json field=requestParameters "topicArn", "name", "resourceArn", "subscriptionArn" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop 
               | json field=responseElements "topicArn" as res_topic_arn nodrop
               | if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn
               | if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn
-              | parse field=topic_arn "arn:aws:sns:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp nodrop
-              | parse field=subscription_arn "arn:aws:sns:*:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
+              | parse field=topic_arn "arn:*:sns:*:*:*" as arn_part, region_temp, accountid_temp, topic_arn_name_temp nodrop
+              | parse field=subscription_arn "arn:*:sns:*:*:*:*" as arn_part, region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
               | if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname
               | if (isBlank(accountid), recipient_account_id, accountid) as accountid
               | toLowerCase(topicname) as topicname

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.13.0: Template to setup the SNS app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v2.14.0: Template to setup the SNS app with AWS and Sumo Logic resources for AWS Observability Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -74,7 +74,7 @@ Parameters:
   Section1aSumoDeployment:
     Type: String
     Default: ""
-    Description: "Enter au, ca, de, eu, fed, jp, kr, us1 or us2"
+    Description: "Enter au, ca, ch, de, eu, fed, jp, kr, us1 or us2"
   Section1bSumoAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
@@ -195,13 +195,13 @@ Resources:
                                            | where event_source = "sns.amazonaws.com"
                                            | json field=userIdentity "accountId", "type", "arn", "userName"  as accountid, type, arn, username nodrop
                                            | parse field=arn ":assumed-role/*" as user nodrop 
-                                           | parse field=arn "arn:aws:iam::*:*" as accountid, user nodrop
+                                           | parse field=arn "arn:*:iam::*:*" as arn_part, accountid, user nodrop
                                            | json field=requestParameters "topicArn", "name", "resourceArn", "subscriptionArn" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop 
                                            | json field=responseElements "topicArn" as res_topic_arn nodrop
                                            | if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn
                                            | if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn
-                                           | parse field=topic_arn "arn:aws:sns:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp nodrop
-                                           | parse field=subscription_arn "arn:aws:sns:*:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
+                                           | parse field=topic_arn "arn:*:sns:*:*:*" as arn_part, region_temp, accountid_temp, topic_arn_name_temp nodrop
+                                           | parse field=subscription_arn "arn:*:sns:*:*:*:*" as arn_part, region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
                                            | if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname
                                            | if (isBlank(accountid), recipient_account_id, accountid) as accountid
                                            | toLowerCase(topicname) as topicname

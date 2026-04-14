@@ -11,7 +11,7 @@ CloudFormationStackName = "<YOUR STACK NAME>"
 
 ####### BELOW ARE REQUIRED PARAMETERS FOR CLOUDFORMATION STACK #######
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-access-configuration-required
-Section1aSumoLogicDeployment                  = "<YOUR SUMO DEPLOYMENT>" # Please replace <YOUR SUMO DEPLOYMENT> (including brackets) with au, ca, de, eu, jp, us2, in, fed or us1.
+Section1aSumoLogicDeployment                  = "<YOUR SUMO DEPLOYMENT>" # Please replace <YOUR SUMO DEPLOYMENT> (including brackets) with au, ca, ch, de, eu, jp, us2, kr, fed or us1.
 Section1bSumoLogicAccessID                    = "<YOUR SUMO ACCESS ID>"  # Please replace <YOUR SUMO ACCESS ID> (including brackets) with your Sumo Logic Access ID.
 Section1cSumoLogicAccessKey                   = "<YOUR SUMO ACCESS KEY>" # Please replace <YOUR SUMO ACCESS KEY> (including brackets) with your Sumo Logic Access KEY.
 Section1dSumoLogicOrganizationId              = "<YOUR SUMO ORG ID>"     # Please replace <YOUR SUMO ORG ID> (including brackets) with your Sumo Logic Organization ID.
