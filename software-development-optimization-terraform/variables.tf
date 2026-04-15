@@ -25,9 +25,9 @@ variable "deployment" {
   description = "Please update with your deployment, refer: https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   validation {
     condition = contains([
-      "US1",
-    "us1", "US2", "us2", "AU", "au", "CA", "ca", "DE", "de", "EU", "eu", "ESC", "esc", "FED", "fed", "JP", "jp", "kr", "KR", "ch", "CH"], var.deployment)
-    error_message = "Argument \"deployment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"de\",\"eu\", \"esc\", \"fed\",\"jp\",\"kr\",\"ch\"."
+      "US1", "us1", "US2", "us2", "AU", "au", "CA", "ca", "ch", "CH", "DE", "de", "EU", "eu", "ESC", "esc", "FED", "fed", "JP", "jp", "kr", "KR"], var.deployment)
+    error_message = "Argument \"deployment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"ch\",\"de\",\"eu\",\"esc\",\"fed\",\"jp\",\"kr\"."
+
   }
 }
 variable "sumo_api_endpoint" {
@@ -35,7 +35,7 @@ variable "sumo_api_endpoint" {
   validation {
     condition = contains([
       "https://api.au.sumologic.com/api/",
-    "https://api.ca.sumologic.com/api/", "https://api.de.sumologic.com/api/", "https://api.eu.sumologic.com/api/", "https://api.fed.sumologic.com/api/", "https://api.in.sumologic.com/api/", "https://api.jp.sumologic.com/api/","https://api.kr.sumologic.com/api/", "https://api.sumologic.com/api/", "https://api.us2.sumologic.com/api/"], var.sumo_api_endpoint)
+    "https://api.ca.sumologic.com/api/", "https://api.ch.sumologic.com/api/", "https://api.de.sumologic.com/api/", "https://api.eu.sumologic.com/api/", "https://api.fed.sumologic.com/api/", "https://api.jp.sumologic.com/api/","https://api.kr.sumologic.com/api/", "https://api.sumologic.com/api/", "https://api.us2.sumologic.com/api/"], var.sumo_api_endpoint)
     error_message = "Argument \"sumo_api_endpoint\" must be one of the values specified at https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security."
   }
 }

@@ -10,7 +10,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_lambda_module"></a> [lambda\_module](#module\_lambda\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.0.20 |
+| <a name="module_lambda_module"></a> [lambda\_module](#module\_lambda\_module) | SumoLogic/sumo-logic-integrations/sumologic//sumologic | 1.0.22 |
 
 ## Resources
 

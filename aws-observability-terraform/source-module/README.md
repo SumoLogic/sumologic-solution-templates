@@ -22,14 +22,14 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_classic_lb_module"></a> [classic\_lb\_module](#module\_classic\_lb\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing | 1.0.20 |
-| <a name="module_cloudtrail_module"></a> [cloudtrail\_module](#module\_cloudtrail\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail | 1.0.20 |
-| <a name="module_cloudwatch_custom_metrics_source_module"></a> [cloudwatch\_custom\_metrics\_source\_module](#module\_cloudwatch\_custom\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics | 1.0.20 |
-| <a name="module_cloudwatch_logs_lambda_log_forwarder_module"></a> [cloudwatch\_logs\_lambda\_log\_forwarder\_module](#module\_cloudwatch\_logs\_lambda\_log\_forwarder\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder | 1.0.20 |
-| <a name="module_cloudwatch_metrics_source_module"></a> [cloudwatch\_metrics\_source\_module](#module\_cloudwatch\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics | 1.0.20 |
-| <a name="module_elb_module"></a> [elb\_module](#module\_elb\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/elb | 1.0.20 |
-| <a name="module_kinesis_firehose_for_logs_module"></a> [kinesis\_firehose\_for\_logs\_module](#module\_kinesis\_firehose\_for\_logs\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs | 1.0.20 |
-| <a name="module_kinesis_firehose_for_metrics_source_module"></a> [kinesis\_firehose\_for\_metrics\_source\_module](#module\_kinesis\_firehose\_for\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics | 1.0.20 |
+| <a name="module_classic_lb_module"></a> [classic\_lb\_module](#module\_classic\_lb\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing | 1.0.22 |
+| <a name="module_cloudtrail_module"></a> [cloudtrail\_module](#module\_cloudtrail\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail | 1.0.22 |
+| <a name="module_cloudwatch_custom_metrics_source_module"></a> [cloudwatch\_custom\_metrics\_source\_module](#module\_cloudwatch\_custom\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics | 1.0.22 |
+| <a name="module_cloudwatch_logs_lambda_log_forwarder_module"></a> [cloudwatch\_logs\_lambda\_log\_forwarder\_module](#module\_cloudwatch\_logs\_lambda\_log\_forwarder\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder | 1.0.22 |
+| <a name="module_cloudwatch_metrics_source_module"></a> [cloudwatch\_metrics\_source\_module](#module\_cloudwatch\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics | 1.0.22 |
+| <a name="module_elb_module"></a> [elb\_module](#module\_elb\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/elb | 1.0.22 |
+| <a name="module_kinesis_firehose_for_logs_module"></a> [kinesis\_firehose\_for\_logs\_module](#module\_kinesis\_firehose\_for\_logs\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs | 1.0.22 |
+| <a name="module_kinesis_firehose_for_metrics_source_module"></a> [kinesis\_firehose\_for\_metrics\_source\_module](#module\_kinesis\_firehose\_for\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics | 1.0.22 |
 
 ## Resources
 

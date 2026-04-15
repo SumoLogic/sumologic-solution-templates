@@ -217,15 +217,17 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityNLBCloudTrailLogsFER
       name = "AwsObservabilityNLBCloudTrailLogsFER"
       scope = "account=* eventSource eventName \"elasticloadbalancing.amazonaws.com\" \"2015-12-01\""
       parse_expression = <<EOT
-              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "apiVersion" as event_source, region, accountid, loadbalancer, loadbalancertype, loadbalancerarn, api_version nodrop 
+              | json "eventSource", "awsRegion", "recipientAccountId", "requestParameters.name", "requestParameters.type", "requestParameters.loadBalancerArn", "requestParameters.listenerArn", "apiVersion" as event_source, region, accountid, networkloadbalancer, loadbalancertype, loadbalancerarn, listenerarn, api_version nodrop
+              | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01"
               | "" as namespace
-              | where event_source = "elasticloadbalancing.amazonaws.com" and api_version matches "2015-12-01" 
-              | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype, loadbalancer, f1 nodrop
-              | if(loadbalancertype matches "network", "aws/nlb", if(balancertype matches "net", "aws/nlb", namespace)) as namespace
-              | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype matches "app", "aws/applicationelb", namespace)) as namespace
-              | where namespace="aws/applicationelb" or isEmpty(namespace)
-              | toLowerCase(loadbalancer) as loadbalancer  
-              | fields region, namespace, loadbalancer, accountid
+              | parse field=loadbalancerarn ":loadbalancer/*/*/*" as balancertype1, networkloadbalancer1, f1 nodrop
+              | parse field=listenerarn ":listener/*/*/*/*" as balancertype2, networkloadbalancer2, f1, f2 nodrop
+              | if(loadbalancertype matches "network", "aws/networkelb", if(balancertype1 matches "net", "aws/networkelb", if(balancertype2 matches "net", "aws/networkelb", namespace))) as namespace
+              | if(loadbalancertype matches "application", "aws/applicationelb", if(balancertype1 matches "app", "aws/applicationelb", if(balancertype2 matches "app", "aws/applicationelb", namespace))) as namespace
+              | where namespace="aws/networkelb" or isEmpty(namespace)
+              | if (!isEmpty(networkloadbalancer), networkloadbalancer, if (!isEmpty(networkloadbalancer1), networkloadbalancer1, networkloadbalancer2)) as networkloadbalancer
+              | toLowerCase(networkloadbalancer) as networkloadbalancer
+              | fields region, namespace, networkloadbalancer, accountid
       EOT
       enabled = true
 }

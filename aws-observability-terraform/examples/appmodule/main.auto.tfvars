@@ -1,6 +1,6 @@
 ####### BELOW ARE REQUIRED PARAMETERS FOR TERRAFORM SCRIPT #######
 # Visit - https://help.sumologic.com/Solutions/AWS_Observability_Solution/03_Set_Up_the_AWS_Observability_Solution#sumo-logic-access-configuration-required
-sumologic_environment       = ""      # Please replace <YOUR SUMO DEPLOYMENT> (including brackets) with au, ca, ch, de, eu, esc, jp, us2, in, fed or us1.
+sumologic_environment       = ""      # Please replace <YOUR SUMO DEPLOYMENT> (including brackets) with au, ca, ch, de, eu, esc, jp, us2, kr, fed or us1.
 sumologic_access_id         = ""
 sumologic_access_key        = ""
 sumologic_organization_id   = ""      # Please replace <YOUR SUMO ORG ID> (including brackets) with your Sumo Logic Organization ID.
