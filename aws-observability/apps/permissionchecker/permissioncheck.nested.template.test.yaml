@@ -207,6 +207,16 @@ Mappings:
     cn-northwest-1:
       AccountId: "037604701340"
 
+  SumoAWSAccountIds:
+    aws:
+      AWSAccountId: "246946804217"
+    aws-us-gov:
+      AWSAccountId: "246946804217"
+    aws-cn:
+      AWSAccountId: "246946804217"
+    aws-eusc:
+      AWSAccountId: "246946804217"
+
 Resources:
 
   ################# Create Lambda Role and Lambda Function to create Sumo Logic Custom Resources #################
@@ -258,7 +268,9 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:${AWS::Partition}:iam::246946804217:root"
+              AWS: !Sub
+                - "arn:${AWS::Partition}:iam::${AWSAccountId}:root"
+                - AWSAccountId: !FindInMap [SumoAWSAccountIds, !Ref "AWS::Partition", AWSAccountId]
             Action: sts:AssumeRole
             Condition:
               StringEquals:
