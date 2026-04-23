@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "Version - v2.14.0: The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets."
+Description: "Version - v2.15.0: The Template should be deployed in Master account. This template setup the Lambda trigger for new account created using AWS Control Tower Account Factory process. The Lambda install the AWS Observability CF template on the regions of new AWS account using stack Sets."
 
 Globals:
   Function:
@@ -45,12 +45,13 @@ Parameters:
       - ch
       - de
       - eu
+      - esc
       - fed
       - jp
       - kr
       - us1
       - us2
-    Description: "Enter au, ca, ch, de, eu, fed, jp, kr, us1 or us2 Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+    Description: "Enter au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2 Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   Section1bSumoLogicAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
@@ -94,7 +95,7 @@ Resources:
         - Sid: Allow administration of the key
           Effect: Allow
           Principal:
-            AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
           Action:
             - kms:Create*
             - kms:Describe*
@@ -168,7 +169,7 @@ Resources:
                   - 'cloudformation:CreateStackInstances'
                   - 'cloudformation:CreateStackSet'
                   - 'cloudformation:UpdateStackInstances'
-                Resource: !Join [':',['arn:aws:cloudformation:*', !Ref 'AWS::AccountId', 'stackset/*:*']]
+                Resource: !Sub "arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stackset/*:*"
               - Effect: Allow
                 Action:
                   - 's3:GetObject'
@@ -184,7 +185,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - iam:PassRole
-                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole"
         - PolicyName: Kms-Decrypt-Policy
           PolicyDocument:
             Version: '2012-10-17'
@@ -198,7 +199,7 @@ Resources:
                   - kms:Decrypt
                 Resource: !GetAtt SumoLogicControlTowerKMSKey.Arn
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
   TriggerCustomizationsOnLifeCycleEvent:
     Type: AWS::Lambda::Function
@@ -213,7 +214,7 @@ Resources:
           from botocore.exceptions import ClientError
 
           name = 'SUMO-LOGIC-AWS-OBSERVABILITY'
-          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.14.0/sumologic_observability.master.template.yaml"
+          templateURL = "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v2.15.0/sumologic_observability.master.template.yaml"
           ALL = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
 
 
@@ -283,13 +284,13 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 128
       Role: !GetAtt "LambdaRoleToCaptureEvents.Arn"
-      Runtime: python3.13
+      Runtime: python3.14
       Timeout: 60
       Environment:
         Variables:
           Deployment: !Ref Section1aSumoLogicDeployment
           OrgId: !Ref Section1dSumoLogicOrganizationId
-          AdminRole: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
+          AdminRole: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole"
           ExecutionRole: !FindInMap [AWSControlTower, ExecutionRole, Name]
           Regions: !Ref Section2aRegions
           Secret: !Ref SumoLogicControlTowerSecret

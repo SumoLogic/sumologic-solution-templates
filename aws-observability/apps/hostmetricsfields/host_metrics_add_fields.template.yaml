@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.14.0: Lambda Function to add fields to host metrics sources based on the available instances in all regions of the current AWS account."
+Description: "Version - v2.15.0: Lambda Function to add fields to host metrics sources based on the available instances in all regions of the current AWS account."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -45,12 +45,13 @@ Parameters:
       - ch
       - de
       - eu
+      - esc
       - fed
       - jp
       - kr
       - us1
       - us2
-    Description: "Enter au, ca, ch, de, eu, fed, jp, kr, us1 or us2 Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+    Description: "Enter au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2 Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   Section1bSumoAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
@@ -181,10 +182,10 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Handler: main.handler
-      Runtime: python3.13
+      Runtime: python3.14
       Code:
         S3Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        S3Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.22.zip"
+        S3Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.23.zip"
       MemorySize: 128
       Timeout: 900
       Role: !GetAtt LambdaRole.Arn

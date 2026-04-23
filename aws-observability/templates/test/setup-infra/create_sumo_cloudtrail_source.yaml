@@ -5,7 +5,7 @@ Parameters:
   SumoLogicDeployment:
     Type: String
     Default: ""
-    Description: "Enter au, ca, ch, de, eu, fed, jp, kr, us1 or us2"
+    Description: "Enter au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2"
   SumoLogicAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
@@ -54,6 +54,8 @@ Mappings:
       apiendpoint: "https://api.de.sumologic.com/api/"
     eu:
       apiendpoint: "https://api.eu.sumologic.com/api/"
+    esc:
+      apiendpoint: "https://api.esc.sumologic.com/api/"
     fed:
       apiendpoint: "https://api.fed.sumologic.com/api/"
     jp:
@@ -83,10 +85,10 @@ Resources:
               - s3:ListBucket
             Resource:
               - !Sub
-                - "arn:aws:s3:::${S3Bucket}"
+                - "arn:${AWS::Partition}:s3:::${S3Bucket}"
                 - S3Bucket: !Ref CloudTrailLogsBucketName
               - !Sub
-                - "arn:aws:s3:::${S3Bucket}/*"
+                - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                 - S3Bucket: !Ref CloudTrailLogsBucketName
 
   CloudTrailSource:

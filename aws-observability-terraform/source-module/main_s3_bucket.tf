@@ -18,6 +18,7 @@ resource "aws_s3_bucket_policy" "dump_access_logs_to_s3" {
   policy = templatefile("${path.module}/templates/s3_bucket_policy.tmpl", {
     BUCKET_NAME     = local.common_bucket_name
     ELB_ACCCOUNT_ID = local.region_to_elb_account_id[local.aws_region]
+    AWS_PARTITION   = data.aws_partition.current.partition
   })
 }
 
@@ -38,6 +39,7 @@ resource "aws_sns_topic" "sns_topic" {
     AWS_REGION     = local.aws_region,
     SNS_TOPIC_NAME = "SumoLogic-Aws-Observability-Module-${random_string.aws_random.id}",
     AWS_ACCOUNT    = local.aws_account_id
+    AWS_PARTITION  = data.aws_partition.current.partition
   })
   tags = var.aws_resource_tags
 }
