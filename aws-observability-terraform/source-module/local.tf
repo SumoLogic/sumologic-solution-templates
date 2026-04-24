@@ -110,6 +110,9 @@ locals {
     "cn-northwest-1" = "037604701340"
   }
 
+  # Check if current region is in the old regions list
+  is_old_region = lookup(local.region_to_elb_account_id, local.aws_region, null) != null
+
   namespace_scan_interval = {
     "ApplicationELB" = 60000,
     "ApiGateway"     = 300000,

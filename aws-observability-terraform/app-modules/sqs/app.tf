@@ -1,5 +1,5 @@
 module "sqs_module" {
-  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=fy27q1"
+  source = "git::https://github.com/SumoLogic/terraform-sumologic-sumo-logic-integrations.git//sumologic?ref=fy27q2"
   # source = "SumoLogic/sumo-logic-integrations/sumologic//sumologic"
   # version = "1.0.23"
 

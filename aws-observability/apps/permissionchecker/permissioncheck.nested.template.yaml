@@ -1,6 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v2.15.0: This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
-Transform: 'AWS::Serverless-2016-10-31'
+Description: "Version - v3.0.0: This CloudFormation template will check for the permission required to deploy the AWS Observability CF template. Based on various error received, please provide the specific permissions to Sumo Logic role or AWS IAM Role used to deploy the template."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -303,13 +302,13 @@ Resources:
                   "*"
 
   LambdaHelper:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: main.handler
       Runtime: python3.14
-      CodeUri:
-        Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.23.zip"
+      Code:
+        S3Bucket: !FindInMap [RegionMap, !Ref 'AWS::Region', bucketname]
+        S3Key: "sumologic-aws-observability/functions/sumo_app_utils/v2.0.23/sumo_app_utils.zip"
       MemorySize: 128
       Timeout: 900
       Role:

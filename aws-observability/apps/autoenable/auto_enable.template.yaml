@@ -1,6 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.15.0: Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
+Description: "Version - v3.0.0: Template to setup Auto Enable ALB Access Logging and Lambda Auto Subscribe Log Groups for AWS Observability Solution."
 
 Parameters:
   SumoLogicResourceRemoveOnDeleteStack:
@@ -120,15 +119,23 @@ Conditions:
     - !Equals [ !Ref AutoSubscribeLogGroupsLambdaOptions, 'Existing' ]
     - !Equals [ !Ref AutoSubscribeLogGroupsLambdaOptions, 'Both' ]
 
+Mappings:
+  CommonData:
+    NestedTemplate:
+      BucketName: "sumologic-appdev-aws-sam-apps"
+      Version: "v2.14.0"
+
 Resources:
 
-  AutoEnableS3LogsAlbAWSResources:
-    Type: AWS::Serverless::Application
+  AutoEnableS3LogsAlbStack:
+    Type: AWS::CloudFormation::Stack
     Condition: auto_enable_s3_logs
     Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
-        SemanticVersion: 1.0.19
+
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/autoenable/s3_logging_auto_enable.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         BucketName: !Ref ALBS3LogsBucketName
         BucketPrefix: "elasticloadbalancing"
@@ -136,14 +143,15 @@ Resources:
         AutoEnableResourceOptions: !Ref ALBAutoEnableS3LogsOptions
         FilterExpression: "'Type': 'application'|'type': 'application'"
         RemoveOnDeleteStack: !Ref SumoLogicResourceRemoveOnDeleteStack
-  
-  AutoEnableS3LogsElbAWSResources:
-    Type: AWS::Serverless::Application
+
+  AutoEnableS3LogsElbStack:
+    Type: AWS::CloudFormation::Stack
     Condition: auto_enable_s3_logs_elb
     Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-s3-logging-auto-enable
-        SemanticVersion: 1.0.19
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/autoenable/s3_logging_auto_enable.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         BucketName: !Ref ELBS3LogsBucketName
         BucketPrefix: !Ref ELBS3LogsBucketPrefix
@@ -153,12 +161,13 @@ Resources:
         RemoveOnDeleteStack: !Ref SumoLogicResourceRemoveOnDeleteStack
 
   AutoSubscribeLambdaLogGroupsAWSResources:
-    Type: AWS::Serverless::Application
+    Type: AWS::CloudFormation::Stack
     Condition: auto_subscribe_new_log_groups
     Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-loggroup-connector
-        SemanticVersion: 1.0.15
+      TemplateURL: !Sub
+        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/autoenable/loggroup_connector.yaml"
+        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
+          Version: !FindInMap [CommonData, NestedTemplate, Version]
       Parameters:
         DestinationArnType: !Ref AutoSubscribeDestinationARNType
         DestinationArnValue: !Ref AutoSubscribeDestinationARN

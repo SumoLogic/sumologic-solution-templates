@@ -6,7 +6,7 @@ provider "sumologic" {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = "me-central-1"
   #
   # Below properties should be added when you would like to onboard more than one region and account
   # More Information regarding AWS Profile can be found at -
