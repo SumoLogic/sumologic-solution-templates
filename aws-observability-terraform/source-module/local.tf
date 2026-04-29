@@ -3,7 +3,15 @@ locals {
 
   aws_region = data.aws_region.current.id
 
-  sumo_account_id = "926226587429"
+  #sumo_account_id = "926226587429"
+
+   # sumo aws account ids
+  sumo_account_ids = {
+    aws        = "926226587429"  # Commercial AWS account
+    aws-us-gov = "926226587429"   # GovCloud account
+    aws-cn     = "926226587429"   # China account
+    aws-eusc   = "052162193518"   # EU Sovereign account
+  }
 
   # CloudTrail Source updated Details
   create_cloudtrail_source = var.collect_cloudtrail_logs && var.cloudtrail_source_url == ""

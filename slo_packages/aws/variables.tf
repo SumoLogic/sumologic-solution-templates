@@ -19,9 +19,8 @@ variable "environment" {
   description = "Please update with your deployment, refer: https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   validation {
     condition = contains([
-      "US1",
-    "us1","US2","us2","AU","au","CA","ca","CH","ch","DE","de","EU","eu","FED","fed","JP","jp","KR","kr"], var.environment)
-    error_message = "Argument \"environment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"ch\",\"de\",\"eu\",\"fed\",\"jp\",\"kr\"."
+      "US1","us1","US2","us2","AU","au","CA","ca","CH","ch","DE","de","EU","eu","ESC","esc","FED","fed","JP","jp","KR","kr"], var.environment)
+    error_message = "Argument \"environment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"ch\",\"de\",\"eu\",\"esc\",\"fed\",\"jp\",\"kr\"."
   }
 }
 variable "folder" {

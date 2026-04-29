@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Version - v2.14.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v2.15.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Parameters:
   SumoLogicDeployment:
@@ -465,33 +465,33 @@ Resources:
                   - s3:PutBucketPolicy
                 Resource:
                   - !Sub
-                    - "arn:aws:s3:::${S3Bucket}"
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}"
                     - S3Bucket: !If [install_alb_logs_source, !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ], ""] 
                   - !Sub
-                    - "arn:aws:s3:::${S3Bucket}/*"
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                     - S3Bucket: !If [install_alb_logs_source, !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ], ""]
                   - !Sub
-                    - "arn:aws:s3:::${S3Bucket}"
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}"
                     - S3Bucket: !If [install_cloudtrail_logs_source, !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ], ""]
                   - !Sub
-                    - "arn:aws:s3:::${S3Bucket}/*"
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                     - S3Bucket: !If [install_cloudtrail_logs_source, !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ], ""]
                   - !Sub
-                    - "arn:aws:s3:::${S3Bucket}"
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}"
                     - S3Bucket: !If [install_elb_logs_source, !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ], ""] 
                   - !Sub
-                    - "arn:aws:s3:::${S3Bucket}/*"
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                     - S3Bucket: !If [install_elb_logs_source, !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ], ""]  
 
   LambdaHelper:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.13
+      Runtime: python3.14
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.22.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.23.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -531,11 +531,11 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
-      Runtime: python3.13
+      Runtime: python3.14
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       CodeUri:
         Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.22.zip"
+        Key: "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.23.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -628,14 +628,14 @@ Resources:
               Service: cloudtrail.amazonaws.com
             Action: s3:GetBucketAcl
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
           - Sid: AWSCloudTrailWrite
             Effect: Allow
             Principal:
               Service: cloudtrail.amazonaws.com
             Action: s3:PutObject
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
@@ -645,32 +645,30 @@ Resources:
               Service: cloudtrail.amazonaws.com
             Action: s3:ListBucket
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
           - Sid: AWSAlbLogsPutObjects
             Effect: Allow
             Principal:
-              AWS: !Join
-                - ""
-                - - "arn:aws:iam::"
-                  - !FindInMap [ Region2ELBAccountId, !Ref 'AWS::Region', AccountId ]
-                  - ":root"
+              AWS: !Sub
+                - "arn:${AWS::Partition}:iam::${ELBAccount}:root"
+                - ELBAccount: !FindInMap [ Region2ELBAccountId, !Ref "AWS::Region", AccountId ]
             Action: s3:PutObject
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
           - Sid: AWSAlbLogDeliveryAclCheck
             Effect: Allow
             Principal:
               Service: delivery.logs.amazonaws.com
             Action: s3:GetBucketAcl
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
           - Sid: AWSAlbLogDeliveryWrite
             Effect: Allow
             Principal:
               Service: delivery.logs.amazonaws.com
             Action: s3:PutObject
             Resource:
-              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
             Condition:
               StringEquals:
                 s3:x-amz-acl: bucket-owner-full-control
@@ -688,10 +686,9 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Ref "AWS::AccountId"
               ArnLike:
-                aws:SourceArn: !Join
-                  - ""
-                  - - "arn:aws:s3:::aws-observability-logs-"
-                    - !Select
+                aws:SourceArn: !Sub
+                  - "arn:${AWS::Partition}:s3:::aws-observability-logs-${StackSuffix}"
+                  - StackSuffix: !Select
                       - 0
                       - !Split
                         - "-"
@@ -749,10 +746,10 @@ Resources:
               - s3:ListBucket
             Resource:
               - !Sub
-                - "arn:aws:s3:::${S3Bucket}"
+                - "arn:${AWS::Partition}:s3:::${S3Bucket}"
                 - S3Bucket: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ] 
               - !Sub
-                - "arn:aws:s3:::${S3Bucket}/*"
+                - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                 - S3Bucket: !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ]
 
   SumoLogicELBS3Policy:
@@ -773,10 +770,10 @@ Resources:
               - s3:ListBucket
             Resource:
               - !Sub
-                - "arn:aws:s3:::${S3Bucket}"
+                - "arn:${AWS::Partition}:s3:::${S3Bucket}"
                 - S3Bucket: !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ] 
               - !Sub
-                - "arn:aws:s3:::${S3Bucket}/*"
+                - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                 - S3Bucket: !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ]            
             
   SumoLogicCloudTrailS3Policy:
@@ -797,10 +794,10 @@ Resources:
               - s3:ListBucket
             Resource:
               - !Sub
-                - "arn:aws:s3:::${S3Bucket}"
+                - "arn:${AWS::Partition}:s3:::${S3Bucket}"
                 - S3Bucket: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
               - !Sub
-                - "arn:aws:s3:::${S3Bucket}/*"
+                - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                 - S3Bucket: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
   
   SumoLogicSourceRole:
@@ -817,7 +814,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${SumoLogicAccountID}:root"
+              AWS: !Sub "arn:${AWS::Partition}:iam::${SumoLogicAccountID}:root"
             Action: sts:AssumeRole
             Condition:
               StringEquals:
@@ -1114,7 +1111,7 @@ Resources:
       Handler: index.lambda_handler
       MemorySize: 128
       Role: !GetAtt "LambdaRole.Arn"
-      Runtime: python3.13
+      Runtime: python3.14
       Timeout: 60
       Environment:
         Variables:
@@ -1331,7 +1328,7 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Ref "AWS::AccountId"
               ArnLike:
-                aws:SourceArn: !Sub "arn:aws:s3:::${ALBS3LogsBucketName}"
+                aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::${ALBS3LogsBucketName}"
             Effect: Allow
             Principal:
               "Service": "s3.amazonaws.com"
@@ -1416,7 +1413,7 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Ref "AWS::AccountId"
               ArnLike:
-                aws:SourceArn: !Sub "arn:aws:s3:::${ELBS3LogsBucketName}"
+                aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::${ELBS3LogsBucketName}"
             Effect: Allow
             Principal:
               "Service": "s3.amazonaws.com"
@@ -1499,7 +1496,7 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Ref "AWS::AccountId"
               ArnLike:
-                aws:SourceArn: !Sub "arn:aws:s3:::${CloudTrailLogsBucketName}"
+                aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::${CloudTrailLogsBucketName}"
             Effect: Allow
             Principal:
               "Service": "s3.amazonaws.com"

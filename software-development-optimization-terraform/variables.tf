@@ -25,9 +25,9 @@ variable "deployment" {
   description = "Please update with your deployment, refer: https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
   validation {
     condition = contains([
-      "US1",
-    "us1", "US2", "us2", "AU", "au", "CA", "ca","DE", "de", "EU", "eu", "FED", "fed", "JP", "jp", "kr", "KR", "ch", "CH"], var.deployment)
-    error_message = "Argument \"deployment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"de\",\"eu\",\"fed\",\"jp\",\"kr\",\"ch\"."
+      "US1", "us1", "US2", "us2", "AU", "au", "CA", "ca", "ch", "CH", "DE", "de", "EU", "eu", "ESC", "esc", "FED", "fed", "JP", "jp", "kr", "KR"], var.deployment)
+    error_message = "Argument \"deployment\" must be one of \"us1\",\"us2\",\"au\",\"ca\",\"ch\",\"de\",\"eu\",\"esc\",\"fed\",\"jp\",\"kr\"."
+
   }
 }
 variable "sumo_api_endpoint" {
