@@ -1,0 +1,162 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::LanguageExtensions
+Description: "Version - v3.0.0: Template to setup the API Gateway app with AWS and Sumo Logic resources for AWS Observability Solution."
+Parameters:
+  Section1aSumoDeployment:
+    Type: String
+    Default: ""
+    Description: "Enter au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2"
+  Section1bSumoAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  Section1cSumoAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  Section1dRemoveSumoResourcesOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Type: String
+  Section1eOrgId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+
+  Section2aInstallApp:
+    Type: String
+    Description: "Yes - Installs the API Gateway App for the Sumo Logic AWS Observability Solution.
+                  No - Skips the installation of this app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+
+  Section3aParentStackLambdaARN:
+    Type: String
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
+  Section3bTemplatesBucketName:
+    Type: String
+    AllowedPattern: ".+"
+    Description: Bucket Name for all the nested templates.
+  Section3cNestedTemplateVersion:
+    Type: String
+    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
+
+  Section4aShare:
+    Type: String
+    Description: "True - Installed App will be visible to all members of the organisation.
+                  False - Installed App will be visible to you only."
+    Default: 'True'
+    AllowedValues:
+      - 'True'
+      - 'False'
+
+  Section5aToUpdate:
+    Type: String
+    Default: ""
+    Description: "Force stack update when parent configuration changes"
+
+
+Mappings:
+#  Apps:
+#    Bedrock:
+#      Name: "Amazon Bedrock"
+#      AppId: "8f4fd1aa-3b83-4d2e-b2ef-e8baec880afa"
+#
+#    BedrockAgentCore:
+#      Name: "Amazon Bedrock AgentCore"
+#      AppId: "f27e26fc-f272-4849-b6de-9170834b11b4"
+  Apps:
+    AmazonECS:
+      Name: "Amazon ECS(Without Container Insights and Traces)"
+      AppId: "b3210735-0917-459e-8d1e-722fee4c22fe"
+
+    AmazonElastiCache:
+      Name: "Amazon ElastiCache"
+      AppId: "82ab79f5-3e85-4974-852f-5cb8f8028230"
+
+    AmazonOverview:
+      Name: "Amazon Overview"
+      AppId: "32c8b96c-161c-46d4-b81d-235cc0b56b87"
+
+    AmazonRDS:
+      Name: "Amazon RDS"
+      AppId: "c32ad59b-ee10-4cd1-8369-3639e8457b1f"
+
+    AmazonSNS:
+      Name: "Amazon SNS"
+      AppId: "9c203dfb-6088-4a76-b12e-cc3a78ce0df5"
+
+    AmazonSQS:
+      Name: "Amazon SQS"
+      AppId: "8b57f601-c163-4481-8ae7-d6e212516506"
+
+    AWSAPIGateway:
+      Name: "AWS API Gateway"
+      AppId: "f1dfe2ea-ee27-4a74-972c-560424b9cb5c"
+
+    AWSApplicationLoadBalancer:
+      Name: "AWS Application Load Balancer"
+      AppId: "27a17946-e475-4d56-8a8f-bc3fbc0400ca"
+
+    AWSClassicLoadBalancer:
+      Name: "AWS Classic Load Balancer"
+      AppId: "fb7a2e22-006c-40ea-945c-e73b6b369e7c"
+
+    AWSDynamoDB:
+      Name: "AWS DynamoDB"
+      AppId: "092203f6-9443-47ca-b2b5-6a4c25e8c14c"
+
+    AWSEC2:
+      Name: "AWS EC2"
+      AppId: "f14714b5-6e86-40e7-aa6c-970e9182c0be"
+
+    AWSLambda:
+      Name: "AWS Lambda"
+      AppId: "d71cb5f7-bf92-4fac-984f-33fdaea856f7"
+
+    AWSNetworkLoadBalancer:
+      Name: "AWS Network Load Balancer"
+      AppId: "5a6e7695-94a9-4548-a44a-054d4e793432"
+
+    HostMetricsEC2:
+      Name: "Host Metrics (EC2)"
+      AppId: "149c19d7-de3a-483b-a1a7-bbd825916548"
+
+Conditions:
+  is_install_app: !Equals [!Ref Section2aInstallApp, "Yes"]
+
+Resources:
+
+  Fn::ForEach::AppsLoop:
+    - AppKey
+#    - [Bedrock, BedrockAgentCore]
+    - [AmazonECS, AmazonElastiCache, AmazonOverview, AmazonRDS, AmazonSNS, AmazonSQS, AWSAPIGateway, AWSApplicationLoadBalancer, AWSClassicLoadBalancer, AWSDynamoDB, AWSEC2, AWSLambda, AWSNetworkLoadBalancer, HostMetricsEC2]
+
+    - SumoApp${AppKey}:
+        Type: Custom::AppV2
+        Condition: is_install_app
+        Properties:
+          ServiceToken: !Ref Section3aParentStackLambdaARN
+          Region: !Ref AWS::Region
+          AppName: !FindInMap [Apps, !Ref AppKey, Name]
+          AppId: !FindInMap [Apps, !Ref AppKey, AppId]
+          share: !Ref Section4aShare
+          orgid: !Ref Section1eOrgId
+          RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+          RetainOldAppOnUpdate: true
+          SumoAccessID: !Ref Section1bSumoAccessID
+          SumoAccessKey: !Ref Section1cSumoAccessKey
+          SumoDeployment: !Ref Section1aSumoDeployment
+          Section5aToUpdate: !Ref Section5aToUpdate
