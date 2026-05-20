@@ -283,7 +283,7 @@ module "cloudwatch_logs_lambda_log_forwarder_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-  app_semantic_version          = "1.0.15"
+  app_semantic_version          = "1.0.16"
   auto_enable_logs_subscription_options = {
     filter      = var.auto_enable_logs_subscription_options.filter
     tags_filter = var.auto_enable_logs_subscription_options.tags_filter
@@ -316,7 +316,7 @@ module "kinesis_firehose_for_logs_module" {
   }
 
   auto_enable_logs_subscription = var.auto_enable_logs_subscription
-  app_semantic_version          = "1.0.15"
+  app_semantic_version          = "1.0.16"
   auto_enable_logs_subscription_options = {
     filter      = var.auto_enable_logs_subscription_options.filter
     tags_filter = var.auto_enable_logs_subscription_options.tags_filter
