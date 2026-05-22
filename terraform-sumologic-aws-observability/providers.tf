@@ -14,4 +14,6 @@ provider "aws" {
   #   profile = "<AWS CLI profile name>"
 }
 
-provider "lambda-invoke-extension" {}
+provider "lambda-invoke-extension" {
+  region = "us-east-1"
+}
