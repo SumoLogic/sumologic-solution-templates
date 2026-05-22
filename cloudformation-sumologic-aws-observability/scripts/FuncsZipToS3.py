@@ -8,25 +8,25 @@ os.environ['AWS_PROFILE'] = 'sumocontent'
 # Mapping regions to buckets
 # Mapping regions to bucket names
 region_to_bucket = {
-    "af-south-1": "appdevzipfiles-af-south-1s",
-    "ap-east-1": "appdevzipfiles-ap-east-1s",
-    "ap-northeast-1": "appdevzipfiles-ap-northeast-1",
-    "ap-northeast-2": "appdevzipfiles-ap-northeast-2",
-    "ap-northeast-3": "appdevzipfiles-ap-northeast-3s",
-    "ap-south-1": "appdevzipfiles-ap-south-1",
-    "ap-southeast-1": "appdevzipfiles-ap-southeast-1",
-    "ap-southeast-2": "appdevzipfiles-ap-southeast-2",
-    "ap-southeast-3": "appdevzipfiles-ap-southeast-3",
-    "ca-central-1": "appdevzipfiles-ca-central-1",
-    "eu-central-1": "appdevzipfiles-eu-central-1",
-    "eu-central-2": "appdevzipfiles-eu-central-2ss",
-    "eu-north-1": "appdevzipfiles-eu-north-1s",
-    "eu-south-1": "appdevzipfiles-eu-south-1",
-    "eu-west-1": "appdevzipfiles-eu-west-1",
-    "eu-west-2": "appdevzipfiles-eu-west-2",
-    "eu-west-3": "appdevzipfiles-eu-west-3",
+    # "af-south-1": "appdevzipfiles-af-south-1s",
+    # "ap-east-1": "appdevzipfiles-ap-east-1s",
+    # "ap-northeast-1": "appdevzipfiles-ap-northeast-1",
+    # "ap-northeast-2": "appdevzipfiles-ap-northeast-2",
+    # "ap-northeast-3": "appdevzipfiles-ap-northeast-3s",
+    # "ap-south-1": "appdevzipfiles-ap-south-1",
+    # "ap-southeast-1": "appdevzipfiles-ap-southeast-1",
+    # "ap-southeast-2": "appdevzipfiles-ap-southeast-2",
+    # "ap-southeast-3": "appdevzipfiles-ap-southeast-3",
+    # "ca-central-1": "appdevzipfiles-ca-central-1",
+    # "eu-central-1": "appdevzipfiles-eu-central-1",
+    # "eu-central-2": "appdevzipfiles-eu-central-2ss",
+    # "eu-north-1": "appdevzipfiles-eu-north-1s",
+    # "eu-south-1": "appdevzipfiles-eu-south-1",
+    # "eu-west-1": "appdevzipfiles-eu-west-1",
+    # "eu-west-2": "appdevzipfiles-eu-west-2",
+    # "eu-west-3": "appdevzipfiles-eu-west-3",
     "me-central-1": "appdevzipfiles-me-central-1",
-    "me-south-1": "appdevzipfiles-me-south-1s",
+    #"me-south-1": "appdevzipfiles-me-south-1s",
     "sa-east-1": "appdevzipfiles-sa-east-1",
     "us-east-1": "appdevzipfiles-us-east-1",
     "us-east-2": "appdevzipfiles-us-east-2",
@@ -38,8 +38,8 @@ region_to_bucket = {
 base_path = "../helper/LambdaFuncs"
 
 # Submodules we care about
-modules = ["sumo_app_utils", "telemetry", "loggroup-lambda-connector"]
-
+#modules = ["cloudwatch-logs-dlq", "sumo-app-utils", "telemetry", "loggroup-lambda-connector"]
+modules = [ "sumo-app-utils"]
 s3_path_prefix = "sumologic-aws-observability/functions/"
 
 def parse_version(vstring):

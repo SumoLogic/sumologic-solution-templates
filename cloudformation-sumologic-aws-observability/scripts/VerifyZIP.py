@@ -35,7 +35,7 @@ region_to_bucket = {
 }
 
 # File path to check
-file_path = "sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelperv2.0.23.zip"
+file_path = "sumologic-aws-observability/functions/sumo-app-utils/v3.0.0/sumo_app_utils.zip"
 
 # Check each bucket
 for region, bucket_name in region_to_bucket.items():
@@ -45,6 +45,10 @@ for region, bucket_name in region_to_bucket.items():
     try:
         s3.head_object(Bucket=bucket_name, Key=file_path)
         print(f"File exists in {bucket_name}")
+
+        # Delete file
+        s3.delete_object(Bucket=bucket_name, Key=file_path)
+        print(f"Deleted file from {bucket_name}")
     except ClientError as e:
         if e.response['Error']['Code'] == "404":
             print(f"File NOT found in {bucket_name}")
