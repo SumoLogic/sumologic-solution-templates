@@ -1,0 +1,2009 @@
+{
+    "type": "FolderSyncDefinition",
+    "name": "AWS API Gateway",
+    "description": "The Sumo Logic App for AWS API Gateway provides visibility into your Amazon APIGateway Service Metrics collected via a CloudWatch Metrics Source. The App’s Dashboards provide preconfigured searches and filters that allow you to monitor your API Gateway Infrastructure.",
+    "children": [
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "1. AWS API Gateway - Latency, Cache",
+            "description": "AWS API Gateway - Latency, Cache dashboard provides insights into API Gateway performance including API requests, latency, API cache hits, and back-end cache misses.",
+            "title": "1. AWS API Gateway - Latency, Cache",
+            "rootPanel": null,
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "apiname": [
+                        "*"
+                    ],
+                    "namespace": [
+                        "aws/apigateway"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelpane-1282e8dc8b362944",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelpane-07fe4834864daa40",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":1}"
+                    },
+                    {
+                        "key": "panelpane-d8cca1fd9e28fa4e",
+                        "structure": "{\"height\":2,\"width\":12,\"x\":0,\"y\":7}"
+                    },
+                    {
+                        "key": "panelpane-be2d46b2823fbb44",
+                        "structure": "{\"height\":2,\"width\":12,\"x\":12,\"y\":7}"
+                    },
+                    {
+                        "key": "panelpane-825676c9a42b7844",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":9}"
+                    },
+                    {
+                        "key": "panelpane-95b93c0ea7c2694f",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":9}"
+                    },
+                    {
+                        "key": "panelpane-de1fae9b96f50949",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":16}"
+                    },
+                    {
+                        "key": "panelpane-611d41d29c4b0b46",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":16}"
+                    },
+                    {
+                        "key": "panelpane-86be2b008a2db942",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":0,\"y\":15}"
+                    },
+                    {
+                        "key": "panelpane-903472b3b1481b4a",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":12,\"y\":15}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelpane-1282e8dc8b362944",
+                    "title": "API Calls Over Time",
+                    "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-07fe4834864daa40",
+                    "title": " API Requests (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Requests\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today, {{apiname}}\"}},{\"series\":[],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday, {{apiname}}\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week, {{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-d8cca1fd9e28fa4e",
+                    "title": "Latency",
+                    "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\",\"alignment\":\"left\",\"fontSize\":16},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Time in between API Gateway receives request from client and returns response to the client"
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-be2d46b2823fbb44",
+                    "title": "‎Integration Latency",
+                    "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\",\"fontSize\":16,\"alignment\":\"left\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Time in between API Gateway relays request to backend and receives response from backend"
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-825676c9a42b7844",
+                    "title": "Average Latency (ms)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Millisecond\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=Latency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-95b93c0ea7c2694f",
+                    "title": "Average Integration Latency (ms)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Millisecond\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=IntegrationLatency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-de1fae9b96f50949",
+                    "title": "Cache Hit Rate",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Cache Hit Rate\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=CacheHitCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account | eval _value * 100 ",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-611d41d29c4b0b46",
+                    "title": "Cache Miss Rate",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Cache Miss Rate\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=CacheMissCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account | eval _value * 100",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-86be2b008a2db942",
+                    "title": " Requests Served From API Cache (Cache Hits)",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"text\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-903472b3b1481b4a",
+                    "title": "Requests Served From Back-end (Cache Misses)",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"text\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": null,
+                    "defaultValue": "aws/apigateway",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}}",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "apiname",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "apiname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "1. AWS API Gateway - Overview",
+            "description": "AWS API Gateway - Overview dashboard provides insights into API Gateway performance throughout your infrastructure, including API calls, latency, client and server-side errors, API cache hits, and back-end cache misses.",
+            "title": "1. AWS API Gateway - Overview",
+            "rootPanel": null,
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "namespace": [
+                        "aws/apigateway"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "_sumo_domain_name": [
+                        "aws"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelpane-1282e8dc8b362944",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelpane-d8cca1fd9e28fa4e",
+                        "structure": "{\"height\":2,\"width\":12,\"x\":0,\"y\":21}"
+                    },
+                    {
+                        "key": "panelpane-be2d46b2823fbb44",
+                        "structure": "{\"height\":2,\"width\":12,\"x\":12,\"y\":21}"
+                    },
+                    {
+                        "key": "panelpane-afb5d2309a793847",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":31}"
+                    },
+                    {
+                        "key": "panelpane-825676c9a42b7844",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":15}"
+                    },
+                    {
+                        "key": "panelpane-0f271c0fbb72984c",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":31}"
+                    },
+                    {
+                        "key": "panelpane-aac836daa8753b49",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":38}"
+                    },
+                    {
+                        "key": "panelpane-3f51a1d2b3563b4c",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":38}"
+                    },
+                    {
+                        "key": "panelpane-de1fae9b96f50949",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":15}"
+                    },
+                    {
+                        "key": "panelpane-86be2b008a2db942",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":0,\"y\":37}"
+                    },
+                    {
+                        "key": "panelpane-903472b3b1481b4a",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":12,\"y\":37}"
+                    },
+                    {
+                        "key": "panelpane-30914953bcc44b4e",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":0,\"y\":14}"
+                    },
+                    {
+                        "key": "panelpane-2e8c53a18e9a484c",
+                        "structure": "{\"height\":1,\"width\":12,\"x\":12,\"y\":14}"
+                    },
+                    {
+                        "key": "panelpane-70bda313b0965946",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":8}"
+                    },
+                    {
+                        "key": "panelpane-7a458955b12bd94e",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":6,\"y\":8}"
+                    },
+                    {
+                        "key": "panelpane-c557c5d28b2c684f",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":8}"
+                    },
+                    {
+                        "key": "panelpane-51ff6a2cae479944",
+                        "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":23}"
+                    },
+                    {
+                        "key": "panelpane-30c3b615b3da684f",
+                        "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":23}"
+                    },
+                    {
+                        "key": "panelPANE-F43AE7E8952D5A40",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":1}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelpane-1282e8dc8b362944",
+                    "title": "All API Calls",
+                    "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-d8cca1fd9e28fa4e",
+                    "title": "Latency",
+                    "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\",\"alignment\":\"left\",\"fontSize\":16,\"format\":\"text\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Overall Latency in ms"
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-be2d46b2823fbb44",
+                    "title": "‎Integration Latency",
+                    "visualSettings": "{\"text\":{\"backgroundColor\":\"#dfe5e9\",\"fontSize\":16,\"alignment\":\"left\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Time in between API Gateway relays request to backend and receives response from backend"
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-afb5d2309a793847",
+                    "title": "Average Latency (ms)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Millisecond\"}},\"overrides\":[{\"series\":[],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\"}},{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=Latency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-825676c9a42b7844",
+                    "title": "5XX Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Sum of 5XX Errors\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=5XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-0f271c0fbb72984c",
+                    "title": "Average Integration Latency (ms)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":\"3\"},\"axes\":{\"axisY\":{\"title\":\"Millisecond\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=IntegrationLatency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-aac836daa8753b49",
+                    "title": "Cache Hit Rate",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Cache Hit Rate \"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=CacheHitCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account | eval _value * 100",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-3f51a1d2b3563b4c",
+                    "title": "Cache Miss Rate",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Cache Miss Rate \"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=CacheMissCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account | eval _value * 100",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-de1fae9b96f50949",
+                    "title": "4XX Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Sum of 4XX Errors\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=4XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-86be2b008a2db942",
+                    "title": " Requests Served From API Cache (Cache Hits)",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"text\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-903472b3b1481b4a",
+                    "title": "Requests Served From Back-end (Cache Misses)",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"text\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-30914953bcc44b4e",
+                    "title": "Client Side Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-2e8c53a18e9a484c",
+                    "title": "Server Side Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-70bda313b0965946",
+                    "title": "API Calls",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Sum\",\"label\":\"Total Calls\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":0,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false},\"valueFontSize\":20}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-7a458955b12bd94e",
+                    "title": "Unique API Calls",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Maximum\",\"label\":\"Unique Calls\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":0,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false},\"valueFontSize\":20}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | count",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-c557c5d28b2c684f",
+                    "title": "API Calls by apiname",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Calls\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname | eval round(_value)",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-51ff6a2cae479944",
+                    "title": "Average Latency (ms)",
+                    "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":500,\"color\":\"#75bf00\"},{\"from\":500,\"to\":1000,\"color\":\"#f6c851\"},{\"from\":1000,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=Latency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-30c3b615b3da684f",
+                    "title": "Average Integration Latency (ms)",
+                    "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":500,\"color\":\"#75bf00\"},{\"from\":500,\"to\":1000,\"color\":\"#f6c851\"},{\"from\":1000,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=IntegrationLatency statistic=Average account={{account}} region={{region}} apiname={{apiname}} | avg by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-F43AE7E8952D5A40",
+                    "title": " API Requests (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by account, region, namespace",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by account, region, namespace | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=sum account={{account}} region={{region}} apiname={{apiname}} | sum by account, region, namespace | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": null,
+                    "defaultValue": "aws/apigateway",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}}",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "apiname",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "apiname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "2. AWS API Gateway - 4XX and 5XX Errors",
+            "description": "AWS API Gateway - 4xx and 5xx Errors dashboard provides insights into API Gateway HTTP 4xx and 5xx code errors throughout your infrastructure, including API requests, client-side errors, and server-side errors.",
+            "title": "2. AWS API Gateway - 4XX and 5XX Errors",
+            "rootPanel": null,
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "apiname": [
+                        "*"
+                    ],
+                    "namespace": [
+                        "aws/apigateway"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelpane-4d3d7212b5a8484a",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":9}"
+                    },
+                    {
+                        "key": "panelpane-ddc0c4fd966e4844",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":17}"
+                    },
+                    {
+                        "key": "panelpane-ecbd97eab891e846",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":1}"
+                    },
+                    {
+                        "key": "panelpane-4b69798bbe22784a",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelpane-62f5162ba859eb45",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":8}"
+                    },
+                    {
+                        "key": "panelpane-ecd366908889b943",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":16}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelpane-4d3d7212b5a8484a",
+                    "title": "4XX Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Sum of 4XX Errors\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=4XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-ddc0c4fd966e4844",
+                    "title": "5XX Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Sum of 5XX Errors\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=5XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-ecbd97eab891e846",
+                    "title": "API Requests (Today, Yesterday, Last Week)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Requests\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Today, {{apiname}}\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Yesterday, {{apiname}}\"}},{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Last Week, {{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | timeshift 1d",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} | sum by apiname, namespace, region, account | timeshift 7d",
+                            "queryType": "Metrics",
+                            "queryKey": "C",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-4b69798bbe22784a",
+                    "title": "All API Calls",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"text\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-62f5162ba859eb45",
+                    "title": "Client Side Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"text\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-ecd366908889b943",
+                    "title": "Server Side Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"fontSize\":24,\"backgroundColor\":\"#dfe5e9\",\"textColor\":\"#222D3B\",\"alignment\":\"center\",\"showTitle\":true,\"format\":\"text\",\"text\":\"\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": null,
+                    "defaultValue": "aws/apigateway",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}}",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "apiname",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "apiname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "2. AWS API Gateway - Audit Events",
+            "description": "AWS API Gateway - Audit Events dashboard provides detailed audit insights into API Gateway events by various dimensions including event names, trends, regions, user agents, and recipient account IDs.",
+            "title": "2. AWS API Gateway - Audit Events",
+            "rootPanel": null,
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "namespace": [
+                        "aws/apigateway"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelpane-d39a82d0b687ab49",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":27}"
+                    },
+                    {
+                        "key": "panelpane-78017f49a1d96a4a",
+                        "structure": "{\"height\":7,\"width\":6,\"x\":6,\"y\":27}"
+                    },
+                    {
+                        "key": "panelPANE-C60FE45FAF802B4D",
+                        "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-54D6935CA0D19846",
+                        "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-D3C4BB28A83C9947",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":8}"
+                    },
+                    {
+                        "key": "panelPANE-A9432A4D87BED943",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":8}"
+                    },
+                    {
+                        "key": "panelPANE-79C1069AAE9C2948",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":6,\"y\":8}"
+                    },
+                    {
+                        "key": "panelPANE-8D29F0E780F36846",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":14}"
+                    },
+                    {
+                        "key": "panelPANE-2EA5D39A9A67D846",
+                        "structure": "{\"height\":6,\"width\":18,\"x\":6,\"y\":14}"
+                    },
+                    {
+                        "key": "panelPANE-A839F6B38A2CD840",
+                        "structure": "{\"height\":7,\"width\":6,\"x\":0,\"y\":20}"
+                    },
+                    {
+                        "key": "panelPANE-FBDDCA8195930A44",
+                        "structure": "{\"height\":7,\"width\":18,\"x\":6,\"y\":20}"
+                    },
+                    {
+                        "key": "panelPANE-A9420681BB19294B",
+                        "structure": "{\"height\":7,\"width\":6,\"x\":0,\"y\":27}"
+                    },
+                    {
+                        "key": "panelPANE-E9024AE2A1BFCB4F",
+                        "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":34}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelpane-d39a82d0b687ab49",
+                    "title": "Events Trend by Event Name",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Events\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" eventName account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| timeslice 15m\n| count as eventCount by _timeslice, event_name\n| transpose row _timeslice column event_name",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-78017f49a1d96a4a",
+                    "title": "Top User Agents",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" userAgent account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by user_agent\n| sort by eventCount, user_agent asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-C60FE45FAF802B4D",
+                    "title": "Failure Activity Location",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\")  and !isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| where !isnull(latitude)",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-54D6935CA0D19846",
+                    "title": "Successful Activity Location",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"title\":{\"fontSize\":16},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}} sourceIPAddress\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !(src_ip matches \"*.amazonaws.com\") and isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = src_ip\n| where !isnull(latitude)",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-D3C4BB28A83C9947",
+                    "title": "Event Status",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"overrides\":[{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"pie\"}},{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"pie\"}},{\"series\":[],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"type\":\"pie\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by eventStatus\n| sort by eventCount, eventStatus asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-A9432A4D87BED943",
+                    "title": "Event Status Trend",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[\"Failure\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#f36644\",\"type\":\"column\"}},{\"series\":[\"Success\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"color\":\"#75bf00\",\"type\":\"column\"}}],\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(userName), user, userName) as user\n| timeslice 15m\n| count by _timeslice, eventStatus\n| fillmissing timeslice(15m), values (\"Success\", \"Failure\") in eventStatus\n| transpose row _timeslice column eventStatus",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-79C1069AAE9C2948",
+                    "title": "Top Error Codes",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by errorCode \n| top 10 errorCode by eventCount, errorCode asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-8D29F0E780F36846",
+                    "title": "Failed Events",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by event_name\n| sort by eventCount, event_name asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-2EA5D39A9A67D846",
+                    "title": "Failed Event Details",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\" and !isEmpty(errorCode)\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop \n| json field=responseElements \"name\", \"Message\" as ApiName, responseMessage nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| if (isEmpty(errorMessage), responseMessage, errorMessage) as errorMessage\n| timeslice 1s\n| count as eventCount by _timeslice, event_name, errorCode, errorMessage, Region, src_ip, accountId, user, type, requestID, user_agent\n| sort by _timeslice\n| limit 100",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-A839F6B38A2CD840",
+                    "title": "Successful Events",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":16},\"legend\":{\"enabled\":false},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where eventStatus = \"Success\"\n| count as eventCount by event_name\n| sort by eventCount, event_name asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-FBDDCA8195930A44",
+                    "title": "Successful Event Details",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" !errorCode account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| where eventStatus = \"Success\"\n| timeslice 1s\n| count as eventCount by _timeslice, event_name, Region, src_ip, accountId, user, type, requestID, user_agent, ApiName\n| sort by _timeslice\n| limit 100",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-A9420681BB19294B",
+                    "title": "Top Users",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count as eventCount by type, user\n| topk(10, eventCount) by type | fields -_rank",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-E9024AE2A1BFCB4F",
+                    "title": "Threat Table based on Caller IP Address",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "\"\\\"eventSource\\\":\\\"apigateway.amazonaws.com\\\"\" account={{account}} Namespace={{namespace}} region={{region}}\n| json \"eventName\", \"eventSource\", \"awsRegion\", \"userAgent\", \"recipientAccountId\", \"userIdentity\", \"requestParameters\", \"responseElements\", \"sourceIPAddress\", \"errorCode\", \"errorMessage\", \"requestID\" as event_name, event_source, Region, user_agent, accountId1, userIdentity, requestParameters, responseElements, src_ip, errorCode, errorMessage, requestID nodrop\n| where event_source = \"apigateway.amazonaws.com\"\n| json field=userIdentity \"accountId\", \"arn\", \"userName\", \"type\" as accountId2, arn, username, type nodrop | parse field=arn \":assumed-role/*\" as user nodrop | parse field=arn \"arn:aws:iam::*:*\" as accountId, user nodrop\n| json field=requestParameters \"basePath\", \"domainName\" as basePath, domainName nodrop | json field=responseElements \"name\" as ApiName nodrop // CreateRestApi, CreateApiKey, CreateUsagePlan, CreateUsagePlanKey, CreateUsagePlanKey, ImportApi, ImportRestApi, UpdateRestApi, UpdateUsagePlan provides ApiName\n| if (!isEmpty(accountId1), accountId1, accountId2) as accountId\n| if (isEmpty(errorCode), \"Success\", \"Failure\") as eventStatus\n| if (isEmpty(userName), user, userName) as user\n| count by src_ip, event_name, user, user_agent\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=src_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and malicious_confidence = \"high\"\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| sort by _count\n| fields src_ip, event_name, user, user_agent, type, actor, malicious_confidence",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": null,
+                    "defaultValue": "aws/apigateway",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}}",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "3. AWS API Gateway - Enhanced Monitoring",
+            "description": "AWS API Gateway - Enhanced Monitoring dashboard provides detailed insights into API Gateway performance throughout your infrastructure, including the number and types of API calls, API resources, cache hits and misses, latency averages, and errors by HTTP method.",
+            "title": "3. AWS API Gateway - Enhanced Monitoring",
+            "rootPanel": null,
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {
+                    "apiname": [
+                        "*"
+                    ],
+                    "namespace": [
+                        "aws/apigateway"
+                    ],
+                    "region": [
+                        "*"
+                    ],
+                    "account": [
+                        "*"
+                    ]
+                }
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelpane-bf711447aeb87a4d",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":9}"
+                    },
+                    {
+                        "key": "panelpane-0c6ca348a22a684a",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":15}"
+                    },
+                    {
+                        "key": "panelpane-fcf2a359aca4f947",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":21}"
+                    },
+                    {
+                        "key": "panelpane-1bd728408f442a49",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":3}"
+                    },
+                    {
+                        "key": "panelpane-134c2b108813b846",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":5,\"y\":3}"
+                    },
+                    {
+                        "key": "panelpane-8623b689ab09684a",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":10,\"y\":3}"
+                    },
+                    {
+                        "key": "panelpane-2c931e93b0a25940",
+                        "structure": "{\"height\":6,\"width\":9,\"x\":15,\"y\":3}"
+                    },
+                    {
+                        "key": "panelpane-6052fefb99524948",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":27}"
+                    },
+                    {
+                        "key": "panelpane-b7fcf1e9a9428b41",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":15}"
+                    },
+                    {
+                        "key": "panelpane-3bd1f319951a1949",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":21}"
+                    },
+                    {
+                        "key": "panelpane-4f8a91c58c9d3b4e",
+                        "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelpane-bf711447aeb87a4d",
+                    "title": "API Calls By HTTP Method",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Requests\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"column\",\"name\":\"{{Method}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=Count Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by method",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-0c6ca348a22a684a",
+                    "title": "4XX Errors by HTTP Method",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Sum of 4XX Errors\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"column\",\"name\":\"{{method}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=4XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by method",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-fcf2a359aca4f947",
+                    "title": "5XX Errors By HTTP Method",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Sum of 5XX Errors\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"column\",\"name\":\"{{method}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=5XXError Statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}}  method={{method}} resource={{resource}} | sum by method",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-1bd728408f442a49",
+                    "title": "API Calls",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Sum\",\"label\":\"Total Calls\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":0,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-134c2b108813b846",
+                    "title": "Unique API Calls",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\"Unique Calls\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":0,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by apiname, namespace, region, account, method | count",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-8623b689ab09684a",
+                    "title": "API Resources",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\"Resource\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"rounding\":0,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by apiname, namespace, region, account, resource | count",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-2c931e93b0a25940",
+                    "title": "API Call Breakdown",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Calls\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=count statistic=Sum account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | sum by apiname, method, resource | eval round(_value)",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-6052fefb99524948",
+                    "title": "Cache Hits and Misses",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":\"0\",\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Rate\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Cache Hits, apiname={{apiname}} \"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Cache Miss, apiname={{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=CacheHitCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | avg by apiname, namespace, region, account | eval _value * 100",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        },
+                        {
+                            "queryString": "Namespace={{namespace}} metric=CacheMissCount statistic=Average account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | avg by apiname, namespace, region, account | eval _value * 100",
+                            "queryType": "Metrics",
+                            "queryKey": "B",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-b7fcf1e9a9428b41",
+                    "title": "Average Latency (ms)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=Latency statistic=Average account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | avg by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-3bd1f319951a1949",
+                    "title": "Average Integration Latency (ms)",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Milliseconds\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{apiname}}\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "queryString": "Namespace={{namespace}} metric=IntegrationLatency statistic=Average account={{account}} region={{region}} apiname={{apiname}} stage={{stage}} method={{method}} resource={{resource}} | avg by apiname, namespace, region, account",
+                            "queryType": "Metrics",
+                            "queryKey": "A",
+                            "metricsQueryMode": "Advanced",
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelpane-4f8a91c58c9d3b4e",
+                    "title": "Note",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"text\":{\"alignment\":\"left\",\"fontSize\":16,\"backgroundColor\":\"#dfe5e9\"},\"title\":{\"fontSize\":\"20\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "This dashboard works on detailed CloudWatch metrics which needs to be explicitly enabled. You can do this in the console by selecting \"Enable CloudWatch Metrics\" under a stage Settings tab. Alternatively, you can call the update-stage AWS CLI command to update the metricsEnabled property to true."
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "account",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "",
+                        "key": "account"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "region",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}}",
+                        "key": "region"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "namespace",
+                    "displayName": null,
+                    "defaultValue": "aws/apigateway",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}}",
+                        "key": "namespace"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "apiname",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                        "key": "apiname"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "stage",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}} apiname={{apiname}}",
+                        "key": "stage"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "method",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}} apiname={{apiname}} stage={{stage}}",
+                        "key": "method"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                },
+                {
+                    "id": null,
+                    "name": "resource",
+                    "displayName": null,
+                    "defaultValue": null,
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "account={{account}} region={{region}} namespace={{namespace}} apiname={{apiname}}",
+                        "key": "resource"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false
+                }
+            ],
+            "coloringRules": []
+        }
+    ]
+}
