@@ -11,14 +11,16 @@
 
 # Validate Sumo Logic environment/deployment.
 
-if ! [[ "$SUMOLOGIC_ENV" =~ ^(au|ca|ch|de|eu|esc|jp|us2|fed|kr|us1)$ ]]; then
-    echo "$SUMOLOGIC_ENV is invalid Sumo Logic deployment. For SUMOLOGIC_ENV, provide one from list : au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+if ! [[ "$SUMOLOGIC_ENV" =~ ^(au|ca|ch|de|eu|esc|jp|us2|fed|kr|us1|stag)$ ]]; then
+    echo "$SUMOLOGIC_ENV is invalid Sumo Logic deployment. For SUMOLOGIC_ENV, provide one from list : au, ca, ch, de, eu, esc, fed, jp, kr, us1, us2 or stag. For more information on Sumo Logic deployments visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
     exit 1
 fi
 
 # Get Sumo Logic api endpoint based on SUMOLOGIC_ENV
 if [ "${SUMOLOGIC_ENV}" == "us1" ]; then
     SUMOLOGIC_BASE_URL="https://api.sumologic.com/api/"
+elif [ "${SUMOLOGIC_ENV}" == "stag" ]; then
+    SUMOLOGIC_BASE_URL="https://stag-api.sumologic.net/api/"
 else
     SUMOLOGIC_BASE_URL="https://api.${SUMOLOGIC_ENV}.sumologic.com/api/"
 fi
@@ -49,7 +51,7 @@ function get_app_instances() {
         -u "${SUMOLOGIC_ACCESSID}:${SUMOLOGIC_ACCESSKEY}" \
         "${SUMOLOGIC_BASE_URL}"v2/apps/instances)"
 
-    echo "${RESPONSE}"
+   echo "${RESPONSE}"
 }
 
 get_app_instances
@@ -70,8 +72,9 @@ if [ $outputVal == 0 ]; then
     for ENTRY in "${awso_apps_list[@]}"; do
         APP_UUID="${ENTRY%%|*}"
         APP_NAME="${ENTRY##*|}"
+        echo "$APP_NAME - $APP_UUID"
 
-        INSTALLATION_ID=$(echo "${INSTANCES_RESPONSE}" | jq -r ".data[] | select(.appId == \"${APP_UUID}\") | .id" | head -1)
+        INSTALLATION_ID=$(echo "${INSTANCES_RESPONSE}" | jq -r ".data[] | select(.uuid == \"${APP_UUID}\") | .id" | head -1)
 
         if [[ -z "${INSTALLATION_ID}" ]]; then
             # App not installed in Sumo org, skip importing
@@ -80,7 +83,7 @@ if [ $outputVal == 0 ]; then
 
         # App installation exists in Sumo org, hence import
         terraform import \
-            "module.apps.sumologic_app.apps[\"${APP_NAME}\"]" "${INSTALLATION_ID}"
+            "module.app-module.sumologic_app.apps[\"${APP_NAME}\"]" "${INSTALLATION_ID}"
     done
 elif [ $outputVal == 2 ]; then
     echo "Error in calling Sumo Logic Apps API."
