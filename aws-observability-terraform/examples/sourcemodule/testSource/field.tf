@@ -246,7 +246,7 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityFieldExtractionRule"
               | where eventSource = "lambda.amazonaws.com"
               | json field=requestParameters "functionName", "resource" as functionname, resource nodrop
               | parse regex field=functionname "\w+:\w+:\S+:[\w-]+:\S+:\S+:(?<functionname>[\S]+)$" nodrop
-              | parse field=resource "arn:aws:lambda:*:function:*" as f1, functionname2 nodrop
+              | parse field=resource "arn:*:lambda:*:function:*" as arn_part, f1, functionname2 nodrop
               | if (isEmpty(functionname), functionname2, functionname) as functionname
               | "aws/lambda" as namespace
               | tolowercase(functionname) as functionname
@@ -296,9 +296,9 @@ resource "sumologic_field_extraction_rule" "AwsObservabilityRdsCloudTrailLogsFER
               | "aws/rds" as namespace
               | json field=requestParameters "dBInstanceIdentifier", "resourceName", "dBClusterIdentifier" as dBInstanceIdentifier1, resourceName, dBClusterIdentifier1 nodrop
               | json field=responseElements "dBInstanceIdentifier" as dBInstanceIdentifier3 nodrop | json field=responseElements "dBClusterIdentifier" as dBClusterIdentifier3 nodrop
-              | parse field=resourceName "arn:aws:rds:*:db:*" as f1, dBInstanceIdentifier2 nodrop | parse field=resourceName "arn:aws:rds:*:cluster:*" as f1, dBClusterIdentifier2 nodrop
-              | if (resourceName matches "arn:aws:rds:*:db:*", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier
-              | if (resourceName matches "arn:aws:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
+              | parse field=resourceName "arn:*:rds:*:db:*" as arn_part, f1, dBInstanceIdentifier2 nodrop | parse field=resourceName "arn:*:rds:*:cluster:*" as arn_part, f1, dBClusterIdentifier2 nodrop
+              | if (resourceName matches "arn:*:rds:*:db:*", dBInstanceIdentifier2, if (!isEmpty(dBInstanceIdentifier1), dBInstanceIdentifier1, dBInstanceIdentifier3) ) as dBInstanceIdentifier
+              | if (resourceName matches "arn:*:rds:*:cluster:*", dBClusterIdentifier2, if (!isEmpty(dBClusterIdentifier1), dBClusterIdentifier1, dBClusterIdentifier3) ) as dBClusterIdentifier
               | if (isEmpty(dBInstanceIdentifier), dBClusterIdentifier, dBInstanceIdentifier) as dbidentifier
               | tolowercase(dbidentifier) as dbidentifier
               | fields region, namespace, dBInstanceIdentifier, dBClusterIdentifier, dbidentifier, accountid
@@ -316,13 +316,13 @@ resource "sumologic_field_extraction_rule" "AwsObservabilitySNSCloudTrailLogsFER
               | where event_source = "sns.amazonaws.com"
               | json field=userIdentity "accountId", "type", "arn", "userName"  as accountid, type, arn, username nodrop
               | parse field=arn ":assumed-role/*" as user nodrop 
-              | parse field=arn "arn:aws:iam::*:*" as accountid, user nodrop
+              | parse field=arn "arn:*:iam::*:*" as arn_part, accountid, user nodrop
               | json field=requestParameters "topicArn", "name", "resourceArn", "subscriptionArn" as req_topic_arn, req_topic_name, resource_arn, subscription_arn  nodrop 
               | json field=responseElements "topicArn" as res_topic_arn nodrop
               | if (isBlank(req_topic_arn), res_topic_arn, req_topic_arn) as topic_arn
               | if (isBlank(topic_arn), resource_arn, topic_arn) as topic_arn
-              | parse field=topic_arn "arn:aws:sns:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp nodrop
-              | parse field=subscription_arn "arn:aws:sns:*:*:*:*" as region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
+              | parse field=topic_arn "arn:*:sns:*:*:*" as arn_part, region_temp, accountid_temp, topic_arn_name_temp nodrop
+              | parse field=subscription_arn "arn:*:sns:*:*:*:*" as arn_part, region_temp, accountid_temp, topic_arn_name_temp, arn_value_temp nodrop
               | if (isBlank(req_topic_name), topic_arn_name_temp, req_topic_name) as topicname
               | if (isBlank(accountid), recipient_account_id, accountid) as accountid
               | "aws/sns" as namespace

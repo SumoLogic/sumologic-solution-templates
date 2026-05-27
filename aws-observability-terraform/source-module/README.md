@@ -22,14 +22,14 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_classic_lb_module"></a> [classic\_lb\_module](#module\_classic\_lb\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing | 1.0.22 |
-| <a name="module_cloudtrail_module"></a> [cloudtrail\_module](#module\_cloudtrail\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail | 1.0.22 |
-| <a name="module_cloudwatch_custom_metrics_source_module"></a> [cloudwatch\_custom\_metrics\_source\_module](#module\_cloudwatch\_custom\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics | 1.0.22 |
-| <a name="module_cloudwatch_logs_lambda_log_forwarder_module"></a> [cloudwatch\_logs\_lambda\_log\_forwarder\_module](#module\_cloudwatch\_logs\_lambda\_log\_forwarder\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder | 1.0.22 |
-| <a name="module_cloudwatch_metrics_source_module"></a> [cloudwatch\_metrics\_source\_module](#module\_cloudwatch\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics | 1.0.22 |
-| <a name="module_elb_module"></a> [elb\_module](#module\_elb\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/elb | 1.0.22 |
-| <a name="module_kinesis_firehose_for_logs_module"></a> [kinesis\_firehose\_for\_logs\_module](#module\_kinesis\_firehose\_for\_logs\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs | 1.0.22 |
-| <a name="module_kinesis_firehose_for_metrics_source_module"></a> [kinesis\_firehose\_for\_metrics\_source\_module](#module\_kinesis\_firehose\_for\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics | 1.0.22 |
+| <a name="module_classic_lb_module"></a> [classic\_lb\_module](#module\_classic\_lb\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/elasticloadbalancing | 1.0.23 |
+| <a name="module_cloudtrail_module"></a> [cloudtrail\_module](#module\_cloudtrail\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudtrail | 1.0.23 |
+| <a name="module_cloudwatch_custom_metrics_source_module"></a> [cloudwatch\_custom\_metrics\_source\_module](#module\_cloudwatch\_custom\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics | 1.0.23 |
+| <a name="module_cloudwatch_logs_lambda_log_forwarder_module"></a> [cloudwatch\_logs\_lambda\_log\_forwarder\_module](#module\_cloudwatch\_logs\_lambda\_log\_forwarder\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchlogsforwarder | 1.0.23 |
+| <a name="module_cloudwatch_metrics_source_module"></a> [cloudwatch\_metrics\_source\_module](#module\_cloudwatch\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/cloudwatchmetrics | 1.0.23 |
+| <a name="module_elb_module"></a> [elb\_module](#module\_elb\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/elb | 1.0.23 |
+| <a name="module_kinesis_firehose_for_logs_module"></a> [kinesis\_firehose\_for\_logs\_module](#module\_kinesis\_firehose\_for\_logs\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseforlogs | 1.0.23 |
+| <a name="module_kinesis_firehose_for_metrics_source_module"></a> [kinesis\_firehose\_for\_metrics\_source\_module](#module\_kinesis\_firehose\_for\_metrics\_source\_module) | SumoLogic/sumo-logic-integrations/sumologic//aws/kinesisfirehoseformetrics | 1.0.23 |
 
 ## Resources
 
@@ -57,6 +57,7 @@
 | [sumologic_collector.collector](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/resources/collector) | resource |
 | [time_sleep.wait_for_minutes](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [sumologic_caller_identity.current](https://registry.terraform.io/providers/SumoLogic/sumologic/latest/docs/data-sources/caller_identity) | data source |
 

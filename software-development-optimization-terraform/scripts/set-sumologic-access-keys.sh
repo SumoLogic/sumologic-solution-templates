@@ -16,7 +16,7 @@ sumologic_access_key=""
 read -r sumologic_access_key
 ./scripts/update_sdo_variable sumo_access_key $sumologic_access_key
 
-echo -n "Sumo Logic Deployment Region [AU, CA, CH, DE, EU, JP, US2, KR, FED, US1]: "
+echo -n "Sumo Logic Deployment Region [AU, CA, CH, DE, EU, ESC, JP, US2, KR, FED, US1]: "
 sumologic_deployment_region=""
 read -r sumologic_deployment_region
 # Make sure we only have to deal with lowercase region values
@@ -30,6 +30,9 @@ case $sumologic_deployment_region  in
   "us2")
     sumologic_api_endpoint="https://api.us2.sumologic.com/api/"
     ;;
+  "ch")
+    sumologic_api_endpoint="https://api.ch.sumologic.com/api/"
+    ;;
   "jp")
     sumologic_api_endpoint="https://api.jp.sumologic.com/api/"
     ;;
@@ -41,6 +44,9 @@ case $sumologic_deployment_region  in
     ;;
   "eu")
     sumologic_api_endpoint="https://api.eu.sumologic.com/api/"
+    ;;
+  "esc")
+    sumologic_api_endpoint="https://api.esc.sumologic.com/api/"
     ;;
   "de")
     sumologic_api_endpoint="https://api.de.sumologic.com/api/"
