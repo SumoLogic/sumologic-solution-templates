@@ -68,12 +68,6 @@ Metadata:
           - Section9dELBS3LogsBucketName
           - Section9eELBS3BucketPathExpression
 
-      - Label:
-          default: "9. App Installation and Sharing"
-        Parameters:
-          - Section10aAppInstallLocation
-          - Section10bShare
-
     ParameterLabels:
       Section1aSumoLogicDeployment:
         default: "Sumo Logic Deployment Name"
@@ -146,11 +140,6 @@ Metadata:
         default: "Amazon S3 Bucket Name"
       Section9eELBS3BucketPathExpression:
         default: "Path Expression for existing ELB logs"
-
-      Section10aAppInstallLocation:
-        default: "Location where you want the App to be Installed"
-      Section10bShare:
-        default: "Do you want to share App with whole organisation"
 
 Parameters:
   Section1aSumoLogicDeployment:
@@ -365,23 +354,6 @@ Parameters:
     Type: String
     Description: "This is required in case the above existing bucket is already configured to receive ELB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/elasticloadbalancing/*"
     Default: "classicloadbalancing/AWSLogs/*/elasticloadbalancing/*"
-
-  Section10aAppInstallLocation:
-    Type: String
-    Description: "Personal Folder - Installs App in user's Personal folder.
-                  Admin Recommended Folder - Installs App in admin Recommended Folder"
-    Default: 'Personal Folder'
-    AllowedValues:
-      - 'Personal Folder'
-      - 'Admin Recommended Folder'
-  Section10bShare:
-    Type: String
-    Description: "True - Installed App will have view permission to all members of the organisation.
-                  False - Installed App will be visible to user installing the solution."
-    Default: 'True'
-    AllowedValues:
-      - 'True'
-      - 'False'
 
 Conditions:
   # Conditions for Bucket
@@ -624,7 +596,7 @@ Resources:
       scanInterval: 60
       ToUpdate: 
         Fn::Base64: !Sub
-          - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}-${w}-${x}"
+          - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}-${x}"
           - a: !Ref Section2aAccountAlias
             b: !Ref Section3aInstallObservabilityApps
             c: !Ref Section4aCreateMetricsSourceOptions
@@ -647,7 +619,6 @@ Resources:
             t: !Ref Section9bELBCreateLogSource
             u: !Ref Section9cELBLogsSourceUrl
             v: !Ref Section9dELBS3LogsBucketName
-            w: !Ref Section10aAppInstallLocation
             x: !FindInMap [CommonData, NestedTemplate, Version]
 
   CreateCommonResources:
@@ -754,7 +725,6 @@ Resources:
         Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        Section1eOrgId: !Ref Section1dSumoLogicOrganizationId
         # -------------------------
         # App Installation
         # -------------------------
@@ -775,14 +745,9 @@ Resources:
         Section3cNestedTemplateVersion:
           !FindInMap [CommonData, NestedTemplate, Version]
         # -------------------------
-        # Sharing
-        # -------------------------
-        Section4aShare: !Ref Section10bShare
-
-        # -------------------------
         # UPDATE TRIGGER HASH (Recommended)
         # -------------------------
-        Section5aToUpdate:
+        Section4aToUpdate:
           Fn::Base64: !Sub
             - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}-${w}-${x}"
             - a: !Ref Section2aAccountAlias

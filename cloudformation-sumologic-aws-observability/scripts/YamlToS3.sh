@@ -8,12 +8,12 @@ BUCKET_NAME="sumologic-appdev-aws-sam-apps"
 S3_BASE_PATH="s3://${BUCKET_NAME}/aws-observability-versions/${VERSION}"
 AWS_PROFILE="sumocontent"
 
-# Common S3 sync options
+# Common S3 options
 COMMON_ARGS=(
     --recursive
     --include "*.template.yaml"
     --exclude '.*'
-    --exclude '*/.* '
+    --exclude '*/.*'
     --exclude '*.zip'
     --exclude '*.sh'
     --exclude '*/test/*'
@@ -115,7 +115,7 @@ if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
     echo "─────────────────────────────────────────"
     if [[ ${failed} -eq 0 ]]; then
         echo "Upload complete for Master and Nested Templates"
-        echo "   Bucket  : ${bucket_name}"
+        echo "   Bucket  : ${BUCKET_NAME}"
         echo "   Version : ${VERSION}"
         echo "   Path    : ${S3_BASE_PATH}"
     else

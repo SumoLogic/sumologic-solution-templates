@@ -25,12 +25,6 @@ Parameters:
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-  Section1eOrgId:
-    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
-    Type: String
-    AllowedPattern: ".+"
-    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
-
   Section2aInstallApp:
     Type: String
     Description: "Yes - Installs the API Gateway App for the Sumo Logic AWS Observability Solution.
@@ -53,16 +47,7 @@ Parameters:
     Description: "Provide the version for the nested templates. Default is the latest version."
     AllowedPattern: ".+"
 
-  Section4aShare:
-    Type: String
-    Description: "True - Installed App will be visible to all members of the organisation.
-                  False - Installed App will be visible to you only."
-    Default: 'True'
-    AllowedValues:
-      - 'True'
-      - 'False'
-
-  Section5aToUpdate:
+  Section4aToUpdate:
     Type: String
     Default: ""
     Description: "Force stack update when parent configuration changes"
@@ -163,12 +148,9 @@ Resources:
           Region: !Ref AWS::Region
           AppName: !FindInMap [Apps, !Ref AppKey, Name]
           AppId: !FindInMap [Apps, !Ref AppKey, AppId]
-          share: !Ref Section4aShare
-          orgid: !Ref Section1eOrgId
           RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
-          RetainOldAppOnUpdate: true
           SumoAccessID: !Ref Section1bSumoAccessID
           SumoAccessKey: !Ref Section1cSumoAccessKey
           SumoDeployment: !Ref Section1aSumoDeployment
-          Section5aToUpdate: !Ref Section5aToUpdate
+          Section4aToUpdate: !Ref Section4aToUpdate
 
