@@ -89,13 +89,26 @@ if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
         fi
     done
 
-    # Upload master template
-    MASTER_TEMPLATE="../templates/sumologic_observability.master.template.yaml"
-    if [[ -f "${MASTER_TEMPLATE}" ]]; then
-        upload_file "${MASTER_TEMPLATE}" || ((failed++))
-    else
-        echo "Master template not found: ${MASTER_TEMPLATE}"
+    # Upload all matching master templates
+    TEMPLATE_DIR="../templates"
+    TEMPLATE_PATTERN="sumologic_observability*"
+    template_count=0
+    template_failed=0
+
+    echo "Searching for templates: ${TEMPLATE_DIR}/${TEMPLATE_PATTERN}"
+
+    while IFS= read -r -d '' template; do
+        template_count=$((template_count + 1))
+        echo "Uploading template: $(basename ${template})"
+        upload_file "${template}" || ((template_failed++))
+    done < <(find "${TEMPLATE_DIR}" -maxdepth 1 -name "${TEMPLATE_PATTERN}" -type f -print0 2>/dev/null)
+
+    if [[ ${template_count} -eq 0 ]]; then
+        echo "No templates found matching: ${TEMPLATE_DIR}/${TEMPLATE_PATTERN}"
         ((failed++))
+    else
+        echo "Processed ${template_count} template(s), Failed: ${template_failed}"
+        failed=$((failed + template_failed))
     fi
 
     # Summary
