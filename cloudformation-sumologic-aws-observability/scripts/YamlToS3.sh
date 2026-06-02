@@ -1,72 +1,118 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "Start S3 upload Script....."
+# ─────────────────────────────────────────────
+# CONFIGURATION
+# ─────────────────────────────────────────────
+VERSION="v3.0.0"
+BUCKET_NAME="sumologic-appdev-aws-sam-apps"
+S3_BASE_PATH="s3://${BUCKET_NAME}/aws-observability-versions/${VERSION}"
+AWS_PROFILE="sumocontent"
 
-export AWS_PROFILE="sumocontent"
+# Common S3 sync options
+COMMON_ARGS=(
+    --recursive
+    --include "*.template.yaml"
+    --exclude '.*'
+    --exclude '*/.* '
+    --exclude '*.zip'
+    --exclude '*.sh'
+    --exclude '*/test/*'
+    --acl public-read
+    --profile "${AWS_PROFILE}"
+)
 
-declare -a regions=("us-east-2" "us-east-1" "us-west-1" "us-west-2" "ap-south-1" "ap-northeast-2" "ap-southeast-1" "ap-southeast-2" "ap-northeast-1" "ca-central-1" "eu-central-1" "eu-west-1" "eu-west-2" "eu-west-3" "eu-north-1s" "sa-east-1" "ap-east-1s" "af-south-1s" "eu-south-1" "me-south-1s" "me-central-1" "eu-central-2s" "ap-northeast-3s" "ap-southeast-3")
+# ─────────────────────────────────────────────
+# FUNCTIONS
+# ─────────────────────────────────────────────
+upload_directory() {
+    local src_dir=$1
+    local dest_path="${S3_BASE_PATH}/"
 
-# Some buckets names have 's' or 'ss' in the region suffix. It is kept intentional as bucket names were not available.
-# Buckets names which are intentional -
-# 1. appdevzipfiles-eu-north-1s
-# 2. appdevzipfiles-ap-east-1s
-# 3. appdevzipfiles-af-south-1s
-# 4. appdevzipfiles-me-south-1s
-# 5. appdevzipfiles-eu-central-2ss
-# 6. appdevzipfiles-ap-northeast-3s
+    echo "Uploading ${src_dir}/ → ${dest_path}"
 
-cd ..\/
+    aws s3 cp "${src_dir}/" "${dest_path}" "${COMMON_ARGS[@]}"
 
-# Upload the ZIP file to bucket appdevzipfiles- in every region with the new version.
-#if [[ ${AWS_PROFILE} == 'default' ]]
-#then
-#  for region in "${regions[@]}"
-#  do
-#      bucket_name=appdevzipfiles-$region
-#
-#      if [[ `echo ${region} | awk '{print substr($0,length,1)}'` == "s" ]]
-#      then
-#          export region=`echo "${region%?}"`
-#      fi
-#
-#      aws s3 cp apps/SumoLogicAWSObservabilityHelper/ s3://${bucket_name}/sumologic-aws-observability/apps/SumoLogicAWSObservabilityHelper/ --recursive --include '*.zip' --exclude '*.sh' --region ${region} --acl public-read --profile ${AWS_PROFILE}
-#
-#      echo "ZIP Upload complete for Region -> ${region} and Bucket Name -> ${bucket_name}"
-#  done
-#fi
+    if [[ $? -eq 0 ]]; then
+        echo "Successfully uploaded: ${src_dir}"
+    else
+        echo "Failed to upload: ${src_dir}"
+        return 1
+    fi
+}
 
-# Upload Control Tower and Permission Check template to sumologic-appdev-aws-sam-apps bucket
-export bucket_name=sumologic-appdev-aws-sam-apps
-#
-#if [[ ${AWS_PROFILE} == 'default' ]]
-#then
-#    aws s3 cp apps/permissionchecker/permissioncheck.template.yaml s3://${bucket_name}/ --acl public-read --profile ${AWS_PROFILE}
-#    echo "Upload complete for Permission check Template to Bucket Name -> ${bucket_name}"
-#
-#    aws s3 cp apps/controltower/controltower.template.yaml s3://${bucket_name}/ --acl public-read --profile ${AWS_PROFILE}
-#    echo "Upload complete for Control Tower Template to Bucket Name -> ${bucket_name}"
-#fi
+upload_file() {
+    local src_file=$1
+    local dest_path="${S3_BASE_PATH}/"
 
-# Upload all templates to sumologic-appdev-aws-sam-apps bucket with version information.
-if [[ ${AWS_PROFILE} == 'sumocontent' ]]
-then
-    export version=v3.0.0
+    echo "Uploading ${src_file} → ${dest_path}"
 
-    aws s3 cp modules/ s3://${bucket_name}/aws-observability-versions/${version}/ \
-        --recursive \
-        --include "*.template.yaml" \
-        --exclude '.*' \
-        --exclude '*/.* ' \
-        --exclude '*.zip' \
-        --exclude '*.sh' \
-        --exclude '*/test/*' \
+    aws s3 cp "${src_file}" "${dest_path}" \
         --acl public-read \
-        --profile ${AWS_PROFILE}
+        --profile "${AWS_PROFILE}"
 
-    aws s3 cp templates/sumologic_observability.master.template.yaml s3://${bucket_name}/aws-observability-versions/${version}/ \
-        --acl public-read \
-        --profile ${AWS_PROFILE}
+    if [[ $? -eq 0 ]]; then
+        echo "Successfully uploaded: ${src_file}"
+    else
+        echo "Failed to upload: ${src_file}"
+        return 1
+    fi
+}
 
-    echo "Upload complete for Master and Nested Template to Bucket Name -> ${bucket_name}"
+# ─────────────────────────────────────────────
+# MAIN
+# ─────────────────────────────────────────────
+echo "Starting S3 upload script..."
+echo "   Version    : ${VERSION}"
+echo "   Bucket     : ${BUCKET_NAME}"
+echo "   Profile    : ${AWS_PROFILE}"
+echo "   Destination: ${S3_BASE_PATH}"
+echo "─────────────────────────────────────────"
+
+if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
+
+    # Directories to upload
+    UPLOAD_DIRS=(
+        "modules"
+        "utilities"
+        "extensions"
+    )
+
+    # Track failures
+    failed=0
+
+    # Upload directories
+    for dir in "${UPLOAD_DIRS[@]}"; do
+        if [[ -d "../${dir}" ]]; then
+            upload_directory "../${dir}" || ((failed++))
+        else
+            echo "Directory not found, skipping: ${dir}"
+        fi
+    done
+
+    # Upload master template
+    MASTER_TEMPLATE="../templates/sumologic_observability.master.template.yaml"
+    if [[ -f "${MASTER_TEMPLATE}" ]]; then
+        upload_file "${MASTER_TEMPLATE}" || ((failed++))
+    else
+        echo "Master template not found: ${MASTER_TEMPLATE}"
+        ((failed++))
+    fi
+
+    # Summary
+    echo "─────────────────────────────────────────"
+    if [[ ${failed} -eq 0 ]]; then
+        echo "Upload complete for Master and Nested Templates"
+        echo "   Bucket  : ${bucket_name}"
+        echo "   Version : ${VERSION}"
+        echo "   Path    : ${S3_BASE_PATH}"
+    else
+        echo "Upload completed with ${failed} failure(s)"
+        exit 1
+    fi
+
+else
+    echo "Skipping upload - AWS_PROFILE is '${AWS_PROFILE}'"
 fi
-echo "End S3 upload Script....."
+
+echo "─────────────────────────────────────────"
+echo "End S3 upload Script"
