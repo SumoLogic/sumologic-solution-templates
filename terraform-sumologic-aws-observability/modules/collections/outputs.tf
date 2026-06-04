@@ -1,7 +1,3 @@
-output "aws_observability_current_region" {
-  value = data.aws_region.current.region
-}
-
 output "sumologic_collector" {
   value       = local.create_collector ? sumologic_collector.collector : {}
   description = "Sumo Logic collector details."
