@@ -109,14 +109,20 @@ Parameters:
     Description : "Path inside bucket for dumping of Access Logs for classic load balancer"
     Default: "" 
 
-  TemplatesBucketName:
+  MPS3BucketName:
     Type: String
     AllowedPattern: ".+"
-    Description: Bucket Name for all the nested templates.
-  NestedTemplateVersion:
+    Description: Name of the S3 bucket for your copy of the nested templates.
+    Default: "sumologic-appdev-aws-sam-apps"
+  MPS3BucketRegion:
     Type: String
-    Description: "Provide the version for the nested templates. Default is the latest version."
+    Description: "AWS Region where the S3 bucket for your copy of the nested templates is hosted."
+    Default: "us-east-1"
+  MPS3KeyPrefix:
+    Type: String
+    Description: "S3 key prefix that is used to simulate a folder for your copy of the nested templates."
     AllowedPattern: ".+"
+    Default: "aws-observability-versions/v3.0.0/templates/"
 
 Conditions:
   auto_enable_s3_logs: !Equals [ !Ref ALBAutoEnableS3Logs, 'Yes' ]
@@ -134,7 +140,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: auto_enable_s3_logs
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/collections/autoenable/s3_logging_auto_enable.template.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}s3_logging_auto_enable.template.yaml"
       Parameters:
         BucketName: !Ref ALBS3LogsBucketName
         BucketPrefix: "elasticloadbalancing"
@@ -147,7 +153,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: auto_enable_s3_logs_elb
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/collections/autoenable/s3_logging_auto_enable.template.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}s3_logging_auto_enable.template.yaml"
       Parameters:
         BucketName: !Ref ELBS3LogsBucketName
         BucketPrefix: !Ref ELBS3LogsBucketPrefix
@@ -160,7 +166,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: auto_subscribe_new_log_groups
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/collections/autoenable/loggroup_connector.template.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}loggroup_connector.template.yaml"
       Parameters:
         DestinationArnType: !Ref AutoSubscribeDestinationARNType
         DestinationArnValue: !Ref AutoSubscribeDestinationARN

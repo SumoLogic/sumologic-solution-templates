@@ -68,6 +68,13 @@ Metadata:
           - Section9dELBS3LogsBucketName
           - Section9eELBS3BucketPathExpression
 
+      - Label:
+          default: "AWS Marketplace Parameters"
+        Parameters:
+          - MPS3BucketName
+          - MPS3BucketRegion
+          - MPS3KeyPrefix
+
     ParameterLabels:
       SecretName:
         default: "Secret ARN"
@@ -140,6 +147,13 @@ Metadata:
         default: "Amazon S3 Bucket Name"
       Section9eELBS3BucketPathExpression:
         default: "Path Expression for existing ELB logs"
+
+      MPS3BucketName:
+        default: "S3 Bucket Name for nested templates"
+      MPS3BucketRegion:
+        default: "S3 Bucket Region for nested templates"
+      MPS3KeyPrefix:
+        default: "S3 Key Prefix for nested templates"
 
 Parameters:
   SecretName:
@@ -354,6 +368,19 @@ Parameters:
     Description: "This is required in case the above existing bucket is already configured to receive ELB access logs. If this is blank, Sumo Logic will store logs in the path expression: *AWSLogs/*/elasticloadbalancing/*"
     Default: "classicloadbalancing/AWSLogs/*/elasticloadbalancing/*"
 
+  MPS3BucketName:
+    Type: String
+    Default: "sumologic-appdev-aws-sam-apps"
+    Description: "Name of the S3 bucket for your copy of the nested templates."
+  MPS3BucketRegion:
+    Type: String
+    Default: "us-east-1"
+    Description: "AWS Region where the S3 bucket for your copy of the nested templates is hosted."
+  MPS3KeyPrefix:
+    Type: String
+    Default: "aws-observability-versions/v3.0.0/templates/"
+    Description: "S3 key prefix that is used to simulate a folder for your copy of the nested templates."
+
 Conditions:
   # Conditions for Bucket
   create_alb_bucket: !And
@@ -426,7 +453,7 @@ Conditions:
   elb_bucket_path_expression_provided: !Not [!Equals [ !Ref Section9eELBS3BucketPathExpression, 'classicloadbalancing/AWSLogs/*/elasticloadbalancing/*' ]]
 
   # Condition for Stacks creation. Calling Nested Stack EveryTime to create FER and Metric Rule. If already present, marked as duplicate in Resource.
-  install_overview_dashboards: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
+  install_observability_apps: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
 
   # Condition to determine if Secret ARN is provided or Access Keys
   SecretNameProvided:
@@ -467,8 +494,9 @@ Mappings:
       SumoAWSAccountID: "052162193518"
   CommonData:
     NestedTemplate:
-      BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v3.0.0"
+      MPS3BucketName: "sumologic-appdev-aws-sam-apps"
+      MPS3BucketRegion: "us-east-1"
+      MPS3KeyPrefix: "aws-observability-versions/v3.0.0/templates/"
     CollectorDetails:
       CollectorNamePrefix: "aws-observability"
       CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
@@ -634,10 +662,7 @@ Resources:
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/collections/resources.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}resources.template.yaml"
       Parameters:
         SumoLogicDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
         SumoLogicAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
@@ -676,8 +701,9 @@ Resources:
         CreateKinesisFirehoseLogSource: !If [ create_kf_logs_source, "Yes", "No" ]
         KinesisFirehoseLogsSourceName: !Sub "kinesis-firehose-cloudwatch-logs-${AWS::Region}"
         KinesisFirehoseLogsSourceCategory: !FindInMap [ CommonData, CollectorDetails, CloudWatchLogsSourceCategory ]
-        TemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-        NestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        MPS3BucketName: !Ref MPS3BucketName
+        MPS3BucketRegion: !Ref MPS3BucketRegion
+        MPS3KeyPrefix: !Ref MPS3KeyPrefix
         CreateELBLogSource: !Ref Section9bELBCreateLogSource
         CreateELBS3Bucket: !If [create_elb_bucket, "Yes", "No"]
         ELBS3LogsBucketName: !Ref Section9dELBS3LogsBucketName
@@ -696,10 +722,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: call_auto_enable
     Properties:
-      TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/collections/autoenable/auto_enable.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}auto_enable.template.yaml"
       Parameters:
         SumoLogicResourceRemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         ALBAutoEnableS3Logs: !If [auto_enable_s3_logs, "Yes", "No"]
@@ -716,31 +739,29 @@ Resources:
         ELBAutoEnableS3LogsOptions: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
         ELBS3LogsBucketName: !If [create_elb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section9dELBS3LogsBucketName]
         ELBS3LogsBucketPrefix: !If [elb_bucket_path_expression_provided, !Ref Section9eELBS3BucketPathExpression, "classicloadbalancing"]
-        TemplatesBucketName: !FindInMap [ CommonData, NestedTemplate, BucketName ]
-        NestedTemplateVersion: !FindInMap [ CommonData, NestedTemplate, Version ]
+        MPS3BucketName: !Ref MPS3BucketName
+        MPS3BucketRegion: !Ref MPS3BucketRegion
+        MPS3KeyPrefix: !Ref MPS3KeyPrefix
 
   sumoAppStacks:
     Type: AWS::CloudFormation::Stack
-    Condition: call_auto_enable
+    Condition: install_observability_apps
     Properties:
-      TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/apps/apps.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}apps.template.yaml"
       Parameters:
         # -------------------------
         # Sumo Deployment
         # -------------------------
-        Section1aSumoDeployment: !Ref Section1aSumoLogicDeployment
-        Section1bSumoAccessID: !Ref Section1bSumoLogicAccessID
-        Section1cSumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        Section1aSumoDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
+        Section1bSumoAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
+        Section1cSumoAccessKey: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessKey, !Ref Section1cSumoLogicAccessKey]
         Section1dRemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         # -------------------------
         # App Installation
         # -------------------------
         Section2aInstallApp:
           !If
-            - install_overview_dashboards
+            - install_observability_apps
             - !GetAtt CreateCommonResources.Outputs.PaidAccountCheck
             - "No"
         # -------------------------
@@ -749,11 +770,9 @@ Resources:
         Section3aParentStackLambdaARN:
           !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
-        Section3bTemplatesBucketName:
-          !FindInMap [CommonData, NestedTemplate, BucketName]
-
-        Section3cNestedTemplateVersion:
-          !FindInMap [CommonData, NestedTemplate, Version]
+        MPS3BucketName: !Ref MPS3BucketName
+        MPS3BucketRegion: !Ref MPS3BucketRegion
+        MPS3KeyPrefix: !Ref MPS3KeyPrefix
         # -------------------------
         # UPDATE TRIGGER HASH (Recommended)
         # -------------------------
@@ -782,4 +801,4 @@ Resources:
               t: !Ref Section9bELBCreateLogSource
               u: !Ref Section9cELBLogsSourceUrl
               v: !Ref Section9dELBS3LogsBucketName
-              w: !FindInMap [CommonData, NestedTemplate, Version]
+              w: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
