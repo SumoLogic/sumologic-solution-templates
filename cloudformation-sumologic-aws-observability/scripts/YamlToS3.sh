@@ -11,26 +11,23 @@ AWS_PROFILE="sumocontent"
 # Common S3 options for nested dirs
 COMMON_ARGS=(
     --recursive
-    --include "*.template.yaml"
+    --include "*.yaml"
+    --include "*.json"
     --exclude '.*'
     --exclude '*/.*'
     --exclude '*.zip'
     --exclude '*.sh'
     --exclude '*.DS_Store'
     --exclude '*/.DS_Store'
+    --exclude 'test/*'
     --exclude '*/test/*'
     --acl public-read
     --profile "${AWS_PROFILE}"
 )
 
 # Format: "path:depth"
-# nested = recursive all yaml files
-# parent = top level yaml files only
 UPLOAD_DIRS=(
-    "../modules:nested"
-    "../utilities:nested"
-    "../extensions:nested"
-    "../templates:parent"
+    "../templates:nested"
 )
 
 # ─────────────────────────────────────────────
@@ -39,45 +36,24 @@ UPLOAD_DIRS=(
 
 count_templates_in_dir() {
     local dir=$1
-    local depth=$2
 
-    if [[ "${depth}" == "parent" ]]; then
-        # ../templates - top level only, all yaml/json files
-        find "${dir}" \
-            -maxdepth 1 \
-            -type f \
-            \( -name "*.yaml" -o -name "*.template.yaml" -o -name "*.json" \) \
-            ! -name ".*" \
-            2>/dev/null | wc -l | tr -d ' '
-    else
-        # ../modules, ../utilities, ../extensions - all nested yaml/json files
-        find "${dir}" \
-            -type f \
-            \( -name "*.yaml" -o -name "*.template.yaml" -o -name "*.json" \) \
-            ! -name ".*" \
-            ! -path "*/.*" \
-            ! -path "*/test/*" \
-            2>/dev/null | wc -l | tr -d ' '
-    fi
+    find "${dir}" \
+        -type f \
+        \( -name "*.yaml" -o -name "*.template.yaml" -o -name "*.json" \) \
+        ! -name ".*" \
+        ! -path "*/.*" \
+        ! -path "*/test/*" \
+        2>/dev/null | wc -l | tr -d ' '
 }
 
 upload_directory() {
     local src_dir=$1
     local depth=$2
-    local dest_path="${S3_BASE_PATH}/"
+    local dest_path="${S3_BASE_PATH}/$(basename "${src_dir}")/"
 
     echo "INFO - Uploading [${depth}]: ${src_dir} -> ${dest_path}"
 
-    if [[ "${depth}" == "parent" ]]; then
-        aws s3 cp "${src_dir}/" "${dest_path}" \
-            --recursive \
-            --include "*.*.yaml" \
-            --exclude '*/*' \
-            --acl public-read \
-            --profile "${AWS_PROFILE}"
-    else
-        aws s3 cp "${src_dir}/" "${dest_path}" "${COMMON_ARGS[@]}"
-    fi
+    aws s3 cp "${src_dir}/" "${dest_path}" "${COMMON_ARGS[@]}"
 
     if [[ $? -eq 0 ]]; then
         echo "INFO - [PASS] Uploaded: ${src_dir}"
@@ -117,7 +93,7 @@ if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
         depth="${entry##*:}"  # Extract depth (after  ":")
 
         if [[ -d "${dir}" ]]; then
-            count=$(count_templates_in_dir "${dir}" "${depth}")
+            count=$(count_templates_in_dir "${dir}")
             total_templates=$((total_templates + count))
             printf "INFO - [%-15s] [%-6s] Templates found: %s\n" "$(basename ${dir})" "${depth}" "${count}"
         else
@@ -140,7 +116,7 @@ if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
         depth="${entry##*:}"
 
         if [[ -d "${dir}" ]]; then
-            dir_template_count=$(count_templates_in_dir "${dir}" "${depth}")
+            dir_template_count=$(count_templates_in_dir "${dir}")
 
             upload_directory "${dir}" "${depth}"
 
@@ -175,7 +151,7 @@ if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
         dir="${entry%%:*}"
         depth="${entry##*:}"
         if [[ -d "${dir}" ]]; then
-            count=$(count_templates_in_dir "${dir}" "${depth}")
+            count=$(count_templates_in_dir "${dir}")
             printf "    %-15s [%-6s] : %s templates\n" "$(basename ${dir})" "${depth}" "${count}"
         fi
     done

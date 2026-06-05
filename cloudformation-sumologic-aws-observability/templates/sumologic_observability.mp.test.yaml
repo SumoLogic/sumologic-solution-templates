@@ -380,7 +380,7 @@ Parameters:
     Description: "AWS Region where the S3 bucket for your copy of the nested templates is hosted."
   MPS3KeyPrefix:
     Type: String
-    Default: "aws-observability-versions/v3.1.0/"
+    Default: "aws-observability-versions/v3.0.0/templates/"
     Description: "S3 key prefix that is used to simulate a folder for your copy of the nested templates."
 
 Conditions:
@@ -496,8 +496,9 @@ Mappings:
       SumoAWSAccountID: "052162193518"
   CommonData:
     NestedTemplate:
-      BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v3.0.0"
+      MPS3BucketName: "sumologic-appdev-aws-sam-apps"
+      MPS3BucketRegion: "us-east-1"
+      MPS3KeyPrefix: "aws-observability-versions/v3.0.0/templates/"
     CollectorDetails:
       CollectorNamePrefix: "aws-observability"
       CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
@@ -663,7 +664,7 @@ Resources:
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}collections/resources.template.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}resources.template.yaml"
       Parameters:
         SumoLogicDeployment: !If [SecretNameProvided, !GetAtt SecretsRetrieval.deployment, !Ref Section1aSumoLogicDeployment]
         SumoLogicAccessID: !If [SecretNameProvided, !GetAtt SecretsRetrieval.accessID, !Ref Section1bSumoLogicAccessID]
@@ -723,7 +724,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: call_auto_enable
     Properties:
-      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}collections/autoenable/auto_enable.template.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}auto_enable.template.yaml"
       Parameters:
         SumoLogicResourceRemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         ALBAutoEnableS3Logs: !If [auto_enable_s3_logs, "Yes", "No"]
@@ -748,7 +749,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: install_observability_apps
     Properties:
-      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}apps/apps.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}apps.template.yaml"
       Parameters:
         # -------------------------
         # Sumo Deployment
@@ -802,4 +803,4 @@ Resources:
               t: !Ref Section9bELBCreateLogSource
               u: !Ref Section9cELBLogsSourceUrl
               v: !Ref Section9dELBS3LogsBucketName
-              w: !FindInMap [CommonData, NestedTemplate, Version]
+              w: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]

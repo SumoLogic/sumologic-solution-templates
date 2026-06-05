@@ -26,18 +26,9 @@ Parameters:
   Section1aSumoLogicDeployment:
     Type: String
     AllowedValues:
-      - au
-      - ca
-      - ch
-      - de
-      - eu
-      - esc
-      - jp
-      - kr
-      - us2
-      - us1
-      - fed
-    Description: "Enter au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2 Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+      - stag
+      - long
+    Description: "Enter stag, long"
   Section1bSumoLogicAccessID:
     Type: String
     Description: "Sumo Logic Access ID. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
@@ -58,8 +49,9 @@ Parameters:
 Mappings:
   CommonData:
     NestedTemplate:
-      BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v3.0.0"
+      MPS3BucketName: "sumologic-appdev-aws-sam-apps"
+      MPS3BucketRegion: "us-east-1"
+      MPS3KeyPrefix: "aws-observability-versions/v3.0.0/templates/"
 
 Resources:
 
@@ -67,16 +59,18 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/permissionchecker/permissioncheck.nested.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
+        - "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}utilities/permissionchecker/permissioncheck.nested.template.test.yaml"
+        - MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
+          MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
+          MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
       Parameters:
         Section1aSumoLogicDeployment: !Ref Section1aSumoLogicDeployment
         Section1bSumoLogicAccessID: !Ref Section1bSumoLogicAccessID
         Section1cSumoLogicAccessKey: !Ref Section1cSumoLogicAccessKey
         Section1dSumoLogicOrganizationId: !Ref Section1dSumoLogicOrganizationId
-        TemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-        NestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
+        MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
+        MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
 
   LambdaRole:
     Type: AWS::IAM::Role
@@ -142,7 +136,6 @@ Resources:
                 Resource: "*"
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-
 
   DeleteCFNLambda:
     Type: "AWS::Lambda::Function"

@@ -15,8 +15,9 @@ Metadata:
       - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
-          - TemplatesBucketName
-          - NestedTemplateVersion
+          - MPS3BucketName
+          - MPS3BucketRegion
+          - MPS3KeyPrefix
 
       - Label:
           default: "App Installation and sharing"
@@ -34,10 +35,12 @@ Metadata:
       Section1dSumoLogicOrganizationId:
         default: "Sumo Logic Organization Id"
 
-      TemplatesBucketName:
+      MPS3BucketName:
         default: "Nested Templates Bucket Name"
-      NestedTemplateVersion:
-        default: "Nested Templates Version"
+      MPS3BucketRegion:
+        default: "Nested Templates Bucket Region"
+      MPS3KeyPrefix:
+        default: "Nested Templates Key Prefix"
 
       Section3aAppInstallLocation:
         default: "App Installation location"
@@ -77,13 +80,17 @@ Parameters:
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
-  TemplatesBucketName:
+  MPS3BucketName:
     Type: String
     AllowedPattern: ".+"
-    Description: Bucket Name for all the nested templates.
-  NestedTemplateVersion:
+    Description: S3 Bucket Name for all the nested templates.
+  MPS3BucketRegion:
     Type: String
-    Description: "Provide the version for the nested templates. Default is the latest version."
+    AllowedPattern: ".+"
+    Description: S3 Bucket Region for all the nested templates.
+  MPS3KeyPrefix:
+    Type: String
+    Description: "S3 Key Prefix for the nested templates."
     AllowedPattern: ".+"
 
   Section3aAppInstallLocation:
@@ -504,7 +511,7 @@ Resources:
   AutoEnableS3LogsAlbAWSResources:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/collections/autoenable/s3_logging_auto_enable.template.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}s3_logging_auto_enable.template.yaml"
       Parameters:
         BucketName: !Ref CommonS3Bucket
         BucketPrefix: "elasticloadbalancing"
@@ -550,28 +557,13 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
       SumoDeployment: !Ref Section1aSumoLogicDeployment
 
-  sumoOverview:
-    Type: Custom::AppV2
-    Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
-      Region: !Ref AWS::Region
-      AppName: "Amazon Overview"
-      AppId: "32c8b96c-161c-46d4-b81d-235cc0b56b87"
-      share: !Ref Section3bShare
-      orgid: !Ref Section1dSumoLogicOrganizationId
-      RemoveOnDeleteStack: true
-      RetainOldAppOnUpdate: true
-      SumoAccessID: !Ref Section1bSumoLogicAccessID
-      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
-      SumoDeployment: !Ref Section1aSumoLogicDeployment
-
   sumoMonitorAlerts:
     Type: Custom::AlertsMonitor
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       Region: !Ref "AWS::Region"
-      FolderName: !Sub "AWS Observability ${NestedTemplateVersion} "
-      MonitorsS3Url: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/aws-observability-versions/${NestedTemplateVersion}/appjson/Test-Alerts.json"
+      FolderName: !Sub "AWS Observability ${MPS3KeyPrefix} "
+      MonitorsS3Url: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}appjson/Test-Alerts.json"
       SuffixDateTime: true
       RetainOldAlerts: true
       RemoveOnDeleteStack: true
@@ -591,6 +583,21 @@ Resources:
                                            | if (eventSource matches "rds.amazonaws.com", "aws/rds", if (eventSource matches "apigateway.amazonaws.com", "aws/apigateway", if (eventSource matches "lambda.amazonaws.com", "aws/lambda", if (eventSource matches "dynamodb.amazonaws.com", "aws/dynamodb", if (eventSource matches "ecs.amazonaws.com", "aws/ecs", if (eventSource matches "elasticache.amazonaws.com", "aws/elasticache", "")))))) as Namespace
                                            | fields region, namespace, accountid'
       FieldExtractionRuleParseEnabled: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+
+  sumoOverview:
+    Type: Custom::AppV2
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref AWS::Region
+      AppName: "Amazon RDS"
+      AppId: "c32ad59b-ee10-4cd1-8369-3639e8457b1f"
+      share: !Ref Section3bShare
+      orgid: !Ref Section1dSumoLogicOrganizationId
+      RemoveOnDeleteStack: true
+      RetainOldAppOnUpdate: true
       SumoAccessID: !Ref Section1bSumoLogicAccessID
       SumoAccessKey: !Ref Section1cSumoLogicAccessKey
       SumoDeployment: !Ref Section1aSumoLogicDeployment
@@ -628,7 +635,7 @@ Resources:
   CloudWatchEventFunction:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: "https://appdev-cloudformation-templates.s3.amazonaws.com/DLQLambdaCloudFormation.json"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}dlq_lambda_cloudformation.template.yaml"
       Parameters:
         SumoEndPointURL: "test-url"
         IncludeLogGroupInfo: true
@@ -653,7 +660,7 @@ Resources:
   KinesisFirehoseMetricsStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWMetrics.template.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}kinesis_firehose_cw_metrics.template.yaml"
       Parameters:
         Section1aSumoLogicKinesisMetricsURL: !GetAtt KinesisFirehoseMetricsSource.SUMO_ENDPOINT
         Section2aCreateS3Bucket: "No"
@@ -679,7 +686,7 @@ Resources:
   KinesisFirehoseLogsStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${TemplatesBucketName}.s3.amazonaws.com/KinesisFirehoseCWLogs.template.yaml"
+      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}kinesis_firehose_cw_logs.template.yaml"
       Parameters:
         Section1aSumoLogicKinesisLogsURL: !GetAtt KinesisFirehoseLogsSource.SUMO_ENDPOINT
         Section2aCreateS3Bucket: "No"

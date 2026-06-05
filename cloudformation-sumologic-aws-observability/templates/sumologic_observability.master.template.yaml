@@ -444,8 +444,9 @@ Mappings:
       SumoAWSAccountID: "052162193518"
   CommonData:
     NestedTemplate:
-      BucketName: "sumologic-appdev-aws-sam-apps"
-      Version: "v3.0.0"
+      MPS3BucketName: "sumologic-appdev-aws-sam-apps"
+      MPS3BucketRegion: "us-east-1"
+      MPS3KeyPrefix: "aws-observability-versions/v3.0.0/templates/"
     CollectorDetails:
       CollectorNamePrefix: "aws-observability"
       CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
@@ -619,15 +620,16 @@ Resources:
             t: !Ref Section9bELBCreateLogSource
             u: !Ref Section9cELBLogsSourceUrl
             v: !Ref Section9dELBS3LogsBucketName
-            w: !FindInMap [CommonData, NestedTemplate, Version]
+            w: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
 
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/collections/resources.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
+        - "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}resources.template.yaml"
+        - MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
+          MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
+          MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
       Parameters:
         SumoLogicDeployment: !Ref Section1aSumoLogicDeployment
         SumoLogicAccessID: !Ref Section1bSumoLogicAccessID
@@ -666,8 +668,9 @@ Resources:
         CreateKinesisFirehoseLogSource: !If [ create_kf_logs_source, "Yes", "No" ]
         KinesisFirehoseLogsSourceName: !Sub "kinesis-firehose-cloudwatch-logs-${AWS::Region}"
         KinesisFirehoseLogsSourceCategory: !FindInMap [ CommonData, CollectorDetails, CloudWatchLogsSourceCategory ]
-        TemplatesBucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-        NestedTemplateVersion: !FindInMap [CommonData, NestedTemplate, Version]
+        MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
+        MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
+        MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
         CreateELBLogSource: !Ref Section9bELBCreateLogSource
         CreateELBS3Bucket: !If [create_elb_bucket, "Yes", "No"]
         ELBS3LogsBucketName: !Ref Section9dELBS3LogsBucketName
@@ -687,9 +690,10 @@ Resources:
     Condition: call_auto_enable
     Properties:
       TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/collections/autoenable/auto_enable.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
+        - "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}auto_enable.template.yaml"
+        - MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
+          MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
+          MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
       Parameters:
         SumoLogicResourceRemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         ALBAutoEnableS3Logs: !If [auto_enable_s3_logs, "Yes", "No"]
@@ -706,17 +710,19 @@ Resources:
         ELBAutoEnableS3LogsOptions: !Ref Section9aAutoEnableS3LogsELBResourcesOptions
         ELBS3LogsBucketName: !If [create_elb_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section9dELBS3LogsBucketName]
         ELBS3LogsBucketPrefix: !If [elb_bucket_path_expression_provided, !Ref Section9eELBS3BucketPathExpression, "classicloadbalancing"]
-        TemplatesBucketName: !FindInMap [ CommonData, NestedTemplate, BucketName ]
-        NestedTemplateVersion: !FindInMap [ CommonData, NestedTemplate, Version ]
+        MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
+        MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
+        MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
 
   sumoAppStacks:
     Type: AWS::CloudFormation::Stack
     Condition: call_auto_enable
     Properties:
       TemplateURL: !Sub
-        - "https://${BucketName}.s3.amazonaws.com/aws-observability-versions/${Version}/apps/apps.template.yaml"
-        - BucketName: !FindInMap [CommonData, NestedTemplate, BucketName]
-          Version: !FindInMap [CommonData, NestedTemplate, Version]
+        - "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}apps.template.yaml"
+        - MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
+          MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
+          MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
       Parameters:
         # -------------------------
         # Sumo Deployment
@@ -739,11 +745,9 @@ Resources:
         Section3aParentStackLambdaARN:
           !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
 
-        Section3bTemplatesBucketName:
-          !FindInMap [CommonData, NestedTemplate, BucketName]
-
-        Section3cNestedTemplateVersion:
-          !FindInMap [CommonData, NestedTemplate, Version]
+        MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
+        MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
+        MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
         # -------------------------
         # UPDATE TRIGGER HASH (Recommended)
         # -------------------------
@@ -772,4 +776,4 @@ Resources:
               t: !Ref Section9bELBCreateLogSource
               u: !Ref Section9cELBLogsSourceUrl
               v: !Ref Section9dELBS3LogsBucketName
-              w: !FindInMap [CommonData, NestedTemplate, Version]
+              w: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
