@@ -53,8 +53,8 @@ Metadata:
       - Label:
           default: "7. Sumo Logic CloudWatch Logs Source"
         Parameters:
-          - Section7aLambdaCreateCloudWatchLogsSourceOptions
-          - Section7bLambdaCloudWatchLogsSourceUrl
+          - Section7aCreateCloudWatchLogsSourceOptions
+          - Section7bCloudWatchLogsSourceUrl
           - Section7cAutoSubscribeLogGroupsOptions
           - Section7dAutoSubscribeLogGroupPattern
           - Section7eAutoSubscribeLogGroupByTags
@@ -95,10 +95,10 @@ Metadata:
         default: "S3 Object URL of a CSV file that maps AWS Account IDs to an Account Alias"
 
       Section3aInstallObservabilityApps:
-        default: "Install AWS Observability Apps and Alerts"
+        default: "Install AWS Observability Apps and Monitors"
 
       Section4aCreateMetricsSourceOptions:
-        default: "Select the kind of CloudWatch Metrics Source to create"
+        default: "Select the kind of Metrics Source to create"
       Section4bMetricsNameSpaces:
         default: "Sumo Logic AWS Metrics Namespaces"
       Section4cCloudWatchExistingSourceAPIUrl:
@@ -126,10 +126,10 @@ Metadata:
       Section6dCloudTrailBucketPathExpression:
         default: "Path Expression for existing CloudTrail logs"
 
-      Section7aLambdaCreateCloudWatchLogsSourceOptions:
-        default: "Select the Sumo Logic CloudWatch Logs Sources"
-      Section7bLambdaCloudWatchLogsSourceUrl:
-        default: "Existing Sumo Logic Lambda CloudWatch Logs Source API URL"
+      Section7aCreateCloudWatchLogsSourceOptions:
+        default: "Select the Sumo Logic CloudWatch Logs Source Type"
+      Section7bCloudWatchLogsSourceUrl:
+        default: "Existing Sumo Logic CloudWatch Logs Source API URL"
       Section7cAutoSubscribeLogGroupsOptions:
         default: "Subscribe log groups to Destination (Lambda or kinesis firehose delivery stream)"
       Section7dAutoSubscribeLogGroupPattern:
@@ -219,8 +219,8 @@ Parameters:
   Section3aInstallObservabilityApps:
     Type: String
     Default: 'Yes'
-    Description: "Yes - Installs Apps (EC2, Application Load Balancer, RDS, API Gateway, Lambda, Dynamo DB, ECS, ElastiCache and NLB) and Alerts for the Sumo Logic AWS Observability Solution. All the Apps are installed in the folder 'AWS Observability'.
-                  No - Skips the installation of Apps and Alerts."
+    Description: "Yes - Installs Apps (AWS Compute, AWS EC2, AWS ECS, AWS Lambda, AWS Application Load Balancer, AWS Network Load Balancer, AWS API Gateway, AWS SQS, AWS SNS, AWS DynamoDB, AWS RDS, AWS ElastiCache) and Monitors for the Sumo Logic AWS Observability Solution. All Apps are installed in the folder 'Installed Apps'.
+                  No - Skips the installation of Apps and Monitors."
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -302,7 +302,7 @@ Parameters:
     Description: "This is required in case the above existing bucket is already configured to receive CloudTrail logs. If this is blank, Sumo Logic will store logs in the path expression: AWSLogs/*/CloudTrail/*"
     Default: "AWSLogs/*/CloudTrail/*"
 
-  Section7aLambdaCreateCloudWatchLogsSourceOptions:
+  Section7aCreateCloudWatchLogsSourceOptions:
     Type: String
     Description: "Lambda Log Forwarder - Creates a Sumo Logic CloudWatch Log Source that collects CloudWatch logs via a Lambda function.
                   Kinesis Firehose Log Source - Creates a Sumo Logic Kinesis Firehose Source to collect CloudWatch logs."
@@ -312,7 +312,7 @@ Parameters:
       - 'Kinesis Firehose Log Source'
       - 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)'
       - 'None'
-  Section7bLambdaCloudWatchLogsSourceUrl:
+  Section7bCloudWatchLogsSourceUrl:
     Type: String
     Description: "Required when already collecting Lambda CloudWatch logs in Sumo Logic. Provide the existing Sumo Logic Lambda CloudWatch Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
     Default: ""
@@ -404,11 +404,11 @@ Conditions:
   create_kf_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourceOptions, 'Kinesis Firehose Metrics Source' ]
   create_cw_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourceOptions, 'CloudWatch Metrics Source' ]
   create_kf_logs_source: !Or
-    - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Kinesis Firehose Log Source' ]
-    - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)' ]
+    - !Equals [ !Ref Section7aCreateCloudWatchLogsSourceOptions, 'Kinesis Firehose Log Source' ]
+    - !Equals [ !Ref Section7aCreateCloudWatchLogsSourceOptions, 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)' ]
   create_cw_logs_source: !Or
-    - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Lambda Log Forwarder' ]
-    - !Equals [ !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions, 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)' ]
+    - !Equals [ !Ref Section7aCreateCloudWatchLogsSourceOptions, 'Lambda Log Forwarder' ]
+    - !Equals [ !Ref Section7aCreateCloudWatchLogsSourceOptions, 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)' ]
   create_elb_source: !Equals [ !Ref Section8bELBCreateLogSource, 'Yes' ]
 
   # Sources Update Condition
@@ -794,8 +794,8 @@ Resources:
               k: !Ref Section6aCreateCloudTrailLogSource
               l: !Ref Section6bCloudTrailLogsSourceUrl
               m: !Ref Section6cCloudTrailLogsBucketName
-              n: !Ref Section7aLambdaCreateCloudWatchLogsSourceOptions
-              o: !Ref Section7bLambdaCloudWatchLogsSourceUrl
+              n: !Ref Section7aCreateCloudWatchLogsSourceOptions
+              o: !Ref Section7bCloudWatchLogsSourceUrl
               p: !Ref Section7cAutoSubscribeLogGroupsOptions
               q: !Ref Section7dAutoSubscribeLogGroupPattern
               r: !Ref Section7eAutoSubscribeLogGroupByTags
