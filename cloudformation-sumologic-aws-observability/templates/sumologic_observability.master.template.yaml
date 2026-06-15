@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: "Version - v3.0.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W3011
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
@@ -371,8 +375,6 @@ Conditions:
     - !Equals [ !Ref Section8dELBS3LogsBucketName, '' ]
 
   # Sources Create Condition
-  create_cloudtrail_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
-  create_alb_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
   create_kf_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourceOptions, 'Kinesis Firehose Metrics Source' ]
   create_cw_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourceOptions, 'CloudWatch Metrics Source' ]
   create_kf_logs_source: !Or
@@ -381,18 +383,11 @@ Conditions:
   create_cw_logs_source: !Or
     - !Equals [ !Ref Section7aCreateCloudWatchLogsSourceOptions, 'Lambda Log Forwarder' ]
     - !Equals [ !Ref Section7aCreateCloudWatchLogsSourceOptions, 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)' ]
-  create_elb_source: !Equals [ !Ref Section8bELBCreateLogSource, 'Yes' ]
 
   # Sources Update Condition
-  install_cloudwatch_metrics_source: !Or
-    - !Condition create_kf_metrics_source
-    - !Condition create_cw_metrics_source
   create_cloudwatch_logs_source: !Or
     - !Condition create_kf_logs_source
     - !Condition create_cw_logs_source
-  update_cloudtrail_logs_source: !And
-    - !Not [!Equals [!Ref Section6bCloudTrailLogsSourceUrl, '']]
-    - !Not [!Equals [!Ref Section6aCreateCloudTrailLogSource, 'Yes']]
 
   # Condition for S3 Logging enable
   is_bucket_available: !Or
@@ -643,7 +638,6 @@ Resources:
         AccountAlias: !Ref Section2aAccountAlias
         AccountAliasMappingS3URL: !Ref Section2bAccountAliasMappingS3URL
         SumoLogicAccountID: !FindInMap [SumoAWSAccountIDs, !Ref "AWS::Partition", SumoAWSAccountID]
-        InstallObservabilityApps: !Ref Section3aInstallObservabilityApps
         CreateMetaDataSource: "No"
         CreateCloudWatchMetricsSource: !If [ create_cw_metrics_source, "Yes", "No" ]
         CloudWatchMetricsSourceName: !Sub "cloudwatch-metrics-${AWS::Region}"
@@ -738,20 +732,12 @@ Resources:
         # -------------------------
         # App Installation
         # -------------------------
-        Section2aInstallApp:
-          !If
-            - install_observability_apps
-            - !GetAtt CreateCommonResources.Outputs.PaidAccountCheck
-            - "No"
+        Section2aInstallApp: !GetAtt CreateCommonResources.Outputs.PaidAccountCheck
         # -------------------------
         # Parent Stack Details
         # -------------------------
         Section3aParentStackLambdaARN:
           !GetAtt CreateCommonResources.Outputs.LambdaHelperARN
-
-        MPS3BucketName: !FindInMap [CommonData, NestedTemplate, MPS3BucketName]
-        MPS3BucketRegion: !FindInMap [CommonData, NestedTemplate, MPS3BucketRegion]
-        MPS3KeyPrefix: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
         # -------------------------
         # UPDATE TRIGGER HASH (Recommended)
         # -------------------------

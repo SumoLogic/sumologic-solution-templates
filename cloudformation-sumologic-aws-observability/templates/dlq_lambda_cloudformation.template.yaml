@@ -108,9 +108,7 @@ Resources:
             DestinationArn: !GetAtt SumoCWLogsLambda.Arn
             FilterPattern: ''
         DependsOn:
-            - SumoCWLogGroup
             - SumoCWLambdaPermission
-            - SumoCWLogsLambda
     SumoCWLambdaPermission:
         Type: AWS::Lambda::Permission
         Properties:
@@ -164,17 +162,14 @@ Resources:
                                 - sqs:GetQueueUrl
                                 - sqs:ListQueues
                                 - sqs:ChangeMessageVisibility
-                                - sqs:SendMessageBatch
                                 - sqs:ReceiveMessage
                                 - sqs:SendMessage
                                 - sqs:GetQueueAttributes
                                 - sqs:ListQueueTags
                                 - sqs:ListDeadLetterSourceQueues
-                                - sqs:DeleteMessageBatch
                                 - sqs:PurgeQueue
                                 - sqs:DeleteQueue
                                 - sqs:CreateQueue
-                                - sqs:ChangeMessageVisibilityBatch
                                 - sqs:SetQueueAttributes
                             Resource:
                                 - !GetAtt SumoCWDeadLetterQueue.Arn
@@ -231,9 +226,6 @@ Resources:
                                                     - !Ref AWS::StackId
     SumoCWLogsLambda:
         Type: AWS::Lambda::Function
-        DependsOn:
-            - SumoCWLambdaExecutionRole
-            - SumoCWDeadLetterQueue
         Properties:
             FunctionName: !Join
                 - '-'
@@ -280,9 +272,6 @@ Resources:
                   Id: TargetFunctionV1
     SumoCWProcessDLQLambda:
         Type: AWS::Lambda::Function
-        DependsOn:
-            - SumoCWLambdaExecutionRole
-            - SumoCWDeadLetterQueue
         Properties:
             FunctionName: !Join
                 - '-'
@@ -342,8 +331,6 @@ Resources:
             Period: '3600'
             Statistic: Sum
             Threshold: '100000'
-        DependsOn:
-            - SumoCWEmailSNSTopic
 Outputs:
     SumoCWLogsLambdaArn:
         Description: The ARN of the sumologic cloudwatch logs lambda

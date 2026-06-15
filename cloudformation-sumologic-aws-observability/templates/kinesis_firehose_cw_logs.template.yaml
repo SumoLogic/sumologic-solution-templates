@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: "Template to setup the AWS CloudWatch Logs collection using Amazon Kinesis Firehose and send the data to provided Sumo Logic URL."
 
 Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W3045
   AWS::ServerlessRepo::Application:
     Author: Sumo Logic
     Description: This solution helps to setup the AWS CloudWatch Logs collection using Amazon Kinesis Firehose and send the data to provided Sumo Logic URL.
@@ -189,7 +193,7 @@ Resources:
               - firehose:PutRecord
               - firehose:PutRecordBatch
               - kinesis:PutRecord
-              - kinesis:PutRecordBatch
+              - kinesis:PutRecords
             Resource: !Sub "arn:${AWS::Partition}:firehose:${AWS::Region}:${AWS::AccountId}:*"
           - Effect: Allow
             Action:

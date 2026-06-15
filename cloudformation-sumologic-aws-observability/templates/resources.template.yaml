@@ -1,6 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: "Version - v3.0.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W1031
+
 Parameters:
   SumoLogicDeployment:
     Type: String
@@ -47,15 +53,6 @@ Parameters:
     Type: String
     Description: "Provide the Sumo Logic Account ID for trust relationship."
     Default: ""
-
-  InstallObservabilityApps:
-    Type: String
-    Default: 'Yes'
-    Description: "Yes - Installs Apps (EC2, Application Load Balancer, RDS, API Gateway, Lambda, Dynamo DB, ECS, ElastiCache and NLB) and Alerts for the Sumo Logic AWS Observability Solution. All the Apps are installed in the folder 'AWS Observability'.
-                  No - Skips the installation of Apps and Alerts."
-    AllowedValues:
-      - 'Yes'
-      - 'No'
 
   CreateMetaDataSource:
     Type: String
@@ -265,7 +262,6 @@ Parameters:
 
 Conditions:
   # Sources Conditions
-  install_observability_apps: !Equals [ !Ref InstallObservabilityApps, 'Yes' ]
   install_metadata_source: !Equals [ !Ref CreateMetaDataSource, 'Yes' ]
   install_cloud_watch_metric_source: !Equals [ !Ref CreateCloudWatchMetricsSource, 'Yes' ]
   install_alb_logs_source: !Equals [ !Ref CreateALBLogSource, 'Yes' ]
@@ -672,7 +668,6 @@ Resources:
   CommonBucketPolicyForOldRegion:
     Type: AWS::CloudFormation::Stack
     Condition: create_bucket_if_old_aws_region
-    DependsOn: CommonS3Bucket
     Properties:
       TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}bucket_policy_old_region.template.yaml"
       Parameters:
@@ -683,7 +678,6 @@ Resources:
   CommonBucketPolicyForNewRegion:
     Type: AWS::CloudFormation::Stack
     Condition: create_bucket_if_new_aws_region
-    DependsOn: CommonS3Bucket
     Properties:
       TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}bucket_policy_new_region.template.yaml"
       Parameters:
@@ -845,46 +839,6 @@ Resources:
 
   ############# START - FIELDS #################
 
-#  AddAccountField:
-#    Type: Custom::SumoLogicFieldsSchema
-#    Properties:
-#      ServiceToken: !GetAtt LambdaHelper.Arn
-#      FieldName: "account"
-#      RemoveOnDeleteStack: false
-#      SumoAccessID: !Ref SumoLogicAccessID
-#      SumoAccessKey: !Ref SumoLogicAccessKey
-#      SumoDeployment: !Ref SumoLogicDeployment
-#
-#  AddRegionField:
-#    Type: Custom::SumoLogicFieldsSchema
-#    Properties:
-#      ServiceToken: !GetAtt LambdaHelper.Arn
-#      FieldName: "region"
-#      RemoveOnDeleteStack: false
-#      SumoAccessID: !Ref SumoLogicAccessID
-#      SumoAccessKey: !Ref SumoLogicAccessKey
-#      SumoDeployment: !Ref SumoLogicDeployment
-#
-#  AddNamespaceField:
-#    Type: Custom::SumoLogicFieldsSchema
-#    Properties:
-#      ServiceToken: !GetAtt LambdaHelper.Arn
-#      FieldName: "namespace"
-#      RemoveOnDeleteStack: false
-#      SumoAccessID: !Ref SumoLogicAccessID
-#      SumoAccessKey: !Ref SumoLogicAccessKey
-#      SumoDeployment: !Ref SumoLogicDeployment
-#
-#  AddAccountIdField:
-#    Type: Custom::SumoLogicFieldsSchema
-#    Properties:
-#      ServiceToken: !GetAtt LambdaHelper.Arn
-#      FieldName: "accountid"
-#      RemoveOnDeleteStack: false
-#      SumoAccessID: !Ref SumoLogicAccessID
-#      SumoAccessKey: !Ref SumoLogicAccessKey
-#      SumoDeployment: !Ref SumoLogicDeployment
-#
   SumoLogicMetaDataSource:
     Condition: install_metadata_source
     Type: Custom::AWSSource
