@@ -1,0 +1,85 @@
+---
+Global:
+  TemplatePath: "../../../sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+      Section2aAccountAlias: 'elbnone'
+TestCase:
+  TestName: elbAutoEnableNone
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+      Section2aAccountAlias: 'elbnone'
+      Section2bAccountAliasMappingS3URL: ''
+      Section3aInstallObservabilityApps: 'No'
+      Section5bALBCreateLogSource: 'No'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'None'
+      Section8bELBCreateLogSource: 'Yes'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - LambdaRole
+          - LambdaPermission
+          - PrimerInvoke
+          - TelemetryLambda
+          - CreateCommonResources
+          - AutoEnableOptions
+          - CreateCommonResources.LambdaRole
+          - CreateCommonResources.LambdaHelper
+          - CreateCommonResources.AccountCheck
+          - CreateCommonResources.CommonBucketSNSTopic
+          - CreateCommonResources.CommonS3Bucket
+          - CreateCommonResources.CommonBucketPolicyForOldRegion
+          - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonBucketPolicy
+          - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonCloudTrail
+          - CreateCommonResources.CommonSNSpolicy
+          - CreateCommonResources.SumoLogicSourceRole
+          - CreateCommonResources.SumoLogicHostedCollector
+          - CreateCommonResources.LambdaToDecideCWMetricsSources
+          - CreateCommonResources.Primerinvoke
+          - CreateCommonResources.ELBSource
+          - CreateCommonResources.ELBSNSSubscription
+          - CreateCommonResources.CloudTrailSource
+          - CreateCommonResources.CloudTrailSNSSubscription
+          - CreateCommonResources.SumoLogicELBS3Policy
+          - CreateCommonResources.SumoLogicCloudTrailS3Policy
+          - CreateCommonResources.AccountAliasValue
+          - CreateCommonResources.LambdaHelperAlias
+          - CreateCommonResources.LambdaRoleAlias
+          - CreateCommonResources.KinesisFirehoseLogsSource
+          - CreateCommonResources.KinesisFirehoseLogsStack
+          - CreateCommonResources.KinesisFirehoseMetricsSource
+          - CreateCommonResources.KinesisFirehoseMetricsStack
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources
+    - AssertType: OutputsCheck
+      Assert:
+        Outputs:
+          - CreateCommonResources.LambdaHelperARN
+          - CreateCommonResources.EnterpriseCheck
+          - CreateCommonResources.PaidAccountCheck
+          - CreateCommonResources.LambdaRoleARN
+          - CreateCommonResources.BucketName
+          - CreateCommonResources.AccountAlias
+          - CreateCommonResources.CollectorName
+    - AssertType: ParameterCheck
+      Assert:
+        CreateCommonResources:
+          CreateELBLogSource: 'Yes'
+          CreateELBS3Bucket: 'Yes'
+          ELBS3LogsBucketName: ""
+          ELBS3BucketPathExpression: 'classicloadbalancing/*'
+          ELBLogsSourceName: "elb-logs-<REGION>"
+          ELBLogsSourceCategory: "aws/observability/elb/logs"
+          CreateALBLogSource: 'No'
+        AutoEnableOptions:
+          ELBAutoEnableS3Logs: 'No'
+          ALBAutoEnableS3Logs: 'No'
