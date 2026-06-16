@@ -29,6 +29,8 @@ REGION_TO_BUCKET = {
     "ap-southeast-1": "appdevzipfiles-ap-southeast-1",
     "ap-southeast-2": "appdevzipfiles-ap-southeast-2",
     "ap-southeast-3": "appdevzipfiles-ap-southeast-3",
+    "ap-southeast-4": "appdevzipfiles-ap-southeast-4s",
+    "ap-southeast-6": "appdevzipfiles-ap-southeast-6ss",
     "ca-central-1": "appdevzipfiles-ca-central-1",
     "eu-central-1": "appdevzipfiles-eu-central-1",
     "eu-central-2": "appdevzipfiles-eu-central-2ss",
