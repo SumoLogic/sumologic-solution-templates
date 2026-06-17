@@ -36,40 +36,12 @@ TestCase:
           - PrimerInvoke
           - TelemetryLambda
           - CreateCommonResources
-          - sumoEC2MetricsAppStack
-          - sumoAlbMetricsAppStack
-          - sumoElbMetricsAppStack
-          - sumoDynamoDBMetricsAppStack
-          - sumoRdsMetricsAppStack
-          - sumoApiGatewayMetricsAppStack
-          - sumoSNSAppStack
-          - sumoSQSAppStack
-          - sumoLambdaMetricsAppStack
-          - sumoECSMetricsAppStack
-          - sumoElasticCacheMetricsAppStack
-          - CreateCommonResources.AddAccountField
-          - CreateCommonResources.AddRegionField
-          - CreateCommonResources.AddNamespaceField
-          - CreateCommonResources.AddAccountIdField
-          - sumoApiGatewayMetricsAppStack.MetricRule
           - CreateCommonResources.LambdaRole
           - CreateCommonResources.LambdaHelper
           - CreateCommonResources.AccountCheck
-          - CreateCommonResources.CreateSumoLogicAWSExplorerView
           - CreateCommonResources.LambdaToDecideCWMetricsSources
           - CreateCommonResources.Primerinvoke
-          - sumoRdsMetricsAppStack.ClusterMetricRule
-          - sumoRdsMetricsAppStack.InstanceMetricRule
-          - sumoNlbMetricsAppStack
-          - sumoNlbMetricsAppStack.MetricRule
           - CreateCommonResources.AccountAliasValue
-          - sumoAlbMetricsAppStack.AccountAliasValue
-          - sumoAlbMetricsAppStack.LambdaHelper
-          - sumoAlbMetricsAppStack.LambdaRole
-          - sumoElbMetricsAppStack.AccountAliasValue
-          - sumoElbMetricsAppStack.LambdaHelper
-          - sumoElbMetricsAppStack.LambdaRole
-          - sumoLambdaMetricsAppStack.AccountAliasValue
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
     - AssertType: OutputsCheck
@@ -90,15 +62,15 @@ TestCase:
           CreateMetaDataSource: 'No'
           MetaDataSourceName: ""
           MetaDataSourceCategory: ""
-          CreateCloudWatchMetricsSource:  'No'
+          CreateCloudWatchMetricsSource: 'No'
           CloudWatchMetricsSourceName: 'cloudwatch-metrics-<REGION>'
-          CloudWatchMetricsNameSpaces: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
-          ScanInterval: "30000"
+          CloudWatchMetricsNameSpaces: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2"
+          ScanInterval: "300000"
           CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
           CreateALBLogSource: 'No'
           CreateALBS3Bucket: 'No'
           ALBS3LogsBucketName: ""
-          ALBS3BucketPathExpression: ''
+          ALBS3BucketPathExpression: '*AWSLogs/*/elasticloadbalancing/*'
           ALBLogsSourceName: "alb-logs-<REGION>"
           ALBLogsSourceCategory: "aws/observability/alb/logs"
           CreateELBLogSource: 'No'
@@ -110,7 +82,7 @@ TestCase:
           CreateCloudTrailLogSource: 'No'
           CreateCloudTrailBucket: 'No'
           CloudTrailLogsBucketName: ""
-          CloudTrailBucketPathExpression: ''
+          CloudTrailBucketPathExpression: 'AWSLogs/*/CloudTrail/*'
           CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
           CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
           CreateCloudWatchLogSource: 'No'
@@ -122,49 +94,3 @@ TestCase:
           CreateKinesisFirehoseMetricsSource: 'No'
           KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
-        sumoEC2MetricsAppStack:
-          Section2aInstallApp: 'No'
-        sumoAlbMetricsAppStack:
-          Section2aAccountAlias: 'infrat5'
-          Section3aInstallApp: 'No'
-          Section4aCloudWatchExistingSourceAPIUrl: ''
-          Section5aALBLogsAPIUrl: ''
-          Section5bALBLogsSourceName: ''
-        sumoElbMetricsAppStack:
-          Section2aAccountAlias: 'infrat5'
-          Section3aInstallApp: 'No'
-          Section4aCloudWatchExistingSourceAPIUrl: ''
-          Section5aELBLogsAPIUrl: ''
-          Section5bELBLogsSourceName: ''
-        sumoDynamoDBMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: ''
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoRdsMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: ''
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoApiGatewayMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: ''
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoLambdaMetricsAppStack:
-          Section2aAccountAlias: 'infrat5'
-          Section3aInstallApp: 'No'
-          Section4aCloudWatchExistingSourceAPIUrl: ''
-          Section5aCloudTrailLogsAPIUrl: ''
-          Section5bCloudTrailLogsSourceName: ''
-          Section6aCloudWatchLogsAPIUrl: ''
-          Section6bCloudWatchLogsSourceName: ''
-        sumoECSMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: ''
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoElasticCacheMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: ''
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoNlbMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aNLBLogsSourceName: ''
-          Section3bNLBSourceUpdated: 'No'

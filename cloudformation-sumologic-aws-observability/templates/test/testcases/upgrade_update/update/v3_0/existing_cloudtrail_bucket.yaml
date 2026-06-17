@@ -54,21 +54,6 @@ TestCase:
           - PrimerInvoke
           - TelemetryLambda
           - CreateCommonResources
-          - sumoEC2MetricsAppStack
-          - sumoAlbMetricsAppStack
-          - sumoElbMetricsAppStack
-          - sumoDynamoDBMetricsAppStack
-          - sumoRdsMetricsAppStack
-          - sumoApiGatewayMetricsAppStack
-          - sumoSNSAppStack
-          - sumoSQSAppStack
-          - sumoLambdaMetricsAppStack
-          - sumoECSMetricsAppStack
-          - sumoElasticCacheMetricsAppStack
-          - CreateCommonResources.AddAccountField
-          - CreateCommonResources.AddRegionField
-          - CreateCommonResources.AddNamespaceField
-          - CreateCommonResources.AddAccountIdField
           - CreateCommonResources.SumoLogicALBS3Policy
           - CreateCommonResources.SumoLogicELBS3Policy
           - CreateCommonResources.SumoLogicCloudTrailS3Policy
@@ -79,14 +64,12 @@ TestCase:
           - CreateCommonResources.CommonS3Bucket
           - CreateCommonResources.CommonBucketPolicy
           - CreateCommonResources.CommonSNSpolicy
-          - CreateCommonResources.CreateSumoLogicAWSExplorerView
           - CreateCommonResources.SumoLogicSourceRole
           - CreateCommonResources.SumoLogicHostedCollector
           - CreateCommonResources.LambdaToDecideCWMetricsSources
           - CreateCommonResources.Primerinvoke
           - CreateCommonResources.CloudWatchMetricsFirstStack
           - CreateCommonResources.CloudWatchMetricsSecondStack
-          - CreateCommonResources.CloudWatchMetricsThirdStack
           - CreateCommonResources.CloudWatchMetricsFirstStack.SecondCloudwatchMetricsSource
           - CreateCommonResources.CloudWatchMetricsFirstStack.ThirdCloudwatchMetricsSource
           - CreateCommonResources.CloudWatchMetricsSecondStack.SecondCloudwatchMetricsSource
@@ -99,35 +82,9 @@ TestCase:
           - CreateCommonResources.CloudTrailSNSTopic
           - CreateCommonResources.CloudTrailSNSpolicy
           - CreateCommonResources.CloudTrailSNSSubscription
-          - sumoRdsMetricsAppStack.ClusterMetricRule
-          - sumoRdsMetricsAppStack.InstanceMetricRule
-          - sumoLambdaMetricsAppStack.LambdaFieldExtractionRule
-          - sumoAlbMetricsAppStack.AlbLogsFieldExtractionRule
-          - sumoElbMetricsAppStack.ElbLogsFieldExtractionRule
-          - sumoApiGatewayMetricsAppStack.CloudTrailLogsFieldExtractionRule
-          - sumoApiGatewayMetricsAppStack.AccessLogsFieldExtractionRule
-          - sumoApiGatewayMetricsAppStack.MetricRule
-          - sumoSNSAppStack.FieldExtractionRule
-          - sumoSQSAppStack.FieldExtractionRule
-          - sumoDynamoDBMetricsAppStack.FieldExtractionRule
-          - sumoRdsMetricsAppStack.FieldExtractionRule
-          - sumoECSMetricsAppStack.FieldExtractionRule
-          - sumoElasticCacheMetricsAppStack.FieldExtractionRule
-          - sumoEC2MetricsAppStack.FieldExtractionRule
-          - sumoNlbMetricsAppStack
-          - sumoNlbMetricsAppStack.MetricRule
           - CreateCommonResources.AccountAliasValue
-          - sumoAlbMetricsAppStack.AccountAliasValue
-          - sumoAlbMetricsAppStack.LambdaHelper
-          - sumoAlbMetricsAppStack.LambdaRole
-          - sumoElbMetricsAppStack.AccountAliasValue
-          - sumoElbMetricsAppStack.LambdaHelper
-          - sumoElbMetricsAppStack.LambdaRole
-          - sumoLambdaMetricsAppStack.AccountAliasValue
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
-          - sumoAlbMetricsAppStack.AlbCloudTrailLogsFieldExtractionRule
-          - sumoElbMetricsAppStack.ClbCloudTrailLogsFieldExtractionRule
     - AssertType: OutputsCheck
       Assert:
         Outputs:
@@ -150,7 +107,7 @@ TestCase:
           CreateCloudWatchMetricsSource:  'Yes'
           CloudWatchMetricsSourceName: 'cloudwatch-metrics-<REGION>'
           CloudWatchMetricsNameSpaces: "AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache"
-          ScanInterval: "30000"
+          ScanInterval: "300000"
           CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
           CreateALBLogSource: 'Yes'
           CreateALBS3Bucket: 'Yes'
@@ -179,49 +136,3 @@ TestCase:
           CreateKinesisFirehoseMetricsSource: 'No'
           KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
-        sumoEC2MetricsAppStack:
-          Section2aInstallApp: 'No'
-        sumoAlbMetricsAppStack:
-          Section2aAccountAlias: 'infrat9'
-          Section3aInstallApp: 'No'
-          Section4aCloudWatchExistingSourceAPIUrl: ''
-          Section5aALBLogsAPIUrl: ''
-          Section5bALBLogsSourceName: '*alb-logs*'
-        sumoElbMetricsAppStack:
-          Section2aAccountAlias: 'infrat9'
-          Section3aInstallApp: 'No'
-          Section4aCloudWatchExistingSourceAPIUrl: ''
-          Section5aELBLogsAPIUrl: ''
-          Section5bELBLogsSourceName: '*elb-logs*'
-        sumoDynamoDBMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoRdsMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoApiGatewayMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoLambdaMetricsAppStack:
-          Section2aAccountAlias: 'infrat9'
-          Section3aInstallApp: 'No'
-          Section4aCloudWatchExistingSourceAPIUrl: ''
-          Section5aCloudTrailLogsAPIUrl: ''
-          Section5bCloudTrailLogsSourceName: '*cloudtrail-logs*'
-          Section6aCloudWatchLogsAPIUrl: ''
-          Section6bCloudWatchLogsSourceName: ''
-        sumoECSMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoElasticCacheMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aCloudTrailLogsSourceName: '*cloudtrail-logs*'
-          Section3bCloudTrailSourceUpdated: 'No'
-        sumoNlbMetricsAppStack:
-          Section2aInstallApp: 'No'
-          Section3aNLBLogsSourceName: ''
-          Section3bNLBSourceUpdated: 'No'
