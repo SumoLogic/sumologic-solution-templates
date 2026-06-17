@@ -25,6 +25,7 @@ resource "aws_iam_policy" "cloudtrail_policy" {
   for_each = toset(local.create_cloudtrail_source && local.create_iam_role ? ["cloudtrail_policy"] : [])
   #for_each = toset(var.collect_cloudtrail_logs && local.create_iam_role ? ["cloudtrail_policy"] : [])
 
+  name   = "Terraform-SumoLogic-CloudTrail-Policy-${random_string.aws_random.id}"
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME   = local.create_cloudtrail_bucket ? local.common_bucket_name : var.cloudtrail_source_details.bucket_details.bucket_name
     AWS_PARTITION = data.aws_partition.current.partition
@@ -44,6 +45,7 @@ resource "aws_iam_role_policy_attachment" "cloudtrail_policy_attach" {
 resource "aws_iam_policy" "elb_policy" {
   for_each = toset(local.create_elb_source && local.create_iam_role ? ["elb_policy"] : [])
 
+  name   = "Terraform-SumoLogic-ALB-Policy-${random_string.aws_random.id}"
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME   = local.create_elb_bucket ? local.common_bucket_name : var.elb_source_details.bucket_details.bucket_name
     AWS_PARTITION = data.aws_partition.current.partition
@@ -55,6 +57,7 @@ resource "aws_iam_policy" "elb_policy" {
 resource "aws_iam_policy" "classic_lb_policy" {
   for_each = toset(local.create_classic_lb_source && local.create_iam_role ? ["classic_lb_policy"] : [])
 
+  name   = "Terraform-SumoLogic-CLB-Policy-${random_string.aws_random.id}"
   policy = templatefile("${path.module}/templates/iam_s3_source_policy.tmpl", {
     BUCKET_NAME   = local.create_classic_lb_bucket ? local.common_bucket_name : var.classic_lb_source_details.bucket_details.bucket_name
     AWS_PARTITION = data.aws_partition.current.partition
@@ -83,6 +86,7 @@ resource "aws_iam_role_policy_attachment" "classic_lb_policy_attach" {
 resource "aws_iam_policy" "cw_metrics_policy" {
   for_each = toset(local.create_metric_source && local.create_iam_role ? ["cw_metrics_policy"] : [])
 
+  name   = "Terraform-SumoLogic-CWMetrics-Policy-${random_string.aws_random.id}"
   policy = templatefile("${path.module}/templates/iam_cw_metrics_source_policy.tmpl", {})
   tags   = var.aws_resource_tags
 }
