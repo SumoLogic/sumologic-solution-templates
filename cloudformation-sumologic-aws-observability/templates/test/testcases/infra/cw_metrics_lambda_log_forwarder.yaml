@@ -6,9 +6,9 @@ Global:
   GlobalParameters:
     Default:
       Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
-      Section2aAccountAlias: 'infrat1'
+      Section2aAccountAlias: 'cwllf'
 TestCase:
-  TestName: defaultParamNoAliasAndCSV
+  TestName: cwMetricsLambdaLogForwarder
   Regions: '${SUMO_REGIONS}'
   Skip: false
   Parameters:
@@ -17,9 +17,17 @@ TestCase:
       Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
       Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
       Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
-      Section2aAccountAlias: 'infrat1'
+      Section2aAccountAlias: 'cwllf'
       Section2bAccountAliasMappingS3URL: ''
-      Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SQS, AWS/SNS, AWS/EC2'
+      Section3aInstallObservabilityApps: 'Yes'
+      Section4aCreateMetricsSourceOptions: 'CloudWatch Metrics Source'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'Both'
+      Section5bALBCreateLogSource: 'Yes'
+      Section6aCreateCloudTrailLogSource: 'Yes'
+      Section7aCreateCloudWatchLogsSourceOptions: 'Lambda Log Forwarder'
+      Section7cAutoSubscribeLogGroupsOptions: 'Both'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'Both'
+      Section8bELBCreateLogSource: 'Yes'
   Assertions:
     - AssertType: ResourceExistence
       Assert:
@@ -31,21 +39,21 @@ TestCase:
           - CreateCommonResources
           - AutoEnableOptions
           - sumoAppStacks
-          - sumoAppStacks.SumoAppAmazonECS
-          - sumoAppStacks.SumoAppAmazonElastiCache
-          - sumoAppStacks.SumoAppAmazonOverview
-          - sumoAppStacks.SumoAppAmazonRDS
-          - sumoAppStacks.SumoAppAmazonSNS
-          - sumoAppStacks.SumoAppAmazonSQS
-          - sumoAppStacks.SumoAppAWSAPIGateway
+          - sumoAppStacks.CreateSumoLogicAWSExplorerView
+          - sumoAppStacks.SumoAppAWSEC2
           - sumoAppStacks.SumoAppAWSApplicationLoadBalancer
           - sumoAppStacks.SumoAppAWSClassicLoadBalancer
           - sumoAppStacks.SumoAppAWSDynamoDB
-          - sumoAppStacks.SumoAppAWSEC2
+          - sumoAppStacks.SumoAppAmazonRDS
+          - sumoAppStacks.SumoAppAWSAPIGateway
+          - sumoAppStacks.SumoAppAmazonSNS
+          - sumoAppStacks.SumoAppAmazonSQS
           - sumoAppStacks.SumoAppAWSLambda
+          - sumoAppStacks.SumoAppAmazonECS
+          - sumoAppStacks.SumoAppAmazonElastiCache
           - sumoAppStacks.SumoAppAWSNetworkLoadBalancer
+          - sumoAppStacks.SumoAppAmazonOverview
           - sumoAppStacks.SumoAppHostMetricsEC2
-          - sumoAppStacks.CreateSumoLogicAWSExplorerView
           - CreateCommonResources.LambdaRole
           - CreateCommonResources.LambdaHelper
           - CreateCommonResources.AccountCheck
@@ -53,44 +61,52 @@ TestCase:
           - CreateCommonResources.CommonS3Bucket
           - CreateCommonResources.CommonBucketPolicyForOldRegion
           - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonBucketPolicy
-          - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonCloudTrail
+          - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole
           - CreateCommonResources.SumoLogicHostedCollector
           - CreateCommonResources.LambdaToDecideCWMetricsSources
           - CreateCommonResources.Primerinvoke
-          - CreateCommonResources.KinesisFirehoseMetricsStack
-          - CreateCommonResources.KinesisFirehoseMetricsSource
-          - CreateCommonResources.KinesisFirehoseLogsStack
-          - CreateCommonResources.KinesisFirehoseLogsSource
-          - CreateCommonResources.KinesisFirehoseMetricsStack.AttachBucketPolicyToFirehoseLogsRole
-          - CreateCommonResources.KinesisFirehoseMetricsStack.FirehoseLogsRole
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStream
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStream
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsFirehoseRolePolicy
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogGroup
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogStream
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRole
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambda
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambdaRole
-          - CreateCommonResources.KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
-          - CreateCommonResources.KinesisFirehoseLogsStack.FirehoseLogsRole
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsFirehoseRolePolicy
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogGroup
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogStream
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogStreamS3
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRole
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRolePolicy
-          - CreateCommonResources.KinesisFirehoseLogsStack.SubscriptionFilter
           - CreateCommonResources.ALBSource
           - CreateCommonResources.ALBSNSSubscription
           - CreateCommonResources.ELBSource
           - CreateCommonResources.ELBSNSSubscription
           - CreateCommonResources.CloudTrailSource
           - CreateCommonResources.CloudTrailSNSSubscription
+          - CreateCommonResources.SumoLogicALBS3Policy
+          - CreateCommonResources.SumoLogicELBS3Policy
+          - CreateCommonResources.SumoLogicCloudTrailS3Policy
+          - CreateCommonResources.AccountAliasValue
+          - CreateCommonResources.LambdaHelperAlias
+          - CreateCommonResources.LambdaRoleAlias
+          - CreateCommonResources.CloudWatchHTTPSource
+          - CreateCommonResources.CloudWatchEventFunction
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWDeadLetterQueue
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWEmailSNSTopic
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWEventsInvokeLambdaPermission
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaExecutionRole
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaPermission
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogGroup
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogSubsriptionFilter
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambda
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQLambda
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWSpilloverAlarm
+          - CreateCommonResources.CloudWatchMetricsFirstStack
+          - CreateCommonResources.CloudWatchMetricsFirstStack.FirstCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsFirstStack.SecondCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsFirstStack.ThirdCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsFirstStack.FourthCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsFirstStack.FifthCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsSecondStack
+          - CreateCommonResources.CloudWatchMetricsSecondStack.FirstCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsSecondStack.SecondCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsSecondStack.ThirdCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsSecondStack.FourthCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsSecondStack.FifthCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsThirdStack
+          - CreateCommonResources.CloudWatchMetricsThirdStack.FirstCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsThirdStack.SecondCloudwatchMetricsSource
           - AutoEnableOptions.AutoEnableS3LogsAlbStack
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.AutoEnableAlbLogEventsInvokePermission
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.AutoEnableAlbLogEventsRuleTrigger
@@ -110,87 +126,51 @@ TestCase:
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupExistingLambdaConnector
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupExistingLambdaConnectorRole
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
-          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaEventRule
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.AutoSubscribeCWLogGroupInvokePermission
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaEventRule
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorRole
-          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.sumoIAMPassRolePolicy
-          - CreateCommonResources.AccountAliasValue
-          - CreateCommonResources.SumoLogicALBS3Policy
-          - CreateCommonResources.SumoLogicELBS3Policy
-          - CreateCommonResources.SumoLogicCloudTrailS3Policy
-          - CreateCommonResources.LambdaHelperAlias
-          - CreateCommonResources.LambdaRoleAlias
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoCWLambdaInvokePermission
     - AssertType: OutputsCheck
       Assert:
         Outputs:
           - CreateCommonResources.LambdaHelperARN
           - CreateCommonResources.EnterpriseCheck
           - CreateCommonResources.PaidAccountCheck
-          - CreateCommonResources.Namespaces
           - CreateCommonResources.LambdaRoleARN
           - CreateCommonResources.BucketName
+          - CreateCommonResources.AccountAlias
+          - CreateCommonResources.CollectorName
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableNewAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableExisitngAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableNewAWSResourcesLambda
-          - CreateCommonResources.KinesisMetricsRoleARN
-          - CreateCommonResources.KinesisMetricsDeliveryStreamARN
-          - CreateCommonResources.KinesisLogsDeliveryStreamARN
-          - CreateCommonResources.KinesisLogsRoleARN
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogGroupARN
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsDeliveryStreamARN
-          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRoleARN
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRoleARN
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStreamARN
-          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogGroupARN
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
-          - CreateCommonResources.AccountAlias
-          - CreateCommonResources.CollectorName
     - AssertType: ParameterCheck
       Assert:
         CreateCommonResources:
-          AccountAlias: "infrat1"
-          AccountAliasMappingS3URL: ''
-          CreateMetaDataSource: 'No'
-          MetaDataSourceName: ""
-          MetaDataSourceCategory: ""
-          CreateCloudWatchMetricsSource: 'No'
-          CloudWatchMetricsSourceName: 'cloudwatch-metrics-<REGION>'
-          CloudWatchMetricsNameSpaces: "AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SQS, AWS/SNS"
-          ScanInterval: "300000"
-          CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
-          CreateKinesisFirehoseMetricsSource: 'Yes'
-          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
-          KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
           CreateALBLogSource: 'Yes'
           CreateALBS3Bucket: 'Yes'
           ALBS3LogsBucketName: ""
-          ALBS3BucketPathExpression: '/elasticloadbalancing/<REGION>/*'
           ALBLogsSourceName: "alb-logs-<REGION>"
           ALBLogsSourceCategory: "aws/observability/alb/logs"
           CreateELBLogSource: 'Yes'
           CreateELBS3Bucket: 'Yes'
           ELBS3LogsBucketName: ""
-          ELBS3BucketPathExpression: 'classicloadbalancing/AWSLogs/'
           ELBLogsSourceName: "classic-lb-logs-<REGION>"
           ELBLogsSourceCategory: "aws/observability/clb/logs"
           CreateCloudTrailLogSource: 'Yes'
           CreateCloudTrailBucket: 'Yes'
           CloudTrailLogsBucketName: ""
-          CloudTrailBucketPathExpression: '/CloudTrail/<REGION>/*'
           CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
           CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
-          CreateCloudWatchLogSource: 'No'
+          CreateCloudWatchMetricsSource: 'Yes'
+          CloudWatchMetricsSourceName: 'cloudwatch-metrics-<REGION>'
+          CloudWatchMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
+          CreateCloudWatchLogSource: 'Yes'
           CloudWatchLogsSourceName: "cloudwatch-logs-<REGION>"
           CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
-          CreateKinesisFirehoseLogSource: 'Yes'
-          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-<REGION>'
-          KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
-        CreateCommonResources.KinesisFirehoseMetricsStack:
-          Section2aCreateS3Bucket: 'No'
-          Section1bNamespaceFilter: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SQS, AWS/SNS'
-        CreateCommonResources.KinesisFirehoseLogsStack:
-          Section2aCreateS3Bucket: 'No'
+          CreateKinesisFirehoseMetricsSource: 'No'
+          CreateKinesisFirehoseLogSource: 'No'
         AutoEnableOptions:
           ALBAutoEnableS3Logs: 'Yes'
           ALBAutoEnableS3LogsOptions: "Both"
@@ -199,11 +179,8 @@ TestCase:
           ELBAutoEnableS3LogsOptions: "Both"
           ELBS3LogsBucketName: 'aws-observability-logs'
           AutoSubscribeLogGroups: 'Yes'
-          AutoSubscribeLogGroupsLambdaOptions: 'Both'
-          AutoSubscribeDestinationARNType: 'Kinesis'
-          AutoSubscribeDestinationARNValue: "arn:<AWS_PARTITION>:firehose:"
-          AutoSubscribeLogGroupPattern: '\/aws\/(lambda|apigateway|rds)'
-          AutoSubscribeRoleArn: "arn:<AWS_PARTITION>:iam::"
+          AutoSubscribeLogGroupsOptions: 'Both'
+          AutoSubscribeDestinationARNType: 'Lambda'
         AutoEnableOptions.AutoEnableS3LogsAlbStack:
           BucketName: 'aws-observability-logs'
           AutoEnableResourceOptions: 'Both'
@@ -212,7 +189,4 @@ TestCase:
           AutoEnableResourceOptions: 'Both'
         AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources:
           UseExistingLogs: 'true'
-          DestinationArnType: 'Kinesis'
-          DestinationArnValue: "arn:<AWS_PARTITION>:firehose:"
-          LogGroupPattern: '\/aws\/(lambda|apigateway|rds)'
-          RoleArn: "arn:<AWS_PARTITION>:iam::"
+          DestinationArnType: 'Lambda'

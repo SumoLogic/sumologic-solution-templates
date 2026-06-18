@@ -1,0 +1,37 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/utilities/permissionchecker/permissioncheck.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default: {}
+TestCase:
+  TestName: permissionChecker
+  Regions: '${SUMO_REGIONS}'
+  Skip: true
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - PermissionStack
+          - LambdaRole
+          - DeleteCFNLambda
+          - Primerinvoke
+          - PermissionStack.LambdaRole
+          - PermissionStack.LambdaHelper
+          - PermissionStack.AccountCheck
+          - PermissionStack.CommonBucketSNSTopic
+          - PermissionStack.CommonS3Bucket
+          - PermissionStack.CommonBucketPolicyForOldRegion
+          - PermissionStack.CommonBucketPolicyForOldRegion.CommonBucketPolicy
+          - PermissionStack.CommonBucketPolicyForOldRegion.CommonCloudTrail
+          - PermissionStack.CommonSNSpolicy
+          - PermissionStack.SumoLogicSourceRole
+          - PermissionStack.SumoLogicHostedCollector
+          - PermissionStack.Primerinvoke
