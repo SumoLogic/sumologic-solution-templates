@@ -5,7 +5,9 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: "test-automation-awso-<RandomString>"
+      BucketName: !Sub
+        - "test-automation-awso-${UniqueId}"
+        - UniqueId: !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]
 
 Outputs:
   BucketName:

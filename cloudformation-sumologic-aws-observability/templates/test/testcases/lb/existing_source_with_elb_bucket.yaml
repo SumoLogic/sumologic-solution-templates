@@ -14,10 +14,10 @@ TestCase:
     - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
       ImpactedParametersPath:
         BucketName:
-          - "parameters.Section5dALBS3LogsBucketName"
-          - "assertions[AssertType==ParameterCheck].Assert.CreateCommonResources.ALBS3LogsBucketName"
-          - "assertions[AssertType==ParameterCheck].Assert.AutoEnableOptions.ALBS3LogsBucketName"
-          - "assertions[AssertType==ParameterCheck].Assert['AutoEnableOptions#AutoEnableS3LogsAlbStack'].BucketName"
+          - "parameters.Section8dELBS3LogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert.CreateCommonResources.ELBS3LogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert.AutoEnableOptions.ELBS3LogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert['AutoEnableOptions#AutoEnableS3LogsElbStack'].BucketName"
     - CFNTemplateURL: "test/setup-infra/create_sumo_lambda_hepler.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -68,14 +68,15 @@ TestCase:
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'None'
       Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
-      Section5aAutoEnableS3LogsALBResourcesOptions: 'Existing'
-      Section5bALBCreateLogSource: 'Yes'
-      Section5dALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
-      Section5eALBS3BucketPathExpression: '*abc*'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
+      Section5bALBCreateLogSource: 'No'
       Section6aCreateCloudTrailLogSource: 'Yes'
       Section7aCreateCloudWatchLogsSourceOptions: 'None'
       Section7bCloudWatchLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511499202'
-      Section8bELBCreateLogSource: 'No'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'Existing'
+      Section8bELBCreateLogSource: 'Yes'
+      Section8dELBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
+      Section8eELBS3BucketPathExpression: '*abc*'
   Assertions:
     - AssertType: ResourceExistence
       Assert:
@@ -86,7 +87,7 @@ TestCase:
           - TelemetryLambda
           - CreateCommonResources
           - AutoEnableOptions
-          - CreateCommonResources.SumoLogicALBS3Policy
+          - CreateCommonResources.SumoLogicELBS3Policy
           - CreateCommonResources.SumoLogicCloudTrailS3Policy
           - CreateCommonResources.LambdaRole
           - CreateCommonResources.LambdaHelper
@@ -101,17 +102,17 @@ TestCase:
           - CreateCommonResources.SumoLogicHostedCollector
           - CreateCommonResources.LambdaToDecideCWMetricsSources
           - CreateCommonResources.Primerinvoke
-          - CreateCommonResources.ALBSource
-          - CreateCommonResources.ALBSNSSubscription
+          - CreateCommonResources.ELBSource
+          - CreateCommonResources.ELBSNSSubscription
           - CreateCommonResources.CloudTrailSource
           - CreateCommonResources.CloudTrailSNSSubscription
           - CreateCommonResources.AccountAliasValue
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack.ExistingAWSResources
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack.SumoLambdaRole
+          - AutoEnableOptions.AutoEnableS3LogsElbStack
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableExisitngAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.ExistingAWSResources
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.SumoLambdaRole
     - AssertType: OutputsCheck
       Assert:
         Outputs:
@@ -121,7 +122,7 @@ TestCase:
           - CreateCommonResources.Namespaces
           - CreateCommonResources.LambdaRoleARN
           - CreateCommonResources.BucketName
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableExisitngAWSResourcesLambda
           - CreateCommonResources.CollectorName
           - CreateCommonResources.AccountAlias
     - AssertType: ParameterCheck
@@ -137,12 +138,13 @@ TestCase:
           CloudWatchMetricsNameSpaces: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
           ScanInterval: "300000"
           CloudWatchMetricSourceCategory: ""
-          CreateALBLogSource: 'Yes'
-          CreateALBS3Bucket: 'No'
-          ALBS3LogsBucketName: "cf-templates-qpf3unpuo1hw-ap-southeast-4"
-          ALBS3BucketPathExpression: '/elasticloadbalancing/<REGION>/*'
-          ALBLogsSourceName: "alb-logs-<REGION>"
-          ALBLogsSourceCategory: "aws/observability/alb/logs"
+          CreateALBLogSource: 'No'
+          CreateELBLogSource: 'Yes'
+          CreateELBS3Bucket: 'No'
+          ELBS3LogsBucketName: "cf-templates-qpf3unpuo1hw-ap-southeast-4"
+          ELBS3BucketPathExpression: '/elasticloadbalancing/<REGION>/*'
+          ELBLogsSourceName: "classic-lb-logs-<REGION>"
+          ELBLogsSourceCategory: "aws/observability/clb/logs"
           CreateCloudTrailLogSource: 'Yes'
           CreateCloudTrailBucket: 'Yes'
           CloudTrailLogsBucketName: ""
@@ -159,9 +161,9 @@ TestCase:
           KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
         AutoEnableOptions:
-          ALBAutoEnableS3Logs: 'Yes'
-          ALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
+          ELBAutoEnableS3Logs: 'Yes'
+          ELBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
           AutoSubscribeLogGroups: 'No'
-        AutoEnableOptions.AutoEnableS3LogsAlbStack:
+        AutoEnableOptions.AutoEnableS3LogsElbStack:
           BucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
           AutoEnableResourceOptions: 'Existing'
