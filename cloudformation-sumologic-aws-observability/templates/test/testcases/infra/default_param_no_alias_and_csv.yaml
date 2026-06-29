@@ -11,6 +11,72 @@ TestCase:
   TestName: defaultParamNoAliasAndCSV
   Regions: '${SUMO_REGIONS}'
   Skip: false
+
+  PreRequisitesInfra:
+    # Create "existing" ALB (simulates ALB already in the account before AWSO deploys)
+    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
+    # Create "existing" ELB (simulates ELB already in the account before AWSO deploys)
+    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      ImpactedParametersPath:
+        ElbName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
+        ElbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
+    # Create "existing" CloudWatch Log Groups (AWSO auto-subscribes based on Section7d/Section7e)
+    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+      ImpactedParametersPath:
+        LogGroupByPatternName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Name"
+        LogGroupByPatternArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Arn"
+        LogGroupByTagsName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#1'].Name"
+        LogGroupByTagsArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#1'].Arn"
+        LogGroupBothName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#2'].Name"
+        LogGroupBothArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#2'].Arn"
+
+  PostRequisitesInfra:
+    # Create "new" ALB (triggers AWSO's EventBridge rule -> Lambda -> auto-enable access logs)
+    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      WaitSeconds: 60
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].DnsName"
+    # Create "new" ELB (triggers AWSO's EventBridge rule -> Lambda -> auto-enable access logs)
+    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      WaitSeconds: 60
+      ImpactedParametersPath:
+        ElbName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].Name"
+        ElbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].DnsName"
+    # Create "new" CloudWatch Log Groups (triggers AWSO's EventBridge -> Lambda -> auto-subscribe based on Section7d/Section7e)
+    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+      WaitSeconds: 60
+      ImpactedParametersPath:
+        LogGroupByPatternName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#0'].Name"
+        LogGroupByPatternArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#0'].Arn"
+        LogGroupByTagsName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#1'].Name"
+        LogGroupByTagsArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#1'].Arn"
+        LogGroupBothName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#2'].Name"
+        LogGroupBothArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#2'].Arn"
+
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -20,8 +86,11 @@ TestCase:
       Section2aAccountAlias: 'infrat1'
       Section2bAccountAliasMappingS3URL: ''
       Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SQS, AWS/SNS, AWS/EC2'
+  AssertionsSkip: false
   Assertions:
+    # --- HEALTH PHASE (run BEFORE PostRequisitesInfra) ---
     - AssertType: ResourceExistence
+      Skip: false
       Assert:
         Resources:
           - LambdaRole
@@ -53,8 +122,11 @@ TestCase:
           - CreateCommonResources.CommonS3Bucket
           - CreateCommonResources.CommonBucketPolicyForOldRegion
           - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonBucketPolicy
-          - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonCloudTrail
+          - CreateCommonResources.CommonBucketPolicyForNewRegion
+          - CreateCommonResources.CommonBucketPolicyForNewRegion.CommonBucketPolicy
+          - CreateCommonResources.CommonBucketPolicyForNewRegion.CommonCloudTrail
+          - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole
           - CreateCommonResources.SumoLogicHostedCollector
           - CreateCommonResources.LambdaToDecideCWMetricsSources
@@ -121,6 +193,7 @@ TestCase:
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
     - AssertType: OutputsCheck
+      Skip: false
       Assert:
         Outputs:
           - CreateCommonResources.LambdaHelperARN
@@ -147,6 +220,7 @@ TestCase:
           - CreateCommonResources.AccountAlias
           - CreateCommonResources.CollectorName
     - AssertType: ParameterCheck
+      Skip: false
       Assert:
         CreateCommonResources:
           AccountAlias: "infrat1"
@@ -216,3 +290,91 @@ TestCase:
           DestinationArnValue: "arn:<AWS_PARTITION>:firehose:"
           LogGroupPattern: '\/aws\/(lambda|apigateway|rds)'
           RoleArn: "arn:<AWS_PARTITION>:iam::"
+    # --- E2E PHASE (run AFTER PostRequisitesInfra) ---
+    # Order optimized: fast gates first, data generation, then data verification last
+    - AssertType: SumoSourceExistenceValidation
+      Skip: false
+      Assert:
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+
+    - AssertType: SumoAppInstallationValidation
+      Skip: false
+      Assert:
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+
+    - AssertType: AWSResourceValidation
+      Skip: false
+      Assert:
+        ALB:
+          LoadBalancers:
+            - Arn: ""
+              DnsName: ""
+            - Arn: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 120
+          S3LogCheckTimeoutSeconds: 600
+        ELB:
+          LoadBalancers:
+            - Name: ""
+              DnsName: ""
+            - Name: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 120
+          S3LogCheckTimeoutSeconds: 600
+        CloudWatchLogGroups:
+          # Validation reads Section7d/Section7e from stack parameters to decide which to validate:
+          #   Section7d (pattern) only → validates LogGroupByPattern + LogGroupBoth
+          #   Section7e (tags) only    → validates LogGroupByTags + LogGroupBoth
+          #   Both Section7d + Section7e → validates all three
+          ExpectedDestinationArn: ""
+          LogEventCount: 10
+          ExistingLogGroups:
+            - Name: ""
+              Arn: ""
+              Type: "ByPattern"
+            - Name: ""
+              Arn: ""
+              Type: "ByTags"
+            - Name: ""
+              Arn: ""
+              Type: "Both"
+          NewLogGroups:
+            - Name: ""
+              Arn: ""
+              Type: "ByPattern"
+            - Name: ""
+              Arn: ""
+              Type: "ByTags"
+            - Name: ""
+              Arn: ""
+              Type: "Both"
+          SubscriptionCheckTimeoutSeconds: 120
+
+    - AssertType: SumoSourceLogsValidation
+      Skip: false
+      Assert:
+        SourceQueryFilters:
+          CloudtrailSourceQueries:
+            - AppendQuery: "| where eventSource=\"lambda.amazonaws.com\""
+            - AppendQuery: "| where eventSource=\"elasticloadbalancing.amazonaws.com\" \"2015-12-01\""
+            - AppendQuery: "| where eventSource=\"elasticloadbalancing.amazonaws.com\" \"2012-06-01\""
+          KinesisFirehoseLogsSourceQueries:
+            - AppendQuery: "| where namespace=\"aws/lambda\""
+          KinesisFirehoseMetricsSourceQueries:
+            - AppendQuery: "namespace=AWS/ApplicationELB"
+            - AppendQuery: "namespace=AWS/ELB"
+            - AppendQuery: "namespace=AWS/Lambda"
+            - AppendQuery: "namespace=AWS/EC2"
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+        TimeoutSeconds: 600
+        TimeRangeMinutes: 60
+
+
