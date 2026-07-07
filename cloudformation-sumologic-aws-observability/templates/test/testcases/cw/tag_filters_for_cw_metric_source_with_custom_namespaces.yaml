@@ -1,0 +1,259 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+      Section2aAccountAlias: 'infrat11'
+TestCase:
+  TestName: tagFiltersForCWMetricSourceWithCustomNamespaces
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  PreRequisitesInfra:
+    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+      ImpactedParametersPath:
+        BucketName:
+          - "parameters.Section6cCloudTrailLogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert.CreateCommonResources.CloudTrailLogsBucketName"
+    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+      ImpactedParametersPath:
+        LogGroupByPatternName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Name"
+        LogGroupByPatternArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Arn"
+        LogGroupByTagsName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#1'].Name"
+        LogGroupByTagsArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#1'].Arn"
+        LogGroupBothName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#2'].Name"
+        LogGroupBothArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#2'].Arn"
+
+  PostRequisitesInfra:
+    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+      WaitSeconds: 30
+      ImpactedParametersPath:
+        LogGroupByPatternName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#0'].Name"
+        LogGroupByPatternArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#0'].Arn"
+        LogGroupByTagsName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#1'].Name"
+        LogGroupByTagsArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#1'].Arn"
+        LogGroupBothName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#2'].Name"
+        LogGroupBothArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#2'].Arn"
+
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+      Section2aAccountAlias: 'infrat11'
+      Section2bAccountAliasMappingS3URL: ''
+      Section3aInstallObservabilityApps: 'No'
+      Section4aCreateMetricsSourceOptions: 'CloudWatch Metrics Source'
+      Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SNS, AWS/SQS, cwgent'
+      Section4dAWSMetricsTagFilters: '{ "AWS/ApiGateway": { "tags": [ "env=prod;dev" ] }, "AWS/DynamoDB": { "tags": [ "env=dev", "creator=himan" , "creator=aki" ] }, "AWS/ElastiCache": { "tags": [ "env=prod;dev", "creator=himan" ] }, "All": { "tags": [ "env=dev" ] } }'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
+      Section5bALBCreateLogSource: 'Yes'
+      Section6aCreateCloudTrailLogSource: 'Yes'
+      Section6cCloudTrailLogsBucketName: 'cf-templates-1qpf3unpuo1hw-<REGION>'
+      Section6dCloudTrailBucketPathExpression: '*abc*'
+      Section7aCreateCloudWatchLogsSourceOptions: 'Lambda Log Forwarder'
+      Section7cAutoSubscribeLogGroupsOptions: 'Both'
+      Section7eAutoSubscribeLogGroupByTags: 'env=prod,creator=himan,team=app'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'None'
+      Section8bELBCreateLogSource: 'Yes'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - LambdaRole
+          - LambdaPermission
+          - PrimerInvoke
+          - TelemetryLambda
+          - CreateCommonResources
+          - AutoEnableOptions
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoCWLambdaInvokePermission
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaEventRule
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.AutoSubscribeCWLogGroupInvokePermission
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorRole
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.InvokeLambdaConnector
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupExistingLambdaConnector
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupExistingLambdaConnectorRole
+          - CreateCommonResources.SumoLogicALBS3Policy
+          - CreateCommonResources.SumoLogicELBS3Policy
+          - CreateCommonResources.SumoLogicCloudTrailS3Policy
+          - CreateCommonResources.LambdaRole
+          - CreateCommonResources.LambdaHelper
+          - CreateCommonResources.AccountCheck
+          - CreateCommonResources.CommonBucketSNSTopic
+          - CreateCommonResources.CommonS3Bucket
+          - CreateCommonResources.CommonBucketPolicyForOldRegion
+          - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonBucketPolicy
+          - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonCloudTrail
+          - CreateCommonResources.CommonBucketPolicyForNewRegion
+          - CreateCommonResources.CommonBucketPolicyForNewRegion.CommonBucketPolicy
+          - CreateCommonResources.CommonBucketPolicyForNewRegion.CommonCloudTrail
+          - CreateCommonResources.CommonSNSpolicy
+          - CreateCommonResources.SumoLogicSourceRole
+          - CreateCommonResources.SumoLogicHostedCollector
+          - CreateCommonResources.LambdaToDecideCWMetricsSources
+          - CreateCommonResources.Primerinvoke
+          - CreateCommonResources.CloudWatchMetricsFirstStack
+          - CreateCommonResources.CloudWatchMetricsSecondStack
+          - CreateCommonResources.CloudWatchMetricsThirdStack
+          - CreateCommonResources.CloudWatchMetricsFirstStack.CustomCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsThirdStack.FirstCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsThirdStack.SecondCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsFirstStack.SecondCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsFirstStack.ThirdCloudwatchMetricsSource
+          - CreateCommonResources.CloudWatchMetricsSecondStack.SecondCloudwatchMetricsSource
+          - CreateCommonResources.ALBSource
+          - CreateCommonResources.ALBSNSSubscription
+          - CreateCommonResources.ELBSource
+          - CreateCommonResources.ELBSNSSubscription
+          - CreateCommonResources.CloudTrailSource
+          - CreateCommonResources.CloudTrailSNSSubscription
+          - CreateCommonResources.CloudTrailSNSTopic
+          - CreateCommonResources.CloudTrailSNSpolicy
+          - CreateCommonResources.CloudWatchEventFunction
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWDeadLetterQueue
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWEmailSNSTopic
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWEventsInvokeLambdaPermission
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaExecutionRole
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaPermission
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogGroup
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogSubsriptionFilter
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambda
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQLambda
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWSpilloverAlarm
+          - CreateCommonResources.CloudWatchHTTPSource
+          - CreateCommonResources.AccountAliasValue
+          - CreateCommonResources.LambdaHelperAlias
+          - CreateCommonResources.LambdaRoleAlias
+    - AssertType: OutputsCheck
+      Assert:
+        Outputs:
+          - CreateCommonResources.LambdaHelperARN
+          - CreateCommonResources.EnterpriseCheck
+          - CreateCommonResources.PaidAccountCheck
+          - CreateCommonResources.Namespaces
+          - CreateCommonResources.LambdaRoleARN
+          - CreateCommonResources.BucketName
+          - CreateCommonResources.CollectorName
+          - CreateCommonResources.AccountAlias
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
+          - CreateCommonResources.CloudWatchLambdaARN
+          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambdaArn
+    - AssertType: ParameterCheck
+      Assert:
+        CreateCommonResources:
+          AccountAlias: "infrat11"
+          AccountAliasMappingS3URL: ""
+          CreateMetaDataSource: 'No'
+          MetaDataSourceName: ""
+          MetaDataSourceCategory: ""
+          CreateCloudWatchMetricsSource: 'Yes'
+          CloudWatchMetricsSourceName: 'cloudwatch-metrics-<REGION>'
+          CloudWatchMetricsNameSpaces: "AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache"
+          ScanInterval: "300000"
+          CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
+          CreateALBLogSource: 'Yes'
+          CreateALBS3Bucket: 'Yes'
+          ALBS3LogsBucketName: ""
+          ALBS3BucketPathExpression: '*AWSLogs/*/elasticloadbalancing/*'
+          ALBLogsSourceName: "alb-logs-<REGION>"
+          ALBLogsSourceCategory: "aws/observability/alb/logs"
+          CreateELBLogSource: 'Yes'
+          CreateELBS3Bucket: 'Yes'
+          ELBS3LogsBucketName: ""
+          ELBS3BucketPathExpression: 'classicloadbalancing/AWSLogs/'
+          ELBLogsSourceName: "classic-lb-logs-<REGION>"
+          ELBLogsSourceCategory: "aws/observability/clb/logs"
+          CreateCloudTrailLogSource: 'Yes'
+          CreateCloudTrailBucket: 'No'
+          CloudTrailLogsBucketName: "cf-templates-1qpf3unpuo1hw-<REGION>"
+          CloudTrailBucketPathExpression: '*abc*'
+          CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
+          CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
+          CreateCloudWatchLogSource: 'Yes'
+          CloudWatchLogsSourceName: "cloudwatch-logs-<REGION>"
+          CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
+          CreateKinesisFirehoseLogSource: 'No'
+          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-<REGION>'
+          KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
+          CreateKinesisFirehoseMetricsSource: 'No'
+          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
+          KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
+        AutoEnableOptions:
+          AutoSubscribeLogGroups: 'Yes'
+          AutoSubscribeLogGroupsLambdaOptions: 'Both'
+          AutoSubscribeDestinationARNType: 'Lambda'
+          AutoSubscribeLogGroupPattern: '\/aws\/(lambda|apigateway|rds)'
+        AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources:
+          UseExistingLogs: 'true'
+          DestinationArnType: 'Lambda'
+          LogGroupPattern: '\/aws\/(lambda|apigateway|rds)'
+          RoleArn: ""
+    # --- E2E PHASE ---
+    - AssertType: SumoSourceExistenceValidation
+      Skip: false
+      Assert:
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+
+    - AssertType: AWSResourceValidation
+      Skip: false
+      Assert:
+        CloudWatchLogGroups:
+          ExpectedDestinationArn: ""
+          LogEventCount: 10
+          ExistingLogGroups:
+            - Name: ""
+              Arn: ""
+              Type: "ByPattern"
+            - Name: ""
+              Arn: ""
+              Type: "ByTags"
+            - Name: ""
+              Arn: ""
+              Type: "Both"
+          NewLogGroups:
+            - Name: ""
+              Arn: ""
+              Type: "ByPattern"
+            - Name: ""
+              Arn: ""
+              Type: "ByTags"
+            - Name: ""
+              Arn: ""
+              Type: "Both"
+          SubscriptionCheckTimeoutSeconds: 120
+
+    - AssertType: SumoSourceLogsValidation
+      Skip: false
+      Assert:
+        SourceQueryFilters:
+          CloudtrailSourceQueries:
+            - AppendQuery: "| json auto | where eventSource=\"lambda.amazonaws.com\""
+          CloudWatchMetricsSourceQueries:
+            - AppendQuery: "namespace=AWS/EC2"
+            - AppendQuery: "namespace=cwgent"
+          CloudWatchLogsSourceQueries:
+            - AppendQuery: "| json auto | where _raw matches \"*lambda*\""
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+        TimeoutSeconds: 600

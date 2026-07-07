@@ -1,0 +1,68 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'false'
+      Section2aAccountAlias: 's3ret'
+TestCase:
+  TestName: s3BucketRetention
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'false'
+      Section2aAccountAlias: 's3ret'
+      Section2bAccountAliasMappingS3URL: ''
+      Section3aInstallObservabilityApps: 'No'
+      Section4aCreateMetricsSourceOptions: 'None'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
+      Section5bALBCreateLogSource: 'Yes'
+      Section6aCreateCloudTrailLogSource: 'Yes'
+      Section7aCreateCloudWatchLogsSourceOptions: 'None'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'None'
+      Section8bELBCreateLogSource: 'No'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - LambdaRole
+          - LambdaPermission
+          - PrimerInvoke
+          - TelemetryLambda
+          - CreateCommonResources
+          - CreateCommonResources.LambdaRole
+          - CreateCommonResources.LambdaHelper
+          - CreateCommonResources.AccountCheck
+          - CreateCommonResources.CommonBucketSNSTopic
+          - CreateCommonResources.CommonS3Bucket
+          - CreateCommonResources.CommonBucketPolicyForOldRegion
+          - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonBucketPolicy
+          - CreateCommonResources.CommonBucketPolicyForNewRegion
+          - CreateCommonResources.CommonBucketPolicyForNewRegion.CommonBucketPolicy
+          - CreateCommonResources.CommonBucketPolicyForNewRegion.CommonCloudTrail
+          - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonCloudTrail
+          - CreateCommonResources.CommonSNSpolicy
+          - CreateCommonResources.SumoLogicSourceRole
+          - CreateCommonResources.SumoLogicHostedCollector
+          - CreateCommonResources.LambdaToDecideCWMetricsSources
+          - CreateCommonResources.Primerinvoke
+          - CreateCommonResources.ALBSource
+          - CreateCommonResources.ALBSNSSubscription
+          - CreateCommonResources.CloudTrailSource
+          - CreateCommonResources.CloudTrailSNSSubscription
+          - CreateCommonResources.SumoLogicALBS3Policy
+          - CreateCommonResources.SumoLogicCloudTrailS3Policy
+          - CreateCommonResources.AccountAliasValue
+          - CreateCommonResources.LambdaHelperAlias
+          - CreateCommonResources.LambdaRoleAlias
+    - AssertType: AWSPreservedValidation
+      Assert:
+        BucketsRetained:
+          - 'aws-observability-logs*'

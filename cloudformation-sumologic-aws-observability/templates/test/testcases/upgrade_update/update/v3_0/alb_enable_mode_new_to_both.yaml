@@ -1,0 +1,261 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+    Update: {}
+TestCase:
+  TestName: albEnableModeNewToBoth
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  PreRequisitesInfra:
+    # Create "existing" ALB before initial deploy — picked up by EnableExistingAWSResources Lambda after update
+    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
+  PostRequisitesInfra:
+    # Create "new" ALB after update — triggers EventBridge rule -> EnableNewAWSResources Lambda
+    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      WaitSeconds: 30
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].DnsName"
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+      Section2aAccountAlias: 'updateab'
+      Section2bAccountAliasMappingS3URL: ''
+      Section3aInstallObservabilityApps: 'No'
+      Section4aCreateMetricsSourceOptions: 'Kinesis Firehose Metrics Source'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'New'
+      Section5bALBCreateLogSource: 'Yes'
+      Section6aCreateCloudTrailLogSource: 'Yes'
+      Section7aCreateCloudWatchLogsSourceOptions: 'Kinesis Firehose Log Source'
+      Section7cAutoSubscribeLogGroupsOptions: 'New'
+      Section7eAutoSubscribeLogGroupByTags: 'env=prod,creator=himan,team=app'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'New'
+      Section8bELBCreateLogSource: 'Yes'
+  UpdateParameters:
+    Values:
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'Both'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - LambdaRole
+          - LambdaPermission
+          - PrimerInvoke
+          - TelemetryLambda
+          - CreateCommonResources
+          - AutoEnableOptions
+          - CreateCommonResources.SumoLogicALBS3Policy
+          - CreateCommonResources.SumoLogicELBS3Policy
+          - CreateCommonResources.SumoLogicCloudTrailS3Policy
+          - CreateCommonResources.LambdaRole
+          - CreateCommonResources.LambdaHelper
+          - CreateCommonResources.AccountCheck
+          - CreateCommonResources.CommonBucketSNSTopic
+          - CreateCommonResources.CommonS3Bucket
+          - CreateCommonResources.CommonBucketPolicyForOldRegion
+          - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonBucketPolicy
+          - CreateCommonResources.CommonBucketPolicyForOldRegion.CommonCloudTrail
+          - CreateCommonResources.CommonBucketPolicyForNewRegion
+          - CreateCommonResources.CommonBucketPolicyForNewRegion.CommonBucketPolicy
+          - CreateCommonResources.CommonBucketPolicyForNewRegion.CommonCloudTrail
+          - CreateCommonResources.CommonSNSpolicy
+          - CreateCommonResources.SumoLogicSourceRole
+          - CreateCommonResources.SumoLogicHostedCollector
+          - CreateCommonResources.LambdaToDecideCWMetricsSources
+          - CreateCommonResources.Primerinvoke
+          - CreateCommonResources.KinesisFirehoseMetricsStack
+          - CreateCommonResources.KinesisFirehoseMetricsSource
+          - CreateCommonResources.KinesisFirehoseMetricsStack.AttachBucketPolicyToFirehoseLogsRole
+          - CreateCommonResources.KinesisFirehoseMetricsStack.FirehoseLogsRole
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStream
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStream
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsFirehoseRolePolicy
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogGroup
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogStream
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRole
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambda
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambdaRole
+          - CreateCommonResources.KinesisFirehoseLogsStack
+          - CreateCommonResources.KinesisFirehoseLogsSource
+          - CreateCommonResources.KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
+          - CreateCommonResources.KinesisFirehoseLogsStack.FirehoseLogsRole
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsFirehoseRolePolicy
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogGroup
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogStream
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogStreamS3
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRole
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRolePolicy
+          - CreateCommonResources.KinesisFirehoseLogsStack.SubscriptionFilter
+          - CreateCommonResources.ALBSource
+          - CreateCommonResources.ALBSNSSubscription
+          - CreateCommonResources.ELBSource
+          - CreateCommonResources.ELBSNSSubscription
+          - CreateCommonResources.CloudTrailSource
+          - CreateCommonResources.CloudTrailSNSSubscription
+          - CreateCommonResources.AccountAliasValue
+          - CreateCommonResources.LambdaHelperAlias
+          - CreateCommonResources.LambdaRoleAlias
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.AutoEnableAlbLogEventsInvokePermission
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.AutoEnableAlbLogEventsRuleTrigger
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableNewAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.ExistingAWSResources
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.SumoLambdaRole
+          - AutoEnableOptions.AutoEnableS3LogsElbStack
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.AutoEnableElbLogEventsInvokePermission
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.AutoEnableElbLogEventsRuleTrigger
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableNewAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.SumoLambdaRole
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.InvokeLambdaConnector
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorRole
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.AutoSubscribeCWLogGroupInvokePermission
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaEventRule
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.sumoIAMPassRolePolicy
+    - AssertType: OutputsCheck
+      Assert:
+        Outputs:
+          - CreateCommonResources.LambdaHelperARN
+          - CreateCommonResources.EnterpriseCheck
+          - CreateCommonResources.PaidAccountCheck
+          - CreateCommonResources.Namespaces
+          - CreateCommonResources.LambdaRoleARN
+          - CreateCommonResources.BucketName
+          - CreateCommonResources.KinesisMetricsRoleARN
+          - CreateCommonResources.KinesisMetricsDeliveryStreamARN
+          - CreateCommonResources.KinesisLogsDeliveryStreamARN
+          - CreateCommonResources.KinesisLogsRoleARN
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRoleARN
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStreamARN
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogGroupARN
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogGroupARN
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsDeliveryStreamARN
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRoleARN
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableNewAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableNewAWSResourcesLambda
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
+          - CreateCommonResources.CollectorName
+          - CreateCommonResources.AccountAlias
+    - AssertType: ParameterCheck
+      Assert:
+        CreateCommonResources:
+          AccountAlias: "updateab"
+          AccountAliasMappingS3URL: ""
+          CreateMetaDataSource: 'No'
+          MetaDataSourceName: ""
+          MetaDataSourceCategory: ""
+          CreateCloudWatchMetricsSource: 'No'
+          CloudWatchMetricsSourceName: 'cloudwatch-metrics-<REGION>'
+          CloudWatchMetricsNameSpaces: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2"
+          ScanInterval: "300000"
+          CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
+          CreateKinesisFirehoseMetricsSource: 'Yes'
+          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
+          KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
+          CreateALBLogSource: 'Yes'
+          CreateALBS3Bucket: 'Yes'
+          ALBS3LogsBucketName: ""
+          ALBS3BucketPathExpression: '*AWSLogs/*/elasticloadbalancing/*'
+          ALBLogsSourceName: "alb-logs-<REGION>"
+          ALBLogsSourceCategory: "aws/observability/alb/logs"
+          CreateELBLogSource: 'Yes'
+          CreateELBS3Bucket: 'Yes'
+          ELBS3LogsBucketName: ""
+          ELBS3BucketPathExpression: 'classicloadbalancing/AWSLogs/'
+          ELBLogsSourceName: "classic-lb-logs-<REGION>"
+          ELBLogsSourceCategory: "aws/observability/clb/logs"
+          CreateCloudTrailLogSource: 'Yes'
+          CreateCloudTrailBucket: 'Yes'
+          CloudTrailLogsBucketName: ""
+          CloudTrailBucketPathExpression: '/CloudTrail/<REGION>/*'
+          CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
+          CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
+          CreateCloudWatchLogSource: 'No'
+          CloudWatchLogsSourceName: "cloudwatch-logs-<REGION>"
+          CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
+          CreateKinesisFirehoseLogSource: 'Yes'
+          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-<REGION>'
+          KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
+        CreateCommonResources.KinesisFirehoseMetricsStack:
+          Section2aCreateS3Bucket: 'No'
+          Section1bNamespaceFilter: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB, AWS/SQS, AWS/SNS, AWS/EC2"
+        CreateCommonResources.KinesisFirehoseLogsStack:
+          Section2aCreateS3Bucket: 'No'
+        AutoEnableOptions:
+          ALBAutoEnableS3Logs: 'Yes'
+          ALBAutoEnableS3LogsOptions: "Both"
+          ALBS3LogsBucketName: 'aws-observability-logs'
+          ELBAutoEnableS3Logs: 'Yes'
+          ELBAutoEnableS3LogsOptions: "New"
+          ELBS3LogsBucketName: 'aws-observability-logs'
+          AutoSubscribeLogGroups: 'Yes'
+          AutoSubscribeLogGroupsOptions: 'New'
+          AutoSubscribeDestinationARNType: 'Kinesis'
+          AutoSubscribeDestinationARNValue: 'arn:<AWS_PARTITION>:firehose:'
+          AutoSubscribeRoleArn: "arn:<AWS_PARTITION>:iam::"
+        AutoEnableOptions.AutoEnableS3LogsAlbStack:
+          BucketName: 'aws-observability-logs'
+          AutoEnableResourceOptions: 'Both'
+        AutoEnableOptions.AutoEnableS3LogsElbStack:
+          BucketName: 'aws-observability-logs'
+          AutoEnableResourceOptions: 'New'
+        AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources:
+          UseExistingLogs: 'false'
+          DestinationArnType: 'Kinesis'
+          DestinationArnValue: 'arn:<AWS_PARTITION>:firehose:'
+          RoleArn: "arn:<AWS_PARTITION>:iam::"
+    # --- E2E PHASE (run after update + PostRequisitesInfra) ---
+    - AssertType: SumoSourceExistenceValidation
+      Skip: false
+      Assert:
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+
+    - AssertType: AWSResourceValidation
+      Skip: false
+      Assert:
+        ALB:
+          LoadBalancers:
+            - Arn: ""
+              DnsName: ""
+            - Arn: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 120
+          S3LogCheckTimeoutSeconds: 600
+
+    - AssertType: SumoSourceLogsValidation
+      Skip: false
+      Assert:
+        SourceQueryFilters:
+          CloudtrailSourceQueries:
+            - AppendQuery: "| json auto | where eventSource=\"lambda.amazonaws.com\""
+          KinesisFirehoseMetricsSourceQueries:
+            - AppendQuery: "namespace=AWS/EC2"
+            - AppendQuery: "namespace=AWS/ApplicationELB"
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+        TimeoutSeconds: 600
