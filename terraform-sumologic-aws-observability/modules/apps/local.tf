@@ -1,13 +1,13 @@
 locals {
   installation_apps_list = [
     {
-      uuid       = "b3210735-0917-459e-8d1e-722fee4c22fe"
+      uuid       = "c26c3149-6131-4b97-b250-adf53ad7cd16"
       name       = "Amazon ECS(Without Container Insights and Traces)"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "82ab79f5-3e85-4974-852f-5cb8f8028230"
+      uuid       = "1354f831-1745-447e-91b9-0dd6b32eebec"
       name       = "Amazon ElastiCache"
       version    = "latest"
       parameters = {}
@@ -19,67 +19,67 @@ locals {
       parameters = {}
     },
     {
-      uuid       = "c32ad59b-ee10-4cd1-8369-3639e8457b1f"
+      uuid       = "30519e43-1a92-482c-be08-deaaf09c88b6"
       name       = "Amazon RDS"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "9c203dfb-6088-4a76-b12e-cc3a78ce0df5"
+      uuid       = "7590a039-5935-47ff-87ea-bc0970e6e96a"
       name       = "Amazon SNS"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "8b57f601-c163-4481-8ae7-d6e212516506"
+      uuid       = "dea50b70-dc1f-406d-884d-3945214861ae"
       name       = "Amazon SQS"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "f1dfe2ea-ee27-4a74-972c-560424b9cb5c"
+      uuid       = "9b952ef9-7a20-44e4-861a-25f9124846ff"
       name       = "AWS API Gateway"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "27a17946-e475-4d56-8a8f-bc3fbc0400ca"
+      uuid       = "8ae2e0f4-cb4f-476b-ba9c-ee84bbab471b"
       name       = "AWS Application Load Balancer"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "fb7a2e22-006c-40ea-945c-e73b6b369e7c"
+      uuid       = "f113016e-4d15-4f4e-a254-4510a995f525"
       name       = "AWS Classic Load Balancer"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "092203f6-9443-47ca-b2b5-6a4c25e8c14c"
+      uuid       = "7d9b9d0b-0a1f-4af9-9edd-889c2190024b"
       name       = "AWS DynamoDB"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "f14714b5-6e86-40e7-aa6c-970e9182c0be"
+      uuid       = "3dcaacb4-a5de-4e57-a477-fccd04f9e40f"
       name       = "AWS EC2"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "d71cb5f7-bf92-4fac-984f-33fdaea856f7"
+      uuid       = "a542409f-c491-404f-9a63-7078fcc945e2"
       name       = "AWS Lambda"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "5a6e7695-94a9-4548-a44a-054d4e793432"
+      uuid       = "3f59d805-e2a8-4e0d-ae90-d40f0eb63671"
       name       = "AWS Network Load Balancer"
       version    = "latest"
       parameters = {}
     },
     {
-      uuid       = "149c19d7-de3a-483b-a1a7-bbd825916548"
+      uuid       = "5ebe888f-43f0-4021-9225-fd5360e58ca4"
       name       = "Host Metrics (EC2)"
       version    = "latest"
       parameters = {}

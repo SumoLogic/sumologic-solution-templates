@@ -18,8 +18,8 @@ module "collection-module" {
   source = "./modules/collections"
 
   providers = {
-    aws                     = aws
-    lambda-invoke-extension = lambda-invoke-extension
+    aws       = aws
+    sumologic = sumologic
   }
 
   aws_account_alias         = var.aws_account_alias

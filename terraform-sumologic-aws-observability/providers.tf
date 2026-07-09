@@ -13,7 +13,3 @@ provider "aws" {
   #   alias   = "production-us-east-1"
   #   profile = "<AWS CLI profile name>"
 }
-
-provider "lambda-invoke-extension" {
-  region = "us-east-1"
-}
