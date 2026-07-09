@@ -74,7 +74,7 @@ See the [`examples/`](./examples) directory for complete working configurations.
 |------|---------|
 | terraform | >= 1.5.7 |
 | aws | >= 5.16.2, < 7.0.0 |
-| sumologic | >= 2.31.3, < 4.0.0 |
+| sumologic | >= 3.2.9, < 4.0.0 |
 | time | >= 0.11.1 |
 | random | >= 3.1.0 |
 
@@ -82,7 +82,7 @@ See the [`examples/`](./examples) directory for complete working configurations.
 
 | Name | Version |
 |------|---------|
-| [sumologic](https://registry.terraform.io/providers/SumoLogic/sumologic/latest) | >= 2.31.3, < 4.0.0 |
+| [sumologic](https://registry.terraform.io/providers/SumoLogic/sumologic/latest) | >= 3.2.9, < 4.0.0 |
 | [aws](https://registry.terraform.io/providers/hashicorp/aws/latest) | >= 5.16.2, < 7.0.0 |
 | [time](https://registry.terraform.io/providers/hashicorp/time/latest) | >= 0.11.1 |
 
