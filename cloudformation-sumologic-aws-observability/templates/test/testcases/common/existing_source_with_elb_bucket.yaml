@@ -57,6 +57,13 @@ TestCase:
       ImpactedParametersPath:
         SumoCloudWatchMetricsAPIURL:
           - "parameters.Section4cCloudWatchExistingSourceAPIUrl"
+    # Create "existing" ELB (AWSO Existing Lambda enables access logs on it at deploy time)
+    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      ImpactedParametersPath:
+        ElbName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
+        ElbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -172,3 +179,21 @@ TestCase:
         AutoEnableOptions.AutoEnableS3LogsElbStack:
           BucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
           AutoEnableResourceOptions: 'Existing'
+    # --- E2E PHASE ---
+    - AssertType: SumoSourceExistenceValidation
+      Skip: false
+      Assert:
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+
+    - AssertType: AWSResourceValidation
+      Skip: false
+      Assert:
+        ELB:
+          LoadBalancers:
+            - Name: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 120
+          S3LogCheckTimeoutSeconds: 600

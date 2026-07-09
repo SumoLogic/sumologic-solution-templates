@@ -44,7 +44,6 @@ TestCase:
           - AutoEnableOptions
           - CreateCommonResources.SumoLogicALBS3Policy
           - CreateCommonResources.SumoLogicELBS3Policy
-          - CreateCommonResources.SumoLogicCloudTrailS3Policy
           - CreateCommonResources.LambdaRole
           - CreateCommonResources.LambdaHelper
           - CreateCommonResources.AccountCheck
@@ -91,8 +90,6 @@ TestCase:
           - CreateCommonResources.ALBSNSSubscription
           - CreateCommonResources.ELBSource
           - CreateCommonResources.ELBSNSSubscription
-          - CreateCommonResources.CloudTrailSource
-          - CreateCommonResources.CloudTrailSNSSubscription
           - CreateCommonResources.AccountAliasValue
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
@@ -107,7 +104,6 @@ TestCase:
           - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableNewAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsElbStack.SumoLambdaRole
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources
-          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.InvokeLambdaConnector
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorRole
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.AutoSubscribeCWLogGroupInvokePermission
@@ -156,7 +152,7 @@ TestCase:
           CreateALBLogSource: 'Yes'
           CreateALBS3Bucket: 'Yes'
           ALBS3LogsBucketName: ""
-          ALBS3BucketPathExpression: '*AWSLogs/*/elasticloadbalancing/*'
+          ALBS3BucketPathExpression: '/elasticloadbalancing/<REGION>/*'
           ALBLogsSourceName: "alb-logs-<REGION>"
           ALBLogsSourceCategory: "aws/observability/alb/logs"
           CreateELBLogSource: 'Yes'
@@ -165,10 +161,10 @@ TestCase:
           ELBS3BucketPathExpression: 'classicloadbalancing/AWSLogs/'
           ELBLogsSourceName: "classic-lb-logs-<REGION>"
           ELBLogsSourceCategory: "aws/observability/clb/logs"
-          CreateCloudTrailLogSource: 'Yes'
-          CreateCloudTrailBucket: 'Yes'
+          CreateCloudTrailLogSource: 'No'
+          CreateCloudTrailBucket: 'No'
           CloudTrailLogsBucketName: ""
-          CloudTrailBucketPathExpression: '/CloudTrail/<REGION>/*'
+          CloudTrailBucketPathExpression: 'AWSLogs/*/CloudTrail/*'
           CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
           CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
           CreateCloudWatchLogSource: 'No'

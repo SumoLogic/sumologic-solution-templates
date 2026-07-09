@@ -59,7 +59,7 @@ TestCase:
       Section2bAccountAliasMappingS3URL: ''
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'CloudWatch Metrics Source'
-      Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SNS, AWS/SQS, cwgent'
+      Section4bMetricsNameSpaces: 'AWS/Lambda'
       Section4dAWSMetricsTagFilters: '{ "AWS/ApiGateway": { "tags": [ "env=prod;dev" ] }, "AWS/DynamoDB": { "tags": [ "env=dev", "creator=himan" , "creator=aki" ] }, "AWS/ElastiCache": { "tags": [ "env=prod;dev", "creator=himan" ] }, "All": { "tags": [ "env=dev" ] } }'
       Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
       Section5bALBCreateLogSource: 'Yes'
@@ -249,8 +249,7 @@ TestCase:
           CloudtrailSourceQueries:
             - AppendQuery: "| json auto | where eventSource=\"lambda.amazonaws.com\""
           CloudWatchMetricsSourceQueries:
-            - AppendQuery: "namespace=AWS/EC2"
-            - AppendQuery: "namespace=cwgent"
+            - AppendQuery: "namespace=AWS/Lambda"
           CloudWatchLogsSourceQueries:
             - AppendQuery: "| json auto | where _raw matches \"*lambda*\""
         AccessId: "${SUMO_ACCESS_ID}"

@@ -548,6 +548,13 @@ Resources:
   SecretsRetrievalFunction:
     Type: "AWS::Lambda::Function"
     Condition: SecretNameProvided
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W89
+            reason: "Lambda function does not require VPC deployment."
+          - id: W92
+            reason: "Lambda function does not require reserved concurrency."
     Properties:
       Description: "A function to retrieve secrets from a provided secrets arn."
       Role: !GetAtt LambdaExecutionRoleSecretsRetrieval.Arn

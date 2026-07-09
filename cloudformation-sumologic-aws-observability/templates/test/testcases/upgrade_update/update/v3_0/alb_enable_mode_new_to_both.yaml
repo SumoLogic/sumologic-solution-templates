@@ -116,9 +116,7 @@ TestCase:
           - AutoEnableOptions.AutoEnableS3LogsAlbStack
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.AutoEnableAlbLogEventsInvokePermission
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.AutoEnableAlbLogEventsRuleTrigger
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableNewAWSResourcesLambda
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack.ExistingAWSResources
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.SumoLambdaRole
           - AutoEnableOptions.AutoEnableS3LogsElbStack
           - AutoEnableOptions.AutoEnableS3LogsElbStack.AutoEnableElbLogEventsInvokePermission
@@ -126,7 +124,6 @@ TestCase:
           - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableNewAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsElbStack.SumoLambdaRole
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources
-          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.InvokeLambdaConnector
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorRole
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.AutoSubscribeCWLogGroupInvokePermission
@@ -151,7 +148,6 @@ TestCase:
           - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogGroupARN
           - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsDeliveryStreamARN
           - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRoleARN
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableNewAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableNewAWSResourcesLambda
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
@@ -176,7 +172,7 @@ TestCase:
           CreateALBLogSource: 'Yes'
           CreateALBS3Bucket: 'Yes'
           ALBS3LogsBucketName: ""
-          ALBS3BucketPathExpression: '*AWSLogs/*/elasticloadbalancing/*'
+          ALBS3BucketPathExpression: '/elasticloadbalancing/<REGION>/*'
           ALBLogsSourceName: "alb-logs-<REGION>"
           ALBLogsSourceCategory: "aws/observability/alb/logs"
           CreateELBLogSource: 'Yes'
@@ -204,7 +200,7 @@ TestCase:
           Section2aCreateS3Bucket: 'No'
         AutoEnableOptions:
           ALBAutoEnableS3Logs: 'Yes'
-          ALBAutoEnableS3LogsOptions: "Both"
+          ALBAutoEnableS3LogsOptions: "New"
           ALBS3LogsBucketName: 'aws-observability-logs'
           ELBAutoEnableS3Logs: 'Yes'
           ELBAutoEnableS3LogsOptions: "New"
@@ -216,7 +212,7 @@ TestCase:
           AutoSubscribeRoleArn: "arn:<AWS_PARTITION>:iam::"
         AutoEnableOptions.AutoEnableS3LogsAlbStack:
           BucketName: 'aws-observability-logs'
-          AutoEnableResourceOptions: 'Both'
+          AutoEnableResourceOptions: 'New'
         AutoEnableOptions.AutoEnableS3LogsElbStack:
           BucketName: 'aws-observability-logs'
           AutoEnableResourceOptions: 'New'

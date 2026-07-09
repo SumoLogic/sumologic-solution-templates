@@ -555,6 +555,13 @@ Resources:
     Condition: send_telemetry_to_sumo
     Type: AWS::Lambda::Function
     DeletionPolicy: Retain
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W89
+            reason: "Lambda function does not require VPC deployment."
+          - id: W92
+            reason: "Lambda function does not require reserved concurrency."
     Properties:
       Handler: lambda_function.lambda_handler
       Runtime: python3.14
