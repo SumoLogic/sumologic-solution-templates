@@ -7,8 +7,8 @@ terraform {
       version = ">= 5.16.2, < 7.0.0"
     }
     sumologic = {
-      version = ">= 2.31.3, < 4.0.0"
       source  = "SumoLogic/sumologic"
+      version = ">= 3.2.9, < 4.0.0"
     }
     time = {
       source  = "hashicorp/time"
@@ -17,10 +17,6 @@ terraform {
     random = {
       source  = "hashicorp/random"
       version = ">= 3.1.0"
-    }
-    lambda-invoke-extension = {
-      source = "local-dev/lambda-invoke-extension"
-      #version = "1.0.0"
     }
   }
 }
