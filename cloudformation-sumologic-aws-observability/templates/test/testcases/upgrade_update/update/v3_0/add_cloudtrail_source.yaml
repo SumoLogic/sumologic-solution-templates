@@ -11,6 +11,23 @@ TestCase:
   TestName: addCloudTrailSource
   Regions: '${SUMO_REGIONS}'
   Skip: false
+  PostRequisitesInfra:
+    # Create "new" ALB (triggers EventBridge -> Lambda -> auto-enable access logs)
+    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      WaitSeconds: 30
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
+    # Create "new" ELB (triggers EventBridge -> Lambda -> auto-enable access logs)
+    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      WaitSeconds: 30
+      ImpactedParametersPath:
+        ElbName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
+        ElbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -208,6 +225,24 @@ TestCase:
         AccessId: "${SUMO_ACCESS_ID}"
         AccessKey: "${SUMO_ACCESS_KEY}"
         Deployment: "${SUMO_DEPLOYMENT}"
+
+    - AssertType: AWSResourceValidation
+      Skip: false
+      Assert:
+        ALB:
+          LoadBalancers:
+            - Arn: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 120
+          S3LogCheckTimeoutSeconds: 600
+        ELB:
+          LoadBalancers:
+            - Name: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 120
+          S3LogCheckTimeoutSeconds: 600
 
     - AssertType: SumoSourceLogsValidation
       Skip: false

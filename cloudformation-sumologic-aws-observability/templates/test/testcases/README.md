@@ -91,8 +91,8 @@
 | Aspect | Baseline | This Test Case |
 |---|---|---|
 | **Alias** | infrat1 | infrat8 |
-| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | S3 bucket + Sumo collector/sources (pre-creates ALB+CloudTrail+Metrics sources) |
-| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | ALB only (triggers auto-enable on new ALB) |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | S3 bucket + Sumo collector/sources (pre-creates ALB+CloudTrail+Metrics sources) + existing ALB |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | ALB (triggers auto-enable on new ALB) |
 | **ALB Auto-Enable** | Both (2 LBs) | Both (existing + new) |
 | **ELB Auto-Enable** | Both (2 LBs) | None |
 | **CW LogGroups** | Existing + New | None |
@@ -108,8 +108,8 @@
 | Aspect | Baseline | This Test Case |
 |---|---|---|
 | **Alias** | infrat1 | infrat10 |
-| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | S3 bucket + Sumo collector/sources (pre-creates ELB+CloudTrail+Metrics sources) |
-| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | ELB only (triggers auto-enable on new ELB) |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | S3 bucket + Sumo collector/sources (pre-creates ELB+CloudTrail+Metrics sources) + existing ELB |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | ELB (triggers auto-enable on new ELB) |
 | **ALB Auto-Enable** | Both (2 LBs) | None |
 | **ELB Auto-Enable** | Both (2 LBs) | Both (existing + new) |
 | **CW LogGroups** | Existing + New | None |
@@ -349,20 +349,20 @@
 | Test Case | CloudtrailSourceQueries | Metrics Queries | CW Logs Queries |
 |---|---|---|---|
 | `default_param_no_alias_and_csv` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
-| `no_cloudtrail` | — (disabled) | CW: namespace=EC2,ApplicationELB,ELB | CWLogs: matches lambda |
+| `no_cloudtrail` | — (disabled) | CW: namespace=Lambda,ApplicationELB,ELB | CWLogs: matches lambda |
 | `kinesis_firehose_all_sources` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
-| `cw_metrics_lambda_log_forwarder` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | CW: namespace=EC2,ApplicationELB,ELB | CWLogs: matches lambda |
+| `cw_metrics_lambda_log_forwarder` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | CW: namespace=Lambda,ApplicationELB,ELB | CWLogs: matches lambda |
 | `only_cloudtrail_with_loggroup_tags` | lambda | KF: namespace=ApplicationELB,ELB,EC2 | KF: namespace=aws/lambda |
-| `existing_cloudtrail_alb_source` | — (existing source) | KF: namespace=ApplicationELB,EC2 | — |
-| `existing_cloudtrail_elb_source` | — (existing source) | KF: namespace=ELB,EC2 | — |
-| `existing_cloudtrail_bucket` | lambda | CW: namespace=EC2 | — |
+| `existing_cloudtrail_alb_source` | — (existing source) | KF: namespace=ApplicationELB,Lambda | — |
+| `existing_cloudtrail_elb_source` | — (existing source) | KF: namespace=ELB,EC2,Lambda | — |
+| `existing_cloudtrail_bucket` | lambda | CW: namespace=Lambda | — |
 | `nothing_to_install` | — | — | — |
 | `only_apps_install` | — | — | — |
 | `kinesis_firehose_all_sources_no_apps` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
 | `remove_on_delete_false` | — | — | — (validates sources PRESERVED after cleanup) |
 | `default_param_no_cloudtrail_invalid_mapping_csv` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
 | `default_param_no_cloudtrail_valid_mapping_csv` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
-| `tag_filters_for_cw_metric_source_with_custom_namespaces` | lambda | CW: namespace=EC2,cwgent | CWLogs: matches lambda |
+| `tag_filters_for_cw_metric_source_with_custom_namespaces` | lambda | CW: namespace=Lambda,cwgent | CWLogs: matches lambda |
 | `create_source_existing_bucket_existing_sources` | lambda | CW: namespace=EC2 | KF: namespace=aws/lambda + CWLogs: matches lambda |
 | `no_metrics_source` | lambda | — (no metrics source) | KF: namespace=aws/lambda |
 | `alb_new_elb_existing` | — | KF: namespace=ApplicationELB,ELB,EC2 | — |

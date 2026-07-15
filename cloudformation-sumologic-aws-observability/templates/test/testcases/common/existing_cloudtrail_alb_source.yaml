@@ -72,6 +72,24 @@ TestCase:
       ImpactedParametersPath:
         SumoLoadBalancerLogAPIURL:
           - "parameters.Section5cALBLogsSourceUrl"
+    # Create "existing" ALB (AWSO Existing Lambda enables access logs at deploy time)
+    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
+
+  PostRequisitesInfra:
+    # Create "new" ALB (triggers EventBridge -> Lambda -> auto-enable access logs)
+    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      WaitSeconds: 30
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].DnsName"
+
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -213,6 +231,19 @@ TestCase:
           BucketName: 'newapigateway'
           AutoEnableResourceOptions: 'Both'
     # --- E2E PHASE ---
+    - AssertType: AWSResourceValidation
+      Skip: false
+      Assert:
+        ALB:
+          LoadBalancers:
+            - Arn: ""
+              DnsName: ""
+            - Arn: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 120
+          S3LogCheckTimeoutSeconds: 600
+
     - AssertType: SumoSourceExistenceValidation
       Skip: false
       Assert:
@@ -233,7 +264,7 @@ TestCase:
         SourceQueryFilters:
           KinesisFirehoseMetricsSourceQueries:
             - AppendQuery: "namespace=AWS/ApplicationELB"
-            - AppendQuery: "namespace=AWS/EC2"
+            - AppendQuery: "namespace=AWS/Lambda"
         AccessId: "${SUMO_ACCESS_ID}"
         AccessKey: "${SUMO_ACCESS_KEY}"
         Deployment: "${SUMO_DEPLOYMENT}"

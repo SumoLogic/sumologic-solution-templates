@@ -72,6 +72,24 @@ TestCase:
       ImpactedParametersPath:
         SumoLoadBalancerLogAPIURL:
           - "parameters.Section8cELBLogsSourceUrl"
+    # Create "existing" ELB (AWSO Existing Lambda enables access logs at deploy time)
+    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      ImpactedParametersPath:
+        ElbName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
+        ElbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
+
+  PostRequisitesInfra:
+    # Create "new" ELB (triggers EventBridge -> Lambda -> auto-enable access logs)
+    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      WaitSeconds: 30
+      ImpactedParametersPath:
+        ElbName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].Name"
+        ElbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].DnsName"
+
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -213,6 +231,19 @@ TestCase:
           BucketName: 'anemaelblogs-<REGION>'
           AutoEnableResourceOptions: 'Both'
     # --- E2E PHASE ---
+    - AssertType: AWSResourceValidation
+      Skip: false
+      Assert:
+        ELB:
+          LoadBalancers:
+            - Name: ""
+              DnsName: ""
+            - Name: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 120
+          S3LogCheckTimeoutSeconds: 600
+
     - AssertType: SumoSourceExistenceValidation
       Skip: false
       Assert:
@@ -234,6 +265,7 @@ TestCase:
           KinesisFirehoseMetricsSourceQueries:
             - AppendQuery: "namespace=AWS/ELB"
             - AppendQuery: "namespace=AWS/EC2"
+            - AppendQuery: "namespace=AWS/Lambda"
         AccessId: "${SUMO_ACCESS_ID}"
         AccessKey: "${SUMO_ACCESS_KEY}"
         Deployment: "${SUMO_DEPLOYMENT}"
