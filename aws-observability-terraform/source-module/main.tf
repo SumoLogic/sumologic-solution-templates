@@ -73,8 +73,8 @@ module "elb_module" {
   #version = "1.0.24"
 
   providers = {
-    aws                    = aws
-    lambda-invoke-extension = lambda-invoke-extension
+    aws       = aws
+    sumologic = sumologic
   }
 
   create_collector          = false
@@ -125,8 +125,8 @@ module "classic_lb_module" {
   #version = "1.0.24"
 
   providers = {
-    aws                    = aws
-    lambda-invoke-extension = lambda-invoke-extension
+    aws       = aws
+    sumologic = sumologic
   }
 
   create_collector          = false

@@ -7,7 +7,7 @@ terraform {
       version = ">= 5.16.2, < 7.0.0"
     }
     sumologic = {
-      version = ">= 2.31.3, < 4.0.0"
+      version = ">= 3.2.9, < 4.0.0"
       source  = "SumoLogic/sumologic"
     }
     time = {
@@ -18,17 +18,9 @@ terraform {
       source  = "hashicorp/random"
       version = ">= 3.1.0"
     }
-    lambda-invoke-extension = {
-      source = "registry.terraform.io/local-dev/lambda-invoke-extension"
-      #version = "0.1.0"
-    }
   }
 }
 
 provider "aws" {
-  region = "me-central-1"
-}
-
-provider "lambda-invoke-extension" {
   region = "me-central-1"
 }
