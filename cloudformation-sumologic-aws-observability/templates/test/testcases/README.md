@@ -4,9 +4,11 @@
 
 | Category | Description | Test Cases |
 |---|---|---|
-| **`common/`** | No CW log source dependency — LB auto-enable, existing sources, apps-only, nothing-to-install | `nothing_to_install`, `only_apps_install`, `existing_cloudtrail_bucket`, `existing_cloudtrail_alb_source`, `existing_cloudtrail_elb_source`, `permission_checker`, `s3_bucket_retention`, `alb_auto_enable_existing`, `elb_auto_enable_existing`, `existing_source_with_alb_bucket`, `existing_source_with_elb_bucket`, `alb_new_elb_existing`, `elb_new_alb_existing` |
+| **`common/`** | No CW log source dependency — LB auto-enable, existing sources, apps-only, nothing-to-install | `nothing_to_install`, `only_apps_install`, `existing_cloudtrail_alb_source`, `existing_cloudtrail_elb_source`, `permission_checker`, `s3_bucket_retention`, `alb_auto_enable_existing`, `elb_auto_enable_existing`, `existing_source_with_alb_bucket`, `existing_source_with_elb_bucket`, `alb_new_elb_existing`, `elb_new_alb_existing` |
 | **`kf/`** | Kinesis Firehose log source — **recommended path** | `default_param_no_alias_and_csv`, `default_param_no_cloudtrail_invalid_mapping_csv`, `default_param_no_cloudtrail_valid_mapping_csv`, `kinesis_firehose_all_sources`, `kinesis_firehose_all_sources_no_apps`, `only_cloudtrail_with_loggroup_tags`, `remove_on_delete_false`, `create_source_existing_bucket_existing_sources`, `no_metrics_source`, `kf_logs_subscribe_new_only` |
-| **`cw/`** | CloudWatch Lambda Forwarder log source — legacy | `cw_metrics_lambda_log_forwarder`, `no_cloudtrail`, `tag_filters_for_cw_metric_source_with_custom_namespaces` |
+| **`cw/`** | CloudWatch Lambda Forwarder log source — legacy | `cw_metrics_lambda_log_forwarder`, `no_cloudtrail`, `existing_cloudtrail_bucket`, `tag_filters_for_cw_metric_source_with_custom_namespaces` |
+| **`migrate/v3_0/`** | Stack migration from older AWSO versions to v3.0.0 | `v2_12_to_v3_0_all_sources`, `v2_13_to_v3_0_all_sources`, `v2_14_to_v3_0_all_sources`, `v2_15_to_v3_0_all_sources` |
+| **`upgrade_update/update/v3_0/`** | In-place stack updates on v3.0.0 — parameter changes, source type switches | `account_alias_update`, `add_apps_on_update`, `add_cloudtrail_source`, `alb_enable_mode_new_to_both`, `cw_metrics_to_kf_metrics`, `disabled_telemetry`, `enable_telemetry`, `lambda_to_kf_logs`, `namespace_update` |
 
 ---
 
@@ -251,9 +253,9 @@
 | **Metrics Source** | KinesisFirehoseMetricsSource | CloudWatchMetricsSource (polling) |
 | **CW Logs Source** | KinesisFirehoseLogsSource | CloudWatchLogsSource (Lambda Forwarder) |
 | **Apps** | Yes | No |
-| **Custom namespaces** | Standard | Includes `cwgent` |
+| **MetricsNameSpaces** | All defaults | `AWS/Lambda` only |
 | **Tag Filters** | None | JSON tag filter per namespace (`Section4dAWSMetricsTagFilters`) |
-| **Difference** | — | CW Metrics with tag filters + custom namespace. No auto-enable for LBs |
+| **Difference** | — | CW Metrics with tag filters on AWS namespaces. No auto-enable for LBs |
 
 ### `no_metrics_source`
 
@@ -362,7 +364,7 @@
 | `remove_on_delete_false` | — | — | — (validates sources PRESERVED after cleanup) |
 | `default_param_no_cloudtrail_invalid_mapping_csv` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
 | `default_param_no_cloudtrail_valid_mapping_csv` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
-| `tag_filters_for_cw_metric_source_with_custom_namespaces` | lambda | CW: namespace=Lambda,cwgent | CWLogs: matches lambda |
+| `tag_filters_for_cw_metric_source_with_custom_namespaces` | lambda | CW: namespace=Lambda | CWLogs: matches lambda |
 | `create_source_existing_bucket_existing_sources` | lambda | CW: namespace=EC2 | KF: namespace=aws/lambda + CWLogs: matches lambda |
 | `no_metrics_source` | lambda | — (no metrics source) | KF: namespace=aws/lambda |
 | `alb_new_elb_existing` | — | KF: namespace=ApplicationELB,ELB,EC2 | — |
