@@ -11,6 +11,13 @@ TestCase:
   Regions: '${SUMO_REGIONS}'
   Skip: false
   PreRequisitesInfra:
+    # Create "existing" ALB (AWSO Existing Lambda enables access logs on it at deploy time)
+    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
     - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
       ImpactedParametersPath:
         BucketName:
@@ -57,13 +64,6 @@ TestCase:
       ImpactedParametersPath:
         SumoCloudWatchMetricsAPIURL:
           - "parameters.Section4cCloudWatchExistingSourceAPIUrl"
-    # Create "existing" ALB (AWSO Existing Lambda enables access logs on it at deploy time)
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
-      ImpactedParametersPath:
-        AlbArn:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
-        AlbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'

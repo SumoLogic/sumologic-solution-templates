@@ -31,7 +31,7 @@
 | **CW Logs Source** | KinesisFirehoseLogsSource | CloudWatchLogsSource (Lambda Forwarder) |
 | **Apps** | Yes | No |
 | **Auto-Subscribe Dest** | Kinesis | Lambda |
-| **Log Group Tags** | Not set | env=prod,creator=himan,team=app |
+| **Log Group Tags** | Not set | Environment=production,CreatedBy=sumocfntester |
 
 ### `kinesis_firehose_all_sources`
 
@@ -83,7 +83,7 @@
 | **Apps** | Yes | No |
 | **Auto-Subscribe Dest** | Kinesis | Kinesis |
 | **Auto-Subscribe Option** | Both | Existing |
-| **Log Group Tags** | Not set | env=prod,creator=himan,team=app |
+| **Log Group Tags** | Not set | Environment=production,CreatedBy=sumocfntester |
 | **ALB/ELB sources** | Created new | Not created (No) |
 | **Custom namespaces** | Standard | Includes `cwgent` |
 | **Difference** | — | Tags-based subscription, Existing-only CW LogGroups, no ALB/ELB source creation |
@@ -248,7 +248,7 @@
 | **PostRequisitesInfra** | ALB + ELB + CW LogGroups | CW LogGroups (auto-subscribe Both) |
 | **ALB Auto-Enable** | Both | None |
 | **ELB Auto-Enable** | Both | None |
-| **CW LogGroups** | Existing + New (pattern) | Existing + New (tags: env=prod,creator=himan,team=app) |
+| **CW LogGroups** | Existing + New (pattern) | Existing + New (tags: Environment=production,CreatedBy=sumocfntester) |
 | **CloudTrail** | Yes (KF) | Yes (existing bucket, path `*abc*`) |
 | **Metrics Source** | KinesisFirehoseMetricsSource | CloudWatchMetricsSource (polling) |
 | **CW Logs Source** | KinesisFirehoseLogsSource | CloudWatchLogsSource (Lambda Forwarder) |
@@ -322,7 +322,7 @@
 | **Apps** | Yes | No |
 | **Auto-Subscribe Option** | Both | **New** (UseExistingLogs=false) |
 | **Auto-Subscribe Dest** | Kinesis | Kinesis |
-| **Log Group Tags** | Not set | env=prod,creator=himan,team=app |
+| **Log Group Tags** | Not set | Environment=production,CreatedBy=sumocfntester |
 | **Difference** | — | KF mirror of `no_cloudtrail` (cw/). Section7c=New-only subscribe. No pre-existing log groups |
 
 ### `create_source_existing_bucket_existing_sources`

@@ -22,13 +22,13 @@ Parameters:
       - true
       - false
     Default: true
-    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
-                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Description: "To uninstall apps when the stack is deleted, set this parameter to True. Default is True.
+                  To prevent uninstall apps when the stack is deleted, set this parameter to False."
     Type: String
   Section2aInstallApp:
     Type: String
-    Description: "Yes - Installs the API Gateway App for the Sumo Logic AWS Observability Solution.
-                  No - Skips the installation of this app."
+    Description: "Yes - Install AWS Apps for the Sumo Logic AWS Observability Solution.
+                  No - Skips the installation of this AWS Apps."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
@@ -50,6 +50,10 @@ Mappings:
     AmazonECS:
       Name: "Amazon ECS(Without Container Insights and Traces)"
       AppId: "c26c3149-6131-4b97-b250-adf53ad7cd16"
+
+    AmazonECSWithCI:
+      Name: "Amazon ECS(With Container Insights and Traces)"
+      AppId: "69c8db21-9d42-4210-8fa8-365155d90074"
 
     AmazonElastiCache:
       Name: "Amazon ElastiCache"
@@ -121,14 +125,12 @@ Resources:
 
   Fn::ForEach::AppsLoop:
     - AppKey
-#    - [Bedrock, BedrockAgentCore]
-    - [AmazonECS, AmazonElastiCache, AmazonOverview, AmazonRDS, AmazonSNS, AmazonSQS, AWSAPIGateway, AWSApplicationLoadBalancer, AWSClassicLoadBalancer, AWSDynamoDB, AWSEC2, AWSLambda, AWSNetworkLoadBalancer, HostMetricsEC2]
+    - [AmazonOverview, AmazonElastiCache, AWSLambda, AmazonSNS, AmazonSQS, AWSApplicationLoadBalancer, AWSClassicLoadBalancer, AWSDynamoDB, AWSEC2, HostMetricsEC2, AmazonECS, AmazonECSWithCI, AWSNetworkLoadBalancer, AmazonRDS, AWSAPIGateway]
     - SumoApp${AppKey}:
         Type: Custom::AppV2
         Condition: is_install_app
         Properties:
           ServiceToken: !Ref Section3aParentStackLambdaARN
-          Region: !Ref AWS::Region
           AppName: !FindInMap [Apps, !Ref AppKey, Name]
           AppId: !FindInMap [Apps, !Ref AppKey, AppId]
           RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
