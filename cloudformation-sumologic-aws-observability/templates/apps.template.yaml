@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::LanguageExtensions
-Description: "Version - v3.0.0: Template to setup the API Gateway app with AWS and Sumo Logic resources for AWS Observability Solution."
+Description: "Version - v3.0.0: Template to install AWS Observability related Apps."
 Parameters:
   Section1aSumoDeployment:
     Type: String
@@ -123,11 +123,25 @@ Resources:
       SumoAccessKey: !Ref Section1cSumoAccessKey
       SumoDeployment: !Ref Section1aSumoDeployment
 
+  SumoAppAmazonOverview:
+    Type: Custom::AppV2
+    Condition: is_install_app
+    Properties:
+      ServiceToken: !Ref Section3aParentStackLambdaARN
+      AppName: "Amazon Overview"
+      AppId: "32c8b96c-161c-46d4-b81d-235cc0b56b87"
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      Section4aToUpdate: !Ref Section4aToUpdate
+
   Fn::ForEach::AppsLoop:
     - AppKey
-    - [AmazonOverview, AmazonElastiCache, AWSLambda, AmazonSNS, AmazonSQS, AWSApplicationLoadBalancer, AWSClassicLoadBalancer, AWSDynamoDB, AWSEC2, HostMetricsEC2, AmazonECS, AmazonECSWithCI, AWSNetworkLoadBalancer, AmazonRDS, AWSAPIGateway]
+    - [AmazonElastiCache, AWSLambda, AmazonSNS, AmazonSQS, AWSApplicationLoadBalancer, AWSClassicLoadBalancer, AWSDynamoDB, AWSEC2, HostMetricsEC2, AmazonECS, AmazonECSWithCI, AWSNetworkLoadBalancer, AmazonRDS, AWSAPIGateway]
     - SumoApp${AppKey}:
         Type: Custom::AppV2
+        DependsOn: SumoAppAmazonOverview
         Condition: is_install_app
         Properties:
           ServiceToken: !Ref Section3aParentStackLambdaARN
