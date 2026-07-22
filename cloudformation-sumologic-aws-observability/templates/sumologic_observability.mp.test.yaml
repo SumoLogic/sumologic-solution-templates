@@ -399,8 +399,14 @@ Conditions:
     - !Equals [ !Ref Section8dELBS3LogsBucketName, '' ]
 
   # Sources Create Condition
+  create_alb_logs_source: !Equals [ !Ref Section5bALBCreateLogSource, 'Yes' ]
+  create_elb_logs_source: !Equals [ !Ref Section8bELBCreateLogSource, 'Yes' ]
+  create_cloudtrail_logs_source: !Equals [ !Ref Section6aCreateCloudTrailLogSource, 'Yes' ]
   create_kf_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourceOptions, 'Kinesis Firehose Metrics Source' ]
   create_cw_metrics_source: !Equals [ !Ref Section4aCreateMetricsSourceOptions, 'CloudWatch Metrics Source' ]
+  create_metrics_source: !Or
+    - !Condition create_kf_metrics_source
+    - !Condition create_cw_metrics_source
   create_kf_logs_source: !Or
     - !Equals [ !Ref Section7aCreateCloudWatchLogsSourceOptions, 'Kinesis Firehose Log Source' ]
     - !Equals [ !Ref Section7aCreateCloudWatchLogsSourceOptions, 'Both (Switch from Lambda Log Forwarder to Kinesis Firehose Log Source)' ]
@@ -716,6 +722,11 @@ Resources:
             - "/*.log"
         ELBLogsSourceName: !Sub "classic-lb-logs-${AWS::Region}"
         ELBLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, ELBLogsSourceCategory]
+        ALBLogsSourceApiUrl: !If [ create_alb_logs_source, "", !Ref Section5cALBLogsSourceUrl ]
+        ELBLogsSourceApiUrl: !If [ create_elb_logs_source, "", !Ref Section8cELBLogsSourceUrl ]
+        CloudTrailLogsSourceApiUrl: !If [ create_cloudtrail_logs_source, "", !Ref Section6bCloudTrailLogsSourceUrl ]
+        CloudWatchLogsSourceApiUrl: !If [ create_cloudwatch_logs_source, "", !Ref Section7bCloudWatchLogsSourceUrl ]
+        MetricsSourceApiUrl: !If [ create_metrics_source, "", !Ref Section4cCloudWatchExistingSourceAPIUrl ]
 
   AutoEnableOptions:
     Type: AWS::CloudFormation::Stack

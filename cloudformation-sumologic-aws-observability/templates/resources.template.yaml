@@ -148,6 +148,14 @@ Parameters:
     Type: String
     Description: "Provide a source Category for the ALB Logs Source."
     Default: ""
+  ALBLogsSourceApiUrl:
+    Type: String
+    Description: "Required when not creating a new ALB source. Provide the existing Sumo Logic ALB Source API URL."
+    Default: ""
+  MetricsSourceApiUrl:
+    Type: String
+    Description: "Required when not creating a new metrics source. Provide the existing Sumo Logic Metrics Source API URL."
+    Default: ""
 
   CreateCloudTrailLogSource:
     Type: String
@@ -180,6 +188,10 @@ Parameters:
     Type: String
     Description: "Provide a source Category for the CloudTrail Logs Source."
     Default: ""
+  CloudTrailLogsSourceApiUrl:
+    Type: String
+    Description: "Required when not creating a new CloudTrail source. Provide the existing Sumo Logic CloudTrail Source API URL."
+    Default: ""
 
   CreateCloudWatchLogSource:
     Type: String
@@ -195,6 +207,10 @@ Parameters:
   CloudWatchLogsSourceCategory:
     Type: String
     Description: "Provide a source Category for the CloudWatch Logs Source."
+    Default: ""
+  CloudWatchLogsSourceApiUrl:
+    Type: String
+    Description: "Required when not creating a new CloudWatch Logs source. Provide the existing Sumo Logic CloudWatch Logs Source API URL."
     Default: ""
 
   CreateKinesisFirehoseLogSource:
@@ -258,6 +274,10 @@ Parameters:
   ELBLogsSourceCategory:
     Type: String
     Description: "Provide a source Category for the ELB Logs Source."
+    Default: ""
+  ELBLogsSourceApiUrl:
+    Type: String
+    Description: "Required when not creating a new ELB source. Provide the existing Sumo Logic ELB Source API URL."
     Default: ""
 
 Conditions:
@@ -351,6 +371,13 @@ Conditions:
   create_bucket_if_new_aws_region: !And
     - !Not [!Condition region_exists_in_mapping]
     - !Condition create_target_s3_bucket
+
+  # Existing source update conditions
+  update_alb_source: !Not [ !Equals [ !Ref ALBLogsSourceApiUrl, '' ] ]
+  update_elb_source: !Not [ !Equals [ !Ref ELBLogsSourceApiUrl, '' ] ]
+  update_cloudtrail_source: !Not [ !Equals [ !Ref CloudTrailLogsSourceApiUrl, '' ] ]
+  update_cloudwatch_source: !Not [ !Equals [ !Ref CloudWatchLogsSourceApiUrl, '' ] ]
+  update_metrics_source: !Not [ !Equals [ !Ref MetricsSourceApiUrl, '' ] ]
 
   # Collector Name Check
   # collector_name_available: !Not [!Equals [ !Ref CollectorName, '']]
@@ -1361,6 +1388,105 @@ Resources:
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
 
+  ############# START - RESOURCES FOR EXISTING SOURCE FIELD UPDATES #################
+
+  SumoALBLogsUpdateSource:
+    Condition: update_alb_source
+    Type: Custom::SumoLogicUpdateFields
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      SourceApiUrl: !Ref ALBLogsSourceApiUrl
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+        region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
+
+  SumoELBLogsUpdateSource:
+    Condition: update_elb_source
+    Type: Custom::SumoLogicUpdateFields
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      SourceApiUrl: !Ref ELBLogsSourceApiUrl
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+        region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
+
+  SumoCloudTrailLogsUpdateSource:
+    Condition: update_cloudtrail_source
+    Type: Custom::SumoLogicUpdateFields
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      SourceApiUrl: !Ref CloudTrailLogsSourceApiUrl
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+
+  SumoHTTPUpdateSource:
+    Condition: update_cloudwatch_source
+    Type: Custom::SumoLogicUpdateFields
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      SourceApiUrl: !Ref CloudWatchLogsSourceApiUrl
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+        region: !Ref "AWS::Region"
+        accountid: !Ref "AWS::AccountId"
+
+  SumoALBMetricsUpdateSource:
+    Condition: update_metrics_source
+    Type: Custom::SumoLogicUpdateFields
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      SourceApiUrl: !Ref MetricsSourceApiUrl
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+
+  SumoELBMetricsUpdateSource:
+    Condition: update_metrics_source
+    Type: Custom::SumoLogicUpdateFields
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      SourceApiUrl: !Ref MetricsSourceApiUrl
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+
+  SumoMetricsUpdateSource:
+    Condition: update_metrics_source
+    Type: Custom::SumoLogicUpdateFields
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      SourceApiUrl: !Ref MetricsSourceApiUrl
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+      SumoAccessID: !Ref SumoLogicAccessID
+      SumoAccessKey: !Ref SumoLogicAccessKey
+      SumoDeployment: !Ref SumoLogicDeployment
+      Fields:
+        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+
 Outputs:
   AccountAlias:
     Description: "Account Alias"
@@ -1410,3 +1536,31 @@ Outputs:
     Description: "The ARN for your CloudWatch Logs role to write to your delivery stream, use this as the role-arn when adding CloudWatch Logs subscription filters."
     Condition: install_kf_metric_source
     Value: !GetAtt KinesisFirehoseMetricsStack.Outputs.KinesisMetricsRoleARN
+  ExistingALBLogSourceName:
+    Description: "Existing ALB Logs Source Name"
+    Condition: update_alb_source
+    Value: !GetAtt SumoALBLogsUpdateSource.source_name
+  ExistingELBLogSourceName:
+    Description: "Existing ELB Logs Source Name"
+    Condition: update_elb_source
+    Value: !GetAtt SumoELBLogsUpdateSource.source_name
+  ExistingCloudTrailLogSourceName:
+    Description: "Existing CloudTrail Logs Source Name"
+    Condition: update_cloudtrail_source
+    Value: !GetAtt SumoCloudTrailLogsUpdateSource.source_name
+  ExistingCloudWatchLogSourceName:
+    Description: "Existing CloudWatch Logs Source Name"
+    Condition: update_cloudwatch_source
+    Value: !GetAtt SumoHTTPUpdateSource.source_name
+  ExistingMetricSourceName:
+    Description: "Existing CloudWatch Metrics Source Name"
+    Condition: update_metrics_source
+    Value: !GetAtt SumoMetricsUpdateSource.source_name
+  ExistingALBMetricSourceName:
+    Description: "Existing ALB CloudWatch Metrics Source Name"
+    Condition: update_metrics_source
+    Value: !GetAtt SumoALBMetricsUpdateSource.source_name
+  ExistingELBMetricSourceName:
+    Description: "Existing ELB CloudWatch Metrics Source Name"
+    Condition: update_metrics_source
+    Value: !GetAtt SumoELBMetricsUpdateSource.source_name
