@@ -125,6 +125,8 @@ TestCase:
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.AutoEnableAlbLogEventsInvokePermission
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.AutoEnableAlbLogEventsRuleTrigger
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableNewAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.ExistingAWSResources
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.SumoLambdaRole
           - AutoEnableOptions.AutoEnableS3LogsElbStack
           - AutoEnableOptions.AutoEnableS3LogsElbStack.AutoEnableElbLogEventsInvokePermission
@@ -208,7 +210,7 @@ TestCase:
           Section2aCreateS3Bucket: 'No'
         AutoEnableOptions:
           ALBAutoEnableS3Logs: 'Yes'
-          ALBAutoEnableS3LogsOptions: "New"
+          ALBAutoEnableS3LogsOptions: "Both"
           ALBS3LogsBucketName: 'aws-observability-logs'
           ELBAutoEnableS3Logs: 'Yes'
           ELBAutoEnableS3LogsOptions: "New"
@@ -220,7 +222,7 @@ TestCase:
           AutoSubscribeRoleArn: "arn:<AWS_PARTITION>:iam::"
         AutoEnableOptions.AutoEnableS3LogsAlbStack:
           BucketName: 'aws-observability-logs'
-          AutoEnableResourceOptions: 'New'
+          AutoEnableResourceOptions: 'Both'
         AutoEnableOptions.AutoEnableS3LogsElbStack:
           BucketName: 'aws-observability-logs'
           AutoEnableResourceOptions: 'New'
@@ -247,14 +249,14 @@ TestCase:
             - Arn: ""
               DnsName: ""
           HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 120
+          AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
         ELB:
           LoadBalancers:
             - Name: ""
               DnsName: ""
           HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 120
+          AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
 
     - AssertType: SumoSourceLogsValidation

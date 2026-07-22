@@ -61,6 +61,7 @@ TestCase:
           - AutoEnableOptions
           - CreateCommonResources.SumoLogicALBS3Policy
           - CreateCommonResources.SumoLogicELBS3Policy
+          - CreateCommonResources.SumoLogicCloudTrailS3Policy
           - CreateCommonResources.LambdaRole
           - CreateCommonResources.LambdaHelper
           - CreateCommonResources.AccountCheck
@@ -107,6 +108,8 @@ TestCase:
           - CreateCommonResources.ALBSNSSubscription
           - CreateCommonResources.ELBSource
           - CreateCommonResources.ELBSNSSubscription
+          - CreateCommonResources.CloudTrailSource
+          - CreateCommonResources.CloudTrailSNSSubscription
           - CreateCommonResources.AccountAliasValue
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
@@ -178,10 +181,10 @@ TestCase:
           ELBS3BucketPathExpression: 'classicloadbalancing/AWSLogs/'
           ELBLogsSourceName: "classic-lb-logs-<REGION>"
           ELBLogsSourceCategory: "aws/observability/clb/logs"
-          CreateCloudTrailLogSource: 'No'
-          CreateCloudTrailBucket: 'No'
+          CreateCloudTrailLogSource: 'Yes'
+          CreateCloudTrailBucket: 'Yes'
           CloudTrailLogsBucketName: ""
-          CloudTrailBucketPathExpression: 'AWSLogs/*/CloudTrail/*'
+          CloudTrailBucketPathExpression: '/CloudTrail/<REGION>/*'
           CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
           CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
           CreateCloudWatchLogSource: 'No'
@@ -234,14 +237,14 @@ TestCase:
             - Arn: ""
               DnsName: ""
           HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 120
+          AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
         ELB:
           LoadBalancers:
             - Name: ""
               DnsName: ""
           HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 120
+          AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
 
     - AssertType: SumoSourceLogsValidation

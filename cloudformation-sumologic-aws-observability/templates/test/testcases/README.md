@@ -354,22 +354,24 @@
 | `no_cloudtrail` | — (disabled) | CW: namespace=Lambda,ApplicationELB,ELB | CWLogs: matches lambda |
 | `kinesis_firehose_all_sources` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
 | `cw_metrics_lambda_log_forwarder` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | CW: namespace=Lambda,ApplicationELB,ELB | CWLogs: matches lambda |
-| `only_cloudtrail_with_loggroup_tags` | lambda | KF: namespace=ApplicationELB,ELB,EC2 | KF: namespace=aws/lambda |
+| `only_cloudtrail_with_loggroup_tags` | lambda | KF: namespace=ApplicationELB,ELB,EC2 | — |
 | `existing_cloudtrail_alb_source` | — (existing source) | KF: namespace=ApplicationELB,Lambda | — |
 | `existing_cloudtrail_elb_source` | — (existing source) | KF: namespace=ELB,EC2,Lambda | — |
 | `existing_cloudtrail_bucket` | lambda | CW: namespace=Lambda | — |
 | `nothing_to_install` | — | — | — |
 | `only_apps_install` | — | — | — |
-| `kinesis_firehose_all_sources_no_apps` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
+| `kinesis_firehose_all_sources_no_apps` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | — |
 | `remove_on_delete_false` | — | — | — (validates sources PRESERVED after cleanup) |
 | `default_param_no_cloudtrail_invalid_mapping_csv` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
 | `default_param_no_cloudtrail_valid_mapping_csv` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
 | `tag_filters_for_cw_metric_source_with_custom_namespaces` | lambda | CW: namespace=Lambda | CWLogs: matches lambda |
-| `create_source_existing_bucket_existing_sources` | lambda | CW: namespace=EC2 | KF: namespace=aws/lambda + CWLogs: matches lambda |
+| `create_source_existing_bucket_existing_sources` | lambda | CW: namespace=EC2 | CWLogs: matches lambda |
 | `no_metrics_source` | lambda | — (no metrics source) | KF: namespace=aws/lambda |
 | `alb_new_elb_existing` | — | KF: namespace=ApplicationELB,ELB,EC2 | — |
 | `elb_new_alb_existing` | — | KF: namespace=ApplicationELB,ELB,EC2 | — |
-| `kf_logs_subscribe_new_only` | — | KF: namespace=EC2,ApplicationELB,ELB | KF: namespace=aws/lambda |
+| `kf_logs_subscribe_new_only` | — | KF: namespace=EC2,ApplicationELB,ELB | — |
+| `alb_auto_enable_existing` | — | KF: namespace=ApplicationELB,Lambda | — |
+| `elb_auto_enable_existing` | — | KF: namespace=ELB,Lambda | — |
 
 ## Parameter → Assertion Mapping
 
@@ -412,6 +414,32 @@
 |---|---|---|
 | `Kinesis Firehose Log Source` | Kinesis | `KinesisLogsDeliveryStreamARN` from stack output |
 | `Lambda Log Forwarder` | Lambda | `CloudWatchLambdaARN` from stack output |
+
+### Conditional Query Rules
+
+**`KinesisFirehoseLogsSourceQueries` namespace filter requires Apps installed**
+
+AWSO Apps install Field Extraction Rules (FERs) that parse CloudWatch log records flowing through Kinesis Firehose and stamp the `namespace` field. When `Section3aInstallObservabilityApps: 'No'`, FERs are absent — `namespace` is not parsed, so any `| where namespace="aws/lambda"` query returns 0 results.
+
+Affected test cases (Apps=No): `kinesis_firehose_all_sources_no_apps`, `only_cloudtrail_with_loggroup_tags`, `kf_logs_subscribe_new_only`, `create_source_existing_bucket_existing_sources`, `alb_auto_enable_existing`, `elb_auto_enable_existing`
+
+**Resolution**: `KinesisFirehoseLogsSourceQueries` namespace filters are omitted from all affected test cases. `SumoSourceExistenceValidation` still confirms the KFLogs source exists.
+
+**`Section4bMetricsNameSpaces` must match deployed infra**
+
+`MetricsSourceQueries` must only validate namespaces where AWS resources exist in the test environment:
+
+| Infrastructure | Namespace |
+|---|---|
+| `create_alb_infra.yaml` (any Pre/PostReq) | `AWS/ApplicationELB` |
+| `create_elb_infra.yaml` (any Pre/PostReq) | `AWS/ELB`, `AWS/EC2` |
+| AWSO stack (always deploys Lambda) | `AWS/Lambda` |
+
+CW Metrics Source (`CloudWatch Metrics Source`): `Section4bMetricsNameSpaces` directly controls which namespaces are polled — queries must only use namespaces in Section4b.
+
+KF Metrics Source (`Kinesis Firehose Metrics Source`): standard namespaces always flow through the stream; queries target only namespaces where infra data exists.
+
+---
 
 ### CloudTrail (`Section6a`)
 

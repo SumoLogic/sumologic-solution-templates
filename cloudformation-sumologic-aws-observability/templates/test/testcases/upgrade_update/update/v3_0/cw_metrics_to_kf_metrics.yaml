@@ -38,7 +38,7 @@ TestCase:
       Section2bAccountAliasMappingS3URL: ''
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'CloudWatch Metrics Source'
-      Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/EC2'
+      Section4bMetricsNameSpaces: 'AWS/ApplicationELB, AWS/Lambda, AWS/ELB, AWS/EC2'
       Section5aAutoEnableS3LogsALBResourcesOptions: 'New'
       Section5bALBCreateLogSource: 'Yes'
       Section6aCreateCloudTrailLogSource: 'Yes'
@@ -79,13 +79,20 @@ TestCase:
           - CreateCommonResources.SumoLogicHostedCollector
           - CreateCommonResources.LambdaToDecideCWMetricsSources
           - CreateCommonResources.Primerinvoke
-          - CreateCommonResources.CloudWatchMetricsFirstStack
-          - CreateCommonResources.CloudWatchMetricsFirstStack.SecondCloudwatchMetricsSource
-          - CreateCommonResources.CloudWatchMetricsFirstStack.ThirdCloudwatchMetricsSource
-          - CreateCommonResources.CloudWatchMetricsSecondStack
-          - CreateCommonResources.CloudWatchMetricsSecondStack.SecondCloudwatchMetricsSource
-          - CreateCommonResources.CloudWatchMetricsSecondStack.FifthCloudwatchMetricsSource
-          - CreateCommonResources.CloudWatchMetricsThirdStack
+          - CreateCommonResources.KinesisFirehoseMetricsStack
+          - CreateCommonResources.KinesisFirehoseMetricsSource
+          - CreateCommonResources.KinesisFirehoseMetricsStack.AttachBucketPolicyToFirehoseLogsRole
+          - CreateCommonResources.KinesisFirehoseMetricsStack.FirehoseLogsRole
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStream
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStream
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsFirehoseRolePolicy
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogGroup
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogStream
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRole
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambda
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambdaRole
           - CreateCommonResources.KinesisFirehoseLogsStack
           - CreateCommonResources.KinesisFirehoseLogsSource
           - CreateCommonResources.KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
@@ -132,6 +139,11 @@ TestCase:
           - CreateCommonResources.Namespaces
           - CreateCommonResources.LambdaRoleARN
           - CreateCommonResources.BucketName
+          - CreateCommonResources.KinesisMetricsRoleARN
+          - CreateCommonResources.KinesisMetricsDeliveryStreamARN
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsRoleARN
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStreamARN
+          - CreateCommonResources.KinesisFirehoseMetricsStack.KinesisMetricsLogGroupARN
           - CreateCommonResources.KinesisLogsDeliveryStreamARN
           - CreateCommonResources.KinesisLogsRoleARN
           - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogGroupARN
@@ -150,12 +162,12 @@ TestCase:
           CreateMetaDataSource: 'No'
           MetaDataSourceName: ""
           MetaDataSourceCategory: ""
-          CreateCloudWatchMetricsSource: 'Yes'
+          CreateCloudWatchMetricsSource: 'No'
           CloudWatchMetricsSourceName: 'cloudwatch-metrics-<REGION>'
-          CloudWatchMetricsNameSpaces: "AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/EC2"
+          CloudWatchMetricsNameSpaces: 'AWS/ApplicationELB, AWS/Lambda, AWS/ELB, AWS/EC2'
           ScanInterval: "300000"
           CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
-          CreateKinesisFirehoseMetricsSource: 'No'
+          CreateKinesisFirehoseMetricsSource: 'Yes'
           KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
           CreateALBLogSource: 'Yes'
@@ -182,6 +194,9 @@ TestCase:
           CreateKinesisFirehoseLogSource: 'Yes'
           KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-<REGION>'
           KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
+        CreateCommonResources.KinesisFirehoseMetricsStack:
+          Section2aCreateS3Bucket: 'No'
+          Section1bNamespaceFilter: 'AWS/ApplicationELB, AWS/Lambda, AWS/ELB, AWS/EC2'
         CreateCommonResources.KinesisFirehoseLogsStack:
           Section2aCreateS3Bucket: 'No'
         AutoEnableOptions:
@@ -223,14 +238,14 @@ TestCase:
             - Arn: ""
               DnsName: ""
           HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 120
+          AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
         ELB:
           LoadBalancers:
             - Name: ""
               DnsName: ""
           HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 120
+          AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
 
     - AssertType: SumoSourceLogsValidation
@@ -240,7 +255,10 @@ TestCase:
           CloudtrailSourceQueries:
             - AppendQuery: "| json auto | where eventSource=\"lambda.amazonaws.com\""
           KinesisFirehoseMetricsSourceQueries:
+            - AppendQuery: "namespace=AWS/Lambda"
             - AppendQuery: "namespace=AWS/EC2"
+            - AppendQuery: "namespace=AWS/ApplicationELB"
+            - AppendQuery: "namespace=AWS/ELB"
         AccessId: "${SUMO_ACCESS_ID}"
         AccessKey: "${SUMO_ACCESS_KEY}"
         Deployment: "${SUMO_DEPLOYMENT}"

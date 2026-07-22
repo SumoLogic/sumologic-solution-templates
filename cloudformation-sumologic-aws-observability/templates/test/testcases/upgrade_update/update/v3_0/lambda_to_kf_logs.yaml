@@ -85,23 +85,22 @@ TestCase:
           - CreateCommonResources.CloudWatchMetricsFirstStack.ThirdCloudwatchMetricsSource
           - CreateCommonResources.CloudWatchMetricsSecondStack.SecondCloudwatchMetricsSource
           - CreateCommonResources.CloudWatchMetricsSecondStack.FifthCloudwatchMetricsSource
+          - CreateCommonResources.KinesisFirehoseLogsStack
+          - CreateCommonResources.KinesisFirehoseLogsSource
+          - CreateCommonResources.KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
+          - CreateCommonResources.KinesisFirehoseLogsStack.FirehoseLogsRole
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsFirehoseRolePolicy
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogGroup
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogStream
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogStreamS3
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRole
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRolePolicy
+          - CreateCommonResources.KinesisFirehoseLogsStack.SubscriptionFilter
           - CreateCommonResources.ALBSource
           - CreateCommonResources.ALBSNSSubscription
           - CreateCommonResources.ELBSource
           - CreateCommonResources.ELBSNSSubscription
-          - CreateCommonResources.CloudWatchHTTPSource
-          - CreateCommonResources.CloudWatchEventFunction
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWDeadLetterQueue
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWEmailSNSTopic
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWEventsInvokeLambdaPermission
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaExecutionRole
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWLambdaPermission
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogGroup
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogSubsriptionFilter
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambda
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQLambda
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWSpilloverAlarm
           - CreateCommonResources.AccountAliasValue
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
@@ -120,7 +119,7 @@ TestCase:
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnectorRole
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.AutoSubscribeCWLogGroupInvokePermission
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaEventRule
-          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoCWLambdaInvokePermission
+          - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.sumoIAMPassRolePolicy
     - AssertType: OutputsCheck
       Assert:
         Outputs:
@@ -130,8 +129,11 @@ TestCase:
           - CreateCommonResources.Namespaces
           - CreateCommonResources.LambdaRoleARN
           - CreateCommonResources.BucketName
-          - CreateCommonResources.CloudWatchLambdaARN
-          - CreateCommonResources.CloudWatchEventFunction.SumoCWLogsLambdaArn
+          - CreateCommonResources.KinesisLogsDeliveryStreamARN
+          - CreateCommonResources.KinesisLogsRoleARN
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsLogGroupARN
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsDeliveryStreamARN
+          - CreateCommonResources.KinesisFirehoseLogsStack.KinesisLogsRoleARN
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableNewAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableNewAWSResourcesLambda
           - AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources.SumoLogGroupLambdaConnector
@@ -167,10 +169,10 @@ TestCase:
           CloudTrailLogsBucketName: ""
           CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
           CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
-          CreateCloudWatchLogSource: 'Yes'
+          CreateCloudWatchLogSource: 'No'
           CloudWatchLogsSourceName: "cloudwatch-logs-<REGION>"
           CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
-          CreateKinesisFirehoseLogSource: 'No'
+          CreateKinesisFirehoseLogSource: 'Yes'
           KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-<REGION>'
           KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
           CreateKinesisFirehoseMetricsSource: 'No'
@@ -185,7 +187,9 @@ TestCase:
           ELBS3LogsBucketName: 'aws-observability-logs'
           AutoSubscribeLogGroups: 'Yes'
           AutoSubscribeLogGroupsOptions: 'New'
-          AutoSubscribeDestinationARNType: 'Lambda'
+          AutoSubscribeDestinationARNType: 'Kinesis'
+          AutoSubscribeDestinationARNValue: 'arn:<AWS_PARTITION>:firehose:'
+          AutoSubscribeRoleArn: "arn:<AWS_PARTITION>:iam::"
         AutoEnableOptions.AutoEnableS3LogsAlbStack:
           BucketName: 'aws-observability-logs'
           AutoEnableResourceOptions: 'New'
@@ -194,7 +198,11 @@ TestCase:
           AutoEnableResourceOptions: 'New'
         AutoEnableOptions.AutoSubscribeLambdaLogGroupsAWSResources:
           UseExistingLogs: 'false'
-          DestinationArnType: 'Lambda'
+          DestinationArnType: 'Kinesis'
+          DestinationArnValue: 'arn:<AWS_PARTITION>:firehose:'
+          RoleArn: "arn:<AWS_PARTITION>:iam::"
+        CreateCommonResources.KinesisFirehoseLogsStack:
+          Section2aCreateS3Bucket: 'No'
     # --- E2E PHASE (run after update) ---
     - AssertType: SumoSourceExistenceValidation
       Skip: false
@@ -211,23 +219,23 @@ TestCase:
             - Arn: ""
               DnsName: ""
           HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 120
-          S3LogCheckTimeoutSeconds: 600
+          AccessLogCheckTimeoutSeconds: 240
+          S3LogCheckTimeoutSeconds: 900
         ELB:
           LoadBalancers:
             - Name: ""
               DnsName: ""
           HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 120
-          S3LogCheckTimeoutSeconds: 600
+          AccessLogCheckTimeoutSeconds: 240
+          S3LogCheckTimeoutSeconds: 900
 
     - AssertType: SumoSourceLogsValidation
       Skip: false
       Assert:
         SourceQueryFilters:
           CloudWatchMetricsSourceQueries:
-            - AppendQuery: "namespace=AWS/EC2"
+            - AppendQuery: "namespace=AWS/Lambda"
         AccessId: "${SUMO_ACCESS_ID}"
         AccessKey: "${SUMO_ACCESS_KEY}"
         Deployment: "${SUMO_DEPLOYMENT}"
-        TimeoutSeconds: 600
+        TimeoutSeconds: 900
