@@ -1,0 +1,682 @@
+# ============================================================================
+# Terraform Configuration File - Example Template
+# ============================================================================
+# IMPORTANT: Keep all variables in this file, even if you're not using them.
+# - Leave variables empty or use default values instead of deleting them
+# - This prevents configuration errors and maintains consistency
+# - Example: If not using activity logs, set enable_activity_logs = false
+#           (don't delete the variable)
+#
+# For detailed descriptions of all variables, see the Configuration Variables
+# section in README.md
+# ============================================================================
+
+# Azure Authentication Configuration
+azure_subscription_id   = "your-azure-subscription-id"
+azure_client_id         = "your-azure-client-id"
+azure_client_secret     = "your-azure-client-secret"
+azure_tenant_id         = "your-azure-tenant-id"
+
+# Azure Resource Configuration
+resource_group_name     = "sumologic-azure-collection-rg"
+eventhub_namespace_name = "sumologic-azure-collection-EventHub"
+policy_name             = "SumoLogicAzureCollectionPolicy"
+
+# Event Hub SKU Configuration (Global Defaults)
+# These settings apply to all regions unless overridden in region_specific_eventhub_skus
+# Valid SKUs: Basic, Standard, Premium, or Dedicated
+#
+# IMPORTANT: Auto-Upgrade Behavior
+# - If a region has more than 10 Event Hub instances and the SKU is Basic or Standard,
+#   the system will automatically upgrade to Premium SKU for that region
+# - This is necessary because Basic/Standard SKUs have a limit of 10 Event Hubs per namespace
+# - Premium SKU supports up to 100 Event Hubs per namespace
+# - You can override this behavior using region_specific_eventhub_skus
+eventhub_namespace_sku  = "Standard"
+
+# Throughput units (applies to Standard and Premium SKUs only)
+# Valid values: 1, 2, 4, 8, or 16
+# Note: Basic SKU has fixed throughput; Dedicated SKU uses Capacity Units instead
+default_throughput_units = 4
+
+# Optional: Region-Specific Event Hub SKU Configuration
+# Use this to override the global SKU and throughput settings for specific regions
+# This override takes precedence over auto-upgrade logic
+# Useful when:
+# - Different regions have different data volumes
+# - Cost optimization requires different SKUs per region
+# - Testing different configurations before global rollout
+# - Compliance requires specific SKU tiers in certain regions
+# - You want to prevent auto-upgrade to Premium (manually set SKU per region)
+#
+# Example:
+# region_specific_eventhub_skus = {
+#   "East US" = {
+#     sku              = "Premium"
+#     throughput_units = 8
+#   }
+#   "West Europe" = {
+#     sku              = "Standard"
+#     throughput_units = 2
+#   }
+#   "Central US" = {
+#     sku              = "Basic"
+#     throughput_units = 1  # Ignored for Basic SKU (fixed throughput)
+#   }
+# }
+region_specific_eventhub_skus = {}
+
+# Regions that only support Basic & Standard SKUs for Event Hub namespaces
+eventhub_namespace_limited_sku_locations = [
+  "West India",
+  "Mexico Central",
+]
+
+# Regions where Event Hub Namespace creation is not supported
+eventhub_namespace_unsupported_locations = [
+  "South Africa West",
+  "Australia Central 2",
+  "USGov Arizona",
+  "USGov Texas",
+  "USGov Virginia",
+  "Brazil Southeast",
+  "China East",
+  "China East 2",
+  "China East 3",
+  "China North",
+  "China North 2",
+  "China North 3",
+  "France South",
+  "Germany North",
+  "Norway West",
+  "Sweden South",
+  "Switzerland West",
+  "Taiwan North",
+  "UAE Central",
+]
+
+# Azure Metrics Source Scan Interval
+# Time interval in milliseconds for scanning new metrics data
+# Default: 300000 (5 minutes)
+# Minimum: 1000 (1 second)
+# Lower values provide more frequent metric updates but increase API calls
+scan_interval = 300000
+
+# Controls azurerm provider behavior for Resource Group deletion.
+# Default is true (safe). Set to false in test environments to allow cleanup of
+# resource groups that still contain nested resources (useful for integration tests).
+prevent_deletion_if_contains_resources = true
+
+# Activity Log Configuration
+activity_log_export_name     = "SumoLogicAzureActivityLogExport"
+activity_log_export_category = "azure/activity-logs"
+location                     = "East US"
+enable_activity_logs         = false
+
+# Activity Log Filters Configuration
+# Filters applied at the Sumo Logic activity log source level
+# Activity logs are subscription-level, so no region filtering is available
+#
+# Filter types: "Include" (only match), "Exclude" (reject match), "Mask" (redact match)
+# Each filter requires:
+# - filter_type: "Include", "Exclude", or "Mask"
+# - name: Descriptive name for the filter
+# - regexp: RE2 regex pattern (must match entire log message)
+# - mask (optional): Replacement string for Mask filters (cannot contain colons)
+#
+# Filters are evaluated in order; first match wins
+#
+# Example configurations:
+# activity_log_filters = [
+#   {
+#     filter_type = "Include"
+#     name        = "Include Write operations only"
+#     regexp      = ".*\"operationName\".*write.*"
+#   },
+#   {
+#     filter_type = "Mask"
+#     name        = "Mask sensitive fields"
+#     regexp      = "(\\\"password\\\".*)"
+#     mask        = "***REDACTED***"  # Cannot contain colons
+#   },
+#   {
+#     filter_type = "Exclude"
+#     name        = "Exclude read operations"
+#     regexp      = ".*\"operationName\".*read.*"
+#   },
+# ]
+activity_log_filters = []
+
+# Resource Targeting Configuration
+# Complete list of all supported Azure resources (as of 17-Oct-2025)
+#
+# Each resource type can optionally specify:
+#
+# 1. log_categories - Filters which log categories to collect:
+#    - Omit field: Collects ALL available log categories (default)
+#    - Empty array []: Collects ALL available log categories (same as omitted)
+#    - Specific categories: Only collects the specified log categories
+#
+# 2. required_resource_tags - Filters resources by tags (AND logic - all tags must match):
+#    - Omit field: No tag filtering, monitors all resources of this type
+#    - Empty map {}: No tag filtering (same as omitted)
+#    - Specific tags: Only monitors resources with ALL specified tags
+#
+# 3. name_filter - Filters resources by regex pattern (case-insensitive):
+#    - Omit field: No name filtering, monitors all resources of this type
+#    - Empty string "": No name filtering (same as omitted)
+#    - Regex pattern: Only monitors resources whose names match the pattern
+#    - Examples: "^prod-.*" (starts with prod-), ".*-test$" (ends with -test),
+#                "dev-.*-[0-9]+" (complex pattern), "^(prod|staging)-.*" (multiple prefixes)
+#
+# 4. log_source_filters - Filters applied at the Sumo Logic log source level:
+#    - Omit field or empty array []: No content filtering at source level
+#    - Filter types: "Include" (only match), "Exclude" (reject match), "Mask" (redact match)
+#    - Each filter requires:
+#      * filter_type: "Include", "Exclude", or "Mask"
+#      * name: Descriptive name for the filter
+#      * regexp: RE2 regex pattern (must match entire log message)
+#      * mask (optional): Replacement string for Mask filters (cannot contain colons)
+#      * regions (optional): List of regions to apply filter to (empty = all regions)
+#    - Region matching is case-insensitive with spaces removed ("East US" = "eastus")
+#    - Filters are evaluated in order; first match wins
+#
+# To find valid log categories for a resource, use Azure CLI:
+# az monitor diagnostic-settings categories list --resource <resource-id>
+#
+# Example with all optional filters:
+# {
+#   log_namespace          = "Microsoft.KeyVault/vaults"
+#   metric_namespace       = "Microsoft.KeyVault/vaults"
+#   log_categories         = ["AuditEvent", "AzurePolicyEvaluationDetails"]
+#   required_resource_tags = { "environment" = "production", "team" = "security" }
+#   name_filter            = "^prod-.*"
+#   log_source_filters     = [
+#     {
+#       filter_type = "Include"
+#       name        = "Include only successful operations"
+#       regexp      = ".*\"ResultType\":\"Success\".*"
+#       regions     = ["East US", "West US"]  # Apply only to these regions
+#     },
+#     {
+#       filter_type = "Mask"
+#       name        = "Mask sensitive data"
+#       regexp      = "(\\\"password\\\"\\s*:\\s*\\\"[^\\\"]+\\\")"
+#       mask        = "***REDACTED***"  # Cannot contain colons
+#       # No regions specified = applies to all regions
+#     },
+#     {
+#       filter_type = "Exclude"
+#       name        = "Exclude health checks"
+#       regexp      = ".*healthcheck.*"
+#     },
+#   ]
+# }
+target_resource_types = [
+  # Azure Application Gateway
+  {
+    log_namespace    = "Microsoft.Network/applicationgateways"
+    metric_namespace = "Microsoft.Network/applicationgateways"
+    
+    # Optional: Specify which log categories to collect
+    # - Omit this field or use [] to collect ALL available log categories
+    # - Specify categories to collect only those logs
+    # - Find valid categories: az monitor diagnostic-settings categories list --resource <resource-id>
+    # log_categories = ["ApplicationGatewayAccessLog", "ApplicationGatewayPerformanceLog", "ApplicationGatewayFirewallLog"]
+    
+    # Optional: Filter resources by tags (AND logic - all tags must match)
+    # - Omit this field or use {} to monitor all resources of this type
+    # required_resource_tags = { "environment" = "production", "team" = "platform" }
+    
+    # Optional: Filter resources by regex pattern (case-insensitive)
+    # - Omit this field or use "" to monitor all resources of this type
+    # - Examples: "^prod-.*" (starts with prod-), ".*-test$" (ends with -test)
+    # name_filter = "^prod-.*"
+  },
+  # Azure Load Balancer
+  {
+    log_namespace    = "Microsoft.Network/loadBalancers"
+    metric_namespace = "Microsoft.Network/loadBalancers"
+  },
+  # Azure Cache for Redis
+  {
+    log_namespace    = "Microsoft.Cache/redis"
+    metric_namespace = "Microsoft.Cache/redis"
+  },
+  # Azure Cache for Redis Enterprise
+  {
+    metric_namespace = "Microsoft.Cache/redisEnterprise"
+  },
+  # Azure Functions
+  {
+    log_namespace    = "Microsoft.Web/sites"
+    metric_namespace = "Microsoft.Web/sites"
+  },
+  # Azure App Service Plan (metrics only)
+  {
+    metric_namespace = "Microsoft.Web/serverfarms"
+  },
+  # Azure Database for MySQL
+  {
+    log_namespace    = "Microsoft.DBforMySQL/flexibleServers"
+    metric_namespace = "Microsoft.DBforMySQL/flexibleServers"
+  },
+  # Azure Cosmos DB (for NoSQL)
+  {
+    log_namespace    = "Microsoft.DocumentDb/databaseAccounts"
+    metric_namespace = "Microsoft.DocumentDB/DatabaseAccounts"
+  },
+  # Azure Database for PostgreSQL
+  {
+    log_namespace    = "Microsoft.DBforPostgreSQL/flexibleServers"
+    metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
+    
+    # Optional: Collect only specific log categories (otherwise collects all)
+    # log_categories = ["PostgreSQLLogs", "PostgreSQLFlexSessions", "PostgreSQLFlexTableStats", "PostgreSQLFlexQueryStoreRuntime", "PostgreSQLFlexQueryStoreWaitStats"]
+  },
+  # Azure Cosmos DB for PostgreSQL
+  {
+    log_namespace    = "Microsoft.DBforPostgreSQL/serverGroupsv2"
+    metric_namespace = "Microsoft.DBForPostgreSQL/serverGroupsv2"
+  },
+  # Azure API Management
+  {
+    log_namespace    = "Microsoft.ApiManagement/service"
+    metric_namespace = "Microsoft.ApiManagement/service"
+  },
+  # Azure Service Bus
+  {
+    log_namespace    = "Microsoft.ServiceBus/namespaces"
+    metric_namespace = "Microsoft.ServiceBus/Namespaces"
+    
+    # Example: Apply log source filters (content filtering at Sumo Logic)
+    # log_source_filters = [
+    #   {
+    #     filter_type = "Include"
+    #     name        = "Include specific resources"
+    #     regexp      = ".*\"resourceId\".*SBUS002.*"
+    #     regions     = ["East US"]  # Apply only to East US region
+    #   },
+    #   {
+    #     filter_type = "Mask"
+    #     name        = "Mask credit cards"
+    #     regexp      = "(\\d{16})"
+    #     mask        = "MaskedID"
+    #     # No regions specified = applies to all regions globally
+    #   },
+    # ]
+  },
+  # Azure Event Grid - Domains
+  {
+    log_namespace    = "Microsoft.EventGrid/domains"
+    metric_namespace = "Microsoft.EventGrid/domains"
+  },
+  # Azure Event Grid - System Topics
+  {
+    log_namespace    = "Microsoft.EventGrid/systemTopics"
+    metric_namespace = "Microsoft.EventGrid/systemTopics"
+  },
+  # Azure Event Grid - Topics
+  {
+    log_namespace    = "Microsoft.EventGrid/topics"
+    metric_namespace = "Microsoft.EventGrid/topics"
+  },
+  # Azure Event Grid - Namespaces
+  {
+    log_namespace    = "Microsoft.EventGrid/namespaces"
+    metric_namespace = "Microsoft.EventGrid/namespaces"
+  },
+  # Azure Virtual Network
+  {
+    log_namespace    = "Microsoft.Network/virtualNetworks"
+    metric_namespace = "Microsoft.Network/virtualNetworks"
+  },
+  # Azure Network Interfaces
+  {
+    log_namespace    = "Microsoft.Network/networkInterfaces"
+    metric_namespace = "Microsoft.Network/networkInterfaces"
+  },
+  # Azure Container Instances (metrics only)
+  {
+    metric_namespace = "Microsoft.ContainerInstance/containerGroups"
+  },
+  # Azure Kubernetes Service (AKS) - Control Plane
+  {
+    log_namespace    = "Microsoft.ContainerService/managedClusters"
+    metric_namespace = "Microsoft.ContainerService/managedClusters"
+  },
+  # Azure Virtual Machine (metrics only)
+  {
+    metric_namespace = "Microsoft.Compute/virtualMachines"
+  },
+  {
+    metric_namespace = "Microsoft.Compute/virtualmachineScaleSets"
+  },
+  # Azure App Service Environment (logs only)
+  {
+    log_namespace = "Microsoft.Web/hostingEnvironments"
+  },
+  # Azure Key Vaults
+  {
+    log_namespace    = "Microsoft.KeyVault/vaults"
+    metric_namespace = "Microsoft.KeyVault/vaults"
+    # Example: Collect specific log categories only
+    # log_categories = ["AuditEvent", "AzurePolicyEvaluationDetails"]
+    
+    # Example: Apply all three optional filters together
+    # log_categories         = ["AuditEvent"]
+    # required_resource_tags = { "environment" = "production", "team" = "security" }
+    # name_filter            = "^prod-.*"  # Only production key vaults starting with "prod-"
+  },
+  # Azure Storage (primary namespace - use nested_namespace_configs for nested resources)
+  {
+    log_namespace    = "Microsoft.Storage/storageAccounts"
+    metric_namespace = "Microsoft.Storage/storageAccounts"
+    # Example: Collect all available log categories (default behavior)
+    # log_categories = []
+    
+    # Example: Different name_filter patterns
+    # name_filter = "^prod-.*"           # Starts with "prod-"
+    # name_filter = ".*-test$"           # Ends with "-test"
+    # name_filter = ".*critical.*"       # Contains "critical"
+    # name_filter = "^(prod|staging)-.*" # Starts with "prod-" or "staging-"
+  },
+  # Azure SQL
+  {
+    log_namespace    = "Microsoft.Sql/servers/databases"
+    metric_namespace = "Microsoft.Sql/servers/databases"
+  },
+  {
+    log_namespace    = "Microsoft.Sql/managedInstances"
+    metric_namespace = "Microsoft.Sql/managedInstances"
+  },
+  {
+    log_namespace    = "Microsoft.Sql/servers/elasticpools"
+    metric_namespace = "Microsoft.Sql/servers/elasticpools"
+  },
+  # Azure Event Hubs - Namespaces
+  {
+    log_namespace    = "Microsoft.EventHub/namespaces"
+    metric_namespace = "Microsoft.EventHub/Namespaces"
+  },
+  # Azure Event Hubs - Clusters (metrics only)
+  {
+    metric_namespace = "Microsoft.EventHub/clusters"
+  },
+  # Azure Machine Learning - Workspaces
+  {
+    log_namespace    = "Microsoft.MachineLearningServices/workspaces"
+    metric_namespace = "Microsoft.MachineLearningServices/workspaces"
+  },
+  # Azure Machine Learning - Online Endpoints (metrics only)
+  {
+    metric_namespace = "Microsoft.MachineLearningServices/workspaces/onlineEndpoints"
+  },
+  # Azure Machine Learning - Online Endpoints Deployments (metrics only)
+  {
+    metric_namespace = "Microsoft.MachineLearningServices/workspaces/onlineEndpoints/deployments"
+  },
+  # Azure OpenAI
+  {
+    log_namespace    = "Microsoft.CognitiveServices/accounts"
+    metric_namespace = "Microsoft.CognitiveServices/accounts"
+  }
+]
+
+required_resource_tags = {}
+
+# Nested namespace configurations for Azure Storage
+nested_namespace_configs = {
+  "Microsoft.Storage/storageAccounts" = [
+    "Microsoft.Storage/storageAccounts/blobServices",
+    "Microsoft.Storage/storageAccounts/fileServices",
+    "Microsoft.Storage/storageAccounts/queueServices",
+    "Microsoft.Storage/storageAccounts/tableServices"
+  ]
+}
+
+# Sumo Logic Configuration
+sumologic_access_id   = "your-sumologic-access-id"
+sumologic_access_key  = "your-sumologic-access-key"
+sumologic_environment = "us1"
+
+# Optional: Base URL for custom Sumo Logic environments
+# Use this for non-standard deployments like Switzerland (ch)
+# If provided, this takes precedence over sumologic_environment
+# Example: "https://api.ch.sumologic.com/api/"
+# Leave commented out for standard deployments (us1, us2, eu, au, etc.)
+# sumologic_environment_base_url = null
+
+sumo_collector_name   = "sumologic-azure-collection"
+
+# App Installation Configuration
+# Complete list of all available Azure apps (as of 17-Oct-2025)
+# 
+# Parameters explanation:
+# - All apps require "index_value" parameter (typically "sumologic_default")
+# - Some apps may support additional custom parameters
+# - Example with multiple parameters:
+#   parameters = {
+#     "index_value"     = "sumologic_default"
+#     "custom_param_1"  = "value1"
+#     "custom_param_2"  = "value2"
+#   }
+installation_apps_list = [
+  # Azure Application Gateway
+  {
+    uuid       = "547aa2ec-1a6f-4fbe-84ca-e5e2bc57fd44"
+    name       = "Azure Application Gateway"
+    version    = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+      # Add additional app-specific parameters here if needed
+    }
+  },
+  # Azure Load Balancer
+  {
+    uuid       = "63e4bd6d-8e15-41c4-a65d-74589574adf2"
+    name       = "Azure Load Balancer"
+    version    = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Cache for Redis
+  {
+    uuid                = "4a240798-d68f-464d-a6e8-ba2be85eba0f"
+    name                = "Azure Cache for Redis"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Functions
+  {
+    uuid                = "a0fb1bf0-2ab4-4f69-bf7e-5d97a176c7ea"
+    name                = "Azure Functions"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Web Apps
+  {
+    uuid                = "a4741497-31c6-4fb2-a236-0223e98b59e8"
+    name                = "Azure Web Apps"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure App Service Plan
+  {
+    uuid                = "cff0d2eb-9340-4108-8314-9faf9906f731"
+    name                = "Azure App Service Plan"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Database for MySQL
+  {
+    uuid                = "8bb63bc0-d6f4-4276-b546-780840c4d423"
+    name                = "Azure Database for MySQL"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Cosmos DB (for NoSQL)
+  {
+    uuid                = "d9ac4e28-13d6-4e69-8dcc-63fd6cb3bc80"
+    name                = "Azure Cosmos DB (for NoSQL)"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Database for PostgreSQL
+  {
+    uuid                = "73a729f2-49b1-4cf1-8494-04a605152358"
+    name                = "Azure Database for PostgreSQL"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Cosmos DB for PostgreSQL
+  {
+    uuid                = "aa97bc6c-7143-4cd9-9373-5f2ab456b4de"
+    name                = "Azure Cosmos DB for PostgreSQL"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure API Management
+  {
+    uuid                = "e78d9390-7365-4fdc-b309-e4a4b369b53d"
+    name                = "Azure API Management"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Service Bus
+  {
+    uuid                = "4bacb88a-0e8d-4c52-bea9-9f9656087459"
+    name                = "Azure Service Bus"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Event Grid
+  {
+    uuid                = "4e5b7c3f-b881-4dab-8609-5261ad14e420"
+    name                = "Azure Event Grid"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Virtual Network
+  {
+    uuid                = "37e3ed67-5f42-4acf-baf1-1dc44834039b"
+    name                = "Azure Virtual Network"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Container Instances (ACI)
+  {
+    uuid                = "bc9969aa-fb5b-49b7-96fb-d3f027396602"
+    name                = "Azure Container Instances (ACI)"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Kubernetes Service (AKS) - Control Plane
+  {
+    uuid                = "b387300a-3c29-4fb1-96b9-f67badc5d403"
+    name                = "Azure Kubernetes Service (AKS) - Control Plane"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Virtual Machine
+  {
+    uuid                = "dfa576fc-7d3b-4946-b414-149567e25d6a"
+    name                = "Azure Virtual Machine"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure App Service Environment
+  {
+    uuid                = "38c941ee-db70-484c-b14b-18e896240ff6"
+    name                = "Azure App Service Environment"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Key Vaults
+  {
+    uuid                = "449c796e-5da2-47ea-a304-e9299dd7435d"
+    name                = "Azure Key Vaults"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Storage
+  {
+    uuid                = "53376d23-2687-4500-b61e-4a2e2a119658"
+    name                = "Azure Storage"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure SQL
+  {
+    uuid                = "e6a61074-f173-458e-8c47-2e48b4b630a4"
+    name                = "Azure SQL"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Event Hubs
+  {
+    uuid                = "e6f1a9ec-eb5c-45ab-9970-57729b091f54"
+    name                = "Azure Event Hubs"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure Machine Learning
+  {
+    uuid                = "9efee397-c633-40eb-b7e5-3cc3bfb26ed1"
+    name                = "Azure Machine Learning"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  },
+  # Azure OpenAI
+  {
+    uuid                = "eca85221-e57a-4b33-958a-309ddd19c8ba"
+    name                = "Azure OpenAI"
+    version             = "latest"
+    parameters = {
+      "index_value" = "sumologic_default"
+    }
+  }
+]
