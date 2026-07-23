@@ -330,48 +330,6 @@ Conditions:
     - !Condition install_cloudtrail_logs_source
     - !Condition install_kf_metric_source
 
-  # https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
-  # Elastic Load Balancing required region-specific account IDs in IAM policies, but this has been replaced by a newer,
-  # simplified policy. The legacy policy is still supported for older regions, with a reference list of account IDs provided.
-  region_exists_in_mapping: !Or
-    - !Or
-      - !Equals [ !Ref 'AWS::Region', "us-east-1" ]
-      - !Equals [ !Ref 'AWS::Region', "us-east-2" ]
-      - !Equals [ !Ref 'AWS::Region', "us-west-1" ]
-      - !Equals [ !Ref 'AWS::Region', "us-west-2" ]
-      - !Equals [ !Ref 'AWS::Region', "af-south-1" ]
-      - !Equals [ !Ref 'AWS::Region', "ca-central-1" ]
-      - !Equals [ !Ref 'AWS::Region', "eu-central-1" ]
-      - !Equals [ !Ref 'AWS::Region', "eu-west-1" ]
-      - !Equals [ !Ref 'AWS::Region', "eu-west-2" ]
-      - !Equals [ !Ref 'AWS::Region', "eu-south-1" ]
-    - !Or
-      - !Equals [ !Ref 'AWS::Region', "eu-west-3" ]
-      - !Equals [ !Ref 'AWS::Region', "eu-north-1" ]
-      - !Equals [ !Ref 'AWS::Region', "ap-east-1" ]
-      - !Equals [ !Ref 'AWS::Region', "ap-northeast-1" ]
-      - !Equals [ !Ref 'AWS::Region', "ap-northeast-2" ]
-      - !Equals [ !Ref 'AWS::Region', "ap-northeast-3" ]
-      - !Equals [ !Ref 'AWS::Region', "ap-southeast-1" ]
-      - !Equals [ !Ref 'AWS::Region', "ap-southeast-2" ]
-      - !Equals [ !Ref 'AWS::Region', "ap-southeast-3" ]
-      - !Equals [ !Ref 'AWS::Region', "ap-south-1" ]
-    - !Or
-      - !Equals [ !Ref 'AWS::Region', "me-south-1" ]
-      - !Equals [ !Ref 'AWS::Region', "sa-east-1" ]
-      - !Equals [ !Ref 'AWS::Region', "us-gov-west-1" ]
-      - !Equals [ !Ref 'AWS::Region', "us-gov-east-1" ]
-      - !Equals [ !Ref 'AWS::Region', "cn-north-1" ]
-      - !Equals [ !Ref 'AWS::Region', "cn-northwest-1" ]
-
-  create_bucket_if_old_aws_region: !And
-    - !Condition region_exists_in_mapping
-    - !Condition create_target_s3_bucket
-
-  create_bucket_if_new_aws_region: !And
-    - !Not [!Condition region_exists_in_mapping]
-    - !Condition create_target_s3_bucket
-
   # Existing source update conditions
   update_alb_source: !Not [ !Equals [ !Ref ALBLogsSourceApiUrl, '' ] ]
   update_elb_source: !Not [ !Equals [ !Ref ELBLogsSourceApiUrl, '' ] ]
@@ -443,60 +401,6 @@ Mappings:
         bucketname: appdevzipfiles-ap-northeast-3s
     ap-southeast-3:
         bucketname: appdevzipfiles-ap-southeast-3
-
-  Region2ELBAccountId:
-    us-east-1:
-      AccountId: "127311923021"
-    us-east-2:
-      AccountId: "033677994240"
-    us-west-1:
-      AccountId: "027434742980"
-    us-west-2:
-      AccountId: "797873946194"
-    af-south-1:
-      AccountId: "098369216593"
-    ca-central-1:
-      AccountId: "985666609251"
-    eu-central-1:
-      AccountId: "054676820928"
-    eu-west-1:
-      AccountId: "156460612806"
-    eu-west-2:
-      AccountId: "652711504416"
-    eu-south-1:
-      AccountId: "635631232127"
-    eu-west-3:
-      AccountId: "009996457667"
-    eu-north-1:
-      AccountId: "897822967062"
-    ap-east-1:
-      AccountId: "754344448648"
-    ap-northeast-1:
-      AccountId: "582318560864"
-    ap-northeast-2:
-      AccountId: "600734575887"
-    ap-northeast-3:
-      AccountId: "383597477331"
-    ap-southeast-1:
-      AccountId: "114774131450"
-    ap-southeast-2:
-      AccountId: "783225319266"
-    ap-southeast-3:
-      AccountId: "589379963580"
-    ap-south-1:
-      AccountId: "718504428378"
-    me-south-1:
-      AccountId: "076674570225"
-    sa-east-1:
-      AccountId: "507241528517"
-    us-gov-west-1:
-      AccountId: "048591011584"
-    us-gov-east-1:
-      AccountId: "190560391635"
-    cn-north-1:
-      AccountId: "638102146993"
-    cn-northwest-1:
-      AccountId: "037604701340"
 
 Resources:
 
@@ -690,24 +594,70 @@ Resources:
           - Event: s3:ObjectCreated:Put
             Topic: !Ref CommonBucketSNSTopic
 
-  CommonBucketPolicyForOldRegion:
-    Type: AWS::CloudFormation::Stack
-    Condition: create_bucket_if_old_aws_region
+  CommonBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: create_target_s3_bucket
     Properties:
-      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}bucket_policy_old_region.template.yaml"
-      Parameters:
-        CommonS3Bucket: !Ref CommonS3Bucket
-        AccountAlias: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-        RegionAccountId: !FindInMap [Region2ELBAccountId, !Ref 'AWS::Region', AccountId]
+      Bucket: !Ref CommonS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Sid: AWSBucketExistenceCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
+          - Sid: AWSAlbLogDeliveryAclCheck
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action:
+              - s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
+          - Sid: AddLBLogsStatement
+            Effect: Allow
+            Principal:
+              Service: logdelivery.elasticloadbalancing.amazonaws.com
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
 
-  CommonBucketPolicyForNewRegion:
-    Type: AWS::CloudFormation::Stack
-    Condition: create_bucket_if_new_aws_region
+  CommonCloudTrail:
+    Type: AWS::CloudTrail::Trail
+    Condition: create_cloudtrail_bucket
+    DependsOn: CommonBucketPolicy
     Properties:
-      TemplateURL: !Sub "https://${MPS3BucketName}.s3.${MPS3BucketRegion}.${AWS::URLSuffix}/${MPS3KeyPrefix}bucket_policy_new_region.template.yaml"
-      Parameters:
-        CommonS3Bucket: !Ref CommonS3Bucket
-        AccountAlias: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
+      IsLogging: true
+      IsMultiRegionTrail: false
+      S3BucketName: !Ref CommonS3Bucket
+      TrailName: !Join
+        - ""
+        - - "Aws-Observability-"
+          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
 
   CommonSNSpolicy:
     Condition: create_target_s3_bucket
