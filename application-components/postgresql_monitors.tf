@@ -318,7 +318,7 @@ module "Postgresql-AccessFromHighlyMaliciousSources" {
 
   # Queries - Only one query is allowed for Logs monitor
   queries = {
-    A = "${var.postgresql_data_source} db_system=postgresql db_cluster=* connection | json \"log\" as _rawlog nodrop | if (isEmpty(_rawlog), _raw, _rawlog) as _raw | parse \"connection received: host=* port=*\" as ip,port | count by ip,  db_cluster | lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat=ip | where type=\"ip_address\" | count by  db_cluster, ip, type, actor, malicious_confidence"
+    A = "${var.postgresql_data_source} db_system=postgresql db_cluster=* connection \n| json \"log\" as _rawlog nodrop \n| if (isEmpty(_rawlog), _raw, _rawlog) as _raw \n| parse \"connection received: host=* port=*\" as ip,port \n| count by ip,  db_cluster \n| threatlookup singleIndicator ip \n| where (_threatlookup.type=\"ipv4-addr:value\" or _threatlookup.type=\"ipv6-addr:value\") and !isNull(_threatlookup.confidence) \n| if (_threatlookup.confidence >= 85, \"high\", if (_threatlookup.confidence >= 50, \"medium\", if (_threatlookup.confidence >= 15, \"low\", if (_threatlookup.confidence >= 0, \"unverified\", \"Unknown\")))) as malicious_confidence \n| if (isEmpty(_threatlookup.actors), \"Unassigned\", _threatlookup.actors) as Actor \n| count by  db_cluster, ip, _threatlookup.threat_type, Actor, malicious_confidence"
   }
 
   # Triggers
