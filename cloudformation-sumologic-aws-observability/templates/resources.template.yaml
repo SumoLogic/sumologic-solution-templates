@@ -310,6 +310,10 @@ Conditions:
     - !Condition create_cloudtrail_bucket
     - !Condition create_elb_bucket
 
+  create_cloudtrail_trail: !Or
+    - !Condition create_cloudtrail_bucket
+    - !Condition is_cloudtrail_bucket_provided
+
   # SNS
   create_cloudtrail_sns_topic: !And
     - !Not [ !Condition create_cloudtrail_bucket ]
@@ -320,6 +324,17 @@ Conditions:
   create_elb_sns_topic: !And
     - !Not [ !Condition create_elb_bucket ]
     - !Condition install_elb_logs_source
+
+  # Add Bucket policy for existing bucket
+  is_cloudtrail_bucket_provided: !And
+    - !Not [ !Equals [ !Ref CloudTrailLogsBucketName, '' ] ]
+    - !Condition create_cloudtrail_sns_topic
+  is_alb_bucket_provided: !And
+    - !Not [ !Equals [ !Ref ALBS3LogsBucketName, '' ] ]
+    - !Condition create_alb_sns_topic
+  is_elb_bucket_provided: !And
+    - !Not [ !Equals [ !Ref ELBS3LogsBucketName, '' ] ]
+    - !Condition create_elb_sns_topic
 
   # Sumo Logic Role
   install_sumo_logic_role: !Or
@@ -646,14 +661,46 @@ Resources:
             Resource:
               - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
 
+  ALBExistingBucketPolicy:
+    Type: Custom::AddBucketPolicy
+    Condition: is_alb_bucket_provided
+    DependsOn: LambdaHelper
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      BucketName: !Ref ALBS3LogsBucketName
+      Partition: !Ref "AWS::Partition"
+      ServiceType: alb
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+
+  ELBExistingBucketPolicy:
+    Type: Custom::AddBucketPolicy
+    Condition: is_elb_bucket_provided
+    DependsOn: LambdaHelper
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      BucketName: !Ref ELBS3LogsBucketName
+      Partition: !Ref "AWS::Partition"
+      ServiceType: elb
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+
+  CloudTrailExistingBucketPolicy:
+    Type: Custom::AddBucketPolicy
+    Condition: is_cloudtrail_bucket_provided
+    DependsOn: LambdaHelper
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      BucketName: !Ref CloudTrailLogsBucketName
+      Partition: !Ref "AWS::Partition"
+      ServiceType: cloudtrail
+      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
+
   CommonCloudTrail:
     Type: AWS::CloudTrail::Trail
-    Condition: create_cloudtrail_bucket
-    DependsOn: CommonBucketPolicy
+    Condition: create_cloudtrail_trail
     Properties:
       IsLogging: true
       IsMultiRegionTrail: false
-      S3BucketName: !Ref CommonS3Bucket
+      S3BucketName: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
       TrailName: !Join
         - ""
         - - "Aws-Observability-"
