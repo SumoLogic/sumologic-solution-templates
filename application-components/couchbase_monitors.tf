@@ -4,6 +4,11 @@ resource "sumologic_monitor_folder" "couchbase_monitor_folder" {
   name        = var.couchbase_monitor_folder
   description = "Folder for Couchbase Monitors"
   parent_id   = sumologic_monitor_folder.root_monitor_folder.id
+  obj_permission {
+    subject_type = "org"
+    subject_id = var.sumologic_organization_id
+    permissions = ["Create", "Read", "Update", "Delete", "Manage"]
+  }
 }
 
 module "Couchbase-HighMemoryUsage" {

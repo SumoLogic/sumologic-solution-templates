@@ -51,4 +51,9 @@ resource "sumologic_content_permission" "share_personal_root_apps_folder_with_or
 resource "sumologic_monitor_folder" "root_monitor_folder" {
   name        = "${var.monitors_folder_name} - ${local.solution_version}"
   description = "This folder contains all the monitors for Application Component Solution."
+  obj_permission {
+    subject_type = "org"
+    subject_id = var.sumologic_organization_id
+    permissions = ["Create", "Read", "Update", "Delete", "Manage"]
+  }
 }
