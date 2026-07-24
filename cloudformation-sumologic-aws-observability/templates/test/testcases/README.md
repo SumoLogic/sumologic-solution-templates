@@ -4,7 +4,7 @@
 
 | Category | Description | Test Cases |
 |---|---|---|
-| **`common/`** | No CW log source dependency — LB auto-enable, existing sources, apps-only, nothing-to-install | `nothing_to_install`, `only_apps_install`, `existing_cloudtrail_alb_source`, `existing_cloudtrail_elb_source`, `permission_checker`, `s3_bucket_retention`, `alb_auto_enable_existing`, `elb_auto_enable_existing`, `existing_source_with_alb_bucket`, `existing_source_with_elb_bucket`, `alb_new_elb_existing`, `elb_new_alb_existing` |
+| **`common/`** | No CW log source dependency — LB auto-enable, existing sources, apps-only, nothing-to-install | `nothing_to_install`, `only_apps_install`, `existing_cloudtrail_alb_source`, `existing_cloudtrail_elb_source`, `permission_checker`, `s3_bucket_retention`, `alb_auto_enable_existing`, `elb_auto_enable_existing`, `existing_source_with_alb_bucket`, `existing_source_with_elb_bucket`, `alb_new_elb_existing`, `elb_new_alb_existing`, `all_existing_buckets`, `all_existing_source_urls` |
 | **`kf/`** | Kinesis Firehose log source — **recommended path** | `default_param_no_alias_and_csv`, `default_param_no_cloudtrail_invalid_mapping_csv`, `default_param_no_cloudtrail_valid_mapping_csv`, `kinesis_firehose_all_sources`, `kinesis_firehose_all_sources_no_apps`, `only_cloudtrail_with_loggroup_tags`, `remove_on_delete_false`, `create_source_existing_bucket_existing_sources`, `no_metrics_source`, `kf_logs_subscribe_new_only` |
 | **`cw/`** | CloudWatch Lambda Forwarder log source — legacy | `cw_metrics_lambda_log_forwarder`, `no_cloudtrail`, `existing_cloudtrail_bucket`, `tag_filters_for_cw_metric_source_with_custom_namespaces` |
 | **`migrate/v3_0/`** | Stack migration from older AWSO versions to v3.0.0 | `v2_12_to_v3_0_all_sources`, `v2_13_to_v3_0_all_sources`, `v2_14_to_v3_0_all_sources`, `v2_15_to_v3_0_all_sources` |
@@ -87,6 +87,135 @@
 | **ALB/ELB sources** | Created new | Not created (No) |
 | **Custom namespaces** | Standard | Includes `cwgent` |
 | **Difference** | — | Tags-based subscription, Existing-only CW LogGroups, no ALB/ELB source creation |
+
+### `all_existing_buckets`
+
+| Aspect | Baseline | This Test Case |
+|---|---|---|
+| **Alias** | infrat1 | alleb1 |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | ALB infra + ELB infra + 3 S3 buckets (ALB, ELB, CloudTrail) |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | None |
+| **ALB Auto-Enable** | Both (2 LBs) | Existing (1 LB) |
+| **ELB Auto-Enable** | Both (2 LBs) | Existing (1 LB) |
+| **CW LogGroups** | Existing + New | None |
+| **CloudTrail** | Yes (KF source, new bucket) | Yes (new source, **existing bucket**) |
+| **ALB Source** | New bucket | New source, **existing bucket** |
+| **ELB Source** | New bucket | New source, **existing bucket** |
+| **Metrics Source** | KinesisFirehoseMetricsSource | None |
+| **CW Logs Source** | KinesisFirehoseLogsSource | None |
+| **Apps** | Yes | No |
+| **CommonS3Bucket** | Created | **Not created** (all Create*Bucket=No) |
+| **New Resources** | — | `ALBExistingBucketPolicy`, `ELBExistingBucketPolicy`, `CloudTrailExistingBucketPolicy`, `CommonCloudTrail` |
+| **Difference** | — | All three bucket flags=No with non-empty bucket names. Tests `Custom::AddBucketPolicy` for all services and `CommonCloudTrail` pointing at existing bucket |
+
+### `all_existing_source_urls`
+
+| Aspect | Baseline | This Test Case |
+|---|---|---|
+| **Alias** | infrat1 | alleu1 |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | ALB infra + ELB infra + 2 S3 buckets (ALB, ELB) + Sumo prereqs + 3 pre-created sources (ALB, ELB, CloudTrail) + CloudTrail S3 bucket (for source prereq only) |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | None |
+| **ALB Auto-Enable** | Both (2 LBs) | Existing (1 LB) |
+| **ELB Auto-Enable** | Both (2 LBs) | Existing (1 LB) |
+| **CW LogGroups** | Existing + New | None |
+| **CloudTrail** | Yes (new source, new bucket) | No new source — **existing source URL** (`Section6bCloudTrailLogsSourceUrl`) |
+| **ALB Source** | New source, new bucket | No new source — **existing source URL** (`Section5cALBLogsSourceUrl`) |
+| **ELB Source** | New source, new bucket | No new source — **existing source URL** (`Section8cELBLogsSourceUrl`) |
+| **Metrics Source** | KinesisFirehoseMetricsSource | None |
+| **CW Logs Source** | KinesisFirehoseLogsSource | None |
+| **Apps** | Yes | No |
+| **CommonS3Bucket** | Created | **Not created** (no new sources, all Create*Bucket=No) |
+| **New Resources** | — | `SumoALBLogsUpdateSource`, `SumoELBLogsUpdateSource`, `SumoCloudTrailLogsUpdateSource` (update_* conditions = True) |
+| **Difference** | — | All three sources use existing source URLs. Tests `Custom::SumoLogicUpdateFields` for ALB, ELB, and CloudTrail simultaneously. Bucket policy is added to ALB + ELB buckets via AutoEnable; no CloudTrail trail created |
+
+### `permission_checker`
+
+> **Special case** — deploys a dedicated `PermissionStack` template (not the master template). Not comparable against baseline parameters. Validates that the Lambda IAM role has sufficient permissions to create all AWSO sub-resources (KF metrics, auto-enable, auto-subscribe, etc.) before any real deployment.
+
+### `s3_bucket_retention`
+
+| Aspect | Baseline | This Test Case |
+|---|---|---|
+| **Alias** | infrat1 | s3ret |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | None |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | None |
+| **ALB Auto-Enable** | Both (2 LBs) | None |
+| **ELB Auto-Enable** | Both (2 LBs) | None |
+| **CW LogGroups** | Existing + New | None |
+| **CloudTrail** | Yes (KF source) | Yes (new source, new bucket) |
+| **ALB Source** | Yes | Yes (new bucket) |
+| **ELB Source** | Yes | No |
+| **Metrics Source** | KinesisFirehoseMetricsSource | None |
+| **CW Logs Source** | KinesisFirehoseLogsSource | None |
+| **Apps** | Yes | No |
+| **RemoveOnDeleteStack** | true | **false** |
+| **Difference** | — | Tests that the `CommonS3Bucket` is NOT deleted when stack is cleaned up with `RemoveOnDeleteStack=false` |
+
+### `alb_auto_enable_existing`
+
+| Aspect | Baseline | This Test Case |
+|---|---|---|
+| **Alias** | infrat1 | albexist |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | ALB only (existing LB) |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | None |
+| **ALB Auto-Enable** | Both (2 LBs) | **Existing** (1 LB) |
+| **ELB Auto-Enable** | Both (2 LBs) | None |
+| **CW LogGroups** | Existing + New | Auto-subscribe Lambda (both) |
+| **CloudTrail** | Yes (KF source) | No |
+| **Metrics Source** | KinesisFirehoseMetricsSource | KinesisFirehoseMetricsSource |
+| **CW Logs Source** | KinesisFirehoseLogsSource | Lambda Log Forwarder |
+| **Apps** | Yes | No |
+| **Difference** | — | ALB-only Existing auto-enable with Lambda log forwarder. No ELB, no CloudTrail |
+
+### `elb_auto_enable_existing`
+
+| Aspect | Baseline | This Test Case |
+|---|---|---|
+| **Alias** | infrat1 | elbexist |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | ELB only (existing LB) |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | None |
+| **ALB Auto-Enable** | Both (2 LBs) | None |
+| **ELB Auto-Enable** | Both (2 LBs) | **Existing** (1 LB) |
+| **CW LogGroups** | Existing + New | Auto-subscribe Lambda (both) |
+| **CloudTrail** | Yes (KF source) | No |
+| **Metrics Source** | KinesisFirehoseMetricsSource | KinesisFirehoseMetricsSource |
+| **CW Logs Source** | KinesisFirehoseLogsSource | Lambda Log Forwarder |
+| **Apps** | Yes | No |
+| **Difference** | — | Mirror of `alb_auto_enable_existing` for ELB. ELB-only Existing auto-enable |
+
+### `existing_source_with_alb_bucket`
+
+| Aspect | Baseline | This Test Case |
+|---|---|---|
+| **Alias** | infrat1 | lbt1 |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | ALB infra + S3 bucket (for ALB) + Sumo prereqs (collector, CW log src, role, KF metrics src) |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | None |
+| **ALB Auto-Enable** | Both (2 LBs) | Existing (1 LB) |
+| **ELB Auto-Enable** | Both (2 LBs) | None |
+| **CW LogGroups** | Existing + New | None |
+| **CloudTrail** | Yes (KF source, new bucket) | Yes (new source, **new bucket**) |
+| **ALB Source** | New bucket | New source, **existing bucket** (`CreateALBS3Bucket=No`) |
+| **Metrics Source** | KinesisFirehoseMetricsSource | None (existing source URL) |
+| **CW Logs Source** | KinesisFirehoseLogsSource | None |
+| **Apps** | Yes | No |
+| **Difference** | — | Tests `ALBExistingBucketPolicy` Custom Resource. ALB logs to an existing S3 bucket with bucket policy appended at deploy time |
+
+### `existing_source_with_elb_bucket`
+
+| Aspect | Baseline | This Test Case |
+|---|---|---|
+| **Alias** | infrat1 | lbt2 |
+| **PreRequisitesInfra** | ALB + ELB + CW LogGroups | S3 bucket (for ELB) + Sumo prereqs + ELB infra |
+| **PostRequisitesInfra** | ALB + ELB + CW LogGroups | None |
+| **ALB Auto-Enable** | Both (2 LBs) | None |
+| **ELB Auto-Enable** | Both (2 LBs) | Existing (1 LB) |
+| **CW LogGroups** | Existing + New | None |
+| **CloudTrail** | Yes (KF source, new bucket) | Yes (new source, **new bucket**) |
+| **ELB Source** | New bucket | New source, **existing bucket** (`CreateELBS3Bucket=No`) |
+| **Metrics Source** | KinesisFirehoseMetricsSource | None (existing source URL) |
+| **CW Logs Source** | KinesisFirehoseLogsSource | None |
+| **Apps** | Yes | No |
+| **Difference** | — | Mirror of `existing_source_with_alb_bucket` for ELB. Tests `ELBExistingBucketPolicy` Custom Resource |
 
 ### `existing_cloudtrail_alb_source`
 
@@ -346,6 +475,41 @@
 | **ScanInterval** | 300000 (default) | 30000 (10x faster) |
 | **Difference** | — | Most complex. All sources pre-existing. Tests migration path (Lambda→KF) |
 
+---
+
+## Migrate Test Cases (`migrate/v3_0/`)
+
+> These tests deploy an older AWSO version first, then perform a stack update to v3.0.0. All four cases use the same post-update configuration (all sources enabled, ALB+ELB Both auto-enable). The only difference is the source version being migrated from.
+
+| Test Case | From Version | Alias | ALB | ELB | CloudTrail | Metrics | CW Logs |
+|---|---|---|---|---|---|---|---|
+| `v2_12_to_v3_0_all_sources` | v2.12 | mgrt1 | Both | Both | Yes | KF | KF |
+| `v2_13_to_v3_0_all_sources` | v2.13 | mgrt1 | Both | Both | Yes | KF | KF |
+| `v2_14_to_v3_0_all_sources` | v2.14 | mgrt1 | Both | Both | Yes | KF | KF |
+| `v2_15_to_v3_0_all_sources` | v2.15 | mgrt1 | Both | Both | Yes | KF | KF |
+
+Parameter renames handled during migration (old → new): `Section9a→Section8a` (ELB auto-enable), `Section7aLambda→Section7a` (CW logs), `Section10a/b` (app install location) removed.
+
+---
+
+## Update Test Cases (`upgrade_update/update/v3_0/`)
+
+> Each test deploys an initial stack, then updates it with changed parameters. The table shows initial deploy → update change.
+
+| Test Case | Alias | Initial Deploy | Update Change | What It Tests |
+|---|---|---|---|---|
+| `account_alias_update` | updateaa1 | ALB+ELB New, CloudTrail, KF metrics+logs, Apps=No, Tags | Same but AccountAlias changes | Alias rename propagates to source names and collector |
+| `add_apps_on_update` | updateap | ALB+ELB New, CloudTrail, KF metrics+logs, Apps=**No** | Apps=**Yes** | Apps install correctly on stack update |
+| `add_cloudtrail_source` | updatect | ALB+ELB New, **CloudTrail=No**, KF metrics+logs | **CloudTrail=Yes** | CloudTrail source + bucket added mid-lifecycle |
+| `alb_enable_mode_new_to_both` | updateab | ALB=**New**, ELB=New, CloudTrail, KF metrics+logs | ALB=**Both** | ALB auto-enable mode switch from New to Both (adds Existing path) |
+| `cw_metrics_to_kf_metrics` | updatecm | ALB+ELB New, CloudTrail, **CW Metrics**, KF logs | **KF Metrics** | Metrics source swap: CloudWatch polling → Kinesis Firehose |
+| `disabled_telemetry` | updatet1 | ALB Existing, **Telemetry=true**, existing S3+CW log src | **Telemetry=false** | Telemetry can be disabled mid-lifecycle |
+| `enable_telemetry` | updatetl | CW Metrics, **Telemetry=false**, no ALB/ELB/CloudTrail | **Telemetry=true** | Telemetry can be enabled mid-lifecycle |
+| `lambda_to_kf_logs` | updatelf | ALB+ELB New, **Lambda Log Forwarder**, CW Metrics | **KF Log Source** | CW logs source swap: Lambda Forwarder → Kinesis Firehose |
+| `namespace_update` | updatens | CloudTrail, CW Metrics (3 namespaces) | CW Metrics (**5 namespaces**) | Namespace list expansion updates metrics source subscription filters |
+
+---
+
 ## SourceQueryFilters by Test Case
 
 | Test Case | CloudtrailSourceQueries | Metrics Queries | CW Logs Queries |
@@ -355,6 +519,7 @@
 | `kinesis_firehose_all_sources` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
 | `cw_metrics_lambda_log_forwarder` | lambda, ALBv2(2015-12-01), ELB(2012-06-01) | CW: namespace=Lambda,ApplicationELB,ELB | CWLogs: matches lambda |
 | `only_cloudtrail_with_loggroup_tags` | lambda | KF: namespace=ApplicationELB,ELB,EC2 | — |
+| `all_existing_buckets` | lambda | — (no metrics source) | — |
 | `existing_cloudtrail_alb_source` | — (existing source) | KF: namespace=ApplicationELB,Lambda | — |
 | `existing_cloudtrail_elb_source` | — (existing source) | KF: namespace=ELB,EC2,Lambda | — |
 | `existing_cloudtrail_bucket` | lambda | CW: namespace=Lambda | — |
@@ -372,6 +537,15 @@
 | `kf_logs_subscribe_new_only` | — | KF: namespace=EC2,ApplicationELB,ELB | — |
 | `alb_auto_enable_existing` | — | KF: namespace=ApplicationELB,Lambda | — |
 | `elb_auto_enable_existing` | — | KF: namespace=ELB,Lambda | — |
+| `existing_source_with_alb_bucket` | lambda | — (no metrics source) | — |
+| `existing_source_with_elb_bucket` | lambda | — (no metrics source) | — |
+| `all_existing_source_urls` | — (existing sources updated via SumoLogicUpdateFields) | — (no metrics source) | — |
+| `permission_checker` | — (no E2E) | — | — |
+| `s3_bucket_retention` | lambda | — (no metrics source) | — |
+| `v2_12_to_v3_0_all_sources` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
+| `v2_13_to_v3_0_all_sources` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
+| `v2_14_to_v3_0_all_sources` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
+| `v2_15_to_v3_0_all_sources` | lambda, ALBv2, ELB | KF: namespace=ApplicationELB,ELB,Lambda,EC2 | KF: namespace=aws/lambda |
 
 ## Parameter → Assertion Mapping
 

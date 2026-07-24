@@ -6,8 +6,9 @@ Global:
   GlobalParameters:
     Default:
       Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+      Section2aAccountAlias: 'alleu1'
 TestCase:
-  TestName: existingSourceWithAlbBucket
+  TestName: allExistingSourceUrls
   Regions: '${SUMO_REGIONS}'
   Skip: false
   PreRequisitesInfra:
@@ -18,11 +19,18 @@ TestCase:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
         AlbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
+    # Create "existing" ELB (AWSO Existing Lambda enables access logs on it at deploy time)
+    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      ImpactedParametersPath:
+        ElbName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
+        ElbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
+    # Existing ALB S3 bucket — used for AutoEnable log delivery and ALB source prereq
     - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
       ImpactedParametersPath:
         BucketName:
           - "parameters.Section5dALBS3LogsBucketName"
-          - "assertions[AssertType==ParameterCheck].Assert.CreateCommonResources.ALBS3LogsBucketName"
           - "assertions[AssertType==ParameterCheck].Assert.AutoEnableOptions.ALBS3LogsBucketName"
           - "assertions[AssertType==ParameterCheck].Assert['AutoEnableOptions#AutoEnableS3LogsAlbStack'].BucketName"
     - CFNTemplateURL: "test/setup-infra/create_sumo_lambda_hepler.yaml"
@@ -30,29 +38,19 @@ TestCase:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
         SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
-        AccountAlias: "lbt1"
+        AccountAlias: "alleu1"
     - CFNTemplateURL: "test/setup-infra/create_sumo_collector.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
         SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
         SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
-    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_log_source.yaml"
-      CFNParameters:
-        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
-        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
-        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
-        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
-        SumoCollectorID: '${SumoCollectorID}'
-        AccountAlias: '${AccountAlias}'
-      ImpactedParametersPath:
-        SumoCloudWatchLogAPIURL:
-          - "parameters.Section7bCloudWatchLogsSourceUrl"
     - CFNTemplateURL: "test/setup-infra/create_sumo_role.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicOrganizationId: '${SUMO_ORG_ID}'
-    - CFNTemplateURL: "test/setup-infra/create_sumo_kinesis_firehose_metrics_source.yaml"
+    # ALB log source pointing at the ALB S3 bucket (BucketName still set to ALB bucket from step above)
+    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_lb_source.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
@@ -61,28 +59,69 @@ TestCase:
         SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
         SumoCollectorID: '${SumoCollectorID}'
         AccountAlias: '${AccountAlias}'
+        LBLogsBucketName: '${BucketName}'
       ImpactedParametersPath:
-        SumoCloudWatchMetricsAPIURL:
-          - "parameters.Section4cCloudWatchExistingSourceAPIUrl"
+        SumoLoadBalancerLogAPIURL:
+          - "parameters.Section5cALBLogsSourceUrl"
+    # Existing ELB S3 bucket — BucketName is now ELB bucket for subsequent steps
+    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+      ImpactedParametersPath:
+        BucketName:
+          - "parameters.Section8dELBS3LogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert.AutoEnableOptions.ELBS3LogsBucketName"
+          - "assertions[AssertType==ParameterCheck].Assert['AutoEnableOptions#AutoEnableS3LogsElbStack'].BucketName"
+    # ELB log source pointing at the ELB S3 bucket
+    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_lb_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        AccountAlias: '${AccountAlias}'
+        LBLogsBucketName: '${BucketName}'
+      ImpactedParametersPath:
+        SumoLoadBalancerLogAPIURL:
+          - "parameters.Section8cELBLogsSourceUrl"
+    # CloudTrail S3 bucket — BucketName is now CloudTrail bucket for the CT source prereq
+    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+    # CloudTrail log source pointing at the CloudTrail S3 bucket
+    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudtrail_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        CloudTrailLogsBucketName: '${BucketName}'
+        AccountAlias: '${AccountAlias}'
+      ImpactedParametersPath:
+        SumoCloudTrailAPIURL:
+          - "parameters.Section6bCloudTrailLogsSourceUrl"
+
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
       Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
       Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
       Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
-      Section2aAccountAlias: 'lbt1'
+      Section2aAccountAlias: 'alleu1'
       Section2bAccountAliasMappingS3URL: ''
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'None'
-      Section4cCloudWatchExistingSourceAPIUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
       Section5aAutoEnableS3LogsALBResourcesOptions: 'Existing'
-      Section5bALBCreateLogSource: 'Yes'
-      Section5dALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
-      Section5eALBS3BucketPathExpression: '*abc*'
-      Section6aCreateCloudTrailLogSource: 'Yes'
+      Section5bALBCreateLogSource: 'No'
+      Section5cALBLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
+      Section5dALBS3LogsBucketName: 'placeholder-alb-bucket'
+      Section6aCreateCloudTrailLogSource: 'No'
+      Section6bCloudTrailLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
       Section7aCreateCloudWatchLogsSourceOptions: 'None'
-      Section7bCloudWatchLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511499202'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'Existing'
       Section8bELBCreateLogSource: 'No'
+      Section8cELBLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
+      Section8dELBS3LogsBucketName: 'placeholder-elb-bucket'
   Assertions:
     - AssertType: ResourceExistence
       Assert:
@@ -93,33 +132,29 @@ TestCase:
           - TelemetryLambda
           - CreateCommonResources
           - AutoEnableOptions
-          - CreateCommonResources.SumoLogicALBS3Policy
-          - CreateCommonResources.SumoLogicCloudTrailS3Policy
           - CreateCommonResources.LambdaRole
           - CreateCommonResources.LambdaHelper
           - CreateCommonResources.AccountCheck
-          - CreateCommonResources.CommonBucketSNSTopic
-          - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
-          - CreateCommonResources.CommonCloudTrail
-          - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole
           - CreateCommonResources.SumoLogicHostedCollector
           - CreateCommonResources.LambdaToDecideCWMetricsSources
           - CreateCommonResources.Primerinvoke
-          - CreateCommonResources.ALBSource
-          - CreateCommonResources.ALBSNSSubscription
-          - CreateCommonResources.ALBSNSTopic
-          - CreateCommonResources.ALBSNSpolicy
-          - CreateCommonResources.CloudTrailSource
-          - CreateCommonResources.CloudTrailSNSSubscription
           - CreateCommonResources.AccountAliasValue
           - CreateCommonResources.LambdaHelperAlias
           - CreateCommonResources.LambdaRoleAlias
+          # Update source custom resources (update_* conditions = true when SourceApiUrl != '')
+          - CreateCommonResources.SumoALBLogsUpdateSource
+          - CreateCommonResources.SumoELBLogsUpdateSource
+          - CreateCommonResources.SumoCloudTrailLogsUpdateSource
+          # AutoEnable stacks (Existing mode — no EventBridge rules, only existing resource Lambda)
           - AutoEnableOptions.AutoEnableS3LogsAlbStack
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.ExistingAWSResources
           - AutoEnableOptions.AutoEnableS3LogsAlbStack.SumoLambdaRole
+          - AutoEnableOptions.AutoEnableS3LogsElbStack
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableExisitngAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.ExistingAWSResources
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.SumoLambdaRole
     - AssertType: OutputsCheck
       Assert:
         Outputs:
@@ -128,33 +163,39 @@ TestCase:
           - CreateCommonResources.PaidAccountCheck
           - CreateCommonResources.Namespaces
           - CreateCommonResources.LambdaRoleARN
-          - CreateCommonResources.BucketName
-          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
           - CreateCommonResources.CollectorName
           - CreateCommonResources.AccountAlias
+          - AutoEnableOptions.AutoEnableS3LogsAlbStack.EnableExisitngAWSResourcesLambda
+          - AutoEnableOptions.AutoEnableS3LogsElbStack.EnableExisitngAWSResourcesLambda
     - AssertType: ParameterCheck
       Assert:
         CreateCommonResources:
-          AccountAlias: "lbt1"
+          AccountAlias: "alleu1"
           AccountAliasMappingS3URL: ""
           CreateMetaDataSource: 'No'
           MetaDataSourceName: ""
           MetaDataSourceCategory: ""
-          CreateCloudWatchMetricsSource:  'No'
+          CreateCloudWatchMetricsSource: 'No'
           CloudWatchMetricsSourceName: ''
           CloudWatchMetricsNameSpaces: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
           ScanInterval: "300000"
           CloudWatchMetricSourceCategory: ""
-          CreateALBLogSource: 'Yes'
+          CreateALBLogSource: 'No'
           CreateALBS3Bucket: 'No'
-          ALBS3LogsBucketName: "cf-templates-qpf3unpuo1hw-ap-southeast-4"
-          ALBS3BucketPathExpression: '/elasticloadbalancing/<REGION>/*'
+          ALBS3LogsBucketName: ""
+          ALBS3BucketPathExpression: ''
           ALBLogsSourceName: "alb-logs-<REGION>"
           ALBLogsSourceCategory: "aws/observability/alb/logs"
-          CreateCloudTrailLogSource: 'Yes'
-          CreateCloudTrailBucket: 'Yes'
+          CreateELBLogSource: 'No'
+          CreateELBS3Bucket: 'No'
+          ELBS3LogsBucketName: ""
+          ELBS3BucketPathExpression: ''
+          ELBLogsSourceName: "classic-lb-logs-<REGION>"
+          ELBLogsSourceCategory: "aws/observability/clb/logs"
+          CreateCloudTrailLogSource: 'No'
+          CreateCloudTrailBucket: 'No'
           CloudTrailLogsBucketName: ""
-          CloudTrailBucketPathExpression: '/CloudTrail/<REGION>/*'
+          CloudTrailBucketPathExpression: ''
           CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
           CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
           CreateCloudWatchLogSource: 'No'
@@ -168,10 +209,17 @@ TestCase:
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
         AutoEnableOptions:
           ALBAutoEnableS3Logs: 'Yes'
-          ALBS3LogsBucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
+          ALBAutoEnableS3LogsOptions: 'Existing'
+          ALBS3LogsBucketName: 'placeholder-alb-bucket'
+          ELBAutoEnableS3Logs: 'Yes'
+          ELBAutoEnableS3LogsOptions: 'Existing'
+          ELBS3LogsBucketName: 'placeholder-elb-bucket'
           AutoSubscribeLogGroups: 'No'
         AutoEnableOptions.AutoEnableS3LogsAlbStack:
-          BucketName: 'cf-templates-qpf3unpuo1hw-ap-southeast-4'
+          BucketName: 'placeholder-alb-bucket'
+          AutoEnableResourceOptions: 'Existing'
+        AutoEnableOptions.AutoEnableS3LogsElbStack:
+          BucketName: 'placeholder-elb-bucket'
           AutoEnableResourceOptions: 'Existing'
     # --- E2E PHASE ---
     - AssertType: SumoSourceExistenceValidation
@@ -191,3 +239,23 @@ TestCase:
           HttpRequestCount: 10
           AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
+        ELB:
+          LoadBalancers:
+            - Name: ""
+              DnsName: ""
+          HttpRequestCount: 10
+          AccessLogCheckTimeoutSeconds: 240
+          S3LogCheckTimeoutSeconds: 600
+
+    - AssertType: SumoSourceLogsValidation
+      Skip: false
+      Assert:
+        SourceQueryFilters:
+          ALBSourceQueries:
+            - AppendQuery: "| json auto | where isnotempty(elb)"
+          ELBSourceQueries:
+            - AppendQuery: "| json auto | where isnotempty(elb_status_code)"
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+        TimeoutSeconds: 600
