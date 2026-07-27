@@ -633,9 +633,7 @@ Resources:
   ELBBucketPolicy:
     Type: Custom::AddBucketPolicy
     Condition: needs_elb_bucket_policy
-    DependsOn:
-      - LambdaHelper
-      - ALBBucketPolicy
+    DependsOn: LambdaHelper
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       BucketName: !If [create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName]
@@ -645,9 +643,7 @@ Resources:
   CloudTrailBucketPolicy:
     Type: Custom::AddBucketPolicy
     Condition: needs_cloudtrail_bucket_policy
-    DependsOn:
-      - LambdaHelper
-      - ELBBucketPolicy
+    DependsOn: LambdaHelper
     Properties:
       ServiceToken: !GetAtt LambdaHelper.Arn
       BucketName: !If [create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName]
