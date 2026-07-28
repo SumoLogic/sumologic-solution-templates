@@ -302,9 +302,15 @@ Conditions:
     - !Condition install_kf_logs_source
 
   # Bucket Condition and Trail
-  create_alb_bucket: !Equals [ !Ref CreateALBS3Bucket, 'Yes' ]
-  create_elb_bucket: !Equals [ !Ref CreateELBS3Bucket, 'Yes' ]
-  create_cloudtrail_bucket: !Equals [ !Ref CreateCloudTrailBucket, 'Yes' ]
+  create_alb_bucket: !And
+    - !Equals [ !Ref CreateALBS3Bucket, 'Yes' ]
+    - !Condition install_alb_logs_source
+  create_elb_bucket: !And
+    - !Equals [ !Ref CreateELBS3Bucket, 'Yes' ]
+    - !Condition install_elb_logs_source
+  create_cloudtrail_bucket: !And
+    - !Equals [ !Ref CreateCloudTrailBucket, 'Yes' ]
+    - !Condition install_cloudtrail_logs_source
   create_target_s3_bucket: !Or
     - !Condition create_alb_bucket
     - !Condition create_cloudtrail_bucket
