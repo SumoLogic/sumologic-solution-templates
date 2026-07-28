@@ -302,13 +302,23 @@ Conditions:
     - !Condition install_kf_logs_source
 
   # Bucket Condition and Trail
-  create_alb_bucket: !Equals [ !Ref CreateALBS3Bucket, 'Yes' ]
-  create_elb_bucket: !Equals [ !Ref CreateELBS3Bucket, 'Yes' ]
-  create_cloudtrail_bucket: !Equals [ !Ref CreateCloudTrailBucket, 'Yes' ]
+  create_alb_bucket: !And
+    - !Equals [ !Ref CreateALBS3Bucket, 'Yes' ]
+    - !Condition install_alb_logs_source
+  create_elb_bucket: !And
+    - !Equals [ !Ref CreateELBS3Bucket, 'Yes' ]
+    - !Condition install_elb_logs_source
+  create_cloudtrail_bucket: !And
+    - !Equals [ !Ref CreateCloudTrailBucket, 'Yes' ]
+    - !Condition install_cloudtrail_logs_source
   create_target_s3_bucket: !Or
     - !Condition create_alb_bucket
     - !Condition create_cloudtrail_bucket
     - !Condition create_elb_bucket
+
+  create_cloudtrail_trail: !Or
+    - !Condition create_cloudtrail_bucket
+    - !Condition is_cloudtrail_bucket_provided
 
   # SNS
   create_cloudtrail_sns_topic: !And
@@ -320,6 +330,28 @@ Conditions:
   create_elb_sns_topic: !And
     - !Not [ !Condition create_elb_bucket ]
     - !Condition install_elb_logs_source
+
+  # Add Bucket policy for existing bucket
+  is_cloudtrail_bucket_provided: !And
+    - !Not [ !Equals [ !Ref CloudTrailLogsBucketName, '' ] ]
+    - !Condition create_cloudtrail_sns_topic
+  is_alb_bucket_provided: !And
+    - !Not [ !Equals [ !Ref ALBS3LogsBucketName, '' ] ]
+    - !Condition create_alb_sns_topic
+  is_elb_bucket_provided: !And
+    - !Not [ !Equals [ !Ref ELBS3LogsBucketName, '' ] ]
+    - !Condition create_elb_sns_topic
+
+  # Bucket policy needed (new or existing bucket)
+  needs_alb_bucket_policy: !Or
+    - !Condition create_alb_bucket
+    - !Condition is_alb_bucket_provided
+  needs_elb_bucket_policy: !Or
+    - !Condition create_elb_bucket
+    - !Condition is_elb_bucket_provided
+  needs_cloudtrail_bucket_policy: !Or
+    - !Condition create_cloudtrail_bucket
+    - !Condition is_cloudtrail_bucket_provided
 
   # Sumo Logic Role
   install_sumo_logic_role: !Or
@@ -594,66 +626,44 @@ Resources:
           - Event: s3:ObjectCreated:Put
             Topic: !Ref CommonBucketSNSTopic
 
-  CommonBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Condition: create_target_s3_bucket
+  ALBBucketPolicy:
+    Type: Custom::AddBucketPolicy
+    Condition: needs_alb_bucket_policy
+    DependsOn: LambdaHelper
     Properties:
-      Bucket: !Ref CommonS3Bucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: AWSCloudTrailAclCheck
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action:
-              - s3:GetBucketAcl
-            Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
-          - Sid: AWSCloudTrailWrite
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action:
-              - s3:PutObject
-            Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
-            Condition:
-              StringEquals:
-                s3:x-amz-acl: bucket-owner-full-control
-          - Sid: AWSBucketExistenceCheck
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action:
-              - s3:ListBucket
-            Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
-          - Sid: AWSAlbLogDeliveryAclCheck
-            Effect: Allow
-            Principal:
-              Service: delivery.logs.amazonaws.com
-            Action:
-              - s3:GetBucketAcl
-            Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}"
-          - Sid: AddLBLogsStatement
-            Effect: Allow
-            Principal:
-              Service: logdelivery.elasticloadbalancing.amazonaws.com
-            Action:
-              - s3:PutObject
-            Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${CommonS3Bucket}/*"
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      BucketName: !If [create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName]
+      Partition: !Ref "AWS::Partition"
+      ServiceType: alb
+
+  ELBBucketPolicy:
+    Type: Custom::AddBucketPolicy
+    Condition: needs_elb_bucket_policy
+    DependsOn: LambdaHelper
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      BucketName: !If [create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName]
+      Partition: !Ref "AWS::Partition"
+      ServiceType: elb
+
+  CloudTrailBucketPolicy:
+    Type: Custom::AddBucketPolicy
+    Condition: needs_cloudtrail_bucket_policy
+    DependsOn: LambdaHelper
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      BucketName: !If [create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName]
+      Partition: !Ref "AWS::Partition"
+      ServiceType: cloudtrail
 
   CommonCloudTrail:
     Type: AWS::CloudTrail::Trail
-    Condition: create_cloudtrail_bucket
-    DependsOn: CommonBucketPolicy
+    Condition: create_cloudtrail_trail
+    DependsOn: CloudTrailBucketPolicy
     Properties:
       IsLogging: true
       IsMultiRegionTrail: false
-      S3BucketName: !Ref CommonS3Bucket
+      S3BucketName: !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ]
       TrailName: !Join
         - ""
         - - "Aws-Observability-"
