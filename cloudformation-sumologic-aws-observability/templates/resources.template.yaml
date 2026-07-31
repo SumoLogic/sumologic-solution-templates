@@ -320,27 +320,25 @@ Conditions:
     - !Condition create_cloudtrail_bucket
     - !Condition is_cloudtrail_bucket_provided
 
-  # SNS
-  create_cloudtrail_sns_topic: !And
-    - !Not [ !Condition create_cloudtrail_bucket ]
-    - !Condition install_cloudtrail_logs_source
-  create_alb_sns_topic: !And
-    - !Not [ !Condition create_alb_bucket ]
-    - !Condition install_alb_logs_source
-  create_elb_sns_topic: !And
-    - !Not [ !Condition create_elb_bucket ]
-    - !Condition install_elb_logs_source
-
-  # Add Bucket policy for existing bucket
-  is_cloudtrail_bucket_provided: !And
-    - !Not [ !Equals [ !Ref CloudTrailLogsBucketName, '' ] ]
-    - !Condition create_cloudtrail_sns_topic
+  # True when source is installed and an existing bucket name is provided (not creating a new one)
   is_alb_bucket_provided: !And
     - !Not [ !Equals [ !Ref ALBS3LogsBucketName, '' ] ]
-    - !Condition create_alb_sns_topic
+    - !Not [ !Condition create_alb_bucket ]
+    - !Condition install_alb_logs_source
   is_elb_bucket_provided: !And
     - !Not [ !Equals [ !Ref ELBS3LogsBucketName, '' ] ]
-    - !Condition create_elb_sns_topic
+    - !Not [ !Condition create_elb_bucket ]
+    - !Condition install_elb_logs_source
+  is_cloudtrail_bucket_provided: !And
+    - !Not [ !Equals [ !Ref CloudTrailLogsBucketName, '' ] ]
+    - !Not [ !Condition create_cloudtrail_bucket ]
+    - !Condition install_cloudtrail_logs_source
+
+  # Triggers the BucketNotifications custom resource when any source uses an existing bucket
+  any_existing_bucket_source: !Or
+    - !Condition is_alb_bucket_provided
+    - !Condition is_elb_bucket_provided
+    - !Condition is_cloudtrail_bucket_provided
 
   # Bucket policy needed (new or existing bucket)
   needs_alb_bucket_policy: !Or
@@ -493,6 +491,29 @@ Resources:
                   - !Sub
                     - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                     - S3Bucket: !If [install_elb_logs_source, !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ], ""]
+              - Effect: Allow
+                Action:
+                  - s3:GetBucketNotification
+                  - s3:PutBucketNotification
+                Resource:
+                  - !Sub
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}"
+                    - S3Bucket: !If [install_alb_logs_source, !If [ create_alb_bucket, !Ref CommonS3Bucket, !Ref ALBS3LogsBucketName ], ""]
+                  - !Sub
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}"
+                    - S3Bucket: !If [install_cloudtrail_logs_source, !If [ create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName ], ""]
+                  - !Sub
+                    - "arn:${AWS::Partition}:s3:::${S3Bucket}"
+                    - S3Bucket: !If [install_elb_logs_source, !If [ create_elb_bucket, !Ref CommonS3Bucket, !Ref ELBS3LogsBucketName ], ""]
+              - Effect: Allow
+                Action:
+                  - sns:CreateTopic
+                  - sns:DeleteTopic
+                  - sns:SetTopicAttributes
+                  - sns:Subscribe
+                  - sns:Unsubscribe
+                  - sns:ListSubscriptionsByTopic
+                Resource: !Sub "arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:sumo-s3-notif-*"
 
   LambdaHelper:
     Type: 'AWS::Lambda::Function'
@@ -655,6 +676,24 @@ Resources:
       BucketName: !If [create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref CloudTrailLogsBucketName]
       Partition: !Ref "AWS::Partition"
       ServiceType: cloudtrail
+
+  BucketNotifications:
+    Type: Custom::ConfigureBucketNotifications
+    Condition: any_existing_bucket_source
+    DependsOn: LambdaHelper
+    Properties:
+      ServiceToken: !GetAtt LambdaHelper.Arn
+      Region: !Ref "AWS::Region"
+      AccountId: !Ref "AWS::AccountId"
+      Partition: !Ref "AWS::Partition"
+      StackId: !Ref "AWS::StackId"
+      Sources:
+        - BucketName: !If [is_alb_bucket_provided, !Ref ALBS3LogsBucketName, ""]
+          SumoEndpoint: !If [is_alb_bucket_provided, !GetAtt ALBSource.SUMO_ENDPOINT, ""]
+        - BucketName: !If [is_elb_bucket_provided, !Ref ELBS3LogsBucketName, ""]
+          SumoEndpoint: !If [is_elb_bucket_provided, !GetAtt ELBSource.SUMO_ENDPOINT, ""]
+        - BucketName: !If [is_cloudtrail_bucket_provided, !Ref CloudTrailLogsBucketName, ""]
+          SumoEndpoint: !If [is_cloudtrail_bucket_provided, !GetAtt CloudTrailSource.SUMO_ENDPOINT, ""]
 
   CommonCloudTrail:
     Type: AWS::CloudTrail::Trail
@@ -1053,32 +1092,11 @@ Resources:
         accountid: !Ref "AWS::AccountId"
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
-  ALBSNSTopic:
-    Type: 'AWS::SNS::Topic'
-    Condition: create_alb_sns_topic
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W47
-            reason: "KmsMasterKeyId not required for SNS topic."
-    Properties:
-      TopicName: !Join
-        - ""
-        - - "alb-sumo-sns-"
-          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-          - !Select
-            - 0
-            - !Split
-              - "-"
-              - !Select
-                - 2
-                - !Split [ "/", !Ref "AWS::StackId" ]
-
   ALBSNSSubscription:
-    Condition: install_alb_logs_source
+    Condition: create_alb_bucket
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn: !If [ create_alb_bucket, !Ref CommonBucketSNSTopic, !Ref ALBSNSTopic ]
+      TopicArn: !Ref CommonBucketSNSTopic
       Endpoint: !GetAtt ALBSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -1090,28 +1108,6 @@ Resources:
           numMaxDelayRetries: 5
           numNoDelayRetries: 0
           backoffFunction: exponential
-
-  ALBSNSpolicy:
-    Condition: create_alb_sns_topic
-    Type: "AWS::SNS::TopicPolicy"
-    Properties:
-      PolicyDocument:
-        Id: ALBSNSpolicy
-        Statement:
-          - Action:
-              - sns:Publish
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref "AWS::AccountId"
-              ArnLike:
-                aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::${ALBS3LogsBucketName}"
-            Effect: Allow
-            Principal:
-              "Service": "s3.amazonaws.com"
-            Resource:
-              - !Ref ALBSNSTopic
-      Topics:
-        - Ref: ALBSNSTopic
 
    ############# START - RESOURCES FOR ELB SOURCE #################
 
@@ -1138,33 +1134,12 @@ Resources:
         accountid: !Ref "AWS::AccountId"
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
-  ELBSNSTopic:
-    Type: 'AWS::SNS::Topic'
-    Condition: create_elb_sns_topic
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W47
-            reason: "KmsMasterKeyId not required for SNS topic."
-    Properties:
-      TopicName: !Join
-        - ""
-        - - "elb-sumo-sns-"
-          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-          - !Select
-            - 0
-            - !Split
-              - "-"
-              - !Select
-                - 2
-                - !Split [ "/", !Ref "AWS::StackId" ]
-
   ELBSNSSubscription:
-    Condition: install_elb_logs_source
+    Condition: create_elb_bucket
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn: !If [ create_elb_bucket, !Ref CommonBucketSNSTopic, !Ref ELBSNSTopic ]
-      Endpoint: !GetAtt ELBSource.SUMO_ENDPOINT # ??
+      TopicArn: !Ref CommonBucketSNSTopic
+      Endpoint: !GetAtt ELBSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
         healthyRetryPolicy:
@@ -1175,28 +1150,6 @@ Resources:
           numMaxDelayRetries: 5
           numNoDelayRetries: 0
           backoffFunction: exponential
-
-  ELBSNSpolicy:
-    Condition: create_elb_sns_topic
-    Type: "AWS::SNS::TopicPolicy"
-    Properties:
-      PolicyDocument:
-        Id: ELBSNSpolicy
-        Statement:
-          - Action:
-              - sns:Publish
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref "AWS::AccountId"
-              ArnLike:
-                aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::${ELBS3LogsBucketName}"
-            Effect: Allow
-            Principal:
-              "Service": "s3.amazonaws.com"
-            Resource:
-              - !Ref ELBSNSTopic
-      Topics:
-        - Ref: ELBSNSTopic
 
   ############# START - RESOURCES FOR CLOUD TRAIL SOURCE #################
 
@@ -1221,32 +1174,11 @@ Resources:
         account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
       RoleArn: !GetAtt SumoLogicSourceRole.Arn
 
-  CloudTrailSNSTopic:
-    Type: 'AWS::SNS::Topic'
-    Condition: create_cloudtrail_sns_topic
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W47
-            reason: "KmsMasterKeyId not required for SNS topic."
-    Properties:
-      TopicName: !Join
-        - ""
-        - - "cloudtrail-sumo-sns-"
-          - !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-          - !Select
-            - 0
-            - !Split
-              - "-"
-              - !Select
-                - 2
-                - !Split [ "/", !Ref "AWS::StackId" ]
-
   CloudTrailSNSSubscription:
-    Condition: install_cloudtrail_logs_source
+    Condition: create_cloudtrail_bucket
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn: !If [ create_cloudtrail_bucket, !Ref CommonBucketSNSTopic, !Ref CloudTrailSNSTopic ]
+      TopicArn: !Ref CommonBucketSNSTopic
       Endpoint: !GetAtt CloudTrailSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -1258,28 +1190,6 @@ Resources:
           numMaxDelayRetries: 5
           numNoDelayRetries: 0
           backoffFunction: exponential
-
-  CloudTrailSNSpolicy:
-    Condition: create_cloudtrail_sns_topic
-    Type: "AWS::SNS::TopicPolicy"
-    Properties:
-      PolicyDocument:
-        Id: CloudTrailSNSpolicy
-        Statement:
-          - Action:
-              - sns:Publish
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref "AWS::AccountId"
-              ArnLike:
-                aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::${CloudTrailLogsBucketName}"
-            Effect: Allow
-            Principal:
-              "Service": "s3.amazonaws.com"
-            Resource:
-              - !Ref CloudTrailSNSTopic
-      Topics:
-        - Ref: CloudTrailSNSTopic
 
   ############# START - RESOURCES FOR CLOUD WATCH LOGS SOURCE #################
 
