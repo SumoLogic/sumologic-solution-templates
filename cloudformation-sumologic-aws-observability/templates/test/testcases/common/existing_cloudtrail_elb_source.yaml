@@ -12,29 +12,36 @@ TestCase:
   Regions: '${SUMO_REGIONS}'
   Skip: false
   PreRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+    - Name: CreateS3Bucket
+      CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
       ImpactedParametersPath:
         BucketName:
           - "parameters.Section8dELBS3LogsBucketName"
           - "assertions[AssertType==ParameterCheck].Assert['AutoEnableOptions'].ELBS3LogsBucketName"
           - "assertions[AssertType==ParameterCheck].Assert['AutoEnableOptions#AutoEnableS3LogsElbStack'].BucketName"
-    - CFNTemplateURL: "test/setup-infra/create_sumo_lambda_hepler.yaml"
+    - Name: CreateLambdaHelper
+      CFNTemplateURL: "test/setup-infra/create_sumo_lambda_hepler.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
         SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
         AccountAlias: "lbt1"
-    - CFNTemplateURL: "test/setup-infra/create_sumo_collector.yaml"
+    - Name: CreateCollector
+      DependsOn: CreateLambdaHelper
+      CFNTemplateURL: "test/setup-infra/create_sumo_collector.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
         SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
         SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
-    - CFNTemplateURL: "test/setup-infra/create_sumo_role.yaml"
+    - Name: CreateRole
+      CFNTemplateURL: "test/setup-infra/create_sumo_role.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicOrganizationId: '${SUMO_ORG_ID}'
-    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudtrail_source.yaml"
+    - Name: CreateCTSource
+      DependsOn: [CreateCollector, CreateRole, CreateS3Bucket]
+      CFNTemplateURL: "test/setup-infra/create_sumo_cloudtrail_source.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
@@ -47,7 +54,9 @@ TestCase:
       ImpactedParametersPath:
         SumoCloudTrailAPIURL:
           - "parameters.Section6bCloudTrailLogsSourceUrl"
-    - CFNTemplateURL: "test/setup-infra/create_sumo_kinesis_firehose_metrics_source.yaml"
+    - Name: CreateKFMetricsSource
+      DependsOn: [CreateCollector, CreateRole]
+      CFNTemplateURL: "test/setup-infra/create_sumo_kinesis_firehose_metrics_source.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
@@ -59,7 +68,9 @@ TestCase:
       ImpactedParametersPath:
         SumoCloudWatchMetricsAPIURL:
           - "parameters.Section4cCloudWatchExistingSourceAPIUrl"
-    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_lb_source.yaml"
+    - Name: CreateELBSource
+      DependsOn: [CreateCollector, CreateRole, CreateS3Bucket]
+      CFNTemplateURL: "test/setup-infra/create_sumo_lb_source.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
@@ -73,7 +84,8 @@ TestCase:
         SumoLoadBalancerLogAPIURL:
           - "parameters.Section8cELBLogsSourceUrl"
     # Create "existing" ELB (AWSO Existing Lambda enables access logs at deploy time)
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       ImpactedParametersPath:
         ElbName:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
@@ -82,7 +94,8 @@ TestCase:
 
   PostRequisitesInfra:
     # Create "new" ELB (triggers EventBridge -> Lambda -> auto-enable access logs)
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         ElbName:
@@ -144,6 +157,8 @@ TestCase:
           - CreateCommonResources.Primerinvoke
           - CreateCommonResources.SumoLogicHostedCollector
           - CreateCommonResources.SumoLogicSourceRole
+          - CreateCommonResources.SumoCloudTrailLogsUpdateSource
+          - CreateCommonResources.SumoELBLogsUpdateSource
           - AutoEnableOptions.AutoEnableS3LogsElbStack
           - AutoEnableOptions.AutoEnableS3LogsElbStack.AutoEnableElbLogEventsInvokePermission
           - AutoEnableOptions.AutoEnableS3LogsElbStack.AutoEnableElbLogEventsRuleTrigger
@@ -187,6 +202,8 @@ TestCase:
           - CreateCommonResources.KinesisFirehoseMetricsStack.FailedDataBucketArn
           - CreateCommonResources.CollectorName
           - CreateCommonResources.AccountAlias
+          - CreateCommonResources.ExistingCloudTrailLogSourceName
+          - CreateCommonResources.ExistingELBLogSourceName
     - AssertType: ParameterCheck
       Assert:
         CreateCommonResources:

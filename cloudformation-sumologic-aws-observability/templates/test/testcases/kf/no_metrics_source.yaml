@@ -13,7 +13,8 @@ TestCase:
   Skip: false
 
   PreRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Name"
@@ -29,7 +30,8 @@ TestCase:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#2'].Arn"
 
   PostRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         LogGroupByPatternName:
@@ -94,7 +96,7 @@ TestCase:
           - CreateCommonResources.AccountCheck
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.CloudTrailBucketPolicy
           - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole

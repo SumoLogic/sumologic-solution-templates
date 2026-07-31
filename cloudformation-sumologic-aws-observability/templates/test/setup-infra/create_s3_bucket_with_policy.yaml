@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Creates an S3 bucket with a pre-existing bucket policy (AllowAccountPutObject).
+  Used to verify that the AWSO AddBucketPolicy Lambda correctly appends ELB/CloudTrail
+  policy statements without overwriting the existing policy.
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub
+        - "test-automation-awso-${UniqueId}"
+        - UniqueId: !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowAccountPutObject
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+            Action: s3:PutObject
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
+
+Outputs:
+  BucketName:
+    Description: Name of the S3 bucket created.
+    Value: !Ref S3Bucket

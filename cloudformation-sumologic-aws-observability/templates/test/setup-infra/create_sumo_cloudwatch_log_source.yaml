@@ -64,7 +64,16 @@ Resources:
     Properties:
       ServiceToken: !Ref SumoLambdaHelperArn
       Region: !Ref "AWS::Region"
-      SourceName: "test-automation-awso-<TestcaseName>"
+      SourceName: !Join
+        - ""
+        - - "test-automation-awso-<TestcaseName>-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split [ "/", !Ref "AWS::StackId" ]
       RemoveOnDeleteStack: true
       SourceCategory: "test/automation/awso/cloudwatch/logs"
       CollectorId: !Ref SumoCollectorID

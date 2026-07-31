@@ -13,7 +13,8 @@ TestCase:
   Skip: false
 
   PreRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       ImpactedParametersPath:
         ElbName:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
@@ -21,7 +22,8 @@ TestCase:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
 
   PostRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         AlbArn:
@@ -67,8 +69,8 @@ TestCase:
           - CreateCommonResources.SumoLogicALBS3Policy
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
-          - CreateCommonResources.CommonCloudTrail
+          - CreateCommonResources.ALBBucketPolicy
+          - CreateCommonResources.ELBBucketPolicy
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.ELBSource
           - CreateCommonResources.ELBSNSSubscription

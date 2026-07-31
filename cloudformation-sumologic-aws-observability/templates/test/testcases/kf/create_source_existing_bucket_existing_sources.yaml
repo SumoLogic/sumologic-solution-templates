@@ -12,13 +12,15 @@ TestCase:
   Regions: '${SUMO_REGIONS}'
   Skip: false
   PreRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+    - Name: CreateS3Bucket
+      CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
       ImpactedParametersPath:
         BucketName:
           - "parameters.Section5dALBS3LogsBucketName"
           - "parameters.Section6cCloudTrailLogsBucketName"
           - "parameters.Section8dELBS3LogsBucketName"
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Name"
@@ -34,8 +36,9 @@ TestCase:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#2'].Arn"
 
   PostRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
-      WaitSeconds: 30
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+      WaitSeconds:
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#0'].Name"

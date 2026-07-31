@@ -14,32 +14,39 @@ TestCase:
   Skip: false
   PreRequisitesInfra:
     # Create "existing" ALB (AWSO Existing Lambda enables access logs at deploy time)
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       ImpactedParametersPath:
         AlbArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
         AlbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
-    - CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+    - Name: CreateS3Bucket
+      CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
       ImpactedParametersPath:
         BucketName:
           - "parameters.Section5dALBS3LogsBucketName"
           - "assertions[AssertType==ParameterCheck].Assert.CreateCommonResources.ALBS3LogsBucketName"
           - "assertions[AssertType==ParameterCheck].Assert.AutoEnableOptions.ALBS3LogsBucketName"
           - "assertions[AssertType==ParameterCheck].Assert['AutoEnableOptions#AutoEnableS3LogsAlbStack'].BucketName"
-    - CFNTemplateURL: "test/setup-infra/create_sumo_lambda_hepler.yaml"
+    - Name: CreateLambdaHelper
+      CFNTemplateURL: "test/setup-infra/create_sumo_lambda_hepler.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
         SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
         AccountAlias: "updatet1"
-    - CFNTemplateURL: "test/setup-infra/create_sumo_collector.yaml"
+    - Name: CreateCollector
+      DependsOn: CreateLambdaHelper
+      CFNTemplateURL: "test/setup-infra/create_sumo_collector.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
         SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
         SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
-    - CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_log_source.yaml"
+    - Name: CreateCWLogSource
+      DependsOn: CreateCollector
+      CFNTemplateURL: "test/setup-infra/create_sumo_cloudwatch_log_source.yaml"
       CFNParameters:
         SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
         SumoLogicAccessID: '${SUMO_ACCESS_ID}'
@@ -87,7 +94,7 @@ TestCase:
           - CreateCommonResources.AccountCheck
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.CloudTrailBucketPolicy
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.SumoLogicSourceRole

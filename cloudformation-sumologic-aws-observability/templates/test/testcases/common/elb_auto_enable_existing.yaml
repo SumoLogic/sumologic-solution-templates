@@ -14,14 +14,16 @@ TestCase:
 
   PreRequisitesInfra:
     # Create "existing" ELB (AWSO Existing Lambda enables access logs on it at deploy time)
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       ImpactedParametersPath:
         ElbName:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
         ElbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
     # Create "existing" CloudWatch Log Groups (AWSO auto-subscribes them at deploy time)
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Name"
@@ -38,8 +40,9 @@ TestCase:
 
   PostRequisitesInfra:
     # Create "new" CloudWatch Log Groups (triggers AWSO's EventBridge -> Lambda -> auto-subscribe)
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
-      WaitSeconds: 30
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+      WaitSeconds:
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#0'].Name"
@@ -81,7 +84,8 @@ TestCase:
           - CreateCommonResources.AccountCheck
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.ELBBucketPolicy
+          - CreateCommonResources.CloudTrailBucketPolicy
           - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole

@@ -71,7 +71,7 @@ Resources:
   SumoLogicLoadBalancerS3Policy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: SumoLogicAwsSourcesPoliciesS3LoadBalancer
+      PolicyName: !Sub "SumoLogicPoliciesLBS3-${LBLogsBucketName}"
       Roles:
         - !Select [1, !Split ["/", !Ref SumoLogicSourceRoleArn]]
       PolicyDocument:
@@ -90,6 +90,7 @@ Resources:
               - !Sub
                 - "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
                 - S3Bucket: !Ref LBLogsBucketName
+
   ALBSource:
     Type: Custom::AWSSource
     DependsOn: SumoLogicLoadBalancerS3Policy
@@ -97,9 +98,18 @@ Resources:
       ServiceToken: !Ref SumoLambdaHelperArn
       SourceType: AwsElbBucket
       Region: !Ref "AWS::Region"
-      SourceName: "test-automation-awso-<TestcaseName>"
+      SourceName: !Join
+        - ""
+        - - "test-automation-awso-<TestcaseName>-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split [ "/", !Ref "AWS::StackId" ]
       RemoveOnDeleteStack: true
-      SourceCategory: "test/automation/awso/cloudwatch/metrics"
+      SourceCategory: "test/automation/awso/access/log"
       CollectorId: !Ref SumoCollectorID
       SumoAccessID: !Ref SumoLogicAccessID
       SumoAccessKey: !Ref SumoLogicAccessKey

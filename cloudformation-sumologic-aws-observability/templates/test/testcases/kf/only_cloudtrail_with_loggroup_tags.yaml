@@ -14,7 +14,8 @@ TestCase:
 
   PreRequisitesInfra:
     # Create "existing" CloudWatch Log Groups (AWSO auto-subscribes existing based on Section7e tags)
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Name"
@@ -29,24 +30,6 @@ TestCase:
         LogGroupBothArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#2'].Arn"
 
-  PostRequisitesInfra:
-    # Create "new" ALB (triggers EventBridge -> Lambda -> auto-enable access logs)
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
-      WaitSeconds: 30
-      ImpactedParametersPath:
-        AlbArn:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
-        AlbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
-    # Create "new" ELB (triggers EventBridge -> Lambda -> auto-enable access logs)
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
-      WaitSeconds: 30
-      ImpactedParametersPath:
-        ElbName:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
-        ElbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
-
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -57,7 +40,7 @@ TestCase:
       Section2bAccountAliasMappingS3URL: ''
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'Kinesis Firehose Metrics Source'
-      Section4bMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SNS, AWS/SQS, cwgent'
+      Section4bMetricsNameSpaces: 'AWS/ApplicationELB, AWS/ELB, AWS/EC2'
       Section4dAWSMetricsTagFilters: '{ "AWS/ApiGateway": { "tags": [ "env=prod;dev" ] }, "AWS/DynamoDB": { "tags": [ "env=dev", "creator=himan" , "creator=aki" ] }, "AWS/ElastiCache": { "tags": [ "env=prod;dev", "creator=himan" ] }, "All": { "tags": [ "env=dev" ] } }'
       Section5aAutoEnableS3LogsALBResourcesOptions: 'New'
       Section5bALBCreateLogSource: 'No'
@@ -82,7 +65,7 @@ TestCase:
           - CreateCommonResources.AccountCheck
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.CloudTrailBucketPolicy
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.SumoLogicSourceRole
@@ -151,7 +134,7 @@ TestCase:
           MetaDataSourceCategory: ""
           CreateCloudWatchMetricsSource: 'No'
           CloudWatchMetricsSourceName: ''
-          CloudWatchMetricsNameSpaces: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SNS, AWS/SQS, cwgent'
+          CloudWatchMetricsNameSpaces: 'AWS/ApplicationELB, AWS/ELB, AWS/EC2'
           ScanInterval: "300000"
           CloudWatchMetricSourceCategory: ""
           CreateALBLogSource: 'No'
@@ -183,7 +166,7 @@ TestCase:
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
         CreateCommonResources.KinesisFirehoseMetricsStack:
           Section2aCreateS3Bucket: 'No'
-          Section1bNamespaceFilter: 'AWS/ApiGateway, AWS/DynamoDB, AWS/ElastiCache, AWS/SNS, AWS/SQS, cwgent'
+          Section1bNamespaceFilter: 'AWS/ApplicationELB, AWS/ELB, AWS/EC2'
     # --- E2E PHASE (run AFTER PostRequisitesInfra) ---
     - AssertType: SumoSourceExistenceValidation
       Skip: false
@@ -195,20 +178,6 @@ TestCase:
     - AssertType: AWSResourceValidation
       Skip: false
       Assert:
-        ALB:
-          LoadBalancers:
-            - Arn: ""
-              DnsName: ""
-          HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 240
-          S3LogCheckTimeoutSeconds: 600
-        ELB:
-          LoadBalancers:
-            - Name: ""
-              DnsName: ""
-          HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 240
-          S3LogCheckTimeoutSeconds: 600
         CloudWatchLogGroups:
           ExpectedDestinationArn: ""
           LogEventCount: 10

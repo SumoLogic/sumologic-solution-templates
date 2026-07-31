@@ -14,21 +14,24 @@ TestCase:
 
   PreRequisitesInfra:
     # Create "existing" ALB (simulates ALB already in the account before AWSO deploys)
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       ImpactedParametersPath:
         AlbArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
         AlbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
     # Create "existing" ELB (simulates ELB already in the account before AWSO deploys)
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       ImpactedParametersPath:
         ElbName:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
         ElbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
     # Create "existing" CloudWatch Log Groups (AWSO auto-subscribes based on Section7d/Section7e)
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Name"
@@ -45,23 +48,26 @@ TestCase:
 
   PostRequisitesInfra:
     # Create "new" ALB (triggers AWSO's EventBridge rule -> Lambda -> auto-enable access logs)
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
-      WaitSeconds: 30
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      WaitSeconds:
       ImpactedParametersPath:
         AlbArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].Arn"
         AlbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].DnsName"
     # Create "new" ELB (triggers AWSO's EventBridge rule -> Lambda -> auto-enable access logs)
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
-      WaitSeconds: 30
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      WaitSeconds:
       ImpactedParametersPath:
         ElbName:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].Name"
         ElbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].DnsName"
     # Create "new" CloudWatch Log Groups (triggers AWSO's EventBridge -> Lambda -> auto-subscribe based on Section7d/Section7e)
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#0'].Name"
@@ -119,7 +125,9 @@ TestCase:
           - CreateCommonResources.AccountCheck
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.ALBBucketPolicy
+          - CreateCommonResources.ELBBucketPolicy
+          - CreateCommonResources.CloudTrailBucketPolicy
           - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole

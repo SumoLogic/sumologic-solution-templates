@@ -13,7 +13,8 @@ TestCase:
   Skip: false
   PreRequisitesInfra:
     # Create "existing" ALB before initial deploy — picked up by EnableExistingAWSResources Lambda after update
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       ImpactedParametersPath:
         AlbArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
@@ -21,16 +22,18 @@ TestCase:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
   PostRequisitesInfra:
     # Create "new" ALB after update — triggers EventBridge rule -> EnableNewAWSResources Lambda
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
-      WaitSeconds: 30
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      WaitSeconds:
       ImpactedParametersPath:
         AlbArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].Arn"
         AlbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].DnsName"
     # Create "new" ELB (triggers EventBridge -> Lambda -> auto-enable access logs)
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
-      WaitSeconds: 30
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      WaitSeconds:
       ImpactedParametersPath:
         ElbName:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
@@ -75,7 +78,9 @@ TestCase:
           - CreateCommonResources.AccountCheck
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.ALBBucketPolicy
+          - CreateCommonResources.ELBBucketPolicy
+          - CreateCommonResources.CloudTrailBucketPolicy
           - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole

@@ -13,19 +13,22 @@ TestCase:
   Skip: false
 
   PreRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       ImpactedParametersPath:
         AlbArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
         AlbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       ImpactedParametersPath:
         ElbName:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
         ElbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       ImpactedParametersPath:
         LogGroupByPatternName:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#0'].Name"
@@ -41,21 +44,24 @@ TestCase:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#ExistingLogGroups#2'].Arn"
 
   PostRequisitesInfra:
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         AlbArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].Arn"
         AlbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].DnsName"
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         ElbName:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].Name"
         ElbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].DnsName"
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         LogGroupByPatternName:
@@ -121,7 +127,9 @@ TestCase:
           - CreateCommonResources.AccountCheck
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.ALBBucketPolicy
+          - CreateCommonResources.ELBBucketPolicy
+          - CreateCommonResources.CloudTrailBucketPolicy
           - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole

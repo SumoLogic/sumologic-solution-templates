@@ -1,0 +1,21 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+      Section2aAccountAlias: 'testenv'
+TestSuiteName: BucketTestsuite
+TestCases:
+  # All LBs use separate user-provided buckets (Existing mode)
+  - 'test/testcases/common/all_existing_buckets.yaml'
+  # All LBs (ALB, ELB, CloudTrail) share a single user-provided bucket
+  - 'test/testcases/common/all_same_existing_bucket.yaml'
+  # ALB uses AWSO-created bucket (New); ELB and CloudTrail share user-provided bucket with pre-existing policy
+  - 'test/testcases/common/mixed_new_existing_bucket.yaml'
+  # S3 bucket retention policy behaviour
+  - 'test/testcases/common/s3_bucket_retention.yaml'
+  # only cloudtrail source,
+  - 'test/testcases/kf/only_cloudtrail_with_loggroup_tags.yaml'

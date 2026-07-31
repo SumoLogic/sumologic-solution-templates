@@ -16,7 +16,8 @@ TestCase:
 
   PostRequisitesInfra:
     # Create "new" ALB (triggers AWSO's EventBridge rule -> Lambda -> auto-enable access logs)
-    - CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         AlbArn:
@@ -24,7 +25,8 @@ TestCase:
         AlbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
     # Create "new" ELB (triggers AWSO's EventBridge rule -> Lambda -> auto-enable access logs)
-    - CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         ElbName:
@@ -32,7 +34,8 @@ TestCase:
         ElbDns:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
     # Create "new" CloudWatch Log Groups (triggers AWSO's EventBridge -> Lambda -> auto-subscribe)
-    - CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
+    - Name: CreateCWLogGroups
+      CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         LogGroupByPatternName:
@@ -47,7 +50,6 @@ TestCase:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#2'].Name"
         LogGroupBothArn:
           - "assertions[AssertType==AWSResourceValidation].Assert['CloudWatchLogGroups#NewLogGroups#2'].Arn"
-
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -85,7 +87,8 @@ TestCase:
           - CreateCommonResources.AccountCheck
           - CreateCommonResources.CommonBucketSNSTopic
           - CreateCommonResources.CommonS3Bucket
-          - CreateCommonResources.CommonBucketPolicy
+          - CreateCommonResources.ALBBucketPolicy
+          - CreateCommonResources.ELBBucketPolicy
           - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole
