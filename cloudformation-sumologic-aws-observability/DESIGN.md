@@ -113,49 +113,39 @@ Created when an existing source API URL is supplied — updates the source with 
 | `CommonBucketSNSTopic` | `AWS::SNS::Topic` | `create_target_s3_bucket` | Shared SNS topic that receives S3 event notifications from CommonS3Bucket |
 | `CommonSNSpolicy` | `AWS::SNS::TopicPolicy` | `create_target_s3_bucket` | Allows S3 to publish to CommonBucketSNSTopic |
 
-#### Existing ALB bucket
+#### New bucket SNS subscriptions
+
+CFN subscriptions only exist for the **new-bucket** path. Existing-bucket subscriptions are created by the `BucketNotifications` Lambda.
 
 | Logical ID | Type | Condition | Description |
 |------------|------|-----------|-------------|
-| `ALBSNSTopic` | `AWS::SNS::Topic` | `create_alb_sns_topic` | Dedicated SNS topic for existing ALB bucket notifications |
-| `ALBSNSpolicy` | `AWS::SNS::TopicPolicy` | `create_alb_sns_topic` | Allows the existing ALB S3 bucket to publish to ALBSNSTopic |
-| `ALBSNSSubscription` | `AWS::SNS::Subscription` | `install_alb_logs_source` | Subscribes the ALB source HTTPS endpoint to the SNS topic |
-
-#### Existing ELB bucket
-
-| Logical ID | Type | Condition | Description |
-|------------|------|-----------|-------------|
-| `ELBSNSTopic` | `AWS::SNS::Topic` | `create_elb_sns_topic` | Dedicated SNS topic for existing ELB bucket notifications |
-| `ELBSNSpolicy` | `AWS::SNS::TopicPolicy` | `create_elb_sns_topic` | Allows the existing ELB S3 bucket to publish to ELBSNSTopic |
-| `ELBSNSSubscription` | `AWS::SNS::Subscription` | `install_elb_logs_source` | Subscribes the ELB source HTTPS endpoint to the SNS topic |
-
-#### Existing CloudTrail bucket
-
-| Logical ID | Type | Condition | Description |
-|------------|------|-----------|-------------|
-| `CloudTrailSNSTopic` | `AWS::SNS::Topic` | `create_cloudtrail_sns_topic` | Dedicated SNS topic for existing CloudTrail bucket notifications |
-| `CloudTrailSNSpolicy` | `AWS::SNS::TopicPolicy` | `create_cloudtrail_sns_topic` | Allows the existing CloudTrail S3 bucket to publish to CloudTrailSNSTopic |
-| `CloudTrailSNSSubscription` | `AWS::SNS::Subscription` | `install_cloudtrail_logs_source` | Subscribes the CloudTrail source HTTPS endpoint to the SNS topic |
+| `ALBSNSSubscription` | `AWS::SNS::Subscription` | `create_alb_bucket` | Subscribes the ALB source HTTPS endpoint to `CommonBucketSNSTopic` (new bucket only) |
+| `ELBSNSSubscription` | `AWS::SNS::Subscription` | `create_elb_bucket` | Subscribes the ELB source HTTPS endpoint to `CommonBucketSNSTopic` (new bucket only) |
+| `CloudTrailSNSSubscription` | `AWS::SNS::Subscription` | `create_cloudtrail_bucket` | Subscribes the CloudTrail source HTTPS endpoint to `CommonBucketSNSTopic` (new bucket only) |
 
 #### S3 Bucket Notifications for Existing Buckets
 
 | Logical ID | Type | Condition | Description |
 |------------|------|-----------|-------------|
-| `ALBBucketNotification` | `Custom::AddBucketNotification` | `is_alb_bucket_provided` | Wires `s3:ObjectCreated:*` notification on the existing ALB bucket to `ALBSNSTopic` |
-| `ELBBucketNotification` | `Custom::AddBucketNotification` | `elb_needs_own_bucket_notification` | Wires `s3:ObjectCreated:*` notification on the existing ELB bucket to `ELBSNSTopic`. Skipped when ELB bucket equals ALB bucket. |
-| `CloudTrailBucketNotification` | `Custom::AddBucketNotification` | `ct_needs_own_bucket_notification` | Wires `s3:ObjectCreated:*` notification on the existing CloudTrail bucket to `CloudTrailSNSTopic`. Skipped when CT bucket equals ALB or ELB bucket. |
+| `BucketNotifications` | `Custom::ConfigureBucketNotifications` | `any_existing_bucket_source` | Single Lambda resource that configures SNS topics, S3 notifications, and HTTPS subscriptions for all existing-bucket sources |
 
-> **Why:** S3 only allows one unfiltered `TopicConfiguration` per event type per bucket. When multiple sources share the same existing bucket, only one `BucketNotification` is created and the other sources' SNS subscriptions are routed to the primary topic (fan-out via SNS subscription).
+> **Why a single Lambda resource:** S3 only allows one unfiltered `TopicConfiguration` per event type per bucket. When multiple sources share the same existing bucket, creating separate CFN notification resources would cause `InvalidArgument: Configurations overlap`. The Lambda groups sources by bucket, creates one SNS topic per unique bucket, and subscribes all Sumo endpoints sharing that bucket — eliminating the need for CFN same-bucket conditions entirely.
 
-#### Same-Bucket Routing Matrix
+**What `BucketNotifications` creates per unique existing bucket:**
+1. One SNS topic named `sumo-s3-notif-{stack_suffix}-{bucket_hash}`
+2. One SNS topic policy allowing S3 to publish from that bucket
+3. One S3 `TopicConfiguration` (`s3:ObjectCreated:Put`) pointing to the topic
+4. One HTTPS subscription per Sumo source endpoint sharing that bucket
 
-| Scenario | `ALBBucketNotification` | `ELBBucketNotification` | `CTBucketNotification` | ELB subscribes to | CT subscribes to |
-|----------|:-----------------------:|:-----------------------:|:----------------------:|-------------------|-----------------|
-| All different buckets | ✅ | ✅ | ✅ | `ELBSNSTopic` | `CloudTrailSNSTopic` |
-| ALB = ELB = CT | ✅ | ❌ skipped | ❌ skipped | `ALBSNSTopic` | `ALBSNSTopic` |
-| ALB = ELB, CT different | ✅ | ❌ skipped | ✅ | `ALBSNSTopic` | `CloudTrailSNSTopic` |
-| ALB = CT, ELB different | ✅ | ✅ | ❌ skipped | `ELBSNSTopic` | `ALBSNSTopic` |
-| ELB = CT, ALB different | ✅ | ✅ | ❌ skipped | `ELBSNSTopic` | `ELBSNSTopic` |
+**Scenarios handled (all in Lambda, zero CFN conditions needed):**
+
+| Scenario | SNS Topics | S3 Notifications | Subscriptions |
+|----------|:----------:|:----------------:|:-------------:|
+| All different buckets | 3 | 3 | 3 (1 per topic) |
+| ALB = ELB = CT (same bucket) | 1 | 1 | 3 (all to same topic) |
+| ALB = ELB, CT different | 2 | 2 | 2 + 1 |
+| ALB = CT, ELB different | 2 | 2 | 2 + 1 |
+| ELB = CT, ALB different | 2 | 2 | 1 + 2 |
 
 ### IAM Roles (Sumo Logic Source Access)
 
@@ -225,9 +215,6 @@ Installs AWS Observability apps and the Explorer hierarchy view in Sumo Logic.
 | `create_alb_bucket` | `CreateALBS3Bucket=Yes` AND `install_alb_logs_source` |
 | `create_elb_bucket` | `CreateELBS3Bucket=Yes` AND `install_elb_logs_source` |
 | `create_cloudtrail_bucket` | `CreateCloudTrailBucket=Yes` AND `install_cloudtrail_logs_source` |
-| `create_alb_sns_topic` | NOT creating new ALB bucket AND installing ALB source |
-| `create_elb_sns_topic` | NOT creating new ELB bucket AND installing ELB source |
-| `create_cloudtrail_sns_topic` | NOT creating new CloudTrail bucket AND installing CloudTrail source |
 | `install_sumo_logic_role` | Any S3-based source or metrics source is being installed |
 | `create_cloudtrail_trail` | New CloudTrail bucket is created OR existing bucket name is provided |
 | `needs_*_bucket_policy` | New bucket created OR existing bucket name is provided |
@@ -235,11 +222,7 @@ Installs AWS Observability apps and the Explorer hierarchy view in Sumo Logic.
 | `call_auto_enable` | Any auto-enable option is enabled |
 | `install_observability_apps` | `Section3aInstallObservabilityApps=Yes` |
 | `send_telemetry_to_sumo` | `Section1fSumoLogicSendTelemetry=true` |
-| `is_alb_bucket_provided` | `ALBS3LogsBucketName` is non-empty AND `create_alb_sns_topic` |
-| `is_elb_bucket_provided` | `ELBS3LogsBucketName` is non-empty AND `create_elb_sns_topic` |
-| `is_cloudtrail_bucket_provided` | `CloudTrailLogsBucketName` is non-empty AND `create_cloudtrail_sns_topic` |
-| `alb_elb_same_bucket` | `is_alb_bucket_provided` AND `is_elb_bucket_provided` AND `ALBS3LogsBucketName == ELBS3LogsBucketName` |
-| `alb_ct_same_bucket` | `is_alb_bucket_provided` AND `is_cloudtrail_bucket_provided` AND `ALBS3LogsBucketName == CloudTrailLogsBucketName` |
-| `elb_ct_same_bucket` | NOT `alb_elb_same_bucket` AND `is_elb_bucket_provided` AND `is_cloudtrail_bucket_provided` AND `ELBS3LogsBucketName == CloudTrailLogsBucketName` |
-| `elb_needs_own_bucket_notification` | `is_elb_bucket_provided` AND NOT `alb_elb_same_bucket` — skips `ELBBucketNotification` when ELB shares the ALB bucket |
-| `ct_needs_own_bucket_notification` | `is_cloudtrail_bucket_provided` AND NOT `alb_ct_same_bucket` AND NOT `elb_ct_same_bucket` — skips `CloudTrailBucketNotification` when CT shares another source's bucket |
+| `is_alb_bucket_provided` | `ALBS3LogsBucketName` is non-empty AND NOT `create_alb_bucket` AND `install_alb_logs_source` |
+| `is_elb_bucket_provided` | `ELBS3LogsBucketName` is non-empty AND NOT `create_elb_bucket` AND `install_elb_logs_source` |
+| `is_cloudtrail_bucket_provided` | `CloudTrailLogsBucketName` is non-empty AND NOT `create_cloudtrail_bucket` AND `install_cloudtrail_logs_source` |
+| `any_existing_bucket_source` | Any of `is_alb_bucket_provided`, `is_elb_bucket_provided`, or `is_cloudtrail_bucket_provided` is true — gates the `BucketNotifications` Lambda resource |

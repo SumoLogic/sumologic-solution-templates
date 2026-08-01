@@ -40,8 +40,8 @@ TestCase:
       Section2bAccountAliasMappingS3URL: ''
       Section3aInstallObservabilityApps: 'No'
       Section4aCreateMetricsSourceOptions: 'Kinesis Firehose Metrics Source'
-      Section4bMetricsNameSpaces: 'AWS/ApplicationELB, AWS/ELB, AWS/EC2'
-      Section4dAWSMetricsTagFilters: '{ "AWS/ApiGateway": { "tags": [ "env=prod;dev" ] }, "AWS/DynamoDB": { "tags": [ "env=dev", "creator=himan" , "creator=aki" ] }, "AWS/ElastiCache": { "tags": [ "env=prod;dev", "creator=himan" ] }, "All": { "tags": [ "env=dev" ] } }'
+      Section4bMetricsNameSpaces: 'AWS/Lambda'
+      Section4dAWSMetricsTagFilters: '{ "AWS/Lambda": { "tags": [ "env=prod;dev" ] } }'
       Section5aAutoEnableS3LogsALBResourcesOptions: 'New'
       Section5bALBCreateLogSource: 'No'
       Section6aCreateCloudTrailLogSource: 'Yes'
@@ -134,7 +134,7 @@ TestCase:
           MetaDataSourceCategory: ""
           CreateCloudWatchMetricsSource: 'No'
           CloudWatchMetricsSourceName: ''
-          CloudWatchMetricsNameSpaces: 'AWS/ApplicationELB, AWS/ELB, AWS/EC2'
+          CloudWatchMetricsNameSpaces: 'AWS/Lambda'
           ScanInterval: "300000"
           CloudWatchMetricSourceCategory: ""
           CreateALBLogSource: 'No'
@@ -166,7 +166,7 @@ TestCase:
           KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
         CreateCommonResources.KinesisFirehoseMetricsStack:
           Section2aCreateS3Bucket: 'No'
-          Section1bNamespaceFilter: 'AWS/ApplicationELB, AWS/ELB, AWS/EC2'
+          Section1bNamespaceFilter: 'AWS/Lambda'
     # --- E2E PHASE (run AFTER PostRequisitesInfra) ---
     - AssertType: SumoSourceExistenceValidation
       Skip: false
@@ -200,9 +200,7 @@ TestCase:
           CloudtrailSourceQueries:
             - AppendQuery: "| json auto | where eventSource=\"lambda.amazonaws.com\""
           KinesisFirehoseMetricsSourceQueries:
-            - AppendQuery: "namespace=AWS/ApplicationELB"
-            - AppendQuery: "namespace=AWS/ELB"
-            - AppendQuery: "namespace=AWS/EC2"
+            - AppendQuery: "namespace=AWS/Lambda"
         AccessId: "${SUMO_ACCESS_ID}"
         AccessKey: "${SUMO_ACCESS_KEY}"
         Deployment: "${SUMO_DEPLOYMENT}"

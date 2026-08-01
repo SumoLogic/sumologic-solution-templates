@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Creates an S3 bucket with a pre-existing SNS TopicConfiguration already set on it.
+  Used to verify that ConfigureBucketNotifications correctly retains existing
+  TopicConfigurations when appending new Sumo Logic notification entries (override test).
+
+Resources:
+  PreExistingSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub
+        - "test-awso-notif-${UniqueId}"
+        - UniqueId: !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]
+
+  # aws:SourceAccount-only condition avoids the circular dependency:
+  # bucket notification needs the policy to exist, but the policy would normally
+  # reference the bucket ARN — scoping by account breaks the cycle.
+  PreExistingSNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref PreExistingSNSTopic
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowS3Publish
+            Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sns:Publish
+            Resource: !Ref PreExistingSNSTopic
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    DependsOn: PreExistingSNSTopicPolicy
+    Properties:
+      BucketName: !Sub
+        - "test-automation-awso-${UniqueId}"
+        - UniqueId: !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Topic: !Ref PreExistingSNSTopic
+
+Outputs:
+  BucketName:
+    Description: Name of the S3 bucket created.
+    Value: !Ref S3Bucket
+  PreExistingTopicArn:
+    Description: ARN of the pre-existing SNS topic configured on the bucket before AWSO deployment.
+    Value: !Ref PreExistingSNSTopic
