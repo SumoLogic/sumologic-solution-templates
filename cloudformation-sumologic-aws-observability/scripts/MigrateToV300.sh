@@ -229,6 +229,7 @@ sumo_put_if_match() {
 }
 
 # Sets COLLECTOR_ID and COLLECTOR_NAME globals to the first aws-observability collector found.
+# Matches the exact naming pattern: aws-observability-{alias}-{AccountId}
 # Returns 0 if found, 1 if not found after paginating all pages.
 find_awso_collector() {
     COLLECTOR_ID="" COLLECTOR_NAME=""
@@ -236,11 +237,17 @@ find_awso_collector() {
     while true; do
         local page
         page=$( sumo_get "/api/v1/collectors?limit=1000&offset=${offset}" )
-        COLLECTOR_ID=$( echo "$page" | jq -r '
-            [.collectors[] | select(.name | startswith("aws-observability"))] | .[0].id // ""' )
+        COLLECTOR_ID=$( echo "$page" | jq -r --arg acct "$ACCOUNT_ID" '
+            [.collectors[] | select(
+                (.name | startswith("aws-observability")) and
+                (.name | endswith("-" + $acct))
+            )] | .[0].id // ""' )
         if [[ -n "$COLLECTOR_ID" && "$COLLECTOR_ID" != "null" ]]; then
-            COLLECTOR_NAME=$( echo "$page" | jq -r '
-                [.collectors[] | select(.name | startswith("aws-observability"))] | .[0].name // ""' )
+            COLLECTOR_NAME=$( echo "$page" | jq -r --arg acct "$ACCOUNT_ID" '
+                [.collectors[] | select(
+                    (.name | startswith("aws-observability")) and
+                    (.name | endswith("-" + $acct))
+                )] | .[0].name // ""' )
             return 0
         fi
         local count
@@ -342,7 +349,42 @@ phase_validate() {
     # Fetch and validate the stack
     local out
     out=$( aws_cmd cloudformation describe-stacks --stack-name "${STACK_NAME}" --region "${REGION}" --output json 2>&1 ) || {
-        log_error "Stack '${STACK_NAME}' not found in region '${REGION}'."; exit 1
+        # Stack not found — could be DELETE_COMPLETE after a Phase 6 timeout.
+        # If a params file from a previous Phase 3 run exists, auto-resume from Phase 7.
+        local -a param_files=()
+        while IFS= read -r f; do param_files+=("$f"); done \
+            < <( ls -t ./migration_params_${NEW_STACK_NAME}_*.json 2>/dev/null )
+        if [[ ${#param_files[@]} -eq 0 ]]; then
+            log_error "Stack '${STACK_NAME}' not found in region '${REGION}'."; exit 1
+        fi
+
+        log_warn "Stack '${STACK_NAME}' not found — it was deleted while the script was not running."
+        local found_params
+        if [[ ${#param_files[@]} -eq 1 ]]; then
+            found_params="${param_files[0]}"
+            log_warn "Found saved params file: ${found_params}"
+        else
+            log_warn "Multiple saved params files found for stack '${NEW_STACK_NAME}':"
+            local i
+            for i in "${!param_files[@]}"; do
+                log_warn "  [$((i+1))] ${param_files[$i]}"
+            done
+            local choice
+            read -r -p "Which params file to use? (1-${#param_files[@]}): " choice
+            if ! [[ "$choice" =~ ^[0-9]+$ ]] || \
+               [[ "$choice" -lt 1 ]] || \
+               [[ "$choice" -gt ${#param_files[@]} ]]; then
+                log_error "Invalid selection. Aborting."; exit 1
+            fi
+            found_params="${param_files[$((choice-1))]}"
+            log_info "Using: ${found_params}"
+        fi
+
+        log_warn "Auto-resuming from Phase 7 (FER cleanup + deploy)..."
+        RESUME=true
+        RESUME_PARAMS_FILE="$found_params"
+        PERSIST_PARAM_FILE="$found_params"
+        return 0
     }
     STACK_JSON="$out"
 
@@ -351,6 +393,58 @@ phase_validate() {
     case "$stack_status" in
         CREATE_COMPLETE|UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE)
             log_info "Stack status: ${stack_status}" ;;
+        DELETE_IN_PROGRESS)
+            log_warn "Stack '${STACK_NAME}' is already deleting (DELETE_IN_PROGRESS)."
+            log_warn "The script exited mid-Phase 6 (timeout or Ctrl+C). Waiting for deletion..."
+            local delete_status
+            delete_status=$( wait_for_stack "$STACK_NAME" "$DELETE_TIMEOUT" ) || true
+            if [[ "$delete_status" != "DELETE_COMPLETE" ]]; then
+                log_error "Stack deletion ended with status: ${delete_status}"
+                log_error "Resolve the issue manually, then use --resume to continue."
+                exit 1
+            fi
+            log_info "Stack deletion completed — auto-continuing to Phase 7 (FER cleanup + deploy)."
+
+            # Find the params file saved by a previous Phase 3 run for this stack
+            local -a di_param_files=()
+            while IFS= read -r f; do di_param_files+=("$f"); done \
+                < <( ls -t ./migration_params_${NEW_STACK_NAME}_*.json 2>/dev/null )
+            if [[ ${#di_param_files[@]} -eq 0 ]]; then
+                log_error "Could not find a saved params file for stack '${NEW_STACK_NAME}'."
+                log_error "Re-run the full migration from the start (stack is already deleted,"
+                log_error "so you will need to re-deploy v3.0.0 manually or use --resume with"
+                log_error "a params file if you have one from a previous run)."
+                exit 1
+            fi
+            local found_params
+            if [[ ${#di_param_files[@]} -eq 1 ]]; then
+                found_params="${di_param_files[0]}"
+                log_info "Using saved params file: ${found_params}"
+            else
+                log_warn "Multiple saved params files found for stack '${NEW_STACK_NAME}':"
+                local i
+                for i in "${!di_param_files[@]}"; do
+                    log_warn "  [$((i+1))] ${di_param_files[$i]}"
+                done
+                local choice
+                read -r -p "Which params file to use? (1-${#di_param_files[@]}): " choice
+                if ! [[ "$choice" =~ ^[0-9]+$ ]] || \
+                   [[ "$choice" -lt 1 ]] || \
+                   [[ "$choice" -gt ${#di_param_files[@]} ]]; then
+                    log_error "Invalid selection. Aborting."; exit 1
+                fi
+                found_params="${di_param_files[$((choice-1))]}"
+                log_info "Using: ${found_params}"
+            fi
+            RESUME=true
+            RESUME_PARAMS_FILE="$found_params"
+            PERSIST_PARAM_FILE="$found_params"
+            # Fall through — main() will detect RESUME=true and run phases 7-12
+            return 0 ;;
+        DELETE_FAILED)
+            log_error "Stack '${STACK_NAME}' is in DELETE_FAILED state."
+            log_error "Resolve the blocking resources, then re-run or use --resume."
+            exit 1 ;;
         *)
             log_error "Stack '${STACK_NAME}' is in status '${stack_status}'. Expected CREATE_COMPLETE or UPDATE_COMPLETE."
             exit 1 ;;
@@ -447,6 +541,42 @@ phase_capture() {
     log_info "ALB bucket:        ${CAPTURED_BUCKET_ALB:-<empty>}"
     log_info "CloudTrail bucket: ${CAPTURED_BUCKET_CLOUDTRAIL:-<empty>}"
     log_info "ELB bucket:        ${CAPTURED_BUCKET_ELB:-<empty>}"
+
+    # Cross-check Sumo bucket names against the CF stack parameters.
+    # Sumo is the source of truth — mismatches are warnings only, not errors.
+    local cf_bucket_alb cf_bucket_cloudtrail cf_bucket_elb
+    cf_bucket_alb=$(        echo "$STACK_JSON" | jq -r '
+        [.Stacks[0].Parameters[] | select(.ParameterKey == "Section5dALBS3LogsBucketName")]
+        | .[0].ParameterValue // ""' )
+    cf_bucket_cloudtrail=$( echo "$STACK_JSON" | jq -r '
+        [.Stacks[0].Parameters[] | select(.ParameterKey == "Section6cCloudTrailLogsBucketName")]
+        | .[0].ParameterValue // ""' )
+    cf_bucket_elb=$(        echo "$STACK_JSON" | jq -r '
+        [.Stacks[0].Parameters[] | select(.ParameterKey == "Section9dELBS3LogsBucketName")]
+        | .[0].ParameterValue // ""' )
+
+    local mismatch=false
+    _check_bucket_mismatch() {
+        local label="$1" sumo_val="$2" cf_val="$3"
+        if [[ -n "$sumo_val" && -n "$cf_val" && "$sumo_val" != "$cf_val" ]]; then
+            log_warn "  ${label}: Sumo='${sumo_val}'  CF='${cf_val}'"
+            mismatch=true
+        elif [[ -z "$sumo_val" && -n "$cf_val" ]]; then
+            log_warn "  ${label}: Sumo source has no bucket configured, but CF stack has '${cf_val}'"
+            mismatch=true
+        fi
+    }
+    _check_bucket_mismatch "ALB bucket      " "$CAPTURED_BUCKET_ALB"        "$cf_bucket_alb"
+    _check_bucket_mismatch "CloudTrail bkt  " "$CAPTURED_BUCKET_CLOUDTRAIL" "$cf_bucket_cloudtrail"
+    _check_bucket_mismatch "ELB bucket      " "$CAPTURED_BUCKET_ELB"        "$cf_bucket_elb"
+
+    if [[ "$mismatch" == true ]]; then
+        log_warn "Bucket name mismatch detected between Sumo sources and CF stack parameters."
+        log_warn "The Sumo source values above will be used for migration (source of truth)."
+        log_warn "Verify the Sumo source configs are correct before proceeding."
+    else
+        log_info "Bucket cross-check: Sumo sources and CF stack parameters agree."
+    fi
 }
 
 # ============================================================
@@ -542,7 +672,7 @@ phase_map_parameters() {
     fi
 
     # Save params to a temp file (cleaned up on exit)
-    TEMP_PARAM_FILE=$( mktemp /tmp/awso_migration_params_XXXXXX.json )
+    TEMP_PARAM_FILE=$( mktemp /tmp/awso_migration_params_XXXXXX )
     echo "$v300_params" > "$TEMP_PARAM_FILE"
 
     # Also save to a persistent file so --resume works if we exit early
@@ -588,10 +718,19 @@ phase_confirm() {
 
     # --- Bucket names ---
     echo ""
-    log_info "  S3 Buckets (fetched from source configs):"
+    log_info "  S3 Buckets (read from Sumo Logic source configs — verify these match your actual AWS buckets):"
     log_info "    ALB bucket:        ${CAPTURED_BUCKET_ALB:-<not found>}"
     log_info "    CloudTrail bucket: ${CAPTURED_BUCKET_CLOUDTRAIL:-<not found>}"
     log_info "    ELB bucket:        ${CAPTURED_BUCKET_ELB:-<not found>}"
+    log_warn "  ⚠  Bucket names are read from Sumo source configs and cross-checked"
+    log_warn "     against the CF stack parameters (Phase 2). Any mismatch was flagged"
+    log_warn "     above. If all clear, confirm the buckets exist in AWS:"
+    [[ -n "$CAPTURED_BUCKET_CLOUDTRAIL" ]] && \
+        log_warn "     aws s3 ls s3://${CAPTURED_BUCKET_CLOUDTRAIL} --region ${REGION}"
+    [[ -n "$CAPTURED_BUCKET_ALB" ]] && \
+        log_warn "     aws s3 ls s3://${CAPTURED_BUCKET_ALB} --region ${REGION}"
+    [[ -n "$CAPTURED_BUCKET_ELB" ]] && \
+        log_warn "     aws s3 ls s3://${CAPTURED_BUCKET_ELB} --region ${REGION}"
 
     # --- v3.0.0 deployment params ---
     echo ""
@@ -601,9 +740,9 @@ phase_confirm() {
     log_info "    Deployment:        ${DEPLOYMENT}"
     log_info "    Install apps:      ${INSTALL_APPS}"
     log_info "    Source mode:       Create New (reuses existing sources by name)"
-    log_info "    ALB bucket:        ${CAPTURED_BUCKET_ALB:-<auto>}"
-    log_info "    CloudTrail bucket: ${CAPTURED_BUCKET_CLOUDTRAIL:-<auto>}"
-    log_info "    ELB bucket:        ${CAPTURED_BUCKET_ELB:-<auto>}"
+    log_info "    ALB bucket:        ${CAPTURED_BUCKET_ALB:-<auto>}  ← confirm this bucket exists in AWS"
+    log_info "    CloudTrail bucket: ${CAPTURED_BUCKET_CLOUDTRAIL:-<auto>}  ← confirm this bucket exists in AWS"
+    log_info "    ELB bucket:        ${CAPTURED_BUCKET_ELB:-<auto>}  ← confirm this bucket exists in AWS"
     log_info "    Params file:       ${PERSIST_PARAM_FILE}"
 
     # --- Destructive actions ---
@@ -662,7 +801,7 @@ phase_ensure_remove_on_delete() {
 
     log_info "RemoveOnDeleteStack is '${remove_on_delete}' — updating to 'false'..."
     local update_params_file
-    update_params_file=$( mktemp /tmp/awso_update_params_XXXXXX.json )
+    update_params_file=$( mktemp /tmp/awso_update_params_XXXXXX )
     echo "$STACK_JSON" | jq '
         [.Stacks[0].Parameters[]
         | if .ParameterKey == "Section1eSumoLogicResourceRemoveOnDeleteStack"
@@ -756,7 +895,14 @@ phase_delete() {
         exit 1
     fi
 
-    log_error "Stack deletion ended with unexpected status: ${final_status}"; exit 1
+    if [[ "$final_status" == "TIMEOUT" ]]; then
+        log_warn "Stack deletion timed out — it is still in progress in AWS."
+        log_warn "Once deletion completes, re-run the same command and the script will"
+        log_warn "automatically detect the completed deletion and continue from Phase 7."
+    else
+        log_error "Stack deletion ended with unexpected status: ${final_status}"
+    fi
+    exit 1
 }
 
 # ============================================================
@@ -891,10 +1037,10 @@ phase_fer_cleanup() {
         log_warn ""
         log_warn "After cleaning up the FERs, resume the migration with:"
         echo ""
-        echo -e "  ${GREEN}$0 --resume \\${NC}"
-        echo -e "  ${GREEN}    -d ${DEPLOYMENT} -i ${ACCESS_ID} -k '***' -o ${ORG_ID} \\${NC}"
-        echo -e "  ${GREEN}    -n ${NEW_STACK_NAME} -r ${REGION} -p ${AWS_PROFILE} \\${NC}"
-        echo -e "  ${GREEN}    --params-file ${PERSIST_PARAM_FILE}${NC}"
+        echo -e "${GREEN}  $0 --resume \\
+      -d ${DEPLOYMENT} -i ${ACCESS_ID} -k '***' -o ${ORG_ID} \\
+      -n ${NEW_STACK_NAME} -r ${REGION} -p ${AWS_PROFILE} \\
+      --params-file ${PERSIST_PARAM_FILE}${NC}"
         echo ""
         exit 2
     fi
@@ -937,7 +1083,7 @@ phase_deploy() {
             log_error "--resume requires --params-file pointing to a valid params JSON file."
             exit 1
         fi
-        TEMP_PARAM_FILE=$( mktemp /tmp/awso_migration_params_XXXXXX.json )
+        TEMP_PARAM_FILE=$( mktemp /tmp/awso_migration_params_XXXXXX )
         cp "$RESUME_PARAMS_FILE" "$TEMP_PARAM_FILE"
         log_info "Loaded params from: ${RESUME_PARAMS_FILE}"
     fi
@@ -1025,6 +1171,141 @@ phase_verify() {
     else
         log_warn "Sources: ${alive}/${total} alive — some may still be initialising."
     fi
+
+    # Bucket policy check — verify each configured bucket grants the required AWS service
+    # principals write access. Migration reuses existing buckets so v3.0.0 never creates a
+    # new bucket policy; a missing or incomplete policy will silently stop log delivery.
+    log_info "Checking S3 bucket policies..."
+    _check_bucket_policy() {
+        local label="$1" bucket="$2"
+        [[ -z "$bucket" ]] && return
+
+        local policy
+        policy=$( aws_cmd s3api get-bucket-policy --bucket "$bucket" --region "$REGION" \
+            --output text --query Policy 2>&1 ) || {
+            log_warn "  ${label} (${bucket}): no bucket policy found — log delivery may be blocked."
+            log_warn "    Expected policy with cloudtrail.amazonaws.com and delivery.logs.amazonaws.com."
+            return
+        }
+
+        local missing=""
+        echo "$policy" | jq -e '
+            .Statement[]? | .Principal.Service? | arrays, strings | . == "cloudtrail.amazonaws.com"
+        ' >/dev/null 2>&1 || missing="${missing} cloudtrail.amazonaws.com"
+
+        echo "$policy" | jq -e '
+            .Statement[]? | .Principal.Service? | arrays, strings | . == "delivery.logs.amazonaws.com"
+        ' >/dev/null 2>&1 || missing="${missing} delivery.logs.amazonaws.com"
+
+        if [[ -z "$missing" ]]; then
+            log_info "  ${label} (${bucket}): policy OK ✓"
+        else
+            log_warn "  ${label} (${bucket}): policy missing principals:${missing}"
+            log_warn "    Check: aws s3api get-bucket-policy --bucket ${bucket} --region ${REGION}"
+        fi
+    }
+
+    _check_bucket_policy "CloudTrail bucket" "$CAPTURED_BUCKET_CLOUDTRAIL"
+    _check_bucket_policy "ALB bucket"        "$CAPTURED_BUCKET_ALB"
+    _check_bucket_policy "ELB bucket"        "$CAPTURED_BUCKET_ELB"
+
+    # S3 notification check — each source bucket must have an SNS TopicConfiguration for
+    # s3:ObjectCreated events so new log files trigger Sumo ingestion. v3.0.0 only wires this
+    # when it creates the bucket; existing buckets may have no notification or a stale topic
+    # ARN pointing at the deleted v2.x SNS topic.
+    log_info "Checking S3 bucket notification configurations..."
+    _check_bucket_notification() {
+        local label="$1" bucket="$2"
+        [[ -z "$bucket" ]] && return
+
+        local notif_json
+        notif_json=$( aws_cmd s3api get-bucket-notification-configuration \
+            --bucket "$bucket" --region "$REGION" --output json 2>&1 ) || {
+            log_warn "  ${label} (${bucket}): could not retrieve notification config."
+            return
+        }
+
+        # Find SNS TopicConfigurations that include an s3:ObjectCreated event
+        local topic_arns
+        topic_arns=$( echo "$notif_json" | jq -r '
+            .TopicConfigurations[]?
+            | select(.Events[]? | startswith("s3:ObjectCreated"))
+            | .TopicArn' )
+
+        if [[ -z "$topic_arns" ]]; then
+            log_warn "  ${label} (${bucket}): no s3:ObjectCreated SNS notification found."
+            log_warn "    New log files will not trigger Sumo ingestion — configure an SNS"
+            log_warn "    notification on this bucket pointing at the v3.0.0 Sumo SNS topic."
+            return
+        fi
+
+        # Verify each topic ARN still exists and is not a leftover from the deleted v2.x stack
+        local topic_arn
+        while IFS= read -r topic_arn; do
+            local sns_check
+            sns_check=$( aws_cmd sns get-topic-attributes \
+                --topic-arn "$topic_arn" --region "$REGION" --output json 2>&1 )
+            if echo "$sns_check" | grep -q "NotFound\|does not exist\|InvalidParameter\|AuthorizationError"; then
+                log_warn "  ${label} (${bucket}): SNS topic '${topic_arn}' does not exist."
+                log_warn "    This is likely the deleted v2.x topic — update the bucket notification"
+                log_warn "    to point at the new v3.0.0 SNS topic."
+            else
+                log_info "  ${label} (${bucket}): SNS notification OK → ${topic_arn} ✓"
+            fi
+        done <<< "$topic_arns"
+    }
+
+    _check_bucket_notification "CloudTrail bucket" "$CAPTURED_BUCKET_CLOUDTRAIL"
+    _check_bucket_notification "ALB bucket"        "$CAPTURED_BUCKET_ALB"
+    _check_bucket_notification "ELB bucket"        "$CAPTURED_BUCKET_ELB"
+
+    # CloudTrail check — the v2.x trail (Aws-Observability-*) was deleted with the old stack.
+    # v3.0.0 only creates a new trail when it also creates a new bucket (not the migration case).
+    # Verify that at least one active trail is writing to the CloudTrail bucket; if none exists
+    # the Sumo CloudTrail source will receive no new data.
+    if [[ -n "$CAPTURED_BUCKET_CLOUDTRAIL" ]]; then
+        log_info "Checking CloudTrail trails writing to '${CAPTURED_BUCKET_CLOUDTRAIL}'..."
+        local trails_json
+        # Default includes shadow trails (read-only copies of multi-region trails created in
+        # other regions). We need them because a multi-region trail homed elsewhere can
+        # legitimately be writing to this bucket.
+        trails_json=$( aws_cmd cloudtrail describe-trails \
+            --region "${REGION}" --output json 2>&1 ) || {
+            log_warn "  Could not list CloudTrail trails — verify manually."
+            trails_json='{"trailList":[]}'
+        }
+
+        # Find trails whose S3BucketName matches the captured bucket
+        local matching_trails
+        matching_trails=$( echo "$trails_json" | jq -r --arg b "$CAPTURED_BUCKET_CLOUDTRAIL" \
+            '[.trailList[] | select(.S3BucketName == $b)]' )
+        local match_count
+        match_count=$( echo "$matching_trails" | jq 'length' )
+
+        if [[ "$match_count" -eq 0 ]]; then
+            log_warn "  No CloudTrail trail found writing to bucket '${CAPTURED_BUCKET_CLOUDTRAIL}'."
+            log_warn "  The v2.x Aws-Observability-* trail was deleted with the old stack."
+            log_warn "  Create a new trail pointing at this bucket, or v3.0.0 CloudTrail source"
+            log_warn "  will receive no data."
+            log_warn "    aws cloudtrail create-trail --name <name> --s3-bucket-name ${CAPTURED_BUCKET_CLOUDTRAIL} --region ${REGION}"
+        else
+            local trail_name trail_home_region trail_logging
+            while IFS= read -r trail_json; do
+                trail_name=$(        echo "$trail_json" | jq -r '.Name' )
+                trail_home_region=$( echo "$trail_json" | jq -r '.HomeRegion' )
+                # get-trail-status must be called against the trail's home region
+                trail_logging=$( aws_cmd cloudtrail get-trail-status \
+                    --name "$trail_name" --region "${trail_home_region}" --output json 2>&1 \
+                    | jq -r '.IsLogging // false' )
+                if [[ "$trail_logging" == "true" ]]; then
+                    log_info "  Trail '${trail_name}' (home: ${trail_home_region}): IsLogging=true ✓"
+                else
+                    log_warn "  Trail '${trail_name}' (home: ${trail_home_region}): IsLogging=false — trail exists but is not logging."
+                    log_warn "    aws cloudtrail start-logging --name ${trail_name} --region ${trail_home_region}"
+                fi
+            done < <( echo "$matching_trails" | jq -c '.[]' )
+        fi
+    fi
 }
 
 # ============================================================
@@ -1091,7 +1372,7 @@ phase_patch_role_arns() {
     fi
 
     local header_file
-    header_file=$( mktemp /tmp/awso_source_headers_XXXXXX.txt )
+    header_file=$( mktemp /tmp/awso_source_headers_XXXXXX )
 
     local source_id
     while IFS= read -r source_id; do
@@ -1272,6 +1553,24 @@ main() {
         phase_report
     else
         phase_validate
+        # phase_validate may flip RESUME=true in two cases:
+        #   1. DELETE_IN_PROGRESS — waited for deletion to finish
+        #   2. Stack not found (DELETE_COMPLETE) — detected a saved params file
+        # Both cases skip straight to cleanup + deploy.
+        if [[ "$RESUME" == true ]]; then
+            log_info "Stack already deleted — auto-resuming from Phase 7."
+            CAPTURED_BUCKET_ALB=$(       jq -r '.[] | select(.ParameterKey=="Section5dALBS3LogsBucketName")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
+            CAPTURED_BUCKET_CLOUDTRAIL=$(jq -r '.[] | select(.ParameterKey=="Section6cCloudTrailLogsBucketName")   | .ParameterValue' "$RESUME_PARAMS_FILE" )
+            CAPTURED_BUCKET_ELB=$(       jq -r '.[] | select(.ParameterKey=="Section8dELBS3LogsBucketName")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
+            [[ -z "$SOURCE_VERSION" ]] && SOURCE_VERSION="(from params file)"
+            phase_fer_cleanup
+            phase_metric_rules_cleanup
+            phase_deploy
+            phase_verify
+            phase_patch_role_arns
+            phase_report
+            return 0
+        fi
         phase_capture
         phase_map_parameters
         phase_confirm
