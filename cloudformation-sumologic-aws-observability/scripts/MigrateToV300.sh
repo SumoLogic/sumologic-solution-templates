@@ -1468,19 +1468,19 @@ phase_patch_role_arns() {
 # ============================================================
 phase_report() {
     log_phase "Phase 12: Migration Summary"
-    echo "" | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  Source version   : v${SOURCE_VERSION:-unknown}${NC}"            | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  Target version   : v3.0.0${NC}"                                 | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  Stack name       : ${NEW_STACK_NAME}${NC}"                      | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  Region           : ${REGION}${NC}"                              | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  Deployment       : ${DEPLOYMENT}${NC}"                          | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  ALB bucket       : ${CAPTURED_BUCKET_ALB:-<empty>}${NC}"        | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  CloudTrail bkt   : ${CAPTURED_BUCKET_CLOUDTRAIL:-<empty>}${NC}" | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  ELB bucket       : ${CAPTURED_BUCKET_ELB:-<empty>}${NC}"        | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  FERs renamed     : ${FER_RENAMED_COUNT}${NC}"                   | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  Sources patched  : ${SOURCES_PATCHED}${NC}"                     | tee -a "$LOG_FILE"
-    echo -e "${GREEN}  Log file         : ${LOG_FILE}${NC}"                            | tee -a "$LOG_FILE"
-    echo "" | tee -a "$LOG_FILE"
+    echo "" | tee >( _log_to_file )
+    echo -e "${GREEN}  Source version   : v${SOURCE_VERSION:-unknown}${NC}"            | tee >( _log_to_file )
+    echo -e "${GREEN}  Target version   : v3.0.0${NC}"                                 | tee >( _log_to_file )
+    echo -e "${GREEN}  Stack name       : ${NEW_STACK_NAME}${NC}"                      | tee >( _log_to_file )
+    echo -e "${GREEN}  Region           : ${REGION}${NC}"                              | tee >( _log_to_file )
+    echo -e "${GREEN}  Deployment       : ${DEPLOYMENT}${NC}"                          | tee >( _log_to_file )
+    echo -e "${GREEN}  ALB bucket       : ${CAPTURED_BUCKET_ALB:-<empty>}${NC}"        | tee >( _log_to_file )
+    echo -e "${GREEN}  CloudTrail bkt   : ${CAPTURED_BUCKET_CLOUDTRAIL:-<empty>}${NC}" | tee >( _log_to_file )
+    echo -e "${GREEN}  ELB bucket       : ${CAPTURED_BUCKET_ELB:-<empty>}${NC}"        | tee >( _log_to_file )
+    echo -e "${GREEN}  FERs renamed     : ${FER_RENAMED_COUNT}${NC}"                   | tee >( _log_to_file )
+    echo -e "${GREEN}  Sources patched  : ${SOURCES_PATCHED}${NC}"                     | tee >( _log_to_file )
+    echo -e "${GREEN}  Log file         : ${LOG_FILE}${NC}"                            | tee >( _log_to_file )
+    echo "" | tee >( _log_to_file )
 }
 
 # ============================================================
