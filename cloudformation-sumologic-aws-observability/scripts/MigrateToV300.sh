@@ -502,6 +502,50 @@ phase_capture() {
     fi
     log_info "Collector: ${COLLECTOR_NAME} (ID: ${COLLECTOR_ID})"
 
+    # Cross-check the collector ID against the CF stack's custom resource.
+    # The SumoLogicHostedCollector custom resource in the CreateCommonResources
+    # nested stack stores the actual Sumo collector ID as its PhysicalResourceId.
+    local cf_nested_stack_id
+    cf_nested_stack_id=$( aws_cmd cloudformation list-stack-resources \
+        --stack-name "${STACK_NAME}" --region "${REGION}" --output json 2>/dev/null \
+        | jq -r '
+            .StackResourceSummaries[]
+            | select(.LogicalResourceId == "CreateCommonResources")
+            | .PhysicalResourceId // ""' )
+
+    if [[ -n "$cf_nested_stack_id" && "$cf_nested_stack_id" != "null" ]]; then
+        local cf_collector_id
+        # PhysicalResourceId is "SumoLogicHostedCollector/<id>" — strip the prefix
+        cf_collector_id=$( aws_cmd cloudformation list-stack-resources \
+            --stack-name "${cf_nested_stack_id}" --region "${REGION}" --output json 2>/dev/null \
+            | jq -r '
+                .StackResourceSummaries[]
+                | select(.LogicalResourceId == "SumoLogicHostedCollector")
+                | .PhysicalResourceId // ""
+                | split("/")[-1]' )
+
+        if [[ -n "$cf_collector_id" && "$cf_collector_id" != "null" ]]; then
+            if [[ "$COLLECTOR_ID" == "$cf_collector_id" ]]; then
+                log_info "Collector ID cross-check: Sumo API and CF stack agree (${COLLECTOR_ID}) ✓"
+            else
+                log_warn "Collector ID mismatch!"
+                log_warn "  Found via Sumo API: ${COLLECTOR_ID} (${COLLECTOR_NAME})"
+                log_warn "  Recorded in CF stack: ${cf_collector_id}"
+                log_warn "  The collector found in Sumo Logic does not match the one created by this CF stack."
+                log_warn "  This may mean the wrong Sumo credentials were provided, or the collector"
+                log_warn "  was recreated outside of CloudFormation."
+                read -r -p "Continue with the Sumo API collector (${COLLECTOR_ID})? (yes/no): " _coll_confirm
+                if [[ "$_coll_confirm" != "yes" ]]; then
+                    log_error "Migration aborted by user."; exit 1
+                fi
+            fi
+        else
+            log_warn "Could not read SumoLogicHostedCollector from nested stack — skipping collector cross-check."
+        fi
+    else
+        log_warn "Could not find CreateCommonResources nested stack — skipping collector cross-check."
+    fi
+
     # Fetch all sources on the collector
     CAPTURED_SOURCES_JSON=$( sumo_get "/api/v1/collectors/${COLLECTOR_ID}/sources" )
 
@@ -1190,11 +1234,13 @@ phase_verify() {
 
         local missing=""
         echo "$policy" | jq -e '
-            .Statement[]? | .Principal.Service? | arrays, strings | . == "cloudtrail.amazonaws.com"
+            [.Statement[]? | .Principal.Service? | arrays, strings] | flatten
+            | any(. == "cloudtrail.amazonaws.com")
         ' >/dev/null 2>&1 || missing="${missing} cloudtrail.amazonaws.com"
 
         echo "$policy" | jq -e '
-            .Statement[]? | .Principal.Service? | arrays, strings | . == "delivery.logs.amazonaws.com"
+            [.Statement[]? | .Principal.Service? | arrays, strings] | flatten
+            | any(. == "delivery.logs.amazonaws.com")
         ' >/dev/null 2>&1 || missing="${missing} delivery.logs.amazonaws.com"
 
         if [[ -z "$missing" ]]; then
