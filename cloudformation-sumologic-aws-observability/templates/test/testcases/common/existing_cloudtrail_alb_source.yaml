@@ -93,15 +93,15 @@ TestCase:
           - "parameters.Section5cALBLogsSourceUrl"
 
   PostRequisitesInfra:
-    # Create "new" ALB (triggers EventBridge -> Lambda -> auto-enable access logs)
+    # Create "new" ALB — no CloudTrail trail (Section6a=No), so EventBridge auto-enable will NOT fire
     - Name: CreateALBInfra
       CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         AlbArn:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].Arn"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ALB#LoadBalancers#0'].Arn"
         AlbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#1'].DnsName"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ALB#LoadBalancers#0'].DnsName"
 
   Parameters:
     Values:
@@ -256,11 +256,15 @@ TestCase:
           LoadBalancers:
             - Arn: ""
               DnsName: ""
-            - Arn: ""
-              DnsName: ""
           HttpRequestCount: 10
           AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
+      NotAssert:
+        ALB:
+          LoadBalancers:
+            - Arn: ""
+              DnsName: ""
+          AccessLogNotEnabledWaitSeconds: 120
 
     - AssertType: SumoSourceExistenceValidation
       Skip: false

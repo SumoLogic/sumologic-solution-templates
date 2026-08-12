@@ -1,0 +1,20 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+      Section2aAccountAlias: 'testenv'
+# Test suite for scenarios where Sumo Logic sources are created in PreRequisitesInfra
+# and their URLs are passed to AWSO. SumoSourceLogsValidation skips these URL-provided
+# sources and only validates sources that AWSO itself creates.
+TestSuiteName: PrereqSourcesTestsuite
+TestCases:
+  # Creates CloudTrail + ALB sources in prereqs; AWSO receives their URLs + enables access logs on ALB
+  - 'test/testcases/common/existing_cloudtrail_alb_source.yaml'
+  # Creates CloudTrail + ELB sources in prereqs; AWSO receives their URLs + enables access logs on ELB
+  - 'test/testcases/common/existing_cloudtrail_elb_source.yaml'
+  # Creates ALB + ELB + CloudTrail sources in prereqs; all URLs passed to AWSO (no AWSO-created sources)
+  - 'test/testcases/common/all_existing_source_urls.yaml'

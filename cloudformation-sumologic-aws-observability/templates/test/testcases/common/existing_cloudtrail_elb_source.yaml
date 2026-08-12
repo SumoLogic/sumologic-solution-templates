@@ -93,15 +93,15 @@ TestCase:
           - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
 
   PostRequisitesInfra:
-    # Create "new" ELB (triggers EventBridge -> Lambda -> auto-enable access logs)
+    # Create "new" ELB — no CloudTrail trail (Section6a=No), so EventBridge auto-enable will NOT fire
     - Name: CreateELBInfra
       CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         ElbName:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].Name"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ELB#LoadBalancers#0'].Name"
         ElbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#1'].DnsName"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ELB#LoadBalancers#0'].DnsName"
 
   Parameters:
     Values:
@@ -256,11 +256,15 @@ TestCase:
           LoadBalancers:
             - Name: ""
               DnsName: ""
-            - Name: ""
-              DnsName: ""
           HttpRequestCount: 10
           AccessLogCheckTimeoutSeconds: 240
           S3LogCheckTimeoutSeconds: 600
+      NotAssert:
+        ELB:
+          LoadBalancers:
+            - Name: ""
+              DnsName: ""
+          AccessLogNotEnabledWaitSeconds: 120
 
     - AssertType: SumoSourceExistenceValidation
       Skip: false

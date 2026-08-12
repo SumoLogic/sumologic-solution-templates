@@ -18,18 +18,18 @@ TestCase:
       WaitSeconds:
       ImpactedParametersPath:
         AlbArn:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ALB#LoadBalancers#0'].Arn"
         AlbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
-    # Create "new" ELB (triggers EventBridge -> Lambda -> auto-enable access logs)
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ALB#LoadBalancers#0'].DnsName"
+    # Create "new" ELB — no CloudTrail trail, so access logging should NOT be auto-enabled
     - Name: CreateELBInfra
       CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       WaitSeconds:
       ImpactedParametersPath:
         ElbName:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ELB#LoadBalancers#0'].Name"
         ElbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ELB#LoadBalancers#0'].DnsName"
   Parameters:
     Values:
       Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
@@ -71,7 +71,6 @@ TestCase:
           - CreateCommonResources.CommonS3Bucket
           - CreateCommonResources.ALBBucketPolicy
           - CreateCommonResources.ELBBucketPolicy
-          - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole
           - CreateCommonResources.SumoLogicHostedCollector
@@ -212,21 +211,18 @@ TestCase:
 
     - AssertType: AWSResourceValidation
       Skip: false
-      Assert:
+      Assert: {}
+      NotAssert:
         ALB:
           LoadBalancers:
             - Arn: ""
               DnsName: ""
-          HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 240
-          S3LogCheckTimeoutSeconds: 900
+          AccessLogNotEnabledWaitSeconds: 120
         ELB:
           LoadBalancers:
             - Name: ""
               DnsName: ""
-          HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 240
-          S3LogCheckTimeoutSeconds: 900
+          AccessLogNotEnabledWaitSeconds: 120
 
     - AssertType: SumoSourceLogsValidation
       Skip: false

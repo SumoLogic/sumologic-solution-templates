@@ -15,24 +15,24 @@ TestCase:
   # No PreRequisitesInfra — auto-enable is "New" only (no existing resources to test)
 
   PostRequisitesInfra:
-    # Create "new" ALB (triggers AWSO's EventBridge rule -> Lambda -> auto-enable access logs)
+    # Create "new" ALB — no CloudTrail trail, so access logging should NOT be auto-enabled
     - Name: CreateALBInfra
       CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         AlbArn:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ALB#LoadBalancers#0'].Arn"
         AlbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
-    # Create "new" ELB (triggers AWSO's EventBridge rule -> Lambda -> auto-enable access logs)
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ALB#LoadBalancers#0'].DnsName"
+    # Create "new" ELB — no CloudTrail trail, so access logging should NOT be auto-enabled
     - Name: CreateELBInfra
       CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
       WaitSeconds: 30
       ImpactedParametersPath:
         ElbName:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ELB#LoadBalancers#0'].Name"
         ElbDns:
-          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
+          - "assertions[AssertType==AWSResourceValidation].NotAssert['ELB#LoadBalancers#0'].DnsName"
     # Create "new" CloudWatch Log Groups (triggers AWSO's EventBridge -> Lambda -> auto-subscribe)
     - Name: CreateCWLogGroups
       CFNTemplateURL: "test/setup-infra/create_cloudwatch_loggroups.yaml"
@@ -89,7 +89,6 @@ TestCase:
           - CreateCommonResources.CommonS3Bucket
           - CreateCommonResources.ALBBucketPolicy
           - CreateCommonResources.ELBBucketPolicy
-          - CreateCommonResources.CommonCloudTrail
           - CreateCommonResources.CommonSNSpolicy
           - CreateCommonResources.SumoLogicSourceRole
           - CreateCommonResources.SumoLogicHostedCollector
@@ -225,20 +224,6 @@ TestCase:
     - AssertType: AWSResourceValidation
       Skip: false
       Assert:
-        ALB:
-          LoadBalancers:
-            - Arn: ""
-              DnsName: ""
-          HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 240
-          S3LogCheckTimeoutSeconds: 600
-        ELB:
-          LoadBalancers:
-            - Name: ""
-              DnsName: ""
-          HttpRequestCount: 10
-          AccessLogCheckTimeoutSeconds: 240
-          S3LogCheckTimeoutSeconds: 600
         CloudWatchLogGroups:
           ExpectedDestinationArn: ""
           LogEventCount: 10
@@ -253,6 +238,17 @@ TestCase:
               Arn: ""
               Type: "Both"
           SubscriptionCheckTimeoutSeconds: 240
+      NotAssert:
+        ALB:
+          LoadBalancers:
+            - Arn: ""
+              DnsName: ""
+          AccessLogNotEnabledWaitSeconds: 120
+        ELB:
+          LoadBalancers:
+            - Name: ""
+              DnsName: ""
+          AccessLogNotEnabledWaitSeconds: 120
 
     - AssertType: SumoSourceLogsValidation
       Skip: false
