@@ -27,7 +27,7 @@ Phase 2:  Capture       → Fetch collector, sources, and S3 bucket names from S
 Phase 3:  Map Params    → Transform v2.x params to v3.0.0 format
 Phase 4:  Confirm       → Show all details + v3.0.0 params + destructive actions, user approval
 Phase 5:  Protect       → Ensure RemoveOnDeleteStack=false (update stack if needed)
-Phase 6:  Delete        → Delete v2.x stack (force-delete if bucket blocks)
+Phase 6:  Delete        → Delete v2.x stack (retain-resources if bucket blocks); clean up nested stacks
 Phase 7:  FER Cleanup   → Rename/disable 17 AWSO FERs to free quota
 Phase 8:  Metric Rules  → Delete 4 AWSO metric rules
 Phase 9:  Deploy        → Create v3.0.0 stack with mapped params
@@ -48,6 +48,14 @@ Phase 12: Report        → Print summary + cleanup instructions
 - Auto-detects source version (v2.12–v2.15) by checking for parameter fingerprint (Section10a + Section7aLambda + Section9a)
 - Captures `ACCOUNT_ID` for later use
 
+### Auto-recovery on special stack states
+
+| Stack status | Behavior |
+|---|---|
+| `DELETE_IN_PROGRESS` | Waits for deletion to complete, then auto-resumes from Phase 7 using a saved params file |
+| `DELETE_FAILED` | Calls `phase_delete_retain_only` to delete with `--retain-resources`, then auto-resumes from Phase 7 |
+| Stack not found (`DELETE_COMPLETE`) | Auto-detects saved params file for the new stack name, sets `RESUME=true` to continue from Phase 7 |
+
 ### Issues Faced & Resolutions
 
 | Issue | Resolution |
@@ -61,12 +69,19 @@ Phase 12: Report        → Print summary + cleanup instructions
 
 ### What it does
 1. Finds the AWSO collector via `find_awso_collector()` (paginated search)
-2. Lists all sources on the collector via `GET /api/v1/collectors/{id}/sources`
-3. Extracts bucket names directly from each S3 source's configuration:
+2. Cross-checks collector ID against `SumoLogicHostedCollector` in the old stack's `CreateCommonResources` nested stack
+3. Lists all sources on the collector via `GET /api/v1/collectors/{id}/sources`
+4. Extracts bucket names directly from each S3 source's configuration:
    - `alb-logs` → `.thirdPartyRef.resources[0].path.bucketName` → ALB bucket
    - `cloudtrail-logs` → CloudTrail bucket
    - `classic-lb-logs` → ELB bucket
-4. Verifies each bucket is accessible via `s3api head-bucket`
+5. Verifies each bucket is accessible via `s3api head-bucket`
+
+### Collector ID mismatch handling
+If the collector found via Sumo API doesn't match the one recorded in the CF stack, the script now offers three options:
+1. **Use Sumo API collector** — proceed with the name-matched collector
+2. **Enter correct collector ID manually** — user provides the exact numeric ID to use
+3. **Abort** — stop migration for manual investigation
 
 ### Why fetch from Sumo sources (not CloudFormation params)
 - Works even if CFN params were left empty (auto-created bucket)
@@ -165,20 +180,38 @@ This is a **critical safety gate**. If `RemoveOnDeleteStack=true` and we proceed
 ## Phase 6: Delete v2.x Stack
 
 ### What it does
-1. Initiates stack deletion
+1. Initiates normal stack deletion
 2. Polls until `DELETE_COMPLETE` or `DELETE_FAILED` (timeout: 1800s)
-3. On `DELETE_FAILED`: expects S3 bucket block, initiates force delete with `--deletion-mode FORCE_DELETE_STACK`
-4. Polls force-delete until complete
+3. On `DELETE_FAILED`: calls `phase_delete_retain_only` (see below)
+4. After main stack is deleted: calls `phase_delete_retain_only` on each orphaned nested stack
+
+### `phase_delete_retain_only` helper
+When a stack is in `DELETE_FAILED`:
+1. Describes stack events to find all `DELETE_FAILED` resources (excluding the stack itself)
+2. Calls `delete-stack --retain-resources <logical-ids>` — skips only the blocking resources, deletes everything else cleanly
+3. Polls until `DELETE_COMPLETE`
+4. For each retained resource that is a nested stack (`AWS::CloudFormation::Stack`): extracts the physical stack name from the ARN and recursively deletes it with `--retain-resources` for its own blocked resources
+
+### `cleanup_orphaned_nested_stacks` helper
+Called by `--resume` when the main stack is already deleted:
+1. Uses `list-stacks --stack-status-filter DELETE_FAILED` to find stacks prefixed `<parent_stack>-`
+2. For each: describes its events, deletes with `--retain-resources` for its blocked logical IDs
+3. Warns on any that don't reach `DELETE_COMPLETE`
+
+### Why `--retain-resources` instead of `FORCE_DELETE_STACK`
+`--retain-resources` takes explicit logical IDs and skips only those resources, deleting everything else cleanly — the main stack and all other nested stacks reach `DELETE_COMPLETE`. `FORCE_DELETE_STACK` can leave additional orphaned nested stacks in an unpredictable state.
 
 ### Why DELETE_FAILED is expected
-The `CommonS3Bucket` in `CreateCommonResources` is non-empty (contains logs). CloudFormation can't delete non-empty S3 buckets. Force-delete skips the bucket, leaving it intact for v3.0.0 to reuse.
+The `CommonS3Bucket` in `CreateCommonResources` is non-empty (contains logs). CloudFormation cannot delete non-empty S3 buckets. Retaining it leaves it intact for v3.0.0 to reuse.
 
 ### Issues Faced & Resolutions
 
 | Issue | Resolution |
 |-------|------------|
 | `log_info` inside polling loop wrote to stdout, contaminating captured status variable | Added `>&2` to redirect log messages to stderr |
-| DELETE_FAILED reason mentions `CreateCommonResources` wrapper, not `BucketNotEmpty` directly | Script shows "Unexpected failure reason" warning but proceeds with force-delete regardless — it works either way |
+| `--retain-resources` ValidationError: "resources must be in a valid state" | Stack's own name appeared in events with `DELETE_FAILED`. Fixed by filtering `select(.LogicalResourceId != $stack)` before building retain list |
+| `mapfile` not available on macOS bash 3.2 | Replaced with portable `while IFS= read -r` loop reading from a heredoc |
+| Orphaned nested stack not deleted after main stack | `phase_delete_retain_only` now iterates retained nested stacks from events and deletes them; `cleanup_orphaned_nested_stacks` handles pre-existing orphans on `--resume` |
 
 ---
 
@@ -280,7 +313,11 @@ v3.0.0 creates the same metric rules. If they already exist from v2.x, the deplo
 4. Confirms 5/5 sources are alive (alb-logs, classic-lb-logs, cloudtrail-logs, cloudwatch-metrics, kinesis-firehose-cloudwatch-logs)
 
 ### Shared helper: `find_awso_collector()`
-Paginated collector lookup extracted into a reusable function (used by Phase 2, Phase 10, and Phase 11). Sets `COLLECTOR_ID` and `COLLECTOR_NAME` globals.
+Paginated collector lookup. Reads `Section2aAccountAlias` from `STACK_JSON`:
+- **If alias available**: matches exactly on `aws-observability-{alias}-{AccountId}` — precise, no false positives
+- **If alias unavailable**: falls back to `startswith("aws-observability")` and `endswith("-{AccountId}")`
+
+Sets `COLLECTOR_ID` and `COLLECTOR_NAME` globals. Used by Phase 2, Phase 10, and Phase 11 (fallback).
 
 ---
 
@@ -290,16 +327,21 @@ Paginated collector lookup extracted into a reusable function (used by Phase 2, 
 After v3.0.0 deploys, existing sources still reference the old v2.x IAM role ARN (which was deleted with the old stack). This phase:
 
 1. Gets the new role ARN from CloudFormation:
-   - `list-stack-resources` → find `CreateCommonResources` nested stack
+   - `list-stack-resources` on `NEW_STACK_NAME` → find `CreateCommonResources` nested stack
    - `describe-stack-resource` on nested stack → get `SumoLogicSourceRole` physical ID
    - Build ARN: `arn:aws:iam::<ACCOUNT_ID>:role/<physical_id>`
-2. Finds the collector (via `find_awso_collector()`)
+2. Gets the collector ID:
+   - **Primary**: `describe-stack-resource` on `CreateCommonResources` → `SumoLogicHostedCollector.PhysicalResourceId` — the authoritative collector created by the new stack
+   - **Fallback**: load new stack into `STACK_JSON`, call `find_awso_collector()` (alias-based exact match)
 3. Lists all sources on the collector
 4. For each source with a stale roleARN:
    - `GET /collectors/{id}/sources/{source_id}` with `-D` to capture ETag
    - `jq` patch: update `.source.thirdPartyRef.resources[].authentication.roleARN`
    - `PUT` with `If-Match: <etag>` header
 5. Reports count of patched sources
+
+### Why get collector ID from CF stack (not name search)
+The new stack's `SumoLogicHostedCollector` physical resource ID is the authoritative source — it's the exact collector the stack created. Name-based search could match a different collector if multiple `aws-observability-*` collectors exist for the same account.
 
 ### Design Decisions
 - **GET full body → patch → PUT**: Sumo API requires full source object on PUT
@@ -343,14 +385,14 @@ Prints a summary of the migration including:
 
 | Flag | Purpose | Default | When to use |
 |------|---------|---------|-------------|
-| `-n NEW_STACK_NAME` | Name for the new v3.0.0 stack | Same as source with version suffix | When you want the new stack to have a different name than the old one |
+| `-n NEW_STACK_NAME` | Name for the new v3.0.0 stack | Same as source | When you want the new stack to have a different name |
 | `-v VERSION` | Source version override | Auto-detected | When auto-detection fails or you want to be explicit (e.g. `-v 2.14`) |
-| `--install-apps Yes/No` | Whether to install Sumo observability apps | `Yes` | Use `No` if deploying to a clean org where Sumo fields don't exist yet (avoids FER creation failures) |
-| `--resume` | Skip phases 2-6 (capture/map/confirm/protect/delete) | Off | When a previous deploy failed (Phase 9) and you need to retry without re-deleting the stack |
-| `--params-file FILE` | Path to saved params JSON | Auto-generated | Use with `--resume` to point to the params file from the failed run |
-| `--patch-roles-only` | Only run roleARN patching | Off | When v3.0.0 is already deployed but sources have stale roleARNs (e.g. after manual troubleshooting) |
-| `-p PROFILE` | AWS CLI profile name | `default` | When using named AWS profiles instead of environment credentials |
-| `--dry-run` | Validate and map params without modifying anything | Off | When you want to preview the migration plan without executing it |
+| `--install-apps Yes/No` | Whether to install Sumo observability apps | `Yes` | Use `No` if deploying to a clean org where Sumo fields don't exist yet |
+| `--resume` | Skip phases 2–5; optionally run Phase 6 if old stack still exists | Off | When Phase 9 deploy failed and you need to retry; or when old stack is stuck in DELETE_FAILED |
+| `--params-file FILE` | Path to saved params JSON | Required with `--resume` | Points to the params file saved by a previous Phase 3 run |
+| `--patch-roles-only` | Only run roleARN patching | Off | When v3.0.0 is already deployed but sources have stale roleARNs |
+| `-p PROFILE` | AWS CLI profile name | `default` | When using named AWS profiles |
+| `--dry-run` | Validate and map params without modifying anything | Off | Preview migration plan without executing |
 
 ### Execution Modes
 
@@ -364,38 +406,37 @@ Prints a summary of the migration including:
   -n awso-production-v300 --install-apps Yes
 ```
 
-Runs all 12 phases in sequence. The script saves a params file automatically — if the deploy fails, you can retry with `--resume`.
+Runs all 12 phases in sequence. The script saves a params file automatically — if the deploy fails, retry with `--resume`.
 
 #### 2. Resume / Continue Mode (`--resume`)
 
 **When to use**:
-- Phase 9 (deploy) failed — e.g. template URL wrong, access key masked as `****`, transient AWS error, or stack rolled back
-- The v2.x stack is **already deleted** and FERs are **already renamed** — you can't re-run full migration because there's nothing to delete/capture
-- You fixed the issue (corrected params file, deleted rolled-back stack) and want to retry the deploy
+- Phase 9 (deploy) failed — stack rolled back or errored
+- The v2.x stack is already deleted and FERs are already renamed
+- Old stack is stuck in `DELETE_FAILED` and needs to be cleaned up before Phase 7+
+
+**How `--resume` handles the old stack** (when `-s STACK_NAME` is also provided):
+
+| Old stack status | Action taken |
+|---|---|
+| Doesn't exist / `DELETE_COMPLETE` | Skip Phase 6; check for orphaned nested stacks |
+| `DELETE_FAILED` | Run `phase_delete_retain_only` then continue to Phase 7 |
+| `DELETE_IN_PROGRESS` | Wait for deletion to complete then continue to Phase 7 |
+| `UPDATE_COMPLETE` / `CREATE_COMPLETE` | Run full `phase_delete` then continue to Phase 7 |
+
+After any of the above, `cleanup_orphaned_nested_stacks` runs to delete any orphaned nested stacks (e.g. `CreateCommonResources`) left behind by a previous `--retain-resources` run.
 
 **How the params file works**:
-- During a full migration, Phase 3 (Map Params) automatically saves the mapped parameters to a JSON file
-- The file is named: `migration_params_<NEW_STACK_NAME>_<YYYYMMDD>_<HHMMSS>.json`
-- Example: `./migration_params_awso-production-v300_20260706_180418.json`
-- On failure, the script prints the exact resume command you need to run — just copy/paste it
-
-**What the script prints on failure**:
-```
-[ERROR] Stack creation ended with status: ROLLBACK_COMPLETE
-[ERROR] Use --resume with the saved params file to retry after resolving the issue:
-[ERROR]   --params-file ./migration_params_awso-production-v300_20260706_180418.json
-```
+- Phase 3 saves: `migration_params_<NEW_STACK_NAME>_<YYYYMMDD>_<HHMMSS>.json`
+- On failure the script prints the exact resume command to copy/paste
 
 **How to resume**:
 ```bash
-# Step 1: Delete the failed/rolled-back stack (if in ROLLBACK_COMPLETE state)
+# Step 1: Delete the failed/rolled-back v3.0.0 stack if in ROLLBACK_COMPLETE
 aws cloudformation delete-stack --stack-name awso-production-v300 --region us-west-2
 aws cloudformation wait stack-delete-complete --stack-name awso-production-v300 --region us-west-2
 
-# Step 2: (Optional) Fix the params file if needed (e.g. correct a value)
-# vim ./migration_params_awso-production-v300_20260706_180418.json
-
-# Step 3: Re-run with --resume
+# Step 2: Re-run with --resume (add -s if old stack may still need deletion)
 ./MigrateToV300.sh \
   -d kr -i suYXzI02B9l4h3 -k <key> \
   -s awso-production-v215 -r us-west-2 \
@@ -403,24 +444,22 @@ aws cloudformation wait stack-delete-complete --stack-name awso-production-v300 
   --resume --params-file ./migration_params_awso-production-v300_20260706_180418.json
 ```
 
-**What `--resume` skips**: Phases 2–6 (capture, map, confirm, protect, delete stack)
-**What `--resume` runs**: Phase 1 (validate only — no stack existence check), Phase 7 (FER cleanup — idempotent, skips if already done), Phase 8 (metric rules cleanup), Phase 9 (deploy), Phase 10 (verify), Phase 11 (patch roles), Phase 12 (report)
+**What `--resume` skips**: Phases 2–5 (capture, map, confirm, protect)
+**What `--resume` runs**: Phase 1 (creds only), Phase 6 (if old stack still exists), Phase 7–12
 
 **Common resume scenarios**:
 
 | Failure | Fix before resuming |
 |---------|-------------------|
 | `ROLLBACK_COMPLETE` (bad params) | Delete rolled-back stack, fix params file |
-| `ROLLBACK_COMPLETE` (access key `****`) | Delete rolled-back stack — script now auto-injects real key from `-k` flag |
-| `S3 error: Access Denied` (bad template URL) | Delete rolled-back stack — fixed in script (correct URL hardcoded) |
-| Timeout during create | Stack may still be creating — check status first. If failed, delete and resume |
-| Network/credential error during create | Just resume — stack may not have been created at all |
+| `ROLLBACK_COMPLETE` (access key `****`) | Delete rolled-back stack — script auto-injects real key from `-k` flag |
+| `S3 error: Access Denied` (bad template URL) | Delete rolled-back stack — correct URL is hardcoded |
+| Old stack stuck in `DELETE_FAILED` | Pass `-s <old-stack>` with `--resume` — script handles it automatically |
+| Orphaned nested stack remaining | Pass `-s <old-stack>` with `--resume` — `cleanup_orphaned_nested_stacks` handles it |
+| Timeout during create | Check stack status first; if failed, delete and resume |
 
 #### 3. Patch-Only Mode (`--patch-roles-only`)
-**When**: v3.0.0 is already deployed and working, but sources still point to the old/deleted IAM role ARN. This can happen if:
-- You migrated manually without the script
-- The script was interrupted after deploy but before role patching
-- You need to re-run role patching after a role was recreated
+**When**: v3.0.0 is already deployed and working, but sources still point to the old/deleted IAM role ARN.
 
 ```bash
 ./MigrateToV300.sh \
@@ -429,7 +468,7 @@ aws cloudformation wait stack-delete-complete --stack-name awso-production-v300 
   --patch-roles-only
 ```
 
-Only runs: validate → patch roles → report. Does NOT delete anything or modify the stack.
+Only runs: validate → patch roles → report.
 
 ### Decision Flowchart
 
@@ -463,7 +502,17 @@ Curl wrappers for Sumo Logic API with:
 - ETag capture/send for optimistic concurrency
 
 ### `find_awso_collector()`
-Paginated collector search (1000 per page) looking for `aws-observability*` prefix. Sets `COLLECTOR_ID` and `COLLECTOR_NAME` globals.
+Paginated collector search (1000 per page). Reads `Section2aAccountAlias` from `STACK_JSON`:
+- If alias available: exact match on `aws-observability-{alias}-{AccountId}`
+- Otherwise: `startswith("aws-observability")` + `endswith("-{AccountId}")`
+
+Sets `COLLECTOR_ID` and `COLLECTOR_NAME` globals.
+
+### `phase_delete_retain_only()`
+Deletes a `DELETE_FAILED` stack using `--retain-resources` with only the specific blocked logical IDs (filtering out the stack's own name). After the main stack is deleted, iterates any retained nested stacks and deletes them the same way.
+
+### `cleanup_orphaned_nested_stacks(parent)`
+Lists all `DELETE_FAILED` stacks prefixed `{parent}-` via `list-stacks`, then deletes each with `--retain-resources` for its own blocked resources. Used by `--resume` when the main stack is already gone.
 
 ### `wait_for_stack()`
 Polls CloudFormation stack status at `POLL_INTERVAL` (30s) until terminal state or timeout.
@@ -494,7 +543,7 @@ AWSO_FER_COUNT=17     # expected FERs to rename
 | 3. Map Params | 32 parameters mapped, saved to file | <1s |
 | 4. Confirm | User approved (stack, sources, buckets, v3.0.0 params, destructive actions shown) | ~10s |
 | 5. Protect | RemoveOnDeleteStack already false | <1s |
-| 6. Delete | DELETE_FAILED → force delete OK | ~7 min |
+| 6. Delete | DELETE_FAILED → retain-resources → nested stack cleanup | ~7 min |
 | 7. FER Cleanup | 17/17 renamed and disabled | ~10s |
 | 8. Metric Rules | 4/4 deleted | <5s |
 | 9. Deploy | CREATE_COMPLETE | ~5 min |
@@ -511,3 +560,4 @@ AWSO_FER_COUNT=17     # expected FERs to rename
 2. **Single region**: Script handles one region at a time. Multi-region deployments need one run per region.
 3. **Apps may fail on clean org**: If Sumo fields don't exist, FER creation fails. Deploy with `--install-apps No` first, then update stack.
 4. **CloudWatch Metrics source type change**: v2.x may use "CloudWatch Metrics Source" while v3.0.0 only supports "Kinesis Firehose Metrics Source". The script carries over whatever the user had — if they had CW Metrics, they'll get CW Metrics in v3.0.0 (if supported by template).
+5. **Retained S3 bucket requires manual cleanup**: After migration, the old `CommonS3Bucket` remains in AWS (intentionally retained). It must be emptied and deleted manually once v3.0.0 is confirmed healthy, or left in place for v3.0.0 to continue reading from.

@@ -228,28 +228,47 @@ sumo_put_if_match() {
         "${SUMO_API_URL}${path}"
 }
 
-# Sets COLLECTOR_ID and COLLECTOR_NAME globals to the first aws-observability collector found.
-# Matches the exact naming pattern: aws-observability-{alias}-{AccountId}
+# Sets COLLECTOR_ID and COLLECTOR_NAME globals to the aws-observability collector for this stack.
+# If Section2aAccountAlias is available in STACK_JSON, matches exactly: aws-observability-{alias}-{AccountId}
+# Otherwise falls back to: startswith("aws-observability") and endswith("-{AccountId}")
 # Returns 0 if found, 1 if not found after paginating all pages.
 find_awso_collector() {
     COLLECTOR_ID="" COLLECTOR_NAME=""
+
+    local alias
+    alias=$( echo "$STACK_JSON" | jq -r '
+        [.Stacks[0].Parameters[] | select(.ParameterKey == "Section2aAccountAlias")]
+        | .[0].ParameterValue // ""' 2>/dev/null || echo "" )
+
     local offset=0
     while true; do
         local page
         page=$( sumo_get "/api/v1/collectors?limit=1000&offset=${offset}" )
-        COLLECTOR_ID=$( echo "$page" | jq -r --arg acct "$ACCOUNT_ID" '
-            [.collectors[] | select(
-                (.name | startswith("aws-observability")) and
-                (.name | endswith("-" + $acct))
-            )] | .[0].id // ""' )
-        if [[ -n "$COLLECTOR_ID" && "$COLLECTOR_ID" != "null" ]]; then
-            COLLECTOR_NAME=$( echo "$page" | jq -r --arg acct "$ACCOUNT_ID" '
+
+        if [[ -n "$alias" && "$alias" != "null" ]]; then
+            local expected_name="aws-observability-${alias}-${ACCOUNT_ID}"
+            COLLECTOR_ID=$( echo "$page" | jq -r --arg name "$expected_name" '
+                [.collectors[] | select(.name == $name)] | .[0].id // ""' )
+            if [[ -n "$COLLECTOR_ID" && "$COLLECTOR_ID" != "null" ]]; then
+                COLLECTOR_NAME="$expected_name"
+                return 0
+            fi
+        else
+            COLLECTOR_ID=$( echo "$page" | jq -r --arg acct "$ACCOUNT_ID" '
                 [.collectors[] | select(
                     (.name | startswith("aws-observability")) and
                     (.name | endswith("-" + $acct))
-                )] | .[0].name // ""' )
-            return 0
+                )] | .[0].id // ""' )
+            if [[ -n "$COLLECTOR_ID" && "$COLLECTOR_ID" != "null" ]]; then
+                COLLECTOR_NAME=$( echo "$page" | jq -r --arg acct "$ACCOUNT_ID" '
+                    [.collectors[] | select(
+                        (.name | startswith("aws-observability")) and
+                        (.name | endswith("-" + $acct))
+                    )] | .[0].name // ""' )
+                return 0
+            fi
         fi
+
         local count
         count=$( echo "$page" | jq '.collectors | length' )
         [[ "$count" -lt 1000 ]] && break
@@ -442,9 +461,25 @@ phase_validate() {
             # Fall through — main() will detect RESUME=true and run phases 7-12
             return 0 ;;
         DELETE_FAILED)
-            log_error "Stack '${STACK_NAME}' is in DELETE_FAILED state."
-            log_error "Resolve the blocking resources, then re-run or use --resume."
-            exit 1 ;;
+            log_warn "Stack '${STACK_NAME}' is in DELETE_FAILED state — retrying delete with retain resources..."
+            STACK_JSON="$out"
+            phase_delete_retain_only
+            log_info "Stack deleted — auto-continuing to Phase 7 (FER cleanup + deploy)."
+
+            local -a df_param_files=()
+            while IFS= read -r f; do df_param_files+=("$f"); done \
+                < <( ls -t ./migration_params_${NEW_STACK_NAME}_*.json 2>/dev/null )
+            if [[ ${#df_param_files[@]} -eq 0 ]]; then
+                log_error "Could not find a saved params file for stack '${NEW_STACK_NAME}'."
+                log_error "Re-run the full migration from the start or use --resume with a params file."
+                exit 1
+            fi
+            local df_found_params="${df_param_files[0]}"
+            log_info "Using saved params file: ${df_found_params}"
+            RESUME=true
+            RESUME_PARAMS_FILE="$df_found_params"
+            PERSIST_PARAM_FILE="$df_found_params"
+            return 0 ;;
         *)
             log_error "Stack '${STACK_NAME}' is in status '${stack_status}'. Expected CREATE_COMPLETE or UPDATE_COMPLETE."
             exit 1 ;;
@@ -534,10 +569,25 @@ phase_capture() {
                 log_warn "  The collector found in Sumo Logic does not match the one created by this CF stack."
                 log_warn "  This may mean the wrong Sumo credentials were provided, or the collector"
                 log_warn "  was recreated outside of CloudFormation."
-                read -r -p "Continue with the Sumo API collector (${COLLECTOR_ID})? (yes/no): " _coll_confirm
-                if [[ "$_coll_confirm" != "yes" ]]; then
-                    log_error "Migration aborted by user."; exit 1
-                fi
+                while true; do
+                    read -r -p "Options: (1) Use Sumo API collector (${COLLECTOR_ID}), (2) Enter correct collector ID, (3) Abort: " _coll_choice
+                    case "$_coll_choice" in
+                        1)
+                            log_info "Using Sumo API collector: ${COLLECTOR_ID}"; break ;;
+                        2)
+                            read -r -p "Enter correct collector ID: " _manual_id
+                            if [[ "$_manual_id" =~ ^[0-9]+$ ]]; then
+                                COLLECTOR_ID="$_manual_id"
+                                log_info "Using manually provided collector ID: ${COLLECTOR_ID}"; break
+                            else
+                                log_warn "Invalid collector ID — must be numeric. Try again."
+                            fi ;;
+                        3)
+                            log_error "Migration aborted by user."; exit 1 ;;
+                        *)
+                            log_warn "Invalid choice. Enter 1, 2, or 3." ;;
+                    esac
+                done
             fi
         else
             log_warn "Could not read SumoLogicHostedCollector from nested stack — skipping collector cross-check."
@@ -874,6 +924,168 @@ phase_ensure_remove_on_delete() {
     STACK_JSON=$( aws_cmd cloudformation describe-stacks --stack-name "${STACK_NAME}" --region "${REGION}" --output json )
 }
 
+# Delete orphaned nested stacks (DELETE_FAILED) whose names start with "<parent_stack>-".
+# These are left behind when the parent was deleted with --retain-resources.
+cleanup_orphaned_nested_stacks() {
+    local parent="$1"
+    local orphans=()
+    while IFS= read -r name; do
+        [[ -n "$name" ]] && orphans+=( "$name" )
+    done <<EOF
+$( aws_cmd cloudformation list-stacks \
+    --region "${REGION}" \
+    --stack-status-filter DELETE_FAILED \
+    --output json 2>/dev/null \
+  | jq -r --arg prefix "${parent}-" \
+    '[.StackSummaries[] | select(.StackName | startswith($prefix)) | .StackName] | .[]' )
+EOF
+
+    if [[ ${#orphans[@]} -eq 0 ]]; then
+        log_info "No orphaned nested stacks found for '${parent}'."
+        return 0
+    fi
+
+    local orphan
+    for orphan in "${orphans[@]}"; do
+        log_warn "Found orphaned nested stack: ${orphan} — cleaning up..."
+
+        local orphan_events
+        orphan_events=$( aws_cmd cloudformation describe-stack-events \
+            --stack-name "$orphan" --region "${REGION}" --output json 2>/dev/null ) || {
+            log_warn "  Could not describe events for ${orphan} — skipping."
+            continue
+        }
+
+        local orphan_retain_ids=()
+        while IFS= read -r rid; do
+            [[ -n "$rid" ]] && orphan_retain_ids+=( "$rid" )
+        done <<EOF
+$( echo "$orphan_events" | jq -r --arg stack "$orphan" '
+    [.StackEvents[] | select(.ResourceStatus == "DELETE_FAILED") | select(.LogicalResourceId != $stack) | .LogicalResourceId]
+    | unique | .[]' )
+EOF
+
+        if [[ ${#orphan_retain_ids[@]} -gt 0 ]]; then
+            log_info "  Retaining in ${orphan}: ${orphan_retain_ids[*]}"
+            aws_cmd cloudformation delete-stack \
+                --stack-name "$orphan" \
+                --retain-resources "${orphan_retain_ids[@]}" \
+                --region "${REGION}" >/dev/null || true
+        else
+            aws_cmd cloudformation delete-stack \
+                --stack-name "$orphan" \
+                --region "${REGION}" >/dev/null || true
+        fi
+
+        local orphan_status
+        orphan_status=$( wait_for_stack "$orphan" "$DELETE_TIMEOUT" ) || true
+        if [[ "$orphan_status" == "DELETE_COMPLETE" ]]; then
+            log_info "  ${orphan}: deleted."
+        else
+            log_warn "  ${orphan}: ended with status ${orphan_status} — manual cleanup required."
+        fi
+    done
+}
+
+# Shared helper: delete a DELETE_FAILED stack using --retain-resources for blocked logical IDs.
+# Caller must ensure the stack is in DELETE_FAILED state before calling.
+phase_delete_retain_only() {
+    local events_json
+    events_json=$( aws_cmd cloudformation describe-stack-events \
+        --stack-name "${STACK_NAME}" --region "${REGION}" --output json )
+
+    local failed_display
+    failed_display=$( echo "$events_json" | jq -r '
+        [.StackEvents[] | select(.ResourceStatus == "DELETE_FAILED")]
+        | sort_by(.Timestamp)
+        | .[]
+        | "  \(.LogicalResourceId): \(.ResourceStatusReason // "")"' )
+
+    log_warn "Stack DELETE_FAILED. Retaining blocked resources and deleting the rest:"
+    echo "$failed_display" | tee -a "$LOG_FILE"
+
+    local retain_ids=()
+    while IFS= read -r rid; do
+        [[ -n "$rid" ]] && retain_ids+=( "$rid" )
+    done <<EOF
+$( echo "$events_json" | jq -r --arg stack "$STACK_NAME" '[.StackEvents[] | select(.ResourceStatus == "DELETE_FAILED") | select(.LogicalResourceId != $stack) | .LogicalResourceId] | unique | .[]' )
+EOF
+
+    log_info "Initiating delete with retain resources: ${retain_ids[*]}"
+    aws_cmd cloudformation delete-stack \
+        --stack-name "${STACK_NAME}" \
+        --retain-resources "${retain_ids[@]}" \
+        --region "${REGION}" >/dev/null
+
+    log_info "Waiting for delete with retain resources (timeout: ${DELETE_TIMEOUT}s)..."
+    local retain_status
+    retain_status=$( wait_for_stack "$STACK_NAME" "$DELETE_TIMEOUT" ) || true
+
+    if [[ "$retain_status" != "DELETE_COMPLETE" ]]; then
+        log_error "Delete with retain resources ended with status: ${retain_status}"
+        log_error "Resolve the issue manually and use --resume to continue."
+        exit 1
+    fi
+
+    log_info "Main stack deleted. Cleaning up retained nested stacks..."
+
+    # For each retained resource that is a nested stack, delete it too
+    local nested_arns=()
+    while IFS= read -r arn; do
+        [[ -n "$arn" ]] && nested_arns+=( "$arn" )
+    done <<EOF
+$( echo "$events_json" | jq -r --arg stack "$STACK_NAME" '
+    [.StackEvents[]
+    | select(.ResourceStatus == "DELETE_FAILED")
+    | select(.ResourceType == "AWS::CloudFormation::Stack")
+    | select(.LogicalResourceId != $stack)
+    | .PhysicalResourceId] | unique | .[]' )
+EOF
+
+    local nested_arn
+    for nested_arn in "${nested_arns[@]}"; do
+        local nested_name
+        nested_name=$( echo "$nested_arn" | cut -d'/' -f2 )
+        log_info "Deleting retained nested stack: ${nested_name}"
+
+        local nested_events_json
+        nested_events_json=$( aws_cmd cloudformation describe-stack-events \
+            --stack-name "$nested_name" --region "${REGION}" --output json 2>/dev/null ) || {
+            log_warn "Could not describe events for ${nested_name} — skipping."
+            continue
+        }
+
+        local nested_retain_ids=()
+        while IFS= read -r rid; do
+            [[ -n "$rid" ]] && nested_retain_ids+=( "$rid" )
+        done <<EOF
+$( echo "$nested_events_json" | jq -r --arg stack "$nested_name" '
+    [.StackEvents[] | select(.ResourceStatus == "DELETE_FAILED") | select(.LogicalResourceId != $stack) | .LogicalResourceId]
+    | unique | .[]' )
+EOF
+
+        if [[ ${#nested_retain_ids[@]} -gt 0 ]]; then
+            log_info "  Retaining in nested stack: ${nested_retain_ids[*]}"
+            aws_cmd cloudformation delete-stack \
+                --stack-name "$nested_name" \
+                --retain-resources "${nested_retain_ids[@]}" \
+                --region "${REGION}" >/dev/null || true
+        else
+            aws_cmd cloudformation delete-stack \
+                --stack-name "$nested_name" \
+                --region "${REGION}" >/dev/null || true
+        fi
+
+        local nested_status
+        nested_status=$( wait_for_stack "$nested_name" "$DELETE_TIMEOUT" ) || true
+        if [[ "$nested_status" == "DELETE_COMPLETE" ]]; then
+            log_info "  ${nested_name}: deleted."
+        else
+            log_warn "  ${nested_name}: ended with status ${nested_status} — manual cleanup required."
+        fi
+    done
+}
+
 # ============================================================
 # Phase 6 — Delete v2.x Stack
 # ============================================================
@@ -894,49 +1106,7 @@ phase_delete() {
     fi
 
     if [[ "$final_status" == "DELETE_FAILED" ]]; then
-        # Use stack events — more reliable than StackStatusReason for identifying failed resources
-        local failed_events
-        failed_events=$( aws_cmd cloudformation describe-stack-events \
-            --stack-name "${STACK_NAME}" --region "${REGION}" --output json \
-            | jq -r '
-                [.StackEvents[]
-                | select(.ResourceStatus == "DELETE_FAILED")]
-                | sort_by(.Timestamp)
-                | .[]
-                | "  \(.LogicalResourceId): \(.ResourceStatusReason // "")"' )
-
-        log_warn "Stack DELETE_FAILED. Blocked resources:"
-        echo "$failed_events" | tee -a "$LOG_FILE"
-
-        # Determine if this is the expected bucket-only failure
-        if echo "$failed_events" | grep -qiE "BucketNotEmpty|not empty"; then
-            log_info "Expected failure: non-empty S3 bucket. Proceeding with force delete..."
-        else
-            log_warn "Unexpected failure reason detected."
-            read -r -p "Force delete anyway? This will retain any blocking resources. (yes/no): " force_confirm
-            if [[ "$force_confirm" != "yes" ]]; then
-                log_error "Migration aborted. Stack '${STACK_NAME}' is in DELETE_FAILED state."
-                log_error "Resolve the blocking resources manually, then re-run the script."
-                exit 1
-            fi
-        fi
-
-        log_info "Initiating force delete..."
-        aws_cmd cloudformation delete-stack \
-            --stack-name "${STACK_NAME}" \
-            --deletion-mode FORCE_DELETE_STACK \
-            --region "${REGION}" >/dev/null
-
-        log_info "Waiting for force delete (timeout: ${DELETE_TIMEOUT}s)..."
-        final_status=$( wait_for_stack "$STACK_NAME" "$DELETE_TIMEOUT" ) || true
-
-        if [[ "$final_status" == "DELETE_COMPLETE" ]]; then
-            log_info "Stack force-deleted. S3 bucket retained and ready for v3.0.0."; return 0
-        fi
-
-        log_error "Force delete ended with status: ${final_status}"
-        log_error "Resolve the issue manually and use --resume to continue."
-        exit 1
+        phase_delete_retain_only; return $?
     fi
 
     if [[ "$final_status" == "TIMEOUT" ]]; then
@@ -1391,12 +1561,28 @@ phase_patch_role_arns() {
     local new_role_arn="arn:aws:iam::${ACCOUNT_ID}:role/${role_name}"
     log_info "New role ARN: ${new_role_arn}"
 
-    # Find the aws-observability collector
-    if ! find_awso_collector; then
-        log_warn "aws-observability collector not found — skipping role ARN patch."
-        return 0
+    # Get collector ID directly from the new stack's SumoLogicHostedCollector resource
+    local cf_collector_id
+    cf_collector_id=$( aws_cmd cloudformation describe-stack-resource \
+        --stack-name "${nested_stack_id}" \
+        --logical-resource-id SumoLogicHostedCollector \
+        --region "${REGION}" \
+        --output json 2>/dev/null \
+        | jq -r '.StackResourceDetail.PhysicalResourceId // "" | split("/")[-1]' )
+
+    if [[ -n "$cf_collector_id" && "$cf_collector_id" != "null" ]]; then
+        COLLECTOR_ID="$cf_collector_id"
+        log_info "Collector ID from new stack: ${COLLECTOR_ID}"
+    else
+        log_warn "Could not read SumoLogicHostedCollector from new stack — falling back to name search."
+        STACK_JSON=$( aws_cmd cloudformation describe-stacks \
+            --stack-name "${NEW_STACK_NAME}" --region "${REGION}" --output json 2>/dev/null ) || true
+        if ! find_awso_collector; then
+            log_warn "aws-observability collector not found — skipping role ARN patch."
+            return 0
+        fi
+        log_info "Collector: ${COLLECTOR_NAME} (ID: ${COLLECTOR_ID})"
     fi
-    log_info "Collector: ${COLLECTOR_NAME} (ID: ${COLLECTOR_ID})"
 
     # List all sources
     local sources_json
@@ -1559,23 +1745,58 @@ main() {
         phase_patch_role_arns
         phase_report
     elif [[ "$RESUME" == true ]]; then
-        log_info "Resume mode — skipping phases 2-6, jumping to cleanup + deploy."
         PERSIST_PARAM_FILE="$RESUME_PARAMS_FILE"
         phase_validate   # validates creds only in resume mode
+
+        # If old stack name provided, check whether Phase 6 still needs to run
+        if [[ -n "$STACK_NAME" ]]; then
+            local old_out
+            old_out=$( aws_cmd cloudformation describe-stacks \
+                --stack-name "${STACK_NAME}" --region "${REGION}" --output json 2>&1 ) || true
+            if echo "$old_out" | grep -q "does not exist"; then
+                log_info "Old stack '${STACK_NAME}' already deleted — skipping Phase 6."
+            else
+                local old_status
+                old_status=$( echo "$old_out" | jq -r '.Stacks[0].StackStatus' 2>/dev/null || echo "UNKNOWN" )
+                case "$old_status" in
+                    DELETE_COMPLETE)
+                        log_info "Old stack '${STACK_NAME}' already deleted — skipping Phase 6." ;;
+                    DELETE_FAILED)
+                        log_warn "Old stack '${STACK_NAME}' is DELETE_FAILED — running Phase 6..."
+                        STACK_JSON="$old_out"
+                        phase_delete_retain_only ;;
+                    DELETE_IN_PROGRESS)
+                        log_warn "Old stack '${STACK_NAME}' is still deleting — waiting..."
+                        local del_status
+                        del_status=$( wait_for_stack "$STACK_NAME" "$DELETE_TIMEOUT" ) || true
+                        if [[ "$del_status" != "DELETE_COMPLETE" ]]; then
+                            log_error "Stack deletion ended with: ${del_status}. Resolve manually then re-run."
+                            exit 1
+                        fi ;;
+                    UPDATE_COMPLETE|CREATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE)
+                        log_warn "Old stack '${STACK_NAME}' still exists (${old_status}) — running Phase 6..."
+                        STACK_JSON="$old_out"
+                        phase_delete ;;
+                    *)
+                        log_warn "Old stack '${STACK_NAME}' has unexpected status '${old_status}' — skipping Phase 6." ;;
+                esac
+            fi
+
+            # Clean up any orphaned nested stacks left from a previous --retain-resources run
+            cleanup_orphaned_nested_stacks "$STACK_NAME"
+        fi
 
         # Populate summary globals from the saved params file so report is accurate
         if [[ -f "$RESUME_PARAMS_FILE" ]]; then
             CAPTURED_BUCKET_ALB=$(       jq -r '.[] | select(.ParameterKey=="Section5dALBS3LogsBucketName")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
             CAPTURED_BUCKET_CLOUDTRAIL=$(jq -r '.[] | select(.ParameterKey=="Section6cCloudTrailLogsBucketName")   | .ParameterValue' "$RESUME_PARAMS_FILE" )
             CAPTURED_BUCKET_ELB=$(       jq -r '.[] | select(.ParameterKey=="Section8dELBS3LogsBucketName")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
-            local resume_version
-            resume_version=$(            jq -r '.[] | select(.ParameterKey=="Section1aSumoLogicDeployment")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
             [[ -z "$SOURCE_VERSION" ]] && SOURCE_VERSION="(from params file)"
         fi
 
         echo ""
         log_warn "Resume will run phases 7-12 using:"
-        log_warn "  Stack name:        ${NEW_STACK_NAME}"
+        log_warn "  New stack name:    ${NEW_STACK_NAME}"
         log_warn "  Region:            ${REGION}"
         log_warn "  Params file:       ${RESUME_PARAMS_FILE}"
         log_warn "  ALB bucket:        ${CAPTURED_BUCKET_ALB:-<empty>}"
