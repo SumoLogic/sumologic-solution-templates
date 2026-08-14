@@ -11,19 +11,17 @@ echo "AWS Observability Script initiated at : $now"
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -i accessID -k accessKey [-p AWS_PROFILE] [-r AWS_REGION]"
+   echo "Usage: $0 -i accessID [-p AWS_PROFILE] [-r AWS_REGION]"
    echo -e "\t-i SUMO_ACCESS_ID"
-   echo -e "\t-k SUMO_ACCESS_KEY"
    echo -e "\t-p AWS_PROFILE"
    echo -e "\t-r AWS_REGION"
    exit 1 # Exit script after printing help
 }
 
-while getopts "i:k:p:r:" opt
+while getopts "i:p:r:" opt
 do
    case "$opt" in
       i ) SUMO_ACCESS_ID="$OPTARG" ;;
-      k ) SUMO_ACCESS_KEY="$OPTARG" ;;
       p ) AWS_PROFILE="${OPTARG}" ;;
       r ) AWS_REGION="${OPTARG}" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
@@ -31,10 +29,19 @@ do
 done
 
 # Print helpFunction in case parameters are empty
-if [ -z "$SUMO_ACCESS_ID" ] || [ -z "$SUMO_ACCESS_KEY" ]
+if [ -z "$SUMO_ACCESS_ID" ]
 then
-   echo "-i <SUMO_ACCESS_ID> -k <SUMO_ACCESS_KEY> are mandatory parameters";
+   echo "-i <SUMO_ACCESS_ID> is a mandatory parameter";
    helpFunction
+fi
+
+printf "Enter Sumo Logic Access Key: "
+read -rsp "" SUMO_ACCESS_KEY
+printf "\n"
+if [ -z "$SUMO_ACCESS_KEY" ]
+then
+   echo "Access key cannot be empty."
+   exit 1
 fi
 
 # If profile(-p) is empty set default profile

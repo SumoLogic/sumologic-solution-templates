@@ -1,12 +1,8 @@
-# Inputs to the script- Mandatory - SUMO_ACCESS_ID and SUMO_ACCESSKEY, Optional - AWS_PROFILE and AWS_REGION
+# Inputs to the script- Mandatory - SUMO_ACCESS_ID, Optional - AWS_PROFILE and AWS_REGION
 param(
      [Parameter(Mandatory,HelpMessage="Enter Sumo Logic Access ID.")]
 	 [Alias('i')]
      [string]$SUMO_ACCESS_ID,
-
-     [Parameter(Mandatory,HelpMessage="Enter Sumo Logic Access Key.")]
-	 [Alias('k')]
-     [string]$SUMO_ACCESS_KEY,
 
      [Parameter(HelpMessage="Enter AWS Profile.")]
 	 [Alias('p')]
@@ -16,6 +12,15 @@ param(
 	 [Alias('r')]
      [string]$AWS_REGION
  )
+
+$secureKey = Read-Host -Prompt "Enter Sumo Logic Access Key" -AsSecureString
+$SUMO_ACCESS_KEY = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
+)
+if (-not $SUMO_ACCESS_KEY) {
+    echo "Access key cannot be empty."
+    Exit 1
+}
 
 # If profile(-p) is empty set default profile
 if(-not $AWS_PROFILE){
