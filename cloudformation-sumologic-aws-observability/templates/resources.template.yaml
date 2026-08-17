@@ -1319,32 +1319,6 @@ Resources:
         region: !Ref "AWS::Region"
         accountid: !Ref "AWS::AccountId"
 
-  SumoALBMetricsUpdateSource:
-    Condition: update_metrics_source
-    Type: Custom::SumoLogicUpdateFields
-    Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
-      SourceApiUrl: !Ref MetricsSourceApiUrl
-      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SumoAccessID: !Ref SumoLogicAccessID
-      SumoAccessKey: !Ref SumoLogicAccessKey
-      SumoDeployment: !Ref SumoLogicDeployment
-      Fields:
-        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-
-  SumoELBMetricsUpdateSource:
-    Condition: update_metrics_source
-    Type: Custom::SumoLogicUpdateFields
-    Properties:
-      ServiceToken: !GetAtt LambdaHelper.Arn
-      SourceApiUrl: !Ref MetricsSourceApiUrl
-      RemoveOnDeleteStack: !Ref RemoveSumoLogicResourcesOnDeleteStack
-      SumoAccessID: !Ref SumoLogicAccessID
-      SumoAccessKey: !Ref SumoLogicAccessKey
-      SumoDeployment: !Ref SumoLogicDeployment
-      Fields:
-        account: !GetAtt AccountAliasValue.ACCOUNT_ALIAS
-
   SumoMetricsUpdateSource:
     Condition: update_metrics_source
     Type: Custom::SumoLogicUpdateFields
@@ -1427,11 +1401,3 @@ Outputs:
     Description: "Existing CloudWatch Metrics Source Name"
     Condition: update_metrics_source
     Value: !GetAtt SumoMetricsUpdateSource.source_name
-  ExistingALBMetricSourceName:
-    Description: "Existing ALB CloudWatch Metrics Source Name"
-    Condition: update_metrics_source
-    Value: !GetAtt SumoALBMetricsUpdateSource.source_name
-  ExistingELBMetricSourceName:
-    Description: "Existing ELB CloudWatch Metrics Source Name"
-    Condition: update_metrics_source
-    Value: !GetAtt SumoELBMetricsUpdateSource.source_name
