@@ -18,6 +18,7 @@ Metadata:
           - Section1cSumoLogicAccessKey
           - Section1dSumoLogicOrganizationId
           - Section1eSumoLogicResourceRemoveOnDeleteStack
+          - Section1fSumoLogicSendTelemetry
 
       - Label:
           default: "2. AWS Account Alias"
@@ -93,6 +94,8 @@ Metadata:
         default: "Sumo Logic Organization Id"
       Section1eSumoLogicResourceRemoveOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
+      Section1fSumoLogicSendTelemetry:
+        default: "Send telemetry to Sumo Logic"
 
       Section2aAccountAlias:
         default: "Alias for AWS Account Identification. Please leave this blank if you are using CloudFormation StackSets to deploy the solution in multiple AWS accounts."
@@ -180,9 +183,10 @@ Parameters:
       - esc
       - fed
       - jp
+      - kr
       - us1
       - us2
-    Description: "Provide value only if Secret ARN is EMPTY, enter au, ca, ch, de, eu, esc, fed, jp, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+    Description: "Provide value only if Secret ARN is EMPTY, enter au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
     Default: ""
   Section1bSumoLogicAccessID:
     Type: String
@@ -207,6 +211,13 @@ Parameters:
     Default: true
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to True. Default is True.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Type: String
+  Section1fSumoLogicSendTelemetry:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "To send telemetry to Sumo Logic, set this parameter to True. Default is True."
     Type: String
 
   Section2aAccountAlias:
@@ -233,7 +244,8 @@ Parameters:
   Section4aCreateMetricsSourceOptions:
     Type: String
     Description: "CloudWatch Metrics Source - Creates Sumo Logic AWS CloudWatch Metrics Sources.
-                  Kinesis Firehose Metrics Source -  Creates a Sumo Logic AWS Kinesis Firehose for Metrics Source."
+                  Kinesis Firehose Metrics Source -  Creates a Sumo Logic AWS Kinesis Firehose for Metrics Source.
+                  None - Does not create a Metrics Source."
     Default: 'Kinesis Firehose Metrics Source'
     AllowedValues:
       - 'CloudWatch Metrics Source'
@@ -245,7 +257,11 @@ Parameters:
     Type: String
   Section4cCloudWatchExistingSourceAPIUrl:
     Type: String
-    Description: "Required when already collecting CloudWatch Metrics. Provide the existing Sumo Logic Metrics Source API URL. Account Field will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Description: "Required when CloudWatch Metrics are already being collected in Sumo Logic. 
+                  Provide the API URL of the existing Sumo Logic Metrics Source. 
+                  The Account field will be added to the existing Source. 
+                  For instructions on obtaining the Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration. 
+                  Select 'None' for 'Select the kind of Metrics Source to create'."
     Default: ""
   Section4dAWSMetricsTagFilters:
     Type: String
@@ -310,7 +326,8 @@ Parameters:
   Section7aCreateCloudWatchLogsSourceOptions:
     Type: String
     Description: "Lambda Log Forwarder - Creates a Sumo Logic CloudWatch Log Source that collects CloudWatch logs via a Lambda function.
-                  Kinesis Firehose Log Source - Creates a Sumo Logic Kinesis Firehose Source to collect CloudWatch logs."
+                  Kinesis Firehose Log Source - Creates a Sumo Logic Kinesis Firehose Source to collect CloudWatch logs.
+                  None - Does not create a Log Source."
     Default: 'Kinesis Firehose Log Source'
     AllowedValues:
       - 'Lambda Log Forwarder'
@@ -319,7 +336,11 @@ Parameters:
       - 'None'
   Section7bCloudWatchLogsSourceUrl:
     Type: String
-    Description: "Required when already collecting Lambda CloudWatch logs in Sumo Logic. Provide the existing Sumo Logic Lambda CloudWatch Source API URL. Account, region and namespace Fields will be added to the Source. For Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration"
+    Description: "Required when Lambda CloudWatch logs are already being collected in Sumo Logic. 
+                  Provide the API URL of the existing Sumo Logic Lambda CloudWatch Source. 
+                  The Account, Region, and Namespace fields will be added to the existing Source. 
+                  For instructions on obtaining the Source API URL, visit https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/View-or-Download-Source-JSON-Configuration. 
+                  Select 'None' for 'Select the Sumo Logic CloudWatch Logs Source Type'."
     Default: ""
   Section7cAutoSubscribeLogGroupsOptions:
     Type: String
@@ -455,6 +476,9 @@ Conditions:
   # Condition for Stacks creation. Calling Nested Stack EveryTime to create FER and Metric Rule. If already present, marked as duplicate in Resource.
   install_observability_apps: !Equals [ !Ref Section3aInstallObservabilityApps, 'Yes' ]
 
+  # Condition for sending solution telemetry to sumo logic.
+  send_telemetry_to_sumo: !Equals [ !Ref Section1fSumoLogicSendTelemetry, 'true' ]
+
   # Condition to determine if Secret ARN is provided or Access Keys
   SecretNameProvided:
     !Not
@@ -504,6 +528,59 @@ Mappings:
       CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
       CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
       ELBLogsSourceCategory: "aws/observability/clb/logs"
+  RegionMap:
+    us-east-1:
+      bucketname: appdevzipfiles-us-east-1
+    us-east-2:
+      bucketname: appdevzipfiles-us-east-2
+    us-west-1:
+      bucketname: appdevzipfiles-us-west-1
+    us-west-2:
+      bucketname: appdevzipfiles-us-west-2
+    ap-south-1:
+      bucketname: appdevzipfiles-ap-south-1
+    ap-northeast-2:
+      bucketname: appdevzipfiles-ap-northeast-2
+    ap-southeast-1:
+      bucketname: appdevzipfiles-ap-southeast-1
+    ap-southeast-2:
+      bucketname: appdevzipfiles-ap-southeast-2
+    ap-southeast-4:
+      bucketname: appdevzipfiles-ap-southeast-4s
+    ap-southeast-6:
+      bucketname: appdevzipfiles-ap-southeast-6ss
+    ap-northeast-1:
+      bucketname: appdevzipfiles-ap-northeast-1
+    ca-central-1:
+      bucketname: appdevzipfiles-ca-central-1
+    eu-central-1:
+      bucketname: appdevzipfiles-eu-central-1
+    eu-west-1:
+      bucketname: appdevzipfiles-eu-west-1
+    eu-west-2:
+      bucketname: appdevzipfiles-eu-west-2
+    eu-west-3:
+      bucketname: appdevzipfiles-eu-west-3
+    eu-north-1:
+      bucketname: appdevzipfiles-eu-north-1s
+    sa-east-1:
+      bucketname: appdevzipfiles-sa-east-1
+    ap-east-1:
+      bucketname: appdevzipfiles-ap-east-1s
+    af-south-1:
+      bucketname: appdevzipfiles-af-south-1s
+    eu-south-1:
+      bucketname: appdevzipfiles-eu-south-1
+    me-south-1:
+      bucketname: appdevzipfiles-me-south-1s
+    me-central-1:
+      bucketname: appdevzipfiles-me-central-1
+    eu-central-2:
+        bucketname: appdevzipfiles-eu-central-2ss
+    ap-northeast-3:
+        bucketname: appdevzipfiles-ap-northeast-3s
+    ap-southeast-3:
+        bucketname: appdevzipfiles-ap-southeast-3
 
 Resources:
   # Retrieve secrets in provided secret ARN
@@ -665,6 +742,127 @@ Resources:
 
           signal.signal(signal.SIGALRM, timeout_handler)
 
+
+  LambdaRole:
+    Condition: send_telemetry_to_sumo
+    Type: AWS::IAM::Role
+    DeletionPolicy: Retain
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "Operations are performed across resources."
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaExecutePolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - lambda:DeleteFunction
+                Resource: !Sub 'arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:*TelemetryLambda*'
+        - PolicyName: BasicLambdaPolicies
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+        - PolicyName: CloudFormationRead
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:Describe*
+                Resource: !Sub '${AWS::StackId}'
+
+  TelemetryLambda:
+    Condition: send_telemetry_to_sumo
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W89
+            reason: "Lambda function does not require VPC deployment."
+          - id: W92
+            reason: "Lambda function does not require reserved concurrency."
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.14
+      Code:
+        S3Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
+        S3Key: "sumologic-aws-observability/functions/telemetry/v1.1.0/telemetry.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role: !GetAtt LambdaRole.Arn
+
+  LambdaPermission:
+    Condition: send_telemetry_to_sumo
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !GetAtt TelemetryLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'cloudformation.amazonaws.com'
+
+  PrimerInvoke:
+    Condition: send_telemetry_to_sumo
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt TelemetryLambda.Arn
+      Handler: lambda_function.lambda_handler
+      stackID:
+          Ref: "AWS::StackId"
+      sumoDeployment:
+          !Ref Section1aSumoLogicDeployment
+      sumoOrgId:
+          !Ref Section1dSumoLogicOrganizationId
+      solutionName: 'AWSO'
+      solutionVersion: 'v3.0.0'
+      deploymentSource: 'cloudFormation'
+      TelemetryEndpoint: "https://endpoint1.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV1S68eao6UYB3LFtqQ7ur1xYlT1EHCfXdhvi6uPNc0aUXIpvq5i_aHewOp5xxxwnGZ5MmSWDR6qV5td4exMM4pZE4Tk6rqKvgextLx7I6IRpg=="
+      scanInterval: 60
+      ToUpdate:
+        Fn::Base64: !Sub
+          - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}-${w}"
+          - a: !Ref Section2aAccountAlias
+            b: !Ref Section3aInstallObservabilityApps
+            c: !Ref Section4aCreateMetricsSourceOptions
+            d: !Ref Section4bMetricsNameSpaces
+            e: !Ref Section4cCloudWatchExistingSourceAPIUrl
+            f: !Ref Section4dAWSMetricsTagFilters
+            g: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
+            h: !Ref Section5bALBCreateLogSource
+            i: !Ref Section5cALBLogsSourceUrl
+            j: !Ref Section5dALBS3LogsBucketName
+            k: !Ref Section6aCreateCloudTrailLogSource
+            l: !Ref Section6bCloudTrailLogsSourceUrl
+            m: !Ref Section6cCloudTrailLogsBucketName
+            n: !Ref Section7aCreateCloudWatchLogsSourceOptions
+            o: !Ref Section7bCloudWatchLogsSourceUrl
+            p: !Ref Section7cAutoSubscribeLogGroupsOptions
+            q: !Ref Section7dAutoSubscribeLogGroupPattern
+            r: !Ref Section7eAutoSubscribeLogGroupByTags
+            s: !Ref Section8aAutoEnableS3LogsELBResourcesOptions
+            t: !Ref Section8bELBCreateLogSource
+            u: !Ref Section8cELBLogsSourceUrl
+            v: !Ref Section8dELBS3LogsBucketName
+            w: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
 
   CreateCommonResources:
     Type: AWS::CloudFormation::Stack
