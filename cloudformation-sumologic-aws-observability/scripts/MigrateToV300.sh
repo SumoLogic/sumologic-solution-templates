@@ -684,6 +684,7 @@ map_params_v215() {
         --arg bucket_cloudtrail "$CAPTURED_BUCKET_CLOUDTRAIL" \
         --arg bucket_elb        "$CAPTURED_BUCKET_ELB" \
         --arg install_apps      "$INSTALL_APPS" \
+        --arg access_id         "$ACCESS_ID" \
         --arg access_key        "$ACCESS_KEY" \
         '
         # Step 1: Remove Section10 params (not in v3.0.0)
@@ -717,6 +718,7 @@ map_params_v215() {
             elif .ParameterKey == "Section6cCloudTrailLogsBucketName"               then (if $ct_enabled  == "Yes" then $bucket_cloudtrail  else "" end)
             elif .ParameterKey == "Section8dELBS3LogsBucketName"                    then (if $elb_enabled == "Yes" then $bucket_elb         else "" end)
             elif .ParameterKey == "Section1eSumoLogicResourceRemoveOnDeleteStack"   then "false"
+            elif .ParameterKey == "Section1bSumoLogicAccessID"                      then $access_id
             elif .ParameterKey == "Section1cSumoLogicAccessKey"                     then $access_key
             elif .ParameterKey == "Section3aInstallObservabilityApps"               then $install_apps
             # Clear source URL params — using "create new" mode, not "existing"
@@ -896,10 +898,16 @@ phase_ensure_remove_on_delete() {
     log_info "RemoveOnDeleteStack is '${remove_on_delete}' — updating to 'false'..."
     local update_params_file
     update_params_file=$( mktemp /tmp/awso_update_params_XXXXXX )
-    echo "$STACK_JSON" | jq '
-        [.Stacks[0].Parameters[]
-        | if .ParameterKey == "Section1eSumoLogicResourceRemoveOnDeleteStack"
+    echo "$STACK_JSON" | jq \
+        --arg access_id  "$ACCESS_ID" \
+        --arg access_key "$ACCESS_KEY" \
+        '[.Stacks[0].Parameters[]
+        | if   .ParameterKey == "Section1eSumoLogicResourceRemoveOnDeleteStack"
           then {"ParameterKey": .ParameterKey, "ParameterValue": "false"}
+          elif .ParameterKey == "Section1bSumoLogicAccessID"
+          then {"ParameterKey": .ParameterKey, "ParameterValue": $access_id}
+          elif .ParameterKey == "Section1cSumoLogicAccessKey"
+          then {"ParameterKey": .ParameterKey, "ParameterValue": $access_key}
           else {"ParameterKey": .ParameterKey, "UsePreviousValue": true}
           end]' > "$update_params_file"
 
