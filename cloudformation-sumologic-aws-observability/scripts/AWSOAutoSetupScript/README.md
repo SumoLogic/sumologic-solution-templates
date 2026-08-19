@@ -11,18 +11,21 @@ wget "https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/m
 
 chmod +x DeployAWSOPosix.sh
 
-./DeployAWSOPosix.sh -i <SUMO_ACCESS_ID> -k <SUMO_ACCESS_KEY> -p <AWS_PROFILE> -r <AWS_REGION>
+./DeployAWSOPosix.sh -i <SUMO_ACCESS_ID> -p <AWS_PROFILE> -r <AWS_REGION>
 ```
+
+The script will prompt you to enter your Sumo Logic Access Key interactively (input is hidden).
 
 ### Parameters
 Provide the following details where you want to install AWS Observability Solution
 
-| Parameter       | Alias | Mandatory | Default   | Description                                             |
-|-----------------|-------|-----------|-----------|---------------------------------------------------------|
-| SUMO_ACCESS_ID  | -i    | Yes       | <>        | Sumo Access Id from your respective Sumo Logic Account  |
-| SUMO_ACCESS_KEY | -k    | Yes       | <>        | Sumo Access Key from your respective Sumo Logic Account |
-| AWS_PROFILE     | -p    | No        | default   | User profile from AWS account which you want to observe |
-| AWS_REGION      | -r    | No        | us-east-1 | AWS region which you want to observe                    |
+| Parameter      | Alias | Mandatory | Default   | Description                                             |
+|----------------|-------|-----------|-----------|---------------------------------------------------------|
+| SUMO_ACCESS_ID | -i    | Yes       | <>        | Sumo Access ID from your respective Sumo Logic Account  |
+| AWS_PROFILE    | -p    | No        | default   | User profile from AWS account which you want to observe |
+| AWS_REGION     | -r    | No        | us-east-1 | AWS region which you want to observe                    |
+
+> **Note:** The Sumo Logic Access Key is read interactively at runtime and is never passed as a command-line argument to avoid exposure in shell history.
 
 <details>
 <summary>Above command performs following actions</summary>
@@ -38,18 +41,21 @@ The `DeployAWSOWin.ps1` enables you to deploy the AWS Observability CloudFromati
 ```
 $uri="https://raw.githubusercontent.com/SumoLogic/sumologic-solution-templates/master/aws-observability/scripts/AWSOAutoSetupScript/DeployAWSOWin.ps1";$path=".\DeployAWSOWin.ps1";(New-Object System.Net.WebClient).DownloadFile($uri, $path);
 
-.\DeployAWSOWin.ps1 -i <SUMO_ACCESS_ID> -k <SUMO_ACCESS_KEY> -p <AWS_PROFILE> -r <AWS_REGION>
+.\DeployAWSOWin.ps1 -i <SUMO_ACCESS_ID> -p <AWS_PROFILE> -r <AWS_REGION>
 ```
+
+The script will prompt you to enter your Sumo Logic Access Key interactively (input is masked).
 
 ### Parameters
 Provide the following details where you want to install AWS Observability Solution
 
-| Parameter       | Alias | Mandatory | Default   | Description                                             |
-|-----------------|-------|-----------|-----------|---------------------------------------------------------|
-| SUMO_ACCESS_ID  | -i    | Yes       | <>        | Sumo Access Id from your respective Sumo Logic Account  |
-| SUMO_ACCESS_KEY | -k    | Yes       | <>        | Sumo Access Key from your respective Sumo Logic Account |
-| AWS_PROFILE     | -p    | No        | default   | User profile from AWS account which you want to observe |
-| AWS_REGION      | -r    | No        | us-east-1 | AWS region which you want to observe                    |
+| Parameter      | Alias | Mandatory | Default   | Description                                             |
+|----------------|-------|-----------|-----------|---------------------------------------------------------|
+| SUMO_ACCESS_ID | -i    | Yes       | <>        | Sumo Access ID from your respective Sumo Logic Account  |
+| AWS_PROFILE    | -p    | No        | default   | User profile from AWS account which you want to observe |
+| AWS_REGION     | -r    | No        | us-east-1 | AWS region which you want to observe                    |
+
+> **Note:** The Sumo Logic Access Key is read interactively at runtime and is never passed as a command-line argument to avoid exposure in shell history.
 
 <details>
 <summary>Above command performs following actions</summary>
