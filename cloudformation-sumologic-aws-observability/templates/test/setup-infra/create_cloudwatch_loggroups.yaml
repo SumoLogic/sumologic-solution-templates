@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Creates CloudWatch Log Groups to verify AWSO auto-subscribes them
+  based on Section7dAutoSubscribeLogGroupPattern and Section7eAutoSubscribeLogGroupByTags.
+  Used in both PreRequisitesInfra (existing) and PostRequisitesInfra (new).
+
+Parameters:
+  TagKey:
+    Type: String
+    Default: "Environment"
+    Description: Tag key for log groups (matches Section7eAutoSubscribeLogGroupByTags)
+  TagValue:
+    Type: String
+    Default: "production"
+    Description: Tag value for log groups (matches Section7eAutoSubscribeLogGroupByTags)
+
+Resources:
+  LogGroupByPattern:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-pattern-test"
+      RetentionInDays: 1
+      Tags:
+        - Key: CreatedBy
+          Value: sumocfntester
+
+  LogGroupByTags:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/${AWS::StackName}-tags-test"
+      RetentionInDays: 1
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: CreatedBy
+          Value: sumocfntester
+
+  LogGroupBoth:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-both-test"
+      RetentionInDays: 1
+      Tags:
+        - Key: !Ref TagKey
+          Value: !Ref TagValue
+        - Key: CreatedBy
+          Value: sumocfntester
+
+Outputs:
+  LogGroupByPatternName:
+    Value: !Ref LogGroupByPattern
+  LogGroupByTagsName:
+    Value: !Ref LogGroupByTags
+  LogGroupBothName:
+    Value: !Ref LogGroupBoth
+  LogGroupByPatternArn:
+    Value: !GetAtt LogGroupByPattern.Arn
+  LogGroupByTagsArn:
+    Value: !GetAtt LogGroupByTags.Arn
+  LogGroupBothArn:
+    Value: !GetAtt LogGroupBoth.Arn

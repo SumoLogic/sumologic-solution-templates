@@ -1,0 +1,99 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+      Section2aAccountAlias: 'appsonly'
+TestCase:
+  TestName: onlyAppsInstall
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+      Section2aAccountAlias: 'appsonly'
+      Section2bAccountAliasMappingS3URL: ''
+      Section3aInstallObservabilityApps: 'Yes'
+      Section4aCreateMetricsSourceOptions: 'None'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
+      Section5bALBCreateLogSource: 'No'
+      Section6aCreateCloudTrailLogSource: 'No'
+      Section7aCreateCloudWatchLogsSourceOptions: 'None'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'None'
+      Section8bELBCreateLogSource: 'No'
+  AssertionsSkip: false
+  Assertions:
+    # --- HEALTH PHASE ---
+    - AssertType: ResourceExistence
+      Skip: false
+      Assert:
+        Resources:
+          - LambdaRole
+          - LambdaPermission
+          - PrimerInvoke
+          - TelemetryLambda
+          - CreateCommonResources
+          - sumoAppStacks
+          - sumoAppStacks.SumoAppAmazonECS
+          - sumoAppStacks.SumoAppAmazonECSWithCI
+          - sumoAppStacks.SumoAppAmazonElastiCache
+          - sumoAppStacks.SumoAppAmazonOverview
+          - sumoAppStacks.SumoAppAmazonRDS
+          - sumoAppStacks.SumoAppAmazonSNS
+          - sumoAppStacks.SumoAppAmazonSQS
+          - sumoAppStacks.SumoAppAWSAPIGateway
+          - sumoAppStacks.SumoAppAWSApplicationLoadBalancer
+          - sumoAppStacks.SumoAppAWSClassicLoadBalancer
+          - sumoAppStacks.SumoAppAWSDynamoDB
+          - sumoAppStacks.SumoAppAWSEC2
+          - sumoAppStacks.SumoAppAWSLambda
+          - sumoAppStacks.SumoAppAWSNetworkLoadBalancer
+          - sumoAppStacks.SumoAppHostMetricsEC2
+          - sumoAppStacks.CreateSumoLogicAWSExplorerView
+          - CreateCommonResources.LambdaRole
+          - CreateCommonResources.LambdaHelper
+          - CreateCommonResources.AccountCheck
+          - CreateCommonResources.LambdaToDecideCWMetricsSources
+          - CreateCommonResources.Primerinvoke
+          - CreateCommonResources.AccountAliasValue
+          - CreateCommonResources.LambdaHelperAlias
+          - CreateCommonResources.LambdaRoleAlias
+    - AssertType: OutputsCheck
+      Skip: false
+      Assert:
+        Outputs:
+          - CreateCommonResources.LambdaHelperARN
+          - CreateCommonResources.EnterpriseCheck
+          - CreateCommonResources.PaidAccountCheck
+          - CreateCommonResources.Namespaces
+          - CreateCommonResources.LambdaRoleARN
+          - CreateCommonResources.CollectorName
+          - CreateCommonResources.AccountAlias
+    - AssertType: ParameterCheck
+      Skip: false
+      Assert:
+        CreateCommonResources:
+          AccountAlias: "appsonly"
+          AccountAliasMappingS3URL: ""
+          CreateMetaDataSource: 'No'
+          CreateCloudWatchMetricsSource: 'No'
+          CreateALBLogSource: 'No'
+          CreateELBLogSource: 'No'
+          CreateCloudTrailLogSource: 'No'
+          CreateCloudWatchLogSource: 'No'
+          CreateKinesisFirehoseLogSource: 'No'
+          CreateKinesisFirehoseMetricsSource: 'No'
+    # --- E2E PHASE ---
+    - AssertType: SumoAppInstallationValidation
+      Skip: false
+      Assert:
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"

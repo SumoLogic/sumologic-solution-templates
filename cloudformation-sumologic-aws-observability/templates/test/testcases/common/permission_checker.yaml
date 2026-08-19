@@ -1,0 +1,86 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/utilities/permissionchecker/permissioncheck.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default: {}
+TestCase:
+  TestName: permissionChecker
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - PermissionStack
+          - LambdaRole
+          - DeleteCFNLambda
+          - Primerinvoke
+          - PermissionStack.LambdaRole
+          - PermissionStack.LambdaHelper
+          - PermissionStack.CommonBucketSNSTopic
+          - PermissionStack.CommonS3Bucket
+          - PermissionStack.CommonSNSpolicy
+          - PermissionStack.SumoLogicSourceRole
+          - PermissionStack.SumoLogicHostedCollector
+          - PermissionStack.AddAccountField
+          - PermissionStack.AutoEnableS3LogsAlbAWSResources
+          - PermissionStack.AutoEnableS3LogsAlbAWSResources.EnableExisitngAWSResourcesLambda
+          - PermissionStack.AutoEnableS3LogsAlbAWSResources.ExistingAWSResources
+          - PermissionStack.AutoEnableS3LogsAlbAWSResources.SumoLambdaRole
+          - PermissionStack.AutoSubscribeLambdaLogGroupsAWSResources
+          - PermissionStack.CloudWatchEventFunction
+          - PermissionStack.CloudWatchEventFunction.SumoCWDeadLetterQueue
+          - PermissionStack.CloudWatchEventFunction.SumoCWEmailSNSTopic
+          - PermissionStack.CloudWatchEventFunction.SumoCWEventsInvokeLambdaPermission
+          - PermissionStack.CloudWatchEventFunction.SumoCWLambdaExecutionRole
+          - PermissionStack.CloudWatchEventFunction.SumoCWLambdaPermission
+          - PermissionStack.CloudWatchEventFunction.SumoCWLogGroup
+          - PermissionStack.CloudWatchEventFunction.SumoCWLogSubsriptionFilter
+          - PermissionStack.CloudWatchEventFunction.SumoCWLogsLambda
+          - PermissionStack.CloudWatchEventFunction.SumoCWProcessDLQLambda
+          - PermissionStack.CloudWatchEventFunction.SumoCWProcessDLQScheduleRule
+          - PermissionStack.CloudWatchEventFunction.SumoCWSpilloverAlarm
+          - PermissionStack.CloudWatchHTTPSource
+          - PermissionStack.CommonBucketPolicy
+          - PermissionStack.CommonCloudTrail
+          - PermissionStack.CreateSumoLogicAWSExplorerView
+          - PermissionStack.EnterpriseCheck
+          - PermissionStack.KinesisFirehoseLogsSource
+          - PermissionStack.KinesisFirehoseLogsStack
+          - PermissionStack.KinesisFirehoseLogsStack.AttachBucketPolicyToFirehoseLogsRole
+          - PermissionStack.KinesisFirehoseLogsStack.FirehoseLogsRole
+          - PermissionStack.KinesisFirehoseLogsStack.KinesisLogsDeliveryStream
+          - PermissionStack.KinesisFirehoseLogsStack.KinesisLogsFirehoseRolePolicy
+          - PermissionStack.KinesisFirehoseLogsStack.KinesisLogsLogGroup
+          - PermissionStack.KinesisFirehoseLogsStack.KinesisLogsLogStream
+          - PermissionStack.KinesisFirehoseLogsStack.KinesisLogsLogStreamS3
+          - PermissionStack.KinesisFirehoseLogsStack.KinesisLogsRole
+          - PermissionStack.KinesisFirehoseLogsStack.KinesisLogsRolePolicy
+          - PermissionStack.KinesisFirehoseLogsStack.SubscriptionFilter
+          - PermissionStack.KinesisFirehoseMetricsSource
+          - PermissionStack.KinesisFirehoseMetricsStack
+          - PermissionStack.KinesisFirehoseMetricsStack.AttachBucketPolicyToFirehoseLogsRole
+          - PermissionStack.KinesisFirehoseMetricsStack.FirehoseLogsRole
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStream
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambda
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsCloudWatchMetricsStreamLambdaRole
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsDeliveryStream
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsFirehoseRolePolicy
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsLogGroup
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsLogStream
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsLogStreamS3
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsRole
+          - PermissionStack.KinesisFirehoseMetricsStack.KinesisMetricsRolePolicy
+          - PermissionStack.LambdaFieldExtractionRule
+          - PermissionStack.LambdaMetricRule
+          - PermissionStack.SumoLogGroupLambdaConnectorRole
+          - PermissionStack.sumoMonitorAlerts
+          - PermissionStack.sumoOverview

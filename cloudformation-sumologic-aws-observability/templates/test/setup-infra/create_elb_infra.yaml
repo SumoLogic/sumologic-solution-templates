@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates an ELB Classic with an EC2 instance running a web server in the default VPC.
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP inbound for ELB and instance
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  WebInstance:
+    Type: AWS::EC2::Instance
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
+    Properties:
+      InstanceType: t3.nano
+      ImageId: !FindInMap [RegionAMI, !Ref "AWS::Region", AMI]
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum install -y httpd aws-cfn-bootstrap
+          echo "OK" > /var/www/html/index.html
+          systemctl start httpd
+          systemctl enable httpd
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource WebInstance --region ${AWS::Region}
+      Tags:
+        - Key: Name
+          Value: !Sub "test-automation-elb-instance-${AWS::StackName}"
+        - Key: Environment
+          Value: test-automation
+        - Key: CreatedBy
+          Value: sumocfntester
+
+
+  Elb:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      AvailabilityZones:
+        - !GetAtt WebInstance.AvailabilityZone
+      Instances:
+        - !Ref WebInstance
+      SecurityGroups:
+        - !GetAtt SecurityGroup.GroupId
+      Listeners:
+        - LoadBalancerPort: 80
+          InstancePort: 80
+          Protocol: HTTP
+      HealthCheck:
+        Target: "HTTP:80/index.html"
+        HealthyThreshold: 2
+        UnhealthyThreshold: 5
+        Interval: 30
+        Timeout: 5
+      Tags:
+        - Key: Name
+          Value: !Sub "test-automation-elb-${AWS::StackName}"
+        - Key: Environment
+          Value: test-automation
+        - Key: CreatedBy
+          Value: sumocfntester
+
+Mappings:
+  RegionAMI:
+    us-east-1:
+      AMI: ami-0c02fb55956c7d316
+    us-east-2:
+      AMI: ami-02d1e544b84bf7502
+    us-west-1:
+      AMI: ami-04a50faf2a2ec1901
+    us-west-2:
+      AMI: ami-04d78408ebc2960db
+    eu-west-1:
+      AMI: ami-0d71ea30463e0ff8d
+    eu-west-2:
+      AMI: ami-05d65c771fbe820b8
+    eu-central-1:
+      AMI: ami-0c956e207f9d113d5
+    eu-central-2:
+      AMI: ami-01c9691d2a3985032
+    eu-north-1:
+      AMI: ami-0a905b99668efea4b
+    ap-east-1:
+      AMI: ami-052faa68ed03db3fa
+    eu-south-1:
+      AMI: ami-017081aa82c64ca2a
+    eu-west-3:
+      AMI: ami-0f52dfb3c2ca43c57
+    ap-southeast-1:
+      AMI: ami-0d70a36e2d6e4d676
+    ap-southeast-2:
+      AMI: ami-0017dd57a68595766
+    ap-southeast-3:
+      AMI: ami-0789d2831b988b0ca
+    ap-southeast-4:
+      AMI: ami-0b7dcd6e6fd797935
+    ap-southeast-6:
+      AMI: ami-06466bc0729ff23ea
+    ap-northeast-1:
+      AMI: ami-0ab0bbbd329f565e6
+    ap-northeast-2:
+      AMI: ami-0b022aa181030acbe
+    ap-northeast-3:
+      AMI: ami-00293f967a1b1b78a
+    ap-south-1:
+      AMI: ami-02b1e663aa8e2a28a
+    sa-east-1:
+      AMI: ami-0b0d54b52c62864d6
+    ca-central-1:
+      AMI: ami-083f3ba0365bc1928
+    af-south-1:
+      AMI: ami-04c6251608a00d7e4
+    me-south-1:
+      AMI: ami-0b4946f31c5e05b2a
+    me-central-1:
+      AMI: ami-0091155cfb8aec78e
+
+Outputs:
+  ElbName:
+    Value: !Ref Elb
+  ElbDns:
+    Value: !GetAtt Elb.DNSName
+  InstanceId:
+    Value: !Ref WebInstance

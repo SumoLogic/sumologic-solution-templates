@@ -1,0 +1,207 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+      Section2aAccountAlias: 'alleu1'
+TestCase:
+  TestName: allExistingSourceUrls
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  PreRequisitesInfra:
+    # Create "existing" ALB (AWSO Existing Lambda enables access logs on it at deploy time)
+    - Name: CreateALBInfra
+      CFNTemplateURL: "test/setup-infra/create_alb_infra.yaml"
+      ImpactedParametersPath:
+        AlbArn:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].Arn"
+        AlbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ALB#LoadBalancers#0'].DnsName"
+    # Create "existing" ELB (AWSO Existing Lambda enables access logs on it at deploy time)
+    - Name: CreateELBInfra
+      CFNTemplateURL: "test/setup-infra/create_elb_infra.yaml"
+      ImpactedParametersPath:
+        ElbName:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].Name"
+        ElbDns:
+          - "assertions[AssertType==AWSResourceValidation].Assert['ELB#LoadBalancers#0'].DnsName"
+    # Existing ELB S3 bucket — BucketName is now ELB bucket for subsequent steps
+    - Name: ELBBucket
+      CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+    - Name: CreateLambdaHelper
+      CFNTemplateURL: "test/setup-infra/create_sumo_lambda_hepler.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        AccountAlias: "alleu1"
+    - Name: CreateCollector
+      DependsOn: CreateLambdaHelper
+      CFNTemplateURL: "test/setup-infra/create_sumo_collector.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+    - Name: CreateRole
+      CFNTemplateURL: "test/setup-infra/create_sumo_role.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicOrganizationId: '${SUMO_ORG_ID}'
+    # ALB log source pointing at the ALB S3 bucket (BucketName still set to ALB bucket from step above)
+    - Name: CreateALBSource
+      DependsOn: [ALBBucket, CreateCollector, CreateRole]
+      CFNTemplateURL: "test/setup-infra/create_sumo_lb_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        AccountAlias: '${AccountAlias}'
+        LBLogsBucketName: '${BucketName}'
+      ImpactedParametersPath:
+        SumoLoadBalancerLogAPIURL:
+          - "parameters.Section5cALBLogsSourceUrl"
+    # ELB log source pointing at the ELB S3 bucket
+    - Name: CreateELBSource
+      DependsOn: [ELBBucket, CreateCollector, CreateRole]
+      CFNTemplateURL: "test/setup-infra/create_sumo_lb_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        AccountAlias: '${AccountAlias}'
+        LBLogsBucketName: '${BucketName}'
+      ImpactedParametersPath:
+        SumoLoadBalancerLogAPIURL:
+          - "parameters.Section8cELBLogsSourceUrl"
+    # CloudTrail S3 bucket — BucketName is now CloudTrail bucket for the CT source prereq
+    - Name: CTBucket
+      DependsOn: CreateELBSource
+      CFNTemplateURL: "test/setup-infra/create_s3_bucket.yaml"
+    # CloudTrail log source pointing at the CloudTrail S3 bucket
+    - Name: CreateCTSource
+      DependsOn: [CTBucket, CreateCollector, CreateRole]
+      CFNTemplateURL: "test/setup-infra/create_sumo_cloudtrail_source.yaml"
+      CFNParameters:
+        SumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+        SumoLogicAccessID: '${SUMO_ACCESS_ID}'
+        SumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+        SumoLambdaHelperArn: '${SumoLambdaHelperArn}'
+        SumoLogicSourceRoleArn: '${SumoLogicSourceRoleArn}'
+        SumoCollectorID: '${SumoCollectorID}'
+        CloudTrailLogsBucketName: '${BucketName}'
+        AccountAlias: '${AccountAlias}'
+      ImpactedParametersPath:
+        SumoCloudTrailAPIURL:
+          - "parameters.Section6bCloudTrailLogsSourceUrl"
+
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+      Section2aAccountAlias: 'alleu1'
+      Section2bAccountAliasMappingS3URL: ''
+      Section3aInstallObservabilityApps: 'No'
+      Section4aCreateMetricsSourceOptions: 'None'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'Existing'
+      Section5bALBCreateLogSource: 'No'
+      Section5cALBLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
+      Section6aCreateCloudTrailLogSource: 'No'
+      Section6bCloudTrailLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
+      Section7aCreateCloudWatchLogsSourceOptions: 'None'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'Existing'
+      Section8bELBCreateLogSource: 'No'
+      Section8cELBLogsSourceUrl: 'https://api.sumologic.com/api/v1/collectors/261725249/sources/1511494842'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - LambdaRole
+          - LambdaPermission
+          - PrimerInvoke
+          - TelemetryLambda
+          - CreateCommonResources
+          - CreateCommonResources.LambdaRole
+          - CreateCommonResources.LambdaHelper
+          - CreateCommonResources.AccountCheck
+          - CreateCommonResources.LambdaToDecideCWMetricsSources
+          - CreateCommonResources.Primerinvoke
+          - CreateCommonResources.AccountAliasValue
+          - CreateCommonResources.LambdaHelperAlias
+          - CreateCommonResources.LambdaRoleAlias
+          # Update source custom resources (update_* conditions = true when SourceApiUrl != '')
+          - CreateCommonResources.SumoALBLogsUpdateSource
+          - CreateCommonResources.SumoELBLogsUpdateSource
+          - CreateCommonResources.SumoCloudTrailLogsUpdateSource
+    - AssertType: OutputsCheck
+      Assert:
+        Outputs:
+          - CreateCommonResources.LambdaHelperARN
+          - CreateCommonResources.EnterpriseCheck
+          - CreateCommonResources.PaidAccountCheck
+          - CreateCommonResources.Namespaces
+          - CreateCommonResources.LambdaRoleARN
+          - CreateCommonResources.CollectorName
+          - CreateCommonResources.AccountAlias
+          - CreateCommonResources.ExistingCloudTrailLogSourceName
+          - CreateCommonResources.ExistingELBLogSourceName
+          - CreateCommonResources.ExistingALBLogSourceName
+    - AssertType: ParameterCheck
+      Assert:
+        CreateCommonResources:
+          AccountAlias: "alleu1"
+          AccountAliasMappingS3URL: ""
+          CreateMetaDataSource: 'No'
+          MetaDataSourceName: ""
+          MetaDataSourceCategory: ""
+          CreateCloudWatchMetricsSource: 'No'
+          CloudWatchMetricsSourceName: ''
+          CloudWatchMetricsNameSpaces: "AWS/ApplicationELB, AWS/ApiGateway, AWS/DynamoDB, AWS/Lambda, AWS/RDS, AWS/ECS, AWS/ElastiCache, AWS/ELB, AWS/NetworkELB"
+          ScanInterval: "300000"
+          CloudWatchMetricSourceCategory: ""
+          CreateALBLogSource: 'No'
+          CreateALBS3Bucket: 'No'
+          ALBS3LogsBucketName: ""
+          ALBS3BucketPathExpression: ''
+          ALBLogsSourceName: "alb-logs-<REGION>"
+          ALBLogsSourceCategory: "aws/observability/alb/logs"
+          CreateELBLogSource: 'No'
+          CreateELBS3Bucket: 'No'
+          ELBS3LogsBucketName: ""
+          ELBS3BucketPathExpression: ''
+          ELBLogsSourceName: "classic-lb-logs-<REGION>"
+          ELBLogsSourceCategory: "aws/observability/clb/logs"
+          CreateCloudTrailLogSource: 'No'
+          CreateCloudTrailBucket: 'No'
+          CloudTrailLogsBucketName: ""
+          CloudTrailBucketPathExpression: ''
+          CloudTrailLogsSourceName: "cloudtrail-logs-<REGION>"
+          CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
+          CreateCloudWatchLogSource: 'No'
+          CloudWatchLogsSourceName: "cloudwatch-logs-<REGION>"
+          CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
+          CreateKinesisFirehoseLogSource: 'No'
+          KinesisFirehoseLogsSourceName: 'kinesis-firehose-cloudwatch-logs-<REGION>'
+          KinesisFirehoseLogsSourceCategory: 'aws/observability/cloudwatch/logs'
+          CreateKinesisFirehoseMetricsSource: 'No'
+          KinesisFirehoseMetricsSourceName: 'cloudwatch-metrics-<REGION>'
+          KinesisFirehoseMetricSourceCategory: 'aws/observability/cloudwatch/metrics'
+    # --- E2E PHASE ---
+    - AssertType: SumoSourceLogsValidation
+      Skip: false
+      Assert:
+        AccessId: "${SUMO_ACCESS_ID}"
+        AccessKey: "${SUMO_ACCESS_KEY}"
+        Deployment: "${SUMO_DEPLOYMENT}"
+        TimeoutSeconds: 600

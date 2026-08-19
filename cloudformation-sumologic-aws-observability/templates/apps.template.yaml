@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::LanguageExtensions
+Description: "Version - v3.0.0: Template to install AWS Observability related Apps."
+Parameters:
+  Section1aSumoDeployment:
+    Type: String
+    Default: ""
+    Description: "Enter au, ca, ch, de, eu, esc, fed, jp, kr, us1 or us2"
+  Section1bSumoAccessID:
+    Type: String
+    Description: "Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  Section1cSumoAccessKey:
+    Type: String
+    Description: "Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  Section1dRemoveSumoResourcesOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "To uninstall apps when the stack is deleted, set this parameter to True. Default is True.
+                  To prevent uninstall apps when the stack is deleted, set this parameter to False."
+    Type: String
+  Section2aInstallApp:
+    Type: String
+    Description: "Yes - Install AWS Apps for the Sumo Logic AWS Observability Solution.
+                  No - Skips the installation of this AWS Apps."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+
+  Section3aParentStackLambdaARN:
+    Type: String
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
+
+  Section4aToUpdate:
+    Type: String
+    Default: ""
+    Description: "Force stack update when parent configuration changes"
+
+
+Mappings:
+  Apps:
+    AmazonECS:
+      Name: "Amazon ECS(Without Container Insights and Traces)"
+      AppId: "c26c3149-6131-4b97-b250-adf53ad7cd16"
+
+    AmazonECSWithCI:
+      Name: "Amazon ECS(With Container Insights and Traces)"
+      AppId: "69c8db21-9d42-4210-8fa8-365155d90074"
+
+    AmazonElastiCache:
+      Name: "Amazon ElastiCache"
+      AppId: "1354f831-1745-447e-91b9-0dd6b32eebec"
+
+    AmazonOverview:
+      Name: "Amazon Overview"
+      AppId: "32c8b96c-161c-46d4-b81d-235cc0b56b87"
+
+    AmazonRDS:
+      Name: "Amazon RDS"
+      AppId: "30519e43-1a92-482c-be08-deaaf09c88b6"
+
+    AmazonSNS:
+      Name: "Amazon SNS"
+      AppId: "7590a039-5935-47ff-87ea-bc0970e6e96a"
+
+    AmazonSQS:
+      Name: "Amazon SQS"
+      AppId: "dea50b70-dc1f-406d-884d-3945214861ae"
+
+    AWSAPIGateway:
+      Name: "AWS API Gateway"
+      AppId: "9b952ef9-7a20-44e4-861a-25f9124846ff"
+
+    AWSApplicationLoadBalancer:
+      Name: "AWS Application Load Balancer"
+      AppId: "8ae2e0f4-cb4f-476b-ba9c-ee84bbab471b"
+
+    AWSClassicLoadBalancer:
+      Name: "AWS Classic Load Balancer"
+      AppId: "f113016e-4d15-4f4e-a254-4510a995f525"
+
+    AWSDynamoDB:
+      Name: "AWS DynamoDB"
+      AppId: "7d9b9d0b-0a1f-4af9-9edd-889c2190024b"
+
+    AWSEC2:
+      Name: "AWS EC2"
+      AppId: "3dcaacb4-a5de-4e57-a477-fccd04f9e40f"
+
+    AWSLambda:
+      Name: "AWS Lambda"
+      AppId: "a542409f-c491-404f-9a63-7078fcc945e2"
+
+    AWSNetworkLoadBalancer:
+      Name: "AWS Network Load Balancer"
+      AppId: "3f59d805-e2a8-4e0d-ae90-d40f0eb63671"
+
+    HostMetricsEC2:
+      Name: "Host Metrics (EC2)"
+      AppId: "5ebe888f-43f0-4021-9225-fd5360e58ca4"
+
+Conditions:
+  is_install_app: !Equals [!Ref Section2aInstallApp, "Yes"]
+
+Resources:
+
+  CreateSumoLogicAWSExplorerView:
+    Type: Custom::SumoLogicAWSExplorer
+    Properties:
+      ServiceToken: !Ref Section3aParentStackLambdaARN
+      RemoveOnDeleteStack: false
+      HierarchyName: "AWS Observability"
+      HierarchyLevel: { "entityType": "account","nextLevelsWithConditions": [ ],"nextLevel": { "entityType": "region","nextLevelsWithConditions": [ ],"nextLevel": { "entityType": "namespace","nextLevelsWithConditions": [ { "condition": "AWS/ApplicationElb","level": { "entityType": "loadbalancer","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ApiGateway","level": { "entityType": "apiname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/DynamoDB","level": { "entityType": "tablename","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/EC2","level": { "entityType": "instanceid","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/RDS","level": { "entityType": "dbidentifier","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/Lambda","level": { "entityType": "functionname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ECS","level": { "entityType": "clustername","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ElastiCache","level": { "entityType": "cacheclusterid","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/NetworkELB","level": { "entityType": "networkloadbalancer","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/ELB","level": { "entityType": "loadbalancername","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/SNS","level": { "entityType": "topicname","nextLevelsWithConditions": [ ] } },{ "condition": "AWS/SQS","level": { "entityType": "queuename","nextLevelsWithConditions": [ ] } } ] } } }
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+
+  SumoAppAmazonOverview:
+    Type: Custom::AppV2
+    Condition: is_install_app
+    Properties:
+      ServiceToken: !Ref Section3aParentStackLambdaARN
+      AppName: "Amazon Overview"
+      AppId: "32c8b96c-161c-46d4-b81d-235cc0b56b87"
+      RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+      SumoAccessID: !Ref Section1bSumoAccessID
+      SumoAccessKey: !Ref Section1cSumoAccessKey
+      SumoDeployment: !Ref Section1aSumoDeployment
+      Section4aToUpdate: !Ref Section4aToUpdate
+
+  Fn::ForEach::AppsLoop:
+    - AppKey
+    - [AmazonElastiCache, AWSLambda, AmazonSNS, AmazonSQS, AWSApplicationLoadBalancer, AWSClassicLoadBalancer, AWSDynamoDB, AWSEC2, HostMetricsEC2, AmazonECS, AmazonECSWithCI, AWSNetworkLoadBalancer, AmazonRDS, AWSAPIGateway]
+    - SumoApp${AppKey}:
+        Type: Custom::AppV2
+        DependsOn: SumoAppAmazonOverview
+        Condition: is_install_app
+        Properties:
+          ServiceToken: !Ref Section3aParentStackLambdaARN
+          AppName: !FindInMap [Apps, !Ref AppKey, Name]
+          AppId: !FindInMap [Apps, !Ref AppKey, AppId]
+          RemoveOnDeleteStack: !Ref Section1dRemoveSumoResourcesOnDeleteStack
+          SumoAccessID: !Ref Section1bSumoAccessID
+          SumoAccessKey: !Ref Section1cSumoAccessKey
+          SumoDeployment: !Ref Section1aSumoDeployment
+          Section4aToUpdate: !Ref Section4aToUpdate
+
