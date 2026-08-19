@@ -410,7 +410,7 @@ Conditions:
   is_bucket_available: !Or
     - !Condition create_alb_bucket
     - !Not [!Equals [ !Ref Section5dALBS3LogsBucketName, '' ]]
-  
+
   is_elb_bucket_available: !Or
     - !Condition create_elb_bucket
     - !Not [!Equals [ !Ref Section8dELBS3LogsBucketName, '' ]]
@@ -418,7 +418,7 @@ Conditions:
   auto_enable_s3_logs: !And
     - !Not [!Equals [ !Ref Section5aAutoEnableS3LogsALBResourcesOptions, 'None' ]]
     - !Condition is_bucket_available
-  
+
   auto_enable_s3_logs_elb: !And
     - !Not [!Equals [ !Ref Section8aAutoEnableS3LogsELBResourcesOptions, 'None' ]]
     - !Condition is_elb_bucket_available
@@ -593,7 +593,7 @@ Resources:
       FunctionName: !GetAtt TelemetryLambda.Arn
       Action: 'lambda:InvokeFunction'
       Principal: 'cloudformation.amazonaws.com'
-  
+
   PrimerInvoke:
     Condition: send_telemetry_to_sumo
     Type: AWS::CloudFormation::CustomResource
@@ -612,7 +612,7 @@ Resources:
       deploymentSource: 'cloudFormation'
       TelemetryEndpoint: "https://endpoint1.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV1S68eao6UYB3LFtqQ7ur1xYlT1EHCfXdhvi6uPNc0aUXIpvq5i_aHewOp5xxxwnGZ5MmSWDR6qV5td4exMM4pZE4Tk6rqKvgextLx7I6IRpg=="
       scanInterval: 60
-      ToUpdate: 
+      ToUpdate:
         Fn::Base64: !Sub
           - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}-${w}"
           - a: !Ref Section2aAccountAlias
