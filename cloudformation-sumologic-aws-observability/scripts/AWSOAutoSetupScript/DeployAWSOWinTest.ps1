@@ -46,24 +46,23 @@ $now=Get-Date
 echo "AWS Observability Script initiated at : $now"
 
 #identify sumo deployment associated with sumo accessId and accessKey
-$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
-$apiUrl="https://api.sumologic.com"
-$deployment="us1"
+# $masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
+# $apiUrl="https://api.sumologic.com"
+# $deployment="us1"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f "$SUMO_ACCESS_ID","$SUMO_ACCESS_KEY")))
 
 # Uncomment following for Stag
-# $apiUrl="https://stag-api.sumologic.net"
-# $deployment="stag" 
-# $masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
-# Uncomment following for Stag
+$apiUrl="https://stag-api.sumologic.net"
+$deployment="stag"
+$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.us-east-1.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.mp.test.yaml"
 
 # # Uncomment following for Long
-$apiUrl="https://long-api.sumologic.net"
-$deployment="long"
-$masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/awsmp/sumologic_observability.mp.test.yaml"
-# # Uncomment following for Long
+# $apiUrl="https://long-api.sumologic.net"
+# $deployment="long"
+# $masterTemplateURL="https://sumologic-appdev-aws-sam-apps.s3.us-east-1.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.mp.test.yaml"
+
 
 try{
 $result = Invoke-WebRequest -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)}  -Uri "$apiUrl/api/v1/collectors/"
