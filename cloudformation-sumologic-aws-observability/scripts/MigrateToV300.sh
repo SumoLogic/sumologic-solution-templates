@@ -61,12 +61,13 @@ AWSO_METRIC_RULES=(
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 
 _log_to_file() { sed 's/\x1b\[[0-9;]*m//g' >> "$LOG_FILE"; }
-log_info()  { echo -e "${GREEN}[INFO]${NC}  $*" | tee >( _log_to_file ); }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*" | tee >( _log_to_file ); }
-log_error() { echo -e "${RED}[ERROR]${NC} $*" | tee >( _log_to_file ); }
+_ts() { date '+%Y-%m-%d %H:%M:%S'; }
+log_info()  { echo -e "${GREEN}[INFO]${NC}  [$( _ts )] $*" | tee >( _log_to_file ); }
+log_warn()  { echo -e "${YELLOW}[WARN]${NC}  [$( _ts )] $*" | tee >( _log_to_file ); }
+log_error() { echo -e "${RED}[ERROR]${NC} [$( _ts )] $*" | tee >( _log_to_file ); }
 log_phase() {
     echo -e "\n${BLUE}════════════════════════════════════════${NC}" | tee >( _log_to_file )
-    echo -e "${BLUE}  $*${NC}" | tee >( _log_to_file )
+    echo -e "${BLUE}  [$( _ts )] $*${NC}" | tee >( _log_to_file )
     echo -e "${BLUE}════════════════════════════════════════${NC}" | tee >( _log_to_file )
 }
 
