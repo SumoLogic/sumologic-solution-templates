@@ -83,7 +83,6 @@ ACCESS_ID=""
 ACCESS_KEY=""
 ORG_ID=""
 STACKSET_NAME="SUMO-LOGIC-AWS-OBSERVABILITY"
-NEW_STACKSET_NAME=""           # defaults to STACKSET_NAME if not set
 ADMIN_ROLE_ARN=""              # auto-detected from StackSet
 EXECUTION_ROLE_NAME=""         # auto-detected from StackSet
 HOME_REGION=""                 # AWS region where the StackSet is registered (Control Tower home region)
@@ -594,7 +593,6 @@ _save_state() {
     failed_json=$( printf '%s\n' "${FAILED_INSTANCES[@]:-}" | jq -R . | jq -s . )
     jq -n \
         --arg     stackset_name    "$STACKSET_NAME" \
-        --arg     new_stackset     "${NEW_STACKSET_NAME:-$STACKSET_NAME}" \
         --arg     home_region      "$HOME_REGION" \
         --argjson instances        "$INSTANCES_JSON" \
         --argjson v300_base_params "$V300_BASE_PARAMS" \
@@ -606,7 +604,6 @@ _save_state() {
         --arg     exec_role        "$EXECUTION_ROLE_NAME" \
         '{
             stackset_name: $stackset_name,
-            new_stackset_name: $new_stackset,
             home_region: $home_region,
             instances: $instances,
             v300_base_params: $v300_base_params,
@@ -636,8 +633,6 @@ _load_state() {
 
     local _field
     _field="stackset_name";     STACKSET_NAME=$(      echo "$s" | jq -r ".$_field // empty" ) \
-        || { log_error "Failed to parse .$_field from state file"; exit 1; }
-    _field="new_stackset_name"; NEW_STACKSET_NAME=$(  echo "$s" | jq -r ".$_field // empty" ) \
         || { log_error "Failed to parse .$_field from state file"; exit 1; }
     _field="instances";         INSTANCES_JSON=$(     echo "$s" | jq -c ".$_field // []" ) \
         || { log_error "Failed to parse .$_field from state file"; exit 1; }
@@ -950,7 +945,7 @@ phase_confirm() {
     echo -e "${YELLOW}════ MIGRATION SUMMARY ════${NC}"
     echo ""
     echo "  StackSet (old) : ${STACKSET_NAME}"
-    echo "  StackSet (new) : ${NEW_STACKSET_NAME:-$STACKSET_NAME}"
+    echo "  StackSet       : ${STACKSET_NAME}"
     echo "  Template       : ${V300_TEMPLATE_URL}"
     echo ""
     echo "  Instances to migrate:"
@@ -1506,8 +1501,6 @@ phase_create_stackset() {
 phase_create_instances() {
     log_phase "Phase 11: Create Stack Instances"
 
-    local target_name="${NEW_STACKSET_NAME:-$STACKSET_NAME}"
-
     if _phase_done "create_instances"; then
         log_info "Already completed — skipping."
         return 0
@@ -1542,7 +1535,7 @@ phase_create_instances() {
 
         local op_id
         op_id=$( aws_cmd cloudformation create-stack-instances \
-            --stack-set-name "$target_name" \
+            --stack-set-name "$STACKSET_NAME" \
             --accounts "$account" \
             --regions  "$region" \
             --parameter-overrides "${param_overrides[@]}" \
@@ -1554,7 +1547,7 @@ phase_create_instances() {
 
         log_info "  create-stack-instances operation: ${op_id}"
         local result
-        result=$( wait_for_stackset_operation "$target_name" "$op_id" "$CREATE_INSTANCES_TIMEOUT" ) || true
+        result=$( wait_for_stackset_operation "$STACKSET_NAME" "$op_id" "$CREATE_INSTANCES_TIMEOUT" ) || true
         if [[ "$result" != "SUCCEEDED" ]]; then
             log_error "create-stack-instances failed for ${account}/${region}: ${result}"
             FAILED_INSTANCES+=("${account}/${region}")
@@ -1582,13 +1575,11 @@ phase_verify() {
         return 0
     fi
 
-    local target_name="${NEW_STACKSET_NAME:-$STACKSET_NAME}"
-
     local raw_instances="[]"
     local next_token=""
     while true; do
         local args=( cloudformation list-stack-instances
-            --stack-set-name "$target_name"
+            --stack-set-name "$STACKSET_NAME"
             --region "$HOME_REGION"
             --output json )
         [[ -n "$next_token" ]] && args+=( --next-token "$next_token" )
@@ -1626,8 +1617,6 @@ phase_patch_role_arns() {
         return 0
     fi
 
-    local target_name="${NEW_STACKSET_NAME:-$STACKSET_NAME}"
-
     # Process each unique account
     local accounts
     accounts=$( echo "$INSTANCES_JSON" | jq -r '[.[].account] | unique | .[]' )
@@ -1663,7 +1652,7 @@ phase_patch_role_arns() {
             # (management credentials), not the member account's cross-account creds.
             local stack_name
             stack_name=$( aws_cmd cloudformation list-stack-instances \
-                --stack-set-name "$target_name" \
+                --stack-set-name "$STACKSET_NAME" \
                 --stack-instance-account "$account" \
                 --stack-instance-region  "$region" \
                 --region "$HOME_REGION" \
@@ -1806,15 +1795,13 @@ phase_patch_role_arns() {
 # ============================================================
 phase_report() {
     log_phase "Phase 14: Migration Summary"
-    local target_name="${NEW_STACKSET_NAME:-$STACKSET_NAME}"
     local total_instances
     total_instances=$( echo "$INSTANCES_JSON" | jq 'length' )
     local unique_accounts unique_regions
     unique_accounts=$( echo "$INSTANCES_JSON" | jq -r '[.[].account] | unique | length' )
     unique_regions=$(  echo "$INSTANCES_JSON" | jq -r '[.[].region]  | unique | length' )
     echo ""
-    echo -e "${GREEN}  StackSet (old)  : ${STACKSET_NAME}${NC}"
-    echo -e "${GREEN}  StackSet (new)  : ${target_name}${NC}"
+    echo -e "${GREEN}  StackSet        : ${STACKSET_NAME}${NC}"
     echo -e "${GREEN}  Home region     : ${HOME_REGION}${NC}"
     echo -e "${GREEN}  Template        : v3.0.0${NC}"
     echo -e "${GREEN}  Accounts        : ${unique_accounts}${NC}"
@@ -1842,8 +1829,7 @@ Required:
   -r REGION              AWS home region where the StackSet is registered (e.g. us-east-1)
 
 Optional:
-  --stackset-name NAME       Existing StackSet name (default: SUMO-LOGIC-AWS-OBSERVABILITY)
-  --new-stackset-name NAME   New StackSet name after migration (default: same as old)
+  -s, --stackset-name NAME       Existing StackSet name (default: SUMO-LOGIC-AWS-OBSERVABILITY)
   --admin-role-arn ARN       StackSet admin role ARN (auto-detected from existing StackSet)
   --execution-role NAME      StackSet execution role name (auto-detected, default: AWSControlTowerExecution)
   -p AWS_PROFILE             AWS CLI profile (default: default)
@@ -1889,8 +1875,7 @@ parse_args() {
             -k)                  ACCESS_KEY="$2";          shift 2 ;;
             -o)                  ORG_ID="$2";              shift 2 ;;
             -r)                  HOME_REGION="$2";         shift 2 ;;
-            --stackset-name)     STACKSET_NAME="$2";       shift 2 ;;
-            --new-stackset-name) NEW_STACKSET_NAME="$2";   shift 2 ;;
+            -s|--stackset-name)     STACKSET_NAME="$2";       shift 2 ;;
             --admin-role-arn)    ADMIN_ROLE_ARN="$2";      shift 2 ;;
             --execution-role)    EXECUTION_ROLE_NAME="$2"; shift 2 ;;
             -p)                  AWS_PROFILE="$2";         shift 2 ;;
@@ -1962,9 +1947,6 @@ main() {
         # --from-phase resets progress to force re-run from a specific phase
         [[ -n "$FROM_PHASE" ]] && _reset_from_phase "$FROM_PHASE"
     fi
-
-    # Set new stackset name default
-    [[ -z "$NEW_STACKSET_NAME" ]] && NEW_STACKSET_NAME="$STACKSET_NAME"
 
     if [[ "$PATCH_ROLES_ONLY" == true ]]; then
         phase_patch_role_arns

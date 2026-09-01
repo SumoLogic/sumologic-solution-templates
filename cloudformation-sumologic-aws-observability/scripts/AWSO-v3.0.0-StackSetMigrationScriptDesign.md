@@ -356,8 +356,7 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 | Flag | Purpose | Default |
 |------|---------|---------|
 | `-k ACCESS_KEY` | Sumo Logic access key | **Prompted interactively** (hidden input, no echo) if omitted — avoids key appearing in shell history |
-| `--stackset-name NAME` | Name of the existing v2.x StackSet | `SUMO-LOGIC-AWS-OBSERVABILITY` |
-| `--new-stackset-name NAME` | Name for the updated StackSet (unused; StackSet updated in-place) | Same as old |
+| `-s, --stackset-name NAME` | Name of the existing v2.x StackSet | `SUMO-LOGIC-AWS-OBSERVABILITY` |
 | `--admin-role-arn ARN` | StackSet administration role ARN | Auto-detected |
 | `--execution-role NAME` | StackSet execution role name | Auto-detected |
 | `-p PROFILE` | AWS CLI profile | `default` |
@@ -381,7 +380,7 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 # Full migration with a non-default StackSet name and apps installed
 ./MigrateAWSOStackSetToV300.sh \
     -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1 \
-    --stackset-name MY-AWSO-STACKSET \
+    -s MY-AWSO-STACKSET \
     --install-apps Yes
 
 # Dry run — enumerate instances and map params; no changes made
