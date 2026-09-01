@@ -400,15 +400,30 @@ Prints a summary of the migration including:
 **When**: First time migrating a v2.x stack to v3.0.0.
 
 ```bash
+# Access key prompted interactively (recommended — keeps key out of shell history)
 ./MigrateAWSOStackToV300.sh \
-  -d kr -i suYXzI02B9l4h3 -k <key> \
+  -d kr -i suYXzI02B9l4h3 \
+  -o 0000000000009CFA0A \
   -s awso-production-v215 -r us-west-2 \
   -n awso-production-v300 --install-apps Yes
 ```
 
 Runs all 12 phases in sequence. The script saves a params file automatically — if the deploy fails, retry with `--resume`.
 
-#### 2. Resume / Continue Mode (`--resume`)
+#### 2. Dry Run (`--dry-run`)
+**When**: Preview the mapped v3.0.0 parameters without making any changes.
+
+```bash
+./MigrateAWSOStackToV300.sh \
+  -d kr -i suYXzI02B9l4h3 \
+  -o 0000000000009CFA0A \
+  -s awso-production-v215 -r us-west-2 \
+  --dry-run
+```
+
+Runs Phases 1–3 (validate, capture, map params) and prints the mapped parameter list, then exits. No stack updates, deletions, or Sumo changes are made.
+
+#### 3. Resume / Continue Mode (`--resume`)
 
 **When to use**:
 - Phase 9 (deploy) failed — stack rolled back or errored
@@ -458,17 +473,19 @@ aws cloudformation wait stack-delete-complete --stack-name awso-production-v300 
 | Orphaned nested stack remaining | Pass `-s <old-stack>` with `--resume` — `cleanup_orphaned_nested_stacks` handles it |
 | Timeout during create | Check stack status first; if failed, delete and resume |
 
-#### 3. Patch-Only Mode (`--patch-roles-only`)
+#### 4. Patch-Only Mode (`--patch-roles-only`)
 **When**: v3.0.0 is already deployed and working, but sources still point to the old/deleted IAM role ARN.
 
 ```bash
 ./MigrateAWSOStackToV300.sh \
-  -d kr -i suYXzI02B9l4h3 -k <key> \
-  -s awso-production-v300 -r us-west-2 \
+  -d kr -i suYXzI02B9l4h3 \
+  -o 0000000000009CFA0A \
+  -r us-west-2 \
+  -n awso-production-v300 \
   --patch-roles-only
 ```
 
-Only runs: validate → patch roles → report.
+Requires `-n NEW_STACK_NAME` (the deployed v3.0.0 stack name — not `-s`). Only runs: validate → patch roles → report.
 
 ### Decision Flowchart
 

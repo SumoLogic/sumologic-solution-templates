@@ -371,23 +371,38 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 | `--patch-roles-only` | Skip directly to Phase 13; implies `--resume` | Off |
 | `-h, --help` | Show help text | — |
 
-### Resume examples
+### Examples
 
 ```bash
-# Resume from saved state (auto-detected)
-./MigrateAWSOStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
-    --stackset-name MY-STACKSET \
+# Full migration (default — access key prompted interactively)
+./MigrateAWSOStackSetToV300.sh \
+    -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1
+
+# Full migration with a non-default StackSet name and apps installed
+./MigrateAWSOStackSetToV300.sh \
+    -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1 \
+    --stackset-name MY-AWSO-STACKSET \
+    --install-apps Yes
+
+# Dry run — enumerate instances and map params; no changes made
+./MigrateAWSOStackSetToV300.sh \
+    -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1 \
+    --dry-run
+
+# Resume from saved state (auto-detected when state file already exists)
+./MigrateAWSOStackSetToV300.sh \
+    -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1 \
     --state-file ./awso_stackset_migration_20260828_110000.json
 
-# Re-run from Phase 6 onwards
-./MigrateAWSOStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
-    --stackset-name MY-STACKSET \
+# Re-run from Phase 6 (delete_instances) onwards
+./MigrateAWSOStackSetToV300.sh \
+    -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1 \
     --state-file ./awso_stackset_migration_20260828_110000.json \
     --from-phase delete_instances
 
-# Patch source role ARNs only (Phase 13)
-./MigrateAWSOStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
-    --stackset-name MY-STACKSET \
+# Patch source role ARNs only (Phase 13) — when v3.0.0 is already deployed
+./MigrateAWSOStackSetToV300.sh \
+    -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1 \
     --state-file ./awso_stackset_migration_20260828_110000.json \
     --patch-roles-only
 ```
