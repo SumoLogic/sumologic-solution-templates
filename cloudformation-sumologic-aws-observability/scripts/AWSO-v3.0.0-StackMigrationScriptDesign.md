@@ -376,7 +376,6 @@ Prints a summary of the migration including:
 |------|---------|---------|
 | `-d DEPLOYMENT` | Sumo Logic deployment region | `kr`, `us1`, `us2`, `eu`, `au`, `ca`, `ch`, `de`, `fed`, `jp` |
 | `-i ACCESS_ID` | Sumo Logic access ID | `suYXzI02B9l4h3` |
-| `-k ACCESS_KEY` | Sumo Logic access key | (64-char key) |
 | `-s STACK_NAME` | Name of the existing v2.x CloudFormation stack | `awso-production-v215` |
 | `-r REGION` | AWS region where the stack is deployed | `us-west-2` |
 | `-o ORG_ID` | Sumo Logic organization ID (used as IAM external ID) | `0000000000009CFA0A` |
@@ -385,6 +384,7 @@ Prints a summary of the migration including:
 
 | Flag | Purpose | Default | When to use |
 |------|---------|---------|-------------|
+| `-k ACCESS_KEY` | Sumo Logic access key | **Prompted interactively** (hidden input, no echo) if omitted | Omit to avoid key appearing in shell history |
 | `-n NEW_STACK_NAME` | Name for the new v3.0.0 stack | Same as source | When you want the new stack to have a different name |
 | `-v VERSION` | Source version override | Auto-detected | When auto-detection fails or you want to be explicit (e.g. `-v 2.14`) |
 | `--install-apps Yes/No` | Whether to install Sumo observability apps | `Yes` | Use `No` if deploying to a clean org where Sumo fields don't exist yet |
@@ -486,6 +486,15 @@ Is v2.x stack still running?
 ---
 
 ## Key Helpers
+
+### Logging functions
+All log output includes a `[YYYY-MM-DD HH:MM:SS]` timestamp:
+```
+[INFO]  [2026-09-01 14:32:05] AWS credentials: OK
+[WARN]  [2026-09-01 14:32:07] Stack in ROLLBACK_COMPLETE — will delete first
+[ERROR] [2026-09-01 14:32:09] Missing required arguments: -d DEPLOYMENT
+```
+Implemented via a `_ts()` helper (`date '+%Y-%m-%d %H:%M:%S'`) called inline in `log_info`, `log_warn`, `log_error`, and `log_phase`. Log output is also written to a file (ANSI codes stripped) via `_log_to_file()`.
 
 ### `aws_cmd()`
 Safe AWS CLI wrapper that handles PATH issues and argument quoting:

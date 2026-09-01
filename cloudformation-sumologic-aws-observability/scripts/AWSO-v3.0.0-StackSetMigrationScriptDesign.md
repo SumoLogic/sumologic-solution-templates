@@ -348,7 +348,6 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 |------|---------|---------|
 | `-d DEPLOYMENT` | Sumo Logic deployment region | `kr`, `us1`, `us2`, `eu`, `au`, `ca`, `ch`, `de`, `fed`, `jp` |
 | `-i ACCESS_ID` | Sumo Logic access ID | `suYXzI02B9l4h3` |
-| `-k ACCESS_KEY` | Sumo Logic access key | (64-char key) |
 | `-o ORG_ID` | Sumo Logic organization ID | `0000000000009CFA0A` |
 | `-r REGION` | AWS home region (where the StackSet is registered) | `us-east-1` |
 
@@ -356,6 +355,7 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 
 | Flag | Purpose | Default |
 |------|---------|---------|
+| `-k ACCESS_KEY` | Sumo Logic access key | **Prompted interactively** (hidden input, no echo) if omitted — avoids key appearing in shell history |
 | `--stackset-name NAME` | Name of the existing v2.x StackSet | `SUMO-LOGIC-AWS-OBSERVABILITY` |
 | `--new-stackset-name NAME` | Name for the updated StackSet (unused; StackSet updated in-place) | Same as old |
 | `--admin-role-arn ARN` | StackSet administration role ARN | Auto-detected |
@@ -375,18 +375,18 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 
 ```bash
 # Resume from saved state (auto-detected)
-./MigrateStackSetToV300.sh -d us1 -i <id> -k <key> -o <org> -r us-east-1 \
+./MigrateStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
     --stackset-name MY-STACKSET \
     --state-file ./awso_stackset_migration_20260828_110000.json
 
 # Re-run from Phase 6 onwards
-./MigrateStackSetToV300.sh -d us1 -i <id> -k <key> -o <org> -r us-east-1 \
+./MigrateStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
     --stackset-name MY-STACKSET \
     --state-file ./awso_stackset_migration_20260828_110000.json \
     --from-phase delete_instances
 
 # Patch source role ARNs only (Phase 13)
-./MigrateStackSetToV300.sh -d us1 -i <id> -k <key> -o <org> -r us-east-1 \
+./MigrateStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
     --stackset-name MY-STACKSET \
     --state-file ./awso_stackset_migration_20260828_110000.json \
     --patch-roles-only
@@ -395,6 +395,15 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 ---
 
 ## Key Helpers
+
+### Logging functions
+All log output includes a `[YYYY-MM-DD HH:MM:SS]` timestamp:
+```
+[INFO]  [2026-09-01 14:32:05] Patching sources in account 285573938264...
+[WARN]  [2026-09-01 14:32:07] Collector ID mismatch for account 285573938264!
+[ERROR] [2026-09-01 14:32:09] Operation abc123: FAILED
+```
+Implemented via a `_ts()` helper (`date '+%Y-%m-%d %H:%M:%S'`) called inline in `log_info`, `log_warn`, `log_error`, and `log_phase`. Log output is also written to a file (ANSI codes stripped) via `_log_to_file()`.
 
 | Helper | Purpose |
 |--------|---------|
