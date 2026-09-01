@@ -1707,7 +1707,6 @@ parse_args() {
     local missing=""
     [[ -z "$DEPLOYMENT" ]] && missing="$missing -d DEPLOYMENT"
     [[ -z "$ACCESS_ID" ]]  && missing="$missing -i ACCESS_ID"
-    [[ -z "$ACCESS_KEY" ]] && missing="$missing -k ACCESS_KEY"
     [[ -z "$ORG_ID" ]]     && missing="$missing -o ORG_ID"
     [[ -z "$REGION" ]]     && missing="$missing -r REGION"
 
@@ -1723,6 +1722,16 @@ parse_args() {
     if [[ -n "$missing" ]]; then
         echo -e "${RED}Missing required arguments:${NC}${missing}"
         help_text; exit 1
+    fi
+
+    # Prompt for access key interactively if not supplied via -k
+    if [[ -z "$ACCESS_KEY" ]]; then
+        read -r -s -p "Enter Sumo Logic Access Key: " ACCESS_KEY < /dev/tty
+        echo ""
+        if [[ -z "$ACCESS_KEY" ]]; then
+            echo -e "${RED}Access key is required.${NC}"
+            exit 1
+        fi
     fi
 
     # Defaults
