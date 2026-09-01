@@ -1,17 +1,17 @@
 # AWSO v3.0.0 — StackSet Migration Script Design Document
 
-**Script**: `scripts/MigrateStackSetToV300.sh`
+**Script**: `scripts/MigrateAWSOStackSetToV300.sh`
 **Supported source versions**: v2.12, v2.13, v2.14, v2.15 deployed via AWS StackSets
 **Target version**: v3.0.0
-**Companion script**: `scripts/MigrateToV300.sh` (single-stack, single-region migration)
+**Companion script**: `scripts/MigrateAWSOStackToV300.sh` (single-stack, single-region migration)
 
 ---
 
 ## When to Use This Script
 
-`MigrateToV300.sh` migrates a single CloudFormation stack in one account and one region.
+`MigrateAWSOStackToV300.sh` migrates a single CloudFormation stack in one account and one region.
 
-Use `MigrateStackSetToV300.sh` when AWSO was deployed via a CloudFormation StackSet — typically through AWS Control Tower or manual StackSet management — across multiple accounts and/or multiple regions. This script:
+Use `MigrateAWSOStackSetToV300.sh` when AWSO was deployed via a CloudFormation StackSet — typically through AWS Control Tower or manual StackSet management — across multiple accounts and/or multiple regions. This script:
 
 - Enumerates every stack instance (account × region) from the StackSet
 - Lets the user optionally select a subset of instances to migrate
@@ -121,7 +121,7 @@ Called at the end of Phase 2 before bucket capture. Presents an interactive prom
 ## Phase 3: Map Parameters
 
 ### What it does
-Fetches the StackSet's base parameters and passes them through the same `map_params_v215()` jq filter used by `MigrateToV300.sh`:
+Fetches the StackSet's base parameters and passes them through the same `map_params_v215()` jq filter used by `MigrateAWSOStackToV300.sh`:
 
 1. **Removes**: `Section10aAppInstallLocation`, `Section10bShare` (not in v3.0.0)
 2. **Renames**:
@@ -290,7 +290,7 @@ For each unique account:
 ### Why sources are filtered by region name
 Each region's `SumoLogicSourceRole` only has IAM permissions for that region's S3 buckets. Applying `us-east-1`'s role ARN to a `us-east-2` source would be rejected by the Sumo API (HTTP 400). Filtering by `(.name | contains($region))` ensures each region's sources are patched only with that region's role ARN.
 
-### Collector ID reconciliation (mirrors MigrateToV300.sh)
+### Collector ID reconciliation (mirrors MigrateAWSOStackToV300.sh)
 When both CF (`SumoLogicHostedCollector.PhysicalResourceId`) and the Sumo API return a collector ID and they disagree, the script prompts the user interactively:
 ```
   1) Use CF stack value: <cf_id>
@@ -375,18 +375,18 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 
 ```bash
 # Resume from saved state (auto-detected)
-./MigrateStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
+./MigrateAWSOStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
     --stackset-name MY-STACKSET \
     --state-file ./awso_stackset_migration_20260828_110000.json
 
 # Re-run from Phase 6 onwards
-./MigrateStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
+./MigrateAWSOStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
     --stackset-name MY-STACKSET \
     --state-file ./awso_stackset_migration_20260828_110000.json \
     --from-phase delete_instances
 
 # Patch source role ARNs only (Phase 13)
-./MigrateStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
+./MigrateAWSOStackSetToV300.sh -d us1 -i <id> -o <org> -r us-east-1 \
     --stackset-name MY-STACKSET \
     --state-file ./awso_stackset_migration_20260828_110000.json \
     --patch-roles-only
@@ -434,9 +434,9 @@ AWSO_FER_COUNT=17
 
 ---
 
-## Differences from MigrateToV300.sh (Single-Stack)
+## Differences from MigrateAWSOStackToV300.sh (Single-Stack)
 
-| Dimension | MigrateToV300.sh | MigrateStackSetToV300.sh |
+| Dimension | MigrateAWSOStackToV300.sh | MigrateAWSOStackSetToV300.sh |
 |-----------|-----------------|--------------------------|
 | Deployment type | Single CloudFormation stack | CloudFormation StackSet |
 | Accounts | 1 | N (enumerated automatically) |

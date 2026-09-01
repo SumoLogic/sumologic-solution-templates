@@ -1,6 +1,6 @@
 # AWSO v3.0.0 — Migration Script Design Document
 
-> **Script**: `scripts/MigrateToV300.sh`
+> **Script**: `scripts/MigrateAWSOStackToV300.sh`
 > **Supported source versions**: v2.12, v2.13, v2.14, v2.15
 > **Target version**: v3.0.0
 > **Status**: Built and validated (2026-07-06, KR org, us-west-2)
@@ -390,7 +390,7 @@ Prints a summary of the migration including:
 | `--install-apps Yes/No` | Whether to install Sumo observability apps | `Yes` | Use `No` if deploying to a clean org where Sumo fields don't exist yet |
 | `--resume` | Skip phases 2–5; optionally run Phase 6 if old stack still exists | Off | When Phase 9 deploy failed and you need to retry; or when old stack is stuck in DELETE_FAILED |
 | `--params-file FILE` | Path to saved params JSON | Required with `--resume` | Points to the params file saved by a previous Phase 3 run |
-| `--patch-roles-only` | Only run roleARN patching | Off | When v3.0.0 is already deployed but sources have stale roleARNs |
+| `--patch-roles-only` | Only run roleARN patching (requires `-n NEW_STACK_NAME`) | Off | When v3.0.0 is already deployed but sources have stale roleARNs |
 | `-p PROFILE` | AWS CLI profile name | `default` | When using named AWS profiles |
 | `--dry-run` | Validate and map params without modifying anything | Off | Preview migration plan without executing |
 
@@ -400,7 +400,7 @@ Prints a summary of the migration including:
 **When**: First time migrating a v2.x stack to v3.0.0.
 
 ```bash
-./MigrateToV300.sh \
+./MigrateAWSOStackToV300.sh \
   -d kr -i suYXzI02B9l4h3 -k <key> \
   -s awso-production-v215 -r us-west-2 \
   -n awso-production-v300 --install-apps Yes
@@ -437,7 +437,7 @@ aws cloudformation delete-stack --stack-name awso-production-v300 --region us-we
 aws cloudformation wait stack-delete-complete --stack-name awso-production-v300 --region us-west-2
 
 # Step 2: Re-run with --resume (add -s if old stack may still need deletion)
-./MigrateToV300.sh \
+./MigrateAWSOStackToV300.sh \
   -d kr -i suYXzI02B9l4h3 -k <key> \
   -s awso-production-v215 -r us-west-2 \
   -n awso-production-v300 \
@@ -462,7 +462,7 @@ aws cloudformation wait stack-delete-complete --stack-name awso-production-v300 
 **When**: v3.0.0 is already deployed and working, but sources still point to the old/deleted IAM role ARN.
 
 ```bash
-./MigrateToV300.sh \
+./MigrateAWSOStackToV300.sh \
   -d kr -i suYXzI02B9l4h3 -k <key> \
   -s awso-production-v300 -r us-west-2 \
   --patch-roles-only
@@ -532,8 +532,9 @@ Polls CloudFormation stack status at `POLL_INTERVAL` (30s) until terminal state 
 
 ```bash
 V300_TEMPLATE_URL="https://sumologic-appdev-aws-sam-apps.s3.us-east-1.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
-DELETE_TIMEOUT=1800    # 30 min
-CREATE_TIMEOUT=2700   # 45 min
+UPDATE_TIMEOUT=1800   # 30 min  (Phase 5 stack update)
+DELETE_TIMEOUT=1800   # 30 min  (Phase 6 stack deletion)
+CREATE_TIMEOUT=2700   # 45 min  (Phase 9 stack creation)
 POLL_INTERVAL=30      # seconds
 AWSO_FER_COUNT=17     # expected FERs to rename
 ```
