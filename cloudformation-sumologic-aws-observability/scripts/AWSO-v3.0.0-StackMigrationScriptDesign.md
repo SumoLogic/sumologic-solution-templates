@@ -45,7 +45,7 @@ Phase 12: Report        → Print summary + cleanup instructions
 - Validates AWS credentials via `sts get-caller-identity`
 - Validates Sumo Logic credentials via API ping
 - Confirms the source stack exists and is in `CREATE_COMPLETE`, `UPDATE_COMPLETE`, or `UPDATE_ROLLBACK_COMPLETE` state
-- Auto-detects source version (v2.12–v2.15) by checking for parameter fingerprint (Section10a + Section7aLambda + Section9a)
+- Auto-detects source version (v2.12–v2.15) by reading the template `Description` field via `aws cloudformation get-template` — e.g. `"Version - v2.15.0..."`. Falls back to parameter key fingerprint (Section10a + Section7aLambda + Section9a) if the description has no version string. Validates detected version against supported list (v2.12–v2.15); exits with error if unsupported.
 - Captures `ACCOUNT_ID` for later use
 
 ### Auto-recovery on special stack states
@@ -142,6 +142,7 @@ Displays a full summary of what was captured, the mapped v3.0.0 parameters, and 
    - Stack deletion
    - 17 AWSO FER renames (lists each name)
    - 4 AWSO metric rule deletions (lists each name)
+   Note: FER and metric-rule entries are only shown when `--install-apps Yes` — when `--install-apps No`, these cleanup steps are skipped and not listed.
 7. **Backup instructions**: where to export FERs and view metric rules in Sumo UI
 8. Requires user to type `yes` to proceed; aborts on anything else
 
@@ -164,6 +165,7 @@ In `--resume` mode, this phase is skipped — the user already confirmed during 
 - If `true`: updates the stack to set it to `false`
 - Waits for `UPDATE_COMPLETE` before proceeding
 - Re-fetches the stack JSON after update
+- Injects `Section1bSumoLogicAccessID` and `Section1cSumoLogicAccessKey` from CLI flags (`-i`/`-k`) as parameter overrides in the update call — ensures fresh credentials are used even if the stored stack parameter is masked (`****`) or expired
 
 ### Why this is a separate phase
 This is a **critical safety gate**. If `RemoveOnDeleteStack=true` and we proceed to Phase 6 (delete), the Sumo Lambda helper will delete the collector and all sources — making them unrecoverable.
@@ -248,6 +250,9 @@ AwsObservabilitySQSCloudTrailLogsFER
 ### Why this is needed
 v3.0.0 creates the same 17 FERs. If they already exist (from v2.x), the deploy fails with `fer:invalid_extraction_rule`. Renaming (not deleting) preserves a backup and frees the names.
 
+### INSTALL_APPS=No skip
+When `--install-apps No` is passed, this phase is skipped. If v3.0.0 is deployed without apps (`Section3aInstallObservabilityApps=No`), it will not create FERs — there is no quota conflict and FER cleanup is unnecessary. The script logs this and returns immediately.
+
 ### Resume mode behavior
 In `--resume` mode, this phase runs but is **idempotent**:
 - Before doing any work, it checks if any of the 17 AWSO FERs still exist with their original names
@@ -281,6 +286,9 @@ Uses `DELETE /api/v1/metricsRules/{name}`:
 
 ### Why this is needed
 v3.0.0 creates the same metric rules. If they already exist from v2.x, the deploy fails with `metrics:rule_already_exists`. Unlike FERs (which are renamed as backup), metric rules are deleted outright — they contain no user data and are fully recreated by v3.0.0.
+
+### INSTALL_APPS=No skip
+When `--install-apps No` is passed, this phase is skipped. v3.0.0 will not create metric rules when apps are not installed, so cleanup is unnecessary.
 
 ---
 

@@ -39,10 +39,10 @@ The script assumes:
 ```
 Phase 0:  (Assumption)    → StackSet is deployed and all instances are CURRENT
 Phase 1:  Validate        → Credentials, StackSet exists, no running operation
-Phase 2:  Enumerate       → list-stack-instances → account/region map; instance selection; bucket + alias capture
+Phase 2:  Enumerate       → list-stack-instances → per-instance version detection (get-template); account/region map; instance selection with version table; bucket + alias capture
 Phase 3:  Map Params      → v2.x StackSet base params → v3.0.0 format
 Phase 4:  Confirm         → Show accounts, regions, mapped params; user approval
-Phase 5:  Update ROD      → update-stack-instances (per account) with RemoveOnDeleteStack=false
+Phase 5:  Update ROD      → update-stack-instances on selected instances only (per account) with RemoveOnDeleteStack=false
 Phase 6:  Delete Instances → delete-stack-instances + async operation poll + auto-cleanup on failure
 Phase 8:  FER Cleanup     → Rename+disable 17 AWSO FERs (org-level, runs once)
 Phase 9:  Metric Rules    → Delete 4 AWSO metric rules (org-level, runs once)
@@ -67,7 +67,7 @@ Phase 14: Report          → Summary: accounts, regions, FERs renamed, sources 
 - Checks that no StackSet operation is currently `RUNNING`
 
 ### Key differences from single-stack validate
-- No source version detection (StackSet base parameters are mapped by the same v2.15 mapper)
+- Source version detection moved to Phase 2 (per-instance via `get-template`); if `-v` is provided, it is validated here against supported versions (v2.12–v2.15)
 - Admin and execution role ARNs are read from the StackSet's own metadata
 
 ### Issues and design decisions
@@ -76,6 +76,7 @@ Phase 14: Report          → Summary: accounts, regions, FERs renamed, sources 
 |-------|------------|
 | `aws` not in PATH on macOS | Wrapped all AWS calls in `aws_cmd()` which uses `/bin/zsh -l -c` |
 | Running operation not always obvious | Added `list-stack-set-operations` + filter `Status == RUNNING`; exits with clear error and operation ID |
+| Silent script exit after "Execution role name (auto-detected)" | `grep -oE 'v2\...` exits with code 1 under `set -euo pipefail` when no match — fixed by adding `|| true` to grep pipeline |
 
 ---
 
@@ -83,10 +84,11 @@ Phase 14: Report          → Summary: accounts, regions, FERs renamed, sources 
 
 ### What it does
 1. Paginates `list-stack-instances` for the StackSet (1000 per page)
-2. For each instance, extracts `Account` and `Region`; initialises alias to account ID as a placeholder
+2. For each instance, extracts `Account`, `Region`, and `StackId`; calls `aws cloudformation get-template --stack-name <StackId> --region <Region>` to read the template's `Description` field and detect the deployed version (e.g. `v2.15.0`). Marks each instance with its detected version (e.g. `v2.15`, `v3.0.0`, `unknown`).
 3. Builds two runtime globals:
-   - `INSTANCES_JSON`: array of `{account, region, alias}` — used by phases 5, 6, 11, and 13
+   - `INSTANCES_JSON`: array of `{account, region, alias, version}` — used by phases 5, 6, 11, and 13
    - `ACCOUNT_ALIAS_MAP`: `{account: alias}` — alias is a placeholder at this point
+3a. Sets `SOURCE_VERSION` from the first instance whose version is in the supported list (v2.12–v2.15), unless already set via `-v`.
 4. Calls `_select_instances()` — lets the user pick all instances or a subset interactively
 5. For each unique account, calls `_capture_buckets_for_account()` which:
    - Assumes the execution role in the member account
@@ -110,9 +112,27 @@ Called at the end of Phase 2 before bucket capture. Presents an interactive prom
   Migrate all instances or select specific ones? (all/select) [all]:
 ```
 
-- **`all`** (or Enter): all instances proceed
-- **`select`**: shows a numbered table of account / region rows; user types `y` or `n` per row
-- If 0 instances selected: prints `[INFO] No instances selected. Exiting.` and exits 0 (not an error)
+After the prompt, the script **always shows a version table** regardless of the choice:
+
+```
+  #     Account           Region          Version    Include?
+  ----  ----------------  --------------  ---------  --------
+  1     285573938264      us-east-1       v3.0.0     Migrated
+  2     285573938264      us-west-2       v2.15.0    Yes
+  3     111122223333      eu-west-1       v2.10.0    Unsupported
+  4     111122223333      us-east-1       unknown    Unsupported
+```
+
+**Per-instance routing rules:**
+
+| Instance version | Include? value | Behavior |
+|---|---|---|
+| `v3.x` | `Migrated` | Auto-excluded; logged as already migrated |
+| `v2.12`–`v2.15` (supported) | `Yes` (all mode) / `[y/n]` (select mode) | Included |
+| Any other detected version | `Unsupported` | Auto-excluded with `[WARN]` log |
+| `unknown` (template unreadable) | `Unsupported` | Auto-excluded with `[WARN]` log |
+
+- If 0 instances remain after filtering: prints `[INFO] No instances to migrate. Exiting.` and exits 0
 - After selection, `INSTANCES_JSON` and `ACCOUNT_ALIAS_MAP` are pruned to only the selected subset
 - On `--resume`: skipped — instance list is loaded from the state file
 
@@ -121,7 +141,7 @@ Called at the end of Phase 2 before bucket capture. Presents an interactive prom
 ## Phase 3: Map Parameters
 
 ### What it does
-Fetches the StackSet's base parameters and passes them through the same `map_params_v215()` jq filter used by `MigrateAWSOStackToV300.sh`:
+Fetches the StackSet's base parameters and passes them through the same `map_params_v215()` jq filter used by `MigrateAWSOStackToV300.sh` (displayed as "Phase 3: Map Parameters v${SOURCE_VERSION} → v3.0.0" at runtime):
 
 1. **Removes**: `Section10aAppInstallLocation`, `Section10bShare` (not in v3.0.0)
 2. **Renames**:
@@ -158,13 +178,16 @@ Confirmation is skipped when resuming.
 ## Phase 5: Update RemoveOnDeleteStack=false
 
 ### What it does
-For each unique account, issues one `update-stack-instances` call with **only that account's regions** and `Section1eSumoLogicResourceRemoveOnDeleteStack=false`. Polls until `SUCCEEDED` (timeout: 1800s per account).
+For each unique account in the **selected** `INSTANCES_JSON`, issues one `update-stack-instances` call with **only that account's selected regions** and `Section1eSumoLogicResourceRemoveOnDeleteStack=false`. Polls until `SUCCEEDED` (timeout: 1800s per account). Instances that were skipped in Phase 2 (Migrated / Unsupported) are not touched.
 
 ### Why one call per account (not one call for all)
 A single call with all accounts × all regions creates a cross-product. Non-existent (account, region) pairs are silently skipped, and the operation can report `SUCCEEDED` before all real instances are updated. Per-account calls with exact regions eliminate this risk.
 
 ### Why this is critical
 If `RemoveOnDeleteStack=true` at the time instances are deleted, the Sumo Lambda custom resource inside each stack will delete the Sumo collector and all sources during stack teardown.
+
+### Why CLI credentials are injected
+The `update-stack-instances` call in this phase also overrides `Section1bSumoLogicAccessID` and `Section1cSumoLogicAccessKey` with the CLI `-i`/`-k` values. The stored stack parameter for `AccessKey` is masked (`****`), and those credentials may have expired since the v2.x StackSet was deployed. Injecting fresh credentials ensures the Lambda custom resource can authenticate to Sumo Logic when it processes the stack update.
 
 ---
 
@@ -220,6 +243,9 @@ AwsObservabilitySNSCloudTrailLogsFER
 AwsObservabilitySQSCloudTrailLogsFER
 ```
 
+### INSTALL_APPS=No skip
+When `--install-apps No` is passed, this phase is skipped automatically. If v3.0.0 is deployed without apps (`Section3aInstallObservabilityApps=No`), it will not create FERs — so there is no quota conflict and cleanup is unnecessary. The phase is marked done to allow resume to continue past it.
+
 ### Quota-too-low path
 If the remaining FER quota is below 17, the script prints the list of FERs that need manual cleanup and exits with code 2.
 
@@ -229,6 +255,9 @@ Phase 8 checks if `v215_backup_<name>` already exists before each rename; skips 
 ---
 
 ## Phase 9: Metric Rules Cleanup (org-level, runs once)
+
+### INSTALL_APPS=No skip
+When `--install-apps No` is passed, this phase is skipped automatically (same reasoning as Phase 8 — no metric rules will be created by v3.0.0).
 
 Deletes 4 AWSO metric rules:
 ```
@@ -316,9 +345,9 @@ Prints a summary: old and new StackSet names, home region, template version, acc
 ```json
 {
   "stackset_name":       "SUMO-LOGIC-AWS-OBSERVABILITY",
-  "new_stackset_name":   "SUMO-LOGIC-AWS-OBSERVABILITY",
+  "source_version":      "2.15",
   "home_region":         "us-east-1",
-  "instances":           [{"account": "222222222222", "region": "us-east-1", "alias": "prod1"}],
+  "instances":           [{"account": "222222222222", "region": "us-east-1", "alias": "prod1", "version": "v2.15.0"}],
   "v300_base_params":    [{"ParameterKey": "...", "ParameterValue": "..."}],
   "account_alias_map":   {"222222222222": "prod1", "333333333333": "dev1"},
   "account_bucket_map":  {
@@ -357,6 +386,7 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 |------|---------|---------|
 | `-k ACCESS_KEY` | Sumo Logic access key | **Prompted interactively** (hidden input, no echo) if omitted — avoids key appearing in shell history |
 | `-s, --stackset-name NAME` | Name of the existing v2.x StackSet | `SUMO-LOGIC-AWS-OBSERVABILITY` |
+| `-v SOURCE_VERSION` | Source version override | Auto-detected from instance template Description in Phase 2 |
 | `--admin-role-arn ARN` | StackSet administration role ARN | Auto-detected |
 | `--execution-role NAME` | StackSet execution role name | Auto-detected |
 | `-p PROFILE` | AWS CLI profile | `default` |
@@ -425,7 +455,7 @@ Implemented via a `_ts()` helper (`date '+%Y-%m-%d %H:%M:%S'`) called inline in 
 | `wait_for_stackset_operation(name, op_id, timeout)` | Polls `describe-stack-set-operation` every 30s; logs per-instance failures to stderr on FAILED/STOPPED; returns status string on stdout |
 | `sumo_get()` / `sumo_put()` / `sumo_get_with_etag()` / `sumo_put_if_match()` | curl wrappers with basic auth and ETag support |
 | `map_params_v215(v2_params_json)` | jq filter; transforms v2.x base params to v3.0.0 format |
-| `_select_instances()` | Interactive prompt to filter `INSTANCES_JSON` to a subset |
+| `_select_instances()` | Shows version table for all instances; auto-excludes v3.x (Migrated) and unsupported/unknown versions (Unsupported); prompts y/n per instance in select mode or auto-includes in all mode |
 | `_capture_buckets_for_account(account)` | Assumes execution role; resolves alias from deployed stack, reconciles collector ID with Sumo API (with mismatch prompt), captures per-region bucket names |
 | `_cleanup_failed_delete_instances(op_id)` | Recovers FAILED (retain+delete) and CANCELLED (per-account retry) instances after a failed delete operation |
 | `_delete_stack_with_retain(stack, region, creds)` | Cross-account delete of a stuck stack using `--retain-resources` |

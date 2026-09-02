@@ -763,7 +763,7 @@ phase_map_parameters() {
 
     if [[ "$DRY_RUN" == true ]]; then
         log_info "──── DRY RUN: Mapped Parameters ────"
-        echo "$v300_params" | jq -r '.[] | "  \(.ParameterKey): \(.ParameterValue)"'
+        echo "$v300_params" | jq -r '.[] | "  \(.ParameterKey): \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"'
         log_info "──── DRY RUN complete. No changes made. ────"
         exit 0
     fi
@@ -854,17 +854,22 @@ phase_confirm() {
     log_warn "  2. DELETE CloudFormation stack '${STACK_NAME}' in region '${REGION}'"
     log_warn "     (after RemoveOnDeleteStack=false — Sumo resources will be preserved)"
     echo ""
-    log_warn "  3. RENAME and DISABLE ${#AWSO_FER_NAMES[@]} AWSO Field Extraction Rules:"
-    local fer_name
-    for fer_name in "${AWSO_FER_NAMES[@]}"; do
-        log_warn "       ${fer_name} → v215_backup_${fer_name}"
-    done
-    echo ""
-    log_warn "  4. DELETE ${#AWSO_METRIC_RULES[@]} AWSO Metric Rules:"
-    local rule_name
-    for rule_name in "${AWSO_METRIC_RULES[@]}"; do
-        log_warn "       ${rule_name}"
-    done
+    if [[ "$INSTALL_APPS" == "Yes" ]]; then
+        log_warn "  3. RENAME and DISABLE ${#AWSO_FER_NAMES[@]} AWSO Field Extraction Rules:"
+        local fer_name
+        for fer_name in "${AWSO_FER_NAMES[@]}"; do
+            log_warn "       ${fer_name} → v215_backup_${fer_name}"
+        done
+        echo ""
+        log_warn "  4. DELETE ${#AWSO_METRIC_RULES[@]} AWSO Metric Rules:"
+        local rule_name
+        for rule_name in "${AWSO_METRIC_RULES[@]}"; do
+            log_warn "       ${rule_name}"
+        done
+    else
+        log_info "  3. FER cleanup — skipped (--install-apps ${INSTALL_APPS})"
+        log_info "  4. Metric Rules cleanup — skipped (--install-apps ${INSTALL_APPS})"
+    fi
     echo ""
     log_warn "═══════════════════════════════════════════════════════════════"
     log_warn "  Please verify the above and take a backup if needed."
@@ -1153,6 +1158,11 @@ fetch_all_fers() {
 phase_fer_cleanup() {
     log_phase "Phase 7: FER Cleanup"
 
+    if [[ "$INSTALL_APPS" != "Yes" ]]; then
+        log_info "Apps not enabled (--install-apps ${INSTALL_APPS}) — v3.0.0 will not create FERs; skipping FER cleanup."
+        return 0
+    fi
+
     # In resume mode, check if FERs were already renamed in a previous run
     if [[ "$RESUME" == true ]]; then
         log_info "Resume mode — checking if FER cleanup was already done..."
@@ -1274,6 +1284,11 @@ phase_fer_cleanup() {
 # ============================================================
 phase_metric_rules_cleanup() {
     log_phase "Phase 8: Metric Rules Cleanup"
+
+    if [[ "$INSTALL_APPS" != "Yes" ]]; then
+        log_info "Apps not enabled (--install-apps ${INSTALL_APPS}) — v3.0.0 will not create Metric Rules; skipping Metric Rules cleanup."
+        return 0
+    fi
 
     local deleted=0 skipped=0
     for rule_name in "${AWSO_METRIC_RULES[@]}"; do
@@ -1822,8 +1837,8 @@ main() {
         log_warn "  ELB bucket:        ${CAPTURED_BUCKET_ELB:-<empty>}"
         echo ""
         log_warn "Key v3.0.0 parameters from saved file:"
-        jq -r '.[] | select(.ParameterKey | test("^Section[1-9]")) | "  \(.ParameterKey) = \(.ParameterValue)"' \
-            "$RESUME_PARAMS_FILE" | grep -v "AccessKey\|AccessID" | tee -a "$LOG_FILE"
+        jq -r '.[] | select(.ParameterKey | test("^Section[1-9]")) | "  \(.ParameterKey) = \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"' \
+            "$RESUME_PARAMS_FILE" | tee -a "$LOG_FILE"
         echo ""
         read -r -p "Proceed with resume? (yes/no): " confirm
         if [[ "$confirm" != "yes" ]]; then

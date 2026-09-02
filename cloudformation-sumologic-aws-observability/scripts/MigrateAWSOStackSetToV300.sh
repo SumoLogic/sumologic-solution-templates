@@ -83,6 +83,8 @@ ACCESS_ID=""
 ACCESS_KEY=""
 ORG_ID=""
 STACKSET_NAME="SUMO-LOGIC-AWS-OBSERVABILITY"
+SOURCE_VERSION=""              # auto-detected from StackSet description in Phase 1
+SUPPORTED_SOURCE_VERSIONS=("2.12" "2.13" "2.14" "2.15")
 ADMIN_ROLE_ARN=""              # auto-detected from StackSet
 EXECUTION_ROLE_NAME=""         # auto-detected from StackSet
 HOME_REGION=""                 # AWS region where the StackSet is registered (Control Tower home region)
@@ -233,44 +235,63 @@ _select_instances() {
         return 0
     fi
 
-    local total
-    total=$( echo "$INSTANCES_JSON" | jq 'length' )
-
     echo ""
     local choice
     read -r -p "  Migrate all instances or select specific ones? (all/select) [all]: " choice < /dev/tty
     choice="${choice:-all}"
 
-    if [[ "$choice" == "all" || "$choice" == "a" ]]; then
-        log_info "Proceeding with all ${total} instances."
-        return 0
-    fi
-
     echo ""
-    printf "  %-4s  %-16s  %-14s  %s\n" "#" "Account" "Region" "Include?"
-    printf "  %-4s  %-16s  %-14s  %s\n" "----" "----------------" "--------------" "--------"
+    printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "#" "Account" "Region" "Version" "Include?"
+    printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "----" "----------------" "--------------" "---------" "--------"
 
-    local selected="[]" idx=0
+    local selected="[]" idx=0 skipped_v3=0 skipped_unsupported=0
     while IFS= read -r inst; do
         idx=$(( idx + 1 ))
-        local acct region yn
-        acct=$(   echo "$inst" | jq -r '.account' )
-        region=$( echo "$inst" | jq -r '.region' )
-        read -r -p "  $(printf '%-4s  %-16s  %-14s' "$idx" "$acct" "$region")  [y/n]: " yn < /dev/tty
-        if [[ "$yn" == "y" || "$yn" == "Y" ]]; then
+        local acct region inst_ver inst_ver_minor
+        acct=$(     echo "$inst" | jq -r '.account' )
+        region=$(   echo "$inst" | jq -r '.region' )
+        inst_ver=$( echo "$inst" | jq -r '.version // "unknown"' )
+
+        # Auto-skip already-migrated v3.x instances
+        if echo "$inst_ver" | grep -qE '^v3\.'; then
+            printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Migrated"
+            skipped_v3=$(( skipped_v3 + 1 ))
+            continue
+        fi
+
+        # Auto-skip unsupported versions (anything not in v2.12–v2.15, including unknown)
+        inst_ver_minor=$( echo "$inst_ver" | sed 's/^v//' | cut -d. -f1-2 )
+        if ! _is_supported_source_version "$inst_ver_minor"; then
+            printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Unsupported"
+            log_warn "  ${acct}/${region}: version ${inst_ver} is not supported (supported: ${SUPPORTED_SOURCE_VERSIONS[*]})."
+            skipped_unsupported=$(( skipped_unsupported + 1 ))
+            continue
+        fi
+
+        if [[ "$choice" == "all" || "$choice" == "a" ]]; then
+            printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Yes"
             selected=$( echo "$selected" | jq --argjson i "$inst" '. + [$i]' )
+        else
+            local yn
+            read -r -p "  $(printf '%-4s  %-16s  %-14s  %-9s' "$idx" "$acct" "$region" "$inst_ver")  [y/n]: " yn < /dev/tty
+            if [[ "$yn" == "y" || "$yn" == "Y" ]]; then
+                selected=$( echo "$selected" | jq --argjson i "$inst" '. + [$i]' )
+            fi
         fi
     done < <( echo "$INSTANCES_JSON" | jq -c '.[]' )
+
+    [[ "$skipped_v3" -gt 0 ]]           && log_info "Skipped ${skipped_v3} instance(s) already at v3.x."
+    [[ "$skipped_unsupported" -gt 0 ]]  && log_warn "Skipped ${skipped_unsupported} instance(s) with unsupported version."
 
     local sel_count
     sel_count=$( echo "$selected" | jq 'length' )
     if [[ "$sel_count" -eq 0 ]]; then
-        log_info "No instances selected. Exiting."
+        log_info "No instances to migrate. Exiting."
         exit 0
     fi
 
     INSTANCES_JSON="$selected"
-    log_info "Selected ${sel_count} of ${idx} instance(s)."
+    log_info "Selected ${sel_count} instance(s) for migration."
 
     # Prune ACCOUNT_ALIAS_MAP to only accounts that still have selected instances
     local selected_accounts
@@ -593,6 +614,7 @@ _save_state() {
     failed_json=$( printf '%s\n' "${FAILED_INSTANCES[@]:-}" | jq -R . | jq -s . )
     jq -n \
         --arg     stackset_name    "$STACKSET_NAME" \
+        --arg     source_version   "$SOURCE_VERSION" \
         --arg     home_region      "$HOME_REGION" \
         --argjson instances        "$INSTANCES_JSON" \
         --argjson v300_base_params "$V300_BASE_PARAMS" \
@@ -604,6 +626,7 @@ _save_state() {
         --arg     exec_role        "$EXECUTION_ROLE_NAME" \
         '{
             stackset_name: $stackset_name,
+            source_version: $source_version,
             home_region: $home_region,
             instances: $instances,
             v300_base_params: $v300_base_params,
@@ -646,6 +669,7 @@ _load_state() {
     # Command-line flags (-r, --admin-role-arn, --execution-role) take precedence;
     # only load from state when the flag was not explicitly provided.
     [[ -z "$HOME_REGION"         ]] && HOME_REGION=$(         echo "$s" | jq -r '.home_region // ""' )
+    [[ -z "$SOURCE_VERSION"      ]] && SOURCE_VERSION=$(      echo "$s" | jq -r '.source_version // ""' )
     [[ -z "$ADMIN_ROLE_ARN"      ]] && ADMIN_ROLE_ARN=$(      echo "$s" | jq -r '.admin_role_arn // ""' )
     [[ -z "$EXECUTION_ROLE_NAME" ]] && EXECUTION_ROLE_NAME=$( echo "$s" | jq -r '.execution_role_name // ""' )
 
@@ -709,6 +733,25 @@ map_params_v215() {
         '
 }
 
+_is_supported_source_version() {
+    local ver="$1"
+    local v
+    for v in "${SUPPORTED_SOURCE_VERSIONS[@]}"; do
+        [[ "$ver" == "$v" ]] && return 0
+    done
+    return 1
+}
+
+_assert_supported_source_version() {
+    local ver="$1"
+    if ! _is_supported_source_version "$ver"; then
+        log_error "Source version v${ver} is not supported for migration."
+        log_error "Supported versions: ${SUPPORTED_SOURCE_VERSIONS[*]} → 3.0.0"
+        log_error "Use -v to specify a supported version, or contact Sumo Logic support."
+        exit 1
+    fi
+}
+
 # ============================================================
 # Phase 1 — Validate
 # ============================================================
@@ -752,6 +795,12 @@ phase_validate() {
         if [[ -z "$EXECUTION_ROLE_NAME" ]]; then
             EXECUTION_ROLE_NAME=$( echo "$ss_detail" | jq -r '.StackSet.ExecutionRoleName // "AWSControlTowerExecution"' )
             log_info "Execution role name (auto-detected): ${EXECUTION_ROLE_NAME}"
+        fi
+
+        # If user specified -v, validate it now; per-instance version detection runs in Phase 2.
+        if [[ -n "$SOURCE_VERSION" ]]; then
+            log_info "Source version: v${SOURCE_VERSION} (user-specified)"
+            _assert_supported_source_version "$SOURCE_VERSION"
         fi
 
         # No running operations
@@ -815,25 +864,60 @@ phase_enumerate() {
     INSTANCES_JSON="[]"
     ACCOUNT_ALIAS_MAP="{}"
 
+    log_info "Detecting version for each instance..."
     while IFS= read -r inst; do
-        local account region alias
+        local account region alias stack_id inst_version
         account=$( echo "$inst" | jq -r '.Account' )
         region=$(  echo "$inst" | jq -r '.Region' )
+        stack_id=$( echo "$inst" | jq -r '.StackId // ""' )
 
         # Alias placeholder — will be resolved authoritatively from describe-stacks
         # in _capture_buckets_for_account (ParameterOverrides is unreliable when
         # Section2aAccountAlias is a StackSet base parameter, not an instance override).
         alias="$account"
 
+        # Detect instance template version via get-template
+        inst_version="unknown"
+        if [[ -n "$stack_id" ]]; then
+            local tpl_json tpl_body tpl_desc
+            tpl_json=$( aws_cmd cloudformation get-template \
+                --stack-name "$stack_id" \
+                --region "$region" \
+                --output json 2>/dev/null ) || true
+            tpl_body=$( echo "$tpl_json" | jq -r '.TemplateBody // ""' )
+            if [[ -n "$tpl_body" ]]; then
+                tpl_desc=$( echo "$tpl_body" | grep -m1 -E '^[[:space:]]*"?Description"?:' \
+                    | sed 's/^[[:space:]]*"*Description"*:[[:space:]]*//' | tr -d '",' )
+                inst_version=$( echo "$tpl_desc" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1 ) || true
+                inst_version="${inst_version:-unknown}"
+            fi
+        fi
+        log_info "  ${account}/${region}: ${inst_version}"
+
+        # Set SOURCE_VERSION from first supported v2.x instance (unless already set via -v)
+        if [[ -z "$SOURCE_VERSION" ]] && echo "$inst_version" | grep -qE '^v2\.'; then
+            local candidate
+            candidate=$( echo "$inst_version" | sed 's/^v//' | cut -d. -f1-2 )
+            if _is_supported_source_version "$candidate"; then
+                SOURCE_VERSION="$candidate"
+                log_info "Source version set from instance ${account}/${region}: v${SOURCE_VERSION}"
+            fi
+        fi
+
         INSTANCES_JSON=$( echo "$INSTANCES_JSON" | jq \
-            --arg a "$account" --arg r "$region" --arg al "$alias" \
-            '. + [{"account": $a, "region": $r, "alias": $al}]' )
+            --arg a "$account" --arg r "$region" --arg al "$alias" --arg v "$inst_version" \
+            '. + [{"account": $a, "region": $r, "alias": $al, "version": $v}]' )
 
         # Last alias per account wins (consistent across regions)
         ACCOUNT_ALIAS_MAP=$( echo "$ACCOUNT_ALIAS_MAP" | jq \
             --arg a "$account" --arg al "$alias" \
             '.[$a] = $al' )
     done < <( echo "$raw_instances" | jq -c '.[]' )
+
+    if [[ -z "$SOURCE_VERSION" ]]; then
+        SOURCE_VERSION="unknown"
+        log_warn "Could not detect source version from any instance — v2.15 parameter mapping will be used. Specify -v 2.15 (or 2.12/2.13/2.14) to suppress this warning."
+    fi
 
     local unique_accounts unique_regions
     unique_accounts=$( echo "$INSTANCES_JSON" | jq -r '[.[].account] | unique | length' )
@@ -862,7 +946,7 @@ phase_enumerate() {
 # Phase 3 — Map Parameters
 # ============================================================
 phase_map_params() {
-    log_phase "Phase 3: Map Parameters"
+    log_phase "Phase 3: Map Parameters v${SOURCE_VERSION:-unknown} → v3.0.0"
 
     if _phase_done "map_params"; then
         log_info "Already completed — skipping."
@@ -880,7 +964,7 @@ phase_map_params() {
     V300_BASE_PARAMS=$( map_params_v215 "$raw_params" )
 
     log_info "Mapped parameters:"
-    echo "$V300_BASE_PARAMS" | jq -r '.[] | "  \(.ParameterKey) = \(.ParameterValue)"' \
+    echo "$V300_BASE_PARAMS" | jq -r '.[] | "  \(.ParameterKey) = \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"' \
         | while IFS= read -r line; do log_info "$line"; done
 
     _mark_phase_done "map_params"
@@ -932,7 +1016,7 @@ phase_confirm() {
         echo "$INSTANCES_JSON" | jq -r '.[] | "  \(.account) / \(.region)  (alias: \(.alias))"'
         echo ""
         log_warn "Shared base parameters (all accounts):"
-        echo "$_shared_params" | jq -r '.[] | "  \(.ParameterKey) = \(.ParameterValue)"'
+        echo "$_shared_params" | jq -r '.[] | "  \(.ParameterKey) = \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"'
         echo ""
         log_warn "Per-account parameter overrides:"
         _print_per_account_overrides
@@ -944,15 +1028,15 @@ phase_confirm() {
     echo ""
     echo -e "${YELLOW}════ MIGRATION SUMMARY ════${NC}"
     echo ""
-    echo "  StackSet (old) : ${STACKSET_NAME}"
     echo "  StackSet       : ${STACKSET_NAME}"
-    echo "  Template       : ${V300_TEMPLATE_URL}"
+    echo "  Source version : v${SOURCE_VERSION:-unknown}"
+    echo "  Target version : v3.0.0"
     echo ""
     echo "  Instances to migrate:"
     echo "$INSTANCES_JSON" | jq -r '.[] | "    \(.account) / \(.region)  (alias: \(.alias))"'
     echo ""
     echo "  Shared base parameters (same for all accounts):"
-    echo "$_shared_params" | jq -r '.[] | "    \(.ParameterKey) = \(.ParameterValue)"'
+    echo "$_shared_params" | jq -r '.[] | "    \(.ParameterKey) = \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"'
     echo ""
     echo "  Per-account parameter overrides (alias + S3 buckets captured from Sumo sources):"
     _print_per_account_overrides
@@ -972,7 +1056,7 @@ phase_confirm() {
 # Phase 5 — Update RemoveOnDeleteStack=false
 # ============================================================
 phase_update_rod() {
-    log_phase "Phase 5: Set RemoveOnDeleteStack=false on all instances"
+    log_phase "Phase 5: Set RemoveOnDeleteStack=false on instances"
 
     if _phase_done "update_rod"; then
         log_info "Already completed — skipping."
@@ -1000,6 +1084,8 @@ phase_update_rod() {
             --regions  "${regs_arr[@]}" \
             --parameter-overrides \
                 "ParameterKey=Section1eSumoLogicResourceRemoveOnDeleteStack,ParameterValue=false" \
+                "ParameterKey=Section1bSumoLogicAccessID,ParameterValue=${ACCESS_ID}" \
+                "ParameterKey=Section1cSumoLogicAccessKey,ParameterValue=${ACCESS_KEY}" \
             --operation-preferences \
                 "MaxConcurrentCount=${CONCURRENCY},FailureToleranceCount=${FAILURE_TOLERANCE}" \
             --region "$HOME_REGION" \
@@ -1351,6 +1437,12 @@ phase_fer_cleanup() {
         return 0
     fi
 
+    if [[ "$INSTALL_APPS" != "Yes" ]]; then
+        log_info "Apps not enabled (--install-apps ${INSTALL_APPS}) — v3.0.0 will not create FERs; skipping FER cleanup."
+        _mark_phase_done "fer_cleanup"
+        return 0
+    fi
+
     local quota_response quota remaining
     quota_response=$( sumo_get "/api/v1/extractionRules/quota" )
     quota=$(     echo "$quota_response" | jq -r '.quota' )
@@ -1429,6 +1521,12 @@ phase_metric_rules_cleanup() {
 
     if _phase_done "metric_rules"; then
         log_info "Already completed — skipping."
+        return 0
+    fi
+
+    if [[ "$INSTALL_APPS" != "Yes" ]]; then
+        log_info "Apps not enabled (--install-apps ${INSTALL_APPS}) — v3.0.0 will not create Metric Rules; skipping Metric Rules cleanup."
+        _mark_phase_done "metric_rules"
         return 0
     fi
 
@@ -1802,8 +1900,9 @@ phase_report() {
     unique_regions=$(  echo "$INSTANCES_JSON" | jq -r '[.[].region]  | unique | length' )
     echo ""
     echo -e "${GREEN}  StackSet        : ${STACKSET_NAME}${NC}"
+    echo -e "${GREEN}  Source version  : v${SOURCE_VERSION:-unknown}${NC}"
+    echo -e "${GREEN}  Target version  : v3.0.0${NC}"
     echo -e "${GREEN}  Home region     : ${HOME_REGION}${NC}"
-    echo -e "${GREEN}  Template        : v3.0.0${NC}"
     echo -e "${GREEN}  Accounts        : ${unique_accounts}${NC}"
     echo -e "${GREEN}  Regions         : ${unique_regions}${NC}"
     echo -e "${GREEN}  Instances       : ${total_instances}${NC}"
@@ -1829,6 +1928,7 @@ Required:
   -r REGION              AWS home region where the StackSet is registered (e.g. us-east-1)
 
 Optional:
+  -v SOURCE_VERSION              Source version override: 2.12, 2.13, 2.14, 2.15 (auto-detected if omitted)
   -s, --stackset-name NAME       Existing StackSet name (default: SUMO-LOGIC-AWS-OBSERVABILITY)
   --admin-role-arn ARN       StackSet admin role ARN (auto-detected from existing StackSet)
   --execution-role NAME      StackSet execution role name (auto-detected, default: AWSControlTowerExecution)
@@ -1875,6 +1975,7 @@ parse_args() {
             -k)                  ACCESS_KEY="$2";          shift 2 ;;
             -o)                  ORG_ID="$2";              shift 2 ;;
             -r)                  HOME_REGION="$2";         shift 2 ;;
+            -v)                     SOURCE_VERSION="$2"; _assert_supported_source_version "$2"; shift 2 ;;
             -s|--stackset-name)     STACKSET_NAME="$2";       shift 2 ;;
             --admin-role-arn)    ADMIN_ROLE_ARN="$2";      shift 2 ;;
             --execution-role)    EXECUTION_ROLE_NAME="$2"; shift 2 ;;
