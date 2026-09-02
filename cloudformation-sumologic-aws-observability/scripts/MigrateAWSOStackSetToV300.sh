@@ -83,6 +83,8 @@ ACCESS_ID=""
 ACCESS_KEY=""
 ORG_ID=""
 STACKSET_NAME="SUMO-LOGIC-AWS-OBSERVABILITY"
+NEW_STACKSET_NAME=""           # set via -n; defaults to ${STACKSET_NAME}-V300 in select mode
+MIGRATION_MODE="all"           # "all" or "select" — resolved by _select_instances()
 SOURCE_VERSION=""              # auto-detected from StackSet description in Phase 1
 SUPPORTED_SOURCE_VERSIONS=("2.12" "2.13" "2.14" "2.15")
 ADMIN_ROLE_ARN=""              # auto-detected from StackSet
@@ -239,10 +241,26 @@ _select_instances() {
     local choice
     read -r -p "  Migrate all instances or select specific ones? (all/select) [all]: " choice < /dev/tty
     choice="${choice:-all}"
+    if [[ "$choice" == "select" || "$choice" == "s" ]]; then
+        MIGRATION_MODE="select"
+    else
+        MIGRATION_MODE="all"
+    fi
+
+    # In select mode, default NEW_STACKSET_NAME if not provided via -n
+    if [[ "$MIGRATION_MODE" == "select" && -z "$NEW_STACKSET_NAME" ]]; then
+        NEW_STACKSET_NAME="sumologic-awso-v300"
+        log_info "New StackSet name defaulted to: ${NEW_STACKSET_NAME}"
+    fi
 
     echo ""
-    printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "#" "Account" "Region" "Version" "Include?"
-    printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "----" "----------------" "--------------" "---------" "--------"
+    if [[ "$MIGRATION_MODE" == "select" ]]; then
+        printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "#" "Account" "Region" "Version" "Include?"
+        printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "----" "----------------" "--------------" "------------" "--------"
+    else
+        printf "  %-4s  %-16s  %-14s  %s\n" "#" "Account" "Region" "Version"
+        printf "  %-4s  %-16s  %-14s  %s\n" "----" "----------------" "--------------" "---------"
+    fi
 
     local selected="[]" idx=0 skipped_v3=0 skipped_unsupported=0
     while IFS= read -r inst; do
@@ -254,7 +272,11 @@ _select_instances() {
 
         # Auto-skip already-migrated v3.x instances
         if echo "$inst_ver" | grep -qE '^v3\.'; then
-            printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Migrated"
+            if [[ "$MIGRATION_MODE" == "select" ]]; then
+                printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Migrated"
+            else
+                printf "  %-4s  %-16s  %-14s  %s\n" "$idx" "$acct" "$region" "${inst_ver} (Migrated)"
+            fi
             skipped_v3=$(( skipped_v3 + 1 ))
             continue
         fi
@@ -262,21 +284,28 @@ _select_instances() {
         # Auto-skip unsupported versions (anything not in v2.12–v2.15, including unknown)
         inst_ver_minor=$( echo "$inst_ver" | sed 's/^v//' | cut -d. -f1-2 )
         if ! _is_supported_source_version "$inst_ver_minor"; then
-            printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Unsupported"
+            if [[ "$MIGRATION_MODE" == "select" ]]; then
+                printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Unsupported"
+            else
+                printf "  %-4s  %-16s  %-14s  %s\n" "$idx" "$acct" "$region" "${inst_ver} (Unsupported)"
+            fi
             log_warn "  ${acct}/${region}: version ${inst_ver} is not supported (supported: ${SUPPORTED_SOURCE_VERSIONS[*]})."
             skipped_unsupported=$(( skipped_unsupported + 1 ))
             continue
         fi
 
-        if [[ "$choice" == "all" || "$choice" == "a" ]]; then
-            printf "  %-4s  %-16s  %-14s  %-9s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Yes"
-            selected=$( echo "$selected" | jq --argjson i "$inst" '. + [$i]' )
-        else
+        if [[ "$MIGRATION_MODE" == "select" ]]; then
             local yn
-            read -r -p "  $(printf '%-4s  %-16s  %-14s  %-9s' "$idx" "$acct" "$region" "$inst_ver")  [y/n]: " yn < /dev/tty
+            read -r -p "  $(printf '%-4s  %-16s  %-14s  %-12s' "$idx" "$acct" "$region" "$inst_ver")  [y/n]: " yn < /dev/tty
             if [[ "$yn" == "y" || "$yn" == "Y" ]]; then
+                printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Yes"
                 selected=$( echo "$selected" | jq --argjson i "$inst" '. + [$i]' )
+            else
+                printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "No"
             fi
+        else
+            printf "  %-4s  %-16s  %-14s  %s\n" "$idx" "$acct" "$region" "$inst_ver"
+            selected=$( echo "$selected" | jq --argjson i "$inst" '. + [$i]' )
         fi
     done < <( echo "$INSTANCES_JSON" | jq -c '.[]' )
 
@@ -291,7 +320,7 @@ _select_instances() {
     fi
 
     INSTANCES_JSON="$selected"
-    log_info "Selected ${sel_count} instance(s) for migration."
+    log_info "${sel_count} instance(s) queued for migration."
 
     # Prune ACCOUNT_ALIAS_MAP to only accounts that still have selected instances
     local selected_accounts
@@ -613,19 +642,23 @@ _save_state() {
     local failed_json
     failed_json=$( printf '%s\n' "${FAILED_INSTANCES[@]:-}" | jq -R . | jq -s . )
     jq -n \
-        --arg     stackset_name    "$STACKSET_NAME" \
-        --arg     source_version   "$SOURCE_VERSION" \
-        --arg     home_region      "$HOME_REGION" \
-        --argjson instances        "$INSTANCES_JSON" \
-        --argjson v300_base_params "$V300_BASE_PARAMS" \
-        --argjson account_alias    "$ACCOUNT_ALIAS_MAP" \
-        --argjson account_buckets  "$ACCOUNT_BUCKET_MAP" \
-        --argjson phases_done      "$phases_json" \
-        --argjson failed           "$failed_json" \
-        --arg     admin_role_arn   "$ADMIN_ROLE_ARN" \
-        --arg     exec_role        "$EXECUTION_ROLE_NAME" \
+        --arg     stackset_name     "$STACKSET_NAME" \
+        --arg     new_stackset_name "$NEW_STACKSET_NAME" \
+        --arg     migration_mode    "$MIGRATION_MODE" \
+        --arg     source_version    "$SOURCE_VERSION" \
+        --arg     home_region       "$HOME_REGION" \
+        --argjson instances         "$INSTANCES_JSON" \
+        --argjson v300_base_params  "$V300_BASE_PARAMS" \
+        --argjson account_alias     "$ACCOUNT_ALIAS_MAP" \
+        --argjson account_buckets   "$ACCOUNT_BUCKET_MAP" \
+        --argjson phases_done       "$phases_json" \
+        --argjson failed            "$failed_json" \
+        --arg     admin_role_arn    "$ADMIN_ROLE_ARN" \
+        --arg     exec_role         "$EXECUTION_ROLE_NAME" \
         '{
             stackset_name: $stackset_name,
+            new_stackset_name: $new_stackset_name,
+            migration_mode: $migration_mode,
             source_version: $source_version,
             home_region: $home_region,
             instances: $instances,
@@ -666,10 +699,12 @@ _load_state() {
     _field="account_bucket_map"; ACCOUNT_BUCKET_MAP=$( echo "$s" | jq -c ".$_field // {}" ) \
         || { log_error "Failed to parse .$_field from state file"; exit 1; }
 
-    # Command-line flags (-r, --admin-role-arn, --execution-role) take precedence;
+    # Command-line flags (-r, -n, --admin-role-arn, --execution-role) take precedence;
     # only load from state when the flag was not explicitly provided.
     [[ -z "$HOME_REGION"         ]] && HOME_REGION=$(         echo "$s" | jq -r '.home_region // ""' )
     [[ -z "$SOURCE_VERSION"      ]] && SOURCE_VERSION=$(      echo "$s" | jq -r '.source_version // ""' )
+    [[ -z "$NEW_STACKSET_NAME"   ]] && NEW_STACKSET_NAME=$(   echo "$s" | jq -r '.new_stackset_name // ""' )
+    MIGRATION_MODE=$(  echo "$s" | jq -r '.migration_mode // "all"' )
     [[ -z "$ADMIN_ROLE_ARN"      ]] && ADMIN_ROLE_ARN=$(      echo "$s" | jq -r '.admin_role_arn // ""' )
     [[ -z "$EXECUTION_ROLE_NAME" ]] && EXECUTION_ROLE_NAME=$( echo "$s" | jq -r '.execution_role_name // ""' )
 
@@ -732,6 +767,12 @@ map_params_v215() {
         )]
         '
 }
+
+# v2.12–v2.14 have identical parameter names to v2.15 — delegate to the same mapper.
+# Add version-specific logic here if a future version requires different handling.
+map_params_v214() { map_params_v215 "$1"; }
+map_params_v213() { map_params_v215 "$1"; }
+map_params_v212() { map_params_v215 "$1"; }
 
 _is_supported_source_version() {
     local ver="$1"
@@ -914,18 +955,20 @@ phase_enumerate() {
             '.[$a] = $al' )
     done < <( echo "$raw_instances" | jq -c '.[]' )
 
-    if [[ -z "$SOURCE_VERSION" ]]; then
-        SOURCE_VERSION="unknown"
-        log_warn "Could not detect source version from any instance — v2.15 parameter mapping will be used. Specify -v 2.15 (or 2.12/2.13/2.14) to suppress this warning."
-    fi
-
     local unique_accounts unique_regions
     unique_accounts=$( echo "$INSTANCES_JSON" | jq -r '[.[].account] | unique | length' )
     unique_regions=$(  echo "$INSTANCES_JSON" | jq -r '[.[].region]  | unique | length' )
     log_info "Accounts: ${unique_accounts}, Regions: ${unique_regions}"
 
     # Prompt user to migrate all instances or select a subset
+    # (exits here if all instances are Migrated/Unsupported)
     _select_instances
+
+    # SOURCE_VERSION fallback — only reached when there are v2.x instances to migrate
+    if [[ -z "$SOURCE_VERSION" ]]; then
+        SOURCE_VERSION="unknown"
+        log_warn "Could not detect source version from any selected instance — v2.15 parameter mapping will be used. Specify -v 2.15 (or 2.12/2.13/2.14) to suppress this warning."
+    fi
 
     # Recalculate counts after potential selection filter
     unique_accounts=$( echo "$INSTANCES_JSON" | jq -r '[.[].account] | unique | length' )
@@ -961,7 +1004,15 @@ phase_map_params() {
         --output json \
         | jq '.StackSet.Parameters' )
 
-    V300_BASE_PARAMS=$( map_params_v215 "$raw_params" )
+    case "$SOURCE_VERSION" in
+        2.15)    V300_BASE_PARAMS=$( map_params_v215 "$raw_params" ) ;;
+        2.14)    V300_BASE_PARAMS=$( map_params_v214 "$raw_params" ) ;;
+        2.13)    V300_BASE_PARAMS=$( map_params_v213 "$raw_params" ) ;;
+        2.12)    V300_BASE_PARAMS=$( map_params_v212 "$raw_params" ) ;;
+        unknown) V300_BASE_PARAMS=$( map_params_v215 "$raw_params" )
+                 log_warn "Source version unknown — using v2.15 parameter mapping." ;;
+        *)       log_error "Unsupported source version: ${SOURCE_VERSION}"; exit 1 ;;
+    esac
 
     log_info "Mapped parameters:"
     echo "$V300_BASE_PARAMS" | jq -r '.[] | "  \(.ParameterKey) = \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"' \
@@ -1028,7 +1079,14 @@ phase_confirm() {
     echo ""
     echo -e "${YELLOW}════ MIGRATION SUMMARY ════${NC}"
     echo ""
-    echo "  StackSet       : ${STACKSET_NAME}"
+    if [[ -n "$NEW_STACKSET_NAME" ]]; then
+        echo "  Mode           : ${MIGRATION_MODE} (create new StackSet)"
+        echo "  Old StackSet   : ${STACKSET_NAME}"
+        echo "  New StackSet   : ${NEW_STACKSET_NAME}"
+    else
+        echo "  Mode           : all (update existing StackSet in-place)"
+        echo "  StackSet       : ${STACKSET_NAME}"
+    fi
     echo "  Source version : v${SOURCE_VERSION:-unknown}"
     echo "  Target version : v3.0.0"
     echo ""
@@ -1041,7 +1099,11 @@ phase_confirm() {
     echo "  Per-account parameter overrides (alias + S3 buckets captured from Sumo sources):"
     _print_per_account_overrides
     echo ""
-    echo -e "${RED}WARNING: This will DELETE all stack instances and the StackSet, then recreate.${NC}"
+    if [[ -n "$NEW_STACKSET_NAME" ]]; then
+        echo -e "${RED}WARNING: Instances will be DELETED from '${STACKSET_NAME}' and recreated in new StackSet '${NEW_STACKSET_NAME}'.${NC}"
+    else
+        echo -e "${RED}WARNING: This will DELETE all stack instances, update the StackSet to v3.0.0, then recreate.${NC}"
+    fi
     echo ""
     read -r -p "Type 'yes' to proceed: " confirm
     if [[ "$confirm" != "yes" ]]; then
@@ -1550,46 +1612,84 @@ phase_metric_rules_cleanup() {
 }
 
 # ============================================================
-# Phase 10 — Update StackSet with v3.0.0 template
-# The StackSet is kept (not deleted); we update its template and base parameters
-# in-place while it has 0 instances (after Phase 6 deleted them all).
+# Phase 10 — Create or Update StackSet with v3.0.0 template
+# -n provided (NEW_STACKSET_NAME set): create-stack-set with new name
+# -n not provided (all mode):          update-stack-set on existing STACKSET_NAME in-place
 # ============================================================
 phase_create_stackset() {
-    log_phase "Phase 10: Update StackSet to v3.0.0 Template"
+    if [[ -n "$NEW_STACKSET_NAME" ]]; then
+        log_phase "Phase 10: Create New StackSet '${NEW_STACKSET_NAME}' with v3.0.0 Template"
+    else
+        log_phase "Phase 10: Update StackSet '${STACKSET_NAME}' to v3.0.0 Template"
+    fi
 
     if _phase_done "create_stackset"; then
         log_info "Already completed — skipping."
         return 0
     fi
 
-    local update_args=(
-        cloudformation update-stack-set
-        --stack-set-name "$STACKSET_NAME"
-        --template-url  "$V300_TEMPLATE_URL"
-        --parameters    "$( echo "$V300_BASE_PARAMS" | jq -c '.' )"
-        --capabilities  CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-        --region "$HOME_REGION"
-        --output json
-    )
-    if [[ -n "$ADMIN_ROLE_ARN" ]]; then
-        update_args+=( --administration-role-arn "$ADMIN_ROLE_ARN" )
-    fi
-    if [[ -n "$EXECUTION_ROLE_NAME" ]]; then
-        update_args+=( --execution-role-name "$EXECUTION_ROLE_NAME" )
+    local params_json
+    params_json=$( echo "$V300_BASE_PARAMS" | jq -c '.' )
+
+    if [[ -n "$NEW_STACKSET_NAME" ]]; then
+        # Check if the StackSet already exists (e.g. from a previous run in select mode).
+        if aws_cmd cloudformation describe-stack-set \
+                --stack-set-name "$NEW_STACKSET_NAME" \
+                --region "$HOME_REGION" \
+                --output json > /dev/null 2>&1; then
+            log_info "StackSet '${NEW_STACKSET_NAME}' already exists — skipping creation, will add instances directly."
+        else
+            # Create a brand-new StackSet with the v3.0.0 template.
+            local create_args=(
+                cloudformation create-stack-set
+                --stack-set-name "$NEW_STACKSET_NAME"
+                --template-url   "$V300_TEMPLATE_URL"
+                --parameters     "$params_json"
+                --capabilities   CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+                --permission-model SELF_MANAGED
+                --region "$HOME_REGION"
+                --output json
+            )
+            if [[ -n "$ADMIN_ROLE_ARN" ]]; then
+                create_args+=( --administration-role-arn "$ADMIN_ROLE_ARN" )
+            fi
+            if [[ -n "$EXECUTION_ROLE_NAME" ]]; then
+                create_args+=( --execution-role-name "$EXECUTION_ROLE_NAME" )
+            fi
+            aws_cmd "${create_args[@]}" > /dev/null
+            log_info "StackSet '${NEW_STACKSET_NAME}' created with v3.0.0 template."
+        fi
+    else
+        # all mode + no -n: all instances were deleted in Phase 6; update is definition-only.
+        local update_args=(
+            cloudformation update-stack-set
+            --stack-set-name "$STACKSET_NAME"
+            --template-url   "$V300_TEMPLATE_URL"
+            --parameters     "$params_json"
+            --capabilities   CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+            --region "$HOME_REGION"
+            --output json
+        )
+        if [[ -n "$ADMIN_ROLE_ARN" ]]; then
+            update_args+=( --administration-role-arn "$ADMIN_ROLE_ARN" )
+        fi
+        if [[ -n "$EXECUTION_ROLE_NAME" ]]; then
+            update_args+=( --execution-role-name "$EXECUTION_ROLE_NAME" )
+        fi
+
+        local op_id
+        op_id=$( aws_cmd "${update_args[@]}" | jq -r '.OperationId' )
+        log_info "update-stack-set operation: ${op_id}"
+
+        local result
+        result=$( wait_for_stackset_operation "$STACKSET_NAME" "$op_id" 600 ) || true
+        if [[ "$result" != "SUCCEEDED" ]]; then
+            log_error "update-stack-set failed with status: ${result}"
+            exit 1
+        fi
+        log_info "StackSet '${STACKSET_NAME}' updated to v3.0.0 template."
     fi
 
-    local op_id
-    op_id=$( aws_cmd "${update_args[@]}" | jq -r '.OperationId' )
-    log_info "update-stack-set operation: ${op_id}"
-
-    local result
-    result=$( wait_for_stackset_operation "$STACKSET_NAME" "$op_id" 600 ) || true
-    if [[ "$result" != "SUCCEEDED" ]]; then
-        log_error "update-stack-set failed with status: ${result}"
-        exit 1
-    fi
-
-    log_info "StackSet '${STACKSET_NAME}' updated to v3.0.0 template."
     _mark_phase_done "create_stackset"
 }
 
@@ -1603,6 +1703,9 @@ phase_create_instances() {
         log_info "Already completed — skipping."
         return 0
     fi
+
+    local target_stackset="$STACKSET_NAME"
+    [[ -n "$NEW_STACKSET_NAME" ]] && target_stackset="$NEW_STACKSET_NAME"
 
     # One create-stack-instances call per (account, region) — each region may have
     # different bucket names so parameter overrides cannot be shared across regions.
@@ -1628,12 +1731,12 @@ phase_create_instances() {
         [[ -n "$bucket_elb" ]] && \
             param_overrides+=( "ParameterKey=Section8dELBS3LogsBucketName,ParameterValue=${bucket_elb}" )
 
-        log_info "Creating instance: account ${account}, region ${region} (alias: ${alias})"
+        log_info "Creating instance in '${target_stackset}': account ${account}, region ${region} (alias: ${alias})"
         log_info "  Bucket overrides — ALB: ${bucket_alb:-<empty>}, CloudTrail: ${bucket_ct:-<empty>}, ELB: ${bucket_elb:-<empty>}"
 
         local op_id
         op_id=$( aws_cmd cloudformation create-stack-instances \
-            --stack-set-name "$STACKSET_NAME" \
+            --stack-set-name "$target_stackset" \
             --accounts "$account" \
             --regions  "$region" \
             --parameter-overrides "${param_overrides[@]}" \
@@ -1645,7 +1748,7 @@ phase_create_instances() {
 
         log_info "  create-stack-instances operation: ${op_id}"
         local result
-        result=$( wait_for_stackset_operation "$STACKSET_NAME" "$op_id" "$CREATE_INSTANCES_TIMEOUT" ) || true
+        result=$( wait_for_stackset_operation "$target_stackset" "$op_id" "$CREATE_INSTANCES_TIMEOUT" ) || true
         if [[ "$result" != "SUCCEEDED" ]]; then
             log_error "create-stack-instances failed for ${account}/${region}: ${result}"
             FAILED_INSTANCES+=("${account}/${region}")
@@ -1673,11 +1776,14 @@ phase_verify() {
         return 0
     fi
 
+    local target_stackset="$STACKSET_NAME"
+    [[ -n "$NEW_STACKSET_NAME" ]] && target_stackset="$NEW_STACKSET_NAME"
+
     local raw_instances="[]"
     local next_token=""
     while true; do
         local args=( cloudformation list-stack-instances
-            --stack-set-name "$STACKSET_NAME"
+            --stack-set-name "$target_stackset"
             --region "$HOME_REGION"
             --output json )
         [[ -n "$next_token" ]] && args+=( --next-token "$next_token" )
@@ -1899,7 +2005,14 @@ phase_report() {
     unique_accounts=$( echo "$INSTANCES_JSON" | jq -r '[.[].account] | unique | length' )
     unique_regions=$(  echo "$INSTANCES_JSON" | jq -r '[.[].region]  | unique | length' )
     echo ""
-    echo -e "${GREEN}  StackSet        : ${STACKSET_NAME}${NC}"
+    if [[ -n "$NEW_STACKSET_NAME" ]]; then
+        echo -e "${GREEN}  Mode            : ${MIGRATION_MODE} (new StackSet)${NC}"
+        echo -e "${GREEN}  Old StackSet    : ${STACKSET_NAME}${NC}"
+        echo -e "${GREEN}  New StackSet    : ${NEW_STACKSET_NAME}${NC}"
+    else
+        echo -e "${GREEN}  Mode            : all (update in-place)${NC}"
+        echo -e "${GREEN}  StackSet        : ${STACKSET_NAME}${NC}"
+    fi
     echo -e "${GREEN}  Source version  : v${SOURCE_VERSION:-unknown}${NC}"
     echo -e "${GREEN}  Target version  : v3.0.0${NC}"
     echo -e "${GREEN}  Home region     : ${HOME_REGION}${NC}"
@@ -1930,6 +2043,7 @@ Required:
 Optional:
   -v SOURCE_VERSION              Source version override: 2.12, 2.13, 2.14, 2.15 (auto-detected if omitted)
   -s, --stackset-name NAME       Existing StackSet name (default: SUMO-LOGIC-AWS-OBSERVABILITY)
+  -n, --new-stackset-name NAME   New StackSet name for select mode (default: <STACKSET_NAME>-V300)
   --admin-role-arn ARN       StackSet admin role ARN (auto-detected from existing StackSet)
   --execution-role NAME      StackSet execution role name (auto-detected, default: AWSControlTowerExecution)
   -p AWS_PROFILE             AWS CLI profile (default: default)
@@ -1975,8 +2089,9 @@ parse_args() {
             -k)                  ACCESS_KEY="$2";          shift 2 ;;
             -o)                  ORG_ID="$2";              shift 2 ;;
             -r)                  HOME_REGION="$2";         shift 2 ;;
-            -v)                     SOURCE_VERSION="$2"; _assert_supported_source_version "$2"; shift 2 ;;
-            -s|--stackset-name)     STACKSET_NAME="$2";       shift 2 ;;
+            -v)                       SOURCE_VERSION="$2"; _assert_supported_source_version "$2"; shift 2 ;;
+            -s|--stackset-name)       STACKSET_NAME="$2";     shift 2 ;;
+            -n|--new-stackset-name)   NEW_STACKSET_NAME="$2"; shift 2 ;;
             --admin-role-arn)    ADMIN_ROLE_ARN="$2";      shift 2 ;;
             --execution-role)    EXECUTION_ROLE_NAME="$2"; shift 2 ;;
             -p)                  AWS_PROFILE="$2";         shift 2 ;;

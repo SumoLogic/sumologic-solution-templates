@@ -46,14 +46,14 @@ Phase 5:  Update ROD      → update-stack-instances on selected instances only 
 Phase 6:  Delete Instances → delete-stack-instances + async operation poll + auto-cleanup on failure
 Phase 8:  FER Cleanup     → Rename+disable 17 AWSO FERs (org-level, runs once)
 Phase 9:  Metric Rules    → Delete 4 AWSO metric rules (org-level, runs once)
-Phase 10: Update StackSet → update-stack-set with v3.0.0 template + base params (in-place)
+Phase 10: Create/Update StackSet → create-stack-set (when -n provided or select mode) or update-stack-set in-place (all mode, no -n)
 Phase 11: Create Instances → One create-stack-instances per (account, region) with alias + bucket overrides
 Phase 12: Verify          → list-stack-instances — all CURRENT/SUCCEEDED
 Phase 13: Patch Roles     → Assume execution role per account; patch Sumo source roleARNs per region
 Phase 14: Report          → Summary: accounts, regions, FERs renamed, sources patched
 ```
 
-> **Note on Phase 7**: An earlier design included a separate "Delete StackSet" phase. This was removed. The StackSet is now kept and updated in-place via `update-stack-set` in Phase 10 while it has 0 instances. Phase numbers 8–14 were kept as-is to preserve resume compatibility with existing state files.
+> **Note on Phase 7**: An earlier design included a separate "Delete StackSet" phase. This was removed. Phase 10 either updates the existing StackSet in-place (`all` mode + no `-n`) or creates a new StackSet (`-n` provided, or `select` mode). Phase numbers 8–14 were kept as-is to preserve resume compatibility with existing state files.
 
 ---
 
@@ -112,29 +112,48 @@ Called at the end of Phase 2 before bucket capture. Presents an interactive prom
   Migrate all instances or select specific ones? (all/select) [all]:
 ```
 
-After the prompt, the script **always shows a version table** regardless of the choice:
+This sets `MIGRATION_MODE` (`all` or `select`). Combined with whether `-n` was provided, four cases arise:
+
+| Mode | `-n` passed | Target StackSet | Phase 10 action |
+|------|-------------|-----------------|-----------------|
+| `all` | no | existing `STACKSET_NAME` | `update-stack-set` in-place |
+| `all` | yes | `NEW_STACKSET_NAME` | `create-stack-set` |
+| `select` | yes | `NEW_STACKSET_NAME` | `create-stack-set` |
+| `select` | no | `sumologic-awso-v300` (default) | `create-stack-set` |
+
+**Version table — `all` mode** (no Include? column):
 
 ```
-  #     Account           Region          Version    Include?
-  ----  ----------------  --------------  ---------  --------
-  1     285573938264      us-east-1       v3.0.0     Migrated
-  2     285573938264      us-west-2       v2.15.0    Yes
-  3     111122223333      eu-west-1       v2.10.0    Unsupported
-  4     111122223333      us-east-1       unknown    Unsupported
+  #     Account           Region          Version
+  ----  ----------------  --------------  ---------
+  1     285573938264      us-east-1       v3.0.0 (Migrated)
+  2     285573938264      us-west-2       v2.15.0
+  3     111122223333      eu-west-1       v2.10.0 (Unsupported)
+```
+
+**Version table — `select` mode** (Include? column with [y/n] prompts):
+
+```
+  #     Account           Region          Version       Include?
+  ----  ----------------  --------------  ------------  --------
+  1     285573938264      us-east-1       v3.0.0        Migrated
+  2     285573938264      us-west-2       v2.15.0       [y/n]: y → Yes
+  3     111122223333      eu-west-1       v2.10.0       Unsupported
+  4     111122223333      us-east-1       unknown       Unsupported
 ```
 
 **Per-instance routing rules:**
 
-| Instance version | Include? value | Behavior |
-|---|---|---|
-| `v3.x` | `Migrated` | Auto-excluded; logged as already migrated |
-| `v2.12`–`v2.15` (supported) | `Yes` (all mode) / `[y/n]` (select mode) | Included |
-| Any other detected version | `Unsupported` | Auto-excluded with `[WARN]` log |
-| `unknown` (template unreadable) | `Unsupported` | Auto-excluded with `[WARN]` log |
+| Instance version | Behavior |
+|---|---|
+| `v3.x` | Auto-excluded — shown as `Migrated` |
+| `v2.12`–`v2.15` (supported) | Auto-included (`all` mode) or prompted `[y/n]` (`select` mode) |
+| Any other version | Auto-excluded — shown as `Unsupported` with `[WARN]` log |
+| `unknown` (template unreadable) | Auto-excluded — shown as `Unsupported` with `[WARN]` log |
 
-- If 0 instances remain after filtering: prints `[INFO] No instances to migrate. Exiting.` and exits 0
-- After selection, `INSTANCES_JSON` and `ACCOUNT_ALIAS_MAP` are pruned to only the selected subset
-- On `--resume`: skipped — instance list is loaded from the state file
+- If 0 eligible instances remain after filtering: exits 0 with `"No instances to migrate."`
+- After selection, `INSTANCES_JSON` and `ACCOUNT_ALIAS_MAP` are pruned to only selected instances
+- On `--resume`: skipped — instance list and `MIGRATION_MODE` are loaded from the state file
 
 ---
 
@@ -271,22 +290,35 @@ AwsObservabilityApiGatewayApiNameMetricsEntityRule
 
 ---
 
-## Phase 10: Update StackSet (in-place)
+## Phase 10: Create or Update StackSet
 
-Issues `update-stack-set` on the **existing StackSet** (which now has 0 instances after Phase 6) with the v3.0.0 template URL and mapped base parameters. Polls via `wait_for_stackset_operation` (timeout: 600s).
+Branches on whether `NEW_STACKSET_NAME` is set (see the four-case matrix in Instance Selection):
 
-### Why update-stack-set instead of delete + create
-Deleting a StackSet requires all instances to be gone first (`StackSetNotEmptyException` otherwise). Rather than deleting and recreating, the script updates the StackSet definition in-place while it is empty. This is simpler, preserves the StackSet's IAM role configuration, and avoids potential name conflicts.
+### Path A — `all` mode + no `-n` → `update-stack-set` in-place
+
+All instances were deleted in Phase 6, so `update-stack-set` without `--accounts`/`--regions` scope is a pure definition update — no stacks exist to propagate to. Polls via `wait_for_stackset_operation` (timeout: 600s).
+
+**Why not scope with --accounts/--regions**: AWS throws `StackInstanceNotFoundException` when targeting accounts/regions that have no instances. Since all instances were deleted in Phase 6, scoping to them causes this error.
+
+**Why update instead of delete + create**: Deleting a StackSet requires all instances to be gone first (`StackSetNotEmptyException` otherwise). Updating in-place preserves IAM role configuration and avoids name conflicts.
+
+### Path B — `-n` provided, or `select` mode → `create-stack-set`
+
+Creates a brand-new StackSet with `NEW_STACKSET_NAME`, the v3.0.0 template URL, and mapped base params. The original `STACKSET_NAME` StackSet is left untouched — any non-selected instances remain there at v2.x.
+
+`create-stack-set` does not return an `OperationId` (unlike `update-stack-set`), so no polling is needed; the call is synchronous.
 
 ---
 
 ## Phase 11: Create Stack Instances (one call per account/region)
 
+The **target StackSet** is `NEW_STACKSET_NAME` if set, otherwise `STACKSET_NAME`.
+
 For each entry in `INSTANCES_JSON` (one entry per account/region pair):
 1. Looks up alias from `ACCOUNT_ALIAS_MAP`
 2. Looks up bucket names from `ACCOUNT_BUCKET_MAP["account/region"]`
 3. Builds `--parameter-overrides` with `Section2aAccountAlias` always set; bucket params (`Section5d`, `Section6c`, `Section8d`) added only if non-empty
-4. Issues `create-stack-instances --accounts <account> --regions <region>`
+4. Issues `create-stack-instances --stack-set-name <target> --accounts <account> --regions <region>`
 5. Polls via `wait_for_stackset_operation` (timeout: 5400s)
 6. On failure: records `account/region` in `FAILED_INSTANCES`, saves state, continues to next instance
 
@@ -297,7 +329,7 @@ Each region can have different S3 bucket names (one `CommonS3Bucket` per region)
 
 ## Phase 12: Verify
 
-Paginates `list-stack-instances` and counts instances in each status. Logs a warning (does not fail) if any instance is not `CURRENT` or `SUCCEEDED`.
+Paginates `list-stack-instances` on the **target StackSet** (`NEW_STACKSET_NAME` if set, otherwise `STACKSET_NAME`) and counts instances in each status. Logs a warning (does not fail) if any instance is not `CURRENT` or `SUCCEEDED`.
 
 ---
 
@@ -345,6 +377,8 @@ Prints a summary: old and new StackSet names, home region, template version, acc
 ```json
 {
   "stackset_name":       "SUMO-LOGIC-AWS-OBSERVABILITY",
+  "new_stackset_name":   "SUMO-LOGIC-AWS-OBSERVABILITY-V300",
+  "migration_mode":      "select",
   "source_version":      "2.15",
   "home_region":         "us-east-1",
   "instances":           [{"account": "222222222222", "region": "us-east-1", "alias": "prod1", "version": "v2.15.0"}],
@@ -360,6 +394,8 @@ Prints a summary: old and new StackSet names, home region, template version, acc
   "execution_role_name": "AWSCloudFormationStackSetExecutionRole"
 }
 ```
+
+`new_stackset_name` is empty string when `all` mode without `-n`. `migration_mode` defaults to `"all"` on load if absent (backwards-compatible with older state files).
 
 ### Phase tokens
 Each phase writes its name to `phases_completed` on success. The `_phase_done "<name>"` guard at the top of each phase function returns early if the token is present — making every phase idempotent on resume.
@@ -386,6 +422,7 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 |------|---------|---------|
 | `-k ACCESS_KEY` | Sumo Logic access key | **Prompted interactively** (hidden input, no echo) if omitted — avoids key appearing in shell history |
 | `-s, --stackset-name NAME` | Name of the existing v2.x StackSet | `SUMO-LOGIC-AWS-OBSERVABILITY` |
+| `-n, --new-stackset-name NAME` | New StackSet name for v3.0.0 (triggers create-stack-set in Phase 10) | `sumologic-awso-v300` in select mode; not used in all+no-n mode |
 | `-v SOURCE_VERSION` | Source version override | Auto-detected from instance template Description in Phase 2 |
 | `--admin-role-arn ARN` | StackSet administration role ARN | Auto-detected |
 | `--execution-role NAME` | StackSet execution role name | Auto-detected |
@@ -403,15 +440,27 @@ If `--state-file` points to an existing file and `--resume` was not explicitly p
 ### Examples
 
 ```bash
-# Full migration (default — access key prompted interactively)
+# all mode, no -n: update existing StackSet in-place (access key prompted interactively)
 ./MigrateAWSOStackSetToV300.sh \
     -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1
+# → choose "all" at prompt → Phase 10: update-stack-set SUMO-LOGIC-AWS-OBSERVABILITY
 
-# Full migration with a non-default StackSet name and apps installed
+# all mode, -n provided: create new StackSet for v3.0.0
 ./MigrateAWSOStackSetToV300.sh \
     -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1 \
-    -s MY-AWSO-STACKSET \
-    --install-apps Yes
+    -n MY-AWSO-STACKSET-V300
+# → choose "all" at prompt → Phase 10: create-stack-set MY-AWSO-STACKSET-V300
+
+# select mode, -n provided: select specific instances → create named StackSet
+./MigrateAWSOStackSetToV300.sh \
+    -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1 \
+    -n MY-AWSO-STACKSET-V300
+# → choose "select" at prompt → [y/n] per instance → Phase 10: create-stack-set MY-AWSO-STACKSET-V300
+
+# select mode, no -n: select specific instances → create default-named StackSet
+./MigrateAWSOStackSetToV300.sh \
+    -d us2 -i suYXzI02B9l4h3 -o 0000000000009CFA0A -r us-east-1
+# → choose "select" at prompt → NEW_STACKSET_NAME defaults to "sumologic-awso-v300"
 
 # Dry run — enumerate instances and map params; no changes made
 ./MigrateAWSOStackSetToV300.sh \
@@ -455,7 +504,7 @@ Implemented via a `_ts()` helper (`date '+%Y-%m-%d %H:%M:%S'`) called inline in 
 | `wait_for_stackset_operation(name, op_id, timeout)` | Polls `describe-stack-set-operation` every 30s; logs per-instance failures to stderr on FAILED/STOPPED; returns status string on stdout |
 | `sumo_get()` / `sumo_put()` / `sumo_get_with_etag()` / `sumo_put_if_match()` | curl wrappers with basic auth and ETag support |
 | `map_params_v215(v2_params_json)` | jq filter; transforms v2.x base params to v3.0.0 format |
-| `_select_instances()` | Shows version table for all instances; auto-excludes v3.x (Migrated) and unsupported/unknown versions (Unsupported); prompts y/n per instance in select mode or auto-includes in all mode |
+| `_select_instances()` | Prompts `all/select`; sets `MIGRATION_MODE` and defaults `NEW_STACKSET_NAME` if needed; shows version table; auto-excludes v3.x (Migrated) and unsupported/unknown (Unsupported); auto-includes eligible in `all` mode, prompts `[y/n]` in `select` mode |
 | `_capture_buckets_for_account(account)` | Assumes execution role; resolves alias from deployed stack, reconciles collector ID with Sumo API (with mismatch prompt), captures per-region bucket names |
 | `_cleanup_failed_delete_instances(op_id)` | Recovers FAILED (retain+delete) and CANCELLED (per-account retry) instances after a failed delete operation |
 | `_delete_stack_with_retain(stack, region, creds)` | Cross-account delete of a stuck stack using `--retain-resources` |
@@ -485,11 +534,11 @@ AWSO_FER_COUNT=17
 | Deployment type | Single CloudFormation stack | CloudFormation StackSet |
 | Accounts | 1 | N (enumerated automatically) |
 | Regions | 1 | M per account (enumerated automatically) |
-| Instance selection | N/A | Interactive prompt to select all or a subset |
+| Instance selection | N/A | `all` (auto-include all eligible) or `select` (interactive [y/n] per instance) |
 | S3 bucket capture | Fetches from Sumo sources | Fetches from deployed stack params and `CommonS3Bucket` physical resource ID per region |
 | Alias source | CLI param or stack param | Resolved from `describe-stacks` on deployed stack via cross-account creds |
 | Stack deletion | `delete-stack` + retain-resources fallback | `delete-stack-instances` + automatic FAILED/CANCELLED recovery |
-| StackSet lifecycle | N/A | `update-stack-set` in-place (no delete+recreate) |
+| StackSet lifecycle | N/A | `update-stack-set` in-place (`all`+no `-n`) or `create-stack-set` with new name (all other cases) |
 | Instance creation | `create-stack` (single call) | One `create-stack-instances` per (account, region) |
 | Role patching | Read role from single nested stack | Assume execution role per account; `list-stack-instances` uses management account creds |
 | State / resume | `--params-file` (params JSON only) | `--state-file` (full JSON: phases, instances, aliases, per-region bucket map) |
