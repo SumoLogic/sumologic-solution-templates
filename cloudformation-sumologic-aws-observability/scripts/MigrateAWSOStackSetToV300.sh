@@ -298,10 +298,7 @@ _select_instances() {
             local yn
             read -r -p "  $(printf '%-4s  %-16s  %-14s  %-12s' "$idx" "$acct" "$region" "$inst_ver")  [y/n]: " yn < /dev/tty
             if [[ "$yn" == "y" || "$yn" == "Y" ]]; then
-                printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Yes"
                 selected=$( echo "$selected" | jq --argjson i "$inst" '. + [$i]' )
-            else
-                printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "No"
             fi
         else
             printf "  %-4s  %-16s  %-14s  %s\n" "$idx" "$acct" "$region" "$inst_ver"
@@ -1848,20 +1845,24 @@ phase_patch_role_arns() {
         SAK=$( echo "$creds" | jq -r '.Credentials.SecretAccessKey' )
         ST=$(  echo "$creds" | jq -r '.Credentials.SessionToken' )
 
+        local target_stackset="$STACKSET_NAME"
+        [[ -n "$NEW_STACKSET_NAME" ]] && target_stackset="$NEW_STACKSET_NAME"
+
         for region in "${regions_for_account[@]}"; do
             log_info "  Region: ${region}"
 
-            # Find the stack in this account/region.
-            # list-stack-instances is a management-account StackSet API — use aws_cmd
-            # (management credentials), not the member account's cross-account creds.
+            # Resolve the CloudFormation stack ARN for this instance.
+            # describe-stack-instance targets a single instance directly and always
+            # returns the StackId when the stack exists (more reliable than list-stack-instances
+            # filters, which can return an empty StackId mid-update).
             local stack_name
-            stack_name=$( aws_cmd cloudformation list-stack-instances \
-                --stack-set-name "$STACKSET_NAME" \
-                --stack-instance-account "$account" \
-                --stack-instance-region  "$region" \
+            stack_name=$( aws_cmd cloudformation describe-stack-instance \
+                --stack-set-name          "$target_stackset" \
+                --stack-instance-account  "$account" \
+                --stack-instance-region   "$region" \
                 --region "$HOME_REGION" \
                 --output json 2>/dev/null \
-                | jq -r '.Summaries[0].StackId // ""' )
+                | jq -r '.StackInstance.StackId // ""' )
 
             [[ -z "$stack_name" ]] && { log_warn "    No stack found for ${account}/${region} — skipping."; continue; }
 
