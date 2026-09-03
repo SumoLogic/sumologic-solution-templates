@@ -85,8 +85,8 @@ ORG_ID=""
 STACKSET_NAME="SUMO-LOGIC-AWS-OBSERVABILITY"
 NEW_STACKSET_NAME=""           # set via -n; defaults to ${STACKSET_NAME}-V300 in select mode
 MIGRATION_MODE="all"           # "all" or "select" — resolved by _select_instances()
-SOURCE_VERSION=""              # auto-detected from StackSet description in Phase 1
-SUPPORTED_SOURCE_VERSIONS=("2.12" "2.13" "2.14" "2.15")
+AWSO_VERSION=""              # auto-detected from StackSet description in Phase 1
+SUPPORTED_AWSO_VERSIONS=("2.12" "2.13" "2.14" "2.15")
 ADMIN_ROLE_ARN=""              # auto-detected from StackSet
 EXECUTION_ROLE_NAME=""         # auto-detected from StackSet
 HOME_REGION=""                 # AWS region where the StackSet is registered (Control Tower home region)
@@ -289,7 +289,7 @@ _select_instances() {
             else
                 printf "  %-4s  %-16s  %-14s  %s\n" "$idx" "$acct" "$region" "${inst_ver} (Unsupported)"
             fi
-            log_warn "  ${acct}/${region}: version ${inst_ver} is not supported (supported: ${SUPPORTED_SOURCE_VERSIONS[*]})."
+            log_warn "  ${acct}/${region}: version ${inst_ver} is not supported (supported: ${SUPPORTED_AWSO_VERSIONS[*]})."
             skipped_unsupported=$(( skipped_unsupported + 1 ))
             continue
         fi
@@ -642,7 +642,7 @@ _save_state() {
         --arg     stackset_name     "$STACKSET_NAME" \
         --arg     new_stackset_name "$NEW_STACKSET_NAME" \
         --arg     migration_mode    "$MIGRATION_MODE" \
-        --arg     source_version    "$SOURCE_VERSION" \
+        --arg     awso_version      "$AWSO_VERSION" \
         --arg     home_region       "$HOME_REGION" \
         --argjson instances         "$INSTANCES_JSON" \
         --argjson v300_base_params  "$V300_BASE_PARAMS" \
@@ -656,7 +656,7 @@ _save_state() {
             stackset_name: $stackset_name,
             new_stackset_name: $new_stackset_name,
             migration_mode: $migration_mode,
-            source_version: $source_version,
+            awso_version: $awso_version,
             home_region: $home_region,
             instances: $instances,
             v300_base_params: $v300_base_params,
@@ -699,7 +699,7 @@ _load_state() {
     # Command-line flags (-r, -n, --admin-role-arn, --execution-role) take precedence;
     # only load from state when the flag was not explicitly provided.
     [[ -z "$HOME_REGION"         ]] && HOME_REGION=$(         echo "$s" | jq -r '.home_region // ""' )
-    [[ -z "$SOURCE_VERSION"      ]] && SOURCE_VERSION=$(      echo "$s" | jq -r '.source_version // ""' )
+    [[ -z "$AWSO_VERSION"      ]] && AWSO_VERSION=$(      echo "$s" | jq -r '.awso_version // .source_version // ""' )
     [[ -z "$NEW_STACKSET_NAME"   ]] && NEW_STACKSET_NAME=$(   echo "$s" | jq -r '.new_stackset_name // ""' )
     MIGRATION_MODE=$(  echo "$s" | jq -r '.migration_mode // "all"' )
     [[ -z "$ADMIN_ROLE_ARN"      ]] && ADMIN_ROLE_ARN=$(      echo "$s" | jq -r '.admin_role_arn // ""' )
@@ -774,7 +774,7 @@ map_params_v212() { map_params_v215 "$1"; }
 _is_supported_source_version() {
     local ver="$1"
     local v
-    for v in "${SUPPORTED_SOURCE_VERSIONS[@]}"; do
+    for v in "${SUPPORTED_AWSO_VERSIONS[@]}"; do
         [[ "$ver" == "$v" ]] && return 0
     done
     return 1
@@ -783,8 +783,8 @@ _is_supported_source_version() {
 _assert_supported_source_version() {
     local ver="$1"
     if ! _is_supported_source_version "$ver"; then
-        log_error "Source version v${ver} is not supported for migration."
-        log_error "Supported versions: ${SUPPORTED_SOURCE_VERSIONS[*]} → 3.0.0"
+        log_error "AWSO version v${ver} is not supported for migration."
+        log_error "Supported versions: ${SUPPORTED_AWSO_VERSIONS[*]} → 3.0.0"
         log_error "Use -v to specify a supported version, or contact Sumo Logic support."
         exit 1
     fi
@@ -836,9 +836,9 @@ phase_validate() {
         fi
 
         # If user specified -v, validate it now; per-instance version detection runs in Phase 2.
-        if [[ -n "$SOURCE_VERSION" ]]; then
-            log_info "Source version: v${SOURCE_VERSION} (user-specified)"
-            _assert_supported_source_version "$SOURCE_VERSION"
+        if [[ -n "$AWSO_VERSION" ]]; then
+            log_info "AWSO version: v${AWSO_VERSION} (user-specified)"
+            _assert_supported_source_version "$AWSO_VERSION"
         fi
 
         # No running operations
@@ -932,13 +932,13 @@ phase_enumerate() {
         fi
         log_info "  ${account}/${region}: ${inst_version}"
 
-        # Set SOURCE_VERSION from first supported v2.x instance (unless already set via -v)
-        if [[ -z "$SOURCE_VERSION" ]] && echo "$inst_version" | grep -qE '^v2\.'; then
+        # Set AWSO_VERSION from first supported v2.x instance (unless already set via -v)
+        if [[ -z "$AWSO_VERSION" ]] && echo "$inst_version" | grep -qE '^v2\.'; then
             local candidate
             candidate=$( echo "$inst_version" | sed 's/^v//' | cut -d. -f1-2 )
             if _is_supported_source_version "$candidate"; then
-                SOURCE_VERSION="$candidate"
-                log_info "Source version set from instance ${account}/${region}: v${SOURCE_VERSION}"
+                AWSO_VERSION="$candidate"
+                log_info "AWSO version set from instance ${account}/${region}: v${AWSO_VERSION}"
             fi
         fi
 
@@ -961,10 +961,10 @@ phase_enumerate() {
     # (exits here if all instances are Migrated/Unsupported)
     _select_instances
 
-    # SOURCE_VERSION fallback — only reached when there are v2.x instances to migrate
-    if [[ -z "$SOURCE_VERSION" ]]; then
-        SOURCE_VERSION="unknown"
-        log_warn "Could not detect source version from any selected instance — v2.15 parameter mapping will be used. Specify -v 2.15 (or 2.12/2.13/2.14) to suppress this warning."
+    # AWSO_VERSION fallback — only reached when there are v2.x instances to migrate
+    if [[ -z "$AWSO_VERSION" ]]; then
+        AWSO_VERSION="unknown"
+        log_warn "Could not detect AWSO version from any selected instance — v2.15 parameter mapping will be used. Specify -v 2.15 (or 2.12/2.13/2.14) to suppress this warning."
     fi
 
     # Recalculate counts after potential selection filter
@@ -986,7 +986,7 @@ phase_enumerate() {
 # Phase 3 — Map Parameters
 # ============================================================
 phase_map_params() {
-    log_phase "Phase 3: Map Parameters v${SOURCE_VERSION:-unknown} → v3.0.0"
+    log_phase "Phase 3: Map Parameters v${AWSO_VERSION:-unknown} → v3.0.0"
 
     if _phase_done "map_params"; then
         log_info "Already completed — skipping."
@@ -1001,14 +1001,14 @@ phase_map_params() {
         --output json \
         | jq '.StackSet.Parameters' )
 
-    case "$SOURCE_VERSION" in
+    case "$AWSO_VERSION" in
         2.15)    V300_BASE_PARAMS=$( map_params_v215 "$raw_params" ) ;;
         2.14)    V300_BASE_PARAMS=$( map_params_v214 "$raw_params" ) ;;
         2.13)    V300_BASE_PARAMS=$( map_params_v213 "$raw_params" ) ;;
         2.12)    V300_BASE_PARAMS=$( map_params_v212 "$raw_params" ) ;;
         unknown) V300_BASE_PARAMS=$( map_params_v215 "$raw_params" )
-                 log_warn "Source version unknown — using v2.15 parameter mapping." ;;
-        *)       log_error "Unsupported source version: ${SOURCE_VERSION}"; exit 1 ;;
+                 log_warn "AWSO version unknown — using v2.15 parameter mapping." ;;
+        *)       log_error "Unsupported AWSO version: ${AWSO_VERSION}"; exit 1 ;;
     esac
 
     log_info "Mapped parameters:"
@@ -1084,7 +1084,7 @@ phase_confirm() {
         echo "  Mode           : all (update existing StackSet in-place)"
         echo "  StackSet       : ${STACKSET_NAME}"
     fi
-    echo "  Source version : v${SOURCE_VERSION:-unknown}"
+    echo "  AWSO version   : v${AWSO_VERSION:-unknown}"
     echo "  Target version : v3.0.0"
     echo ""
     echo "  Instances to migrate:"
@@ -2014,7 +2014,7 @@ phase_report() {
         echo -e "${GREEN}  Mode            : all (update in-place)${NC}"
         echo -e "${GREEN}  StackSet        : ${STACKSET_NAME}${NC}"
     fi
-    echo -e "${GREEN}  Source version  : v${SOURCE_VERSION:-unknown}${NC}"
+    echo -e "${GREEN}  AWSO version    : v${AWSO_VERSION:-unknown}${NC}"
     echo -e "${GREEN}  Target version  : v3.0.0${NC}"
     echo -e "${GREEN}  Home region     : ${HOME_REGION}${NC}"
     echo -e "${GREEN}  Accounts        : ${unique_accounts}${NC}"
@@ -2042,7 +2042,7 @@ Required:
   -r REGION              AWS home region where the StackSet is registered (e.g. us-east-1)
 
 Optional:
-  -v SOURCE_VERSION              Source version override: 2.12, 2.13, 2.14, 2.15 (auto-detected if omitted)
+  -v AWSO_VERSION              AWSO version override: 2.12, 2.13, 2.14, 2.15 (auto-detected if omitted)
   -s, --stackset-name NAME       Existing StackSet name (default: SUMO-LOGIC-AWS-OBSERVABILITY)
   -n, --new-stackset-name NAME   New StackSet name for select mode (default: <STACKSET_NAME>-V300)
   --admin-role-arn ARN       StackSet admin role ARN (auto-detected from existing StackSet)
@@ -2090,7 +2090,7 @@ parse_args() {
             -k)                  ACCESS_KEY="$2";          shift 2 ;;
             -o)                  ORG_ID="$2";              shift 2 ;;
             -r)                  HOME_REGION="$2";         shift 2 ;;
-            -v)                       SOURCE_VERSION="$2"; _assert_supported_source_version "$2"; shift 2 ;;
+            -v)                       AWSO_VERSION="$2"; _assert_supported_source_version "$2"; shift 2 ;;
             -s|--stackset-name)       STACKSET_NAME="$2";     shift 2 ;;
             -n|--new-stackset-name)   NEW_STACKSET_NAME="$2"; shift 2 ;;
             --admin-role-arn)    ADMIN_ROLE_ARN="$2";      shift 2 ;;
