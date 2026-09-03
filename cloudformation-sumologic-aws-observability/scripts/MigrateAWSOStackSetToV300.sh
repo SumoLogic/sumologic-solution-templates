@@ -467,6 +467,7 @@ _capture_buckets_for_account() {
     while IFS= read -r region; do
         log_info "  Account ${account} / ${region}: capturing buckets..."
         local bucket_alb="" bucket_ct="" bucket_elb=""
+        local alb_on="Yes" ct_on="Yes" elb_on="Yes"   # default: assume enabled until CF says otherwise
 
         if [[ -n "$AKI" ]]; then
             local r_stack_id
@@ -490,8 +491,15 @@ _capture_buckets_for_account() {
                 bucket_ct=$(  echo "$r_params" | jq -r '[.[] | select(.ParameterKey == "Section6cCloudTrailLogsBucketName")] | .[0].ParameterValue // ""' )
                 bucket_elb=$( echo "$r_params" | jq -r '[.[] | select(.ParameterKey == "Section9dELBS3LogsBucketName")] | .[0].ParameterValue // ""' )
 
-                # If bucket params are empty, read CommonS3Bucket from CreateCommonResources
-                if [[ -z "$bucket_alb" || -z "$bucket_ct" || -z "$bucket_elb" ]]; then
+                # Read v2.x source creation flags (v2.x uses Section9b for ELB).
+                # Overwrite the outer defaults with actual CF values.
+                alb_on=$( echo "$r_params" | jq -r '([.[] | select(.ParameterKey == "Section5bALBCreateLogSource")]          | .[0].ParameterValue // "Yes")' )
+                ct_on=$(  echo "$r_params" | jq -r '([.[] | select(.ParameterKey == "Section6aCreateCloudTrailLogSource")]   | .[0].ParameterValue // "Yes")' )
+                elb_on=$( echo "$r_params" | jq -r '([.[] | select(.ParameterKey == "Section9bELBCreateLogSource")]          | .[0].ParameterValue // "Yes")' )
+
+                # If bucket params are empty, read CommonS3Bucket from CreateCommonResources —
+                # but only for enabled source types; disabled types never need a bucket.
+                if [[ ( "$alb_on" == "Yes" && -z "$bucket_alb" ) || ( "$ct_on" == "Yes" && -z "$bucket_ct" ) || ( "$elb_on" == "Yes" && -z "$bucket_elb" ) ]]; then
                     local r_nested
                     r_nested=$( AWS_ACCESS_KEY_ID="$AKI" AWS_SECRET_ACCESS_KEY="$SAK" AWS_SESSION_TOKEN="$ST" \
                         aws cloudformation list-stack-resources \
@@ -505,25 +513,35 @@ _capture_buckets_for_account() {
                             --stack-name "$r_nested" --region "$region" --output json 2>/dev/null \
                             | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "CommonS3Bucket") | .PhysicalResourceId // ""' )
                         [[ "$common_bucket" == "null" ]] && common_bucket=""
-                        [[ -z "$bucket_alb" ]] && bucket_alb="$common_bucket"
-                        [[ -z "$bucket_ct"  ]] && bucket_ct="$common_bucket"
-                        [[ -z "$bucket_elb" ]] && bucket_elb="$common_bucket"
+                        [[ "$alb_on" == "Yes" && -z "$bucket_alb" ]] && bucket_alb="$common_bucket"
+                        [[ "$ct_on"  == "Yes" && -z "$bucket_ct"  ]] && bucket_ct="$common_bucket"
+                        [[ "$elb_on" == "Yes" && -z "$bucket_elb" ]] && bucket_elb="$common_bucket"
                     fi
                 fi
+
+                # Blank out buckets for disabled source types (in case the CF param was set
+                # but the source was never enabled, or the explicit param was non-empty).
+                [[ "$alb_on" != "Yes" ]] && bucket_alb=""
+                [[ "$ct_on"  != "Yes" ]] && bucket_ct=""
+                [[ "$elb_on" != "Yes" ]] && bucket_elb=""
             fi
         fi
 
-        # Fall back to Sumo source matching by region suffix if CF lookup gave nothing
-        if [[ -z "$bucket_alb" && -n "$sources_json" ]]; then
-            bucket_alb=$( echo "$sources_json" | jq -r --arg r "$region" \
-                '[.sources[] | select(.name | (startswith("alb-logs") and (contains($r) or (endswith("alb-logs")))))
-                | .thirdPartyRef.resources[0].path.bucketName // ""][0] // ""' )
-            bucket_ct=$( echo "$sources_json" | jq -r --arg r "$region" \
-                '[.sources[] | select(.name | (startswith("cloudtrail-logs") and (contains($r) or (endswith("cloudtrail-logs")))))
-                | .thirdPartyRef.resources[0].path.bucketName // ""][0] // ""' )
-            bucket_elb=$( echo "$sources_json" | jq -r --arg r "$region" \
-                '[.sources[] | select(.name | (startswith("classic-lb-logs") and (contains($r) or (endswith("classic-lb-logs")))))
-                | .thirdPartyRef.resources[0].path.bucketName // ""][0] // ""' )
+        # Fall back to Sumo source matching by region suffix if CF lookup gave nothing.
+        # Each bucket is looked up independently, guarded by its source creation flag.
+        if [[ -n "$sources_json" ]]; then
+            [[ -z "$bucket_alb" && "$alb_on" == "Yes" ]] && \
+                bucket_alb=$( echo "$sources_json" | jq -r --arg r "$region" \
+                    '[.sources[] | select(.name | (startswith("alb-logs") and (contains($r) or (endswith("alb-logs")))))
+                    | .thirdPartyRef.resources[0].path.bucketName // ""][0] // ""' )
+            [[ -z "$bucket_ct" && "$ct_on" == "Yes" ]] && \
+                bucket_ct=$( echo "$sources_json" | jq -r --arg r "$region" \
+                    '[.sources[] | select(.name | (startswith("cloudtrail-logs") and (contains($r) or (endswith("cloudtrail-logs")))))
+                    | .thirdPartyRef.resources[0].path.bucketName // ""][0] // ""' )
+            [[ -z "$bucket_elb" && "$elb_on" == "Yes" ]] && \
+                bucket_elb=$( echo "$sources_json" | jq -r --arg r "$region" \
+                    '[.sources[] | select(.name | (startswith("classic-lb-logs") and (contains($r) or (endswith("classic-lb-logs")))))
+                    | .thirdPartyRef.resources[0].path.bucketName // ""][0] // ""' )
         fi
 
         log_info "    ALB bucket:        ${bucket_alb:-<empty>}"
