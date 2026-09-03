@@ -1718,14 +1718,20 @@ phase_create_instances() {
         bucket_ct=$(  echo "$ACCOUNT_BUCKET_MAP" | jq -r --arg k "$key" '.[$k].cloudtrail // ""' )
         bucket_elb=$( echo "$ACCOUNT_BUCKET_MAP" | jq -r --arg k "$key" '.[$k].elb        // ""' )
 
+        # Only set bucket overrides when the source type is enabled — skip for disabled types.
+        local alb_enabled ct_enabled elb_enabled
+        alb_enabled=$( echo "$V300_BASE_PARAMS" | jq -r '(map(select(.ParameterKey == "Section5bALBCreateLogSource"))          | .[0].ParameterValue // "Yes")' )
+        ct_enabled=$(  echo "$V300_BASE_PARAMS" | jq -r '(map(select(.ParameterKey == "Section6aCreateCloudTrailLogSource"))   | .[0].ParameterValue // "Yes")' )
+        elb_enabled=$( echo "$V300_BASE_PARAMS" | jq -r '(map(select(.ParameterKey == "Section8bELBCreateLogSource"))          | .[0].ParameterValue // "Yes")' )
+
         local param_overrides=(
             "ParameterKey=Section2aAccountAlias,ParameterValue=${alias}"
         )
-        [[ -n "$bucket_alb" ]] && \
+        [[ -n "$bucket_alb" && "$alb_enabled" == "Yes" ]] && \
             param_overrides+=( "ParameterKey=Section5dALBS3LogsBucketName,ParameterValue=${bucket_alb}" )
-        [[ -n "$bucket_ct"  ]] && \
+        [[ -n "$bucket_ct"  && "$ct_enabled"  == "Yes" ]] && \
             param_overrides+=( "ParameterKey=Section6cCloudTrailLogsBucketName,ParameterValue=${bucket_ct}" )
-        [[ -n "$bucket_elb" ]] && \
+        [[ -n "$bucket_elb" && "$elb_enabled" == "Yes" ]] && \
             param_overrides+=( "ParameterKey=Section8dELBS3LogsBucketName,ParameterValue=${bucket_elb}" )
 
         log_info "Creating instance in '${target_stackset}': account ${account}, region ${region} (alias: ${alias})"
@@ -1934,18 +1940,44 @@ phase_patch_role_arns() {
             fi
             log_info "    Collector ID: ${collector_id}"
 
+            # Read stack parameters to determine which source types are enabled.
+            # Skip patching sources for disabled types — they are orphaned from v2.x and
+            # their underlying AWS resources may no longer exist, causing HTTP 400 on PUT.
+            local stack_params
+            stack_params=$( AWS_ACCESS_KEY_ID="$AKI" AWS_SECRET_ACCESS_KEY="$SAK" AWS_SESSION_TOKEN="$ST" \
+                aws cloudformation describe-stacks \
+                --stack-name "$stack_name" \
+                --region "$region" \
+                --output json 2>/dev/null \
+                | jq '.Stacks[0].Parameters // []' )
+
+            local alb_e ct_e elb_e
+            alb_e=$( echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section5bALBCreateLogSource"))          | .[0].ParameterValue // "Yes")' )
+            ct_e=$(  echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section6aCreateCloudTrailLogSource"))   | .[0].ParameterValue // "Yes")' )
+            elb_e=$( echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section8bELBCreateLogSource"))          | .[0].ParameterValue // "Yes")' )
+            log_info "    Source types enabled — ALB: ${alb_e}, CloudTrail: ${ct_e}, CLB: ${elb_e}"
+
             # List sources and patch stale roleARNs
             local sources_json
             sources_json=$( sumo_get "/api/v1/collectors/${collector_id}/sources" )
 
             local stale_ids
-            stale_ids=$( echo "$sources_json" | jq -r --arg new_arn "$new_role_arn" --arg region "$region" '
+            stale_ids=$( echo "$sources_json" | jq -r \
+                --arg new_arn  "$new_role_arn" \
+                --arg region   "$region" \
+                --arg alb_e    "$alb_e" \
+                --arg ct_e     "$ct_e" \
+                --arg elb_e    "$elb_e" \
+                '
                 .sources[]
                 | select(
                     (.name | contains($region)) and
                     .thirdPartyRef.resources != null and
                     (.thirdPartyRef.resources[].authentication.roleARN? // "" | . != "" and . != $new_arn)
                   )
+                | select( ((.name | startswith("alb-logs"))         | not) or ($alb_e == "Yes") )
+                | select( ((.name | startswith("cloudtrail-logs"))  | not) or ($ct_e  == "Yes") )
+                | select( ((.name | startswith("classic-lb-logs"))  | not) or ($elb_e == "Yes") )
                 | .id' )
 
             if [[ -z "$stale_ids" ]]; then

@@ -1628,18 +1628,40 @@ phase_patch_role_arns() {
         log_info "Collector: ${COLLECTOR_NAME} (ID: ${COLLECTOR_ID})"
     fi
 
+    # Read stack parameters to determine which source types are enabled.
+    # Skip patching sources for disabled types — they are orphaned from v2.x and
+    # their underlying AWS resources may no longer exist, causing HTTP 400 on PUT.
+    local stack_params
+    stack_params=$( aws_cmd cloudformation describe-stacks \
+        --stack-name "${NEW_STACK_NAME}" --region "${REGION}" --output json 2>/dev/null \
+        | jq '.Stacks[0].Parameters // []' )
+
+    local alb_e ct_e elb_e
+    alb_e=$( echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section5bALBCreateLogSource"))          | .[0].ParameterValue // "Yes")' )
+    ct_e=$(  echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section6aCreateCloudTrailLogSource"))   | .[0].ParameterValue // "Yes")' )
+    elb_e=$( echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section8bELBCreateLogSource"))          | .[0].ParameterValue // "Yes")' )
+    log_info "Source types enabled — ALB: ${alb_e}, CloudTrail: ${ct_e}, CLB: ${elb_e}"
+
     # List all sources
     local sources_json
     sources_json=$( sumo_get "/api/v1/collectors/${COLLECTOR_ID}/sources" )
 
-    # Identify sources that have a roleARN that doesn't match the new one
+    # Identify sources that have a stale roleARN, skipping disabled source types.
     local stale_ids
-    stale_ids=$( echo "$sources_json" | jq -r --arg new_arn "$new_role_arn" '
+    stale_ids=$( echo "$sources_json" | jq -r \
+        --arg new_arn "$new_role_arn" \
+        --arg alb_e   "$alb_e" \
+        --arg ct_e    "$ct_e" \
+        --arg elb_e   "$elb_e" \
+        '
         .sources[]
         | select(
             .thirdPartyRef.resources != null and
             (.thirdPartyRef.resources[].authentication.roleARN? // "" | . != "" and . != $new_arn)
           )
+        | select( ((.name | startswith("alb-logs"))        | not) or ($alb_e == "Yes") )
+        | select( ((.name | startswith("cloudtrail-logs")) | not) or ($ct_e  == "Yes") )
+        | select( ((.name | startswith("classic-lb-logs")) | not) or ($elb_e == "Yes") )
         | .id' )
 
     if [[ -z "$stale_ids" ]]; then
