@@ -61,12 +61,13 @@ AWSO_METRIC_RULES=(
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 
 _log_to_file() { sed 's/\x1b\[[0-9;]*m//g' >> "$LOG_FILE"; }
-log_info()  { echo -e "${GREEN}[INFO]${NC}  $*" | tee >( _log_to_file ); }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*" | tee >( _log_to_file ); }
-log_error() { echo -e "${RED}[ERROR]${NC} $*" | tee >( _log_to_file ); }
+_ts() { date '+%Y-%m-%d %H:%M:%S'; }
+log_info()  { echo -e "${GREEN}[INFO]${NC}  [$( _ts )] $*" | tee >( _log_to_file ); }
+log_warn()  { echo -e "${YELLOW}[WARN]${NC}  [$( _ts )] $*" | tee >( _log_to_file ); }
+log_error() { echo -e "${RED}[ERROR]${NC} [$( _ts )] $*" | tee >( _log_to_file ); }
 log_phase() {
     echo -e "\n${BLUE}════════════════════════════════════════${NC}" | tee >( _log_to_file )
-    echo -e "${BLUE}  $*${NC}" | tee >( _log_to_file )
+    echo -e "${BLUE}  [$( _ts )] $*${NC}" | tee >( _log_to_file )
     echo -e "${BLUE}════════════════════════════════════════${NC}" | tee >( _log_to_file )
 }
 
@@ -77,7 +78,8 @@ ACCESS_KEY=""
 ORG_ID=""
 STACK_NAME=""
 REGION=""
-SOURCE_VERSION=""
+AWSO_VERSION=""
+SUPPORTED_AWSO_VERSIONS=("2.12" "2.13" "2.14" "2.15")
 NEW_STACK_NAME=""
 AWS_PROFILE="default"
 INSTALL_APPS="Yes"
@@ -133,7 +135,7 @@ Required (resume run):
   -d -i -k -o -r       Still required for credential validation
 
 Optional:
-  -v SOURCE_VERSION    Source version: 2.15, 2.14, 2.13, 2.12 (auto-detected if omitted)
+  -v AWSO_VERSION    AWSO version: 2.15, 2.14, 2.13, 2.12 (auto-detected if omitted)
   -n NEW_STACK_NAME    v3.0.0 stack name (defaults to STACK_NAME)
   -p AWS_PROFILE       AWS CLI profile (default: default)
   --install-apps YES|NO  Install Sumo Logic apps (default: Yes)
@@ -361,7 +363,7 @@ phase_validate() {
     # In resume mode we skip the stack checks
     if [[ "$RESUME" == true ]]; then
         log_info "Resume mode — skipping stack validation."
-        [[ -z "$SOURCE_VERSION" ]] && SOURCE_VERSION="unknown"
+        [[ -z "$AWSO_VERSION" ]] && AWSO_VERSION="unknown"
         return 0
     fi
 
@@ -486,14 +488,15 @@ phase_validate() {
     esac
 
     # Auto-detect source version if not provided
-    if [[ -z "$SOURCE_VERSION" ]]; then
+    if [[ -z "$AWSO_VERSION" ]]; then
         # Primary: parse "Version - vX.Y.Z" from the stack Description field
         local description detected_version
         description=$( echo "$STACK_JSON" | jq -r '.Stacks[0].Description // ""' )
-        detected_version=$( echo "$description" | grep -oE 'v2\.[0-9]+\.[0-9]+' | head -1 | sed 's/^v//' | cut -d. -f1-2 )
+        detected_version=$( echo "$description" | grep -oE 'v2\.[0-9]+\.[0-9]+' | head -1 | sed 's/^v//' | cut -d. -f1-2 ) || true
 
         if [[ -n "$detected_version" ]]; then
-            SOURCE_VERSION="$detected_version"
+            AWSO_VERSION="$detected_version"
+            _assert_supported_source_version "$AWSO_VERSION"
         else
             # Fallback: parameter fingerprint — all v2.12–v2.15 share the same keys,
             # so this only confirms it's a supported v2.x stack, not which minor version.
@@ -509,16 +512,16 @@ phase_validate() {
                 | if index("Section9aAutoEnableS3LogsELBResourcesOptions") then "yes" else "no" end' )
 
             if [[ "$has_section10" == "yes" && "$has_lambda_section7" == "yes" && "$has_section9" == "yes" ]]; then
-                SOURCE_VERSION="2.15"
+                AWSO_VERSION="2.15"
                 log_warn "Could not detect exact version from stack description — assuming v2.15 (parameter names are identical for v2.12–v2.15). Use -v to override."
             else
                 log_error "Could not auto-detect source version. Please specify with -v (e.g. -v 2.14)."
                 exit 1
             fi
         fi
-        log_info "Auto-detected source version: v${SOURCE_VERSION}"
+        log_info "Auto-detected AWSO version: v${AWSO_VERSION}"
     else
-        log_info "Source version: v${SOURCE_VERSION} (user-specified)"
+        log_info "AWSO version: v${AWSO_VERSION} (user-specified)"
     fi
 
     log_info "Validation complete."
@@ -677,6 +680,24 @@ phase_capture() {
 # Phase 3 — Map Parameters
 # ============================================================
 
+_is_supported_source_version() {
+    local ver="$1" v
+    for v in "${SUPPORTED_AWSO_VERSIONS[@]}"; do
+        [[ "$ver" == "$v" ]] && return 0
+    done
+    return 1
+}
+
+_assert_supported_source_version() {
+    local ver="$1"
+    if ! _is_supported_source_version "$ver"; then
+        log_error "AWSO version v${ver} is not supported for migration."
+        log_error "Supported versions: ${SUPPORTED_AWSO_VERSIONS[*]} → 3.0.0"
+        log_error "Use -v to specify a supported version, or contact Sumo Logic support."
+        exit 1
+    fi
+}
+
 map_params_v215() {
     local v2_params="$1"
     echo "$v2_params" | jq \
@@ -738,18 +759,18 @@ map_params_v213() { map_params_v215 "$1"; }
 map_params_v212() { map_params_v215 "$1"; }
 
 phase_map_parameters() {
-    log_phase "Phase 3: Map Parameters v${SOURCE_VERSION} → v3.0.0"
+    log_phase "Phase 3: Map Parameters v${AWSO_VERSION} → v3.0.0"
 
     local v2_params
     v2_params=$( echo "$STACK_JSON" | jq '.Stacks[0].Parameters' )
 
     local v300_params
-    case "$SOURCE_VERSION" in
+    case "$AWSO_VERSION" in
         2.15) v300_params=$( map_params_v215 "$v2_params" ) ;;
         2.14) v300_params=$( map_params_v214 "$v2_params" ) ;;
         2.13) v300_params=$( map_params_v213 "$v2_params" ) ;;
         2.12) v300_params=$( map_params_v212 "$v2_params" ) ;;
-        *)    log_error "Unsupported source version: ${SOURCE_VERSION}"; exit 1 ;;
+        *)    log_error "Unsupported AWSO version: ${AWSO_VERSION}"; exit 1 ;;
     esac
 
     local param_count
@@ -762,7 +783,7 @@ phase_map_parameters() {
 
     if [[ "$DRY_RUN" == true ]]; then
         log_info "──── DRY RUN: Mapped Parameters ────"
-        echo "$v300_params" | jq -r '.[] | "  \(.ParameterKey): \(.ParameterValue)"'
+        echo "$v300_params" | jq -r '.[] | "  \(.ParameterKey): \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"'
         log_info "──── DRY RUN complete. No changes made. ────"
         exit 0
     fi
@@ -795,7 +816,7 @@ phase_confirm() {
     log_info "    Name:    ${STACK_NAME}"
     log_info "    Region:  ${REGION}"
     log_info "    Account: ${ACCOUNT_ID}"
-    log_info "    Version: v${SOURCE_VERSION}"
+    log_info "    Version: v${AWSO_VERSION}"
 
     # --- Collector & sources ---
     echo ""
@@ -853,17 +874,22 @@ phase_confirm() {
     log_warn "  2. DELETE CloudFormation stack '${STACK_NAME}' in region '${REGION}'"
     log_warn "     (after RemoveOnDeleteStack=false — Sumo resources will be preserved)"
     echo ""
-    log_warn "  3. RENAME and DISABLE ${#AWSO_FER_NAMES[@]} AWSO Field Extraction Rules:"
-    local fer_name
-    for fer_name in "${AWSO_FER_NAMES[@]}"; do
-        log_warn "       ${fer_name} → v215_backup_${fer_name}"
-    done
-    echo ""
-    log_warn "  4. DELETE ${#AWSO_METRIC_RULES[@]} AWSO Metric Rules:"
-    local rule_name
-    for rule_name in "${AWSO_METRIC_RULES[@]}"; do
-        log_warn "       ${rule_name}"
-    done
+    if [[ "$INSTALL_APPS" == "Yes" ]]; then
+        log_warn "  3. RENAME and DISABLE ${#AWSO_FER_NAMES[@]} AWSO Field Extraction Rules:"
+        local fer_name
+        for fer_name in "${AWSO_FER_NAMES[@]}"; do
+            log_warn "       ${fer_name} → v215_backup_${fer_name}"
+        done
+        echo ""
+        log_warn "  4. DELETE ${#AWSO_METRIC_RULES[@]} AWSO Metric Rules:"
+        local rule_name
+        for rule_name in "${AWSO_METRIC_RULES[@]}"; do
+            log_warn "       ${rule_name}"
+        done
+    else
+        log_info "  3. FER cleanup — skipped (--install-apps ${INSTALL_APPS})"
+        log_info "  4. Metric Rules cleanup — skipped (--install-apps ${INSTALL_APPS})"
+    fi
     echo ""
     log_warn "═══════════════════════════════════════════════════════════════"
     log_warn "  Please verify the above and take a backup if needed."
@@ -1098,7 +1124,7 @@ EOF
 # Phase 6 — Delete v2.x Stack
 # ============================================================
 phase_delete() {
-    log_phase "Phase 6: Delete v${SOURCE_VERSION} Stack"
+    log_phase "Phase 6: Delete v${AWSO_VERSION} Stack"
 
     log_info "Initiating stack deletion..."
     aws_cmd cloudformation delete-stack \
@@ -1151,6 +1177,11 @@ fetch_all_fers() {
 
 phase_fer_cleanup() {
     log_phase "Phase 7: FER Cleanup"
+
+    if [[ "$INSTALL_APPS" != "Yes" ]]; then
+        log_info "Apps not enabled (--install-apps ${INSTALL_APPS}) — v3.0.0 will not create FERs; skipping FER cleanup."
+        return 0
+    fi
 
     # In resume mode, check if FERs were already renamed in a previous run
     if [[ "$RESUME" == true ]]; then
@@ -1273,6 +1304,11 @@ phase_fer_cleanup() {
 # ============================================================
 phase_metric_rules_cleanup() {
     log_phase "Phase 8: Metric Rules Cleanup"
+
+    if [[ "$INSTALL_APPS" != "Yes" ]]; then
+        log_info "Apps not enabled (--install-apps ${INSTALL_APPS}) — v3.0.0 will not create Metric Rules; skipping Metric Rules cleanup."
+        return 0
+    fi
 
     local deleted=0 skipped=0
     for rule_name in "${AWSO_METRIC_RULES[@]}"; do
@@ -1592,18 +1628,40 @@ phase_patch_role_arns() {
         log_info "Collector: ${COLLECTOR_NAME} (ID: ${COLLECTOR_ID})"
     fi
 
+    # Read stack parameters to determine which source types are enabled.
+    # Skip patching sources for disabled types — they are orphaned from v2.x and
+    # their underlying AWS resources may no longer exist, causing HTTP 400 on PUT.
+    local stack_params
+    stack_params=$( aws_cmd cloudformation describe-stacks \
+        --stack-name "${NEW_STACK_NAME}" --region "${REGION}" --output json 2>/dev/null \
+        | jq '.Stacks[0].Parameters // []' )
+
+    local alb_e ct_e elb_e
+    alb_e=$( echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section5bALBCreateLogSource"))          | .[0].ParameterValue // "Yes")' )
+    ct_e=$(  echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section6aCreateCloudTrailLogSource"))   | .[0].ParameterValue // "Yes")' )
+    elb_e=$( echo "$stack_params" | jq -r '(map(select(.ParameterKey == "Section8bELBCreateLogSource"))          | .[0].ParameterValue // "Yes")' )
+    log_info "Source types enabled — ALB: ${alb_e}, CloudTrail: ${ct_e}, CLB: ${elb_e}"
+
     # List all sources
     local sources_json
     sources_json=$( sumo_get "/api/v1/collectors/${COLLECTOR_ID}/sources" )
 
-    # Identify sources that have a roleARN that doesn't match the new one
+    # Identify sources that have a stale roleARN, skipping disabled source types.
     local stale_ids
-    stale_ids=$( echo "$sources_json" | jq -r --arg new_arn "$new_role_arn" '
+    stale_ids=$( echo "$sources_json" | jq -r \
+        --arg new_arn "$new_role_arn" \
+        --arg alb_e   "$alb_e" \
+        --arg ct_e    "$ct_e" \
+        --arg elb_e   "$elb_e" \
+        '
         .sources[]
         | select(
             .thirdPartyRef.resources != null and
             (.thirdPartyRef.resources[].authentication.roleARN? // "" | . != "" and . != $new_arn)
           )
+        | select( ((.name | startswith("alb-logs"))        | not) or ($alb_e == "Yes") )
+        | select( ((.name | startswith("cloudtrail-logs")) | not) or ($ct_e  == "Yes") )
+        | select( ((.name | startswith("classic-lb-logs")) | not) or ($elb_e == "Yes") )
         | .id' )
 
     if [[ -z "$stale_ids" ]]; then
@@ -1663,7 +1721,7 @@ phase_patch_role_arns() {
 phase_report() {
     log_phase "Phase 12: Migration Summary"
     echo "" | tee >( _log_to_file )
-    echo -e "${GREEN}  Source version   : v${SOURCE_VERSION:-unknown}${NC}"            | tee >( _log_to_file )
+    echo -e "${GREEN}  AWSO version     : v${AWSO_VERSION:-unknown}${NC}"            | tee >( _log_to_file )
     echo -e "${GREEN}  Target version   : v3.0.0${NC}"                                 | tee >( _log_to_file )
     echo -e "${GREEN}  Stack name       : ${NEW_STACK_NAME}${NC}"                      | tee >( _log_to_file )
     echo -e "${GREEN}  Region           : ${REGION}${NC}"                              | tee >( _log_to_file )
@@ -1689,7 +1747,7 @@ parse_args() {
             -o)            ORG_ID="$2";              shift 2 ;;
             -s)            STACK_NAME="$2";          shift 2 ;;
             -r)            REGION="$2";              shift 2 ;;
-            -v)            SOURCE_VERSION="$2";      shift 2 ;;
+            -v)            AWSO_VERSION="$2"; _assert_supported_source_version "$2"; shift 2 ;;
             -n)            NEW_STACK_NAME="$2";      shift 2 ;;
             -p)            AWS_PROFILE="$2";         shift 2 ;;
             --install-apps) INSTALL_APPS="$2";       shift 2 ;;
@@ -1706,7 +1764,6 @@ parse_args() {
     local missing=""
     [[ -z "$DEPLOYMENT" ]] && missing="$missing -d DEPLOYMENT"
     [[ -z "$ACCESS_ID" ]]  && missing="$missing -i ACCESS_ID"
-    [[ -z "$ACCESS_KEY" ]] && missing="$missing -k ACCESS_KEY"
     [[ -z "$ORG_ID" ]]     && missing="$missing -o ORG_ID"
     [[ -z "$REGION" ]]     && missing="$missing -r REGION"
 
@@ -1722,6 +1779,16 @@ parse_args() {
     if [[ -n "$missing" ]]; then
         echo -e "${RED}Missing required arguments:${NC}${missing}"
         help_text; exit 1
+    fi
+
+    # Prompt for access key interactively if not supplied via -k
+    if [[ -z "$ACCESS_KEY" ]]; then
+        read -r -s -p "Enter Sumo Logic Access Key: " ACCESS_KEY < /dev/tty
+        echo ""
+        if [[ -z "$ACCESS_KEY" ]]; then
+            echo -e "${RED}Access key is required.${NC}"
+            exit 1
+        fi
     fi
 
     # Defaults
@@ -1799,7 +1866,7 @@ main() {
             CAPTURED_BUCKET_ALB=$(       jq -r '.[] | select(.ParameterKey=="Section5dALBS3LogsBucketName")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
             CAPTURED_BUCKET_CLOUDTRAIL=$(jq -r '.[] | select(.ParameterKey=="Section6cCloudTrailLogsBucketName")   | .ParameterValue' "$RESUME_PARAMS_FILE" )
             CAPTURED_BUCKET_ELB=$(       jq -r '.[] | select(.ParameterKey=="Section8dELBS3LogsBucketName")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
-            [[ -z "$SOURCE_VERSION" ]] && SOURCE_VERSION="(from params file)"
+            [[ -z "$AWSO_VERSION" ]] && AWSO_VERSION="(from params file)"
         fi
 
         echo ""
@@ -1812,8 +1879,8 @@ main() {
         log_warn "  ELB bucket:        ${CAPTURED_BUCKET_ELB:-<empty>}"
         echo ""
         log_warn "Key v3.0.0 parameters from saved file:"
-        jq -r '.[] | select(.ParameterKey | test("^Section[1-9]")) | "  \(.ParameterKey) = \(.ParameterValue)"' \
-            "$RESUME_PARAMS_FILE" | grep -v "AccessKey\|AccessID" | tee -a "$LOG_FILE"
+        jq -r '.[] | select(.ParameterKey | test("^Section[1-9]")) | "  \(.ParameterKey) = \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"' \
+            "$RESUME_PARAMS_FILE" | tee -a "$LOG_FILE"
         echo ""
         read -r -p "Proceed with resume? (yes/no): " confirm
         if [[ "$confirm" != "yes" ]]; then
@@ -1837,7 +1904,7 @@ main() {
             CAPTURED_BUCKET_ALB=$(       jq -r '.[] | select(.ParameterKey=="Section5dALBS3LogsBucketName")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
             CAPTURED_BUCKET_CLOUDTRAIL=$(jq -r '.[] | select(.ParameterKey=="Section6cCloudTrailLogsBucketName")   | .ParameterValue' "$RESUME_PARAMS_FILE" )
             CAPTURED_BUCKET_ELB=$(       jq -r '.[] | select(.ParameterKey=="Section8dELBS3LogsBucketName")        | .ParameterValue' "$RESUME_PARAMS_FILE" )
-            [[ -z "$SOURCE_VERSION" ]] && SOURCE_VERSION="(from params file)"
+            [[ -z "$AWSO_VERSION" ]] && AWSO_VERSION="(from params file)"
             phase_fer_cleanup
             phase_metric_rules_cleanup
             phase_deploy
