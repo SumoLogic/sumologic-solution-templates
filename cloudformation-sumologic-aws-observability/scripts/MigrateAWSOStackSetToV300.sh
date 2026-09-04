@@ -92,6 +92,7 @@ EXECUTION_ROLE_NAME=""         # auto-detected from StackSet
 HOME_REGION=""                 # AWS region where the StackSet is registered (Control Tower home region)
 AWS_PROFILE="default"
 INSTALL_APPS="No"
+INSTALL_APPS_EXPLICIT=false       # set to true when --install-apps is passed explicitly
 CONCURRENCY=1
 FAILURE_TOLERANCE=0
 DRY_RUN=false
@@ -740,9 +741,10 @@ _load_state() {
 map_params_v215() {
     local v2_params="$1"
     echo "$v2_params" | jq \
-        --arg install_apps "$INSTALL_APPS" \
-        --arg access_id    "$ACCESS_ID" \
-        --arg access_key   "$ACCESS_KEY" \
+        --arg install_apps          "$INSTALL_APPS" \
+        --arg install_apps_explicit "$INSTALL_APPS_EXPLICIT" \
+        --arg access_id             "$ACCESS_ID" \
+        --arg access_key            "$ACCESS_KEY" \
         '
         # Remove Section10 (not in v3.0.0)
         [ .[] | select(
@@ -768,7 +770,7 @@ map_params_v215() {
             if   .ParameterKey == "Section1eSumoLogicResourceRemoveOnDeleteStack" then "false"
             elif .ParameterKey == "Section1bSumoLogicAccessID"                    then $access_id
             elif .ParameterKey == "Section1cSumoLogicAccessKey"                   then $access_key
-            elif .ParameterKey == "Section3aInstallObservabilityApps"             then $install_apps
+            elif .ParameterKey == "Section3aInstallObservabilityApps"             then (if $install_apps_explicit == "true" then $install_apps else .ParameterValue end)
             elif .ParameterKey == "Section4cCloudWatchExistingSourceAPIUrl"       then ""
             elif .ParameterKey == "Section5cALBLogsSourceUrl"                     then ""
             elif .ParameterKey == "Section5dALBS3LogsBucketName"                  then ""
@@ -1028,6 +1030,11 @@ phase_map_params() {
                  log_warn "AWSO version unknown — using v2.15 parameter mapping." ;;
         *)       log_error "Unsupported AWSO version: ${AWSO_VERSION}"; exit 1 ;;
     esac
+
+    # Sync INSTALL_APPS from the mapped value so Phases 8/9 gates reflect
+    # the effective setting (v2.x original unless --install-apps was explicit).
+    INSTALL_APPS=$( echo "$V300_BASE_PARAMS" | jq -r \
+        '(map(select(.ParameterKey == "Section3aInstallObservabilityApps")) | .[0].ParameterValue // "No")' )
 
     log_info "Mapped parameters:"
     echo "$V300_BASE_PARAMS" | jq -r '.[] | "  \(.ParameterKey) = \(if .ParameterKey | test("AccessKey|AccessID") then "***" else .ParameterValue end)"' \
@@ -2146,7 +2153,7 @@ parse_args() {
             --admin-role-arn)    ADMIN_ROLE_ARN="$2";      shift 2 ;;
             --execution-role)    EXECUTION_ROLE_NAME="$2"; shift 2 ;;
             -p)                  AWS_PROFILE="$2";         shift 2 ;;
-            --install-apps)      INSTALL_APPS="$2";        shift 2 ;;
+            --install-apps)      INSTALL_APPS="$2"; INSTALL_APPS_EXPLICIT=true; shift 2 ;;
             --concurrency)       CONCURRENCY="$2";         shift 2 ;;
             --failure-tolerance) FAILURE_TOLERANCE="$2";   shift 2 ;;
             --dry-run)           DRY_RUN=true;             shift ;;
