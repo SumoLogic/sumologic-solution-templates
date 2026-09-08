@@ -1,6 +1,6 @@
 # AWSO v3.0.0 — Migration Script Design Document
 
-> **Script**: `scripts/MigrateToV300.sh`
+> **Script**: `scripts/MigrateAWSOStackToV300.sh`
 > **Supported source versions**: v2.12, v2.13, v2.14, v2.15
 > **Target version**: v3.0.0
 > **Status**: Built and validated (2026-07-06, KR org, us-west-2)
@@ -45,7 +45,7 @@ Phase 12: Report        → Print summary + cleanup instructions
 - Validates AWS credentials via `sts get-caller-identity`
 - Validates Sumo Logic credentials via API ping
 - Confirms the source stack exists and is in `CREATE_COMPLETE`, `UPDATE_COMPLETE`, or `UPDATE_ROLLBACK_COMPLETE` state
-- Auto-detects source version (v2.12–v2.15) by checking for parameter fingerprint (Section10a + Section7aLambda + Section9a)
+- Auto-detects source version (v2.12–v2.15) by reading the template `Description` field via `aws cloudformation get-template` — e.g. `"Version - v2.15.0..."`. Falls back to parameter key fingerprint (Section10a + Section7aLambda + Section9a) if the description has no version string. Validates detected version against supported list (v2.12–v2.15); exits with error if unsupported.
 - Captures `ACCOUNT_ID` for later use
 
 ### Auto-recovery on special stack states
@@ -142,6 +142,7 @@ Displays a full summary of what was captured, the mapped v3.0.0 parameters, and 
    - Stack deletion
    - 17 AWSO FER renames (lists each name)
    - 4 AWSO metric rule deletions (lists each name)
+   Note: FER and metric-rule entries are only shown when `--install-apps Yes` — when `--install-apps No`, these cleanup steps are skipped and not listed.
 7. **Backup instructions**: where to export FERs and view metric rules in Sumo UI
 8. Requires user to type `yes` to proceed; aborts on anything else
 
@@ -164,6 +165,7 @@ In `--resume` mode, this phase is skipped — the user already confirmed during 
 - If `true`: updates the stack to set it to `false`
 - Waits for `UPDATE_COMPLETE` before proceeding
 - Re-fetches the stack JSON after update
+- Injects `Section1bSumoLogicAccessID` and `Section1cSumoLogicAccessKey` from CLI flags (`-i`/`-k`) as parameter overrides in the update call — ensures fresh credentials are used even if the stored stack parameter is masked (`****`) or expired
 
 ### Why this is a separate phase
 This is a **critical safety gate**. If `RemoveOnDeleteStack=true` and we proceed to Phase 6 (delete), the Sumo Lambda helper will delete the collector and all sources — making them unrecoverable.
@@ -248,6 +250,9 @@ AwsObservabilitySQSCloudTrailLogsFER
 ### Why this is needed
 v3.0.0 creates the same 17 FERs. If they already exist (from v2.x), the deploy fails with `fer:invalid_extraction_rule`. Renaming (not deleting) preserves a backup and frees the names.
 
+### INSTALL_APPS=No skip
+When `--install-apps No` is passed, this phase is skipped. If v3.0.0 is deployed without apps (`Section3aInstallObservabilityApps=No`), it will not create FERs — there is no quota conflict and FER cleanup is unnecessary. The script logs this and returns immediately.
+
 ### Resume mode behavior
 In `--resume` mode, this phase runs but is **idempotent**:
 - Before doing any work, it checks if any of the 17 AWSO FERs still exist with their original names
@@ -281,6 +286,9 @@ Uses `DELETE /api/v1/metricsRules/{name}`:
 
 ### Why this is needed
 v3.0.0 creates the same metric rules. If they already exist from v2.x, the deploy fails with `metrics:rule_already_exists`. Unlike FERs (which are renamed as backup), metric rules are deleted outright — they contain no user data and are fully recreated by v3.0.0.
+
+### INSTALL_APPS=No skip
+When `--install-apps No` is passed, this phase is skipped. v3.0.0 will not create metric rules when apps are not installed, so cleanup is unnecessary.
 
 ---
 
@@ -376,7 +384,6 @@ Prints a summary of the migration including:
 |------|---------|---------|
 | `-d DEPLOYMENT` | Sumo Logic deployment region | `kr`, `us1`, `us2`, `eu`, `au`, `ca`, `ch`, `de`, `fed`, `jp` |
 | `-i ACCESS_ID` | Sumo Logic access ID | `suYXzI02B9l4h3` |
-| `-k ACCESS_KEY` | Sumo Logic access key | (64-char key) |
 | `-s STACK_NAME` | Name of the existing v2.x CloudFormation stack | `awso-production-v215` |
 | `-r REGION` | AWS region where the stack is deployed | `us-west-2` |
 | `-o ORG_ID` | Sumo Logic organization ID (used as IAM external ID) | `0000000000009CFA0A` |
@@ -385,12 +392,13 @@ Prints a summary of the migration including:
 
 | Flag | Purpose | Default | When to use |
 |------|---------|---------|-------------|
+| `-k ACCESS_KEY` | Sumo Logic access key | **Prompted interactively** (hidden input, no echo) if omitted | Omit to avoid key appearing in shell history |
 | `-n NEW_STACK_NAME` | Name for the new v3.0.0 stack | Same as source | When you want the new stack to have a different name |
 | `-v VERSION` | Source version override | Auto-detected | When auto-detection fails or you want to be explicit (e.g. `-v 2.14`) |
 | `--install-apps Yes/No` | Whether to install Sumo observability apps | `Yes` | Use `No` if deploying to a clean org where Sumo fields don't exist yet |
 | `--resume` | Skip phases 2–5; optionally run Phase 6 if old stack still exists | Off | When Phase 9 deploy failed and you need to retry; or when old stack is stuck in DELETE_FAILED |
 | `--params-file FILE` | Path to saved params JSON | Required with `--resume` | Points to the params file saved by a previous Phase 3 run |
-| `--patch-roles-only` | Only run roleARN patching | Off | When v3.0.0 is already deployed but sources have stale roleARNs |
+| `--patch-roles-only` | Only run roleARN patching (requires `-n NEW_STACK_NAME`) | Off | When v3.0.0 is already deployed but sources have stale roleARNs |
 | `-p PROFILE` | AWS CLI profile name | `default` | When using named AWS profiles |
 | `--dry-run` | Validate and map params without modifying anything | Off | Preview migration plan without executing |
 
@@ -400,15 +408,30 @@ Prints a summary of the migration including:
 **When**: First time migrating a v2.x stack to v3.0.0.
 
 ```bash
-./MigrateToV300.sh \
-  -d kr -i suYXzI02B9l4h3 -k <key> \
+# Access key prompted interactively (recommended — keeps key out of shell history)
+./MigrateAWSOStackToV300.sh \
+  -d kr -i suYXzI02B9l4h3 \
+  -o 0000000000009CFA0A \
   -s awso-production-v215 -r us-west-2 \
   -n awso-production-v300 --install-apps Yes
 ```
 
 Runs all 12 phases in sequence. The script saves a params file automatically — if the deploy fails, retry with `--resume`.
 
-#### 2. Resume / Continue Mode (`--resume`)
+#### 2. Dry Run (`--dry-run`)
+**When**: Preview the mapped v3.0.0 parameters without making any changes.
+
+```bash
+./MigrateAWSOStackToV300.sh \
+  -d kr -i suYXzI02B9l4h3 \
+  -o 0000000000009CFA0A \
+  -s awso-production-v215 -r us-west-2 \
+  --dry-run
+```
+
+Runs Phases 1–3 (validate, capture, map params) and prints the mapped parameter list, then exits. No stack updates, deletions, or Sumo changes are made.
+
+#### 3. Resume / Continue Mode (`--resume`)
 
 **When to use**:
 - Phase 9 (deploy) failed — stack rolled back or errored
@@ -437,7 +460,7 @@ aws cloudformation delete-stack --stack-name awso-production-v300 --region us-we
 aws cloudformation wait stack-delete-complete --stack-name awso-production-v300 --region us-west-2
 
 # Step 2: Re-run with --resume (add -s if old stack may still need deletion)
-./MigrateToV300.sh \
+./MigrateAWSOStackToV300.sh \
   -d kr -i suYXzI02B9l4h3 -k <key> \
   -s awso-production-v215 -r us-west-2 \
   -n awso-production-v300 \
@@ -458,17 +481,19 @@ aws cloudformation wait stack-delete-complete --stack-name awso-production-v300 
 | Orphaned nested stack remaining | Pass `-s <old-stack>` with `--resume` — `cleanup_orphaned_nested_stacks` handles it |
 | Timeout during create | Check stack status first; if failed, delete and resume |
 
-#### 3. Patch-Only Mode (`--patch-roles-only`)
+#### 4. Patch-Only Mode (`--patch-roles-only`)
 **When**: v3.0.0 is already deployed and working, but sources still point to the old/deleted IAM role ARN.
 
 ```bash
-./MigrateToV300.sh \
-  -d kr -i suYXzI02B9l4h3 -k <key> \
-  -s awso-production-v300 -r us-west-2 \
+./MigrateAWSOStackToV300.sh \
+  -d kr -i suYXzI02B9l4h3 \
+  -o 0000000000009CFA0A \
+  -r us-west-2 \
+  -n awso-production-v300 \
   --patch-roles-only
 ```
 
-Only runs: validate → patch roles → report.
+Requires `-n NEW_STACK_NAME` (the deployed v3.0.0 stack name — not `-s`). Only runs: validate → patch roles → report.
 
 ### Decision Flowchart
 
@@ -486,6 +511,15 @@ Is v2.x stack still running?
 ---
 
 ## Key Helpers
+
+### Logging functions
+All log output includes a `[YYYY-MM-DD HH:MM:SS]` timestamp:
+```
+[INFO]  [2026-09-01 14:32:05] AWS credentials: OK
+[WARN]  [2026-09-01 14:32:07] Stack in ROLLBACK_COMPLETE — will delete first
+[ERROR] [2026-09-01 14:32:09] Missing required arguments: -d DEPLOYMENT
+```
+Implemented via a `_ts()` helper (`date '+%Y-%m-%d %H:%M:%S'`) called inline in `log_info`, `log_warn`, `log_error`, and `log_phase`. Log output is also written to a file (ANSI codes stripped) via `_log_to_file()`.
 
 ### `aws_cmd()`
 Safe AWS CLI wrapper that handles PATH issues and argument quoting:
@@ -523,8 +557,9 @@ Polls CloudFormation stack status at `POLL_INTERVAL` (30s) until terminal state 
 
 ```bash
 V300_TEMPLATE_URL="https://sumologic-appdev-aws-sam-apps.s3.us-east-1.amazonaws.com/aws-observability-versions/v3.0.0/templates/sumologic_observability.master.template.yaml"
-DELETE_TIMEOUT=1800    # 30 min
-CREATE_TIMEOUT=2700   # 45 min
+UPDATE_TIMEOUT=1800   # 30 min  (Phase 5 stack update)
+DELETE_TIMEOUT=1800   # 30 min  (Phase 6 stack deletion)
+CREATE_TIMEOUT=2700   # 45 min  (Phase 9 stack creation)
 POLL_INTERVAL=30      # seconds
 AWSO_FER_COUNT=17     # expected FERs to rename
 ```
