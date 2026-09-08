@@ -496,7 +496,7 @@ phase_validate() {
 
         if [[ -n "$detected_version" ]]; then
             AWSO_VERSION="$detected_version"
-            _assert_supported_source_version "$AWSO_VERSION"
+            _assert_supported_awso_version "$AWSO_VERSION"
         else
             # Fallback: parameter fingerprint — all v2.12–v2.15 share the same keys,
             # so this only confirms it's a supported v2.x stack, not which minor version.
@@ -680,7 +680,7 @@ phase_capture() {
 # Phase 3 — Map Parameters
 # ============================================================
 
-_is_supported_source_version() {
+_is_supported_awso_version() {
     local ver="$1" v
     for v in "${SUPPORTED_AWSO_VERSIONS[@]}"; do
         [[ "$ver" == "$v" ]] && return 0
@@ -688,9 +688,9 @@ _is_supported_source_version() {
     return 1
 }
 
-_assert_supported_source_version() {
+_assert_supported_awso_version() {
     local ver="$1"
-    if ! _is_supported_source_version "$ver"; then
+    if ! _is_supported_awso_version "$ver"; then
         log_error "AWSO version v${ver} is not supported for migration."
         log_error "Supported versions: ${SUPPORTED_AWSO_VERSIONS[*]} → 3.0.0"
         log_error "Use -v to specify a supported version, or contact Sumo Logic support."
@@ -1747,7 +1747,7 @@ parse_args() {
             -o)            ORG_ID="$2";              shift 2 ;;
             -s)            STACK_NAME="$2";          shift 2 ;;
             -r)            REGION="$2";              shift 2 ;;
-            -v)            AWSO_VERSION="$2"; _assert_supported_source_version "$2"; shift 2 ;;
+            -v)            AWSO_VERSION="$2"; _assert_supported_awso_version "$2"; shift 2 ;;
             -n)            NEW_STACK_NAME="$2";      shift 2 ;;
             -p)            AWS_PROFILE="$2";         shift 2 ;;
             --install-apps) INSTALL_APPS="$2";       shift 2 ;;

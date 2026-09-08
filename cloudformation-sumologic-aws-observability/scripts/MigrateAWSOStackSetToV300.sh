@@ -284,7 +284,7 @@ _select_instances() {
 
         # Auto-skip unsupported versions (anything not in v2.12–v2.15, including unknown)
         inst_ver_minor=$( echo "$inst_ver" | sed 's/^v//' | cut -d. -f1-2 )
-        if ! _is_supported_source_version "$inst_ver_minor"; then
+        if ! _is_supported_awso_version "$inst_ver_minor"; then
             if [[ "$MIGRATION_MODE" == "select" ]]; then
                 printf "  %-4s  %-16s  %-14s  %-12s  %s\n" "$idx" "$acct" "$region" "$inst_ver" "Unsupported"
             else
@@ -791,7 +791,7 @@ map_params_v214() { map_params_v215 "$1"; }
 map_params_v213() { map_params_v215 "$1"; }
 map_params_v212() { map_params_v215 "$1"; }
 
-_is_supported_source_version() {
+_is_supported_awso_version() {
     local ver="$1"
     local v
     for v in "${SUPPORTED_AWSO_VERSIONS[@]}"; do
@@ -800,9 +800,9 @@ _is_supported_source_version() {
     return 1
 }
 
-_assert_supported_source_version() {
+_assert_supported_awso_version() {
     local ver="$1"
-    if ! _is_supported_source_version "$ver"; then
+    if ! _is_supported_awso_version "$ver"; then
         log_error "AWSO version v${ver} is not supported for migration."
         log_error "Supported versions: ${SUPPORTED_AWSO_VERSIONS[*]} → 3.0.0"
         log_error "Use -v to specify a supported version, or contact Sumo Logic support."
@@ -858,7 +858,7 @@ phase_validate() {
         # If user specified -v, validate it now; per-instance version detection runs in Phase 2.
         if [[ -n "$AWSO_VERSION" ]]; then
             log_info "AWSO version: v${AWSO_VERSION} (user-specified)"
-            _assert_supported_source_version "$AWSO_VERSION"
+            _assert_supported_awso_version "$AWSO_VERSION"
         fi
 
         # No running operations
@@ -956,7 +956,7 @@ phase_enumerate() {
         if [[ -z "$AWSO_VERSION" ]] && echo "$inst_version" | grep -qE '^v2\.'; then
             local candidate
             candidate=$( echo "$inst_version" | sed 's/^v//' | cut -d. -f1-2 )
-            if _is_supported_source_version "$candidate"; then
+            if _is_supported_awso_version "$candidate"; then
                 AWSO_VERSION="$candidate"
                 log_info "AWSO version set from instance ${account}/${region}: v${AWSO_VERSION}"
             fi
@@ -2147,7 +2147,7 @@ parse_args() {
             -k)                  ACCESS_KEY="$2";          shift 2 ;;
             -o)                  ORG_ID="$2";              shift 2 ;;
             -r)                  HOME_REGION="$2";         shift 2 ;;
-            -v)                       AWSO_VERSION="$2"; _assert_supported_source_version "$2"; shift 2 ;;
+            -v)                       AWSO_VERSION="$2"; _assert_supported_awso_version "$2"; shift 2 ;;
             -s|--stackset-name)       STACKSET_NAME="$2";     shift 2 ;;
             -n|--new-stackset-name)   NEW_STACKSET_NAME="$2"; shift 2 ;;
             --admin-role-arn)    ADMIN_ROLE_ARN="$2";      shift 2 ;;
