@@ -4,20 +4,21 @@ Updates the `account` field on existing AWS Observability collector sources with
 
 ## Prerequisites
 
-- Python 3.6+
+- Python 3.13+
 - `pip install requests`
 - Sumo Logic Access ID and Access Key with collector/source read+write permissions
-- Your Sumo Logic deployment environment (`us1`, `us2`, `eu`, `au`, `de`, `jp`, `ca`, `in`, `kr`, `fed`)
+- Your Sumo Logic deployment environment (`au`, `ca`, `ch`, `de`, `eu`, `jp`, `fed`, `kr`, `us1`, or `us2`)
 
 ## Usage
 
 ### Step 1: Generate CSV
 
 ```bash
+# Access key is prompted interactively (recommended — keeps key out of shell history)
 python3 backfill_aws_account_alias.py \
   --access-id <SUMO_ACCESS_ID> \
-  --access-key <SUMO_ACCESS_KEY> \
-  --deploy-env <DEPLOYMENT>
+  --deploy-env <DEPLOYMENT> \
+  --log-dir <LOG_DIRECTORY>        # optional
 ```
 
 This creates `backfill_aws_account_alias.csv` listing all sources under `aws-observability-*` collectors.
@@ -33,21 +34,36 @@ Alias rules: 3-63 chars, lowercase letters/digits/hyphens only, no consecutive h
 ### Step 3: Apply changes
 
 ```bash
+# Preview what would change (no actual updates)
 python3 backfill_aws_account_alias.py \
   --access-id <SUMO_ACCESS_ID> \
-  --access-key <SUMO_ACCESS_KEY> \
   --deploy-env <DEPLOYMENT> \
-  --filename backfill_aws_account_alias.csv
+  --filename backfill_aws_account_alias.csv \
+  --dry-run
+
+# Apply for real
+python3 backfill_aws_account_alias.py \
+  --access-id <SUMO_ACCESS_ID> \
+  --deploy-env <DEPLOYMENT> \
+  --filename backfill_aws_account_alias.csv \
+  --log-dir <LOG_DIRECTORY>        # optional
 ```
+
+> **Note:** When updating more than 100 sources, the script prompts for confirmation. Pass `--yes` to skip the prompt (useful for CI).
+>
+> `--access-key` can also be passed as a CLI flag for automation/CI use cases.
 
 ## Parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `--access-id` | Yes | Sumo Logic Access ID |
-| `--access-key` | Yes | Sumo Logic Access Key |
+| `--access-key` | No | Sumo Logic Access Key (prompted interactively if omitted) |
 | `--deploy-env` | Yes | Deployment environment (e.g., `us2`, `eu`) |
 | `--filename` | Step 2 only | Path to the edited CSV file |
+| `--dry-run` | No | Validate and show what would be updated without making API calls |
+| `--yes` | No | Skip confirmation prompt for large batch updates (>100 sources) |
+| `--log-dir` | No | Directory for the log file (created if it doesn't exist; defaults to current directory) |
 
 ## When to use
 
