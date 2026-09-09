@@ -7,7 +7,7 @@ Two-step process:
   Step 2 (apply):   Reads user-updated CSV and applies alias changes
 
 Usage:
-    # Step 1: Generate CSV (access key prompted interactively — recommended)
+    # Step 1: Generate CSV
     python3 backfill_aws_account_alias.py --access-id <ID> --deploy-env <ENV>
 
     # Step 2: Apply changes from edited CSV
@@ -365,7 +365,7 @@ def main(argv=None):
     parser.add_argument("--access-id", required=True, help="Sumo Logic access ID")
     parser.add_argument(
         "--deploy-env", required=True,
-        help="Deployment (au, us, de, stag, etc.)",
+        help="Deployment (au, ca, ch, de, eu, jp, fed, kr, us1, us2)",
     )
     parser.add_argument(
         "--filename", metavar="FILEPATH",

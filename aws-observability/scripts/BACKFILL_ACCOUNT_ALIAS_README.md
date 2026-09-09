@@ -14,7 +14,7 @@ Updates the `account` field on existing AWS Observability collector sources with
 ### Step 1: Generate CSV
 
 ```bash
-# Access key is prompted interactively (recommended — keeps key out of shell history)
+# Access key is prompted interactively
 python3 backfill_aws_account_alias.py \
   --access-id <SUMO_ACCESS_ID> \
   --deploy-env <DEPLOYMENT> \
