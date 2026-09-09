@@ -51,14 +51,13 @@ python3 backfill_aws_account_alias.py \
 
 > **Note:** When updating more than 100 sources, the script prompts for confirmation. Pass `--yes` to skip the prompt (useful for CI).
 >
-> `--access-key` can also be passed as a CLI flag for automation/CI use cases.
+> For automation/CI, set the `SUMO_ACCESS_KEY` environment variable instead of the interactive prompt.
 
 ## Parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `--access-id` | Yes | Sumo Logic Access ID |
-| `--access-key` | No | Sumo Logic Access Key (prompted interactively if omitted) |
 | `--deploy-env` | Yes | Deployment environment (e.g., `us2`, `eu`) |
 | `--filename` | Step 2 only | Path to the edited CSV file |
 | `--dry-run` | No | Validate and show what would be updated without making API calls |

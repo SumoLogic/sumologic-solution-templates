@@ -19,8 +19,8 @@ Usage:
     # Skip confirmation prompt for large batches (>100 sources)
     python3 backfill_aws_account_alias.py --access-id <ID> --deploy-env <ENV> --filename <csv_path> --yes
 
-    # Access key can also be passed via --access-key for automation/CI
-    python3 backfill_aws_account_alias.py --access-id <ID> --access-key <KEY> --deploy-env <ENV>
+    # Access key via environment variable for automation/CI
+    SUMO_ACCESS_KEY=<KEY> python3 backfill_aws_account_alias.py --access-id <ID> --deploy-env <ENV>
 
 Requirements:
     pip install requests
@@ -364,10 +364,6 @@ def main(argv=None):
     )
     parser.add_argument("--access-id", required=True, help="Sumo Logic access ID")
     parser.add_argument(
-        "--access-key", default=None,
-        help="Sumo Logic access key (prompted interactively if omitted)",
-    )
-    parser.add_argument(
         "--deploy-env", required=True,
         help="Deployment (au, us, de, stag, etc.)",
     )
@@ -403,12 +399,12 @@ def main(argv=None):
     root_logger.addHandler(file_handler)
     logger.info("Log file: %s", os.path.abspath(log_path))
 
-    access_key = args.access_key
+    access_key = os.environ.get("SUMO_ACCESS_KEY")
     if not access_key:
         access_key = getpass.getpass("Enter Sumo Logic Access Key: ")
-        if not access_key:
-            logger.critical("Access key is required.")
-            sys.exit(1)
+    if not access_key:
+        logger.critical("Access key is required. Set SUMO_ACCESS_KEY or enter it when prompted.")
+        sys.exit(1)
 
     base_url = build_base_url(args.deploy_env)
     session = create_session(args.access_id, access_key)
