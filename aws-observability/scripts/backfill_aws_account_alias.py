@@ -302,9 +302,8 @@ def step2_apply(session, base_url, csv_path, args):
 
     to_update = [
         r for r in rows
-        if (r.get("override_account_field_with_alias", "")
-            .strip().lower() == "yes")
-        and r.get("alias", "").strip()
+        if ((r.get("override_account_field_with_alias") or "").strip().lower() == "yes")
+        and ((r.get("alias") or "").strip())
     ]
 
     if not to_update:
