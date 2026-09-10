@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 def build_base_url(deploy_env):
     """Construct the Sumo Logic API base URL for the given deployment environment."""
     regional = {"au", "ca", "ch", "de", "eu", "jp", "fed", "kr", "us1", "us2"}
-    if deploy_env == "us":
+    if deploy_env == "us1":
         return "https://api.sumologic.com/api/v1"
     if deploy_env in regional:
         return f"https://api.{deploy_env}.sumologic.com/api/v1"
@@ -384,18 +384,23 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
 
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
-
     log_dir = args.log_dir if args.log_dir else "."
     os.makedirs(log_dir, exist_ok=True)
     log_path = os.path.join(log_dir, LOG_FILE)
-    file_handler = logging.FileHandler(log_path, encoding="utf-8")
-    file_handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s] %(message)s",
-                          datefmt="%Y-%m-%d %H:%M:%S")
+
+    log_fmt = "%(asctime)s [%(levelname)s] %(message)s"
+    log_datefmt = "%Y-%m-%d %H:%M:%S"
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format=log_fmt,
+        datefmt=log_datefmt,
+        handlers=[
+            logging.FileHandler(log_path, encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
+        force=True,
     )
-    root_logger.addHandler(file_handler)
     logger.info("Log file: %s", os.path.abspath(log_path))
 
     access_key = os.environ.get("SUMO_ACCESS_KEY")
