@@ -16,9 +16,6 @@ Usage:
     # Dry run — validate and preview what would change, without making API calls
     python3 backfill_aws_account_alias.py --access-id <ID> --deploy-env <ENV> --filename <csv_path> --dry-run
 
-    # Skip confirmation prompt for large batches (>100 sources)
-    python3 backfill_aws_account_alias.py --access-id <ID> --deploy-env <ENV> --filename <csv_path> --yes
-
     # Access key via environment variable for automation/CI
     SUMO_ACCESS_KEY=<KEY> python3 backfill_aws_account_alias.py --access-id <ID> --deploy-env <ENV>
 
@@ -319,12 +316,6 @@ def step2_apply(session, base_url, csv_path, args):
         logger.info("No valid aliases to apply (skipped %d).", skipped)
         return 0
 
-    if len(valid_rows) > 100 and not args.yes:
-        resp = input(f"About to update {len(valid_rows)} sources. Continue? [y/N] ")
-        if resp.lower() != "y":
-            logger.info("Aborted by user.")
-            return 0
-
     if args.dry_run:
         logger.info("DRY RUN — %d sources would be updated:", len(valid_rows))
         for row in valid_rows:
@@ -373,10 +364,6 @@ def main(argv=None):
     parser.add_argument(
         "--dry-run", action="store_true",
         help="Validate and show what would be updated, but skip actual API calls",
-    )
-    parser.add_argument(
-        "--yes", action="store_true",
-        help="Skip confirmation prompt for large batch updates (>100 sources)",
     )
     parser.add_argument(
         "--log-dir", metavar="DIRPATH", default=None,
