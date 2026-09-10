@@ -21,7 +21,7 @@ python3 backfill_aws_account_alias.py \
   --log-dir <LOG_DIRECTORY>        # optional
 ```
 
-This creates `backfill_aws_account_alias.csv` listing all sources under `aws-observability-*` collectors.
+This creates `backfill_aws_account_alias.csv` listing sources under `aws-observability-*` collectors whose current `account` or `accountid` field matches the collector’s AWS account ID.
 
 ### Step 2: Edit the CSV
 
