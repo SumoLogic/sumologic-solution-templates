@@ -124,7 +124,7 @@ Usage: $0 -d DEPLOYMENT -i ACCESS_ID -k ACCESS_KEY -o ORG_ID -s STACK_NAME -r RE
 Required (normal run):
   -d DEPLOYMENT        Sumo Logic deployment (us1, us2, kr, eu, de, au, jp, ca, ch, fed, esc)
   -i ACCESS_ID         Sumo Logic access ID
-  -k ACCESS_KEY        Sumo Logic access key
+  -k ACCESS_KEY        Sumo Logic access key (omit to be prompted interactively)
   -o ORG_ID            Sumo Logic org ID
   -s STACK_NAME        Existing AWSO v2.x stack name to migrate
   -r REGION            AWS region (e.g. us-east-1, us-west-2)
@@ -132,13 +132,19 @@ Required (normal run):
 Required (resume run):
   --resume             Resume from Phase 7 (cleanup + deploy), skipping phases 1-6
   --params-file PATH   Path to the saved params JSON (printed when FER limit is exceeded)
+  -n NEW_STACK_NAME    v3.0.0 stack name to deploy (required for resume)
   -d -i -k -o -r       Still required for credential validation
 
+Required (patch-roles-only run):
+  --patch-roles-only   Re-run Phase 11 only: patch Sumo source roleARNs to the v3.0.0 IAM role
+  -n NEW_STACK_NAME    Deployed v3.0.0 stack name whose IAM role will be patched
+  -d -i -k -o -r       Required for credential validation
+
 Optional:
-  -v AWSO_VERSION    AWSO version: 2.15, 2.14, 2.13, 2.12 (auto-detected if omitted)
-  -n NEW_STACK_NAME    v3.0.0 stack name (defaults to STACK_NAME)
+  -v AWSO_VERSION      AWSO version: 2.15, 2.14, 2.13, 2.12 (auto-detected if omitted)
+  -n NEW_STACK_NAME    v3.0.0 stack name (defaults to STACK_NAME for normal runs)
   -p AWS_PROFILE       AWS CLI profile (default: default)
-  --install-apps YES|NO  Install Sumo Logic apps (default: Yes)
+  --install-apps YES|NO  Override the v2.x stack's Install Apps setting (default: inherited from v2.x stack)
   --dry-run            Show mapped parameters without making any changes
   -h, --help           Show this help
 
@@ -152,6 +158,10 @@ Examples:
   # Resume after manual FER cleanup
   $0 --resume -d kr -i suXXXXX -k XXXXX -o 0000000000000004 -r us-west-2 \\
     -n my-awso-stack --params-file ./migration_params_my-awso-stack_20260703_120000.json
+
+  # Patch source role ARNs only (v3.0.0 stack already deployed)
+  $0 --patch-roles-only -d kr -i suXXXXX -k XXXXX -o 0000000000000004 \\
+    -n my-awso-stack -r us-west-2
 
 EOF
 }
