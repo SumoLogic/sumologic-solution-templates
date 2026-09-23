@@ -934,7 +934,10 @@ phase_enumerate() {
         # Section2aAccountAlias is a StackSet base parameter, not an instance override).
         alias="$account"
 
-        # Detect instance template version via get-template
+        # Detect instance template version via get-template.
+        # Try with management-account credentials first; if that returns nothing (cross-account
+        # stack the management account cannot read directly), retry by assuming the execution role
+        # in the member account.
         inst_version="unknown"
         if [[ -n "$stack_id" ]]; then
             local tpl_json tpl_body tpl_desc
@@ -943,6 +946,16 @@ phase_enumerate() {
                 --region "$region" \
                 --output json 2>/dev/null ) || true
             tpl_body=$( echo "$tpl_json" | jq -r '.TemplateBody // ""' )
+
+            if [[ -z "$tpl_body" && -n "$EXECUTION_ROLE_NAME" ]]; then
+                local exec_role_arn="arn:aws:iam::${account}:role/${EXECUTION_ROLE_NAME}"
+                tpl_json=$( aws_cmd_as_role "$exec_role_arn" "" cloudformation get-template \
+                    --stack-name "$stack_id" \
+                    --region "$region" \
+                    --output json 2>/dev/null ) || true
+                tpl_body=$( echo "$tpl_json" | jq -r '.TemplateBody // ""' )
+            fi
+
             if [[ -n "$tpl_body" ]]; then
                 tpl_desc=$( echo "$tpl_body" | grep -m1 -E '^[[:space:]]*"?Description"?:' \
                     | sed 's/^[[:space:]]*"*Description"*:[[:space:]]*//' | tr -d '",' )
