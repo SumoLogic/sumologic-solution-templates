@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v3.0.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
+Description: "Version - v3.1.0. Note: Before deploying this template, please select the appropriate region. This CloudFormation template will automate the setup of the AWS Observability Solution. For more information on each parameter, please see the AWS Observability Setup Guide: https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/01_Deploy_and_Use_AWS_Observability/05_Deploy_AWS_Observability"
 
 Metadata:
   cfn-lint:
@@ -453,7 +453,7 @@ Mappings:
     NestedTemplate:
       MPS3BucketName: "sumologic-appdev-aws-sam-apps"
       MPS3BucketRegion: "us-east-1"
-      MPS3KeyPrefix: "aws-observability-versions/v3.0.0/templates/"
+      MPS3KeyPrefix: "aws-observability-versions/v3.1.0/templates/"
     CollectorDetails:
       CollectorNamePrefix: "aws-observability"
       CloudWatchMetricSourceCategory: "aws/observability/cloudwatch/metrics"
@@ -461,6 +461,8 @@ Mappings:
       CloudTrailLogsSourceCategory: "aws/observability/cloudtrail/logs"
       CloudWatchLogsSourceCategory: "aws/observability/cloudwatch/logs"
       ELBLogsSourceCategory: "aws/observability/clb/logs"
+    StaticOutboundIP:
+      SSMPrefix: "/sumologic/awso/network"
   RegionMap:
     us-east-1:
       bucketname: appdevzipfiles-us-east-1
@@ -516,6 +518,162 @@ Mappings:
         bucketname: appdevzipfiles-ap-southeast-3
 
 Resources:
+  # Retrieve static outbound IP network details from SSM Parameter Store, if available
+  StaticIpConfigLookupRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "EC2 describe actions do not support resource level permissions."
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: NetworkConfigRetrieval
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                Resource: !Sub
+                  - "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${SSMPrefix}/*"
+                  - SSMPrefix: !FindInMap [CommonData, StaticOutboundIP, SSMPrefix]
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                Resource: '*'
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  StaticIpConfigLookupFunction:
+    Type: AWS::Lambda::Function
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W89
+            reason: "Lambda function only reads SSM and EC2 details, does not require VPC deployment."
+          - id: W58
+            reason: "CloudWatch Logs permissions are granted by AWSLambdaBasicExecutionRole managed policy."
+          - id: W92
+            reason: "Lambda function does not require reserved concurrency."
+    Properties:
+      Description: "A function to retrieve static outbound IP network details from SSM Parameter Store."
+      Role: !GetAtt StaticIpConfigLookupRole.Arn
+      Handler: "index.handler"
+      Runtime: "python3.14"
+      Timeout: 60
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import os
+          import boto3
+          from urllib.request import build_opener, HTTPHandler, Request
+
+          LOGGER = logging.getLogger()
+          LOGGER.setLevel(logging.INFO)
+          NAMES = ["private-subnet-ids", "security-group-id", "nat-public-ip", "vpc-id"]
+          NOT_CONFIGURED = {"SubnetIds": "", "SecurityGroupId": "", "NatPublicIp": "Not configured", "VpcId": ""}
+
+
+          def get_network_config(prefix):
+              ssm = boto3.client("ssm")
+              response = ssm.get_parameters(Names=[f"{prefix}/{name}" for name in NAMES])
+              values = {p["Name"].rsplit("/", 1)[-1]: p["Value"] for p in response.get("Parameters", [])}
+              # nat-public-ip is written last by static_outbound_ip.template.yaml. Without it the network is not
+              # configured, the other names may be inputs published by the customer for that template.
+              if not values.get("nat-public-ip"):
+                  LOGGER.info("No static outbound IP configuration found under %s.", prefix)
+                  return NOT_CONFIGURED
+              missing = [name for name in NAMES if not values.get(name)]
+              if missing:
+                  raise Exception(f"Incomplete static outbound IP configuration under {prefix}, missing {missing}. "
+                                  f"Redeploy static_outbound_ip.template.yaml or delete the remaining parameters.")
+              vpc_id = values["vpc-id"]
+              subnet_ids = [s.strip() for s in values["private-subnet-ids"].split(",") if s.strip()]
+              ec2 = boto3.client("ec2")
+              for subnet in ec2.describe_subnets(SubnetIds=subnet_ids)["Subnets"]:
+                  if subnet["VpcId"] != vpc_id:
+                      raise Exception(f"Subnet {subnet['SubnetId']} does not belong to VPC {vpc_id}.")
+              for group in ec2.describe_security_groups(GroupIds=[values["security-group-id"]])["SecurityGroups"]:
+                  if group["VpcId"] != vpc_id:
+                      raise Exception(f"Security group {group['GroupId']} does not belong to VPC {vpc_id}.")
+              LOGGER.info("Using static outbound IP %s, subnets %s.", values["nat-public-ip"], subnet_ids)
+              return {"SubnetIds": ",".join(subnet_ids), "SecurityGroupId": values["security-group-id"],
+                      "NatPublicIp": values["nat-public-ip"], "VpcId": vpc_id}
+
+
+          def handler(event, context):
+              LOGGER.info("Received %s request.", event.get("RequestType"))
+              try:
+                  if event["RequestType"] in ("Create", "Update"):
+                      data = get_network_config(event["ResourceProperties"]["SSMPrefix"])
+                  else:
+                      data = {}
+                  send_response(event, context, "SUCCESS", data)
+              except Exception as e:  # pylint: disable=W0703
+                  LOGGER.error("Failed: %s", e)
+                  send_response(event, context, "FAILED", {}, str(e))
+
+
+          def send_response(event, context, status, data, reason=None):
+              body = json.dumps({
+                  "Status": status,
+                  "Reason": reason or "See the details in CloudWatch Log Stream: " + context.log_stream_name,
+                  "PhysicalResourceId": event.get("PhysicalResourceId", "NetworkConfigRetrieval"),
+                  "StackId": event["StackId"],
+                  "RequestId": event["RequestId"],
+                  "LogicalResourceId": event["LogicalResourceId"],
+                  "Data": data
+              }).encode("utf-8")
+              request = Request(event["ResponseURL"], data=body)
+              request.add_header("Content-Type", "")
+              request.add_header("Content-Length", len(body))
+              request.get_method = lambda: "PUT"
+              build_opener(HTTPHandler).open(request)
+
+  NetworkConfigRetrieval:
+    Type: Custom::NetworkConfigRetrieval
+    Properties:
+      ServiceToken: !GetAtt StaticIpConfigLookupFunction.Arn
+      SSMPrefix: !FindInMap [CommonData, StaticOutboundIP, SSMPrefix]
+      TemplateVersion: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
+      ParametersHash:
+        Fn::Base64: !Sub
+          - "${a}-${b}-${c}-${d}-${e}-${f}-${g}-${h}-${i}-${j}-${k}-${l}-${m}-${n}-${o}-${p}-${q}-${r}-${s}-${t}-${u}-${v}-${w}"
+          - a: !Ref Section2aAccountAlias
+            b: !Ref Section3aInstallObservabilityApps
+            c: !Ref Section4aCreateMetricsSourceOptions
+            d: !Ref Section4bMetricsNameSpaces
+            e: !Ref Section4cCloudWatchExistingSourceAPIUrl
+            f: !Ref Section4dAWSMetricsTagFilters
+            g: !Ref Section5aAutoEnableS3LogsALBResourcesOptions
+            h: !Ref Section5bALBCreateLogSource
+            i: !Ref Section5cALBLogsSourceUrl
+            j: !Ref Section5dALBS3LogsBucketName
+            k: !Ref Section6aCreateCloudTrailLogSource
+            l: !Ref Section6bCloudTrailLogsSourceUrl
+            m: !Ref Section6cCloudTrailLogsBucketName
+            n: !Ref Section7aCreateCloudWatchLogsSourceOptions
+            o: !Ref Section7bCloudWatchLogsSourceUrl
+            p: !Ref Section7cAutoSubscribeLogGroupsOptions
+            q: !Ref Section7dAutoSubscribeLogGroupPattern
+            r: !Ref Section7eAutoSubscribeLogGroupByTags
+            s: !Ref Section8aAutoEnableS3LogsELBResourcesOptions
+            t: !Ref Section8bELBCreateLogSource
+            u: !Ref Section8cELBLogsSourceUrl
+            v: !Ref Section8dELBS3LogsBucketName
+            w: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
+
   LambdaRole:
     Condition: send_telemetry_to_sumo
     Type: AWS::IAM::Role
@@ -607,7 +765,7 @@ Resources:
       sumoOrgId:
           !Ref Section1dSumoLogicOrganizationId
       solutionName: 'AWSO'
-      solutionVersion: 'v3.0.0'
+      solutionVersion: 'v3.1.0'
       deploymentSource: 'cloudFormation'
       TelemetryEndpoint: "https://endpoint1.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV1S68eao6UYB3LFtqQ7ur1xYlT1EHCfXdhvi6uPNc0aUXIpvq5i_aHewOp5xxxwnGZ5MmSWDR6qV5td4exMM4pZE4Tk6rqKvgextLx7I6IRpg=="
       scanInterval: 60
@@ -704,6 +862,8 @@ Resources:
             - "/*.log"
         ELBLogsSourceName: !Sub "classic-lb-logs-${AWS::Region}"
         ELBLogsSourceCategory: !FindInMap [CommonData, CollectorDetails, ELBLogsSourceCategory]
+        LambdaSubnetIds: !GetAtt NetworkConfigRetrieval.SubnetIds
+        LambdaSecurityGroupIds: !GetAtt NetworkConfigRetrieval.SecurityGroupId
 
   AutoEnableOptions:
     Type: AWS::CloudFormation::Stack
@@ -790,3 +950,8 @@ Resources:
               u: !Ref Section8cELBLogsSourceUrl
               v: !Ref Section8dELBS3LogsBucketName
               w: !FindInMap [CommonData, NestedTemplate, MPS3KeyPrefix]
+
+Outputs:
+  SumoAPIOutboundIP:
+    Description: "Static outbound IP used by Lambda functions calling Sumo Logic APIs (from static_outbound_ip.template.yaml). Add this IP to Sumo Logic API allowlist."
+    Value: !GetAtt NetworkConfigRetrieval.NatPublicIp

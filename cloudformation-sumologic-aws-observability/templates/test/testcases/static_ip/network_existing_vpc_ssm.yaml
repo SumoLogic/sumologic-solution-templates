@@ -1,0 +1,37 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.1.0/templates/static_outbound_ip.template.yaml"
+  StackName: AWSOStaticIP
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default: {}
+TestCase:
+  TestName: staticIpNetworkExistingVpcFromSsm
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  # The existing VPC and its SSM input /sumologic/awso/network/vpc-id are created before the network stack,
+  # the VPC parameters stay blank so the stack reads them from SSM.
+  PreRequisitesInfra:
+    - Name: CreateExistingVpcWithSsmInput
+      CFNTemplateURL: "test/setup-infra/create_vpc_with_ssm_input.yaml"
+  Parameters:
+    Values:
+      Section1aNetworkOption: 'ExistingVPC'
+      Section1bElasticIPAllocationId: ''
+      Section3aExistingVpcId: ''
+      Section3bExistingPrivateSubnetIds: ''
+      Section3cExistingSecurityGroupId: ''
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - StaticIpNetworkSetupFunction
+          - StaticIpNetworkSetupRole
+          - VPCNetworkSetup
+    - AssertType: OutputsCheck
+      Assert:
+        Outputs:
+          - VpcId
+          - PrivateSubnetIds
+          - SecurityGroupId
+          - NatPublicIp

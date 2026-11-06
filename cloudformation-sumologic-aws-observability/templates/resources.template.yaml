@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "Version - v3.0.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
+Description: "Version - v3.1.0: Template to Setup Sumo Logic Sources and supporting AWS Resources for CloudTrail, ALB, Lambda CloudWatch Logs and CloudWatch Metrics."
 
 Metadata:
   cfn-lint:
@@ -242,7 +242,7 @@ Parameters:
     Type: String
     Description: "S3 key prefix that is used to simulate a folder for your copy of the nested templates."
     AllowedPattern: ".+"
-    Default: "aws-observability-versions/v3.0.0/templates/"
+    Default: "aws-observability-versions/v3.1.0/templates/"
   
   CreateELBLogSource:
     Type: String
@@ -280,7 +280,19 @@ Parameters:
     Description: "Required when not creating a new ELB source. Provide the existing Sumo Logic ELB Source API URL."
     Default: ""
 
+  LambdaSubnetIds:
+    Type: CommaDelimitedList
+    Description: "Optional. Private subnet IDs (routed through NAT Gateway with static IP) for Lambda functions calling Sumo Logic APIs. Leave blank to run Lambda functions without VPC."
+    Default: ""
+  LambdaSecurityGroupIds:
+    Type: CommaDelimitedList
+    Description: "Optional. Security group IDs for Lambda functions calling Sumo Logic APIs. Required when LambdaSubnetIds is provided."
+    Default: ""
+
 Conditions:
+  # Static outbound IP - attach Lambda functions calling Sumo Logic APIs to VPC
+  attach_lambda_vpc: !Not [ !Equals [ !Join [ "", !Ref LambdaSubnetIds ], "" ] ]
+
   # Sources Conditions
   install_metadata_source: !Equals [ !Ref CreateMetaDataSource, 'Yes' ]
   install_cloud_watch_metric_source: !Equals [ !Ref CreateCloudWatchMetricsSource, 'Yes' ]
@@ -450,6 +462,10 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Path: /
+      ManagedPolicyArns: !If
+        - attach_lambda_vpc
+        - - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        - !Ref AWS::NoValue
       Policies:
         - PolicyName: AwsObservabilityLambdaExecutePolicies
           PolicyDocument:
@@ -524,13 +540,18 @@ Resources:
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       Code:
         S3Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        S3Key: "sumologic-aws-observability/functions/sumo-app-utils/v3.0.0/sumo-app-utils.zip"
+        S3Key: "sumologic-aws-observability/functions/sumo-app-utils/v3.1.0/sumo-app-utils.zip"
       MemorySize: 128
       Timeout: 900
       Role:
         Fn::GetAtt:
           - LambdaRole
           - Arn
+      VpcConfig: !If
+        - attach_lambda_vpc
+        - SubnetIds: !Ref LambdaSubnetIds
+          SecurityGroupIds: !Ref LambdaSecurityGroupIds
+        - !Ref AWS::NoValue
 
   LambdaRoleAlias:
     Type: AWS::IAM::Role
@@ -548,6 +569,10 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Path: /
+      ManagedPolicyArns: !If
+        - attach_lambda_vpc
+        - - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        - !Ref AWS::NoValue
       Policies:
         - PolicyName: AwsObservabilityLambdaExecutePolicies
           PolicyDocument:
@@ -568,13 +593,18 @@ Resources:
       Description: "Lambda Function for deploying SumoLogic AWS Observability Solution."
       Code:
         S3Bucket: !FindInMap [ RegionMap, !Ref 'AWS::Region', bucketname ]
-        S3Key: "sumologic-aws-observability/functions/sumo-app-utils/v3.0.0/sumo-app-utils.zip"
+        S3Key: "sumologic-aws-observability/functions/sumo-app-utils/v3.1.0/sumo-app-utils.zip"
       MemorySize: 128
       Timeout: 900
       Role:
         Fn::GetAtt:
           - LambdaRoleAlias
           - Arn
+      VpcConfig: !If
+        - attach_lambda_vpc
+        - SubnetIds: !Ref LambdaSubnetIds
+          SecurityGroupIds: !Ref LambdaSecurityGroupIds
+        - !Ref AWS::NoValue
 
   AccountCheck:
     Type: Custom::EnterpriseOrTrialAccountCheck

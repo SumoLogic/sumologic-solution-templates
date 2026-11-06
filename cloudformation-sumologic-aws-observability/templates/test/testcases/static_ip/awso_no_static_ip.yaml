@@ -1,0 +1,49 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.1.0/templates/sumologic_observability.master.template.yaml"
+  StackName: AWSO
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default:
+      Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+      Section2aAccountAlias: 'infrat5'
+TestCase:
+  TestName: awsoNoStaticIp
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  # No /sumologic/awso/network/nat-public-ip in SSM: AWSO must behave as before, Lambdas stay outside a VPC.
+  Parameters:
+    Values:
+      Section1aSumoLogicDeployment: '${SUMO_DEPLOYMENT}'
+      Section1bSumoLogicAccessID: '${SUMO_ACCESS_ID}'
+      Section1cSumoLogicAccessKey: '${SUMO_ACCESS_KEY}'
+      Section1dSumoLogicOrganizationId: '${SUMO_ORG_ID}'
+      Section1fSumoLogicSendTelemetry: 'false'
+      Section2aAccountAlias: 'infrat5'
+      Section2bAccountAliasMappingS3URL: ''
+      Section3aInstallObservabilityApps: 'No'
+      Section4aCreateMetricsSourceOptions: 'None'
+      Section5aAutoEnableS3LogsALBResourcesOptions: 'None'
+      Section5bALBCreateLogSource: 'No'
+      Section6aCreateCloudTrailLogSource: 'No'
+      Section7aCreateCloudWatchLogsSourceOptions: 'None'
+      Section8aAutoEnableS3LogsELBResourcesOptions: 'None'
+      Section8bELBCreateLogSource: 'No'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - StaticIpConfigLookupFunction
+          - NetworkConfigRetrieval
+          - CreateCommonResources
+          - CreateCommonResources.LambdaHelper
+          - CreateCommonResources.LambdaHelperAlias
+    - AssertType: OutputsCheck
+      Assert:
+        Outputs:
+          - SumoAPIOutboundIP
+    - AssertType: ParameterCheck
+      Assert:
+        CreateCommonResources:
+          LambdaSubnetIds: ""
+          LambdaSecurityGroupIds: ""

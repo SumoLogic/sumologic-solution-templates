@@ -1,0 +1,39 @@
+---
+Global:
+  TemplatePath: "https://sumologic-appdev-aws-sam-apps.s3.amazonaws.com/aws-observability-versions/v3.1.0/templates/static_outbound_ip.template.yaml"
+  StackName: AWSOStaticIP
+  ParallelTestsRun: 1
+  GlobalParameters:
+    Default: {}
+TestCase:
+  TestName: staticIpNetworkNewVpc
+  Regions: '${SUMO_REGIONS}'
+  Skip: false
+  Parameters:
+    Values:
+      Section1aNetworkOption: 'NewVPC'
+      Section1bElasticIPAllocationId: ''
+      Section2aVpcCidr: '10.250.0.0/24'
+  Assertions:
+    - AssertType: ResourceExistence
+      Assert:
+        Resources:
+          - VPC
+          - InternetGateway
+          - PublicSubnet
+          - NatEIP
+          - NatGateway
+          - PrivateSubnetA
+          - PrivateSubnetB
+          - LambdaSecurityGroup
+          - SSMVpcId
+          - SSMPrivateSubnetIds
+          - SSMSecurityGroupId
+          - SSMNatPublicIp
+    - AssertType: OutputsCheck
+      Assert:
+        Outputs:
+          - VpcId
+          - PrivateSubnetIds
+          - SecurityGroupId
+          - NatPublicIp

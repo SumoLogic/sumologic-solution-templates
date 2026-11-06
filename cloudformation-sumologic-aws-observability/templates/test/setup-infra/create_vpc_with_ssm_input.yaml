@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Test setup. A bare VPC (no IGW, no NAT) and its AWSO input parameter /sumologic/awso/network/vpc-id.
+Resources:
+  ExistingVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.240.0.0/24
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: sumologic-awso-test-existing-vpc
+  VpcIdInput:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /sumologic/awso/network/vpc-id
+      Type: String
+      Value: !Ref ExistingVpc
+Outputs:
+  VpcId:
+    Value: !Ref ExistingVpc

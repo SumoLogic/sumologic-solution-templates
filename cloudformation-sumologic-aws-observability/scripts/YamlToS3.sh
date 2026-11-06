@@ -3,7 +3,7 @@
 # ─────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────
-VERSION="v3.0.0"
+VERSION="v3.1.0"
 BUCKET_NAME="sumologic-appdev-aws-sam-apps"
 S3_BASE_PATH="s3://${BUCKET_NAME}/aws-observability-versions/${VERSION}"
 AWS_PROFILE="sumocontent"
@@ -24,6 +24,30 @@ COMMON_ARGS=(
     --acl public-read
     --profile "${AWS_PROFILE}"
 )
+
+# ─────────────────────────────────────────────
+# ARGUMENTS
+# ─────────────────────────────────────────────
+DRY_RUN=false
+
+usage() {
+    echo "Usage: $(basename "$0") [-n|--dry-run] [-h|--help]"
+    echo "  -n, --dry-run   Show what would be uploaded to S3 without uploading anything"
+    echo "  -h, --help      Show this help"
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -n|--dry-run) DRY_RUN=true ;;
+        -h|--help)    usage; exit 0 ;;
+        *)            echo "ERROR - Unknown argument: $1"; usage; exit 2 ;;
+    esac
+    shift
+done
+
+if [[ "${DRY_RUN}" == "true" ]]; then
+    COMMON_ARGS+=(--dryrun)
+fi
 
 # Format: "path:depth"
 UPLOAD_DIRS=(
@@ -51,12 +75,20 @@ upload_directory() {
     local depth=$2
     local dest_path="${S3_BASE_PATH}/$(basename "${src_dir}")/"
 
-    echo "INFO - Uploading [${depth}]: ${src_dir} -> ${dest_path}"
+    if [[ "${DRY_RUN}" == "true" ]]; then
+        echo "INFO - [DRY RUN] Would upload [${depth}]: ${src_dir} -> ${dest_path}"
+    else
+        echo "INFO - Uploading [${depth}]: ${src_dir} -> ${dest_path}"
+    fi
 
     aws s3 cp "${src_dir}/" "${dest_path}" "${COMMON_ARGS[@]}"
 
     if [[ $? -eq 0 ]]; then
-        echo "INFO - [PASS] Uploaded: ${src_dir}"
+        if [[ "${DRY_RUN}" == "true" ]]; then
+            echo "INFO - [PASS] Dry run completed: ${src_dir}"
+        else
+            echo "INFO - [PASS] Uploaded: ${src_dir}"
+        fi
         return 0
     else
         echo "ERROR - [FAIL] Failed: ${src_dir}"
@@ -72,6 +104,11 @@ echo "INFO - Version     : ${VERSION}"
 echo "INFO - Bucket      : ${BUCKET_NAME}"
 echo "INFO - Profile     : ${AWS_PROFILE}"
 echo "INFO - Destination : ${S3_BASE_PATH}"
+if [[ "${DRY_RUN}" == "true" ]]; then
+    echo "INFO - Mode        : DRY RUN - nothing will be uploaded"
+else
+    echo "INFO - Mode        : UPLOAD"
+fi
 echo "-----------------------------------------"
 
 if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
@@ -136,7 +173,11 @@ if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
     # 3. Summary
     # ─────────────────────────────────────────
     echo "========================================="
-    echo "UPLOAD SUMMARY"
+    if [[ "${DRY_RUN}" == "true" ]]; then
+        echo "UPLOAD SUMMARY (DRY RUN - nothing was uploaded)"
+    else
+        echo "UPLOAD SUMMARY"
+    fi
     echo "========================================="
     printf "%-30s %s\n" "  Total Directories  :" "${#UPLOAD_DIRS[@]}"
     printf "%-30s %s\n" "  Successful Dirs    :" "${success_dirs}"
@@ -157,7 +198,10 @@ if [[ "${AWS_PROFILE}" == 'sumocontent' ]]; then
     done
     echo "========================================="
 
-    if [[ ${failed_dirs} -eq 0 ]]; then
+    if [[ ${failed_dirs} -eq 0 && "${DRY_RUN}" == "true" ]]; then
+        echo "INFO - [PASS] Dry run completed successfully, nothing was uploaded. Run without --dry-run to upload"
+        echo "INFO - Path    : ${S3_BASE_PATH}"
+    elif [[ ${failed_dirs} -eq 0 ]]; then
         echo "INFO - [PASS] All uploads completed successfully"
         echo "INFO - Bucket  : ${BUCKET_NAME}"
         echo "INFO - Version : ${VERSION}"
